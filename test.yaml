@@ -23,59 +23,59 @@ setup:
     - id: "S001"
       title: "Initialize Next.js 15 project"
       commands:
-        - "npx create-next-app@latest clean-task-manager --typescript --tailwind --app --no-src-dir --import-alias '@/*' --eslint"
+        - "npx create-next-app@latest clean-task-manager --typescript --tailwind --app --no-src-dir --import-alias '@/*' --eslint -y"
         - "cd clean-task-manager"
     
     - id: "S002"
       title: "Install core dependencies"
       commands:
-        - "npm install js-yaml @types/js-yaml"
-        - "npm install lucide-react"
-        - "npm install prisma @prisma/client"
-        - "npm install zod"
-        - "npm install react-hot-toast"
-        - "npm install @monaco-editor/react"
-        - "npm install framer-motion"
-        - "npm install date-fns"
-        - "npm install -D @types/node"
+        - "cd clean-task-manager && npm install js-yaml @types/js-yaml"
+        - "cd clean-task-manager && npm install lucide-react"
+        - "cd clean-task-manager && npm install prisma @prisma/client"
+        - "cd clean-task-manager && npm install zod"
+        - "cd clean-task-manager && npm install react-hot-toast"
+        - "cd clean-task-manager && npm install @monaco-editor/react"
+        - "cd clean-task-manager && npm install framer-motion"
+        - "cd clean-task-manager && npm install date-fns"
+        - "cd clean-task-manager && npm install -D @types/node"
 
     - id: "S003"
       title: "Setup Shadcn UI"
       commands:
-        - "npx shadcn-ui@latest init -y"
-        - "npx shadcn-ui@latest add button"
-        - "npx shadcn-ui@latest add card"
-        - "npx shadcn-ui@latest add checkbox"
-        - "npx shadcn-ui@latest add dialog"
-        - "npx shadcn-ui@latest add dropdown-menu"
-        - "npx shadcn-ui@latest add input"
-        - "npx shadcn-ui@latest add label"
-        - "npx shadcn-ui@latest add scroll-area"
-        - "npx shadcn-ui@latest add select"
-        - "npx shadcn-ui@latest add separator"
-        - "npx shadcn-ui@latest add tabs"
-        - "npx shadcn-ui@latest add textarea"
-        - "npx shadcn-ui@latest add toast"
-        - "npx shadcn-ui@latest add tooltip"
+        - "cd clean-task-manager && npx shadcn-ui@latest init -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add button -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add card -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add checkbox -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add dialog -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add dropdown-menu -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add input -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add label -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add scroll-area -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add select -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add separator -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add tabs -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add textarea -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add toast -y"
+        - "cd clean-task-manager && npx shadcn-ui@latest add tooltip -y"
 
     - id: "S004"
       title: "Create Clean Architecture structure"
       commands:
-        - "mkdir -p app/{domain,data,infra,presentation,main}"
-        - "mkdir -p app/domain/{models,usecases,errors}"
-        - "mkdir -p app/data/{usecases,protocols}"
-        - "mkdir -p app/infra/{yaml,shell,database}"
-        - "mkdir -p app/presentation/{components,hooks,contexts,utils}"
-        - "mkdir -p app/main/{factories,config}"
-        - "mkdir -p app/(pages)/{dashboard,editor,settings}"
-        - "mkdir -p app/api/{tasks,projects,validation}"
+        - "cd clean-task-manager && mkdir -p app/{domain,data,infra,presentation,main}"
+        - "cd clean-task-manager && mkdir -p app/domain/{models,usecases,errors}"
+        - "cd clean-task-manager && mkdir -p app/data/{usecases,protocols}"
+        - "cd clean-task-manager && mkdir -p app/infra/{yaml,shell,database}"
+        - "cd clean-task-manager && mkdir -p app/presentation/{components,hooks,contexts,utils}"
+        - "cd clean-task-manager && mkdir -p app/main/{factories,config}"
+        - "cd clean-task-manager && mkdir -p app/(pages)/{dashboard,editor,settings}"
+        - "cd clean-task-manager && mkdir -p app/api/{tasks,projects,validation}"
 
     - id: "S005"
       title: "Setup Prisma"
       commands:
-        - "npx prisma init"
+        - "cd clean-task-manager && npx prisma init"
       files:
-        - path: "prisma/schema.prisma"
+        - path: "clean-task-manager/prisma/schema.prisma"
           content: |
             generator client {
               provider = "prisma-client-js"
@@ -149,7 +149,7 @@ domain:
     - id: "D001"
       title: "Create domain models"
       files:
-        - path: "app/domain/models/project.ts"
+        - path: "clean-task-manager/app/domain/models/project.ts"
           content: |
             /**
              * Project model for Clean Architecture templates
@@ -174,7 +174,7 @@ domain:
               auth?: string
             }
 
-        - path: "app/domain/models/feature.ts"
+        - path: "clean-task-manager/app/domain/models/feature.ts"
           content: |
             /**
              * Feature model representing a project feature
@@ -190,7 +190,7 @@ domain:
               updatedAt: Date
             }
 
-        - path: "app/domain/models/phase.ts"
+        - path: "clean-task-manager/app/domain/models/phase.ts"
           content: |
             /**
              * Phase model for feature implementation
@@ -206,7 +206,7 @@ domain:
               updatedAt: Date
             }
 
-        - path: "app/domain/models/task.ts"
+        - path: "clean-task-manager/app/domain/models/task.ts"
           content: |
             /**
              * Task model for execution
@@ -257,7 +257,7 @@ domain:
               expected: boolean | string | number
             }
 
-        - path: "app/domain/models/index.ts"
+        - path: "clean-task-manager/app/domain/models/index.ts"
           content: |
             export * from './project'
             export * from './feature'
@@ -267,7 +267,7 @@ domain:
     - id: "D002"
       title: "Create use case interfaces"
       files:
-        - path: "app/domain/usecases/parse-yaml.ts"
+        - path: "clean-task-manager/app/domain/usecases/parse-yaml.ts"
           content: |
             import { ProjectModel } from '@/domain/models'
 
@@ -287,7 +287,7 @@ domain:
               export type Result = ProjectModel | null
             }
 
-        - path: "app/domain/usecases/execute-task.ts"
+        - path: "clean-task-manager/app/domain/usecases/execute-task.ts"
           content: |
             import { TaskModel } from '@/domain/models'
 
@@ -312,7 +312,7 @@ domain:
               }
             }
 
-        - path: "app/domain/usecases/generate-prompt.ts"
+        - path: "clean-task-manager/app/domain/usecases/generate-prompt.ts"
           content: |
             import { TaskModel } from '@/domain/models'
 
@@ -342,7 +342,7 @@ presentation:
     - id: "P001"
       title: "Create TaskManager main component"
       files:
-        - path: "app/presentation/components/task-manager/index.tsx"
+        - path: "clean-task-manager/app/presentation/components/task-manager/index.tsx"
           content: |
             'use client'
 
@@ -510,7 +510,7 @@ presentation:
     - id: "P002"
       title: "Create TaskList component"
       files:
-        - path: "app/presentation/components/task-list/index.tsx"
+        - path: "clean-task-manager/app/presentation/components/task-list/index.tsx"
           content: |
             'use client'
 
@@ -627,7 +627,7 @@ presentation:
     - id: "P003"
       title: "Create hooks"
       files:
-        - path: "app/presentation/hooks/use-task-manager.ts"
+        - path: "clean-task-manager/app/presentation/hooks/use-task-manager.ts"
           content: |
             'use client'
 
@@ -782,7 +782,7 @@ pages:
     - id: "PG001"
       title: "Create main layout"
       files:
-        - path: "app/layout.tsx"
+        - path: "clean-task-manager/app/layout.tsx"
           content: |
             import type { Metadata } from 'next'
             import { Inter } from 'next/font/google'
@@ -813,7 +813,7 @@ pages:
               )
             }
 
-        - path: "app/page.tsx"
+        - path: "clean-task-manager/app/page.tsx"
           content: |
             import { TaskManager } from '@/presentation/components/task-manager'
 
@@ -828,7 +828,7 @@ pages:
     - id: "PG002"
       title: "Create API routes"
       files:
-        - path: "app/api/projects/route.ts"
+        - path: "clean-task-manager/app/api/projects/route.ts"
           content: |
             import { NextRequest, NextResponse } from 'next/server'
             import { readFile, writeFile } from 'fs/promises'
@@ -867,7 +867,7 @@ pages:
               }
             }
 
-        - path: "app/api/tasks/execute/route.ts"
+        - path: "clean-task-manager/app/api/tasks/execute/route.ts"
           content: |
             import { NextRequest, NextResponse } from 'next/server'
             import { exec } from 'child_process'
@@ -902,7 +902,7 @@ final:
     - id: "F001"
       title: "Create example YAML template"
       files:
-        - path: "templates/project.yaml"
+        - path: "clean-task-manager/templates/project.yaml"
           content: |
             project:
               name: "Example Project"
@@ -937,7 +937,7 @@ final:
     - id: "F002"
       title: "Setup environment variables"
       files:
-        - path: ".env.local"
+        - path: "clean-task-manager/.env.local"
           content: |
             DATABASE_URL="postgresql://user:password@localhost:5432/taskmanager"
             NODE_ENV="development"
@@ -946,22 +946,22 @@ final:
       title: "Update package.json scripts"
       commands:
         - |
-          npm pkg set scripts.dev="next dev"
-          npm pkg set scripts.build="next build"
-          npm pkg set scripts.start="next start"
-          npm pkg set scripts.lint="next lint"
-          npm pkg set scripts.db:push="prisma db push"
-          npm pkg set scripts.db:studio="prisma studio"
+          cd clean-task-manager && npm pkg set scripts.dev="next dev"
+          cd clean-task-manager && npm pkg set scripts.build="next build"
+          cd clean-task-manager && npm pkg set scripts.start="next start"
+          cd clean-task-manager && npm pkg set scripts.lint="next lint"
+          cd clean-task-manager && npm pkg set scripts.db:push="prisma db push"
+          cd clean-task-manager && npm pkg set scripts.db:studio="prisma studio"
 
     - id: "F004"
       title: "Initialize database"
       commands:
-        - "npx prisma db push"
+        - "cd clean-task-manager && npx prisma db push"
 
     - id: "F005"
       title: "Run development server"
       commands:
-        - "npm run dev"
+        - "cd clean-task-manager && npm run dev"
       notes: "Application will be available at http://localhost:3000"
 
 # Execution instructions for Claude Code

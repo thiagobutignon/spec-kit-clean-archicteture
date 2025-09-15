@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const { promisify } = require('util');
@@ -193,14 +194,202 @@ function parseTestYAML(content) {
   return sections;
 }
 
+// Logger class for intercepting and saving logs
+class Logger {
+  constructor(logFile = 'execution.log') {
+    this.logFile = logFile;
+    this.originalConsoleLog = console.log;
+    this.originalConsoleError = console.error;
+    this.originalConsoleWarn = console.warn;
+    this.setupLogFile();
+    this.interceptConsole();
+  }
+
+  setupLogFile() {
+    // Create logs directory if it doesn't exist
+    const logDir = path.dirname(this.logFile);
+    if (logDir !== '.' && !fsSync.existsSync(logDir)) {
+      fsSync.mkdirSync(logDir, { recursive: true });
+    }
+
+    // Rotate log file if it exists and is large
+    this.rotateLogIfNeeded();
+
+    // Create log file with header
+    const startTime = new Date().toISOString();
+    const logHeader = `\n${'='.repeat(80)}\n` +
+                     `EXECUTION LOG STARTED: ${startTime}\n` +
+                     `Process ID: ${process.pid}\n` +
+                     `Node Version: ${process.version}\n` +
+                     `Platform: ${process.platform}\n` +
+                     `Working Directory: ${process.cwd()}\n` +
+                     `${'='.repeat(80)}\n\n`;
+
+    fsSync.writeFileSync(this.logFile, logHeader, 'utf8');
+  }
+
+  rotateLogIfNeeded() {
+    try {
+      if (fsSync.existsSync(this.logFile)) {
+        const stats = fsSync.statSync(this.logFile);
+        const maxSize = 10 * 1024 * 1024; // 10MB
+
+        if (stats.size > maxSize) {
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+          const rotatedFile = this.logFile.replace(/\.log$/, `-${timestamp}.log`);
+          fsSync.renameSync(this.logFile, rotatedFile);
+          this.originalConsoleLog(`Rotated log file to: ${rotatedFile}`);
+        }
+      }
+    } catch (error) {
+      this.originalConsoleLog('Error rotating log file:', error.message);
+    }
+  }
+
+  interceptConsole() {
+    // Intercept console.log
+    console.log = (...args) => {
+      this.originalConsoleLog.apply(console, args);
+      this.saveToFile(args, 'LOG');
+    };
+
+    // Intercept console.error
+    console.error = (...args) => {
+      this.originalConsoleError.apply(console, args);
+      this.saveToFile(args, 'ERROR');
+    };
+
+    // Intercept console.warn
+    console.warn = (...args) => {
+      this.originalConsoleWarn.apply(console, args);
+      this.saveToFile(args, 'WARN');
+    };
+  }
+
+  saveToFile(args, consoleMethod = 'LOG') {
+    try {
+      const timestamp = new Date().toISOString();
+      const message = args.map(arg => {
+        if (typeof arg === 'object') {
+          try {
+            return JSON.stringify(arg, null, 2);
+          } catch {
+            return String(arg);
+          }
+        }
+        return String(arg);
+      }).join(' ');
+
+      // Remove ANSI color codes for file logging
+      const cleanMessage = message.replace(/\x1b\[[0-9;]*m/g, '');
+
+      // Remove duplicate timestamp if it's already in the message
+      const finalMessage = cleanMessage.replace(/^\[[\d-T:.Z]+\]\s*/, '');
+
+      // Detect log level from content or console method
+      let level = this.detectLogLevel(finalMessage);
+      if (consoleMethod === 'ERROR') level = 'error';
+      if (consoleMethod === 'WARN') level = 'warn';
+
+      const logEntry = {
+        timestamp,
+        level: level.toUpperCase(),
+        method: consoleMethod,
+        message: finalMessage,
+        pid: process.pid
+      };
+
+      // Format log line with padding for better readability
+      const paddedLevel = level.toUpperCase().padEnd(7);
+      const logLine = `${timestamp} [${paddedLevel}] ${finalMessage}\n`;
+
+      // Append to file (async to avoid blocking)
+      fs.appendFile(this.logFile, logLine, 'utf8').catch(err => {
+        this.originalConsoleLog('Error writing to log file:', err.message);
+      });
+
+    } catch (error) {
+      this.originalConsoleLog('Error in log interceptor:', error.message);
+    }
+  }
+
+  detectLogLevel(message) {
+    const lowerMessage = message.toLowerCase();
+
+    if (lowerMessage.includes('error') || lowerMessage.includes('failed') || lowerMessage.includes('✗')) {
+      return 'error';
+    }
+    if (lowerMessage.includes('warning') || lowerMessage.includes('warn') || lowerMessage.includes('skipping')) {
+      return 'warn';
+    }
+    if (lowerMessage.includes('success') || lowerMessage.includes('completed') || lowerMessage.includes('✓')) {
+      return 'success';
+    }
+    if (lowerMessage.includes('executing') || lowerMessage.includes('running') || lowerMessage.includes('creating')) {
+      return 'action';
+    }
+
+    return 'info';
+  }
+
+  restore() {
+    console.log = this.originalConsoleLog;
+    console.error = this.originalConsoleError;
+    console.warn = this.originalConsoleWarn;
+  }
+
+  async saveExecutionSummary(stats) {
+    const endTime = new Date().toISOString();
+    const duration = Math.round((Date.now() - stats.startTime) / 1000);
+
+    const summary = {
+      timestamp: endTime,
+      executionSummary: {
+        totalTasks: stats.totalTasks,
+        completedTasks: stats.completedTasks,
+        failedTasks: stats.failedTasks,
+        skippedTasks: stats.totalTasks - stats.completedTasks - stats.failedTasks,
+        duration: `${duration} seconds`,
+        successRate: `${Math.round((stats.completedTasks / stats.totalTasks) * 100)}%`,
+        startTime: new Date(stats.startTime).toISOString(),
+        endTime: endTime
+      },
+      environment: {
+        nodeVersion: process.version,
+        platform: process.platform,
+        workingDirectory: process.cwd(),
+        pid: process.pid
+      }
+    };
+
+    const summaryLine = `\n${'='.repeat(80)}\n` +
+                       `EXECUTION SUMMARY\n` +
+                       `${'='.repeat(80)}\n` +
+                       `${JSON.stringify(summary, null, 2)}\n` +
+                       `${'='.repeat(80)}\n` +
+                       `LOG ENDED: ${endTime}\n` +
+                       `${'='.repeat(80)}\n\n`;
+
+    try {
+      await fs.appendFile(this.logFile, summaryLine, 'utf8');
+    } catch (error) {
+      this.originalConsoleLog('Error writing summary to log file:', error.message);
+    }
+  }
+}
+
 class TaskExecutor {
-  constructor() {
+  constructor(logFile = 'logs/execution.log') {
     this.stats = {
       totalTasks: 0,
       completedTasks: 0,
       failedTasks: 0,
       startTime: Date.now()
     };
+
+    // Initialize logger
+    this.logger = new Logger(logFile);
+    this.log('TaskExecutor initialized with logging enabled', 'info');
   }
 
   log(message, type = 'info') {
@@ -342,7 +531,7 @@ class TaskExecutor {
     return true;
   }
 
-  printStats() {
+  async printStats() {
     const duration = Math.round((Date.now() - this.stats.startTime) / 1000);
 
     this.log('\n📊 Execution Summary:', 'info');
@@ -351,6 +540,15 @@ class TaskExecutor {
     this.log(`Failed: ${this.stats.failedTasks}`, this.stats.failedTasks > 0 ? 'error' : 'info');
     this.log(`Duration: ${duration} seconds`, 'info');
     this.log(`Success Rate: ${Math.round((this.stats.completedTasks / this.stats.totalTasks) * 100)}%`, 'info');
+
+    // Save execution summary to log file
+    await this.logger.saveExecutionSummary(this.stats);
+    this.log(`\n📝 Execution log saved to: ${this.logger.logFile}`, 'info');
+  }
+
+  cleanup() {
+    // Restore original console.log
+    this.logger.restore();
   }
 }
 
@@ -400,12 +598,21 @@ async function main() {
       }
     }
 
-    executor.printStats();
+    await executor.printStats();
     executor.log('🎉 Execution completed!', 'success');
+
+    // Cleanup logger
+    executor.cleanup();
 
   } catch (error) {
     executor.log(`Fatal error: ${error.message}`, 'error');
     console.error(error.stack);
+
+    // Cleanup logger before exit
+    if (executor && executor.cleanup) {
+      executor.cleanup();
+    }
+
     process.exit(1);
   }
 }
