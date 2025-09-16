@@ -1,11 +1,18 @@
 # Task: Reflect on Domain YAML Plan
 
+## 🤖 RLHF Scoring Optimization
+
+During reflection, optimize the plan for the highest RLHF score:
+- **-2 to 0**: Identify and fix architecture violations, missing references
+- **+1**: Ensure valid implementation with proper patterns
+- **+2**: Add ubiquitous language, domain documentation, and DDD best practices
+
 ## 1. Your Deliverable
 
 Your output is a JSON object containing your reflections and, if necessary, a revised YAML plan.
 
-- If no changes are needed: `{"status": "NO_CHANGES_NEEDED", "reflection": "The plan is optimal and requires no changes.", "revised_yaml": null}`.
-- If changes are made: `{"status": "REVISED", "reflection": "...", "revised_yaml": "..."}`.
+- If no changes are needed: `{"status": "NO_CHANGES_NEEDED", "reflection": "The plan is optimal and requires no changes.", "revised_yaml": null, "estimated_rlhf_score": 2}`.
+- If changes are made: `{"status": "REVISED", "reflection": "...", "revised_yaml": "...", "estimated_rlhf_score": 2}`.
 
 ## 2. Objective
 
@@ -47,9 +54,20 @@ You must critically analyze the YAML plan by asking these questions. Your final 
   - "Are there redundant steps? For example, creating a file and then immediately refactoring it? Could this be a single `create_file` step with the final content?"
   - "Are all commits meaningful and atomic, or are there too many small commits that could be combined?"
 
-- **[ ] Ubiquitous Language Consistency:**
+- **[ ] Ubiquitous Language Consistency (RLHF +2 Requirement):**
   - "If `ubiquitousLanguage` is defined, are all terms used consistently throughout the plan?"
   - "Do the step descriptions and commit messages use the established domain vocabulary?"
+  - "Are JSDoc comments with `@domainConcept` tags present for +2 scoring?"
+
+- **[ ] Clean Architecture Compliance (RLHF -2 Prevention):**
+  - "Are there any external dependencies (axios, fetch, etc.) in domain layer?"
+  - "Is the REPLACE/WITH syntax correctly formatted in all refactor steps?"
+  - "Do all use cases follow the interface pattern (not classes)?"
+
+- **[ ] Domain Documentation Quality (RLHF +1 to +2):**
+  - "Do templates include meaningful domain documentation?"
+  - "Are `@pattern` tags used to identify design patterns?"
+  - "Is the business context clearly expressed in comments?"
 
 ## 5. Step-by-Step Execution Plan
 
@@ -58,9 +76,12 @@ You must critically analyze the YAML plan by asking these questions. Your final 
 3.  **Decide on Action:**
     a. **If the plan is optimal and no improvements can be made:** Conclude that no changes are necessary.
     b. **If you identify potential improvements:** Create a copy of the YAML in memory and apply the necessary modifications (reorder steps, combine steps, add missing steps, etc.).
-4.  **Generate Report:**
-    a. If no changes were made, produce the output JSON with `status: "NO_CHANGES_NEEDED"`.
-    b. If you modified the plan, produce the output JSON with `status: "REVISED"`. In the `reflection` field, write a clear and concise summary of the changes you made and **why** you made them, referencing the checklist. Place the complete, modified YAML in the `revised_yaml` field.
+4.  **Calculate RLHF Score Estimate:**
+    - Estimate the potential RLHF score (0-2) based on the plan quality
+    - Consider presence of ubiquitous language, domain documentation, and architecture compliance
+5.  **Generate Report:**
+    a. If no changes were made, produce the output JSON with `status: "NO_CHANGES_NEEDED"` and `estimated_rlhf_score`.
+    b. If you modified the plan, produce the output JSON with `status: "REVISED"`. In the `reflection` field, write a clear and concise summary of the changes you made and **why** you made them, referencing the checklist. Place the complete, modified YAML in the `revised_yaml` field along with `estimated_rlhf_score`.
 
 ---
 
@@ -99,8 +120,9 @@ steps:
 ```json
 {
   "status": "REVISED",
-  "reflection": "The original plan was inefficient. It created a file in one step and then immediately refactored it in the next. I have combined these into a single 'create_file' step that generates the file with logging included from the start, following the KISS principle. The workflow steps (branch and PR) are correctly positioned.",
-  "revised_yaml": "steps:\n  - id: 'create-feature-branch'\n    type: 'branch'\n    # ...\n  - id: 'create-user-service-with-logging'\n    type: 'create_file'\n    # ... (combined step)\n  - id: 'create-pull-request'\n    type: 'pull_request'\n    # ..."
+  "reflection": "The original plan was inefficient. It created a file in one step and then immediately refactored it in the next. I have combined these into a single 'create_file' step that generates the file with logging included from the start, following the KISS principle. Added JSDoc comments with @domainConcept tags for RLHF +2 scoring. The workflow steps (branch and PR) are correctly positioned.",
+  "revised_yaml": "steps:\n  - id: 'create-feature-branch'\n    type: 'branch'\n    # ...\n  - id: 'create-user-service-with-logging'\n    type: 'create_file'\n    template: |\n      /**\n       * @domainConcept User Service\n       * @pattern Domain Service\n       */\n      # ... (combined step with documentation)\n  - id: 'create-pull-request'\n    type: 'pull_request'\n    # ...",
+  "estimated_rlhf_score": 2
 }
 ```
 
@@ -124,7 +146,37 @@ steps:
 ```json
 {
   "status": "REVISED",
-  "reflection": "The plan was missing the final pull_request step, which is essential for completing the workflow. I've added it to ensure the feature can be properly submitted for review to the staging branch.",
-  "revised_yaml": "steps:\n  # ... (all existing steps)\n  - id: 'create-pull-request'\n    type: 'pull_request'\n    description: 'Create pull request for domain to staging'\n    action:\n      target_branch: 'staging'\n      source_branch: 'feat/[feature]-domain'\n    # ..."
+  "reflection": "The plan was missing the final pull_request step, which is essential for completing the workflow. I've added it to ensure the feature can be properly submitted for review to the staging branch. Also verified that ubiquitous language is present for potential RLHF +2 scoring.",
+  "revised_yaml": "steps:\n  # ... (all existing steps)\n  - id: 'create-pull-request'\n    type: 'pull_request'\n    description: 'Create pull request for domain to staging'\n    action:\n      target_branch: 'staging'\n      source_branch: 'feat/[feature]-domain'\n    # ...",
+  "estimated_rlhf_score": 1.5
+}
+```
+
+### Example 3: Architecture Violation (RLHF -2 Risk)
+
+`/reflection-tasks-domain from yaml:`
+
+```yaml
+steps:
+  - id: "create-fetch-user-use-case"
+    type: "create_file"
+    path: "src/features/user/domain/use-cases/fetch-user.ts"
+    template: |
+      import axios from 'axios';
+
+      export interface FetchUser {
+        execute(input: FetchUserInput): Promise<FetchUserOutput>;
+      }
+    # ...
+```
+
+**Expected Output:**
+
+```json
+{
+  "status": "REVISED",
+  "reflection": "CRITICAL: Found architecture violation - axios import in domain layer would result in RLHF -2 score. Removed external dependency and added proper domain documentation with @domainConcept tags. This ensures Clean Architecture compliance and aims for RLHF +2 score.",
+  "revised_yaml": "steps:\n  - id: 'create-fetch-user-use-case'\n    type: 'create_file'\n    path: 'src/features/user/domain/use-cases/fetch-user.ts'\n    template: |\n      /**\n       * @domainConcept User Fetching\n       * @pattern Use Case Interface\n       * @principle Clean Architecture - No external dependencies in domain\n       */\n      export interface FetchUser {\n        execute(input: FetchUserInput): Promise<FetchUserOutput>;\n      }\n    # ...",
+  "estimated_rlhf_score": 2
 }
 ```
