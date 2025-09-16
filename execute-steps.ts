@@ -5,6 +5,7 @@ import os from 'os';
 import yaml from 'yaml';
 import 'zx/globals';
 import Logger from './logger';
+import { RLHFSystem } from './rlhf-system';
 
 $.verbose = true;
 $.shell = '/bin/bash';
@@ -38,12 +39,15 @@ interface ImplementationPlan {
 class StepExecutor {
   private plan: ImplementationPlan;
   private logger: Logger;
+  private rlhf: RLHFSystem;
+  private startTime: number = 0;
 
   constructor(private implementationPath: string) {
     this.plan = { steps: [] };
 
     const logDir = path.join(path.dirname(implementationPath), '.logs', path.basename(implementationPath, '.yaml'));
     this.logger = new Logger(logDir);
+    this.rlhf = new RLHFSystem();
   }
 
   private async loadPlan(): Promise<void> {
@@ -85,41 +89,78 @@ class StepExecutor {
       }
 
       try {
+        // Track execution time
+        this.startTime = Date.now();
+
         // Executa a ação principal do passo
         await this.executeStepAction(step);
-        
+
         // Se a ação foi bem-sucedida, executa o script de validação
         if (step.validation_script) {
           const scriptOutput = await this.runValidationScript(step.validation_script, step.id);
+
+          // Calculate execution duration
+          const duration = Date.now() - this.startTime;
+
+          // Apply automated RLHF scoring
+          step.rlhf_score = await this.rlhf.calculateScore(step.type, true);
+
           // ATUALIZAÇÃO DE ESTADO EM CASO DE SUCESSO
           step.status = 'SUCCESS';
-          step.execution_log = `Completed successfully at ${new Date().toISOString()}.\n\n--- SCRIPT OUTPUT ---\n${scriptOutput}`;
+          step.execution_log = `Completed successfully at ${new Date().toISOString()} (${duration}ms).\nRLHF Score: ${step.rlhf_score}\n\n--- SCRIPT OUTPUT ---\n${scriptOutput}`;
           await this.savePlan();
         } else {
           // Se não houver script, a ação bem-sucedida é suficiente
+          const duration = Date.now() - this.startTime;
+          step.rlhf_score = await this.rlhf.calculateScore(step.type, true);
           step.status = 'SUCCESS';
-          step.execution_log = `Action completed successfully at ${new Date().toISOString()}. No validation script provided.`;
+          step.execution_log = `Action completed successfully at ${new Date().toISOString()} (${duration}ms). RLHF Score: ${step.rlhf_score}. No validation script provided.`;
           await this.savePlan();
         }
-        
-        console.log(chalk.green.bold(`✅ Step '${stepId}' completed successfully.`));
+
+        console.log(chalk.green.bold(`✅ Step '${stepId}' completed successfully. RLHF Score: ${step.rlhf_score}`));
 
       } catch (error: any) {
+        // Calculate execution duration even for failures
+        const duration = Date.now() - this.startTime;
+
         // ATUALIZAÇÃO DE ESTADO EM CASO DE FALHA
         step.status = 'FAILED';
         const errorMessage = error.stderr || error.stdout || error.message || 'Unknown error';
-        step.execution_log = `Failed at ${new Date().toISOString()}:\n\n--- ERROR LOG ---\n${errorMessage}`;
-        step.rlhf_score = -2; // Pontuação padrão para falha de execução
+
+        // Apply automated RLHF scoring for failure
+        step.rlhf_score = await this.rlhf.calculateScore(step.type, false);
+
+        step.execution_log = `Failed at ${new Date().toISOString()} (${duration}ms).\nRLHF Score: ${step.rlhf_score}\n\n--- ERROR LOG ---\n${errorMessage}`;
         await this.savePlan(); // Salva o estado de falha
 
-        console.error(chalk.red.bold(`\n❌ ERROR: Step '${stepId}' failed.`));
+        console.error(chalk.red.bold(`\n❌ ERROR: Step '${stepId}' failed. RLHF Score: ${step.rlhf_score}`));
         console.error(chalk.red(errorMessage));
         console.error(chalk.red.bold('Aborting execution. The YAML file has been updated with the failure details.'));
+
+        // Trigger RLHF analysis for learning
+        await this.rlhf.analyzeExecution(this.implementationPath);
+
         process.exit(1);
       }
     }
 
     console.log(chalk.green.bold('\n🎉 All steps completed successfully!'));
+
+    // Perform final RLHF analysis
+    console.log(chalk.blue.bold('\n🤖 Running RLHF analysis...'));
+    await this.rlhf.analyzeExecution(this.implementationPath);
+
+    // Calculate final score
+    const finalScore = await this.calculateFinalRLHFScore();
+    this.plan.evaluation = this.plan.evaluation || {};
+    this.plan.evaluation.final_rlhf_score = finalScore;
+    this.plan.evaluation.final_status = 'SUCCESS';
+    await this.savePlan();
+
+    console.log(chalk.cyan.bold(`\n📊 Final RLHF Score: ${finalScore}/2`));
+    console.log(chalk.cyan('Run `npx tsx rlhf-system.ts report` to see learning insights'));
+
     this.logger.close();
   }
 
@@ -242,6 +283,26 @@ class StepExecutor {
 
     // The validation script will handle the actual PR creation
     console.log(chalk.blue(`   📝 PR configuration validated. Will be created by validation script.`));
+  }
+
+  private async calculateFinalRLHFScore(): Promise<number> {
+    const steps = this.plan.steps || [];
+    let totalScore = 0;
+    let validScores = 0;
+
+    for (const step of steps) {
+      if (step.rlhf_score !== null && step.rlhf_score !== undefined) {
+        totalScore += step.rlhf_score;
+        validScores++;
+      }
+    }
+
+    // Average score, normalized to 0-2 range
+    if (validScores === 0) return 1; // Neutral score if no data
+
+    const avgScore = totalScore / validScores;
+    // Normalize from [-2, 2] to [0, 2]
+    return Math.max(0, Math.min(2, avgScore + 1));
   }
 
 private async runValidationScript(scriptContent: string, stepId: string): Promise<string> {
