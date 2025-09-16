@@ -274,3 +274,56 @@ exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,out
 [2025-09-16T19:27:17.753Z] Done in 0.47s.
 [2025-09-16T19:27:17.759Z] ✅ Tests passed
 📦 Staging changes...
+[2025-09-16T19:27:17.781Z] 💾 Creating commit...
+[2025-09-16T19:27:17.807Z] [main 2c4d4f5] feat(user-registration): add send-welcome-email use case
+ 19 files changed, 360 insertions(+), 27 deletions(-)
+ create mode 100644 coverage/spec-kit-clean-archicteture/src/features/user-registration/domain/use-cases/send-welcome-email.ts.html
+ create mode 100644 src/features/user-registration/domain/use-cases/send-welcome-email.ts
+[2025-09-16T19:27:17.807Z] ✅ Successfully committed
+[2025-09-16T19:27:17.808Z] --- Script finished successfully ---
+[2025-09-16T19:27:17.811Z] --- Running validation script for 'create-error-user-already-exists' ---
+[2025-09-16T19:27:17.816Z] 🔍 Running lint check...
+[2025-09-16T19:27:17.887Z] yarn run v1.22.22
+[2025-09-16T19:27:17.897Z] [ERROR] warning ../../package.json: No license field
+[2025-09-16T19:27:17.901Z] $ eslint .
+[2025-09-16T19:27:18.377Z] /Users/thiagobutignon/dev/spec-kit-clean-archicteture/coverage/block-navigation.js
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+✖ 1 problem (0 errors, 1 warning)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+[2025-09-16T19:27:18.387Z] Done in 0.50s.
+[2025-09-16T19:27:18.393Z] ✅ Lint passed
+🧪 Running tests with coverage...
+[2025-09-16T19:27:18.466Z] yarn run v1.22.22
+[2025-09-16T19:27:18.476Z] [ERROR] warning ../../package.json: No license field
+[2025-09-16T19:27:18.480Z] $ vitest --passWithNoTests --coverage
+[2025-09-16T19:27:18.820Z] 
+[2025-09-16T19:27:18.820Z] RUN  v3.2.4 /Users/thiagobutignon/dev/spec-kit-clean-archicteture
+      Coverage enabled with v8
+[2025-09-16T19:27:18.896Z] No test files found, exiting with code 0
+[2025-09-16T19:27:18.896Z] [ERROR] include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+[2025-09-16T19:27:18.897Z] % Coverage report from v8
+[2025-09-16T19:27:18.898Z] -------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T19:27:18.898Z] File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T19:27:18.899Z] All files          |       0 |    77.77 |   77.77 |       0 |
+[2025-09-16T19:27:18.899Z] ...n-archicteture |       0 |    66.66 |   66.66 |       0 |
+[2025-09-16T19:27:18.899Z] execute-steps.ts |       0 |      100 |     100 |       0 | 3-265
+[2025-09-16T19:27:18.899Z] logger.ts        |       0 |        0 |       0 |       0 | 1-46
+[2025-09-16T19:27:18.899Z] ...ementation.ts |       0 |      100 |     100 |       0 | 3-293             
+ .../domain/errors |       0 |      100 |     100 |       0 |
+[2025-09-16T19:27:18.899Z] ...-not-found.ts |       0 |      100 |     100 |       0 | 5-10              
+ ...le/domain/test |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:18.899Z] ...e-use-case.ts |       0 |        0 |       0 |       0 | 1-30
+[2025-09-16T19:27:18.899Z] ...main/use-cases |       0 |        0 |       0 |       0 |                   
+  ...er-profile.ts |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:18.899Z] .../domain/errors |       0 |      100 |     100 |       0 |                   
+  ...ady-exists.ts |       0 |      100 |     100 |       0 | 5-10              
+ ...main/use-cases |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:18.899Z] register-user.ts |       0 |        0 |       0 |       0 |                   
+  ...come-email.ts |       0 |        0 |       0 |       0 |                   
+-------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T19:27:18.952Z] Done in 0.49s.
+[2025-09-16T19:27:18.958Z] ✅ Tests passed
+📦 Staging changes...

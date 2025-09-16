@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1758050837708" clover="3.2.0">
-  <project timestamp="1758050837708" name="All files">
-    <metrics statements="427" coveredstatements="0" conditionals="8" coveredconditionals="6" methods="8" coveredmethods="6" elements="443" coveredelements="12" complexity="0" loc="427" ncloc="427" packages="5" files="8" classes="8"/>
+<coverage generated="1758050838907" clover="3.2.0">
+  <project timestamp="1758050838907" name="All files">
+    <metrics statements="433" coveredstatements="0" conditionals="9" coveredconditionals="7" methods="9" coveredmethods="7" elements="451" coveredelements="14" complexity="0" loc="433" ncloc="433" packages="6" files="9" classes="9"/>
     <package name="spec-kit-clean-archicteture">
       <metrics statements="407" coveredstatements="0" conditionals="3" coveredconditionals="2" methods="3" coveredmethods="2"/>
       <file name="execute-steps.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/execute-steps.ts">
@@ -457,6 +457,18 @@
       <metrics statements="0" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
       <file name="get-user-profile.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/user-profile/domain/use-cases/get-user-profile.ts">
         <metrics statements="0" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+      </file>
+    </package>
+    <package name="spec-kit-clean-archicteture.src.features.user-registration.domain.errors">
+      <metrics statements="6" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+      <file name="user-already-exists.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/user-registration/domain/errors/user-already-exists.ts">
+        <metrics statements="6" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+        <line num="5" count="0" type="stmt"/>
+        <line num="6" count="0" type="stmt"/>
+        <line num="7" count="0" type="stmt"/>
+        <line num="8" count="0" type="stmt"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="10" count="0" type="stmt"/>
       </file>
     </package>
     <package name="spec-kit-clean-archicteture.src.features.user-registration.domain.use-cases">
