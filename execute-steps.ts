@@ -54,9 +54,11 @@ class StepExecutor {
     console.log(chalk.green.bold('\n🎉 All steps completed successfully!'));
   }
 
-  private async executeStep(step: any): Promise<void> {
-    if (step.type === 'file') {
-      await this.handleFileStep(step);
+  private async executeStep(step: Step): Promise<void> {
+    if (step.type === 'create_file') {
+      await this.handleCreateFileStep(step);
+    } else if (step.type === 'refactor_file') {
+      await this.handleRefactorFileStep(step);
     } else if (step.type === 'folder') {
       await this.handleFolderStep(step);
     }
@@ -66,10 +68,10 @@ class StepExecutor {
     }
   }
 
-  private async handleFileStep(step: any): Promise<void> {
+  private async handleCreateFileStep(step: Step): Promise<void> {
+    // Lógica que já tínhamos para criar um arquivo
     const { path, template = '' } = step;
-    if (!path) throw new Error("File step is missing the 'path' attribute.");
-
+    if (!path) throw new Error("Create file step is missing 'path'.");
     console.log(chalk.cyan(`   📄 Creating file: ${path}`));
     await fs.ensureDir(path.substring(0, path.lastIndexOf('/')));
     await fs.writeFile(path, template);
@@ -85,6 +87,42 @@ class StepExecutor {
       console.log(chalk.cyan(`   📁 Creating directory: ${fullPath}`));
       await fs.ensureDir(fullPath);
     }
+  }
+
+  private async handleRefactorFileStep(step: Step): Promise<void> {
+    const { path, template = '' } = step;
+    if (!path) throw new Error("Refactor file step is missing 'path'.");
+
+    console.log(chalk.cyan(`   🔧 Refactoring file: ${path}`));
+
+    // 1. Parsear o template de refatoração
+    const replaceMatch = template.match(/<<<REPLACE>>>(.*?)<<<\/REPLACE>>>/s);
+    const withMatch = template.match(/<<<WITH>>>(.*?)<<<\/WITH>>>/s);
+
+    if (!replaceMatch || !withMatch) {
+      throw new Error(`Invalid refactor template for step ${step.id}. Missing <<<REPLACE>>> or <<<WITH>>> blocks.`);
+    }
+
+    const oldCode = replaceMatch[1].trim();
+    const newCode = withMatch[1].trim();
+
+    // 2. Ler o arquivo existente
+    if (!await fs.pathExists(path)) {
+      throw new Error(`File to refactor does not exist at path: ${path}`);
+    }
+    const fileContent = await fs.readFile(path, 'utf-8');
+
+    // 3. Executar a substituição
+    const newFileContent = fileContent.replace(oldCode, newCode);
+
+    if (newFileContent === fileContent) {
+      // A substituição falhou, o código antigo não foi encontrado
+      throw new Error(`Could not find the OLD code block in ${path}. Refactoring failed.`);
+    }
+
+    // 4. Escrever o arquivo modificado
+    await fs.writeFile(path, newFileContent);
+    console.log(chalk.green(`   ✅ Successfully applied refactoring to ${path}`));
   }
 
   /**

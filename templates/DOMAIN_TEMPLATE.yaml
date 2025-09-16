@@ -124,6 +124,14 @@ steps:
   - id: 'create-structure'
     type: 'folder'
     description: 'Create domain folder structure'
+    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+    rlhf_score: null # -2, -1, 0, 1, 2
+    execution_log: ''
+    # AI-NOTE: 'references' for this step can be left empty or link to architectural decision records.
+    references:
+      - type: 'internal_guideline'
+        source: 'ARCHITECTURE.md'
+        description: 'Following the standard feature-based domain structure.'
     action:
       create_folders:
         basePath: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain'
@@ -131,14 +139,37 @@ steps:
           - 'errors'
           - 'use-cases'
           - 'test'
-    validation:
-      command: 'ls -la src/features/__FEATURE_NAME_KEBAB_CASE__/domain'
-      expected: 'All three folders exist'
+    validation_script: |
+      echo "✅ Verifying folder structure..."
+      # Adiciona uma verificação explícita para falhar se as pastas não existirem
+      if [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/domain/errors" ] || \
+         [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases" ] || \
+         [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/domain/test" ]; then
+        echo "❌ ERROR: One or more domain folders were not created."
+        exit 1
+      fi
+      echo "✅ Folders exist."
 
   # Step 2: Create first use case
   - id: 'create-use-case-__ACTION_ENTITY_KEBAB_CASE__'
-    type: 'file'
+    type: 'create_file'
     description: 'Create __ACTION_ENTITY_PASCAL_CASE__ use case interface'
+    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+    rlhf_score: null # -2, -1, 0, 1, 2
+    execution_log: ''
+    # AI-NOTE: For each step, you MUST populate this 'references' section.
+    # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
+    references:
+      - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
+        source: 'context7'
+        query: 'awesome system design __CONCEPT__'
+        url: 'https://github.com/...' # Link direto para a fonte que inspirou o design
+        description: 'This use case follows the Command pattern for handling actions.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: '*Repository'
+        description: 'The structure is consistent with existing use cases like `OtherUseCase` found in the project.'
     path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases/__ACTION_ENTITY_KEBAB_CASE__.ts'
     template: |
       /**
@@ -214,8 +245,24 @@ steps:
 
   # Step 3: Create error class
   - id: 'create-error-__ERROR_NAME_KEBAB_CASE__'
-    type: 'file'
+    type: 'create_file'
     description: 'Create __ERROR_NAME_KEBAB_CASE__ domain error'
+    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+    rlhf_score: null # -2, -1, 0, 1, 2
+    execution_log: ''
+    # AI-NOTE: For each step, you MUST populate this 'references' section.
+    # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
+    references:
+      - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
+        source: 'context7'
+        query: 'awesome system design __CONCEPT__'
+        url: 'https://github.com/...' # Link direto para a fonte que inspirou o design
+        description: 'This use case follows the Command pattern for handling actions.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: '*Repository'
+        description: 'The structure is consistent with existing use cases like `OtherUseCase` found in the project.'
     path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/errors/__ERROR_NAME_KEBAB_CASE__.ts'
     template: |
       /**
@@ -274,8 +321,24 @@ steps:
 
   # Step 4: Create test helper
   - id: 'create-test-helper-__ACTION_ENTITY_KEBAB_CASE__'
-    type: 'file'
+    type: 'create_file'
     description: 'Create mock for __ACTION_ENTITY_PASCAL_CASE__ use case'
+    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+    rlhf_score: null # -2, -1, 0, 1, 2
+    execution_log: ''
+    # AI-NOTE: For each step, you MUST populate this 'references' section.
+    # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
+    references:
+      - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
+        source: 'context7'
+        query: 'awesome system design __CONCEPT__'
+        url: 'https://github.com/...' # Link direto para a fonte que inspirou o design
+        description: 'This use case follows the Command pattern for handling actions.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: '*Repository'
+        description: 'The structure is consistent with existing use cases like `OtherUseCase` found in the project.'
     path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/test/mock-__ACTION_ENTITY_KEBAB_CASE__-use-case.ts'
     template: |
       import { vi } from 'vitest'
@@ -340,6 +403,80 @@ steps:
 
       echo "💾 Creating commit..."
       git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add __ACTION_ENTITY_KEBAB_CASE__ use case test helpers"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED - Checking git status..."
+        git status
+        echo "📋 Review the status above and fix any issues"
+        exit 1
+      fi
+      echo "✅ Successfully committed"
+
+  # OPTIONAL STEP: You can add more steps here for additional use cases, errors, or test helpers as needed.
+  - id: 'refactor-__FILE_TO_MODIFY_KEBAB_CASE__'
+    type: 'refactor_file'
+    description: 'Refactor __FILE_TO_MODIFY_PASCAL_CASE__ to incorporate new logic'
+    status: 'pending'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_referencing_symbols'
+        query: '__SYMBOL_BEING_CHANGED__'
+        description: 'Refactoring this file because it is a primary consumer of the changed `__SYMBOL__` interface.'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/path/to/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+    # O 'template' aqui não é o conteúdo completo do arquivo,
+    # mas sim um "diff" no formato que você sugeriu.
+    template: |
+      <<<REPLACE>>>
+      // Código antigo que a IA identificou para ser substituído
+      export type OldType = {
+        fieldA: string;
+      }
+      <<</REPLACE>>>
+      <<<WITH>>>
+      // Novo código que a IA gerou para substituir o antigo
+      export type OldType = {
+        fieldA: string;
+        newFieldB: number; // Adicionando o novo campo
+      }
+      <<</WITH>>>
+    validation_script: |
+      echo "🔍 Running lint check..."
+      yarn lint
+      if [ $? -ne 0 ]; then
+        echo "❌ LINT FAILED - Attempting auto-fix..."
+        yarn lint --fix
+        if [ $? -ne 0 ]; then
+          echo "❌ AUTO-FIX FAILED - Manual intervention required"
+          echo "📋 Run 'yarn lint' to see remaining errors"
+          exit 1
+        fi
+        echo "✅ Lint errors auto-fixed, validating again..."
+        yarn lint
+        if [ $? -ne 0 ]; then
+          echo "❌ LINT STILL FAILING - Manual fixes needed"
+          exit 1
+        fi
+      fi
+      echo "✅ Lint passed"
+
+      echo "🧪 Running tests with coverage..."
+      yarn test --coverage
+      if [ $? -ne 0 ]; then
+        echo "❌ TESTS FAILED - Running specific test to identify issue..."
+        yarn test --run --reporter=verbose
+        echo "❌ Tests must be fixed manually"
+        echo "📋 Check the test output above for details"
+        exit 1
+      fi
+      echo "✅ Tests passed"
+
+      echo "📦 Staging changes..."
+      git add .
+
+      echo "💾 Creating commit..."
+      git commit -m "refactor(__FEATURE_NAME_KEBAB_CASE__): refactor __FILE_TO_MODIFY_KEBAB_CASE__"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED - Checking git status..."
         git status
@@ -523,3 +660,29 @@ ai_guidelines:
   - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery' # Adicionar esta regra para clareza extra
   - 'MUST use vitest, NOT jest'
   - 'MUST follow all domain rules - no business logic, no external dependencies'
+
+# ------------------------------------------------------------------------------
+# AI-NOTE: TASK EVALUATION SECTION.
+# After the entire execution is complete, this section will be populated by a
+# human reviewer or an evaluation script.
+# ------------------------------------------------------------------------------
+
+evaluation:
+  # AI-NOTE: This final_status will be 'SUCCESS' if all steps passed, or 'FAILED' if any step failed.
+  final_status: 'PENDING' # PENDING | SUCCESS | FAILED
+  # AI-NOTE: The final_rlhf_score is an overall score for the entire task, assigned by a human reviewer.
+  final_rlhf_score: null # -2, -1, 0, 1, 2
+  # AI-NOTE: The reviewer will add a summary of what went well and what could be improved.
+  # This text is the primary source for future learning and template improvements.
+  reviewer_summary: |
+    - What went well:
+      - ...
+    - Areas for improvement:
+      - ...
+  # AI-NOTE: This section lists actionable suggestions for improving the master templates or prompts.
+  # This is the key to the continuous learning loop.
+  template_improvement_suggestions:
+    - target_template: 'domain.template.yaml'
+      target_step_id: 'create-use-case-__ACTION_ENTITY_KEBAB_CASE__'
+      suggestion: 'The generated mock data was too simplistic. The template should be updated to include more realistic data generation.'
+      priority: 'medium'
