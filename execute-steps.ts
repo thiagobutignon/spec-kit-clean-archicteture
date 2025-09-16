@@ -1,24 +1,52 @@
 #!/usr/bin/env tsx
 
-import crypto from 'crypto'; // Usado para gerar um nome de arquivo único
-import os from 'os'; // Usado para encontrar o diretório temporário do sistema
+import crypto from 'crypto';
+import os from 'os';
 import yaml from 'yaml';
 import 'zx/globals';
+import Logger from './logger';
 
-// Configuração do zx
 $.verbose = true;
 $.shell = '/bin/bash';
 
+interface Step {
+  id: string;
+  type: 'create_file' | 'refactor_file' | 'delete_file' | 'folder';
+  status: 'PENDING' | 'SUCCESS' | 'FAILED' | 'SKIPPED';
+  rlhf_score: number | null;
+  execution_log: string;
+  path?: string;
+  template?: string;
+  action?: {
+    create_folders?: {
+      basePath?: string;
+      folders?: string[];
+    };
+  };
+  validation_script?: string;
+}
+
+interface ImplementationPlan {
+  steps: Step[];
+  [key: string]: any;
+}
+
 class StepExecutor {
-  private implementationData: any;
+  private plan: ImplementationPlan;
+  private logger: Logger;
 
-  constructor(private implementationPath: string) {}
+  constructor(private implementationPath: string) {
+    this.plan = { steps: [] };
 
-  private async loadFile(): Promise<void> {
+    const logDir = path.join(path.dirname(implementationPath), '.logs', path.basename(implementationPath, '.yaml'));
+    this.logger = new Logger(logDir);
+  }
+
+  private async loadPlan(): Promise<void> {
     console.log(chalk.magenta.bold(`🚀 Loading implementation file: ${this.implementationPath}`));
     try {
       const fileContent = await fs.readFile(this.implementationPath, 'utf-8');
-      this.implementationData = yaml.parse(fileContent);
+      this.plan = yaml.parse(fileContent);
     } catch (error: any) {
       console.error(chalk.red.bold(`❌ Error: Could not read or parse the YAML file.`));
       console.error(chalk.red(`   Reason: ${error.message}`));
@@ -26,9 +54,14 @@ class StepExecutor {
     }
   }
 
+  private async savePlan(): Promise<void> {
+    const yamlString = yaml.stringify(this.plan);
+    await fs.writeFile(this.implementationPath, yamlString, 'utf-8');
+  }
+
   public async run(): Promise<void> {
-    await this.loadFile();
-    const steps = this.implementationData?.steps;
+    await this.loadPlan();
+    const steps = this.plan.steps;
 
     if (!steps || !Array.isArray(steps)) {
       console.warn(chalk.yellow("Warning: No 'steps' section found. Nothing to execute."));
@@ -39,32 +72,83 @@ class StepExecutor {
 
     for (const [index, step] of steps.entries()) {
       const stepId = step.id || `Unnamed Step ${index + 1}`;
-      console.log(chalk.blue.bold(`\n▶️  Executing Step ${index + 1}/${steps.length}: ${stepId}`));
+      console.log(chalk.blue.bold(`\n▶️  Processing Step ${index + 1}/${steps.length}: ${stepId}`));
+
+      // LÓGICA PARA PULAR PASSOS JÁ CONCLUÍDOS
+      if (step.status === 'SUCCESS' || step.status === 'SKIPPED') {
+        console.log(chalk.gray(`   ⏭️  Skipping step with status '${step.status}'.`));
+        continue;
+      }
 
       try {
-        await this.executeStep(step);
+        // Executa a ação principal do passo
+        await this.executeStepAction(step);
+        
+        // Se a ação foi bem-sucedida, executa o script de validação
+        if (step.validation_script) {
+          const scriptOutput = await this.runValidationScript(step.validation_script, step.id);
+          // ATUALIZAÇÃO DE ESTADO EM CASO DE SUCESSO
+          step.status = 'SUCCESS';
+          step.execution_log = `Completed successfully at ${new Date().toISOString()}.\n\n--- SCRIPT OUTPUT ---\n${scriptOutput}`;
+          await this.savePlan();
+        } else {
+          // Se não houver script, a ação bem-sucedida é suficiente
+          step.status = 'SUCCESS';
+          step.execution_log = `Action completed successfully at ${new Date().toISOString()}. No validation script provided.`;
+          await this.savePlan();
+        }
+        
         console.log(chalk.green.bold(`✅ Step '${stepId}' completed successfully.`));
-      } catch (error) {
+
+      } catch (error: any) {
+        // ATUALIZAÇÃO DE ESTADO EM CASO DE FALHA
+        step.status = 'FAILED';
+        const errorMessage = error.stderr || error.stdout || error.message || 'Unknown error';
+        step.execution_log = `Failed at ${new Date().toISOString()}:\n\n--- ERROR LOG ---\n${errorMessage}`;
+        step.rlhf_score = -2; // Pontuação padrão para falha de execução
+        await this.savePlan(); // Salva o estado de falha
+
         console.error(chalk.red.bold(`\n❌ ERROR: Step '${stepId}' failed.`));
-        console.error(chalk.red.bold('Aborting execution.'));
+        console.error(chalk.red(errorMessage));
+        console.error(chalk.red.bold('Aborting execution. The YAML file has been updated with the failure details.'));
         process.exit(1);
       }
     }
 
     console.log(chalk.green.bold('\n🎉 All steps completed successfully!'));
+    this.logger.close();
   }
 
-  private async executeStep(step: Step): Promise<void> {
-    if (step.type === 'create_file') {
-      await this.handleCreateFileStep(step);
-    } else if (step.type === 'refactor_file') {
-      await this.handleRefactorFileStep(step);
-    } else if (step.type === 'folder') {
-      await this.handleFolderStep(step);
+  private async executeStepAction(step: Step): Promise<void> {
+    switch (step.type) {
+      case 'create_file':
+        await this.handleCreateFileStep(step);
+        break;
+      case 'refactor_file':
+        await this.handleRefactorFileStep(step);
+        break;
+      case 'delete_file':
+        await this.handleDeleteFileStep(step);
+        break;
+      case 'folder':
+        await this.handleFolderStep(step);
+        break;
+      default:
+        throw new Error(`Unknown step type: '${(step as any).type}'`);
     }
+  }
 
-    if (step.validation_script) {
-      await this.runValidationScript(step.validation_script, step.id);
+  private async handleDeleteFileStep(step: Step): Promise<void> {
+    const { path } = step;
+    if (!path) throw new Error("Delete file step is missing 'path'.");
+
+    console.log(chalk.red(`   🗑️ Deleting file: ${path}`));
+
+    if (await fs.pathExists(path)) {
+      await fs.remove(path);
+      console.log(chalk.green(`   ✅ File successfully deleted.`));
+    } else {
+      console.warn(chalk.yellow(`   ⚠️  Warning: File to delete at ${path} does not exist. Skipping.`));
     }
   }
 
@@ -95,7 +179,6 @@ class StepExecutor {
 
     console.log(chalk.cyan(`   🔧 Refactoring file: ${path}`));
 
-    // 1. Parsear o template de refatoração
     const replaceMatch = template.match(/<<<REPLACE>>>(.*?)<<<\/REPLACE>>>/s);
     const withMatch = template.match(/<<<WITH>>>(.*?)<<<\/WITH>>>/s);
 
@@ -106,67 +189,73 @@ class StepExecutor {
     const oldCode = replaceMatch[1].trim();
     const newCode = withMatch[1].trim();
 
-    // 2. Ler o arquivo existente
     if (!await fs.pathExists(path)) {
       throw new Error(`File to refactor does not exist at path: ${path}`);
     }
     const fileContent = await fs.readFile(path, 'utf-8');
 
-    // 3. Executar a substituição
     const newFileContent = fileContent.replace(oldCode, newCode);
 
     if (newFileContent === fileContent) {
-      // A substituição falhou, o código antigo não foi encontrado
       throw new Error(`Could not find the OLD code block in ${path}. Refactoring failed.`);
     }
 
-    // 4. Escrever o arquivo modificado
     await fs.writeFile(path, newFileContent);
     console.log(chalk.green(`   ✅ Successfully applied refactoring to ${path}`));
   }
 
-  /**
-   * Executa um script shell escrevendo-o em um arquivo temporário e executando esse arquivo.
-   * Esta é a abordagem mais robusta para scripts multi-linha complexos.
-   */
-  private async runValidationScript(scriptContent: string, stepId: string): Promise<void> {
-    console.log(chalk.yellow(`   --- Running validation script for '${stepId}' ---`));
+private async runValidationScript(scriptContent: string, stepId: string): Promise<string> {
+    this.logger.log(`--- Running validation script for '${stepId}' ---`);
     
-    // Cria um caminho único para o nosso script temporário
     const tempScriptPath = path.join(os.tmpdir(), `step-${crypto.randomUUID()}.sh`);
+    let fullOutput = '';
 
     try {
-      // Normaliza os finais de linha para garantir a compatibilidade
       const normalizedScript = scriptContent.replace(/\r\n/g, '\n');
-      
-      // Escreve o script no arquivo temporário
       await fs.writeFile(tempScriptPath, normalizedScript);
-      
-      // Torna o arquivo temporário executável
       await fs.chmod(tempScriptPath, '755');
       
-      // Executa o arquivo de script
-      // zx irá transmitir a saída (stdout/stderr) automaticamente
-      await $([tempScriptPath]);
+      // Configura o zx para não imprimir a saída no console (nós faremos isso)
+      $.verbose = false;
+      const processPromise = $`bash ${tempScriptPath}`;
 
+      // Intercepta stdout e stderr
+      processPromise.stdout.on('data', (chunk) => {
+        const data = chunk.toString();
+        this.logger.log(data.trim());
+        fullOutput += data;
+      });
+      processPromise.stderr.on('data', (chunk) => {
+        const data = chunk.toString();
+        this.logger.error(data.trim());
+        fullOutput += data;
+      });
+
+      // Espera o processo terminar
+      await processPromise;
+      
+      $.verbose = true; // Restaura o modo verbose para outros comandos
+      this.logger.log(`--- Script finished successfully ---`);
+      return fullOutput;
+
+    } catch (error: any) {
+      $.verbose = true; // Garante que o modo verbose seja restaurado em caso de erro
+      // O erro já foi logado pelo stream, então apenas o relançamos
+      throw error;
     } finally {
-      // Bloco finally garante que o arquivo temporário seja sempre excluído,
-      // mesmo que o script falhe.
       if (await fs.pathExists(tempScriptPath)) {
         await fs.remove(tempScriptPath);
       }
     }
-    
-    console.log(chalk.yellow(`   --- Script finished successfully ---`));
   }
 }
 
 async function main() {
   if (argv._.length < 1) {
-    console.error(chalk.red.bold('Usage: npx tsx execute_steps.ts <path_to_implementation.yaml>'));
+    console.error(chalk.red.bold('Usage: npx tsx execute-steps.ts <path_to_implementation.yaml>'));
     process.exit(1);
   }
-  const yamlFilePath = argv._[0];
+  const yamlFilePath = argv._[0] as string;
   const executor = new StepExecutor(yamlFilePath);
   await executor.run();
 }

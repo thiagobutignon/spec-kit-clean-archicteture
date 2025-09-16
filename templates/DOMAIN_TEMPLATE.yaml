@@ -485,6 +485,50 @@ steps:
       fi
       echo "✅ Successfully committed"
 
+  # AI-NOTE: This step is used by the AI during the self-correction loop.
+  # When a 'create_file' step fails, the AI can generate an instance of this
+  # step to delete the broken artifact before attempting a fix.
+  - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'
+    type: 'delete_file'
+    description: 'Delete the file __FILE_TO_DELETE_PASCAL_CASE__ due to a generation error'
+    status: 'pending'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'internal_correction'
+        source: 'self'
+        description: 'Deleting the artifact from the failed step `__FAILED_STEP_ID__` to prepare for a corrected version.'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/path/to/__FILE_TO_DELETE_KEBAB_CASE__.ts'
+    # AI-NOTE: The validation_script for a delete action should verify the file is gone
+    # and then perform the standard quality checks before committing the deletion.
+    validation_script: |
+      echo "🗑️ Verifying file deletion..."
+      if [ -f "src/features/__FEATURE_NAME_KEBAB_CASE__/path/to/__FILE_TO_DELETE_KEBAB_CASE__.ts" ]; then
+        echo "❌ ERROR: File at __FILE_TO_DELETE_KEBAB_CASE__.ts was not deleted."
+        exit 1
+      fi
+      echo "✅ File successfully deleted."
+
+      echo "🔍 Running lint check on the project..."
+      yarn lint
+      if [ $? -ne 0 ]; then
+        echo "❌ LINT FAILED after deletion."
+        exit 1
+      fi
+      echo "✅ Lint passed."
+
+      echo "📦 Staging changes..."
+      git add .
+
+      echo "💾 Creating commit..."
+      git commit -m "chore(__FEATURE_NAME_KEBAB_CASE__): delete broken artifact __FILE_TO_DELETE_KEBAB_CASE__"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED - Checking git status..."
+        git status
+        exit 1
+      fi
+      echo "✅ Successfully committed deletion."
+
 # ------------------------------------------------------------------------------
 # AI-NOTE: IMMUTABLE DOCUMENTATION SECTIONS AHEAD.
 # Copy these sections verbatim. The [placeholders] inside the commands

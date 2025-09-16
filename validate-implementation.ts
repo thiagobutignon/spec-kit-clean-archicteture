@@ -5,10 +5,27 @@ import * as fs from 'fs';
 import { fileURLToPath } from 'url';
 import * as yaml from 'yaml';
 
-// --- Interfaces para Tipagem ---
+
+
+// --- Interfaces para Tipagem Alinhadas com o Novo Template ---
+type StepType = 'folder' | 'create_file' | 'refactor_file' | 'delete_file';
+type StepStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'SKIPPED';
+
+interface Reference {
+  type: 'external_pattern' | 'internal_code_analysis' | 'internal_guideline' | 'internal_correction';
+  source: string;
+  description: string;
+  [key: string]: unknown;
+}
+
 interface Step {
   id: string;
-  type: 'file' | 'folder';
+  type: StepType;
+  description: string;
+  status: StepStatus;
+  rlhf_score: number | null;
+  execution_log: string;
+  references: Reference[];
   validation_script?: string;
   [key: string]: unknown;
 }
@@ -18,7 +35,6 @@ interface ValidationResult {
   errors: string[];
   matches: string[];
 }
-
 /**
  * Validates a feature implementation YAML file against the master template.
  */
@@ -49,6 +65,7 @@ class ImplementationValidator {
     this.validateImmutableSections();
     this.validateStructure();
     this.validateSteps();
+    this.validateEvaluationSection(); // <-- NOVA VALIDAÇÃO
 
     this.printResults();
     return this.result;
@@ -158,31 +175,67 @@ class ImplementationValidator {
    */
   private validateSteps(): void {
     console.log('👣 Validating code generation steps...');
-    if (!this.templateContent.steps || !this.implementationContent.steps) {
-      this.result.errors.push(`❌ ERROR: The 'steps' section is missing.`);
+    if (!this.implementationContent.steps || !Array.isArray(this.implementationContent.steps)) {
+      this.result.errors.push(`❌ ERROR: The 'steps' section is missing or is not an array.`);
       return;
     }
 
-    const templateSteps = this.templateContent.steps as Step[];
     const implementationSteps = this.implementationContent.steps as Step[];
+    const allowedTypes: StepType[] = ['folder', 'create_file', 'refactor_file', 'delete_file'];
 
-    implementationSteps.forEach((implStep) => {
-      const templateStep = templateSteps.find((ts) => implStep.id.startsWith(ts.id.split('__')[0]));
+    implementationSteps.forEach((implStep, index) => {
+      const stepId = implStep.id || `step at index ${index}`;
+      console.log(`  -> Validating step: ${stepId}`);
 
-      if (!templateStep) {
-        this.result.errors.push(`❌ ERROR: Could not find a matching template for the implementation step with id '${implStep.id}'.`);
-        return;
+      // 1. Validar a presença e tipo dos campos obrigatórios
+      if (implStep.execution_log !== '') {
+        this.result.errors.push(`❌ ERROR in step '${stepId}': Initial execution_log must be empty.`);
       }
 
-      console.log(`  -> Validating step: ${implStep.id}`);
+      if (!implStep.id || !implStep.type || !implStep.description || !implStep.status) {
+        this.result.errors.push(`❌ ERROR in step '${stepId}': Missing one or more required fields: id, type, description, status.`);
+      }
+      if (implStep.status !== 'PENDING') {
+        this.result.errors.push(`❌ ERROR in step '${stepId}': Initial status must be 'PENDING', but found '${implStep.status}'.`);
+      }
+      if (!allowedTypes.includes(implStep.type)) {
+        this.result.errors.push(`❌ ERROR in step '${stepId}': Invalid type '${implStep.type}'.`);
+      }
+      if (!implStep.references || !Array.isArray(implStep.references) || implStep.references.length === 0) {
+        this.result.errors.push(`❌ ERROR in step '${stepId}': The 'references' array must exist and cannot be empty.`);
+      }
 
-      const script = implStep.validation_script;
-      if (!script || !script.includes('yarn lint') || !script.includes('yarn test') || !script.includes('git commit')) {
-          this.result.errors.push(`❌ ERROR: The 'validation_script' for step '${implStep.id}' is missing or incomplete.`);
-      } else {
-          this.result.matches.push(`✅ Validation script for step '${implStep.id}' seems correct.`);
+      // 2. Validar o script de validação (se existir)
+      if (implStep.validation_script) {
+        const script = implStep.validation_script;
+        if (!script.includes('git commit')) {
+            this.result.errors.push(`❌ ERROR in step '${stepId}': The 'validation_script' is missing a 'git commit' command.`);
+        } else {
+            this.result.matches.push(`✅ Validation script for step '${stepId}' seems correct.`);
+        }
       }
     });
+  }
+
+  private validateEvaluationSection(): void {
+    console.log('📊 Validating evaluation section...');
+    if (!this.implementationContent.evaluation) {
+      this.result.errors.push(`❌ ERROR: The 'evaluation' section is missing from the implementation file.`);
+      return;
+    }
+
+    const evalSection = this.implementationContent.evaluation;
+    if (evalSection.final_status !== 'PENDING') {
+      this.result.errors.push(`❌ ERROR in 'evaluation': Initial final_status must be 'PENDING'.`);
+    }
+    if (evalSection.final_rlhf_score !== null) {
+      this.result.errors.push(`❌ ERROR in 'evaluation': Initial final_rlhf_score must be null.`);
+    }
+    if (!evalSection.reviewer_summary || !evalSection.template_improvement_suggestions) {
+      this.result.errors.push(`❌ ERROR in 'evaluation': Missing 'reviewer_summary' or 'template_improvement_suggestions' sections.`);
+    }
+
+    this.result.matches.push('✅ Evaluation section is correctly structured.');
   }
 
   /**
