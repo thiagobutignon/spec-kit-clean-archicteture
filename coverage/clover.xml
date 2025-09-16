@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1758050836515" clover="3.2.0">
-  <project timestamp="1758050836515" name="All files">
-    <metrics statements="427" coveredstatements="0" conditionals="7" coveredconditionals="5" methods="7" coveredmethods="5" elements="441" coveredelements="10" complexity="0" loc="427" ncloc="427" packages="5" files="7" classes="7"/>
+<coverage generated="1758050837708" clover="3.2.0">
+  <project timestamp="1758050837708" name="All files">
+    <metrics statements="427" coveredstatements="0" conditionals="8" coveredconditionals="6" methods="8" coveredmethods="6" elements="443" coveredelements="12" complexity="0" loc="427" ncloc="427" packages="5" files="8" classes="8"/>
     <package name="spec-kit-clean-archicteture">
       <metrics statements="407" coveredstatements="0" conditionals="3" coveredconditionals="2" methods="3" coveredmethods="2"/>
       <file name="execute-steps.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/execute-steps.ts">
@@ -460,8 +460,11 @@
       </file>
     </package>
     <package name="spec-kit-clean-archicteture.src.features.user-registration.domain.use-cases">
-      <metrics statements="0" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+      <metrics statements="0" coveredstatements="0" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
       <file name="register-user.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/user-registration/domain/use-cases/register-user.ts">
+        <metrics statements="0" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+      </file>
+      <file name="send-welcome-email.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/user-registration/domain/use-cases/send-welcome-email.ts">
         <metrics statements="0" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
       </file>
     </package>

@@ -222,3 +222,55 @@ exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,out
 [2025-09-16T19:27:16.558Z] Done in 0.54s.
 [2025-09-16T19:27:16.563Z] ✅ Tests passed
 📦 Staging changes...
+[2025-09-16T19:27:16.583Z] 💾 Creating commit...
+[2025-09-16T19:27:16.611Z] [main b964583] feat(user-registration): add register-user use case
+ 18 files changed, 824 insertions(+), 342 deletions(-)
+ create mode 100644 coverage/spec-kit-clean-archicteture/src/features/user-registration/domain/use-cases/index.html
+ create mode 100644 coverage/spec-kit-clean-archicteture/src/features/user-registration/domain/use-cases/register-user.ts.html
+ create mode 100644 src/features/user-registration/domain/use-cases/register-user.ts
+[2025-09-16T19:27:16.611Z] ✅ Successfully committed
+[2025-09-16T19:27:16.611Z] --- Script finished successfully ---
+[2025-09-16T19:27:16.614Z] --- Running validation script for 'create-use-case-send-welcome-email' ---
+[2025-09-16T19:27:16.619Z] 🔍 Running lint check...
+[2025-09-16T19:27:16.693Z] yarn run v1.22.22
+[2025-09-16T19:27:16.705Z] [ERROR] warning ../../package.json: No license field
+[2025-09-16T19:27:16.709Z] $ eslint .
+[2025-09-16T19:27:17.200Z] /Users/thiagobutignon/dev/spec-kit-clean-archicteture/coverage/block-navigation.js
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+✖ 1 problem (0 errors, 1 warning)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+[2025-09-16T19:27:17.209Z] Done in 0.52s.
+[2025-09-16T19:27:17.215Z] ✅ Lint passed
+🧪 Running tests with coverage...
+[2025-09-16T19:27:17.288Z] yarn run v1.22.22
+[2025-09-16T19:27:17.298Z] [ERROR] warning ../../package.json: No license field
+[2025-09-16T19:27:17.302Z] $ vitest --passWithNoTests --coverage
+[2025-09-16T19:27:17.629Z] 
+[2025-09-16T19:27:17.629Z] RUN  v3.2.4 /Users/thiagobutignon/dev/spec-kit-clean-archicteture
+      Coverage enabled with v8
+[2025-09-16T19:27:17.697Z] No test files found, exiting with code 0
+[2025-09-16T19:27:17.697Z] [ERROR] include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+[2025-09-16T19:27:17.698Z] % Coverage report from v8
+[2025-09-16T19:27:17.699Z] -------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T19:27:17.699Z] File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T19:27:17.700Z] All files          |       0 |       75 |      75 |       0 |
+[2025-09-16T19:27:17.700Z] ...n-archicteture |       0 |    66.66 |   66.66 |       0 |
+[2025-09-16T19:27:17.700Z] execute-steps.ts |       0 |      100 |     100 |       0 | 3-265
+[2025-09-16T19:27:17.700Z] logger.ts        |       0 |        0 |       0 |       0 | 1-46
+[2025-09-16T19:27:17.700Z] ...ementation.ts |       0 |      100 |     100 |       0 | 3-293
+[2025-09-16T19:27:17.700Z] .../domain/errors |       0 |      100 |     100 |       0 |
+[2025-09-16T19:27:17.700Z] ...-not-found.ts |       0 |      100 |     100 |       0 | 5-10
+[2025-09-16T19:27:17.700Z] ...le/domain/test |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:17.700Z] ...e-use-case.ts |       0 |        0 |       0 |       0 | 1-30
+[2025-09-16T19:27:17.700Z] ...main/use-cases |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:17.700Z] ...er-profile.ts |       0 |        0 |       0 |       0 |                   
+ ...main/use-cases |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:17.700Z] register-user.ts |       0 |        0 |       0 |       0 |                   
+  ...come-email.ts |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:17.700Z] -------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T19:27:17.753Z] Done in 0.47s.
+[2025-09-16T19:27:17.759Z] ✅ Tests passed
+📦 Staging changes...
