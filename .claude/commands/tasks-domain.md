@@ -12,7 +12,7 @@ Your **only** output for this task is the complete and valid content of a single
 
 ## 3. Source of Truth
 
-- **File:** `TODO_DOMAIN_TEMPLATE.yaml`
+- **File:** `templates/DOMAIN_TEMPLATE.yaml`
 - **Rule:** You MUST follow all `# AI-NOTE:` directives and replace all `__PLACEHOLDER__` variables.
 
 ## 4. Input Parameters
@@ -26,7 +26,7 @@ Your **only** output for this task is the complete and valid content of a single
 3.  **Replace Placeholders:** Systematically replace all placeholders in the in-memory copy using the data from the JSON input.
 4.  **Preserve Immutable Sections:** Double-check that all rule and documentation sections are untouched.
 5.  **Final Validation (Mandatory):**
-    a. Run the command: `npx tsx validate-implementation.ts TODO_DOMAIN_TEMPLATE.yaml {{featureName}}-implementation.yaml`.
+    a. Run the command: `npx tsx validate-implementation.ts templates/DOMAIN_TEMPLATE.yaml {{featureName}}-implementation.yaml`.
     b. **Analyze the output:** - If the script exits with `✅ SUCCESS`, your task is complete. **Provide the final, validated YAML content as your output.** - If the script exits with `❌ FAILURE`, **do not show the broken YAML**. Instead, read the `➡️ AI ACTION:` instructions, fix the YAML in memory, and re-run the validation. Repeat this loop until the validation passes.
 
 ## 6. User Interaction

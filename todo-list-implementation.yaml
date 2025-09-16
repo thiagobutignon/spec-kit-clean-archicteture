@@ -43,7 +43,7 @@ layer_rules:
     - 'Main Layer - No dependency injection logic'
     - 'External Libraries - No third-party dependencies'
 
-# Domain layer rules from DOMAIN_TEMPLATE.md
+# Domain layer rules from templates/DOMAIN_TEMPLATES.md
 domain_rules:
   allowed:
     - 'Simple type definitions (Input/Output types)'
@@ -66,7 +66,7 @@ domain_rules:
     - 'Calculations or computations'
     - 'Any behavior beyond type definitions and interfaces'
 
-# Use case rules from DOMAIN_TEMPLATE.md
+# Use case rules from templates/DOMAIN_TEMPLATES.md
 use_case_rules:
   should:
     - 'Define only interfaces/contracts, not implementations'
@@ -83,7 +83,7 @@ use_case_rules:
     - 'Have side effects'
     - 'Execute multiple operations (e.g., CreateUserAndSendEmail is wrong)'
 
-# Error rules from DOMAIN_TEMPLATE.md
+# Error rules from templates/DOMAIN_TEMPLATES.md
 error_rules:
   should:
     - 'Extend the native Error class'
@@ -98,7 +98,7 @@ error_rules:
     - 'Expose sensitive information'
     - 'Import external dependencies'
 
-# Test helper rules from DOMAIN_TEMPLATE.md
+# Test helper rules from templates/DOMAIN_TEMPLATES.md
 test_helper_rules:
   should:
     - 'Create mock/stub implementations of use cases'
@@ -1067,7 +1067,7 @@ troubleshooting:
     - 'Verify interface implementations are complete'
     - 'Run yarn tsc --noEmit to check types'
 
-# Refactoring checklist from DOMAIN_TEMPLATE.md
+# Refactoring checklist from templates/DOMAIN_TEMPLATES.md
 refactoring:
   before_refactoring: |
     # Check current status and differences
@@ -1157,7 +1157,7 @@ refactoring:
         # 7. Show the final diff
         git show --stat
 
-# Recovery steps from DOMAIN_TEMPLATE.md
+# Recovery steps from templates/DOMAIN_TEMPLATES.md
 recovery:
   accidental_commit: |
     # Revert the last commit but keep changes
@@ -1202,7 +1202,7 @@ recovery:
     git diff --staged --stat
     git commit -m "refactor([feature-name]): remove business logic from domain layer"
 
-# AI Guidelines from DOMAIN_TEMPLATE.md
+# AI Guidelines from templates/DOMAIN_TEMPLATES.md
 ai_guidelines:
   - 'Always validate before committing: Run lint first, Run tests second, Only commit if both pass'
   - 'If generation fails: Identify the specific error, Fix only that error, Re-run validation, Do NOT proceed until fixed'
