@@ -2,3 +2,50 @@
 [2025-09-16T11:53:40.271Z] ✅ Verifying folder structure...
 [2025-09-16T11:53:40.271Z] ✅ Folders exist.
 📦 Staging changes...
+[2025-09-16T11:53:40.282Z] 💾 Creating commit...
+[2025-09-16T11:53:40.300Z] [main 2bf21bd] feat(user-profile): create domain folder structure
+ 5 files changed, 1347 insertions(+), 1217 deletions(-)
+ create mode 100644 .claude/commands/domain-execute.md
+ create mode 100644 .logs/temp-plan/execution.log
+ create mode 100644 temp-plan.yaml
+ delete mode 100644 todo-list-implementation.yaml
+ create mode 100644 user-profile-implementation.yaml
+[2025-09-16T11:53:40.300Z] ✅ Successfully committed
+[2025-09-16T11:53:40.302Z] --- Script finished successfully ---
+[2025-09-16T11:53:40.306Z] --- Running validation script for 'create-use-case-get-user-profile' ---
+[2025-09-16T11:53:40.311Z] 🔍 Running lint check...
+[2025-09-16T11:53:40.396Z] yarn run v1.22.22
+[2025-09-16T11:53:40.408Z] [ERROR] warning ../../package.json: No license field
+[2025-09-16T11:53:40.413Z] $ eslint .
+[2025-09-16T11:53:41.326Z] /Users/thiagobutignon/dev/spec-kit-clean-archicteture/coverage/block-navigation.js
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+✖ 1 problem (0 errors, 1 warning)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+[2025-09-16T11:53:41.337Z] Done in 0.94s.
+[2025-09-16T11:53:41.344Z] ✅ Lint passed
+🧪 Running tests with coverage...
+[2025-09-16T11:53:41.425Z] yarn run v1.22.22
+[2025-09-16T11:53:41.435Z] [ERROR] warning ../../package.json: No license field
+[2025-09-16T11:53:41.439Z] $ vitest --passWithNoTests --coverage
+[2025-09-16T11:53:41.804Z] 
+[2025-09-16T11:53:41.804Z] RUN  v3.2.4 /Users/thiagobutignon/dev/spec-kit-clean-archicteture
+      Coverage enabled with v8
+[2025-09-16T11:53:41.859Z] No test files found, exiting with code 0
+[2025-09-16T11:53:41.859Z] [ERROR] include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+[2025-09-16T11:53:41.859Z] [ERROR] exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+[2025-09-16T11:53:41.860Z] % Coverage report from v8
+[2025-09-16T11:53:41.862Z] -------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T11:53:41.862Z] File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T11:53:41.862Z] All files          |       0 |       75 |      75 |       0 |
+[2025-09-16T11:53:41.862Z] ...n-archicteture |       0 |    66.66 |   66.66 |       0 |
+[2025-09-16T11:53:41.862Z] execute-steps.ts |       0 |      100 |     100 |       0 | 3-265
+[2025-09-16T11:53:41.862Z] logger.ts        |       0 |        0 |       0 |       0 | 1-46
+[2025-09-16T11:53:41.862Z] ...ementation.ts |       0 |      100 |     100 |       0 | 3-293
+[2025-09-16T11:53:41.862Z] ...main/use-cases |       0 |        0 |       0 |       0 |
+[2025-09-16T11:53:41.862Z] ...er-profile.ts |       0 |        0 |       0 |       0 |
+[2025-09-16T11:53:41.862Z] -------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T11:53:41.915Z] Done in 0.49s.
+[2025-09-16T11:53:41.921Z] ✅ Tests passed
+📦 Staging changes...

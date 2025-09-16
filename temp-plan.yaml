@@ -1,189 +1,176 @@
-# AI-NOTE: This YAML file is the single source of truth for generating domain layers.
-# When creating a feature implementation, you MUST adhere to the structure and rules defined here.
-version: '3.0.0'
-# AI-NOTE: Update these fields to describe the specific feature.
+version: 3.0.0
 metadata:
-  title: 'UserProfile Domain Layer - Clean Architecture'
-  description: 'TDD template for user profile feature following the master template rules.'
-  source: 'TODO_DOMAIN_TEMPLATE.yaml'
-  # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
-  lastUpdated: '2025-01-16'
-
-# AI-NOTE: Replace __FEATURE_NAME_KEBAB_CASE__ with the feature name.
+  title: UserProfile Domain Layer - Clean Architecture
+  description: TDD template for user profile feature following the master template rules.
+  source: TODO_DOMAIN_TEMPLATE.yaml
+  lastUpdated: 2025-01-16
 structure:
-  basePath: 'src/features/user-profile/domain'
+  basePath: src/features/user-profile/domain
   folders:
-    - 'errors'      # Feature-specific errors
-    - 'use-cases'   # Feature use case interfaces
-    - 'test'        # Feature test helpers
-
-# ------------------------------------------------------------------------------
-# AI-NOTE: IMMUTABLE SECTIONS AHEAD.
-# The sections from here until 'steps' are architectural rules.
-# You MUST copy them verbatim into the implementation file without ANY modification.
-# ------------------------------------------------------------------------------
-
+    - errors
+    - use-cases
+    - test
 layer_rules:
   can_import_from_domain:
-    - 'Data Layer - Implements the use case interfaces'
-    - 'Presentation Layer - Uses domain types and calls use cases'
-    - 'Infrastructure Layer - May use domain types for adapters'
-    - 'Main/Factory Layer - Wires everything together, knows all layers'
-    - 'Test Files - Can import domain types and interfaces for testing'
-
+    - Data Layer - Implements the use case interfaces
+    - Presentation Layer - Uses domain types and calls use cases
+    - Infrastructure Layer - May use domain types for adapters
+    - Main/Factory Layer - Wires everything together, knows all layers
+    - Test Files - Can import domain types and interfaces for testing
   cannot_import_from_domain:
-    - 'External Libraries - Should never know about domain'
-    - 'Node Modules - Third-party code should not depend on domain'
-
+    - External Libraries - Should never know about domain
+    - Node Modules - Third-party code should not depend on domain
   domain_cannot_import_from:
-    - 'Any other layer - Domain must be completely independent'
-    - 'Data Layer - No implementation details'
-    - 'Presentation Layer - No UI concerns'
-    - 'Infrastructure Layer - No external dependencies'
-    - 'Main Layer - No dependency injection logic'
-    - 'External Libraries - No third-party dependencies'
-
-# Domain layer rules from templates/DOMAIN_TEMPLATES.md
+    - Any other layer - Domain must be completely independent
+    - Data Layer - No implementation details
+    - Presentation Layer - No UI concerns
+    - Infrastructure Layer - No external dependencies
+    - Main Layer - No dependency injection logic
+    - External Libraries - No third-party dependencies
 domain_rules:
   allowed:
-    - 'Simple type definitions (Input/Output types)'
-    - 'Use case interfaces (contracts only)'
-    - 'Domain-specific error classes'
-    - 'Test mock functions'
-
+    - Simple type definitions (Input/Output types)
+    - Use case interfaces (contracts only)
+    - Domain-specific error classes
+    - Test mock functions
   forbidden:
-    - 'Framework dependencies (React, Next.js, Express)'
-    - 'External libraries (axios, fetch, database clients)'
-    - 'Implementation details of any kind'
-    - 'UI components'
-    - 'HTTP/Database/File system operations'
-    - 'Environment variables'
-    - 'Console.log or any I/O operations'
-    - 'Value objects'
-    - 'Entities'
-    - 'Business rules or business logic'
-    - 'Validation logic'
-    - 'Calculations or computations'
-    - 'Any behavior beyond type definitions and interfaces'
-
-# Use case rules from templates/DOMAIN_TEMPLATES.md
+    - Framework dependencies (React, Next.js, Express)
+    - External libraries (axios, fetch, database clients)
+    - Implementation details of any kind
+    - UI components
+    - HTTP/Database/File system operations
+    - Environment variables
+    - Console.log or any I/O operations
+    - Value objects
+    - Entities
+    - Business rules or business logic
+    - Validation logic
+    - Calculations or computations
+    - Any behavior beyond type definitions and interfaces
 use_case_rules:
   should:
-    - 'Define only interfaces/contracts, not implementations'
-    - 'Have EXACTLY ONE responsibility (one business operation)'
-    - 'Do ONE thing and ONE thing only (never multiple operations)'
-    - 'Return domain types or primitives'
-    - 'Be named with verbs (CreateUser, AuthenticateUser, etc.)'
-    - 'Be framework agnostic'
-
+    - Define only interfaces/contracts, not implementations
+    - Have EXACTLY ONE responsibility (one business operation)
+    - Do ONE thing and ONE thing only (never multiple operations)
+    - Return domain types or primitives
+    - Be named with verbs (CreateUser, AuthenticateUser, etc.)
+    - Be framework agnostic
   should_not:
-    - 'Contain implementation logic'
-    - 'Know about HTTP, databases, or external services'
-    - 'Import from data, presentation, or infrastructure layers'
-    - 'Have side effects'
-    - 'Execute multiple operations (e.g., CreateUserAndSendEmail is wrong)'
-
-# Error rules from templates/DOMAIN_TEMPLATES.md
+    - Contain implementation logic
+    - Know about HTTP, databases, or external services
+    - Import from data, presentation, or infrastructure layers
+    - Have side effects
+    - Execute multiple operations (e.g., CreateUserAndSendEmail is wrong)
 error_rules:
   should:
-    - 'Extend the native Error class'
-    - 'Have descriptive names ending with Error'
-    - 'Contain meaningful error messages'
-    - 'Represent business rule violations'
-    - 'Be thrown when domain invariants are violated'
-
+    - Extend the native Error class
+    - Have descriptive names ending with Error
+    - Contain meaningful error messages
+    - Represent business rule violations
+    - Be thrown when domain invariants are violated
   should_not:
-    - 'Contain HTTP status codes'
-    - 'Include technical/implementation details'
-    - 'Expose sensitive information'
-    - 'Import external dependencies'
-
-# Test helper rules from templates/DOMAIN_TEMPLATES.md
+    - Contain HTTP status codes
+    - Include technical/implementation details
+    - Expose sensitive information
+    - Import external dependencies
 test_helper_rules:
   should:
-    - 'Create mock/stub implementations of use cases'
-    - 'Generate fake test data'
-    - 'Be pure functions that return consistent data'
-    - 'Help reduce test boilerplate'
-    - 'Use ONLY Vitest (Jest is prohibited)'
-
+    - Create mock/stub implementations of use cases
+    - Generate fake test data
+    - Be pure functions that return consistent data
+    - Help reduce test boilerplate
+    - Use ONLY Vitest (Jest is prohibited)
   should_not:
-    - 'Make real API calls or database queries'
-    - 'Depend on external services'
-    - 'Contain test assertions (those belong in test files)'
-    - 'Have side effects or maintain state'
-    - 'Use Jest (use Vitest instead)'
-
-# ------------------------------------------------------------------------------
-# AI-NOTE: DYNAMIC IMPLEMENTATION SECTION.
-# Replicate the generic steps below for each use case, error, and test helper
-# required by the feature, replacing the placeholder variables (e.g., __FEATURE_NAME_KEBAB_CASE__).
-# ------------------------------------------------------------------------------
-
+    - Make real API calls or database queries
+    - Depend on external services
+    - Contain test assertions (those belong in test files)
+    - Have side effects or maintain state
+    - Use Jest (use Vitest instead)
 steps:
-  - id: 'create-structure'
-    type: 'folder'
-    description: 'Create domain folder structure'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
-    execution_log: ''
-    # AI-NOTE: 'references' for this step can be left empty or link to architectural decision records.
+  - id: create-structure
+    type: folder
+    description: Create domain folder structure
+    status: SUCCESS
+    rlhf_score: null
+    execution_log: |
+      Completed successfully at 2025-09-16T11:53:40.302Z.
+
+      --- SCRIPT OUTPUT ---
+      ✅ Verifying folder structure...
+      ✅ Folders exist.
+      📦 Staging changes...
+      💾 Creating commit...
+      [main 2bf21bd] feat(user-profile): create domain folder structure
+       5 files changed, 1347 insertions(+), 1217 deletions(-)
+       create mode 100644 .claude/commands/domain-execute.md
+       create mode 100644 .logs/temp-plan/execution.log
+       create mode 100644 temp-plan.yaml
+       delete mode 100644 todo-list-implementation.yaml
+       create mode 100644 user-profile-implementation.yaml
+      ✅ Successfully committed
     references:
-      - type: 'internal_guideline'
-        source: 'ARCHITECTURE.md'
-        description: 'Following the standard feature-based domain structure.'
+      - type: internal_guideline
+        source: ARCHITECTURE.md
+        description: Following the standard feature-based domain structure.
     action:
       create_folders:
-        basePath: 'src/features/user-profile/domain'
+        basePath: src/features/user-profile/domain
         folders:
-          - 'errors'
-          - 'use-cases'
-          - 'test'
-    validation_script: |
+          - errors
+          - use-cases
+          - test
+    validation_script: >
       echo "✅ Verifying folder structure..."
-      # Adiciona uma verificação explícita para falhar se as pastas não existirem
+
+      # Adiciona uma verificação explícita para falhar se as pastas não
+      existirem
+
       if [ ! -d "src/features/user-profile/domain/errors" ] || \
          [ ! -d "src/features/user-profile/domain/use-cases" ] || \
          [ ! -d "src/features/user-profile/domain/test" ]; then
         echo "❌ ERROR: One or more domain folders were not created."
         exit 1
       fi
+
       echo "✅ Folders exist."
 
+
       echo "📦 Staging changes..."
+
       git add .
 
+
       echo "💾 Creating commit..."
+
       git commit -m "feat(user-profile): create domain folder structure"
+
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED - Checking git status..."
         git status
         echo "📋 Review the status above and fix any issues"
         exit 1
       fi
-      echo "✅ Successfully committed"
 
-  # Step 2: Create first use case
-  - id: 'create-use-case-get-user-profile'
-    type: 'create_file'
-    description: 'Create GetUserProfile use case interface'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
-    execution_log: ''
-    # AI-NOTE: For each step, you MUST populate this 'references' section.
-    # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
+      echo "✅ Successfully committed"
+  - id: create-use-case-get-user-profile
+    type: create_file
+    description: Create GetUserProfile use case interface
+    status: PENDING
+    rlhf_score: null
+    execution_log: ""
     references:
-      - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
-        source: 'context7'
-        query: 'awesome system design user profile retrieval'
-        url: 'https://github.com/donnemartin/system-design-primer'
-        description: 'This use case follows the Command pattern for handling actions.'
-      - type: 'internal_code_analysis'
-        source: 'serena'
-        tool: 'find_symbol'
-        query: '*UseCase'
-        description: 'The structure is consistent with existing use cases like `OtherUseCase` found in the project.'
-    path: 'src/features/user-profile/domain/use-cases/get-user-profile.ts'
+      - type: external_pattern
+        source: context7
+        query: awesome system design user profile retrieval
+        url: https://github.com/donnemartin/system-design-primer
+        description: This use case follows the Command pattern for handling actions.
+      - type: internal_code_analysis
+        source: serena
+        tool: find_symbol
+        query: "*UseCase"
+        description: The structure is consistent with existing use cases like
+          `OtherUseCase` found in the project.
+    path: src/features/user-profile/domain/use-cases/get-user-profile.ts
     template: |
       /**
        * Input parameters for GetUserProfileUseCase
@@ -214,10 +201,14 @@ steps:
          */
         execute: (input: GetUserProfileInput) => Promise<GetUserProfileOutput>
       }
-    validation_script: |
-      # AI-NOTE: This script is immutable. Only the commit message placeholder is replaced.
+    validation_script: >
+      # AI-NOTE: This script is immutable. Only the commit message placeholder
+      is replaced.
+
       echo "🔍 Running lint check..."
+
       yarn lint
+
       if [ $? -ne 0 ]; then
         echo "❌ LINT FAILED - Attempting auto-fix..."
         yarn lint --fix
@@ -233,10 +224,14 @@ steps:
           exit 1
         fi
       fi
+
       echo "✅ Lint passed"
 
+
       echo "🧪 Running tests with coverage..."
+
       yarn test --coverage
+
       if [ $? -ne 0 ]; then
         echo "❌ TESTS FAILED - Running specific test to identify issue..."
         yarn test --run --reporter=verbose
@@ -244,42 +239,46 @@ steps:
         echo "📋 Check the test output above for details"
         exit 1
       fi
+
       echo "✅ Tests passed"
 
+
       echo "📦 Staging changes..."
+
       git add .
 
+
       echo "💾 Creating commit..."
+
       git commit -m "feat(user-profile): add get-user-profile use case"
+
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED - Checking git status..."
         git status
         echo "📋 Review the status above and fix any issues"
         exit 1
       fi
-      echo "✅ Successfully committed"
 
-  # Step 3: Create error class
-  - id: 'create-error-user-not-found'
-    type: 'create_file'
-    description: 'Create user-not-found domain error'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
-    execution_log: ''
-    # AI-NOTE: For each step, you MUST populate this 'references' section.
-    # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
+      echo "✅ Successfully committed"
+  - id: create-error-user-not-found
+    type: create_file
+    description: Create user-not-found domain error
+    status: PENDING
+    rlhf_score: null
+    execution_log: ""
     references:
-      - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
-        source: 'context7'
-        query: 'awesome system design error handling'
-        url: 'https://github.com/goldbergyoni/nodebestpractices'
-        description: 'This error follows best practices for domain error handling.'
-      - type: 'internal_code_analysis'
-        source: 'serena'
-        tool: 'find_symbol'
-        query: '*Error'
-        description: 'The structure is consistent with existing error classes found in the project.'
-    path: 'src/features/user-profile/domain/errors/user-not-found.ts'
+      - type: external_pattern
+        source: context7
+        query: awesome system design error handling
+        url: https://github.com/goldbergyoni/nodebestpractices
+        description: This error follows best practices for domain error handling.
+      - type: internal_code_analysis
+        source: serena
+        tool: find_symbol
+        query: "*Error"
+        description: The structure is consistent with existing error classes found in
+          the project.
+    path: src/features/user-profile/domain/errors/user-not-found.ts
     template: |
       /**
        * Error thrown when the requested user does not exist
@@ -334,31 +333,31 @@ steps:
         exit 1
       fi
       echo "✅ Successfully committed"
-
-  # Step 4: Create test helper
-  - id: 'create-test-helper-get-user-profile'
-    type: 'create_file'
-    description: 'Create mock for GetUserProfile use case'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
-    execution_log: ''
-    # AI-NOTE: For each step, you MUST populate this 'references' section.
-    # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
+  - id: create-test-helper-get-user-profile
+    type: create_file
+    description: Create mock for GetUserProfile use case
+    status: PENDING
+    rlhf_score: null
+    execution_log: ""
     references:
-      - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
-        source: 'context7'
-        query: 'vitest testing best practices'
-        url: 'https://vitest.dev/guide/mocking'
-        description: 'Following Vitest best practices for creating test mocks.'
-      - type: 'internal_code_analysis'
-        source: 'serena'
-        tool: 'find_symbol'
-        query: 'mock*UseCase'
-        description: 'The structure is consistent with existing test helpers found in the project.'
-    path: 'src/features/user-profile/domain/test/mock-get-user-profile-use-case.ts'
-    template: |
+      - type: external_pattern
+        source: context7
+        query: vitest testing best practices
+        url: https://vitest.dev/guide/mocking
+        description: Following Vitest best practices for creating test mocks.
+      - type: internal_code_analysis
+        source: serena
+        tool: find_symbol
+        query: mock*UseCase
+        description: The structure is consistent with existing test helpers found in the
+          project.
+    path: src/features/user-profile/domain/test/mock-get-user-profile-use-case.ts
+    template: >
       import { vi } from 'vitest'
-      import type { GetUserProfileUseCase, GetUserProfileInput, GetUserProfileOutput } from '../use-cases/get-user-profile'
+
+      import type { GetUserProfileUseCase, GetUserProfileInput,
+      GetUserProfileOutput } from '../use-cases/get-user-profile'
+
 
       /**
        * Creates a mock instance of GetUserProfileInput
@@ -367,6 +366,7 @@ steps:
       export const mockGetUserProfileInput = (): GetUserProfileInput => ({
         userId: 'user-123'
       })
+
 
       /**
        * Creates a mock instance of GetUserProfileOutput
@@ -379,6 +379,7 @@ steps:
         lastName: 'Doe'
       })
 
+
       /**
        * Creates a mock instance of GetUserProfileUseCase
        * @returns Mocked use case with vitest functions
@@ -386,9 +387,11 @@ steps:
       export const mockGetUserProfileUseCase = (): GetUserProfileUseCase => ({
         execute: vi.fn()
       })
-    validation_script: |
+    validation_script: >
       echo "🔍 Running lint check..."
+
       yarn lint
+
       if [ $? -ne 0 ]; then
         echo "❌ LINT FAILED - Attempting auto-fix..."
         yarn lint --fix
@@ -404,10 +407,14 @@ steps:
           exit 1
         fi
       fi
+
       echo "✅ Lint passed"
 
+
       echo "🧪 Running tests with coverage..."
+
       yarn test --coverage
+
       if [ $? -ne 0 ]; then
         echo "❌ TESTS FAILED - Running specific test to identify issue..."
         yarn test --run --reporter=verbose
@@ -415,49 +422,46 @@ steps:
         echo "📋 Check the test output above for details"
         exit 1
       fi
+
       echo "✅ Tests passed"
 
+
       echo "📦 Staging changes..."
+
       git add .
 
+
       echo "💾 Creating commit..."
-      git commit -m "test(user-profile): add get-user-profile use case test helpers"
+
+      git commit -m "test(user-profile): add get-user-profile use case test
+      helpers"
+
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED - Checking git status..."
         git status
         echo "📋 Review the status above and fix any issues"
         exit 1
       fi
+
       echo "✅ Successfully committed"
-
-# ------------------------------------------------------------------------------
-# AI-NOTE: IMMUTABLE DOCUMENTATION SECTIONS AHEAD.
-# Copy these sections verbatim. The [placeholders] inside the commands
-# are for HUMAN examples and MUST NOT be replaced by the AI.
-# ------------------------------------------------------------------------------
-
 troubleshooting:
   lint_fails:
-    - 'DO NOT commit - Fix all lint errors first'
-    - 'Check for unused imports'
-    - 'Verify proper TypeScript types'
-    - 'Ensure no console.log statements'
-    - 'Run yarn lint --fix to auto-fix when possible'
-
+    - DO NOT commit - Fix all lint errors first
+    - Check for unused imports
+    - Verify proper TypeScript types
+    - Ensure no console.log statements
+    - Run yarn lint --fix to auto-fix when possible
   tests_fail:
-    - 'DO NOT commit - All tests must pass'
-    - 'Check if mocks match the actual interfaces'
-    - 'Verify Input/Output types are correct'
-    - 'Ensure test coverage meets requirements'
-    - 'Run specific test: yarn test [test-file-path]'
-
+    - DO NOT commit - All tests must pass
+    - Check if mocks match the actual interfaces
+    - Verify Input/Output types are correct
+    - Ensure test coverage meets requirements
+    - "Run specific test: yarn test [test-file-path]"
   typescript_fails:
-    - 'Check all type definitions match'
-    - 'Ensure no missing imports'
-    - 'Verify interface implementations are complete'
-    - 'Run yarn tsc --noEmit to check types'
-
-# Refactoring checklist from templates/DOMAIN_TEMPLATES.md
+    - Check all type definitions match
+    - Ensure no missing imports
+    - Verify interface implementations are complete
+    - Run yarn tsc --noEmit to check types
 refactoring:
   before_refactoring: |
     # Check current status and differences
@@ -481,7 +485,6 @@ refactoring:
       exit 1
     fi
     echo "✅ Ready to refactor"
-
   during_refactoring: |
     # After each change, check what was modified
     echo "🔍 Reviewing changes..."
@@ -497,17 +500,17 @@ refactoring:
 
     # Show what was changed in the last commit
     git show --stat
-
   common_scenarios:
-    - name: 'Splitting a use case'
-      wrong_example: |
+    - name: Splitting a use case
+      wrong_example: >
         interface CreateUserAndSendEmailUseCase {
           execute: (input: CreateUserAndSendEmailInput) => Promise<CreateUserAndSendEmailOutput>
         }
-      correct_example: |
+      correct_example: >
         interface CreateUserUseCase {
           execute: (input: CreateUserInput) => Promise<CreateUserOutput>
         }
+
         interface SendWelcomeEmailUseCase {
           execute: (input: SendWelcomeEmailInput) => Promise<SendWelcomeEmailOutput>
         }
@@ -515,39 +518,56 @@ refactoring:
         # Split the combined use case into separate files
         # Update all imports and references
         # Run tests after each change
-
-    - name: 'Renaming for clarity'
-      script: |
+    - name: Renaming for clarity
+      script: >
         # 1. See all occurrences before changing
+
         echo "🔍 Finding all occurrences of [OldName]..."
+
         grep -r "[OldName]" src/features/[feature-name]/
+
 
         # 2. Perform the rename
+
         echo "✏️ Renaming [OldName] to [NewName]..."
+
         # Update files...
 
+
         # 3. Review the changes
+
         echo "📊 Reviewing rename changes..."
+
         git diff --word-diff
 
+
         # 4. Validate nothing broke
+
         yarn lint && yarn test --run
 
+
         # 5. Check if rename is complete
+
         echo "🔍 Ensuring no [OldName] remains..."
+
         grep -r "[OldName]" src/features/[feature-name]/
+
         if [ $? -eq 0 ]; then
           echo "⚠️ Warning: [OldName] still found in some files"
         fi
 
+
         # 6. Commit the rename
+
         git add .
-        git commit -m "refactor([feature-name]): rename [OldName] to [NewName] for clarity"
+
+        git commit -m "refactor([feature-name]): rename [OldName] to [NewName]
+        for clarity"
+
 
         # 7. Show the final diff
-        git show --stat
 
-# Recovery steps from templates/DOMAIN_TEMPLATES.md
+        git show --stat
 recovery:
   accidental_commit: |
     # Revert the last commit but keep changes
@@ -563,71 +583,84 @@ recovery:
     # Commit again with fixed code
     git add .
     git commit -m "[original message] - fixed"
-
-  domain_polluted: |
+  domain_polluted: >
     # 1. Identify violations in domain
+
     echo "🔍 Checking for domain violations..."
+
     git diff src/features/[feature-name]/domain/
 
+
     # Check for forbidden patterns
+
     echo "⚠️ Checking for business logic..."
-    grep -r "class.*{.*calculate\|validate\|process" src/features/[feature-name]/domain/
+
+    grep -r "class.*{.*calculate\|validate\|process"
+    src/features/[feature-name]/domain/
+
 
     echo "⚠️ Checking for external dependencies..."
+
     grep -r "import.*axios\|fetch\|http" src/features/[feature-name]/domain/
 
+
     echo "⚠️ Checking for console logs..."
+
     grep -r "console\." src/features/[feature-name]/domain/
 
+
     # 2. Show what needs to be moved
+
     git diff src/features/[feature-name]/domain/ --name-only
 
+
     # 3. After moving code to proper layers
+
     echo "✅ Validating domain is clean..."
+
     yarn lint
+
     yarn test --run
 
+
     # 4. Commit the cleanup
+
     git add .
+
     git diff --staged --stat
-    git commit -m "refactor([feature-name]): remove business logic from domain layer"
 
-# AI Guidelines from templates/DOMAIN_TEMPLATES.md
+    git commit -m "refactor([feature-name]): remove business logic from domain
+    layer"
 ai_guidelines:
-  - 'Always validate before committing: Run lint first, Run tests second, Only commit if both pass'
-  - 'If generation fails: Identify the specific error, Fix only that error, Re-run validation, Do NOT proceed until fixed'
-  - 'Follow the principle: One use case = One file = One responsibility'
-  - 'If tempted to add "And" in a use case name, split it'
-  - 'When in doubt: Choose simplicity over complexity, Split rather than combine, Ask for clarification rather than assume'
-  - 'MUST generate different case styles from the input names (e.g., "Add Item To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart, lower case=add item to cart).'
-  - 'MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__) with actual values'
-  - 'MUST NOT leave any placeholder variables in the final implementation'
-  - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery' # Adicionar esta regra para clareza extra
-  - 'MUST use vitest, NOT jest'
-  - 'MUST follow all domain rules - no business logic, no external dependencies'
-
-# ------------------------------------------------------------------------------
-# AI-NOTE: TASK EVALUATION SECTION.
-# After the entire execution is complete, this section will be populated by a
-# human reviewer or an evaluation script.
-# ------------------------------------------------------------------------------
-
+  - "Always validate before committing: Run lint first, Run tests second, Only
+    commit if both pass"
+  - "If generation fails: Identify the specific error, Fix only that error,
+    Re-run validation, Do NOT proceed until fixed"
+  - "Follow the principle: One use case = One file = One responsibility"
+  - If tempted to add "And" in a use case name, split it
+  - "When in doubt: Choose simplicity over complexity, Split rather than
+    combine, Ask for clarification rather than assume"
+  - 'MUST generate different case styles from the input names (e.g., "Add Item
+    To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart,
+    lower case=add item to cart).'
+  - MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__)
+    with actual values
+  - MUST NOT leave any placeholder variables in the final implementation
+  - MUST NOT replace any [placeholders] found inside documentation sections like
+    refactoring or recovery
+  - MUST use vitest, NOT jest
+  - MUST follow all domain rules - no business logic, no external dependencies
 evaluation:
-  # AI-NOTE: This final_status will be 'SUCCESS' if all steps passed, or 'FAILED' if any step failed.
-  final_status: 'PENDING' # PENDING | SUCCESS | FAILED
-  # AI-NOTE: The final_rlhf_score is an overall score for the entire task, assigned by a human reviewer.
-  final_rlhf_score: null # -2, -1, 0, 1, 2
-  # AI-NOTE: The reviewer will add a summary of what went well and what could be improved.
-  # This text is the primary source for future learning and template improvements.
+  final_status: PENDING
+  final_rlhf_score: null
   reviewer_summary: |
     - What went well:
       - ...
     - Areas for improvement:
       - ...
-  # AI-NOTE: This section lists actionable suggestions for improving the master templates or prompts.
-  # This is the key to the continuous learning loop.
   template_improvement_suggestions:
-    - target_template: 'domain.template.yaml'
-      target_step_id: 'create-use-case-get-user-profile'
-      suggestion: 'The generated mock data was too simplistic. The template should be updated to include more realistic data generation.'
-      priority: 'medium'
+    - target_template: domain.template.yaml
+      target_step_id: create-use-case-get-user-profile
+      suggestion: The generated mock data was too simplistic. The template should be
+        updated to include more realistic data generation.
+      priority: medium
