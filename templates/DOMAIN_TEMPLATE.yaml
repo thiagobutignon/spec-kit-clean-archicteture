@@ -121,6 +121,56 @@ test_helper_rules:
 # ------------------------------------------------------------------------------
 
 steps:
+  - id: 'create-feature-branch'
+    type: 'branch'
+    description: 'Create a new feature branch for __FEATURE_NAME_PASCAL_CASE__'
+    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+    rlhf_score: null # -2, -1, 0, 1, 2
+    execution_log: ''
+    references:
+      - type: 'internal_guideline'
+        source: 'GIT_WORKFLOW.md'
+        description: 'Following git branching best practices for feature development.'
+    action:
+      branch_name: 'feat/__FEATURE_NAME_KEBAB_CASE__-domain'
+    validation_script: |
+      echo "🌿 Creating feature branch..."
+      # Check if we are on a clean state
+      if [ -n "$(git status --porcelain)" ]; then
+        echo "⚠️ Warning: You have uncommitted changes. Stashing them..."
+        git stash save "Auto-stash before creating feature branch for __FEATURE_NAME_KEBAB_CASE__"
+      fi
+
+      # Get current branch to use as base
+      CURRENT_BRANCH=$(git branch --show-current)
+      echo "📍 Current branch: $CURRENT_BRANCH"
+
+      # Create and checkout new feature branch
+      BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-domain"
+
+      # Check if branch already exists
+      if git show-ref --quiet refs/heads/$BRANCH_NAME; then
+        echo "⚠️ Branch $BRANCH_NAME already exists. Checking out..."
+        git checkout $BRANCH_NAME
+      else
+        echo "🌿 Creating new branch: $BRANCH_NAME"
+        git checkout -b $BRANCH_NAME
+      fi
+
+      # Verify we're on the correct branch
+      CURRENT=$(git branch --show-current)
+      if [ "$CURRENT" != "$BRANCH_NAME" ]; then
+        echo "❌ ERROR: Failed to switch to branch $BRANCH_NAME"
+        exit 1
+      fi
+
+      echo "✅ Successfully created and switched to branch: $BRANCH_NAME"
+
+      # If we had stashed changes, inform the user
+      if git stash list | grep -q "Auto-stash before creating feature branch"; then
+        echo "💡 Note: You have stashed changes. Run 'git stash pop' to restore them if needed."
+      fi
+
   - id: 'create-structure'
     type: 'folder'
     description: 'Create domain folder structure'
