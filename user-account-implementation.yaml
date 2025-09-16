@@ -3,15 +3,15 @@
 version: '3.0.0'
 # AI-NOTE: Update these fields to describe the specific feature.
 metadata:
-  title: '__FEATURE_NAME_PASCAL_CASE__ Domain Layer - Clean Architecture'
-  description: 'TDD template for __FEATURE_NAME_LOWER_CASE__ feature following the master template rules.'
+  title: 'UserAccount Domain Layer - Clean Architecture'
+  description: 'TDD template for user account feature following the master template rules.'
   source: 'TODO_DOMAIN_TEMPLATE.yaml'
   # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
-  lastUpdated: '__CURRENT_DATE__'
+  lastUpdated: '2025-09-16'
 
-# AI-NOTE: Replace __FEATURE_NAME_KEBAB_CASE__ with the feature name.
+# AI-NOTE: Replace user-account with the feature name.
 structure:
-  basePath: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain'
+  basePath: 'src/features/user-account/domain'
   folders:
     - 'errors'      # Feature-specific errors
     - 'use-cases'   # Feature use case interfaces
@@ -126,46 +126,89 @@ steps:
     description: 'Create domain folder structure'
     action:
       create_folders:
-        basePath: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain'
+        basePath: 'src/features/user-account/domain'
         folders:
           - 'errors'
           - 'use-cases'
           - 'test'
     validation:
-      command: 'ls -la src/features/__FEATURE_NAME_KEBAB_CASE__/domain'
+      command: 'ls -la src/features/user-account/domain'
       expected: 'All three folders exist'
+    validation_script: |
+      echo "🔍 Running lint check..."
+      yarn lint
+      if [ $? -ne 0 ]; then
+        echo "❌ LINT FAILED - Attempting auto-fix..."
+        yarn lint --fix
+        if [ $? -ne 0 ]; then
+          echo "❌ AUTO-FIX FAILED - Manual intervention required"
+          echo "📋 Run 'yarn lint' to see remaining errors"
+          exit 1
+        fi
+        echo "✅ Lint errors auto-fixed, validating again..."
+        yarn lint
+        if [ $? -ne 0 ]; then
+          echo "❌ LINT STILL FAILING - Manual fixes needed"
+          exit 1
+        fi
+      fi
+      echo "✅ Lint passed"
+
+      echo "🧪 Running tests with coverage..."
+      yarn test --coverage
+      if [ $? -ne 0 ]; then
+        echo "❌ TESTS FAILED - Running specific test to identify issue..."
+        yarn test --run --reporter=verbose
+        echo "❌ Tests must be fixed manually"
+        echo "📋 Check the test output above for details"
+        exit 1
+      fi
+      echo "✅ Tests passed"
+
+      echo "📦 Staging changes..."
+      git add .
+
+      echo "💾 Creating commit..."
+      git commit -m "feat(user-account): create domain folder structure"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED - Checking git status..."
+        git status
+        echo "📋 Review the status above and fix any issues"
+        exit 1
+      fi
+      echo "✅ Successfully committed"
 
   # Step 2: Create first use case
-  - id: 'create-use-case-__ACTION_ENTITY_KEBAB_CASE__'
+  - id: 'create-use-case-create-user-account'
     type: 'file'
-    description: 'Create __ACTION_ENTITY_PASCAL_CASE__ use case interface'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases/__ACTION_ENTITY_KEBAB_CASE__.ts'
+    description: 'Create CreateUserAccount use case interface'
+    path: 'src/features/user-account/domain/use-cases/create-user-account.ts'
     template: |
       /**
-       * Input parameters for __ACTION_ENTITY_PASCAL_CASE__UseCase
+       * Input parameters for CreateUserAccountUseCase
        */
-      export type __ACTION_ENTITY_PASCAL_CASE__Input = {
+      export type CreateUserAccountInput = {
         // Define your input parameters here
       }
 
       /**
-       * Output type for __ACTION_ENTITY_PASCAL_CASE__UseCase
+       * Output type for CreateUserAccountUseCase
        */
-      export type __ACTION_ENTITY_PASCAL_CASE__Output = {
+      export type CreateUserAccountOutput = {
         // Define your output type here
       }
 
       /**
-       * __ACTION_ENTITY_PASCAL_CASE__UseCase interface
-       * @description __USE_CASE_DESCRIPTION__
+       * CreateUserAccountUseCase interface
+       * @description Creates a new user account with email, first name, last name, and password
        */
-      export interface __ACTION_ENTITY_PASCAL_CASE__UseCase {
+      export interface CreateUserAccountUseCase {
         /**
-         * Execute the __ACTION_ENTITY_LOWER_CASE__ operation
+         * Execute the create user account operation
          * @param input - The input parameters
          * @returns Promise with the operation output
          */
-        execute: (input: __ACTION_ENTITY_PASCAL_CASE__Input) => Promise<__ACTION_ENTITY_PASCAL_CASE__Output>
+        execute: (input: CreateUserAccountInput) => Promise<CreateUserAccountOutput>
       }
     validation_script: |
       # AI-NOTE: This script is immutable. Only the commit message placeholder is replaced.
@@ -203,7 +246,7 @@ steps:
       git add .
 
       echo "💾 Creating commit..."
-      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add __ACTION_ENTITY_KEBAB_CASE__ use case"
+      git commit -m "feat(user-account): add create-user-account use case"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED - Checking git status..."
         git status
@@ -213,19 +256,19 @@ steps:
       echo "✅ Successfully committed"
 
   # Step 3: Create error class
-  - id: 'create-error-__ERROR_NAME_KEBAB_CASE__'
+  - id: 'create-error-email-already-exists'
     type: 'file'
-    description: 'Create __ERROR_NAME_KEBAB_CASE__ domain error'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/errors/__ERROR_NAME_KEBAB_CASE__.ts'
+    description: 'Create email-already-exists domain error'
+    path: 'src/features/user-account/domain/errors/email-already-exists.ts'
     template: |
       /**
-       * Error thrown when __ERROR_DESCRIPTION__
+       * Error thrown when email already exists in the system
        * @extends Error
        */
-      export class __ERROR_NAME_PASCAL_CASE__Error extends Error {
+      export class EmailAlreadyExistsError extends Error {
         constructor() {
-          super('__ERROR_MESSAGE__')
-          this.name = '__ERROR_NAME_PASCAL_CASE__Error'
+          super('Email already exists')
+          this.name = 'EmailAlreadyExistsError'
         }
       }
     validation_script: |
@@ -263,7 +306,125 @@ steps:
       git add .
 
       echo "💾 Creating commit..."
-      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add __ERROR_NAME_KEBAB_CASE__ domain error"
+      git commit -m "feat(user-account): add email-already-exists domain error"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED - Checking git status..."
+        git status
+        echo "📋 Review the status above and fix any issues"
+        exit 1
+      fi
+      echo "✅ Successfully committed"
+
+  - id: 'create-error-invalid-email-format'
+    type: 'file'
+    description: 'Create invalid-email-format domain error'
+    path: 'src/features/user-account/domain/errors/invalid-email-format.ts'
+    template: |
+      /**
+       * Error thrown when email format is invalid
+       * @extends Error
+       */
+      export class InvalidEmailFormatError extends Error {
+        constructor() {
+          super('Invalid email format')
+          this.name = 'InvalidEmailFormatError'
+        }
+      }
+    validation_script: |
+      echo "🔍 Running lint check..."
+      yarn lint
+      if [ $? -ne 0 ]; then
+        echo "❌ LINT FAILED - Attempting auto-fix..."
+        yarn lint --fix
+        if [ $? -ne 0 ]; then
+          echo "❌ AUTO-FIX FAILED - Manual intervention required"
+          echo "📋 Run 'yarn lint' to see remaining errors"
+          exit 1
+        fi
+        echo "✅ Lint errors auto-fixed, validating again..."
+        yarn lint
+        if [ $? -ne 0 ]; then
+          echo "❌ LINT STILL FAILING - Manual fixes needed"
+          exit 1
+        fi
+      fi
+      echo "✅ Lint passed"
+
+      echo "🧪 Running tests with coverage..."
+      yarn test --coverage
+      if [ $? -ne 0 ]; then
+        echo "❌ TESTS FAILED - Running specific test to identify issue..."
+        yarn test --run --reporter=verbose
+        echo "❌ Tests must be fixed manually"
+        echo "📋 Check the test output above for details"
+        exit 1
+      fi
+      echo "✅ Tests passed"
+
+      echo "📦 Staging changes..."
+      git add .
+
+      echo "💾 Creating commit..."
+      git commit -m "feat(user-account): add invalid-email-format domain error"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED - Checking git status..."
+        git status
+        echo "📋 Review the status above and fix any issues"
+        exit 1
+      fi
+      echo "✅ Successfully committed"
+
+  - id: 'create-error-weak-password'
+    type: 'file'
+    description: 'Create weak-password domain error'
+    path: 'src/features/user-account/domain/errors/weak-password.ts'
+    template: |
+      /**
+       * Error thrown when password does not meet security requirements
+       * @extends Error
+       */
+      export class WeakPasswordError extends Error {
+        constructor() {
+          super('Password does not meet security requirements')
+          this.name = 'WeakPasswordError'
+        }
+      }
+    validation_script: |
+      echo "🔍 Running lint check..."
+      yarn lint
+      if [ $? -ne 0 ]; then
+        echo "❌ LINT FAILED - Attempting auto-fix..."
+        yarn lint --fix
+        if [ $? -ne 0 ]; then
+          echo "❌ AUTO-FIX FAILED - Manual intervention required"
+          echo "📋 Run 'yarn lint' to see remaining errors"
+          exit 1
+        fi
+        echo "✅ Lint errors auto-fixed, validating again..."
+        yarn lint
+        if [ $? -ne 0 ]; then
+          echo "❌ LINT STILL FAILING - Manual fixes needed"
+          exit 1
+        fi
+      fi
+      echo "✅ Lint passed"
+
+      echo "🧪 Running tests with coverage..."
+      yarn test --coverage
+      if [ $? -ne 0 ]; then
+        echo "❌ TESTS FAILED - Running specific test to identify issue..."
+        yarn test --run --reporter=verbose
+        echo "❌ Tests must be fixed manually"
+        echo "📋 Check the test output above for details"
+        exit 1
+      fi
+      echo "✅ Tests passed"
+
+      echo "📦 Staging changes..."
+      git add .
+
+      echo "💾 Creating commit..."
+      git commit -m "feat(user-account): add weak-password domain error"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED - Checking git status..."
         git status
@@ -273,35 +434,35 @@ steps:
       echo "✅ Successfully committed"
 
   # Step 4: Create test helper
-  - id: 'create-test-helper-__ACTION_ENTITY_KEBAB_CASE__'
+  - id: 'create-test-helper-create-user-account'
     type: 'file'
-    description: 'Create mock for __ACTION_ENTITY_PASCAL_CASE__ use case'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/test/mock-__ACTION_ENTITY_KEBAB_CASE__-use-case.ts'
+    description: 'Create mock for CreateUserAccount use case'
+    path: 'src/features/user-account/domain/test/mock-create-user-account-use-case.ts'
     template: |
       import { vi } from 'vitest'
-      import type { __ACTION_ENTITY_PASCAL_CASE__UseCase, __ACTION_ENTITY_PASCAL_CASE__Input, __ACTION_ENTITY_PASCAL_CASE__Output } from '../use-cases/__ACTION_ENTITY_KEBAB_CASE__'
+      import type { CreateUserAccountUseCase, CreateUserAccountInput, CreateUserAccountOutput } from '../use-cases/create-user-account'
 
       /**
-       * Creates a mock instance of __ACTION_ENTITY_PASCAL_CASE__Input
+       * Creates a mock instance of CreateUserAccountInput
        * @returns Mock input for testing
        */
-      export const mock__ACTION_ENTITY_PASCAL_CASE__Input = (): __ACTION_ENTITY_PASCAL_CASE__Input => ({
+      export const mockCreateUserAccountInput = (): CreateUserAccountInput => ({
         // Mock input parameters
       })
 
       /**
-       * Creates a mock instance of __ACTION_ENTITY_PASCAL_CASE__Output
+       * Creates a mock instance of CreateUserAccountOutput
        * @returns Mock output for testing
        */
-      export const mock__ACTION_ENTITY_PASCAL_CASE__Output = (): __ACTION_ENTITY_PASCAL_CASE__Output => ({
+      export const mockCreateUserAccountOutput = (): CreateUserAccountOutput => ({
         // Mock output data
       })
 
       /**
-       * Creates a mock instance of __ACTION_ENTITY_PASCAL_CASE__UseCase
+       * Creates a mock instance of CreateUserAccountUseCase
        * @returns Mocked use case with vitest functions
        */
-      export const mock__ACTION_ENTITY_PASCAL_CASE__UseCase = (): __ACTION_ENTITY_PASCAL_CASE__UseCase => ({
+      export const mockCreateUserAccountUseCase = (): CreateUserAccountUseCase => ({
         execute: vi.fn()
       })
     validation_script: |
@@ -339,7 +500,7 @@ steps:
       git add .
 
       echo "💾 Creating commit..."
-      git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add __ACTION_ENTITY_KEBAB_CASE__ use case test helpers"
+      git commit -m "test(user-account): add create-user-account use case test helpers"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED - Checking git status..."
         git status
@@ -520,6 +681,6 @@ ai_guidelines:
   - 'MUST generate different case styles from the input names (e.g., "Add Item To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart, lower case=add item to cart).'
   - 'MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__) with actual values'
   - 'MUST NOT leave any placeholder variables in the final implementation'
-  - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery' # Adicionar esta regra para clareza extra
+  - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery'
   - 'MUST use vitest, NOT jest'
   - 'MUST follow all domain rules - no business logic, no external dependencies'

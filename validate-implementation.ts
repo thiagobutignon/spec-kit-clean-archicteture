@@ -47,22 +47,58 @@ class ImplementationValidator {
   }
 
   /**
-   * CRITICAL CHECK: Ensures no __PLACEHOLDER__ variables are left in the implementation file.
+   * CRITICAL CHECK: Ensures no __PLACEHOLDER__ variables are left in the implementation file,
+   * except for exactly 2 allowed occurrences of __FEATURE_NAME_KEBAB_CASE__ in:
+   * 1. AI-NOTE comment (line ~120)
+   * 2. ai_guidelines section (immutable)
    */
   private validateNoPlaceholders(): void {
     console.log('🔎 Checking for unresolved placeholders...');
-    const implementationString = JSON.stringify(this.implementationContent);
+
+    // Read the raw file content to check placeholders accurately
+    const rawContent = fs.readFileSync(this.implementationPath, 'utf-8');
+
     const placeholderRegex = /__([A-Z_]+)__/g; // Updated Regex for __PLACEHOLDER__
-    const matches = implementationString.match(placeholderRegex);
+    const matches = rawContent.match(placeholderRegex);
 
     if (matches) {
-      const uniqueMatches = [...new Set(matches)];
-      this.result.errors.push(
-        `❌ CRITICAL ERROR: Found unresolved placeholders: ${uniqueMatches.join(', ')}.\n` +
-        `   ➡️ AI ACTION: You MUST replace every __PLACEHOLDER__ with a specific value for your feature.`
-      );
+      // Count occurrences of each placeholder
+      const placeholderCounts: Record<string, number> = {};
+      matches.forEach((match: string) => {
+        placeholderCounts[match] = (placeholderCounts[match] || 0) + 1;
+      });
+
+      // Check if __FEATURE_NAME_KEBAB_CASE__ has exactly 2 occurrences
+      const featurePlaceholder = '__FEATURE_NAME_KEBAB_CASE__';
+      const featureCount = placeholderCounts[featurePlaceholder] || 0;
+
+      // Remove __FEATURE_NAME_KEBAB_CASE__ from the counts if it has exactly 2 occurrences
+      // These are allowed in: AI-NOTE comment and ai_guidelines section
+      if (featureCount === 2) {
+        delete placeholderCounts[featurePlaceholder];
+      }
+
+      // Check for any remaining placeholders
+      const remainingPlaceholders = Object.keys(placeholderCounts);
+
+      if (remainingPlaceholders.length > 0) {
+        this.result.errors.push(
+          `❌ CRITICAL ERROR: Found unresolved placeholders: ${remainingPlaceholders.join(', ')}.\n` +
+          `   ➡️ AI ACTION: You MUST replace every __PLACEHOLDER__ with a specific value for your feature.`
+        );
+      } else if (featureCount !== 2 && featureCount > 0) {
+        this.result.errors.push(
+          `❌ ERROR: Found ${featureCount} occurrence(s) of __FEATURE_NAME_KEBAB_CASE__, but exactly 2 are expected.\n` +
+          `   ➡️ AI ACTION: Ensure __FEATURE_NAME_KEBAB_CASE__ appears exactly twice: once in the AI-NOTE comment (line ~120) and once in ai_guidelines section.`
+        );
+      } else if (featureCount === 0) {
+        // All placeholders replaced - this is valid
+        this.result.matches.push('✅ All placeholders have been properly replaced.');
+      } else {
+        this.result.matches.push('✅ __FEATURE_NAME_KEBAB_CASE__ appears exactly 2 times as expected (AI-NOTE and ai_guidelines).');
+      }
     } else {
-      this.result.matches.push('✅ No unresolved __PLACEHOLDER__ variables found.');
+      this.result.matches.push('✅ All placeholders have been properly replaced.');
     }
   }
 
