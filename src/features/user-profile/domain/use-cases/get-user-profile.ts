@@ -13,6 +13,7 @@ export type GetUserProfileOutput = {
   email: string
   firstName: string
   lastName: string
+  nickname?: string
 }
 
 /**

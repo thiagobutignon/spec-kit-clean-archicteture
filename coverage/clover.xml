@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1758023624243" clover="3.2.0">
-  <project timestamp="1758023624243" name="All files">
+<coverage generated="1758024766292" clover="3.2.0">
+  <project timestamp="1758024766292" name="All files">
     <metrics statements="426" coveredstatements="0" conditionals="6" coveredconditionals="4" methods="6" coveredmethods="4" elements="438" coveredelements="8" complexity="0" loc="426" ncloc="426" packages="4" files="6" classes="6"/>
     <package name="spec-kit-clean-archicteture">
       <metrics statements="407" coveredstatements="0" conditionals="3" coveredconditionals="2" methods="3" coveredmethods="2"/>

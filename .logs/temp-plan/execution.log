@@ -158,3 +158,11 @@ exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,out
 [2025-09-16T11:53:44.291Z] Done in 0.48s.
 [2025-09-16T11:53:44.297Z] ✅ Tests passed
 📦 Staging changes...
+[2025-09-16T11:53:44.314Z] 💾 Creating commit...
+[2025-09-16T11:53:44.336Z] [main b8c23c1] test(user-profile): add get-user-profile use case test helpers
+ 16 files changed, 475 insertions(+), 20 deletions(-)
+ create mode 100644 coverage/spec-kit-clean-archicteture/src/features/user-profile/domain/test/index.html
+ create mode 100644 coverage/spec-kit-clean-archicteture/src/features/user-profile/domain/test/mock-get-user-profile-use-case.ts.html
+ create mode 100644 src/features/user-profile/domain/test/mock-get-user-profile-use-case.ts
+[2025-09-16T11:53:44.336Z] ✅ Successfully committed
+[2025-09-16T11:53:44.336Z] --- Script finished successfully ---
