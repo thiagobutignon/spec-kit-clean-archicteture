@@ -6,7 +6,8 @@ import chalk from 'chalk';
 
 /**
  * RLHF Analytics Dashboard
- * Visualizes learning metrics and improvements
+ * Visualizes learning metrics, improvements, and score distributions
+ * Score Range: -2 (Catastrophic) to +2 (Perfect)
  */
 
 class RLHFDashboard {
@@ -19,6 +20,7 @@ class RLHFDashboard {
     console.log(chalk.cyan.bold('═'.repeat(80)));
 
     await this.displayMetricsSummary();
+    await this.displayRLHFScoreDistribution();
     await this.displayPatternAnalysis();
     await this.displayImprovementStatus();
     await this.displayRecommendations();
@@ -43,6 +45,10 @@ class RLHFDashboard {
     // Calculate average duration
     const avgDuration = metrics.reduce((acc: number, m: any) => acc + m.duration, 0) / totalRuns;
 
+    // Calculate average RLHF score
+    const avgRLHFScore = metrics.reduce((acc: number, m: any) =>
+      acc + (m.rlhfScore || 0), 0) / totalRuns;
+
     // Group errors by type
     const errorTypes: Record<string, number> = {};
     metrics.filter((m: any) => !m.success).forEach((m: any) => {
@@ -55,6 +61,7 @@ class RLHFDashboard {
     console.log(chalk.green(`  ✅ Success Rate: ${successRate}% (${successCount}/${totalRuns})`));
     console.log(chalk.blue(`  ⏱️  Avg Duration: ${avgDuration.toFixed(0)}ms`));
     console.log(chalk.magenta(`  📝 Total Executions: ${totalRuns}`));
+    console.log(this.getRLHFScoreColor(avgRLHFScore)(`  🏆 Avg RLHF Score: ${avgRLHFScore.toFixed(2)}/2`));
 
     if (Object.keys(errorTypes).length > 0) {
       console.log(chalk.red('\n  ❌ Error Breakdown:'));
@@ -67,6 +74,87 @@ class RLHFDashboard {
           console.log(chalk.red(`     ${type.padEnd(20)} ${bar} ${count} (${percentage}%)`));
         });
     }
+  }
+
+  private async displayRLHFScoreDistribution(): Promise<void> {
+    const metricsFile = path.join(this.dataDir, 'metrics.json');
+
+    if (!await fs.pathExists(metricsFile)) {
+      return;
+    }
+
+    const metrics = await fs.readJson(metricsFile);
+
+    // Count score distribution
+    const scoreDistribution: Record<string, number> = {
+      'catastrophic (-2)': 0,
+      'runtime error (-1)': 0,
+      'low confidence (0)': 0,
+      'good (+1)': 0,
+      'perfect (+2)': 0
+    };
+
+    metrics.forEach((m: any) => {
+      const score = m.rlhfScore || 0;
+      if (score <= -2) scoreDistribution['catastrophic (-2)']++;
+      else if (score <= -1) scoreDistribution['runtime error (-1)']++;
+      else if (score <= 0) scoreDistribution['low confidence (0)']++;
+      else if (score <= 1) scoreDistribution['good (+1)']++;
+      else scoreDistribution['perfect (+2)']++;
+    });
+
+    console.log(chalk.white.bold('\n🎯 RLHF Score Distribution:'));
+    console.log(chalk.white('─'.repeat(40)));
+
+    Object.entries(scoreDistribution).forEach(([level, count]) => {
+      const percentage = metrics.length > 0 ? (count / metrics.length * 100).toFixed(1) : '0';
+      const bar = this.createBar(parseFloat(percentage), 20, this.getScoreBarColor(level));
+      const emoji = this.getScoreEmoji(level);
+      console.log(`  ${emoji} ${level.padEnd(20)} ${bar} ${count} (${percentage}%)`);
+    });
+
+    // Show score trend
+    if (metrics.length > 5) {
+      const recentScores = metrics.slice(-5).map((m: any) => m.rlhfScore || 0);
+      const avgRecent = recentScores.reduce((a: number, b: number) => a + b, 0) / recentScores.length;
+      const oldScores = metrics.slice(0, 5).map((m: any) => m.rlhfScore || 0);
+      const avgOld = oldScores.reduce((a: number, b: number) => a + b, 0) / oldScores.length;
+      const trend = avgRecent - avgOld;
+
+      if (trend > 0.1) {
+        console.log(chalk.green(`\n  📈 Score Trend: Improving (+${trend.toFixed(2)})`));
+      } else if (trend < -0.1) {
+        console.log(chalk.red(`\n  📉 Score Trend: Declining (${trend.toFixed(2)})`));
+      } else {
+        console.log(chalk.yellow(`\n  ➡️ Score Trend: Stable`));
+      }
+    }
+  }
+
+  private getScoreEmoji(level: string): string {
+    if (level.includes('-2')) return '💥';
+    if (level.includes('-1')) return '❌';
+    if (level.includes('0')) return '⚠️';
+    if (level.includes('+1')) return '✅';
+    if (level.includes('+2')) return '🏆';
+    return '❓';
+  }
+
+  private getScoreBarColor(level: string): string {
+    if (level.includes('-2')) return 'red';
+    if (level.includes('-1')) return 'red';
+    if (level.includes('0')) return 'yellow';
+    if (level.includes('+1')) return 'green';
+    if (level.includes('+2')) return 'green';
+    return 'blue';
+  }
+
+  private getRLHFScoreColor(score: number): any {
+    if (score >= 1.5) return chalk.green.bold;
+    if (score >= 0.5) return chalk.green;
+    if (score >= -0.5) return chalk.yellow;
+    if (score >= -1.5) return chalk.red;
+    return chalk.red.bold;
   }
 
   private async displayPatternAnalysis(): Promise<void> {
@@ -157,6 +245,21 @@ class RLHFDashboard {
     console.log(chalk.white('─'.repeat(40)));
 
     const recommendations = [];
+
+    // Check RLHF score
+    if (report.summary.avgRLHFScore && report.summary.avgRLHFScore < 0) {
+      recommendations.push({
+        priority: 'high',
+        message: `Average RLHF score is negative (${report.summary.avgRLHFScore.toFixed(2)}). Critical improvements needed.`,
+        action: 'Review architecture violations and apply RLHF learnings'
+      });
+    } else if (report.summary.avgRLHFScore && report.summary.avgRLHFScore < 1) {
+      recommendations.push({
+        priority: 'medium',
+        message: `RLHF score below +1 (${report.summary.avgRLHFScore.toFixed(2)}). Room for improvement.`,
+        action: 'Add domain documentation and ubiquitous language'
+      });
+    }
 
     // Check success rate
     if (report.summary.successRate < 0.7) {
@@ -277,8 +380,8 @@ class RLHFDashboard {
       </div>
 
       <div class="card">
-        <h2>Learning Progress</h2>
-        <canvas id="learningChart"></canvas>
+        <h2>RLHF Score Progress</h2>
+        <canvas id="rlhfScoreChart"></canvas>
       </div>
     </div>
   </div>
@@ -287,7 +390,7 @@ class RLHFDashboard {
     const metricsData = ${JSON.stringify(metrics)};
     const patternsData = ${JSON.stringify(patterns)};
 
-    // Success Rate Chart
+    // Success Rate and RLHF Score Chart
     new Chart(document.getElementById('successChart'), {
       type: 'line',
       data: {
@@ -296,12 +399,49 @@ class RLHFDashboard {
           label: 'Success Rate',
           data: metricsData.slice(-20).map(m => m.success ? 100 : 0),
           borderColor: '#4caf50',
-          tension: 0.4
+          tension: 0.4,
+          yAxisID: 'y'
+        }, {
+          label: 'RLHF Score',
+          data: metricsData.slice(-20).map(m => ((m.rlhfScore || 0) + 2) * 25),
+          borderColor: '#00bcd4',
+          tension: 0.4,
+          yAxisID: 'y'
         }]
       },
       options: {
         responsive: true,
         plugins: { legend: { labels: { color: '#e0e0e0' } } },
+        scales: {
+          y: {
+            ticks: { color: '#e0e0e0' },
+            grid: { color: '#444' },
+            min: 0,
+            max: 100
+          },
+          x: { ticks: { color: '#e0e0e0' }, grid: { color: '#444' } }
+        }
+      }
+    });
+
+    // RLHF Score Distribution
+    const scoreDistribution = [-2, -1, 0, 1, 2].map(score =>
+      metricsData.filter(m => Math.round(m.rlhfScore || 0) === score).length
+    );
+
+    new Chart(document.getElementById('rlhfScoreChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Catastrophic (-2)', 'Runtime Error (-1)', 'Low Confidence (0)', 'Good (+1)', 'Perfect (+2)'],
+        datasets: [{
+          label: 'Score Distribution',
+          data: scoreDistribution,
+          backgroundColor: ['#d32f2f', '#f44336', '#ffeb3b', '#8bc34a', '#4caf50']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
         scales: {
           y: { ticks: { color: '#e0e0e0' }, grid: { color: '#444' } },
           x: { ticks: { color: '#e0e0e0' }, grid: { color: '#444' } }
@@ -352,7 +492,8 @@ async function main() {
   }
 }
 
-if (require.main === module) {
+// Check if running as main module
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(console.error);
 }
 
