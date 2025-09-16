@@ -1,11 +1,20 @@
 # Task: Validate Domain JSON Plan
 
+## 🤖 RLHF Scoring Impact
+
+This validation directly affects your RLHF score:
+- **-2 (CATASTROPHIC)**: Wrong REPLACE/WITH format, architecture violations
+- **-1 (RUNTIME ERROR)**: Missing placeholders, invalid templates
+- **0 (LOW CONFIDENCE)**: Missing references, unclear concepts
+- **+1 (GOOD)**: Valid but missing ubiquitous language
+- **+2 (PERFECT)**: Complete with DDD concepts and ubiquitous language
+
 ## 1. Your Deliverable
 
 Your **only** output for this task is a validation report.
 
-- If the validation passes, the output is a simple JSON object: `{"status": "SUCCESS", "message": "JSON plan is valid and complete."}`.
-- If the validation fails, the output is a JSON object detailing the errors: `{"status": "FAILED", "errors": ["error message 1", "error message 2"]}`.
+- If the validation passes, the output is a simple JSON object: `{"status": "SUCCESS", "message": "JSON plan is valid and complete.", "qualityScore": "PERFECT|GOOD|ACCEPTABLE"}`.
+- If the validation fails, the output is a JSON object detailing the errors: `{"status": "FAILED", "errors": ["error message 1", "error message 2"], "severity": "CATASTROPHIC|RUNTIME|WARNING"}`.
 
 ## 2. Objective
 
@@ -35,9 +44,11 @@ You **MUST** validate the input JSON against every rule in this checklist. The v
   - [ ] If the step creates a use case, the `template` must contain placeholders `__USE_CASE_INPUT_FIELDS__` and `__USE_CASE_OUTPUT_FIELDS__`, AND the step must have `input` and `output` arrays with field definitions.
   - [ ] If the step creates a test helper, the `template` must contain `__MOCK_INPUT_DATA__` and `__MOCK_OUTPUT_DATA__`, AND the step must have `mockInput` and `mockOutput` objects with test data.
   - [ ] If the step creates an error class, the `template` should be complete (no placeholders needed).
+  - [ ] **RLHF +2 Check:** Templates should include JSDoc comments with `@domainConcept` and `@pattern` tags for perfect scoring.
 - [ ] **Template Correctness (`refactor_file`):**
   - [ ] The `template` key must exist and not be empty.
   - [ ] The `template` string must contain exactly one `<<<REPLACE>>>...<<</REPLACE>>>` block and one `<<<WITH>>>...<<</WITH>>>` block.
+  - [ ] **RLHF -2 Check:** Invalid REPLACE/WITH format causes catastrophic errors.
 - [ ] **Dependency Sanity Check:**
   - [ ] A `refactor_file` or `delete_file` step should not appear before the `create_file` step for the same file. (You can't modify a file that hasn't been created yet).
   - [ ] The `steps` array should generally start with `type: 'folder'` or `type: 'create_file'`.
@@ -48,22 +59,31 @@ You **MUST** validate the input JSON against every rule in this checklist. The v
 - [ ] **Mock Data Presence:** For every use case, there must be a corresponding `create_test-helper` step, and its `mockInput` and `mockOutput` data should not be empty.
 - [ ] **Use Case Naming:** Use case names must be verbs (e.g., CreateUser, UpdateProduct, NOT UserCreator or ProductUpdater).
 
-### D. Domain Layer Purity Validation
+### D. Domain Layer Purity Validation (RLHF Score Critical)
 
-- [ ] **No External Dependencies:** Templates must NOT contain imports from: axios, fetch, prisma, express, react, next, redis, keycloak, or any external libraries.
+- [ ] **No External Dependencies (RLHF -2 if violated):** Templates must NOT contain imports from: axios, fetch, prisma, express, react, next, redis, keycloak, or any external libraries.
 - [ ] **Use Cases as Interfaces:** Use case templates must define an interface with an `execute` method, not a class or implementation.
 - [ ] **Error Extension:** Error class templates must extend the native `Error` class, not custom base classes.
 - [ ] **No Business Logic:** Templates must not contain implementation logic, calculations, validations, or any business rules.
 - [ ] **Clean Types:** Input/Output types should only use TypeScript native types and other domain types.
+- [ ] **DDD Alignment (RLHF +2 requirement):** Check for proper domain modeling with Value Objects, Entities, and Aggregates where appropriate.
+
+### E. RLHF Quality Indicators (For Scoring)
+
+- [ ] **Ubiquitous Language Present (RLHF +2):** Check if `ubiquitousLanguage` object exists with meaningful business terms.
+- [ ] **Domain Concepts Documentation (RLHF +1 to +2):** Verify templates include comments explaining domain concepts.
+- [ ] **Reference Quality (RLHF 0 to +1):** Each step should have meaningful references to patterns, documentation, or existing code.
+- [ ] **Test Coverage Planning (RLHF +1):** Every use case should have corresponding test helpers with realistic mock data.
 
 ## 5. Step-by-Step Execution Plan
 
 1.  **Parse Input:** Receive the JSON plan.
 2.  **Iterate Checklist:** Go through every rule in the "Validation Checklist" above.
-3.  **Collect Errors:** For each rule that is violated, add a descriptive error message to a list.
-4.  **Generate Report:**
-    a. If the list of errors is empty, produce the SUCCESS JSON object.
-    b. If the list contains any errors, produce the FAILED JSON object, including the list of errors.
+3.  **Calculate RLHF Impact:** Assess the severity and quality score based on violations and quality indicators.
+4.  **Collect Errors:** For each rule that is violated, add a descriptive error message to a list with RLHF score impact.
+5.  **Generate Report:**
+    a. If the list of errors is empty, produce the SUCCESS JSON object with quality score.
+    b. If the list contains any errors, produce the FAILED JSON object, including the list of errors and severity level.
 
 ---
 
@@ -100,7 +120,8 @@ You **MUST** validate the input JSON against every rule in this checklist. The v
 ```json
 {
   "status": "SUCCESS",
-  "message": "JSON plan is valid and complete."
+  "message": "JSON plan is valid and complete.",
+  "qualityScore": "PERFECT"
 }
 ```
 
@@ -129,8 +150,9 @@ You **MUST** validate the input JSON against every rule in this checklist. The v
 {
   "status": "FAILED",
   "errors": [
-    "Path inconsistency: The path 'src/features/some-other-feature/...' does not match the featureName 'User Account'.",
-    "Missing references: The 'references' array for step 'create-use-case-create-user-account' cannot be empty."
-  ]
+    "Path inconsistency: The path 'src/features/some-other-feature/...' does not match the featureName 'User Account'. (RLHF Impact: -1)",
+    "Missing references: The 'references' array for step 'create-use-case-create-user-account' cannot be empty. (RLHF Impact: 0)"
+  ],
+  "severity": "RUNTIME"
 }
 ```
