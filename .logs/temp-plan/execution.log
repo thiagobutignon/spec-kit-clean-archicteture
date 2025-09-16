@@ -615,3 +615,10 @@ exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,out
 [2025-09-16T19:27:25.197Z] Done in 0.48s.
 [2025-09-16T19:27:25.202Z] ✅ Tests passed
 📦 Staging changes...
+[2025-09-16T19:27:25.223Z] 💾 Creating commit...
+[2025-09-16T19:27:25.251Z] [main 0729325] test(user-registration): add send-welcome-email use case test helpers
+ 27 files changed, 405 insertions(+), 41 deletions(-)
+ create mode 100644 coverage/spec-kit-clean-archicteture/src/features/user-registration/domain/test/mock-send-welcome-email-use-case.ts.html
+ create mode 100644 src/features/user-registration/domain/test/mock-send-welcome-email-use-case.ts
+[2025-09-16T19:27:25.251Z] ✅ Successfully committed
+[2025-09-16T19:27:25.252Z] --- Script finished successfully ---
