@@ -4,12 +4,12 @@ version: '3.0.0'
 # AI-NOTE: Update these fields to describe the specific feature.
 metadata:
   title: 'UserAccount Domain Layer - Clean Architecture'
-  description: 'TDD template for user account feature following the master template rules.'
+  description: 'TDD template for user-account feature following the master template rules.'
   source: 'TODO_DOMAIN_TEMPLATE.yaml'
   # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
-  lastUpdated: '2025-09-16'
+  lastUpdated: '2025-01-16'
 
-# AI-NOTE: Replace user-account with the feature name.
+# AI-NOTE: Replace __FEATURE_NAME_KEBAB_CASE__ with the feature name.
 structure:
   basePath: 'src/features/user-account/domain'
   folders:
@@ -134,49 +134,6 @@ steps:
     validation:
       command: 'ls -la src/features/user-account/domain'
       expected: 'All three folders exist'
-    validation_script: |
-      echo "🔍 Running lint check..."
-      yarn lint
-      if [ $? -ne 0 ]; then
-        echo "❌ LINT FAILED - Attempting auto-fix..."
-        yarn lint --fix
-        if [ $? -ne 0 ]; then
-          echo "❌ AUTO-FIX FAILED - Manual intervention required"
-          echo "📋 Run 'yarn lint' to see remaining errors"
-          exit 1
-        fi
-        echo "✅ Lint errors auto-fixed, validating again..."
-        yarn lint
-        if [ $? -ne 0 ]; then
-          echo "❌ LINT STILL FAILING - Manual fixes needed"
-          exit 1
-        fi
-      fi
-      echo "✅ Lint passed"
-
-      echo "🧪 Running tests with coverage..."
-      yarn test --coverage
-      if [ $? -ne 0 ]; then
-        echo "❌ TESTS FAILED - Running specific test to identify issue..."
-        yarn test --run --reporter=verbose
-        echo "❌ Tests must be fixed manually"
-        echo "📋 Check the test output above for details"
-        exit 1
-      fi
-      echo "✅ Tests passed"
-
-      echo "📦 Staging changes..."
-      git add .
-
-      echo "💾 Creating commit..."
-      git commit -m "feat(user-account): create domain folder structure"
-      if [ $? -ne 0 ]; then
-        echo "❌ COMMIT FAILED - Checking git status..."
-        git status
-        echo "📋 Review the status above and fix any issues"
-        exit 1
-      fi
-      echo "✅ Successfully committed"
 
   # Step 2: Create first use case
   - id: 'create-use-case-create-user-account'
@@ -188,14 +145,21 @@ steps:
        * Input parameters for CreateUserAccountUseCase
        */
       export type CreateUserAccountInput = {
-        // Define your input parameters here
+        email: string;
+        firstName: string;
+        lastName: string;
+        password: string;
       }
 
       /**
        * Output type for CreateUserAccountUseCase
        */
       export type CreateUserAccountOutput = {
-        // Define your output type here
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        createdAt: Date;
       }
 
       /**
@@ -255,20 +219,20 @@ steps:
       fi
       echo "✅ Successfully committed"
 
-  # Step 3: Create error class
-  - id: 'create-error-email-already-exists'
+  # Step 3: Create error class - User Already Exists
+  - id: 'create-error-user-already-exists'
     type: 'file'
-    description: 'Create email-already-exists domain error'
-    path: 'src/features/user-account/domain/errors/email-already-exists.ts'
+    description: 'Create user-already-exists domain error'
+    path: 'src/features/user-account/domain/errors/user-already-exists.ts'
     template: |
       /**
-       * Error thrown when email already exists in the system
+       * Error thrown when the email is already registered
        * @extends Error
        */
-      export class EmailAlreadyExistsError extends Error {
+      export class UserAlreadyExistsError extends Error {
         constructor() {
-          super('Email already exists')
-          this.name = 'EmailAlreadyExistsError'
+          super('User with this email already exists')
+          this.name = 'UserAlreadyExistsError'
         }
       }
     validation_script: |
@@ -306,7 +270,7 @@ steps:
       git add .
 
       echo "💾 Creating commit..."
-      git commit -m "feat(user-account): add email-already-exists domain error"
+      git commit -m "feat(user-account): add user-already-exists domain error"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED - Checking git status..."
         git status
@@ -315,19 +279,20 @@ steps:
       fi
       echo "✅ Successfully committed"
 
-  - id: 'create-error-invalid-email-format'
+  # Step 4: Create error class - Invalid User Data
+  - id: 'create-error-invalid-user-data'
     type: 'file'
-    description: 'Create invalid-email-format domain error'
-    path: 'src/features/user-account/domain/errors/invalid-email-format.ts'
+    description: 'Create invalid-user-data domain error'
+    path: 'src/features/user-account/domain/errors/invalid-user-data.ts'
     template: |
       /**
-       * Error thrown when email format is invalid
+       * Error thrown when required fields are invalid or missing
        * @extends Error
        */
-      export class InvalidEmailFormatError extends Error {
+      export class InvalidUserDataError extends Error {
         constructor() {
-          super('Invalid email format')
-          this.name = 'InvalidEmailFormatError'
+          super('Invalid or missing required user data')
+          this.name = 'InvalidUserDataError'
         }
       }
     validation_script: |
@@ -365,7 +330,7 @@ steps:
       git add .
 
       echo "💾 Creating commit..."
-      git commit -m "feat(user-account): add invalid-email-format domain error"
+      git commit -m "feat(user-account): add invalid-user-data domain error"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED - Checking git status..."
         git status
@@ -374,66 +339,7 @@ steps:
       fi
       echo "✅ Successfully committed"
 
-  - id: 'create-error-weak-password'
-    type: 'file'
-    description: 'Create weak-password domain error'
-    path: 'src/features/user-account/domain/errors/weak-password.ts'
-    template: |
-      /**
-       * Error thrown when password does not meet security requirements
-       * @extends Error
-       */
-      export class WeakPasswordError extends Error {
-        constructor() {
-          super('Password does not meet security requirements')
-          this.name = 'WeakPasswordError'
-        }
-      }
-    validation_script: |
-      echo "🔍 Running lint check..."
-      yarn lint
-      if [ $? -ne 0 ]; then
-        echo "❌ LINT FAILED - Attempting auto-fix..."
-        yarn lint --fix
-        if [ $? -ne 0 ]; then
-          echo "❌ AUTO-FIX FAILED - Manual intervention required"
-          echo "📋 Run 'yarn lint' to see remaining errors"
-          exit 1
-        fi
-        echo "✅ Lint errors auto-fixed, validating again..."
-        yarn lint
-        if [ $? -ne 0 ]; then
-          echo "❌ LINT STILL FAILING - Manual fixes needed"
-          exit 1
-        fi
-      fi
-      echo "✅ Lint passed"
-
-      echo "🧪 Running tests with coverage..."
-      yarn test --coverage
-      if [ $? -ne 0 ]; then
-        echo "❌ TESTS FAILED - Running specific test to identify issue..."
-        yarn test --run --reporter=verbose
-        echo "❌ Tests must be fixed manually"
-        echo "📋 Check the test output above for details"
-        exit 1
-      fi
-      echo "✅ Tests passed"
-
-      echo "📦 Staging changes..."
-      git add .
-
-      echo "💾 Creating commit..."
-      git commit -m "feat(user-account): add weak-password domain error"
-      if [ $? -ne 0 ]; then
-        echo "❌ COMMIT FAILED - Checking git status..."
-        git status
-        echo "📋 Review the status above and fix any issues"
-        exit 1
-      fi
-      echo "✅ Successfully committed"
-
-  # Step 4: Create test helper
+  # Step 5: Create test helper
   - id: 'create-test-helper-create-user-account'
     type: 'file'
     description: 'Create mock for CreateUserAccount use case'
@@ -447,7 +353,10 @@ steps:
        * @returns Mock input for testing
        */
       export const mockCreateUserAccountInput = (): CreateUserAccountInput => ({
-        // Mock input parameters
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        password: 'SecurePassword123!',
       })
 
       /**
@@ -455,7 +364,11 @@ steps:
        * @returns Mock output for testing
        */
       export const mockCreateUserAccountOutput = (): CreateUserAccountOutput => ({
-        // Mock output data
+        id: 'user-123',
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        createdAt: new Date('2025-01-01T00:00:00Z'),
       })
 
       /**
@@ -681,6 +594,6 @@ ai_guidelines:
   - 'MUST generate different case styles from the input names (e.g., "Add Item To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart, lower case=add item to cart).'
   - 'MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__) with actual values'
   - 'MUST NOT leave any placeholder variables in the final implementation'
-  - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery'
+  - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery' # Adicionar esta regra para clareza extra
   - 'MUST use vitest, NOT jest'
   - 'MUST follow all domain rules - no business logic, no external dependencies'

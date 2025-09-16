@@ -145,14 +145,14 @@ steps:
        * Input parameters for __ACTION_ENTITY_PASCAL_CASE__UseCase
        */
       export type __ACTION_ENTITY_PASCAL_CASE__Input = {
-        // Define your input parameters here
+        __USE_CASE_INPUT_FIELDS__
       }
 
       /**
        * Output type for __ACTION_ENTITY_PASCAL_CASE__UseCase
        */
       export type __ACTION_ENTITY_PASCAL_CASE__Output = {
-        // Define your output type here
+        __USE_CASE_OUTPUT_FIELDS__
       }
 
       /**
@@ -286,7 +286,7 @@ steps:
        * @returns Mock input for testing
        */
       export const mock__ACTION_ENTITY_PASCAL_CASE__Input = (): __ACTION_ENTITY_PASCAL_CASE__Input => ({
-        // Mock input parameters
+        __MOCK_INPUT_DATA__
       })
 
       /**
@@ -294,7 +294,7 @@ steps:
        * @returns Mock output for testing
        */
       export const mock__ACTION_ENTITY_PASCAL_CASE__Output = (): __ACTION_ENTITY_PASCAL_CASE__Output => ({
-        // Mock output data
+        __MOCK_OUTPUT_DATA__
       })
 
       /**
