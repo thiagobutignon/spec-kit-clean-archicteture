@@ -1,0 +1,4 @@
+[2025-09-16T22:26:09.141Z] 🧮 Calculating intelligent RLHF score for create_file (success)
+[2025-09-16T22:26:09.141Z] ✅ Success analysis: Score 1 for quality level
+[2025-09-16T22:26:12.883Z] 🧮 Calculating intelligent RLHF score for refactor_file (failure)
+[2025-09-16T22:26:12.884Z] ⚠️ Low confidence case: Score 0

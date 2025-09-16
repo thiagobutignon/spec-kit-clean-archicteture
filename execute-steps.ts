@@ -5,13 +5,14 @@ import os from 'os';
 import yaml from 'yaml';
 import 'zx/globals';
 import Logger from './logger';
+import { RLHFSystem } from './rlhf-system';
 
 $.verbose = true;
 $.shell = '/bin/bash';
 
 interface Step {
   id: string;
-  type: 'create_file' | 'refactor_file' | 'delete_file' | 'folder';
+  type: 'create_file' | 'refactor_file' | 'delete_file' | 'folder' | 'branch' | 'pull_request';
   status: 'PENDING' | 'SUCCESS' | 'FAILED' | 'SKIPPED';
   rlhf_score: number | null;
   execution_log: string;
@@ -22,6 +23,10 @@ interface Step {
       basePath?: string;
       folders?: string[];
     };
+    branch_name?: string;
+    target_branch?: string;
+    source_branch?: string;
+    title?: string;
   };
   validation_script?: string;
 }
@@ -34,12 +39,15 @@ interface ImplementationPlan {
 class StepExecutor {
   private plan: ImplementationPlan;
   private logger: Logger;
+  private rlhf: RLHFSystem;
+  private startTime: number = 0;
 
   constructor(private implementationPath: string) {
     this.plan = { steps: [] };
 
     const logDir = path.join(path.dirname(implementationPath), '.logs', path.basename(implementationPath, '.yaml'));
     this.logger = new Logger(logDir);
+    this.rlhf = new RLHFSystem();
   }
 
   private async loadPlan(): Promise<void> {
@@ -81,41 +89,98 @@ class StepExecutor {
       }
 
       try {
+        // Track execution time
+        this.startTime = Date.now();
+
         // Executa a ação principal do passo
         await this.executeStepAction(step);
-        
+
         // Se a ação foi bem-sucedida, executa o script de validação
         if (step.validation_script) {
           const scriptOutput = await this.runValidationScript(step.validation_script, step.id);
+
+          // Calculate execution duration
+          const duration = Date.now() - this.startTime;
+
+          // Apply automated RLHF scoring with validation output for quality analysis
+          // Pass both script output and step data for comprehensive analysis
+          step.rlhf_score = await this.rlhf.calculateScore(step.type, true, scriptOutput, step);
+
           // ATUALIZAÇÃO DE ESTADO EM CASO DE SUCESSO
           step.status = 'SUCCESS';
-          step.execution_log = `Completed successfully at ${new Date().toISOString()}.\n\n--- SCRIPT OUTPUT ---\n${scriptOutput}`;
+          step.execution_log = `Completed successfully at ${new Date().toISOString()} (${duration}ms).\nRLHF Score: ${step.rlhf_score}\n\n--- SCRIPT OUTPUT ---\n${scriptOutput}`;
           await this.savePlan();
         } else {
           // Se não houver script, a ação bem-sucedida é suficiente
+          const duration = Date.now() - this.startTime;
+          step.rlhf_score = await this.rlhf.calculateScore(step.type, true, undefined, step);
           step.status = 'SUCCESS';
-          step.execution_log = `Action completed successfully at ${new Date().toISOString()}. No validation script provided.`;
+          step.execution_log = `Action completed successfully at ${new Date().toISOString()} (${duration}ms). RLHF Score: ${step.rlhf_score}. No validation script provided.`;
           await this.savePlan();
         }
-        
-        console.log(chalk.green.bold(`✅ Step '${stepId}' completed successfully.`));
+
+        // Visual feedback based on RLHF score
+        const scoreEmoji = this.getScoreEmoji(step.rlhf_score || 0);
+        const scoreColor = this.getScoreColor(step.rlhf_score || 0);
+        console.log(scoreColor(`${scoreEmoji} Step '${stepId}' completed successfully. RLHF Score: ${step.rlhf_score}`));
 
       } catch (error: any) {
+        // Calculate execution duration even for failures
+        const duration = Date.now() - this.startTime;
+
         // ATUALIZAÇÃO DE ESTADO EM CASO DE FALHA
         step.status = 'FAILED';
-        const errorMessage = error.stderr || error.stdout || error.message || 'Unknown error';
-        step.execution_log = `Failed at ${new Date().toISOString()}:\n\n--- ERROR LOG ---\n${errorMessage}`;
-        step.rlhf_score = -2; // Pontuação padrão para falha de execução
+        const errorMessage = this.enhanceErrorMessage(error, step);
+
+        // Apply automated RLHF scoring for failure
+        step.rlhf_score = await this.rlhf.calculateScore(step.type, false, errorMessage, step);
+
+        step.execution_log = `Failed at ${new Date().toISOString()} (${duration}ms).\nRLHF Score: ${step.rlhf_score}\n\n--- ERROR LOG ---\n${errorMessage}`;
         await this.savePlan(); // Salva o estado de falha
 
-        console.error(chalk.red.bold(`\n❌ ERROR: Step '${stepId}' failed.`));
+        // Visual feedback based on RLHF score for failures
+        const scoreEmoji = this.getScoreEmoji(step.rlhf_score || 0);
+        const scoreColor = this.getScoreColor(step.rlhf_score || 0);
+
+        console.error(scoreColor(`\n${scoreEmoji} ERROR: Step '${stepId}' failed. RLHF Score: ${step.rlhf_score}`));
         console.error(chalk.red(errorMessage));
+
+        // Additional guidance based on score
+        if (step.rlhf_score === -2) {
+          console.error(chalk.red.bold('🚨 CATASTROPHIC ERROR: This indicates a fundamental issue with architecture or template format.'));
+          console.error(chalk.yellow('💡 Check: Clean Architecture violations, REPLACE/WITH syntax, domain boundaries.'));
+        } else if (step.rlhf_score === -1) {
+          console.error(chalk.red.bold('⚠️ RUNTIME ERROR: The step failed during execution.'));
+          console.error(chalk.yellow('💡 Check: Lint issues, test failures, git operations, dependencies.'));
+        } else {
+          console.error(chalk.yellow.bold('❓ UNCERTAIN ERROR: The system has low confidence about this failure.'));
+        }
+
         console.error(chalk.red.bold('Aborting execution. The YAML file has been updated with the failure details.'));
+
+        // Trigger RLHF analysis for learning
+        await this.rlhf.analyzeExecution(this.implementationPath);
+
         process.exit(1);
       }
     }
 
     console.log(chalk.green.bold('\n🎉 All steps completed successfully!'));
+
+    // Perform final RLHF analysis
+    console.log(chalk.blue.bold('\n🤖 Running RLHF analysis...'));
+    await this.rlhf.analyzeExecution(this.implementationPath);
+
+    // Calculate final score
+    const finalScore = await this.calculateFinalRLHFScore();
+    this.plan.evaluation = this.plan.evaluation || {};
+    this.plan.evaluation.final_rlhf_score = finalScore;
+    this.plan.evaluation.final_status = 'SUCCESS';
+    await this.savePlan();
+
+    console.log(chalk.cyan.bold(`\n📊 Final RLHF Score: ${finalScore}/2`));
+    console.log(chalk.cyan('Run `npx tsx rlhf-system.ts report` to see learning insights'));
+
     this.logger.close();
   }
 
@@ -132,6 +197,12 @@ class StepExecutor {
         break;
       case 'folder':
         await this.handleFolderStep(step);
+        break;
+      case 'branch':
+        await this.handleBranchStep(step);
+        break;
+      case 'pull_request':
+        await this.handlePullRequestStep(step);
         break;
       default:
         throw new Error(`Unknown step type: '${(step as any).type}'`);
@@ -202,6 +273,99 @@ class StepExecutor {
 
     await fs.writeFile(path, newFileContent);
     console.log(chalk.green(`   ✅ Successfully applied refactoring to ${path}`));
+  }
+
+  private async handleBranchStep(step: Step): Promise<void> {
+    const branchName = step.action?.branch_name;
+    if (!branchName) {
+      throw new Error("Branch step is missing 'action.branch_name'.");
+    }
+
+    console.log(chalk.cyan(`   🌿 Managing branch: ${branchName}`));
+
+    // The validation script will handle the actual git operations
+    // This method just ensures the configuration is correct
+    console.log(chalk.blue(`   📝 Branch configuration validated. Will be created/checked out by validation script.`));
+  }
+
+  private async handlePullRequestStep(step: Step): Promise<void> {
+    const { target_branch, source_branch, title } = step.action || {};
+
+    if (!target_branch || !source_branch) {
+      throw new Error("Pull request step is missing required 'action.target_branch' or 'action.source_branch'.");
+    }
+
+    console.log(chalk.cyan(`   🔄 Preparing pull request from ${source_branch} to ${target_branch}`));
+
+    if (title) {
+      console.log(chalk.blue(`   📋 PR Title: ${title}`));
+    }
+
+    // The validation script will handle the actual PR creation
+    console.log(chalk.blue(`   📝 PR configuration validated. Will be created by validation script.`));
+  }
+
+  /**
+   * Get emoji based on RLHF score
+   */
+  private getScoreEmoji(score: number): string {
+    if (score >= 2) return '🏆'; // Perfect execution
+    if (score >= 1) return '✅'; // Good execution
+    if (score >= 0) return '⚠️'; // Low confidence
+    if (score >= -1) return '❌'; // Runtime error
+    return '💥'; // Catastrophic error
+  }
+
+  /**
+   * Get color function based on RLHF score
+   */
+  private getScoreColor(score: number): any {
+    if (score >= 2) return chalk.green.bold; // Perfect
+    if (score >= 1) return chalk.green; // Good
+    if (score >= 0) return chalk.yellow; // Low confidence
+    if (score >= -1) return chalk.red; // Runtime error
+    return chalk.red.bold; // Catastrophic
+  }
+
+  /**
+   * Enhanced error analysis for better RLHF scoring
+   */
+  private enhanceErrorMessage(error: any, step: Step): string {
+    const baseError = error.stderr || error.stdout || error.message || 'Unknown error';
+
+    // Add context for refactor_file errors
+    if (step.type === 'refactor_file' && step.template) {
+      if (!step.template.includes('<<<REPLACE>>>') || !step.template.includes('<<<WITH>>>')) {
+        return `TEMPLATE FORMAT ERROR: Missing <<<REPLACE>>> or <<<WITH>>> blocks in refactor template.\n\nOriginal error: ${baseError}`;
+      }
+    }
+
+    // Add context for architecture violations
+    if (baseError.toLowerCase().includes('import') && step.type === 'create_file') {
+      return `POTENTIAL ARCHITECTURE VIOLATION: Import statement issue in domain layer.\n\nOriginal error: ${baseError}`;
+    }
+
+    return baseError;
+  }
+
+  private async calculateFinalRLHFScore(): Promise<number> {
+    const steps = this.plan.steps || [];
+    let totalScore = 0;
+    let validScores = 0;
+
+    for (const step of steps) {
+      if (step.rlhf_score !== null && step.rlhf_score !== undefined) {
+        totalScore += step.rlhf_score;
+        validScores++;
+      }
+    }
+
+    // Average score, normalized to 0-2 range
+    if (validScores === 0) return 1; // Neutral score if no data
+
+    const avgScore = totalScore / validScores;
+    // Normalize from [-2, 2] to [0, 2]
+    return Math.max(0, Math.min(2, avgScore + 1));
   }
 
 private async runValidationScript(scriptContent: string, stepId: string): Promise<string> {

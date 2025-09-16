@@ -1,42 +1,17 @@
 # AI-NOTE: This YAML file is the single source of truth for generating domain layers.
 # When creating a feature implementation, you MUST adhere to the structure and rules defined here.
-#
-# INTELLIGENT RLHF SCORING SYSTEM:
-# The system uses Reinforcement Learning from Human Feedback to score execution quality:
-# -2: CATASTROPHIC - Architecture violations, incorrect REPLACE/WITH format in refactor steps
-# -1: RUNTIME ERROR - Lint failures, test failures, git operation problems
-#  0: LOW CONFIDENCE - System is uncertain, avoids hallucinations
-# +1: GOOD - Task complete but missing DDD elements (ubiquitous language, patterns)
-# +2: PERFECT - Exceptional quality with Clean Architecture, DDD principles, ubiquitous language
-#
-# QUALITY INDICATORS FOR +2 SCORE:
-# - Uses ubiquitous language terminology
-# - Follows Domain-Driven Design principles
-# - Applies Clean Architecture concepts
-# - Implements patterns: Aggregate Root, Value Objects, Domain Events
-# - Perfect branch naming: feat/[feature-name]-domain
-# - Comprehensive PR descriptions
-#
 version: '3.0.0'
 # AI-NOTE: Update these fields to describe the specific feature.
 metadata:
-  title: '__FEATURE_NAME_PASCAL_CASE__ Domain Layer - Clean Architecture'
-  description: 'TDD template for __FEATURE_NAME_LOWER_CASE__ feature following the master template rules.'
+  title: 'UserProfile Domain Layer - Clean Architecture'
+  description: 'TDD template for user profile feature following the master template rules.'
   source: 'TODO_DOMAIN_TEMPLATE.yaml'
   # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
-  lastUpdated: '__CURRENT_DATE__'
-  # AI-NOTE: Define ubiquitous language for +2 RLHF score
-  ubiquitousLanguage:
-    - term: '__ENTITY_NAME__'
-      definition: '__ENTITY_DEFINITION_IN_BUSINESS_CONTEXT__'
-    - term: '__VALUE_OBJECT_NAME__'
-      definition: '__VALUE_OBJECT_BUSINESS_MEANING__'
-    - term: '__DOMAIN_EVENT__'
-      definition: '__EVENT_BUSINESS_SIGNIFICANCE__'
+  lastUpdated: '2025-01-16'
 
 # AI-NOTE: Replace __FEATURE_NAME_KEBAB_CASE__ with the feature name.
 structure:
-  basePath: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain'
+  basePath: 'src/features/user-profile/domain'
   folders:
     - 'errors'      # Feature-specific errors
     - 'use-cases'   # Feature use case interfaces
@@ -46,14 +21,6 @@ structure:
 # AI-NOTE: IMMUTABLE SECTIONS AHEAD.
 # The sections from here until 'steps' are architectural rules.
 # You MUST copy them verbatim into the implementation file without ANY modification.
-#
-# AUTOMATED LEARNING SYSTEM:
-# The RLHF system automatically:
-# - Tracks success/failure patterns across executions
-# - Identifies common error types and their fixes
-# - Applies improvements when confidence > 80%
-# - Generates learning reports with actionable insights
-# - Prevents hallucinations with score 0 for uncertain cases
 # ------------------------------------------------------------------------------
 
 layer_rules:
@@ -156,22 +123,22 @@ test_helper_rules:
 steps:
   - id: 'create-feature-branch'
     type: 'branch'
-    description: 'Create a new feature branch for __FEATURE_NAME_PASCAL_CASE__'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
+    description: 'Create a new feature branch for User Profile'
+    status: 'PENDING'
+    rlhf_score: null
     execution_log: ''
     references:
       - type: 'internal_guideline'
         source: 'GIT_WORKFLOW.md'
         description: 'Following git branching best practices for feature development.'
     action:
-      branch_name: 'feat/__FEATURE_NAME_KEBAB_CASE__-domain'
+      branch_name: 'feat/user-profile-domain'
     validation_script: |
       echo "🌿 Creating feature branch..."
       # Check if we are on a clean state
       if [ -n "$(git status --porcelain)" ]; then
         echo "⚠️ Warning: You have uncommitted changes. Stashing them..."
-        git stash save "Auto-stash before creating feature branch for __FEATURE_NAME_KEBAB_CASE__"
+        git stash save "Auto-stash before creating feature branch for user-profile"
       fi
 
       # Get current branch to use as base
@@ -179,7 +146,7 @@ steps:
       echo "📍 Current branch: $CURRENT_BRANCH"
 
       # Create and checkout new feature branch
-      BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-domain"
+      BRANCH_NAME="feat/user-profile-domain"
 
       # Check if branch already exists
       if git show-ref --quiet refs/heads/$BRANCH_NAME; then
@@ -199,11 +166,6 @@ steps:
 
       echo "✅ Successfully created and switched to branch: $BRANCH_NAME"
 
-      # If we had stashed changes, inform the user
-      if git stash list | grep -q "Auto-stash before creating feature branch"; then
-        echo "💡 Note: You have stashed changes. Run 'git stash pop' to restore them if needed."
-      fi
-
   - id: 'create-structure'
     type: 'folder'
     description: 'Create domain folder structure'
@@ -217,7 +179,7 @@ steps:
         description: 'Following the standard feature-based domain structure.'
     action:
       create_folders:
-        basePath: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain'
+        basePath: 'src/features/user-profile/domain'
         folders:
           - 'errors'
           - 'use-cases'
@@ -225,18 +187,31 @@ steps:
     validation_script: |
       echo "✅ Verifying folder structure..."
       # Adiciona uma verificação explícita para falhar se as pastas não existirem
-      if [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/domain/errors" ] || \
-         [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases" ] || \
-         [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/domain/test" ]; then
+      if [ ! -d "src/features/user-profile/domain/errors" ] || \
+         [ ! -d "src/features/user-profile/domain/use-cases" ] || \
+         [ ! -d "src/features/user-profile/domain/test" ]; then
         echo "❌ ERROR: One or more domain folders were not created."
         exit 1
       fi
       echo "✅ Folders exist."
 
+      echo "📦 Staging changes..."
+      git add .
+
+      echo "💾 Creating commit..."
+      git commit -m "feat(user-profile): create domain folder structure"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED - Checking git status..."
+        git status
+        echo "📋 Review the status above and fix any issues"
+        exit 1
+      fi
+      echo "✅ Successfully committed"
+
   # Step 2: Create first use case
-  - id: 'create-use-case-__ACTION_ENTITY_KEBAB_CASE__'
+  - id: 'create-use-case-get-user-profile'
     type: 'create_file'
-    description: 'Create __ACTION_ENTITY_PASCAL_CASE__ use case interface'
+    description: 'Create GetUserProfile use case interface'
     status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
     rlhf_score: null # -2, -1, 0, 1, 2
     execution_log: ''
@@ -245,51 +220,44 @@ steps:
     references:
       - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
         source: 'context7'
-        query: 'awesome system design __CONCEPT__'
-        url: 'https://github.com/...' # Link direto para a fonte que inspirou o design
+        query: 'awesome system design user profile retrieval'
+        url: 'https://github.com/donnemartin/system-design-primer'
         description: 'This use case follows the Command pattern for handling actions.'
       - type: 'internal_code_analysis'
         source: 'serena'
         tool: 'find_symbol'
-        query: '*Repository'
+        query: '*UseCase'
         description: 'The structure is consistent with existing use cases like `OtherUseCase` found in the project.'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases/__ACTION_ENTITY_KEBAB_CASE__.ts'
-    # AI-NOTE FOR +2 SCORE: Include domain concepts and ubiquitous language in comments
-    # Use business terminology, not technical jargon
-    # Reference Domain-Driven Design principles when applicable
+    path: 'src/features/user-profile/domain/use-cases/get-user-profile.ts'
     template: |
       /**
-       * Input parameters for __ACTION_ENTITY_PASCAL_CASE__UseCase
-       * Following Clean Architecture principles - pure domain types
-       * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+       * Input parameters for GetUserProfileUseCase
        */
-      export type __ACTION_ENTITY_PASCAL_CASE__Input = {
-        __USE_CASE_INPUT_FIELDS__
+      export type GetUserProfileInput = {
+        userId: string
       }
 
       /**
-       * Output type for __ACTION_ENTITY_PASCAL_CASE__UseCase
-       * Represents the business outcome of the operation
-       * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+       * Output type for GetUserProfileUseCase
        */
-      export type __ACTION_ENTITY_PASCAL_CASE__Output = {
-        __USE_CASE_OUTPUT_FIELDS__
+      export type GetUserProfileOutput = {
+        id: string
+        email: string
+        firstName: string
+        lastName: string
       }
 
       /**
-       * __ACTION_ENTITY_PASCAL_CASE__UseCase interface
-       * @description __USE_CASE_DESCRIPTION__
-       * @pattern Command Pattern - Single Responsibility Principle
-       * @layer Domain Layer - Framework agnostic business interface
+       * GetUserProfileUseCase interface
+       * @description Retrieves a user's profile information
        */
-      export interface __ACTION_ENTITY_PASCAL_CASE__UseCase {
+      export interface GetUserProfileUseCase {
         /**
-         * Execute the __ACTION_ENTITY_LOWER_CASE__ operation
+         * Execute the get user profile operation
          * @param input - The input parameters
          * @returns Promise with the operation output
-         * @throws Domain errors when business rules are violated
          */
-        execute: (input: __ACTION_ENTITY_PASCAL_CASE__Input) => Promise<__ACTION_ENTITY_PASCAL_CASE__Output>
+        execute: (input: GetUserProfileInput) => Promise<GetUserProfileOutput>
       }
     validation_script: |
       # AI-NOTE: This script is immutable. Only the commit message placeholder is replaced.
@@ -327,7 +295,7 @@ steps:
       git add .
 
       echo "💾 Creating commit..."
-      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add __ACTION_ENTITY_KEBAB_CASE__ use case"
+      git commit -m "feat(user-profile): add get-user-profile use case"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED - Checking git status..."
         git status
@@ -337,9 +305,9 @@ steps:
       echo "✅ Successfully committed"
 
   # Step 3: Create error class
-  - id: 'create-error-__ERROR_NAME_KEBAB_CASE__'
+  - id: 'create-error-user-not-found'
     type: 'create_file'
-    description: 'Create __ERROR_NAME_KEBAB_CASE__ domain error'
+    description: 'Create user-not-found domain error'
     status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
     rlhf_score: null # -2, -1, 0, 1, 2
     execution_log: ''
@@ -348,30 +316,24 @@ steps:
     references:
       - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
         source: 'context7'
-        query: 'awesome system design __CONCEPT__'
-        url: 'https://github.com/...' # Link direto para a fonte que inspirou o design
-        description: 'This use case follows the Command pattern for handling actions.'
+        query: 'awesome system design error handling'
+        url: 'https://github.com/goldbergyoni/nodebestpractices'
+        description: 'This error follows best practices for domain error handling.'
       - type: 'internal_code_analysis'
         source: 'serena'
         tool: 'find_symbol'
-        query: '*Repository'
-        description: 'The structure is consistent with existing use cases like `OtherUseCase` found in the project.'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/errors/__ERROR_NAME_KEBAB_CASE__.ts'
-    # AI-NOTE FOR +2 SCORE: Domain errors should represent business rule violations
-    # Use ubiquitous language in error messages
-    # Never expose technical details or implementation specifics
+        query: '*Error'
+        description: 'The structure is consistent with existing error classes found in the project.'
+    path: 'src/features/user-profile/domain/errors/user-not-found.ts'
     template: |
       /**
-       * Domain error thrown when __ERROR_DESCRIPTION__
-       * Represents a business rule violation in the __FEATURE_NAME__ bounded context
-       * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
-       * @pattern Domain Error - Clean Architecture principle
+       * Error thrown when the requested user does not exist
        * @extends Error
        */
-      export class __ERROR_NAME_PASCAL_CASE__Error extends Error {
+      export class UserNotFoundError extends Error {
         constructor() {
-          super('__ERROR_MESSAGE__')
-          this.name = '__ERROR_NAME_PASCAL_CASE__Error'
+          super('User with the given ID was not found')
+          this.name = 'UserNotFoundError'
         }
       }
     validation_script: |
@@ -409,7 +371,7 @@ steps:
       git add .
 
       echo "💾 Creating commit..."
-      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add __ERROR_NAME_KEBAB_CASE__ domain error"
+      git commit -m "feat(user-profile): add user-not-found domain error"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED - Checking git status..."
         git status
@@ -419,9 +381,9 @@ steps:
       echo "✅ Successfully committed"
 
   # Step 4: Create test helper
-  - id: 'create-test-helper-__ACTION_ENTITY_KEBAB_CASE__'
+  - id: 'create-test-helper-get-user-profile'
     type: 'create_file'
-    description: 'Create mock for __ACTION_ENTITY_PASCAL_CASE__ use case'
+    description: 'Create mock for GetUserProfile use case'
     status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
     rlhf_score: null # -2, -1, 0, 1, 2
     execution_log: ''
@@ -430,40 +392,43 @@ steps:
     references:
       - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
         source: 'context7'
-        query: 'awesome system design __CONCEPT__'
-        url: 'https://github.com/...' # Link direto para a fonte que inspirou o design
-        description: 'This use case follows the Command pattern for handling actions.'
+        query: 'vitest testing best practices'
+        url: 'https://vitest.dev/guide/mocking'
+        description: 'Following Vitest best practices for creating test mocks.'
       - type: 'internal_code_analysis'
         source: 'serena'
         tool: 'find_symbol'
-        query: '*Repository'
-        description: 'The structure is consistent with existing use cases like `OtherUseCase` found in the project.'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/test/mock-__ACTION_ENTITY_KEBAB_CASE__-use-case.ts'
+        query: 'mock*UseCase'
+        description: 'The structure is consistent with existing test helpers found in the project.'
+    path: 'src/features/user-profile/domain/test/mock-get-user-profile-use-case.ts'
     template: |
       import { vi } from 'vitest'
-      import type { __ACTION_ENTITY_PASCAL_CASE__UseCase, __ACTION_ENTITY_PASCAL_CASE__Input, __ACTION_ENTITY_PASCAL_CASE__Output } from '../use-cases/__ACTION_ENTITY_KEBAB_CASE__'
+      import type { GetUserProfileUseCase, GetUserProfileInput, GetUserProfileOutput } from '../use-cases/get-user-profile'
 
       /**
-       * Creates a mock instance of __ACTION_ENTITY_PASCAL_CASE__Input
+       * Creates a mock instance of GetUserProfileInput
        * @returns Mock input for testing
        */
-      export const mock__ACTION_ENTITY_PASCAL_CASE__Input = (): __ACTION_ENTITY_PASCAL_CASE__Input => ({
-        __MOCK_INPUT_DATA__
+      export const mockGetUserProfileInput = (): GetUserProfileInput => ({
+        userId: 'user-123'
       })
 
       /**
-       * Creates a mock instance of __ACTION_ENTITY_PASCAL_CASE__Output
+       * Creates a mock instance of GetUserProfileOutput
        * @returns Mock output for testing
        */
-      export const mock__ACTION_ENTITY_PASCAL_CASE__Output = (): __ACTION_ENTITY_PASCAL_CASE__Output => ({
-        __MOCK_OUTPUT_DATA__
+      export const mockGetUserProfileOutput = (): GetUserProfileOutput => ({
+        id: 'user-123',
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe'
       })
 
       /**
-       * Creates a mock instance of __ACTION_ENTITY_PASCAL_CASE__UseCase
+       * Creates a mock instance of GetUserProfileUseCase
        * @returns Mocked use case with vitest functions
        */
-      export const mock__ACTION_ENTITY_PASCAL_CASE__UseCase = (): __ACTION_ENTITY_PASCAL_CASE__UseCase => ({
+      export const mockGetUserProfileUseCase = (): GetUserProfileUseCase => ({
         execute: vi.fn()
       })
     validation_script: |
@@ -501,7 +466,7 @@ steps:
       git add .
 
       echo "💾 Creating commit..."
-      git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add __ACTION_ENTITY_KEBAB_CASE__ use case test helpers"
+      git commit -m "test(user-profile): add get-user-profile use case test helpers"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED - Checking git status..."
         git status
@@ -509,136 +474,13 @@ steps:
         exit 1
       fi
       echo "✅ Successfully committed"
-
-  # OPTIONAL STEP: You can add more steps here for additional use cases, errors, or test helpers as needed.
-  - id: 'refactor-__FILE_TO_MODIFY_KEBAB_CASE__'
-    type: 'refactor_file'
-    description: 'Refactor __FILE_TO_MODIFY_PASCAL_CASE__ to incorporate new logic'
-    status: 'PENDING'
-    rlhf_score: null
-    execution_log: ''
-    references:
-      - type: 'internal_code_analysis'
-        source: 'serena'
-        tool: 'find_referencing_symbols'
-        query: '__SYMBOL_BEING_CHANGED__'
-        description: 'Refactoring this file because it is a primary consumer of the changed `__SYMBOL__` interface.'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/path/to/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
-    # CRITICAL FOR RLHF SCORE: The template MUST use REPLACE/WITH format for refactor_file steps
-    # Missing these blocks will result in a CATASTROPHIC -2 score
-    # Format requirements:
-    # 1. MUST include <<<REPLACE>>> block with exact code to be replaced
-    # 2. MUST include <<<WITH>>> block with new code
-    # 3. MUST include closing tags: <<</REPLACE>>> and <<</WITH>>>
-    # 4. The code in REPLACE block must match EXACTLY what's in the file
-    template: |
-      <<<REPLACE>>>
-      // Código antigo que a IA identificou para ser substituído
-      export type OldType = {
-        fieldA: string;
-      }
-      <<</REPLACE>>>
-      <<<WITH>>>
-      // Novo código que a IA gerou para substituir o antigo
-      export type OldType = {
-        fieldA: string;
-        newFieldB: number; // Adicionando o novo campo
-      }
-      <<</WITH>>>
-    validation_script: |
-      echo "🔍 Running lint check..."
-      yarn lint
-      if [ $? -ne 0 ]; then
-        echo "❌ LINT FAILED - Attempting auto-fix..."
-        yarn lint --fix
-        if [ $? -ne 0 ]; then
-          echo "❌ AUTO-FIX FAILED - Manual intervention required"
-          echo "📋 Run 'yarn lint' to see remaining errors"
-          exit 1
-        fi
-        echo "✅ Lint errors auto-fixed, validating again..."
-        yarn lint
-        if [ $? -ne 0 ]; then
-          echo "❌ LINT STILL FAILING - Manual fixes needed"
-          exit 1
-        fi
-      fi
-      echo "✅ Lint passed"
-
-      echo "🧪 Running tests with coverage..."
-      yarn test --coverage
-      if [ $? -ne 0 ]; then
-        echo "❌ TESTS FAILED - Running specific test to identify issue..."
-        yarn test --run --reporter=verbose
-        echo "❌ Tests must be fixed manually"
-        echo "📋 Check the test output above for details"
-        exit 1
-      fi
-      echo "✅ Tests passed"
-
-      echo "📦 Staging changes..."
-      git add .
-
-      echo "💾 Creating commit..."
-      git commit -m "refactor(__FEATURE_NAME_KEBAB_CASE__): refactor __FILE_TO_MODIFY_KEBAB_CASE__"
-      if [ $? -ne 0 ]; then
-        echo "❌ COMMIT FAILED - Checking git status..."
-        git status
-        echo "📋 Review the status above and fix any issues"
-        exit 1
-      fi
-      echo "✅ Successfully committed"
-
-  # AI-NOTE: This step is used by the AI during the self-correction loop.
-  # When a 'create_file' step fails, the AI can generate an instance of this
-  # step to delete the broken artifact before attempting a fix.
-  - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'
-    type: 'delete_file'
-    description: 'Delete the file __FILE_TO_DELETE_PASCAL_CASE__ due to a generation error'
-    status: 'PENDING'
-    rlhf_score: null
-    execution_log: ''
-    references:
-      - type: 'internal_correction'
-        source: 'self'
-        description: 'Deleting the artifact from the failed step `__FAILED_STEP_ID__` to prepare for a corrected version.'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/path/to/__FILE_TO_DELETE_KEBAB_CASE__.ts'
-    # AI-NOTE: The validation_script for a delete action should verify the file is gone
-    # and then perform the standard quality checks before committing the deletion.
-    validation_script: |
-      echo "🗑️ Verifying file deletion..."
-      if [ -f "src/features/__FEATURE_NAME_KEBAB_CASE__/path/to/__FILE_TO_DELETE_KEBAB_CASE__.ts" ]; then
-        echo "❌ ERROR: File at __FILE_TO_DELETE_KEBAB_CASE__.ts was not deleted."
-        exit 1
-      fi
-      echo "✅ File successfully deleted."
-
-      echo "🔍 Running lint check on the project..."
-      yarn lint
-      if [ $? -ne 0 ]; then
-        echo "❌ LINT FAILED after deletion."
-        exit 1
-      fi
-      echo "✅ Lint passed."
-
-      echo "📦 Staging changes..."
-      git add .
-
-      echo "💾 Creating commit..."
-      git commit -m "chore(__FEATURE_NAME_KEBAB_CASE__): delete broken artifact __FILE_TO_DELETE_KEBAB_CASE__"
-      if [ $? -ne 0 ]; then
-        echo "❌ COMMIT FAILED - Checking git status..."
-        git status
-        exit 1
-      fi
-      echo "✅ Successfully committed deletion."
 
   # Final Step: Create Pull Request to staging
   - id: 'create-pull-request'
     type: 'pull_request'
-    description: 'Create pull request for __FEATURE_NAME_PASCAL_CASE__ domain to staging'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
+    description: 'Create pull request for User Profile domain to staging'
+    status: 'PENDING'
+    rlhf_score: null
     execution_log: ''
     references:
       - type: 'internal_guideline'
@@ -646,14 +488,14 @@ steps:
         description: 'Following PR process for feature integration to staging.'
     action:
       target_branch: 'staging'
-      source_branch: 'feat/__FEATURE_NAME_KEBAB_CASE__-domain'
-      title: 'feat(__FEATURE_NAME_KEBAB_CASE__): implement domain layer'
+      source_branch: 'feat/user-profile-domain'
+      title: 'feat(user-profile): implement domain layer'
     validation_script: |
       echo "🚀 Preparing to create pull request..."
 
       # Push the current branch to remote
       echo "📤 Pushing branch to remote..."
-      git push --set-upstream origin feat/__FEATURE_NAME_KEBAB_CASE__-domain
+      git push --set-upstream origin feat/user-profile-domain
       if [ $? -ne 0 ]; then
         echo "❌ ERROR: Failed to push branch to remote"
         exit 1
@@ -663,7 +505,7 @@ steps:
       if ! command -v gh &> /dev/null; then
         echo "⚠️ GitHub CLI (gh) is not installed."
         echo "📋 Please create PR manually at:"
-        echo "   https://github.com/$(git remote get-url origin | sed 's/.*github.com[:/]\(.*\)\.git/\1/')/pull/new/feat/__FEATURE_NAME_KEBAB_CASE__-domain"
+        echo "   https://github.com/$(git remote get-url origin | sed 's/.*github.com[:/]\(.*\)\.git/\1/')/pull/new/feat/user-profile-domain"
         exit 0
       fi
 
@@ -671,11 +513,11 @@ steps:
       echo "🔄 Creating pull request to staging..."
       PR_BODY="## Summary
 
-      Implementation of domain layer for __FEATURE_NAME_PASCAL_CASE__ feature.
+      Implementation of domain layer for User Profile feature.
 
       ### Changes included:
-      - Use case interfaces
-      - Domain errors
+      - Use case interfaces (GetUserProfile)
+      - Domain errors (UserNotFound)
       - Test helpers and mocks
 
       ### Domain Layer Compliance:
@@ -694,8 +536,8 @@ steps:
 
       gh pr create \
         --base staging \
-        --head feat/__FEATURE_NAME_KEBAB_CASE__-domain \
-        --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement domain layer" \
+        --head feat/user-profile-domain \
+        --title "feat(user-profile): implement domain layer" \
         --body "$PR_BODY" \
         --assignee @me
 
@@ -711,7 +553,7 @@ steps:
         gh pr view --web
       else
         echo "⚠️ Could not create PR automatically. Please create manually:"
-        echo "   gh pr create --base staging --head feat/__FEATURE_NAME_KEBAB_CASE__-domain"
+        echo "   gh pr create --base staging --head feat/user-profile-domain"
       fi
 
 # ------------------------------------------------------------------------------
@@ -899,15 +741,10 @@ ai_guidelines:
 evaluation:
   # AI-NOTE: This final_status will be 'SUCCESS' if all steps passed, or 'FAILED' if any step failed.
   final_status: 'PENDING' # PENDING | SUCCESS | FAILED
-  # AI-NOTE: The final_rlhf_score is calculated automatically based on execution quality
-  # -2: Catastrophic errors (architecture violations, wrong REPLACE/WITH format)
-  # -1: Runtime errors (lint, tests, git failures)
-  #  0: Low confidence (system uncertain, prevents hallucinations)
-  # +1: Good execution but missing DDD elements
-  # +2: Perfect with Clean Architecture, DDD, ubiquitous language
+  # AI-NOTE: The final_rlhf_score is an overall score for the entire task, assigned by a human reviewer.
   final_rlhf_score: null # -2, -1, 0, 1, 2
-  # AI-NOTE: The system automatically analyzes patterns and learns from each execution
-  # This text is enhanced by automated RLHF analysis for continuous improvement
+  # AI-NOTE: The reviewer will add a summary of what went well and what could be improved.
+  # This text is the primary source for future learning and template improvements.
   reviewer_summary: |
     - What went well:
       - ...
@@ -917,6 +754,6 @@ evaluation:
   # This is the key to the continuous learning loop.
   template_improvement_suggestions:
     - target_template: 'domain.template.yaml'
-      target_step_id: 'create-use-case-__ACTION_ENTITY_KEBAB_CASE__'
+      target_step_id: 'create-use-case-get-user-profile'
       suggestion: 'The generated mock data was too simplistic. The template should be updated to include more realistic data generation.'
       priority: 'medium'

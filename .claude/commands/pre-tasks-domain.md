@@ -10,6 +10,25 @@ The Domain Layer is the CORE of Clean Architecture and MUST remain:
 
 Remember: Domain defines WHAT, not HOW!
 
+## 🤖 INTELLIGENT RLHF SCORING SYSTEM
+
+The system uses automated scoring to ensure quality:
+
+### Score Levels:
+- **-2 (CATASTROPHIC)**: Architecture violations, wrong REPLACE/WITH format
+- **-1 (RUNTIME ERROR)**: Lint failures, test failures, git operations
+- **0 (LOW CONFIDENCE)**: System uncertain, prevents hallucinations
+- **+1 (GOOD)**: Complete but missing DDD elements
+- **+2 (PERFECT)**: Exceptional with Clean Architecture + DDD
+
+### 🏆 How to Achieve +2 Score:
+1. **Define Ubiquitous Language** explicitly
+2. **Use Domain-Driven Design** principles
+3. **Apply Clean Architecture** concepts
+4. **Reference patterns**: Aggregate Root, Value Objects, Domain Events
+5. **Perfect naming**: Use business vocabulary consistently
+6. **Document domain concepts** with @domainConcept tags
+
 ## 1. Your Deliverable
 
 Your **only** output for this task is a single, complete, and well-formed **JSON object**. This JSON will serve as the input for the `/tasks-domain` command, which will then generate the final YAML plan.
@@ -29,19 +48,23 @@ Your goal is to transform a high-level, conceptual feature request into a detail
 
 ## 5. Step-by-Step Execution Plan
 
-### Step 1: Deconstruct Request & Establish Ubiquitous Language
+### Step 1: Deconstruct Request & Establish Ubiquitous Language 🏆
+
+**CRITICAL FOR +2 SCORE: Ubiquitous Language is the foundation of DDD**
 
 **Identify Core Domain Concepts:**
 
 - Extract the core concepts and entities from the `UserInput`
 - Determine if the request is for a **new feature** or a **modification**
-- **Establish Ubiquitous Language:**
+- **Establish Ubiquitous Language:** (ESSENTIAL FOR +2 SCORE)
   - List all domain terms that will be used
   - Ensure consistent naming across the entire feature
   - Map business terms to technical terms
   - Document any domain-specific terminology
+  - Define each term with business context
+  - Ensure alignment with stakeholder vocabulary
 
-**Ubiquitous Language Checklist:**
+**Ubiquitous Language Checklist for +2 Score:**
 
 - [ ] All entity names match business vocabulary
 - [ ] Use case names reflect business operations
@@ -49,6 +72,9 @@ Your goal is to transform a high-level, conceptual feature request into a detail
 - [ ] No technical jargon in domain terminology
 - [ ] Consistent plural/singular usage
 - [ ] No abbreviations unless part of business language
+- [ ] Each term has a clear business definition
+- [ ] Terms are used consistently throughout
+- [ ] Language is validated with domain experts
 
 ### Step 2: External Research - Domain Layer Specific (The "What")
 
@@ -199,33 +225,58 @@ Before synthesizing the JSON, validate against these CRITICAL rules:
 
 ## 6. Examples of Correct Domain Patterns
 
-### ✅ CORRECT Use Case (Interface Only):
+### ✅ CORRECT Use Case for +2 Score (Interface with Domain Concepts):
 
 ```typescript
+/**
+ * CreateUser use case interface
+ * @domainConcept User Registration - Core business operation
+ * @pattern Command Pattern - Single Responsibility Principle
+ * @layer Domain Layer - Framework agnostic business interface
+ */
 export interface CreateUser {
+  /**
+   * Execute user creation following business rules
+   * @throws UserAlreadyExistsError when email is taken
+   * @throws InvalidUserDataError when business rules violated
+   */
   execute(input: CreateUserInput): Promise<CreateUserOutput>;
 }
 
+/**
+ * Input for user creation - represents registration request
+ * @domainConcept Registration Request from bounded context
+ */
 export type CreateUserInput = {
-  email: string;
-  name: string;
-  password: string;
+  email: string;      // Business identifier for user
+  name: string;       // User's display name in system
+  password: string;   // Authentication credential
 };
 
+/**
+ * Output representing successfully created user
+ * @domainConcept User Aggregate in the system
+ */
 export type CreateUserOutput = {
-  id: string;
-  email: string;
-  name: string;
-  createdAt: Date;
+  id: string;         // System-generated unique identifier
+  email: string;      // Confirmed business identifier
+  name: string;       // Stored display name
+  createdAt: Date;    // Domain event timestamp
 };
 ```
 
-### ✅ CORRECT Error:
+### ✅ CORRECT Error for +2 Score:
 
 ```typescript
+/**
+ * Domain error for user not found scenario
+ * @domainConcept User existence validation in bounded context
+ * @pattern Domain Error - Clean Architecture principle
+ */
 export class UserNotFoundError extends Error {
   constructor(userId: string) {
-    super(`User with id ${userId} not found`);
+    // Business-friendly message using ubiquitous language
+    super(`User with identifier ${userId} does not exist in the system`);
     this.name = "UserNotFoundError";
   }
 }
@@ -494,12 +545,15 @@ Your final JSON must follow this structure with COMPLETE examples:
 3. **The `<<<WITH>>>` block contains the new code to replace it**
 4. **Multiple refactors to the same file should be separate steps**
 
-### Important Notes:
+### Important Notes for +2 Score:
 
-- **ubiquitousLanguage field is OPTIONAL** - Include it when establishing domain vocabulary is important
+- **ubiquitousLanguage field is RECOMMENDED** - Include it for +2 RLHF score
 - **Placeholders are REQUIRED** for use cases and test helpers to maintain pipeline compatibility
 - **The validate-domain-json phase will check for these placeholders**
 - **The tasks-domain phase will replace placeholders with actual values**
+- **Add @domainConcept tags** in templates for higher scores
+- **Use business vocabulary** consistently for perfect execution
+- **Document patterns used** (@pattern tags) for Clean Architecture bonus
 
 ## 9. Final Validation Checklist
 
@@ -539,17 +593,37 @@ Before outputting the JSON, verify:
 - [ ] Interface Segregation (focused interfaces)
 - [ ] Dependency Inversion (depend on abstractions)
 
-## 10. Common Mistakes to Avoid
+## 10. Common Mistakes to Avoid (That Lead to Low Scores)
 
-1. **Mixing Layers**: Never include Data or Presentation concerns
-2. **Fat Interfaces**: Keep use cases focused on ONE operation
-3. **Implementation Leak**: No logic, only contracts
-4. **External Dependencies**: Domain must be pure TypeScript
-5. **Inconsistent Language**: Always use established domain terms
-6. **Technical Names**: Use business vocabulary, not technical
-7. **Multiple Responsibilities**: One use case = one business operation
-8. **Validation in Domain**: Validation belongs in Presentation layer
+### Mistakes that cause -2 (CATASTROPHIC):
+1. **Wrong REPLACE/WITH format**: Missing or incorrect template blocks
+2. **Architecture violations**: Importing from other layers
+3. **External dependencies**: Using libraries in domain
+
+### Mistakes that cause -1 (RUNTIME ERROR):
+4. **Invalid TypeScript**: Syntax errors in templates
+5. **Missing required fields**: Incomplete type definitions
+6. **Incorrect naming**: Not following conventions
+
+### Mistakes that cause 0 (LOW CONFIDENCE):
+7. **Unclear domain concepts**: Vague or ambiguous terms
+8. **Missing references**: No context7 or serena analysis
+
+### Mistakes that prevent +2 (PERFECT):
+9. **No ubiquitous language**: Missing domain vocabulary
+10. **No @domainConcept tags**: Undocumented business concepts
+11. **Technical jargon**: Using tech terms instead of business
+12. **Missing patterns**: Not referencing DDD/Clean Architecture
 
 ---
 
-**Remember**: The Domain Layer is the heart of your application. It should be so pure that it could be lifted and placed in any other application using different frameworks, databases, or UI technologies without any modifications.
+## 🏆 Pro Tips for +2 Score:
+
+1. **Always define ubiquitousLanguage** with clear business definitions
+2. **Use @domainConcept tags** in all templates
+3. **Reference DDD patterns** explicitly (@pattern tags)
+4. **Maintain Clean Architecture** principles strictly
+5. **Document business rules** in comments using domain language
+6. **Ensure perfect naming** following business vocabulary
+
+**Remember**: The Domain Layer is the heart of your application. With proper ubiquitous language and Clean Architecture, you can achieve a perfect +2 RLHF score!
