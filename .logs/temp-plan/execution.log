@@ -166,3 +166,7 @@ exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,out
  create mode 100644 src/features/user-profile/domain/test/mock-get-user-profile-use-case.ts
 [2025-09-16T11:53:44.336Z] ✅ Successfully committed
 [2025-09-16T11:53:44.336Z] --- Script finished successfully ---
+[2025-09-16T19:27:14.909Z] --- Running validation script for 'create-structure' ---
+[2025-09-16T19:27:14.921Z] ✅ Verifying folder structure...
+[2025-09-16T19:27:14.921Z] ✅ Folders exist.
+📦 Staging changes...

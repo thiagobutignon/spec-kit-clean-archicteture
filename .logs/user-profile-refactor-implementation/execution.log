@@ -90,3 +90,8 @@ exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,out
 [2025-09-16T12:12:47.547Z] Done in 0.47s.
 [2025-09-16T12:12:47.553Z] ✅ Tests passed
 📦 Staging changes...
+[2025-09-16T12:12:47.570Z] 💾 Creating commit...
+[2025-09-16T12:12:47.593Z] [main 237118c] test(user-profile): update mock to include nickname field
+ 16 files changed, 346 insertions(+), 239 deletions(-)
+[2025-09-16T12:12:47.593Z] ✅ Successfully committed
+[2025-09-16T12:12:47.594Z] --- Script finished successfully ---

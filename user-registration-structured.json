@@ -1,0 +1,137 @@
+{
+  "feature": "user-registration",
+  "useCases": [
+    {
+      "name": "RegisterUser",
+      "description": "Registers a new user in the system",
+      "input": [
+        {
+          "name": "email",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "firstName",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "lastName",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "output": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "firstName",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "lastName",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "createdAt",
+          "type": "Date",
+          "required": true
+        }
+      ],
+      "mockInput": {
+        "email": "newuser@example.com",
+        "password": "SecurePass123!",
+        "firstName": "Jane",
+        "lastName": "Smith"
+      },
+      "mockOutput": {
+        "id": "user-456",
+        "email": "newuser@example.com",
+        "firstName": "Jane",
+        "lastName": "Smith",
+        "createdAt": "new Date('2024-01-01T00:00:00Z')"
+      }
+    },
+    {
+      "name": "SendWelcomeEmail",
+      "description": "Sends a welcome email to newly registered users",
+      "input": [
+        {
+          "name": "userId",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "firstName",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "output": [
+        {
+          "name": "emailId",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "sentAt",
+          "type": "Date",
+          "required": true
+        },
+        {
+          "name": "status",
+          "type": "'sent' | 'queued' | 'failed'",
+          "required": true
+        }
+      ],
+      "mockInput": {
+        "userId": "user-456",
+        "email": "newuser@example.com",
+        "firstName": "Jane"
+      },
+      "mockOutput": {
+        "emailId": "email-789",
+        "sentAt": "new Date('2024-01-01T00:01:00Z')",
+        "status": "'sent'"
+      }
+    }
+  ],
+  "errors": [
+    {
+      "name": "UserAlreadyExistsError",
+      "message": "A user with this email already exists"
+    },
+    {
+      "name": "InvalidEmailError",
+      "message": "The provided email address is not valid"
+    },
+    {
+      "name": "WeakPasswordError",
+      "message": "Password must be at least 8 characters long and contain uppercase, lowercase, number and special character"
+    },
+    {
+      "name": "EmailSendFailedError",
+      "message": "Failed to send email notification"
+    }
+  ]
+}
