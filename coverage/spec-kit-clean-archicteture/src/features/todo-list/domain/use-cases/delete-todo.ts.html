@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases/list-todos.ts</title>
+    <title>Code coverage report for spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases/delete-todo.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../../../../../prettify.css" />
     <link rel="stylesheet" href="../../../../../../base.css" />
@@ -19,7 +19,7 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../../../../../index.html">All files</a> / <a href="index.html">spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases</a> list-todos.ts</h1>
+        <h1><a href="../../../../../../index.html">All files</a> / <a href="index.html">spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases</a> delete-todo.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
@@ -90,23 +90,7 @@
 <a name='L25'></a><a href='#L25'>25</a>
 <a name='L26'></a><a href='#L26'>26</a>
 <a name='L27'></a><a href='#L27'>27</a>
-<a name='L28'></a><a href='#L28'>28</a>
-<a name='L29'></a><a href='#L29'>29</a>
-<a name='L30'></a><a href='#L30'>30</a>
-<a name='L31'></a><a href='#L31'>31</a>
-<a name='L32'></a><a href='#L32'>32</a>
-<a name='L33'></a><a href='#L33'>33</a>
-<a name='L34'></a><a href='#L34'>34</a>
-<a name='L35'></a><a href='#L35'>35</a>
-<a name='L36'></a><a href='#L36'>36</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L28'></a><a href='#L28'>28</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -134,39 +118,31 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
- * Input parameters for ListTodosUseCase
+ * Input parameters for DeleteTodoUseCase
  */
-export type ListTodosInput = {
+export type DeleteTodoInput = {
   tenantId: string
-  completed?: boolean
+  todoId: string
 }
 &nbsp;
 /**
- * Output type for ListTodosUseCase
+ * Output type for DeleteTodoUseCase
  */
-export type ListTodosOutput = {
-  todos: Array&lt;{
-    id: string
-    tenantId: string
-    title: string
-    description?: string
-    completed: boolean
-    createdAt: Date
-    updatedAt?: Date
-  }&gt;
+export type DeleteTodoOutput = {
+  success: boolean
 }
 &nbsp;
 /**
- * ListTodosUseCase interface
- * @description Lists all todo items for a specific tenant
+ * DeleteTodoUseCase interface
+ * @description Deletes a todo item for a specific tenant
  */
-export interface ListTodosUseCase {
+export interface DeleteTodoUseCase {
   /**
-   * Execute the list todos operation
+   * Execute the delete todo operation
    * @param input - The input parameters
    * @returns Promise with the operation output
    */
-  execute: (input: ListTodosInput) =&gt; Promise&lt;ListTodosOutput&gt;
+  execute: (input: DeleteTodoInput) =&gt; Promise&lt;DeleteTodoOutput&gt;
 }
 &nbsp;</pre></td></tr></table></pre>
 
