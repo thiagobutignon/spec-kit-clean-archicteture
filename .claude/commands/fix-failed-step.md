@@ -1,5 +1,14 @@
 # Task: Fix a Failed Step in an Implementation Plan
 
+## 🤖 RLHF Scoring Awareness
+
+When fixing failed steps, understand the RLHF score impact:
+- **-2 (CATASTROPHIC)**: Architecture violations, wrong REPLACE/WITH format
+- **-1 (RUNTIME ERROR)**: The current failure level - lint/test/git failures
+- **0 (LOW CONFIDENCE)**: Missing references or unclear fixes
+- **+1 (GOOD)**: Valid fix but could be improved
+- **+2 (PERFECT)**: Fix that includes domain documentation and best practices
+
 ## 1. Your Objective
 
 Your goal is to analyze a failed step in a YAML implementation plan and generate a **new step** to correct the issue.
@@ -12,6 +21,7 @@ You will be given the entire content of a YAML file that has one or more steps w
 
 1.  **Identify the Failure:** Find the last step in the file with `status: 'FAILED'`.
 2.  **Analyze the Error:** Read the `execution_log` of the failed step to understand the root cause of the failure (e.g., linting error, test failure, commit error, branch conflict, PR creation failure).
+    - Check the `rlhf_score` to understand severity (-2 for catastrophic, -1 for runtime errors).
 3.  **Analyze the Step Type:** Check if it's a regular step (`create_file`, `refactor_file`) or a workflow step (`branch`, `pull_request`).
 4.  **Formulate a Correction:** Based on your analysis, decide on the best course of action:
 
@@ -25,7 +35,7 @@ You will be given the entire content of a YAML file that has one or more steps w
     b. **PR failures:** Create a fix step to push missing commits or fix PR configuration.
     c. **Permission issues:** Add a step to configure git credentials or permissions.
 
-5.  **Generate the Fix Step:**
+5.  **Generate the Fix Step (Aim for RLHF +2):**
     a. Create a **new step object** in the YAML structure.
     b. The new step's `id` should be descriptive, like `fix-for-[id-of-failed-step]`.
     c. The `type` of the new step should be appropriate for the fix:
@@ -34,7 +44,8 @@ You will be given the entire content of a YAML file that has one or more steps w
     d. Populate the appropriate fields based on step type:
        - For file steps: `path` and `template`
        - For branch/PR steps: `action` with appropriate configuration
-    e. Populate the `references` section to explain _why_ this fix is correct.
+    e. **CRITICAL for RLHF +1/+2**: Populate the `references` section to explain _why_ this fix is correct.
+    f. **For RLHF +2**: If fixing domain code, include JSDoc comments with `@domainConcept` tags.
 6.  **Append the New Step:** Add the newly generated step object to the **end of the `steps` array** in the YAML file.
 7.  **Do Not Modify the Failed Step:** The original step with `status: 'FAILED'` **MUST** remain in the file untouched as a historical record.
 
@@ -58,11 +69,13 @@ You will be given the entire content of a YAML file that has one or more steps w
 
 ### Code Step Failures
 
-| Error | Likely Cause | Fix Strategy |
-|-------|--------------|--------------|
-| "lint errors" | Code style issues | Refactor file with fixes |
-| "type errors" | TypeScript issues | Fix type definitions |
-| "test failures" | Breaking changes | Update test or implementation |
+| Error | Likely Cause | Fix Strategy | RLHF Impact |
+|-------|--------------|--------------|-------------|
+| "lint errors" | Code style issues | Refactor file with fixes | -1 → +1 |
+| "type errors" | TypeScript issues | Fix type definitions | -1 → +1 |
+| "test failures" | Breaking changes | Update test or implementation | -1 → +1 |
+| "import violation" | External deps in domain | Remove external dependencies | -2 → +2 |
+| "REPLACE/WITH syntax" | Wrong template format | Fix template syntax | -2 → +1 |
 
 ## 5. Example Fix Steps
 
@@ -122,14 +135,14 @@ If the PR step failed because GitHub CLI is not installed:
       description: 'GitHub CLI not available, using git push with manual PR instructions'
 ```
 
-### Example 3: Fixing a Failed Code Step (Lint Error)
+### Example 3: Fixing a Failed Code Step (Lint Error - Aiming for RLHF +2)
 
 If a create_file step failed due to lint errors:
 
 ```yaml
 - id: 'fix-for-create-use-case-get-user'
   type: 'refactor_file'
-  description: 'Fix lint errors in GetUser use case'
+  description: 'Fix lint errors in GetUser use case with domain documentation'
   status: 'PENDING'
   rlhf_score: null
   execution_log: ''
@@ -141,6 +154,11 @@ If a create_file step failed due to lint errors:
     }
     <<</REPLACE>>>
     <<<WITH>>>
+    /**
+     * @domainConcept User Retrieval
+     * @pattern Use Case Interface
+     * @description Retrieves user information from the domain
+     */
     export interface GetUser {
       execute(input: GetUserInput): Promise<GetUserOutput>;
     }
@@ -148,11 +166,56 @@ If a create_file step failed due to lint errors:
   validation_script: |
     echo "🔍 Running lint check..."
     yarn lint
-    # ... rest of validation
+    echo "✅ Lint check passed"
+    echo "🏆 Added domain documentation for RLHF +2 score"
   references:
     - type: 'internal_correction'
       source: 'self'
       description: 'Added missing semicolon to fix lint error'
+    - type: 'quality_improvement'
+      source: 'ddd_best_practices'
+      description: 'Added JSDoc with @domainConcept for RLHF +2 score'
+```
+
+### Example 4: Fixing a Catastrophic Error (RLHF -2)
+
+If a step failed due to architecture violation:
+
+```yaml
+- id: 'fix-for-create-use-case-with-axios'
+  type: 'refactor_file'
+  description: 'Remove external dependency from domain layer'
+  status: 'PENDING'
+  rlhf_score: null
+  execution_log: ''
+  path: 'src/features/user/domain/use-cases/fetch-user.ts'
+  template: |
+    <<<REPLACE>>>
+    import axios from 'axios';
+
+    export interface FetchUser {
+      execute(input: FetchUserInput): Promise<FetchUserOutput>;
+    }
+    <<</REPLACE>>>
+    <<<WITH>>>
+    /**
+     * @domainConcept User Fetching
+     * @pattern Clean Architecture - Domain Layer
+     * @principle No external dependencies in domain
+     */
+    export interface FetchUser {
+      execute(input: FetchUserInput): Promise<FetchUserOutput>;
+    }
+    <<</WITH>>>
+  validation_script: |
+    echo "🏗️ Verifying Clean Architecture compliance..."
+    grep -r "import.*from.*axios" src/features/*/domain/ && echo "❌ Found axios in domain" && exit 1
+    echo "✅ Domain layer is clean - no external dependencies"
+    echo "🏆 Architecture violation fixed for RLHF +2 score"
+  references:
+    - type: 'architecture_fix'
+      source: 'clean_architecture'
+      description: 'Removed axios import - external deps not allowed in domain layer (was RLHF -2)'
 ```
 
 ## 6. Your Deliverable
