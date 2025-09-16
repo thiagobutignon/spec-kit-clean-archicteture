@@ -4,6 +4,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as yaml from 'yaml';
 import { createHash } from 'crypto';
+import chalk from 'chalk';
 import Logger from './logger';
 
 /**
@@ -58,13 +59,18 @@ class RLHFSystem {
   private improvementsFile = path.join(this.dataDir, 'improvements.json');
   private logger: Logger;
   private patternCache = new Map<string, { result: any; timestamp: number }>();
-  private cacheExpiry = 5 * 60 * 1000; // 5 minutes cache
+  private cacheExpiry: number;
+  private maxCacheSize = 100; // Maximum cache entries
+  private cacheStats = { hits: 0, misses: 0, evictions: 0 };
   private progressCallback?: (message: string, percentage: number) => void;
+  private progressFile = path.join(this.dataDir, 'progress.json');
 
-  constructor() {
+  constructor(cacheExpiry?: number) {
     fs.ensureDirSync(this.dataDir);
     const logDir = path.join(this.dataDir, 'logs');
     this.logger = new Logger(logDir);
+    this.cacheExpiry = cacheExpiry || 5 * 60 * 1000; // Default 5 minutes
+    this.setupCleanupHandlers();
   }
 
   /**
@@ -581,13 +587,24 @@ class RLHFSystem {
   private getCachedResult(key: string): any | null {
     const cached = this.patternCache.get(key);
     if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
+      this.cacheStats.hits++;
       return cached.result;
     }
-    this.patternCache.delete(key); // Remove expired cache
+    this.cacheStats.misses++;
+    if (cached) {
+      this.patternCache.delete(key); // Remove expired cache
+    }
     return null;
   }
 
   private setCachedResult(key: string, result: any): void {
+    // Implement LRU eviction if cache is too large
+    if (this.patternCache.size >= this.maxCacheSize) {
+      const firstKey = this.patternCache.keys().next().value;
+      this.patternCache.delete(firstKey);
+      this.cacheStats.evictions++;
+    }
+
     this.patternCache.set(key, {
       result,
       timestamp: Date.now()
@@ -601,6 +618,10 @@ class RLHFSystem {
     if (this.progressCallback) {
       this.progressCallback(message, percentage);
     }
+
+    // Save progress for resumability
+    this.saveProgress(message, percentage);
+
     // Visual progress bar in console
     const barLength = 30;
     const filled = Math.round((percentage / 100) * barLength);
@@ -608,11 +629,57 @@ class RLHFSystem {
     process.stdout.write(`\r[${bar}] ${percentage}% - ${message}`);
     if (percentage === 100) {
       console.log(); // New line when complete
+      // Clean up progress file on completion
+      if (fs.existsSync(this.progressFile)) {
+        fs.removeSync(this.progressFile);
+      }
     }
+  }
+
+  private saveProgress(message: string, percentage: number): void {
+    try {
+      fs.writeJsonSync(this.progressFile, {
+        message,
+        percentage,
+        timestamp: Date.now(),
+        cacheStats: this.cacheStats
+      });
+    } catch (error) {
+      // Silently fail if can't save progress
+    }
+  }
+
+  private setupCleanupHandlers(): void {
+    // Clean up on exit
+    process.on('SIGINT', () => {
+      console.log('\n\nCleaning up...');
+      this.logCacheStats();
+      this.close();
+      process.exit(0);
+    });
+
+    process.on('SIGTERM', () => {
+      this.logCacheStats();
+      this.close();
+      process.exit(0);
+    });
+  }
+
+  private logCacheStats(): void {
+    console.log(chalk.gray(`\n📊 Cache Statistics:`));
+    console.log(chalk.gray(`   Hits: ${this.cacheStats.hits}`));
+    console.log(chalk.gray(`   Misses: ${this.cacheStats.misses}`));
+    console.log(chalk.gray(`   Evictions: ${this.cacheStats.evictions}`));
+    const hitRate = this.cacheStats.hits / (this.cacheStats.hits + this.cacheStats.misses) * 100;
+    console.log(chalk.gray(`   Hit Rate: ${hitRate.toFixed(1)}%`));
   }
 
   public setProgressCallback(callback: (message: string, percentage: number) => void): void {
     this.progressCallback = callback;
+  }
+
+  public getCacheStatistics(): typeof this.cacheStats {
+    return { ...this.cacheStats };
   }
 }
 
