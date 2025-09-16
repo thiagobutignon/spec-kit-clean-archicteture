@@ -554,3 +554,64 @@ exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,out
 [2025-09-16T19:27:23.926Z] Done in 0.48s.
 [2025-09-16T19:27:23.931Z] ✅ Tests passed
 📦 Staging changes...
+[2025-09-16T19:27:23.955Z] 💾 Creating commit...
+[2025-09-16T19:27:23.982Z] [main db2f682] test(user-registration): add register-user use case test helpers
+ 26 files changed, 524 insertions(+), 30 deletions(-)
+ create mode 100644 coverage/spec-kit-clean-archicteture/src/features/user-registration/domain/test/index.html
+ create mode 100644 coverage/spec-kit-clean-archicteture/src/features/user-registration/domain/test/mock-register-user-use-case.ts.html
+ create mode 100644 src/features/user-registration/domain/test/mock-register-user-use-case.ts
+[2025-09-16T19:27:23.983Z] ✅ Successfully committed
+[2025-09-16T19:27:23.983Z] --- Script finished successfully ---
+[2025-09-16T19:27:23.986Z] --- Running validation script for 'create-test-helper-send-welcome-email' ---
+[2025-09-16T19:27:23.993Z] 🔍 Running lint check...
+[2025-09-16T19:27:24.072Z] yarn run v1.22.22
+[2025-09-16T19:27:24.082Z] [ERROR] warning ../../package.json: No license field
+[2025-09-16T19:27:24.086Z] $ eslint .
+[2025-09-16T19:27:24.626Z] /Users/thiagobutignon/dev/spec-kit-clean-archicteture/coverage/block-navigation.js
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+✖ 1 problem (0 errors, 1 warning)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+[2025-09-16T19:27:24.636Z] Done in 0.56s.
+[2025-09-16T19:27:24.642Z] ✅ Lint passed
+🧪 Running tests with coverage...
+[2025-09-16T19:27:24.715Z] yarn run v1.22.22
+[2025-09-16T19:27:24.726Z] [ERROR] warning ../../package.json: No license field
+[2025-09-16T19:27:24.730Z] $ vitest --passWithNoTests --coverage
+[2025-09-16T19:27:25.064Z] 
+[2025-09-16T19:27:25.064Z] RUN  v3.2.4 /Users/thiagobutignon/dev/spec-kit-clean-archicteture
+      Coverage enabled with v8
+[2025-09-16T19:27:25.140Z] No test files found, exiting with code 0
+[2025-09-16T19:27:25.140Z] [ERROR] include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+[2025-09-16T19:27:25.140Z] [ERROR] 
+[2025-09-16T19:27:25.140Z] % Coverage report from v8
+[2025-09-16T19:27:25.142Z] -------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T19:27:25.142Z] File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T19:27:25.143Z] All files          |       0 |    71.42 |   71.42 |       0 |
+[2025-09-16T19:27:25.143Z] ...n-archicteture |       0 |    66.66 |   66.66 |       0 |
+[2025-09-16T19:27:25.143Z] execute-steps.ts |       0 |      100 |     100 |       0 | 3-265
+[2025-09-16T19:27:25.143Z] logger.ts        |       0 |        0 |       0 |       0 | 1-46
+[2025-09-16T19:27:25.143Z] ...ementation.ts |       0 |      100 |     100 |       0 | 3-293
+[2025-09-16T19:27:25.143Z] .../domain/errors |       0 |      100 |     100 |       0 |
+[2025-09-16T19:27:25.143Z] ...-not-found.ts |       0 |      100 |     100 |       0 | 5-10              
+ ...le/domain/test |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:25.143Z] ...e-use-case.ts |       0 |        0 |       0 |       0 | 1-30
+[2025-09-16T19:27:25.143Z] ...main/use-cases |       0 |        0 |       0 |       0 |                   
+  ...er-profile.ts |       0 |        0 |       0 |       0 |                   
+ .../domain/errors |       0 |      100 |     100 |       0 |                   
+  ...end-failed.ts |       0 |      100 |     100 |       0 | 5-10
+[2025-09-16T19:27:25.143Z] invalid-email.ts |       0 |      100 |     100 |       0 | 5-10              
+  ...ady-exists.ts |       0 |      100 |     100 |       0 | 5-10              
+  weak-password.ts |       0 |      100 |     100 |       0 | 5-10              
+ ...on/domain/test |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:25.143Z] ...r-use-case.ts |       0 |        0 |       0 |       0 | 1-33              
+  ...l-use-case.ts |       0 |        0 |       0 |       0 | 1-30              
+ ...main/use-cases |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:25.143Z] register-user.ts |       0 |        0 |       0 |       0 |                   
+  ...come-email.ts |       0 |        0 |       0 |       0 |                   
+-------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T19:27:25.197Z] Done in 0.48s.
+[2025-09-16T19:27:25.202Z] ✅ Tests passed
+📦 Staging changes...
