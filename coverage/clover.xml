@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1758050842621" clover="3.2.0">
-  <project timestamp="1758050842621" name="All files">
-    <metrics statements="451" coveredstatements="0" conditionals="12" coveredconditionals="10" methods="12" coveredmethods="10" elements="475" coveredelements="20" complexity="0" loc="451" ncloc="451" packages="6" files="12" classes="12"/>
+<coverage generated="1758050843886" clover="3.2.0">
+  <project timestamp="1758050843886" name="All files">
+    <metrics statements="468" coveredstatements="0" conditionals="13" coveredconditionals="10" methods="13" coveredmethods="10" elements="494" coveredelements="20" complexity="0" loc="468" ncloc="468" packages="7" files="13" classes="13"/>
     <package name="spec-kit-clean-archicteture">
       <metrics statements="407" coveredstatements="0" conditionals="3" coveredconditionals="2" methods="3" coveredmethods="2"/>
       <file name="execute-steps.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/execute-steps.ts">
@@ -496,6 +496,29 @@
         <line num="8" count="0" type="stmt"/>
         <line num="9" count="0" type="stmt"/>
         <line num="10" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="spec-kit-clean-archicteture.src.features.user-registration.domain.test">
+      <metrics statements="17" coveredstatements="0" conditionals="1" coveredconditionals="0" methods="1" coveredmethods="0"/>
+      <file name="mock-register-user-use-case.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/user-registration/domain/test/mock-register-user-use-case.ts">
+        <metrics statements="17" coveredstatements="0" conditionals="1" coveredconditionals="0" methods="1" coveredmethods="0"/>
+        <line num="1" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="8" count="0" type="stmt"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="10" count="0" type="stmt"/>
+        <line num="11" count="0" type="stmt"/>
+        <line num="12" count="0" type="stmt"/>
+        <line num="13" count="0" type="stmt"/>
+        <line num="19" count="0" type="stmt"/>
+        <line num="20" count="0" type="stmt"/>
+        <line num="21" count="0" type="stmt"/>
+        <line num="22" count="0" type="stmt"/>
+        <line num="23" count="0" type="stmt"/>
+        <line num="24" count="0" type="stmt"/>
+        <line num="25" count="0" type="stmt"/>
+        <line num="31" count="0" type="stmt"/>
+        <line num="32" count="0" type="stmt"/>
+        <line num="33" count="0" type="stmt"/>
       </file>
     </package>
     <package name="spec-kit-clean-archicteture.src.features.user-registration.domain.use-cases">
