@@ -316,40 +316,190 @@ export const calculatePrice = (input: CalculatePriceInput): number => {
 
 ## 8. JSON Output Structure
 
-Your final JSON must follow this structure:
+Your final JSON must follow this structure with COMPLETE examples:
+
+### Example 1: Creating New Files (with Placeholders)
 
 ```json
 {
   "featureName": "UserRegistration",
   "ubiquitousLanguage": {
-    "term1": "definition1",
-    "term2": "definition2"
+    "Registration": "The process of creating a new user account",
+    "WelcomeEmail": "Initial email sent after successful registration"
   },
   "steps": [
     {
+      "id": "create-register-user-use-case",
       "type": "create_file",
+      "description": "Create RegisterUser use case interface",
       "path": "src/features/user-registration/domain/use-cases/register-user.ts",
-      "template": "// Interface-only template",
+      "template": "export interface RegisterUser {\n  execute(input: RegisterUserInput): Promise<RegisterUserOutput>;\n}\n\nexport type RegisterUserInput = {\n  __USE_CASE_INPUT_FIELDS__\n};\n\nexport type RegisterUserOutput = {\n  __USE_CASE_OUTPUT_FIELDS__\n};",
+      "input": [
+        { "name": "email", "type": "string" },
+        { "name": "password", "type": "string" },
+        { "name": "name", "type": "string" }
+      ],
+      "output": [
+        { "name": "id", "type": "string" },
+        { "name": "email", "type": "string" },
+        { "name": "name", "type": "string" },
+        { "name": "createdAt", "type": "Date" }
+      ],
       "references": [
         {
           "type": "external_pattern",
           "source": "context7",
-          "query": "DDD user registration",
-          "url": "https://...",
+          "query": "DDD user registration domain patterns",
+          "url": "https://example.com/ddd-patterns",
           "description": "Domain pattern for user registration"
-        },
+        }
+      ]
+    },
+    {
+      "id": "create-register-user-test-helper",
+      "type": "create_file",
+      "description": "Create test helper for RegisterUser use case",
+      "path": "src/features/user-registration/domain/use-cases/__test-helpers__/register-user.ts",
+      "template": "export const mockRegisterUser = (): RegisterUser => ({\n  execute: jest.fn().mockResolvedValue({\n    __MOCK_OUTPUT_DATA__\n  })\n});",
+      "mockInput": {
+        "email": "john@example.com",
+        "password": "securePassword123",
+        "name": "John Doe"
+      },
+      "mockOutput": {
+        "id": "user-123",
+        "email": "john@example.com",
+        "name": "John Doe",
+        "createdAt": "new Date('2024-01-01')"
+      },
+      "references": []
+    },
+    {
+      "id": "create-user-already-exists-error",
+      "type": "create_file",
+      "description": "Create UserAlreadyExists domain error",
+      "path": "src/features/user-registration/domain/errors/user-already-exists.ts",
+      "template": "export class UserAlreadyExistsError extends Error {\n  constructor(email: string) {\n    super(`User with email ${email} already exists`);\n    this.name = 'UserAlreadyExistsError';\n  }\n}",
+      "references": []
+    }
+  ]
+}
+```
+
+### Example 2: Refactoring Existing Files
+
+```json
+{
+  "featureName": "UserProfile",
+  "ubiquitousLanguage": {
+    "Nickname": "Optional display name chosen by the user",
+    "ProfileUpdate": "Modification of existing user information"
+  },
+  "steps": [
+    {
+      "id": "refactor-update-user-input",
+      "type": "refactor_file",
+      "description": "Add nickname field to UpdateUserInput type",
+      "path": "src/features/user-profile/domain/use-cases/update-user.ts",
+      "template": "<<<REPLACE>>>\nexport type UpdateUserInput = {\n  firstName?: string;\n  lastName?: string;\n};\n<<</REPLACE>>>\n<<<WITH>>>\nexport type UpdateUserInput = {\n  firstName?: string;\n  lastName?: string;\n  nickname?: string;\n};\n<<</WITH>>>",
+      "references": [
         {
           "type": "internal_code_analysis",
           "source": "serena",
           "tool": "find_symbol",
-          "query": "existing use case pattern",
-          "description": "Following existing conventions"
+          "query": "UpdateUserInput",
+          "description": "Located UpdateUserInput type for modification"
+        }
+      ]
+    },
+    {
+      "id": "refactor-update-user-output",
+      "type": "refactor_file",
+      "description": "Add nickname to UpdateUserOutput type",
+      "path": "src/features/user-profile/domain/use-cases/update-user.ts",
+      "template": "<<<REPLACE>>>\nexport type UpdateUserOutput = {\n  id: string;\n  firstName: string;\n  lastName: string;\n  updatedAt: Date;\n};\n<<</REPLACE>>>\n<<<WITH>>>\nexport type UpdateUserOutput = {\n  id: string;\n  firstName: string;\n  lastName: string;\n  nickname?: string;\n  updatedAt: Date;\n};\n<<</WITH>>>",
+      "references": []
+    },
+    {
+      "id": "create-nickname-too-long-error",
+      "type": "create_file",
+      "description": "Create NicknameTooLong domain error",
+      "path": "src/features/user-profile/domain/errors/nickname-too-long.ts",
+      "template": "export class NicknameTooLongError extends Error {\n  constructor(maxLength: number) {\n    super(`Nickname must not exceed ${maxLength} characters`);\n    this.name = 'NicknameTooLongError';\n  }\n}",
+      "references": [
+        {
+          "type": "external_pattern",
+          "source": "context7",
+          "query": "domain validation errors DDD",
+          "url": "https://example.com/validation-patterns",
+          "description": "Standard practice for domain validation errors"
         }
       ]
     }
   ]
 }
 ```
+
+### Example 3: Complex Refactoring with Multiple Changes
+
+```json
+{
+  "featureName": "OrderManagement",
+  "ubiquitousLanguage": {
+    "OrderCancellation": "The process of voiding an existing order",
+    "RefundPolicy": "Rules governing money return after cancellation"
+  },
+  "steps": [
+    {
+      "id": "refactor-cancel-order-interface",
+      "type": "refactor_file",
+      "description": "Add refund reason to CancelOrder use case",
+      "path": "src/features/order-management/domain/use-cases/cancel-order.ts",
+      "template": "<<<REPLACE>>>\nexport interface CancelOrder {\n  execute(input: CancelOrderInput): Promise<CancelOrderOutput>;\n}\n\nexport type CancelOrderInput = {\n  orderId: string;\n  userId: string;\n};\n<<</REPLACE>>>\n<<<WITH>>>\nexport interface CancelOrder {\n  execute(input: CancelOrderInput): Promise<CancelOrderOutput>;\n}\n\nexport type CancelOrderInput = {\n  orderId: string;\n  userId: string;\n  reason: CancellationReason;\n  refundRequested: boolean;\n};\n\nexport enum CancellationReason {\n  CUSTOMER_REQUEST = 'CUSTOMER_REQUEST',\n  OUT_OF_STOCK = 'OUT_OF_STOCK',\n  PRICING_ERROR = 'PRICING_ERROR',\n  FRAUDULENT = 'FRAUDULENT',\n  OTHER = 'OTHER'\n}\n<<</WITH>>>",
+      "references": [
+        {
+          "type": "internal_code_analysis",
+          "source": "serena",
+          "tool": "find_symbol",
+          "query": "CancelOrderInput",
+          "description": "Located CancelOrderInput for enhancement"
+        },
+        {
+          "type": "external_pattern",
+          "source": "context7",
+          "query": "order cancellation reasons e-commerce",
+          "url": "https://example.com/order-patterns",
+          "description": "Common cancellation reason patterns"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Critical Template Rules:
+
+#### For `create_file` steps:
+1. **Use PLACEHOLDERS in templates** - The template should contain placeholders that will be replaced by the next phase:
+   - `__USE_CASE_INPUT_FIELDS__` - Will be replaced with actual input fields
+   - `__USE_CASE_OUTPUT_FIELDS__` - Will be replaced with actual output fields
+   - `__MOCK_INPUT_DATA__` - Will be replaced with mock input values
+   - `__MOCK_OUTPUT_DATA__` - Will be replaced with mock output values
+2. **Provide field definitions separately** - Use `input`, `output`, `mockInput`, and `mockOutput` arrays/objects
+3. **Exception: Error classes** - Error classes don't use placeholders, provide complete template
+
+#### For `refactor_file` steps:
+1. **Template must use `<<<REPLACE>>>` and `<<<WITH>>>` blocks**
+2. **The `<<<REPLACE>>>` block must match the existing code EXACTLY (including whitespace)**
+3. **The `<<<WITH>>>` block contains the new code to replace it**
+4. **Multiple refactors to the same file should be separate steps**
+
+### Important Notes:
+
+- **ubiquitousLanguage field is OPTIONAL** - Include it when establishing domain vocabulary is important
+- **Placeholders are REQUIRED** for use cases and test helpers to maintain pipeline compatibility
+- **The validate-domain-json phase will check for these placeholders**
+- **The tasks-domain phase will replace placeholders with actual values**
 
 ## 9. Final Validation Checklist
 
