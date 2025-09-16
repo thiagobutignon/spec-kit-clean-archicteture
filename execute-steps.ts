@@ -1,20 +1,19 @@
 #!/usr/bin/env tsx
 
+import crypto from 'crypto'; // Usado para gerar um nome de arquivo único
+import os from 'os'; // Usado para encontrar o diretório temporário do sistema
 import yaml from 'yaml';
-import 'zx/globals'; // Importa $, fs, etc. para o escopo global
+import 'zx/globals';
 
 // Configuração do zx
-$.verbose = true; // Imprime cada comando antes de executá-lo
-$.shell = '/bin/bash'; // Garante que estamos usando bash
+$.verbose = true;
+$.shell = '/bin/bash';
 
 class StepExecutor {
   private implementationData: any;
 
   constructor(private implementationPath: string) {}
 
-  /**
-   * Carrega e parseia o arquivo YAML de implementação.
-   */
   private async loadFile(): Promise<void> {
     console.log(chalk.magenta.bold(`🚀 Loading implementation file: ${this.implementationPath}`));
     try {
@@ -27,9 +26,6 @@ class StepExecutor {
     }
   }
 
-  /**
-   * Executa todos os passos definidos no arquivo YAML em ordem.
-   */
   public async run(): Promise<void> {
     await this.loadFile();
     const steps = this.implementationData?.steps;
@@ -58,9 +54,6 @@ class StepExecutor {
     console.log(chalk.green.bold('\n🎉 All steps completed successfully!'));
   }
 
-  /**
-   * Despacha a execução para o manipulador correto e executa o script de validação.
-   */
   private async executeStep(step: any): Promise<void> {
     if (step.type === 'file') {
       await this.handleFileStep(step);
@@ -73,9 +66,6 @@ class StepExecutor {
     }
   }
 
-  /**
-   * Cria um arquivo com base no template definido no passo.
-   */
   private async handleFileStep(step: any): Promise<void> {
     const { path, template = '' } = step;
     if (!path) throw new Error("File step is missing the 'path' attribute.");
@@ -85,9 +75,6 @@ class StepExecutor {
     await fs.writeFile(path, template);
   }
 
-  /**
-   * Cria as pastas definidas no passo.
-   */
   private async handleFolderStep(step: any): Promise<void> {
     const basePath = step.action?.create_folders?.basePath;
     const folders = step.action?.create_folders?.folders || [];
@@ -101,14 +88,36 @@ class StepExecutor {
   }
 
   /**
-   * Executa um script shell usando zx.
+   * Executa um script shell escrevendo-o em um arquivo temporário e executando esse arquivo.
+   * Esta é a abordagem mais robusta para scripts multi-linha complexos.
    */
   private async runValidationScript(scriptContent: string, stepId: string): Promise<void> {
     console.log(chalk.yellow(`   --- Running validation script for '${stepId}' ---`));
     
-    // zx lida com a execução de scripts multi-linha e streaming de saída nativamente.
-    // O bloco try/catch no método run() irá capturar qualquer falha.
-    await $`${scriptContent}`;
+    // Cria um caminho único para o nosso script temporário
+    const tempScriptPath = path.join(os.tmpdir(), `step-${crypto.randomUUID()}.sh`);
+
+    try {
+      // Normaliza os finais de linha para garantir a compatibilidade
+      const normalizedScript = scriptContent.replace(/\r\n/g, '\n');
+      
+      // Escreve o script no arquivo temporário
+      await fs.writeFile(tempScriptPath, normalizedScript);
+      
+      // Torna o arquivo temporário executável
+      await fs.chmod(tempScriptPath, '755');
+      
+      // Executa o arquivo de script
+      // zx irá transmitir a saída (stdout/stderr) automaticamente
+      await $([tempScriptPath]);
+
+    } finally {
+      // Bloco finally garante que o arquivo temporário seja sempre excluído,
+      // mesmo que o script falhe.
+      if (await fs.pathExists(tempScriptPath)) {
+        await fs.remove(tempScriptPath);
+      }
+    }
     
     console.log(chalk.yellow(`   --- Script finished successfully ---`));
   }
@@ -125,6 +134,5 @@ async function main() {
 }
 
 main().catch(err => {
-  // O erro já é logado dentro do zx, então só precisamos garantir que o processo saia com falha.
   process.exit(1);
 });

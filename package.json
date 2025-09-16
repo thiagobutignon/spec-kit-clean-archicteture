@@ -1,18 +1,22 @@
 {
   "name": "spec-kit-clean-archicteture",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "repository": "git@github.com:thiagobutignon/spec-kit-clean-archicteture.git",
   "author": "Thiago Butignon <thiagobutignon@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "lint": "eslint . --ext .ts",
-    "test": "vitest"
+    "lint": "eslint .",
+    "test": "vitest --passWithNoTests"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.35.0",
+    "globals": "^16.4.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.0",
     "vitest": "^3.2.4",
     "yaml": "^2.8.1",
     "zx": "^8.8.1"
