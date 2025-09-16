@@ -155,9 +155,72 @@ steps:
   - id: create-use-case-get-user-profile
     type: create_file
     description: Create GetUserProfile use case interface
-    status: PENDING
+    status: SUCCESS
     rlhf_score: null
-    execution_log: ""
+    execution_log: |
+      Completed successfully at 2025-09-16T11:53:41.965Z.
+
+      --- SCRIPT OUTPUT ---
+      🔍 Running lint check...
+      yarn run v1.22.22
+      warning ../../package.json: No license field
+      $ eslint .
+
+      /Users/thiagobutignon/dev/spec-kit-clean-archicteture/coverage/block-navigation.js
+        1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+      ✖ 1 problem (0 errors, 1 warning)
+        0 errors and 1 warning potentially fixable with the `--fix` option.
+
+      Done in 0.94s.
+      ✅ Lint passed
+      🧪 Running tests with coverage...
+      yarn run v1.22.22
+      warning ../../package.json: No license field
+      $ vitest --passWithNoTests --coverage
+
+       RUN  v3.2.4 /Users/thiagobutignon/dev/spec-kit-clean-archicteture
+            Coverage enabled with v8
+
+      No test files found, exiting with code 0
+
+      include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+      exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+
+       % Coverage report from v8
+      -------------------|---------|----------|---------|---------|-------------------
+      File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+      -------------------|---------|----------|---------|---------|-------------------
+      All files          |       0 |       75 |      75 |       0 |                   
+       ...n-archicteture |       0 |    66.66 |   66.66 |       0 |                   
+        execute-steps.ts |       0 |      100 |     100 |       0 | 3-265             
+        logger.ts        |       0 |        0 |       0 |       0 | 1-46              
+        ...ementation.ts |       0 |      100 |     100 |       0 | 3-293             
+       ...main/use-cases |       0 |        0 |       0 |       0 |                   
+        ...er-profile.ts |       0 |        0 |       0 |       0 |                   
+      -------------------|---------|----------|---------|---------|-------------------
+      Done in 0.49s.
+      ✅ Tests passed
+      📦 Staging changes...
+      💾 Creating commit...
+      [main 876e4f8] feat(user-profile): add get-user-profile use case
+       23 files changed, 1363 insertions(+), 2508 deletions(-)
+       rename coverage/spec-kit-clean-archicteture/{src/features/todo-list/domain/test/mock-list-todos-use-case.ts.html => logger.ts.html} (59%)
+       delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/errors/index.html
+       delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/errors/invalid-todo-data.ts.html
+       delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/errors/todo-not-found.ts.html
+       delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/errors/unauthorized-tenant-access.ts.html
+       delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/test/index.html
+       delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/test/mock-create-todo-use-case.ts.html
+       delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/test/mock-delete-todo-use-case.ts.html
+       delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/test/mock-update-todo-use-case.ts.html
+       delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases/create-todo.ts.html
+       delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases/list-todos.ts.html
+       delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases/update-todo.ts.html
+       rename coverage/spec-kit-clean-archicteture/src/features/{todo-list/domain/use-cases/delete-todo.ts.html => user-profile/domain/use-cases/get-user-profile.ts.html} (86%)
+       rename coverage/spec-kit-clean-archicteture/src/features/{todo-list => user-profile}/domain/use-cases/index.html (64%)
+       create mode 100644 src/features/user-profile/domain/use-cases/get-user-profile.ts
+      ✅ Successfully committed
     references:
       - type: external_pattern
         source: context7

@@ -49,3 +49,62 @@
 [2025-09-16T11:53:41.915Z] Done in 0.49s.
 [2025-09-16T11:53:41.921Z] ✅ Tests passed
 📦 Staging changes...
+[2025-09-16T11:53:41.936Z] 💾 Creating commit...
+[2025-09-16T11:53:41.964Z] [main 876e4f8] feat(user-profile): add get-user-profile use case
+ 23 files changed, 1363 insertions(+), 2508 deletions(-)
+ rename coverage/spec-kit-clean-archicteture/{src/features/todo-list/domain/test/mock-list-todos-use-case.ts.html => logger.ts.html} (59%)
+ delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/errors/index.html
+ delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/errors/invalid-todo-data.ts.html
+ delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/errors/todo-not-found.ts.html
+ delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/errors/unauthorized-tenant-access.ts.html
+ delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/test/index.html
+ delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/test/mock-create-todo-use-case.ts.html
+ delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/test/mock-delete-todo-use-case.ts.html
+ delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/test/mock-update-todo-use-case.ts.html
+ delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases/create-todo.ts.html
+ delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases/list-todos.ts.html
+ delete mode 100644 coverage/spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases/update-todo.ts.html
+ rename coverage/spec-kit-clean-archicteture/src/features/{todo-list/domain/use-cases/delete-todo.ts.html => user-profile/domain/use-cases/get-user-profile.ts.html} (86%)
+ rename coverage/spec-kit-clean-archicteture/src/features/{todo-list => user-profile}/domain/use-cases/index.html (64%)
+ create mode 100644 src/features/user-profile/domain/use-cases/get-user-profile.ts
+[2025-09-16T11:53:41.964Z] ✅ Successfully committed
+[2025-09-16T11:53:41.965Z] --- Script finished successfully ---
+[2025-09-16T11:53:41.968Z] --- Running validation script for 'create-error-user-not-found' ---
+[2025-09-16T11:53:41.972Z] 🔍 Running lint check...
+[2025-09-16T11:53:42.047Z] yarn run v1.22.22
+[2025-09-16T11:53:42.057Z] [ERROR] warning ../../package.json: No license field
+[2025-09-16T11:53:42.062Z] $ eslint .
+[2025-09-16T11:53:42.542Z] /Users/thiagobutignon/dev/spec-kit-clean-archicteture/coverage/block-navigation.js
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+✖ 1 problem (0 errors, 1 warning)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+[2025-09-16T11:53:42.551Z] Done in 0.51s.
+[2025-09-16T11:53:42.557Z] ✅ Lint passed
+🧪 Running tests with coverage...
+[2025-09-16T11:53:42.633Z] yarn run v1.22.22
+[2025-09-16T11:53:42.644Z] [ERROR] warning ../../package.json: No license field
+[2025-09-16T11:53:42.648Z] $ vitest --passWithNoTests --coverage
+[2025-09-16T11:53:42.985Z] 
+[2025-09-16T11:53:42.985Z] RUN  v3.2.4 /Users/thiagobutignon/dev/spec-kit-clean-archicteture
+      Coverage enabled with v8
+[2025-09-16T11:53:43.044Z] No test files found, exiting with code 0
+[2025-09-16T11:53:43.044Z] [ERROR] include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+[2025-09-16T11:53:43.045Z] % Coverage report from v8
+[2025-09-16T11:53:43.046Z] -------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T11:53:43.046Z] File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T11:53:43.047Z] All files          |       0 |       80 |      80 |       0 |
+[2025-09-16T11:53:43.047Z] ...n-archicteture |       0 |    66.66 |   66.66 |       0 |
+[2025-09-16T11:53:43.047Z] execute-steps.ts |       0 |      100 |     100 |       0 | 3-265
+[2025-09-16T11:53:43.047Z] logger.ts        |       0 |        0 |       0 |       0 | 1-46
+[2025-09-16T11:53:43.047Z] ...ementation.ts |       0 |      100 |     100 |       0 | 3-293             
+ .../domain/errors |       0 |      100 |     100 |       0 |
+[2025-09-16T11:53:43.047Z] ...-not-found.ts |       0 |      100 |     100 |       0 | 5-10
+[2025-09-16T11:53:43.047Z] ...main/use-cases |       0 |        0 |       0 |       0 |
+[2025-09-16T11:53:43.047Z] ...er-profile.ts |       0 |        0 |       0 |       0 |                   
+-------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T11:53:43.100Z] Done in 0.47s.
+[2025-09-16T11:53:43.106Z] ✅ Tests passed
+📦 Staging changes...
