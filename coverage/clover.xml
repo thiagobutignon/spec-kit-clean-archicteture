@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1758005346590" clover="3.2.0">
-  <project timestamp="1758005346590" name="All files">
-    <metrics statements="262" coveredstatements="0" conditionals="7" coveredconditionals="7" methods="7" coveredmethods="7" elements="276" coveredelements="14" complexity="0" loc="262" ncloc="262" packages="3" files="7" classes="7"/>
+<coverage generated="1758005347738" clover="3.2.0">
+  <project timestamp="1758005347738" name="All files">
+    <metrics statements="268" coveredstatements="0" conditionals="8" coveredconditionals="8" methods="8" coveredmethods="8" elements="284" coveredelements="16" complexity="0" loc="268" ncloc="268" packages="3" files="8" classes="8"/>
     <package name="spec-kit-clean-archicteture">
       <metrics statements="256" coveredstatements="0" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
       <file name="execute-steps.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/execute-steps.ts">
@@ -268,8 +268,17 @@
       </file>
     </package>
     <package name="spec-kit-clean-archicteture.src.features.todo-list.domain.errors">
-      <metrics statements="6" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+      <metrics statements="12" coveredstatements="0" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
       <file name="todo-not-found.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/todo-list/domain/errors/todo-not-found.ts">
+        <metrics statements="6" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+        <line num="5" count="0" type="stmt"/>
+        <line num="6" count="0" type="stmt"/>
+        <line num="7" count="0" type="stmt"/>
+        <line num="8" count="0" type="stmt"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="10" count="0" type="stmt"/>
+      </file>
+      <file name="unauthorized-tenant-access.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/todo-list/domain/errors/unauthorized-tenant-access.ts">
         <metrics statements="6" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
         <line num="5" count="0" type="stmt"/>
         <line num="6" count="0" type="stmt"/>
