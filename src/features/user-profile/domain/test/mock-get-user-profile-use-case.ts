@@ -17,7 +17,8 @@ export const mockGetUserProfileOutput = (): GetUserProfileOutput => ({
   id: 'user-123',
   email: 'test@example.com',
   firstName: 'John',
-  lastName: 'Doe'
+  lastName: 'Doe',
+  nickname: 'JD'
 })
 
 /**
