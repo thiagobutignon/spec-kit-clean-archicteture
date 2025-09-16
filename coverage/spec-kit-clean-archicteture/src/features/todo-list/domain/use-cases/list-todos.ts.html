@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases/create-todo.ts</title>
+    <title>Code coverage report for spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases/list-todos.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../../../../../prettify.css" />
     <link rel="stylesheet" href="../../../../../../base.css" />
@@ -19,7 +19,7 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../../../../../index.html">All files</a> / <a href="index.html">spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases</a> create-todo.ts</h1>
+        <h1><a href="../../../../../../index.html">All files</a> / <a href="index.html">spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases</a> list-todos.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
@@ -96,7 +96,11 @@
 <a name='L31'></a><a href='#L31'>31</a>
 <a name='L32'></a><a href='#L32'>32</a>
 <a name='L33'></a><a href='#L33'>33</a>
-<a name='L34'></a><a href='#L34'>34</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -130,37 +134,39 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
- * Input parameters for CreateTodoUseCase
+ * Input parameters for ListTodosUseCase
  */
-export type CreateTodoInput = {
+export type ListTodosInput = {
   tenantId: string
-  title: string
-  description?: string
+  completed?: boolean
 }
 &nbsp;
 /**
- * Output type for CreateTodoUseCase
+ * Output type for ListTodosUseCase
  */
-export type CreateTodoOutput = {
-  id: string
-  tenantId: string
-  title: string
-  description?: string
-  completed: boolean
-  createdAt: Date
+export type ListTodosOutput = {
+  todos: Array&lt;{
+    id: string
+    tenantId: string
+    title: string
+    description?: string
+    completed: boolean
+    createdAt: Date
+    updatedAt?: Date
+  }&gt;
 }
 &nbsp;
 /**
- * CreateTodoUseCase interface
- * @description Creates a new todo item for a specific tenant
+ * ListTodosUseCase interface
+ * @description Lists all todo items for a specific tenant
  */
-export interface CreateTodoUseCase {
+export interface ListTodosUseCase {
   /**
-   * Execute the create todo operation
+   * Execute the list todos operation
    * @param input - The input parameters
    * @returns Promise with the operation output
    */
-  execute: (input: CreateTodoInput) =&gt; Promise&lt;CreateTodoOutput&gt;
+  execute: (input: ListTodosInput) =&gt; Promise&lt;ListTodosOutput&gt;
 }
 &nbsp;</pre></td></tr></table></pre>
 

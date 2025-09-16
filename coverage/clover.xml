@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1758005342011" clover="3.2.0">
-  <project timestamp="1758005342011" name="All files">
-    <metrics statements="256" coveredstatements="0" conditionals="3" coveredconditionals="3" methods="3" coveredmethods="3" elements="262" coveredelements="6" complexity="0" loc="256" ncloc="256" packages="2" files="3" classes="3"/>
+<coverage generated="1758005343126" clover="3.2.0">
+  <project timestamp="1758005343126" name="All files">
+    <metrics statements="256" coveredstatements="0" conditionals="4" coveredconditionals="4" methods="4" coveredmethods="4" elements="264" coveredelements="8" complexity="0" loc="256" ncloc="256" packages="2" files="4" classes="4"/>
     <package name="spec-kit-clean-archicteture">
       <metrics statements="256" coveredstatements="0" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
       <file name="execute-steps.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/execute-steps.ts">
@@ -268,8 +268,11 @@
       </file>
     </package>
     <package name="spec-kit-clean-archicteture.src.features.todo-list.domain.use-cases">
-      <metrics statements="0" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+      <metrics statements="0" coveredstatements="0" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
       <file name="create-todo.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases/create-todo.ts">
+        <metrics statements="0" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+      </file>
+      <file name="list-todos.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/todo-list/domain/use-cases/list-todos.ts">
         <metrics statements="0" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
       </file>
     </package>
