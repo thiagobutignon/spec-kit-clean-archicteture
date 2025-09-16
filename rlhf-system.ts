@@ -57,6 +57,9 @@ class RLHFSystem {
   private patternsFile = path.join(this.dataDir, 'patterns.json');
   private improvementsFile = path.join(this.dataDir, 'improvements.json');
   private logger: Logger;
+  private patternCache = new Map<string, { result: any; timestamp: number }>();
+  private cacheExpiry = 5 * 60 * 1000; // 5 minutes cache
+  private progressCallback?: (message: string, percentage: number) => void;
 
   constructor() {
     fs.ensureDirSync(this.dataDir);
@@ -69,11 +72,20 @@ class RLHFSystem {
    */
   async analyzeExecution(yamlPath: string): Promise<void> {
     this.logger.log(`🤖 Starting RLHF analysis for: ${yamlPath}`);
+    this.reportProgress('Starting RLHF analysis', 0);
+
     const content = await fs.readFile(yamlPath, 'utf-8');
     const plan = yaml.parse(content);
+    this.reportProgress('Parsing YAML file', 10);
+
     const metrics: ExecutionMetrics[] = [];
+    const totalSteps = plan.steps.length;
+    let processedSteps = 0;
 
     for (const step of plan.steps) {
+      // Check cache first for pattern analysis
+      const cacheKey = this.getCacheKey(step);
+      const cached = this.getCachedResult(cacheKey);
       const metric: ExecutionMetrics = {
         stepId: step.id,
         stepType: step.type,
@@ -90,12 +102,29 @@ class RLHFSystem {
       }
 
       metrics.push(metric);
+
+      // Cache pattern analysis if not cached
+      if (!cached && step.template) {
+        this.setCachedResult(cacheKey, metric);
+      }
+
+      processedSteps++;
+      this.reportProgress(
+        `Processing step ${processedSteps}/${totalSteps}`,
+        10 + (processedSteps / totalSteps * 60)
+      );
     }
 
+    this.reportProgress('Saving metrics', 75);
     await this.saveMetrics(metrics);
+
+    this.reportProgress('Updating patterns', 85);
     await this.updatePatterns(metrics);
+
+    this.reportProgress('Generating improvements', 95);
     await this.generateImprovements(metrics);
 
+    this.reportProgress('Analysis complete', 100);
     this.logger.log(`✅ RLHF analysis complete. Processed ${metrics.length} steps.`);
   }
 
@@ -538,6 +567,52 @@ class RLHFSystem {
    */
   public close(): void {
     this.logger.close();
+  }
+
+  /**
+   * Caching utilities for pattern analysis
+   */
+  private getCacheKey(step: any): string {
+    return createHash('md5')
+      .update(JSON.stringify({ id: step.id, type: step.type, template: step.template || '' }))
+      .digest('hex');
+  }
+
+  private getCachedResult(key: string): any | null {
+    const cached = this.patternCache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
+      return cached.result;
+    }
+    this.patternCache.delete(key); // Remove expired cache
+    return null;
+  }
+
+  private setCachedResult(key: string, result: any): void {
+    this.patternCache.set(key, {
+      result,
+      timestamp: Date.now()
+    });
+  }
+
+  /**
+   * Progress reporting
+   */
+  private reportProgress(message: string, percentage: number): void {
+    if (this.progressCallback) {
+      this.progressCallback(message, percentage);
+    }
+    // Visual progress bar in console
+    const barLength = 30;
+    const filled = Math.round((percentage / 100) * barLength);
+    const bar = '█'.repeat(filled) + '░'.repeat(barLength - filled);
+    process.stdout.write(`\r[${bar}] ${percentage}% - ${message}`);
+    if (percentage === 100) {
+      console.log(); // New line when complete
+    }
+  }
+
+  public setProgressCallback(callback: (message: string, percentage: number) => void): void {
+    this.progressCallback = callback;
   }
 }
 
