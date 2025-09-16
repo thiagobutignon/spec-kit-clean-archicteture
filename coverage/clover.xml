@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1758005348874" clover="3.2.0">
-  <project timestamp="1758005348874" name="All files">
-    <metrics statements="274" coveredstatements="0" conditionals="9" coveredconditionals="9" methods="9" coveredmethods="9" elements="292" coveredelements="18" complexity="0" loc="274" ncloc="274" packages="3" files="9" classes="9"/>
+<coverage generated="1758005350025" clover="3.2.0">
+  <project timestamp="1758005350025" name="All files">
+    <metrics statements="291" coveredstatements="0" conditionals="10" coveredconditionals="9" methods="10" coveredmethods="9" elements="311" coveredelements="18" complexity="0" loc="291" ncloc="291" packages="4" files="10" classes="10"/>
     <package name="spec-kit-clean-archicteture">
       <metrics statements="256" coveredstatements="0" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
       <file name="execute-steps.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/execute-steps.ts">
@@ -295,6 +295,29 @@
         <line num="8" count="0" type="stmt"/>
         <line num="9" count="0" type="stmt"/>
         <line num="10" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="spec-kit-clean-archicteture.src.features.todo-list.domain.test">
+      <metrics statements="17" coveredstatements="0" conditionals="1" coveredconditionals="0" methods="1" coveredmethods="0"/>
+      <file name="mock-create-todo-use-case.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/todo-list/domain/test/mock-create-todo-use-case.ts">
+        <metrics statements="17" coveredstatements="0" conditionals="1" coveredconditionals="0" methods="1" coveredmethods="0"/>
+        <line num="1" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="8" count="0" type="stmt"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="10" count="0" type="stmt"/>
+        <line num="11" count="0" type="stmt"/>
+        <line num="12" count="0" type="stmt"/>
+        <line num="18" count="0" type="stmt"/>
+        <line num="19" count="0" type="stmt"/>
+        <line num="20" count="0" type="stmt"/>
+        <line num="21" count="0" type="stmt"/>
+        <line num="22" count="0" type="stmt"/>
+        <line num="23" count="0" type="stmt"/>
+        <line num="24" count="0" type="stmt"/>
+        <line num="25" count="0" type="stmt"/>
+        <line num="31" count="0" type="stmt"/>
+        <line num="32" count="0" type="stmt"/>
+        <line num="33" count="0" type="stmt"/>
       </file>
     </package>
     <package name="spec-kit-clean-archicteture.src.features.todo-list.domain.use-cases">
