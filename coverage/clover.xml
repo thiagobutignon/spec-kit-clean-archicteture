@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1758024767501" clover="3.2.0">
-  <project timestamp="1758024767501" name="All files">
-    <metrics statements="427" coveredstatements="0" conditionals="6" coveredconditionals="4" methods="6" coveredmethods="4" elements="439" coveredelements="8" complexity="0" loc="427" ncloc="427" packages="4" files="6" classes="6"/>
+<coverage generated="1758050836515" clover="3.2.0">
+  <project timestamp="1758050836515" name="All files">
+    <metrics statements="427" coveredstatements="0" conditionals="7" coveredconditionals="5" methods="7" coveredmethods="5" elements="441" coveredelements="10" complexity="0" loc="427" ncloc="427" packages="5" files="7" classes="7"/>
     <package name="spec-kit-clean-archicteture">
       <metrics statements="407" coveredstatements="0" conditionals="3" coveredconditionals="2" methods="3" coveredmethods="2"/>
       <file name="execute-steps.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/execute-steps.ts">
@@ -456,6 +456,12 @@
     <package name="spec-kit-clean-archicteture.src.features.user-profile.domain.use-cases">
       <metrics statements="0" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
       <file name="get-user-profile.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/user-profile/domain/use-cases/get-user-profile.ts">
+        <metrics statements="0" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+      </file>
+    </package>
+    <package name="spec-kit-clean-archicteture.src.features.user-registration.domain.use-cases">
+      <metrics statements="0" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+      <file name="register-user.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/user-registration/domain/use-cases/register-user.ts">
         <metrics statements="0" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
       </file>
     </package>
