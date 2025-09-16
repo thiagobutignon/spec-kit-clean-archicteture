@@ -21,18 +21,20 @@ You **MUST** validate the input JSON against every rule in this checklist. The v
 
 ### A. Schema and Structure Validation
 
-- [ ] **Root Keys:** The root of the JSON object must contain `featureName` (string) and `steps` (array of objects).
+- [ ] **Root Keys:** The root of the JSON object must contain `featureName` (string) and `steps` (array of objects). Optional: `ubiquitousLanguage` (object).
+- [ ] **Ubiquitous Language (if present):** If `ubiquitousLanguage` exists, it must be an object with string key-value pairs defining domain terms.
 - [ ] **Step Keys:** Every object inside the `steps` array must contain `id` (string), `type` (string), `description` (string), and `path` (string).
 - [ ] **Step Types:** The `type` for each step must be one of the allowed values: `create_file`, `refactor_file`, `delete_file`, `folder`.
-- [ ] **References:** Every step must have a `references` array, and it must not be empty. Each object in the array must have `type`, `source`, and `description`.
+- [ ] **References:** Every step must have a `references` array (it can be empty for simple steps like errors). Each object in the array must have `type`, `source`, and `description`.
 
 ### B. Logical Consistency and Completeness
 
 - [ ] **Path Consistency:** The `path` in each step must be consistent with the `featureName`. For example, if `featureName` is "User Account", the path should contain `features/user-account/`.
 - [ ] **Template Completeness (`create_file`):**
   - [ ] The `template` key must exist and not be empty.
-  - [ ] If the step creates a use case, the `template` must contain placeholders like `__USE_CASE_INPUT_FIELDS__` and `__USE_CASE_OUTPUT_FIELDS__`.
-  - [ ] If the step creates a test helper, the `template` must contain `__MOCK_INPUT_DATA__` and `__MOCK_OUTPUT_DATA__`.
+  - [ ] If the step creates a use case, the `template` must contain placeholders `__USE_CASE_INPUT_FIELDS__` and `__USE_CASE_OUTPUT_FIELDS__`, AND the step must have `input` and `output` arrays with field definitions.
+  - [ ] If the step creates a test helper, the `template` must contain `__MOCK_INPUT_DATA__` and `__MOCK_OUTPUT_DATA__`, AND the step must have `mockInput` and `mockOutput` objects with test data.
+  - [ ] If the step creates an error class, the `template` should be complete (no placeholders needed).
 - [ ] **Template Correctness (`refactor_file`):**
   - [ ] The `template` key must exist and not be empty.
   - [ ] The `template` string must contain exactly one `<<<REPLACE>>>...<<</REPLACE>>>` block and one `<<<WITH>>>...<<</WITH>>>` block.
@@ -44,6 +46,15 @@ You **MUST** validate the input JSON against every rule in this checklist. The v
 
 - [ ] **Naming Conventions:** The `name` fields within the JSON (for use cases, errors, etc.) should follow PascalCase. The `id` and `path` should use kebab-case.
 - [ ] **Mock Data Presence:** For every use case, there must be a corresponding `create_test-helper` step, and its `mockInput` and `mockOutput` data should not be empty.
+- [ ] **Use Case Naming:** Use case names must be verbs (e.g., CreateUser, UpdateProduct, NOT UserCreator or ProductUpdater).
+
+### D. Domain Layer Purity Validation
+
+- [ ] **No External Dependencies:** Templates must NOT contain imports from: axios, fetch, prisma, express, react, next, redis, keycloak, or any external libraries.
+- [ ] **Use Cases as Interfaces:** Use case templates must define an interface with an `execute` method, not a class or implementation.
+- [ ] **Error Extension:** Error class templates must extend the native `Error` class, not custom base classes.
+- [ ] **No Business Logic:** Templates must not contain implementation logic, calculations, validations, or any business rules.
+- [ ] **Clean Types:** Input/Output types should only use TypeScript native types and other domain types.
 
 ## 5. Step-by-Step Execution Plan
 
