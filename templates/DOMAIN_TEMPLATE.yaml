@@ -465,7 +465,7 @@ steps:
   - id: 'refactor-__FILE_TO_MODIFY_KEBAB_CASE__'
     type: 'refactor_file'
     description: 'Refactor __FILE_TO_MODIFY_PASCAL_CASE__ to incorporate new logic'
-    status: 'pending'
+    status: 'PENDING'
     rlhf_score: null
     execution_log: ''
     references:
@@ -541,7 +541,7 @@ steps:
   - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'
     type: 'delete_file'
     description: 'Delete the file __FILE_TO_DELETE_PASCAL_CASE__ due to a generation error'
-    status: 'pending'
+    status: 'PENDING'
     rlhf_score: null
     execution_log: ''
     references:

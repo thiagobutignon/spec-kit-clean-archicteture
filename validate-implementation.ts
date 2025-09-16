@@ -8,13 +8,20 @@ import * as yaml from 'yaml';
 
 
 // --- Interfaces para Tipagem Alinhadas com o Novo Template ---
-type StepType = 'folder' | 'create_file' | 'refactor_file' | 'delete_file';
+type StepType = 'folder' | 'create_file' | 'refactor_file' | 'delete_file' | 'branch' | 'pull_request';
 type StepStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'SKIPPED';
 
 interface Reference {
   type: 'external_pattern' | 'internal_code_analysis' | 'internal_guideline' | 'internal_correction';
   source: string;
   description: string;
+  [key: string]: unknown;
+}
+
+interface StepAction {
+  branch_name?: string;
+  target_branch?: string;
+  source_branch?: string;
   [key: string]: unknown;
 }
 
@@ -27,6 +34,7 @@ interface Step {
   execution_log: string;
   references: Reference[];
   validation_script?: string;
+  action?: StepAction;
   [key: string]: unknown;
 }
 
@@ -181,7 +189,21 @@ class ImplementationValidator {
     }
 
     const implementationSteps = this.implementationContent.steps as Step[];
-    const allowedTypes: StepType[] = ['folder', 'create_file', 'refactor_file', 'delete_file'];
+    const allowedTypes: StepType[] = ['folder', 'create_file', 'refactor_file', 'delete_file', 'branch', 'pull_request'];
+
+    // Check if first step is branch creation
+    if (implementationSteps.length > 0 && implementationSteps[0].type !== 'branch') {
+      this.result.errors.push(
+        `❌ ERROR: The first step should be 'branch' type to create a feature branch.\n` +
+        `   ➡️ AI ACTION: Add a 'create-feature-branch' step as the first step in your implementation.`
+      );
+    }
+
+    // Check if last step is PR creation
+    const lastStep = implementationSteps[implementationSteps.length - 1];
+    if (lastStep && lastStep.type !== 'pull_request') {
+      console.log(`⚠️ WARNING: Consider adding a 'pull_request' step at the end to automate PR creation to staging.`);
+    }
 
     implementationSteps.forEach((implStep, index) => {
       const stepId = implStep.id || `step at index ${index}`;
@@ -201,18 +223,66 @@ class ImplementationValidator {
       if (!allowedTypes.includes(implStep.type)) {
         this.result.errors.push(`❌ ERROR in step '${stepId}': Invalid type '${implStep.type}'.`);
       }
-      if (!implStep.references || !Array.isArray(implStep.references) || implStep.references.length === 0) {
-        this.result.errors.push(`❌ ERROR in step '${stepId}': The 'references' array must exist and cannot be empty.`);
+
+      // References are optional for some step types
+      const stepsRequiringReferences = ['create_file', 'refactor_file'];
+      if (stepsRequiringReferences.includes(implStep.type)) {
+        if (!implStep.references || !Array.isArray(implStep.references) || implStep.references.length === 0) {
+          this.result.errors.push(`❌ ERROR in step '${stepId}': The 'references' array must exist and cannot be empty for ${implStep.type} steps.`);
+        }
       }
 
-      // 2. Validar o script de validação (se existir)
+      // 2. Type-specific validations
+      if (implStep.type === 'branch') {
+        if (!implStep.action || !implStep.action.branch_name) {
+          this.result.errors.push(
+            `❌ ERROR in step '${stepId}': Branch step missing 'action.branch_name'.\n` +
+            `   ➡️ AI ACTION: Add 'action.branch_name' with format 'feat/[feature-name]-domain'.`
+          );
+        } else if (!implStep.action.branch_name.startsWith('feat/')) {
+          this.result.errors.push(
+            `❌ ERROR in step '${stepId}': Branch name should follow pattern 'feat/[feature-name]-domain'.\n` +
+            `   ➡️ AI ACTION: Update branch name to start with 'feat/' prefix.`
+          );
+        }
+      }
+
+      if (implStep.type === 'pull_request') {
+        if (!implStep.action || !implStep.action.target_branch || !implStep.action.source_branch) {
+          this.result.errors.push(
+            `❌ ERROR in step '${stepId}': PR step missing required action fields.\n` +
+            `   ➡️ AI ACTION: Add 'action.target_branch' (usually 'staging') and 'action.source_branch'.`
+          );
+        }
+        if (implStep.action && implStep.action.target_branch !== 'staging') {
+          console.log(`⚠️ WARNING in step '${stepId}': PR target branch is '${implStep.action.target_branch}' instead of 'staging'. Make sure this is intentional.`);
+        }
+      }
+
+      // 3. Validar o script de validação (se existir)
       if (implStep.validation_script) {
         const script = implStep.validation_script;
-        if (!script.includes('git commit')) {
+
+        // Different validation rules for different step types
+        if (implStep.type === 'branch') {
+          if (!script.includes('git checkout')) {
+            this.result.errors.push(
+              `❌ ERROR in step '${stepId}': Branch validation script missing 'git checkout' command.\n` +
+              `   ➡️ AI ACTION: Add branch creation/checkout logic to validation script.`
+            );
+          }
+        } else if (implStep.type === 'pull_request') {
+          if (!script.includes('gh pr create') && !script.includes('hub pull-request')) {
+            console.log(`⚠️ WARNING in step '${stepId}': PR creation script doesn't use GitHub CLI. Manual PR creation may be required.`);
+          }
+        } else if (implStep.type !== 'folder') {
+          // Other steps should have git commit
+          if (!script.includes('git commit')) {
             this.result.errors.push(`❌ ERROR in step '${stepId}': The 'validation_script' is missing a 'git commit' command.`);
-        } else {
-            this.result.matches.push(`✅ Validation script for step '${stepId}' seems correct.`);
+          }
         }
+
+        this.result.matches.push(`✅ Validation script for step '${stepId}' seems correct.`);
       }
     });
   }
