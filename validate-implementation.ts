@@ -2,7 +2,16 @@
 
 import { deepStrictEqual } from 'assert';
 import * as fs from 'fs';
+import { fileURLToPath } from 'url';
 import * as yaml from 'yaml';
+
+// --- Interfaces para Tipagem ---
+interface Step {
+  id: string;
+  type: 'file' | 'folder';
+  validation_script?: string;
+  [key: string]: unknown;
+}
 
 interface ValidationResult {
   valid: boolean;
@@ -12,11 +21,10 @@ interface ValidationResult {
 
 /**
  * Validates a feature implementation YAML file against the master template.
- * It checks for placeholder completion, rule immutability, and structural integrity.
  */
 class ImplementationValidator {
-  private templateContent: any;
-  private implementationContent: any;
+  private templateContent: Record<string, any> = {};
+  private implementationContent: Record<string, any> = {};
   private result: ValidationResult = {
     valid: true,
     errors: [],
@@ -47,58 +55,35 @@ class ImplementationValidator {
   }
 
   /**
-   * CRITICAL CHECK: Ensures no __PLACEHOLDER__ variables are left in the implementation file,
-   * except for exactly 2 allowed occurrences of __FEATURE_NAME_KEBAB_CASE__ in:
-   * 1. AI-NOTE comment (line ~120)
-   * 2. ai_guidelines section (immutable)
+   * CRITICAL CHECK: Ensures no __PLACEHOLDER__ variables are left in the dynamic sections of the file.
+   * It ignores placeholders found in immutable documentation sections.
    */
   private validateNoPlaceholders(): void {
     console.log('🔎 Checking for unresolved placeholders...');
 
-    // Read the raw file content to check placeholders accurately
-    const rawContent = fs.readFileSync(this.implementationPath, 'utf-8');
+    // Criamos uma cópia profunda do objeto para poder modificá-lo sem afetar outras funções.
+    const contentToCheck = JSON.parse(JSON.stringify(this.implementationContent));
 
-    const placeholderRegex = /__([A-Z_]+)__/g; // Updated Regex for __PLACEHOLDER__
-    const matches = rawContent.match(placeholderRegex);
+    // Seções que são cópias literais do template e podem conter [placeholders] de exemplo.
+    const immutableDocSections = ['troubleshooting', 'refactoring', 'recovery', 'ai_guidelines'];
+
+    // Remove as seções imutáveis da cópia antes de procurar por placeholders.
+    for (const section of immutableDocSections) {
+      delete contentToCheck[section];
+    }
+
+    const contentString = JSON.stringify(contentToCheck);
+    const placeholderRegex = /__([A-Z_]+)__/g;
+    const matches = contentString.match(placeholderRegex);
 
     if (matches) {
-      // Count occurrences of each placeholder
-      const placeholderCounts: Record<string, number> = {};
-      matches.forEach((match: string) => {
-        placeholderCounts[match] = (placeholderCounts[match] || 0) + 1;
-      });
-
-      // Check if __FEATURE_NAME_KEBAB_CASE__ has exactly 2 occurrences
-      const featurePlaceholder = '__FEATURE_NAME_KEBAB_CASE__';
-      const featureCount = placeholderCounts[featurePlaceholder] || 0;
-
-      // Remove __FEATURE_NAME_KEBAB_CASE__ from the counts if it has exactly 2 occurrences
-      // These are allowed in: AI-NOTE comment and ai_guidelines section
-      if (featureCount === 2) {
-        delete placeholderCounts[featurePlaceholder];
-      }
-
-      // Check for any remaining placeholders
-      const remainingPlaceholders = Object.keys(placeholderCounts);
-
-      if (remainingPlaceholders.length > 0) {
-        this.result.errors.push(
-          `❌ CRITICAL ERROR: Found unresolved placeholders: ${remainingPlaceholders.join(', ')}.\n` +
-          `   ➡️ AI ACTION: You MUST replace every __PLACEHOLDER__ with a specific value for your feature.`
-        );
-      } else if (featureCount !== 2 && featureCount > 0) {
-        this.result.errors.push(
-          `❌ ERROR: Found ${featureCount} occurrence(s) of __FEATURE_NAME_KEBAB_CASE__, but exactly 2 are expected.\n` +
-          `   ➡️ AI ACTION: Ensure __FEATURE_NAME_KEBAB_CASE__ appears exactly twice: once in the AI-NOTE comment (line ~120) and once in ai_guidelines section.`
-        );
-      } else if (featureCount === 0) {
-        // All placeholders replaced - this is valid
-        this.result.matches.push('✅ All placeholders have been properly replaced.');
-      } else {
-        this.result.matches.push('✅ __FEATURE_NAME_KEBAB_CASE__ appears exactly 2 times as expected (AI-NOTE and ai_guidelines).');
-      }
+      const uniqueMatches = [...new Set(matches)];
+      this.result.errors.push(
+        `❌ CRITICAL ERROR: Found unresolved placeholders in dynamic sections: ${uniqueMatches.join(', ')}.\n` +
+        `   ➡️ AI ACTION: You MUST replace every placeholder variable (like __FEATURE_NAME_KEBAB_CASE__) with a specific value for your feature.`
+      );
     } else {
-      this.result.matches.push('✅ All placeholders have been properly replaced.');
+      this.result.matches.push('✅ No unresolved placeholders found in dynamic content.');
     }
   }
 
@@ -115,8 +100,8 @@ class ImplementationValidator {
     for (const section of sectionsToCompare) {
       if (!this.templateContent[section] || !this.implementationContent[section]) {
         this.result.errors.push(
-          `❌ ERROR: The required section '${section}' is missing from the template or the implementation.\n` +
-          `   ➡️ AI ACTION: You MUST include this section in your implementation file.`
+          `❌ ERROR: The required section '${section}' is missing.\n` +
+          `   ➡️ AI ACTION: You MUST include this section in your implementation file, copied exactly from the template.`
         );
         continue;
       }
@@ -126,7 +111,7 @@ class ImplementationValidator {
       } catch (error) {
         this.result.errors.push(
           `❌ ERROR: The content of the immutable section '${section}' has been modified.\n` +
-          `   ➡️ AI ACTION: You MUST copy this section exactly as it is from the template file. Do not add, remove, or change any content within it.`
+          `   ➡️ AI ACTION: You MUST copy this section exactly as it is from the template file. Do not change it.`
         );
       }
     }
@@ -138,21 +123,15 @@ class ImplementationValidator {
   private validateStructure(): void {
     console.log('📁 Validating folder structure definition...');
     if (!this.templateContent.structure || !this.implementationContent.structure) {
-      this.result.errors.push(
-        `❌ ERROR: The 'structure' section is missing.\n` +
-        `   ➡️ AI ACTION: Your implementation file MUST contain a 'structure' section.`
-      );
+      this.result.errors.push(`❌ ERROR: The 'structure' section is missing.`);
       return;
     }
 
-    const templateBasePath = this.templateContent.structure.basePath;
-    const implementationBasePath = this.implementationContent.structure.basePath;
+    const templateBasePath = this.templateContent.structure.basePath as string;
+    const implementationBasePath = this.implementationContent.structure.basePath as string;
 
     if (!templateBasePath || !implementationBasePath) {
-      this.result.errors.push(
-        `❌ ERROR: The 'basePath' key is missing inside the 'structure' section.\n` +
-        `   ➡️ AI ACTION: Ensure the 'structure' section contains a 'basePath' key.`
-      );
+      this.result.errors.push(`❌ ERROR: The 'basePath' key is missing inside the 'structure' section.`);
       return;
     }
 
@@ -160,10 +139,7 @@ class ImplementationValidator {
     const featureNameMatch = implementationBasePath.match(featureNameRegex);
 
     if (!featureNameMatch) {
-      this.result.errors.push(
-        `❌ ERROR: The implementation 'basePath' ('${implementationBasePath}') does not match the expected pattern 'src/features/.../domain'.\n` +
-        `   ➡️ AI ACTION: Correct the 'basePath' to follow the required directory structure.`
-      );
+      this.result.errors.push(`❌ ERROR: The implementation 'basePath' ('${implementationBasePath}') does not match the expected pattern 'src/features/.../domain'.`);
       return;
     }
 
@@ -171,10 +147,7 @@ class ImplementationValidator {
     const expectedBasePath = templateBasePath.replace('__FEATURE_NAME_KEBAB_CASE__', featureName);
 
     if (expectedBasePath !== implementationBasePath) {
-      this.result.errors.push(
-        `❌ ERROR: The implementation 'basePath' ('${implementationBasePath}') does not correctly match the template pattern ('${expectedBasePath}').\n` +
-        `   ➡️ AI ACTION: Ensure the basePath correctly replaces __FEATURE_NAME_KEBAB_CASE__ with your feature's name in kebab-case.`
-      );
+      this.result.errors.push(`❌ ERROR: The implementation 'basePath' ('${implementationBasePath}') does not correctly match the template pattern ('${expectedBasePath}').`);
     } else {
       this.result.matches.push('✅ Feature folder structure is correctly defined.');
     }
@@ -186,24 +159,18 @@ class ImplementationValidator {
   private validateSteps(): void {
     console.log('👣 Validating code generation steps...');
     if (!this.templateContent.steps || !this.implementationContent.steps) {
-      this.result.errors.push(
-        `❌ ERROR: The 'steps' section is missing.\n` +
-        `   ➡️ AI ACTION: Your implementation file MUST contain a 'steps' section with instantiated tasks.`
-      );
+      this.result.errors.push(`❌ ERROR: The 'steps' section is missing.`);
       return;
     }
 
-    const templateSteps = this.templateContent.steps;
-    const implementationSteps = this.implementationContent.steps;
+    const templateSteps = this.templateContent.steps as Step[];
+    const implementationSteps = this.implementationContent.steps as Step[];
 
-    implementationSteps.forEach((implStep: any) => {
-      const templateStep = templateSteps.find((ts: any) => implStep.id.startsWith(ts.id.split('__')[0]));
+    implementationSteps.forEach((implStep) => {
+      const templateStep = templateSteps.find((ts) => implStep.id.startsWith(ts.id.split('__')[0]));
 
       if (!templateStep) {
-        this.result.errors.push(
-          `❌ ERROR: Could not find a matching template for the implementation step with id '${implStep.id}'.\n` +
-          `   ➡️ AI ACTION: Ensure your step IDs are generated by replicating the generic step IDs from the template (e.g., 'create-use-case-__ACTION_ENTITY_KEBAB_CASE__' becomes 'create-use-case-add-item').`
-        );
+        this.result.errors.push(`❌ ERROR: Could not find a matching template for the implementation step with id '${implStep.id}'.`);
         return;
       }
 
@@ -211,10 +178,7 @@ class ImplementationValidator {
 
       const script = implStep.validation_script;
       if (!script || !script.includes('yarn lint') || !script.includes('yarn test') || !script.includes('git commit')) {
-          this.result.errors.push(
-            `❌ ERROR: The 'validation_script' for step '${implStep.id}' is missing or incomplete.\n` +
-            `   ➡️ AI ACTION: Each step MUST have a complete validation script that includes 'yarn lint', 'yarn test', and 'git commit' commands, based on the template.`
-          );
+          this.result.errors.push(`❌ ERROR: The 'validation_script' for step '${implStep.id}' is missing or incomplete.`);
       } else {
           this.result.matches.push(`✅ Validation script for step '${implStep.id}' seems correct.`);
       }
@@ -267,6 +231,10 @@ async function main() {
   process.exit(result.valid ? 0 : 1);
 }
 
-if (require.main === module) {
+// --- ES Module safe entry point check ---
+const currentFilePath = fileURLToPath(import.meta.url);
+const scriptPath = fs.realpathSync(process.argv[1]);
+
+if (currentFilePath === scriptPath) {
   main().catch(console.error);
 }

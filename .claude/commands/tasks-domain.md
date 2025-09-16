@@ -1,41 +1,41 @@
 # Task: Generate Domain Layer for a New Feature
 
-## 1. Objective
+## 1. Your Deliverable
 
-Generate a complete and valid `{{featureName}}-implementation.yaml` file based **strictly** on `TODO_DOMAIN_TEMPLATE.yaml`.
+Your **only** output for this task is the complete and valid content of a single YAML file: `{{featureName}}-implementation.yaml`.
 
-## 2. Source of Truth
+## 2. Prohibited Actions
+
+- You **MUST NOT** execute any commands from the `validation_script` (e.g., `mkdir`, `yarn lint`, `git commit`).
+- You **MUST NOT** create or write to any files other than the implementation YAML file.
+- Your job is to **create the plan**, not to **execute the plan**.
+
+## 3. Source of Truth
 
 - **File:** `TODO_DOMAIN_TEMPLATE.yaml`
 - **Rule:** You MUST follow all `# AI-NOTE:` directives and replace all `__PLACEHOLDER__` variables.
 
-## 3. Input Parameters
+## 4. Input Parameters
 
 - **Feature Definition:** A single JSON object containing all the necessary information for the feature.
 
-## 4. Step-by-Step Execution Plan
+## 5. Step-by-Step Execution Plan
 
-1.  **Parse Input:** Parse the provided JSON object to understand the feature's requirements.
-2.  **Initialize:** Create the implementation file as a verbatim copy of the template.
-3.  **Replace Global Placeholders:** Use the `featureName` from the JSON to replace `__FEATURE_NAME_...__` and `__CURRENT_DATE__`.
-4.  **Generate `steps`:**
-    - **For each Use Case object in the `useCases` array:**
-      a. Replicate the `create-use-case` and `create-test-helper` blocks from the template.
-      b. Replace `__ACTION_ENTITY_...__` placeholders with the use case `name`.
-      c. Replace `__USE_CASE_DESCRIPTION__` with the use case `description`.
-      d. **Generate TypeScript Fields:** - For `__USE_CASE_INPUT_FIELDS__`, generate a multi-line string of `key: type;` from the `input` array. - For `__USE_CASE_OUTPUT_FIELDS__`, do the same from the `output` array.
-      e. **Generate Mock Data:** - For `__MOCK_INPUT_DATA__`, generate a multi-line string of `key: value,` from the `mockInput` array. - For `__MOCK_OUTPUT_DATA__`, do the same from the `mockOutput` array.
-    - **For each Error object in the `errors` array:**
-      a. Replicate the `create-error` block.
-      b. Replace `__ERROR_NAME_...__`, `__ERROR_DESCRIPTION__`, and `__ERROR_MESSAGE__` using the error's `name`, `description`, and `message`.
-5.  **Preserve Immutable Sections:** Ensure all rule and documentation sections are untouched.
-6.  **Final Validation:** Run `npx tsx validate-implementation.ts` and ensure it passes. If it fails, read the `➡️ AI ACTION:` instructions and self-correct until it succeeds.
+1.  **Parse Input:** Parse the provided JSON object.
+2.  **Initialize:** Create the implementation YAML file in memory as a verbatim copy of the template.
+3.  **Replace Placeholders:** Systematically replace all placeholders in the in-memory copy using the data from the JSON input.
+4.  **Preserve Immutable Sections:** Double-check that all rule and documentation sections are untouched.
+5.  **Final Validation (Mandatory):**
+    a. Run the command: `npx tsx validate-implementation.ts TODO_DOMAIN_TEMPLATE.yaml {{featureName}}-implementation.yaml`.
+    b. **Analyze the output:** - If the script exits with `✅ SUCCESS`, your task is complete. **Provide the final, validated YAML content as your output.** - If the script exits with `❌ FAILURE`, **do not show the broken YAML**. Instead, read the `➡️ AI ACTION:` instructions, fix the YAML in memory, and re-run the validation. Repeat this loop until the validation passes.
+
+## 6. User Interaction
+
+After you provide the final, validated YAML, I (the user) will review it. If it is correct, I will then personally run the `execute-steps.ts` script to apply the changes to the filesystem.
 
 ---
 
 ## Example Invocation
-
-To invoke this task, provide the command followed by a single, well-formed JSON code block.
 
 `/tasks-domain create feature from json:`
 
@@ -45,32 +45,22 @@ To invoke this task, provide the command followed by a single, well-formed JSON 
   "useCases": [
     {
       "name": "Create User Account",
-      "description": "Creates a new user account with email, first name, last name, and password",
+      "description": "Creates a new user account",
       "input": [
         { "name": "email", "type": "string" },
-        { "name": "firstName", "type": "string" },
-        { "name": "lastName", "type": "string" },
         { "name": "password", "type": "string" }
       ],
       "output": [
         { "name": "id", "type": "string" },
-        { "name": "email", "type": "string" },
-        { "name": "firstName", "type": "string" },
-        { "name": "lastName", "type": "string" },
-        { "name": "createdAt", "type": "Date" }
+        { "name": "email", "type": "string" }
       ],
       "mockInput": [
         { "name": "email", "value": "'test@example.com'" },
-        { "name": "firstName", "value": "'John'" },
-        { "name": "lastName", "value": "'Doe'" },
         { "name": "password", "value": "'SecurePassword123!'" }
       ],
       "mockOutput": [
         { "name": "id", "value": "'user-123'" },
-        { "name": "email", "value": "'test@example.com'" },
-        { "name": "firstName", "value": "'John'" },
-        { "name": "lastName", "value": "'Doe'" },
-        { "name": "createdAt", "value": "new Date('2025-01-01T00:00:00Z')" }
+        { "name": "email", "value": "'test@example.com'" }
       ]
     }
   ],
@@ -79,11 +69,6 @@ To invoke this task, provide the command followed by a single, well-formed JSON 
       "name": "User Already Exists",
       "description": "when the email is already registered",
       "message": "User with this email already exists"
-    },
-    {
-      "name": "Invalid User Data",
-      "description": "when required fields are invalid or missing",
-      "message": "Invalid or missing required user data"
     }
   ]
 }
