@@ -1,5 +1,22 @@
 # AI-NOTE: This YAML file is the single source of truth for generating domain layers.
 # When creating a feature implementation, you MUST adhere to the structure and rules defined here.
+#
+# INTELLIGENT RLHF SCORING SYSTEM:
+# The system uses Reinforcement Learning from Human Feedback to score execution quality:
+# -2: CATASTROPHIC - Architecture violations, incorrect REPLACE/WITH format in refactor steps
+# -1: RUNTIME ERROR - Lint failures, test failures, git operation problems
+#  0: LOW CONFIDENCE - System is uncertain, avoids hallucinations
+# +1: GOOD - Task complete but missing DDD elements (ubiquitous language, patterns)
+# +2: PERFECT - Exceptional quality with Clean Architecture, DDD principles, ubiquitous language
+#
+# QUALITY INDICATORS FOR +2 SCORE:
+# - Uses ubiquitous language terminology
+# - Follows Domain-Driven Design principles
+# - Applies Clean Architecture concepts
+# - Implements patterns: Aggregate Root, Value Objects, Domain Events
+# - Perfect branch naming: feat/[feature-name]-domain
+# - Comprehensive PR descriptions
+#
 version: '3.0.0'
 # AI-NOTE: Update these fields to describe the specific feature.
 metadata:
@@ -8,6 +25,14 @@ metadata:
   source: 'TODO_DOMAIN_TEMPLATE.yaml'
   # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
   lastUpdated: '__CURRENT_DATE__'
+  # AI-NOTE: Define ubiquitous language for +2 RLHF score
+  ubiquitousLanguage:
+    - term: '__ENTITY_NAME__'
+      definition: '__ENTITY_DEFINITION_IN_BUSINESS_CONTEXT__'
+    - term: '__VALUE_OBJECT_NAME__'
+      definition: '__VALUE_OBJECT_BUSINESS_MEANING__'
+    - term: '__DOMAIN_EVENT__'
+      definition: '__EVENT_BUSINESS_SIGNIFICANCE__'
 
 # AI-NOTE: Replace __FEATURE_NAME_KEBAB_CASE__ with the feature name.
 structure:
@@ -21,6 +46,14 @@ structure:
 # AI-NOTE: IMMUTABLE SECTIONS AHEAD.
 # The sections from here until 'steps' are architectural rules.
 # You MUST copy them verbatim into the implementation file without ANY modification.
+#
+# AUTOMATED LEARNING SYSTEM:
+# The RLHF system automatically:
+# - Tracks success/failure patterns across executions
+# - Identifies common error types and their fixes
+# - Applies improvements when confidence > 80%
+# - Generates learning reports with actionable insights
+# - Prevents hallucinations with score 0 for uncertain cases
 # ------------------------------------------------------------------------------
 
 layer_rules:
@@ -221,9 +254,14 @@ steps:
         query: '*Repository'
         description: 'The structure is consistent with existing use cases like `OtherUseCase` found in the project.'
     path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases/__ACTION_ENTITY_KEBAB_CASE__.ts'
+    # AI-NOTE FOR +2 SCORE: Include domain concepts and ubiquitous language in comments
+    # Use business terminology, not technical jargon
+    # Reference Domain-Driven Design principles when applicable
     template: |
       /**
        * Input parameters for __ACTION_ENTITY_PASCAL_CASE__UseCase
+       * Following Clean Architecture principles - pure domain types
+       * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
        */
       export type __ACTION_ENTITY_PASCAL_CASE__Input = {
         __USE_CASE_INPUT_FIELDS__
@@ -231,6 +269,8 @@ steps:
 
       /**
        * Output type for __ACTION_ENTITY_PASCAL_CASE__UseCase
+       * Represents the business outcome of the operation
+       * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
        */
       export type __ACTION_ENTITY_PASCAL_CASE__Output = {
         __USE_CASE_OUTPUT_FIELDS__
@@ -239,12 +279,15 @@ steps:
       /**
        * __ACTION_ENTITY_PASCAL_CASE__UseCase interface
        * @description __USE_CASE_DESCRIPTION__
+       * @pattern Command Pattern - Single Responsibility Principle
+       * @layer Domain Layer - Framework agnostic business interface
        */
       export interface __ACTION_ENTITY_PASCAL_CASE__UseCase {
         /**
          * Execute the __ACTION_ENTITY_LOWER_CASE__ operation
          * @param input - The input parameters
          * @returns Promise with the operation output
+         * @throws Domain errors when business rules are violated
          */
         execute: (input: __ACTION_ENTITY_PASCAL_CASE__Input) => Promise<__ACTION_ENTITY_PASCAL_CASE__Output>
       }
@@ -314,9 +357,15 @@ steps:
         query: '*Repository'
         description: 'The structure is consistent with existing use cases like `OtherUseCase` found in the project.'
     path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/errors/__ERROR_NAME_KEBAB_CASE__.ts'
+    # AI-NOTE FOR +2 SCORE: Domain errors should represent business rule violations
+    # Use ubiquitous language in error messages
+    # Never expose technical details or implementation specifics
     template: |
       /**
-       * Error thrown when __ERROR_DESCRIPTION__
+       * Domain error thrown when __ERROR_DESCRIPTION__
+       * Represents a business rule violation in the __FEATURE_NAME__ bounded context
+       * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+       * @pattern Domain Error - Clean Architecture principle
        * @extends Error
        */
       export class __ERROR_NAME_PASCAL_CASE__Error extends Error {
@@ -475,8 +524,13 @@ steps:
         query: '__SYMBOL_BEING_CHANGED__'
         description: 'Refactoring this file because it is a primary consumer of the changed `__SYMBOL__` interface.'
     path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/path/to/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
-    # O 'template' aqui não é o conteúdo completo do arquivo,
-    # mas sim um "diff" no formato que você sugeriu.
+    # CRITICAL FOR RLHF SCORE: The template MUST use REPLACE/WITH format for refactor_file steps
+    # Missing these blocks will result in a CATASTROPHIC -2 score
+    # Format requirements:
+    # 1. MUST include <<<REPLACE>>> block with exact code to be replaced
+    # 2. MUST include <<<WITH>>> block with new code
+    # 3. MUST include closing tags: <<</REPLACE>>> and <<</WITH>>>
+    # 4. The code in REPLACE block must match EXACTLY what's in the file
     template: |
       <<<REPLACE>>>
       // Código antigo que a IA identificou para ser substituído
@@ -845,10 +899,15 @@ ai_guidelines:
 evaluation:
   # AI-NOTE: This final_status will be 'SUCCESS' if all steps passed, or 'FAILED' if any step failed.
   final_status: 'PENDING' # PENDING | SUCCESS | FAILED
-  # AI-NOTE: The final_rlhf_score is an overall score for the entire task, assigned by a human reviewer.
+  # AI-NOTE: The final_rlhf_score is calculated automatically based on execution quality
+  # -2: Catastrophic errors (architecture violations, wrong REPLACE/WITH format)
+  # -1: Runtime errors (lint, tests, git failures)
+  #  0: Low confidence (system uncertain, prevents hallucinations)
+  # +1: Good execution but missing DDD elements
+  # +2: Perfect with Clean Architecture, DDD, ubiquitous language
   final_rlhf_score: null # -2, -1, 0, 1, 2
-  # AI-NOTE: The reviewer will add a summary of what went well and what could be improved.
-  # This text is the primary source for future learning and template improvements.
+  # AI-NOTE: The system automatically analyzes patterns and learns from each execution
+  # This text is enhanced by automated RLHF analysis for continuous improvement
   reviewer_summary: |
     - What went well:
       - ...

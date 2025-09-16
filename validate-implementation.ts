@@ -2,8 +2,11 @@
 
 import { deepStrictEqual } from 'assert';
 import * as fs from 'fs';
+import * as path from 'path';
 import { fileURLToPath } from 'url';
 import * as yaml from 'yaml';
+import { RLHFSystem } from './rlhf-system.js';
+import Logger from './logger.js';
 
 
 
@@ -42,6 +45,9 @@ interface ValidationResult {
   valid: boolean;
   errors: string[];
   matches: string[];
+  rlhf_score?: number;
+  quality_indicators?: string[];
+  catastrophic_issues?: string[];
 }
 /**
  * Validates a feature implementation YAML file against the master template.
@@ -49,21 +55,33 @@ interface ValidationResult {
 class ImplementationValidator {
   private templateContent: Record<string, any> = {};
   private implementationContent: Record<string, any> = {};
+  private rlhf: RLHFSystem;
+  private logger: Logger;
   private result: ValidationResult = {
     valid: true,
     errors: [],
     matches: [],
+    quality_indicators: [],
+    catastrophic_issues: [],
   };
 
   constructor(
     private templatePath: string,
     private implementationPath: string,
-  ) {}
+  ) {
+    this.rlhf = new RLHFSystem();
+
+    // Create logs directory for validation
+    const logDir = path.join(process.cwd(), '.logs', 'validation');
+    this.logger = new Logger(logDir);
+  }
 
   /**
    * Runs all validation checks.
    */
   async validate(): Promise<ValidationResult> {
+    this.logger.log(`🔍 Starting validation of '${this.implementationPath}' against template '${this.templatePath}'`);
+
     this.templateContent = yaml.parse(fs.readFileSync(this.templatePath, 'utf-8'));
     this.implementationContent = yaml.parse(fs.readFileSync(this.implementationPath, 'utf-8'));
 
@@ -73,9 +91,13 @@ class ImplementationValidator {
     this.validateImmutableSections();
     this.validateStructure();
     this.validateSteps();
-    this.validateEvaluationSection(); // <-- NOVA VALIDAÇÃO
+    this.validateEvaluationSection();
+    this.validateArchitecturalQuality(); // <-- NOVA VALIDAÇÃO ARQUITETURAL
+    await this.calculateRLHFScore(); // <-- SCORE RLHF
 
     this.printResults();
+
+    this.logger.log(`✅ Validation completed. Valid: ${this.result.valid}, RLHF Score: ${this.result.rlhf_score}`);
     return this.result;
   }
 
@@ -103,11 +125,13 @@ class ImplementationValidator {
 
     if (matches) {
       const uniqueMatches = [...new Set(matches)];
+      this.logger.log(`❌ Found unresolved placeholders: ${uniqueMatches.join(', ')}`);
       this.result.errors.push(
         `❌ CRITICAL ERROR: Found unresolved placeholders in dynamic sections: ${uniqueMatches.join(', ')}.\n` +
         `   ➡️ AI ACTION: You MUST replace every placeholder variable (like __FEATURE_NAME_KEBAB_CASE__) with a specific value for your feature.`
       );
     } else {
+      this.logger.log('✅ No unresolved placeholders found');
       this.result.matches.push('✅ No unresolved placeholders found in dynamic content.');
     }
   }
@@ -259,7 +283,12 @@ class ImplementationValidator {
         }
       }
 
-      // 3. Validar o script de validação (se existir)
+      // 3. Validar template REPLACE/WITH para refactor_file
+      if (implStep.type === 'refactor_file') {
+        this.validateRefactorTemplate(implStep, stepId);
+      }
+
+      // 4. Validar o script de validação (se existir)
       if (implStep.validation_script) {
         const script = implStep.validation_script;
 
@@ -309,12 +338,190 @@ class ImplementationValidator {
   }
 
   /**
+   * Validates REPLACE/WITH template syntax for refactor_file steps
+   */
+  private validateRefactorTemplate(step: Step, stepId: string): void {
+    if (!step.template) {
+      this.result.errors.push(
+        `❌ CATASTROPHIC ERROR in step '${stepId}': refactor_file step missing 'template' field.\n` +
+        `   ➡️ AI ACTION: Add 'template' field with <<<REPLACE>>> and <<<WITH>>> blocks.`
+      );
+      this.result.catastrophic_issues?.push(`Missing template in refactor_file step '${stepId}'`);
+      return;
+    }
+
+    const template = step.template as string;
+
+    // Check for REPLACE block
+    if (!template.includes('<<<REPLACE>>>')) {
+      this.result.errors.push(
+        `❌ CATASTROPHIC ERROR in step '${stepId}': Missing '<<<REPLACE>>>' block in refactor template.\n` +
+        `   ➡️ AI ACTION: Add '<<<REPLACE>>>' block with the code to be replaced.`
+      );
+      this.result.catastrophic_issues?.push(`Missing REPLACE block in step '${stepId}'`);
+    }
+
+    // Check for WITH block
+    if (!template.includes('<<<WITH>>>')) {
+      this.result.errors.push(
+        `❌ CATASTROPHIC ERROR in step '${stepId}': Missing '<<<WITH>>>' block in refactor template.\n` +
+        `   ➡️ AI ACTION: Add '<<<WITH>>>' block with the new code.`
+      );
+      this.result.catastrophic_issues?.push(`Missing WITH block in step '${stepId}'`);
+    }
+
+    // Check for closing tags
+    if (!template.includes('<<</REPLACE>>>')) {
+      this.result.errors.push(
+        `❌ CATASTROPHIC ERROR in step '${stepId}': Missing '<<</REPLACE>>>' closing tag.\n` +
+        `   ➡️ AI ACTION: Add '<<</REPLACE>>>' to close the REPLACE block.`
+      );
+      this.result.catastrophic_issues?.push(`Missing REPLACE closing tag in step '${stepId}'`);
+    }
+
+    if (!template.includes('<<</WITH>>>')) {
+      this.result.errors.push(
+        `❌ CATASTROPHIC ERROR in step '${stepId}': Missing '<<</WITH>>>' closing tag.\n` +
+        `   ➡️ AI ACTION: Add '<<</WITH>>>' to close the WITH block.`
+      );
+      this.result.catastrophic_issues?.push(`Missing WITH closing tag in step '${stepId}'`);
+    }
+
+    // If all blocks are present, validate structure
+    if (template.includes('<<<REPLACE>>>') && template.includes('<<<WITH>>>') &&
+        template.includes('<<</REPLACE>>>') && template.includes('<<</WITH>>>')) {
+      this.result.matches.push(`✅ Refactor template syntax is correct for step '${stepId}'.`);
+    }
+  }
+
+  /**
+   * Validates architectural quality indicators for RLHF +2 scoring
+   */
+  private validateArchitecturalQuality(): void {
+    console.log('🏗️ Analyzing architectural quality and domain design...');
+
+    const implementationString = JSON.stringify(this.implementationContent).toLowerCase();
+
+    // Perfect execution indicators (+2 score)
+    const qualityPatterns = [
+      { pattern: /ubiquitous.*language/i, indicator: 'Uses ubiquitous language terminology' },
+      { pattern: /domain.*driven.*design/i, indicator: 'Follows Domain-Driven Design principles' },
+      { pattern: /clean.*architecture/i, indicator: 'Applies Clean Architecture concepts' },
+      { pattern: /aggregate.*root/i, indicator: 'Implements Aggregate Root pattern' },
+      { pattern: /value.*object/i, indicator: 'Uses Value Objects' },
+      { pattern: /domain.*event/i, indicator: 'Implements Domain Events' },
+      { pattern: /repository.*pattern/i, indicator: 'Uses Repository pattern' },
+      { pattern: /interface.*segregation/i, indicator: 'Applies Interface Segregation' },
+      { pattern: /dependency.*inversion/i, indicator: 'Uses Dependency Inversion' },
+      { pattern: /single.*responsibility/i, indicator: 'Follows Single Responsibility Principle' }
+    ];
+
+    let qualityScore = 0;
+    for (const { pattern, indicator } of qualityPatterns) {
+      if (pattern.test(implementationString)) {
+        this.result.quality_indicators?.push(indicator);
+        this.result.matches.push(`🏆 ${indicator}`);
+        qualityScore++;
+      }
+    }
+
+    // Check for proper domain layer structure
+    const steps = this.implementationContent.steps as Step[];
+    const hasProperStructure = steps?.some(step =>
+      step.type === 'folder' &&
+      JSON.stringify(step).includes('domain')
+    );
+
+    if (hasProperStructure) {
+      this.result.quality_indicators?.push('Proper domain layer structure');
+      this.result.matches.push('🏆 Proper domain layer structure defined');
+      qualityScore++;
+    }
+
+    // Check for proper branch naming convention
+    const branchStep = steps?.find(step => step.type === 'branch');
+    if (branchStep?.action?.branch_name?.includes('feat/') &&
+        branchStep.action.branch_name.includes('-domain')) {
+      this.result.quality_indicators?.push('Perfect branch naming convention');
+      this.result.matches.push('🏆 Perfect branch naming convention');
+      qualityScore++;
+    }
+
+    console.log(`   Found ${qualityScore} quality indicators for potential +2 RLHF score.`);
+  }
+
+  /**
+   * Calculate RLHF score for the implementation
+   */
+  private async calculateRLHFScore(): Promise<void> {
+    console.log('🤖 Calculating RLHF validation score...');
+    this.logger.log('🤖 Starting RLHF score calculation for validation');
+
+    // Determine success based on validation result
+    const success = this.result.errors.length === 0;
+
+    // Prepare error message if there are errors
+    const errorMessage = this.result.errors.length > 0
+      ? this.result.errors.join('\n')
+      : undefined;
+
+    // Calculate score using RLHF system
+    this.result.rlhf_score = await this.rlhf.calculateScore(
+      'validation',
+      success,
+      errorMessage,
+      this.implementationContent
+    );
+
+    // Adjust score based on quality indicators and catastrophic issues
+    if (this.result.catastrophic_issues && this.result.catastrophic_issues.length > 0) {
+      this.result.rlhf_score = -2; // Force catastrophic score
+    } else if (this.result.quality_indicators && this.result.quality_indicators.length >= 3) {
+      this.result.rlhf_score = Math.max(this.result.rlhf_score || 0, 2); // Boost to perfect score
+    }
+
+    console.log(`   RLHF Validation Score: ${this.result.rlhf_score}`);
+    this.logger.log(`📊 Final RLHF validation score: ${this.result.rlhf_score}`);
+  }
+
+  /**
    * Prints the final validation results to the console.
    */
   private printResults(): void {
     console.log('\n' + '═'.repeat(80));
     console.log('📊 Implementation Validation Results');
     console.log('═'.repeat(80));
+
+    // RLHF Score with visual feedback
+    if (this.result.rlhf_score !== undefined) {
+      const scoreEmoji = this.getScoreEmoji(this.result.rlhf_score);
+      const scoreColor = this.getScoreColor(this.result.rlhf_score);
+      console.log(scoreColor(`\n🤖 RLHF Validation Score: ${this.result.rlhf_score} ${scoreEmoji}`));
+
+      if (this.result.rlhf_score >= 2) {
+        console.log('🏆 PERFECT: Exceptional architectural quality with DDD principles!');
+      } else if (this.result.rlhf_score >= 1) {
+        console.log('✅ GOOD: Well-structured implementation following best practices.');
+      } else if (this.result.rlhf_score >= 0) {
+        console.log('⚠️ UNCERTAIN: Some quality concerns or missing architectural elements.');
+      } else if (this.result.rlhf_score >= -1) {
+        console.log('❌ RUNTIME ISSUES: Problems that will cause execution failures.');
+      } else {
+        console.log('💥 CATASTROPHIC: Fundamental architectural or format violations.');
+      }
+    }
+
+    // Quality indicators
+    if (this.result.quality_indicators && this.result.quality_indicators.length > 0) {
+      console.log('\n🏆 Architectural Quality Indicators:');
+      this.result.quality_indicators.forEach(qi => console.log(`   🎯 ${qi}`));
+    }
+
+    // Catastrophic issues
+    if (this.result.catastrophic_issues && this.result.catastrophic_issues.length > 0) {
+      console.log('\n💥 Catastrophic Issues Detected:');
+      this.result.catastrophic_issues.forEach(ci => console.log(`   🚨 ${ci}`));
+    }
 
     if (this.result.matches.length > 0) {
       console.log('\n✅ Checks Passed:');
@@ -337,6 +544,28 @@ class ImplementationValidator {
     }
     console.log('═'.repeat(80));
   }
+
+  /**
+   * Get emoji based on RLHF score
+   */
+  private getScoreEmoji(score: number): string {
+    if (score >= 2) return '🏆'; // Perfect execution
+    if (score >= 1) return '✅'; // Good execution
+    if (score >= 0) return '⚠️'; // Low confidence
+    if (score >= -1) return '❌'; // Runtime error
+    return '💥'; // Catastrophic error
+  }
+
+  /**
+   * Get color function based on RLHF score
+   */
+  private getScoreColor(score: number): (text: string) => string {
+    if (score >= 2) return (text: string) => `\x1b[32m\x1b[1m${text}\x1b[0m`; // Green bold
+    if (score >= 1) return (text: string) => `\x1b[32m${text}\x1b[0m`; // Green
+    if (score >= 0) return (text: string) => `\x1b[33m${text}\x1b[0m`; // Yellow
+    if (score >= -1) return (text: string) => `\x1b[31m${text}\x1b[0m`; // Red
+    return (text: string) => `\x1b[31m\x1b[1m${text}\x1b[0m`; // Red bold
+  }
 }
 
 async function main() {
@@ -350,6 +579,10 @@ async function main() {
   const [templatePath, implementationPath] = args;
   const validator = new ImplementationValidator(templatePath, implementationPath);
   const result = await validator.validate();
+
+  // Clean up resources
+  (validator as any).rlhf.close();
+  (validator as any).logger.close();
 
   process.exit(result.valid ? 0 : 1);
 }

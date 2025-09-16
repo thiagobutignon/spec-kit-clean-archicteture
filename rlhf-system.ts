@@ -4,6 +4,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as yaml from 'yaml';
 import { createHash } from 'crypto';
+import Logger from './logger';
 
 /**
  * Automated RLHF System for Domain Generation
@@ -13,6 +14,13 @@ import { createHash } from 'crypto';
  * 2. Identifies common error types
  * 3. Adjusts templates and processes
  * 4. Improves generation quality over time
+ *
+ * INTELLIGENT SCORING SYSTEM:
+ * -2: Catastrophic errors (architecture violations, incorrect REPLACE/WITH format)
+ * -1: Runtime errors during execution (lint, tests, git operations)
+ *  0: Low confidence situations - PREVENTS HALLUCINATIONS
+ * +1: Task complete but missing elements (ubiquitous language, best practices)
+ * +2: Perfect execution with domain knowledge and clean architecture
  */
 
 interface ExecutionMetrics {
@@ -48,15 +56,19 @@ class RLHFSystem {
   private metricsFile = path.join(this.dataDir, 'metrics.json');
   private patternsFile = path.join(this.dataDir, 'patterns.json');
   private improvementsFile = path.join(this.dataDir, 'improvements.json');
+  private logger: Logger;
 
   constructor() {
     fs.ensureDirSync(this.dataDir);
+    const logDir = path.join(this.dataDir, 'logs');
+    this.logger = new Logger(logDir);
   }
 
   /**
    * Analyze execution results and extract metrics
    */
   async analyzeExecution(yamlPath: string): Promise<void> {
+    this.logger.log(`🤖 Starting RLHF analysis for: ${yamlPath}`);
     const content = await fs.readFile(yamlPath, 'utf-8');
     const plan = yaml.parse(content);
     const metrics: ExecutionMetrics[] = [];
@@ -83,6 +95,8 @@ class RLHFSystem {
     await this.saveMetrics(metrics);
     await this.updatePatterns(metrics);
     await this.generateImprovements(metrics);
+
+    this.logger.log(`✅ RLHF analysis complete. Processed ${metrics.length} steps.`);
   }
 
   /**
@@ -221,12 +235,12 @@ class RLHFSystem {
   /**
    * Generate template improvements based on patterns
    */
-  private async generateImprovements(metrics: ExecutionMetrics[]): Promise<void> {
+  private async generateImprovements(_metrics: ExecutionMetrics[]): Promise<void> {
     const patterns = await this.loadPatterns();
     const improvements: TemplateImprovement[] = [];
 
     // Find patterns with low success rates
-    for (const [key, pattern] of patterns.entries()) {
+    for (const [key, pattern] of Array.from(patterns.entries())) {
       if (pattern.successRate < 0.3 && pattern.occurrences > 5) {
         const improvement: TemplateImprovement = {
           templatePath: this.inferTemplatePath(key),
@@ -279,7 +293,8 @@ class RLHFSystem {
    * Apply improvement to template automatically
    */
   private async applyImprovement(improvement: TemplateImprovement): Promise<void> {
-    console.log(`🤖 Auto-applying improvement for ${improvement.problemPattern}`);
+    this.logger.log(`🤖 Auto-applying improvement for ${improvement.problemPattern}`);
+    this.logger.log(`📝 Solution: ${improvement.solution} (confidence: ${(improvement.confidence * 100).toFixed(1)}%)`);
 
     // This would modify the actual template files
     // For now, we'll just log and mark as applied
@@ -300,12 +315,15 @@ class RLHFSystem {
 
     records.push(record);
     await fs.writeJson(recordsFile, records, { spaces: 2 });
+
+    this.logger.log(`✅ Improvement applied and recorded for ${improvement.problemPattern}`);
   }
 
   /**
    * Generate learning report
    */
   async generateReport(): Promise<void> {
+    this.logger.log('📊 Generating RLHF learning report...');
     const metrics = await fs.readJson(this.metricsFile);
     const patterns = await fs.readJson(this.patternsFile);
     const improvements = await fs.readJson(this.improvementsFile);
@@ -333,6 +351,9 @@ class RLHFSystem {
       report,
       { spaces: 2 }
     );
+
+    this.logger.log(`✅ Learning report generated. Success rate: ${(report.summary.successRate * 100).toFixed(1)}%`);
+    this.logger.log(`📈 Patterns discovered: ${Object.keys(patterns).length}, Improvements suggested: ${report.suggestedImprovements.length}`);
   }
 
   /**
@@ -349,28 +370,174 @@ class RLHFSystem {
   }
 
   /**
-   * Calculate RLHF score based on historical performance
+   * Calculate RLHF score based on intelligent scoring system
+   * -2: Catastrophic errors (architecture violations, incorrect REPLACE/WITH format)
+   * -1: Runtime errors during execution
+   *  0: Low confidence - AVOIDS HALLUCINATIONS
+   * +1: Task complete but missing something (e.g., ubiquitous language)
+   * +2: Perfect execution
    */
-  async calculateScore(stepType: string, success: boolean): Promise<number> {
-    const patterns = await this.loadPatterns();
-    const key = `${stepType}_${success ? 'success' : 'failure'}`;
-    const pattern = patterns.get(key);
+  async calculateScore(stepType: string, success: boolean, errorMessage?: string, stepData?: any): Promise<number> {
+    this.logger.log(`🧮 Calculating intelligent RLHF score for ${stepType} (${success ? 'success' : 'failure'})`);
 
-    if (!pattern) {
-      return success ? 1 : -1; // Default scores
+    // For failures, analyze error severity
+    if (!success && errorMessage) {
+      const score = this.analyzeFailureSeverity(errorMessage, stepType, stepData);
+      this.logger.log(`❌ Failure analysis: Score ${score} for error type`);
+      return score;
     }
 
-    // Score based on rarity and impact
-    const rarityScore = 1 - (pattern.occurrences / 100); // Rarer = higher impact
-    const impactScore = success
-      ? pattern.successRate
-      : (1 - pattern.successRate);
+    // For successes, analyze completion quality
+    if (success) {
+      const score = this.analyzeSuccessQuality(stepType, stepData);
+      this.logger.log(`✅ Success analysis: Score ${score} for quality level`);
+      return score;
+    }
 
-    // RLHF score from -2 to 2
-    const baseScore = success ? 1 : -1;
-    const adjustedScore = baseScore * (1 + rarityScore * impactScore);
+    // Default low confidence score
+    this.logger.log(`⚠️ Low confidence case: Score 0`);
+    return 0;
+  }
 
-    return Math.max(-2, Math.min(2, adjustedScore));
+  /**
+   * Analyze failure severity to determine score
+   */
+  private analyzeFailureSeverity(errorMessage: string, stepType: string, stepData?: any): number {
+
+    // -2: Catastrophic errors (architecture violations, format errors)
+    const catastrophicPatterns = [
+      /replace.*with.*format/i,
+      /<<<replace>>>.*<<</i,
+      /architecture.*violation/i,
+      /clean.*architecture/i,
+      /domain.*layer.*violation/i,
+      /invalid.*template.*format/i,
+      /missing.*replace.*block/i,
+      /missing.*with.*block/i,
+      /template.*syntax.*error/i
+    ];
+
+    for (const pattern of catastrophicPatterns) {
+      if (pattern.test(errorMessage)) {
+        return -2;
+      }
+    }
+
+    // Additional catastrophic checks for step data
+    if (stepData?.template && stepType === 'refactor_file') {
+      if (!stepData.template.includes('<<<REPLACE>>>') || !stepData.template.includes('<<<WITH>>>')) {
+        return -2;
+      }
+    }
+
+    // -1: Runtime errors during execution
+    const runtimePatterns = [
+      /lint.*failed/i,
+      /test.*failed/i,
+      /typescript.*error/i,
+      /compilation.*error/i,
+      /branch.*conflict/i,
+      /pr.*creation.*failed/i,
+      /permission.*denied/i,
+      /git.*operation.*failed/i,
+      /file.*not.*found/i,
+      /command.*not.*found/i,
+      /network.*error/i,
+      /timeout/i
+    ];
+
+    for (const pattern of runtimePatterns) {
+      if (pattern.test(errorMessage)) {
+        return -1;
+      }
+    }
+
+    // Unknown error type - low confidence
+    return 0;
+  }
+
+  /**
+   * Analyze success quality to determine score
+   */
+  private analyzeSuccessQuality(stepType: string, stepData?: any): number {
+    let score = 1; // Base success score
+    let qualityIndicators = 0;
+    let missingElements = 0;
+
+    // Check for quality indicators
+    if (stepData?.template) {
+      const template = stepData.template.toLowerCase();
+
+      // Perfect execution indicators (+2)
+      const perfectIndicators = [
+        /ubiquitous.*language/i,
+        /domain.*driven.*design/i,
+        /clean.*architecture/i,
+        /interface.*segregation/i,
+        /dependency.*inversion/i,
+        /single.*responsibility/i,
+        /aggregate.*root/i,
+        /value.*object/i,
+        /domain.*event/i,
+        /repository.*pattern/i
+      ];
+
+      for (const indicator of perfectIndicators) {
+        if (indicator.test(template)) {
+          qualityIndicators++;
+        }
+      }
+
+      // Missing elements that should be there
+      const expectedElements = [
+        { pattern: /export.*interface/i, name: 'interface_export' },
+        { pattern: /export.*type/i, name: 'type_export' },
+        { pattern: /export.*class/i, name: 'class_export' },
+        { pattern: /async.*function/i, name: 'async_function' },
+        { pattern: /promise<.*>/i, name: 'promise_typing' }
+      ];
+
+      if (stepType === 'create_file') {
+        for (const element of expectedElements) {
+          if (!element.pattern.test(template)) {
+            missingElements++;
+          }
+        }
+      }
+    }
+
+    // Scoring logic
+    if (qualityIndicators >= 2) {
+      score = 2; // Perfect execution
+    } else if (qualityIndicators >= 1) {
+      score = 2; // Good execution with domain knowledge
+    } else if (missingElements > 2) {
+      score = 1; // Complete but missing important elements
+    } else {
+      score = 1; // Standard successful completion
+    }
+
+    // Branch and PR steps quality analysis
+    if (stepType === 'branch') {
+      if (stepData?.action?.branch_name?.includes('feat/') && stepData.action.branch_name.includes('-domain')) {
+        score = 2; // Perfect branch naming
+      }
+    }
+
+    if (stepType === 'pull_request') {
+      if (stepData?.action?.title?.includes('feat(') || stepData.action?.title?.includes('domain')) {
+        score = 2; // Perfect PR title
+      }
+    }
+
+    return score;
+  }
+
+  /**
+   * Clean up resources
+   */
+  public close(): void {
+    this.logger.close();
   }
 }
 
@@ -398,7 +565,7 @@ async function main() {
         const score = await rlhf.calculateScore(args[0], args[1] === 'true');
         console.log(`RLHF Score: ${score}`);
       } else {
-        console.error('Usage: rlhf-system score <step-type> <success>');
+        console.error('Usage: rlhf-system score <step-type> <success> [error-message]');
       }
       break;
 
@@ -408,9 +575,13 @@ async function main() {
       console.log('  report              - Generate learning report');
       console.log('  score <type> <bool> - Calculate RLHF score');
   }
+
+  // Clean up logger
+  rlhf.close();
 }
 
-if (require.main === module) {
+// Check if this file is being run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(console.error);
 }
 
