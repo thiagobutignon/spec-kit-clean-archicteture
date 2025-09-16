@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for spec-kit-clean-archicteture/src/features/todo-list/domain/test/mock-create-todo-use-case.ts</title>
+    <title>Code coverage report for spec-kit-clean-archicteture/src/features/todo-list/domain/test/mock-update-todo-use-case.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../../../../../prettify.css" />
     <link rel="stylesheet" href="../../../../../../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../../../../../index.html">All files</a> / <a href="index.html">spec-kit-clean-archicteture/src/features/todo-list/domain/test</a> mock-create-todo-use-case.ts</h1>
+        <h1><a href="../../../../../../index.html">All files</a> / <a href="index.html">spec-kit-clean-archicteture/src/features/todo-list/domain/test</a> mock-update-todo-use-case.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/17</span>
+                <span class='fraction'>0/19</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/17</span>
+                <span class='fraction'>0/19</span>
             </div>
         
             
@@ -96,7 +96,9 @@
 <a name='L31'></a><a href='#L31'>31</a>
 <a name='L32'></a><a href='#L32'>32</a>
 <a name='L33'></a><a href='#L33'>33</a>
-<a name='L34'></a><a href='#L34'>34</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -108,11 +110,13 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -130,36 +134,38 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import { vi } from 'vitest'<span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span>
-import type { CreateTodoUseCase, CreateTodoInput, CreateTodoOutput } from '../use-cases/create-todo'
+import type { UpdateTodoUseCase, UpdateTodoInput, UpdateTodoOutput } from '../use-cases/update-todo'
 &nbsp;
 /**
- * Creates a mock instance of CreateTodoInput
+ * Creates a mock instance of UpdateTodoInput
  * @returns Mock input for testing
  */
-<span class="cstat-no" title="statement not covered" >export const mockCreateTodoInput = (): CreateTodoInput =&gt; ({</span>
+<span class="cstat-no" title="statement not covered" >export const mockUpdateTodoInput = (): UpdateTodoInput =&gt; ({</span>
 <span class="cstat-no" title="statement not covered" >  tenantId: 'tenant-123',</span>
-<span class="cstat-no" title="statement not covered" >  title: 'Test Todo Item',</span>
-<span class="cstat-no" title="statement not covered" >  description: 'This is a test todo item'</span>
+<span class="cstat-no" title="statement not covered" >  todoId: 'todo-123',</span>
+<span class="cstat-no" title="statement not covered" >  title: 'Updated Todo Item',</span>
+<span class="cstat-no" title="statement not covered" >  completed: true</span>
 <span class="cstat-no" title="statement not covered" >})</span>
 &nbsp;
 /**
- * Creates a mock instance of CreateTodoOutput
+ * Creates a mock instance of UpdateTodoOutput
  * @returns Mock output for testing
  */
-<span class="cstat-no" title="statement not covered" >export const mockCreateTodoOutput = (): CreateTodoOutput =&gt; ({</span>
+<span class="cstat-no" title="statement not covered" >export const mockUpdateTodoOutput = (): UpdateTodoOutput =&gt; ({</span>
 <span class="cstat-no" title="statement not covered" >  id: 'todo-123',</span>
 <span class="cstat-no" title="statement not covered" >  tenantId: 'tenant-123',</span>
-<span class="cstat-no" title="statement not covered" >  title: 'Test Todo Item',</span>
-<span class="cstat-no" title="statement not covered" >  description: 'This is a test todo item',</span>
-<span class="cstat-no" title="statement not covered" >  completed: false,</span>
-<span class="cstat-no" title="statement not covered" >  createdAt: new Date('2025-01-01T00:00:00Z')</span>
+<span class="cstat-no" title="statement not covered" >  title: 'Updated Todo Item',</span>
+<span class="cstat-no" title="statement not covered" >  description: 'This is an updated todo item',</span>
+<span class="cstat-no" title="statement not covered" >  completed: true,</span>
+<span class="cstat-no" title="statement not covered" >  createdAt: new Date('2025-01-01T00:00:00Z'),</span>
+<span class="cstat-no" title="statement not covered" >  updatedAt: new Date('2025-01-02T00:00:00Z')</span>
 <span class="cstat-no" title="statement not covered" >})</span>
 &nbsp;
 /**
- * Creates a mock instance of CreateTodoUseCase
+ * Creates a mock instance of UpdateTodoUseCase
  * @returns Mocked use case with vitest functions
  */
-<span class="cstat-no" title="statement not covered" >export const mockCreateTodoUseCase = (): CreateTodoUseCase =&gt; ({</span>
+<span class="cstat-no" title="statement not covered" >export const mockUpdateTodoUseCase = (): UpdateTodoUseCase =&gt; ({</span>
 <span class="cstat-no" title="statement not covered" >  execute: vi.fn()</span>
 <span class="cstat-no" title="statement not covered" >})</span>
 &nbsp;</pre></td></tr></table></pre>
