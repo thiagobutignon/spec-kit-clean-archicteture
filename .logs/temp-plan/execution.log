@@ -438,3 +438,59 @@ exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,out
 [2025-09-16T19:27:21.444Z] Done in 0.49s.
 [2025-09-16T19:27:21.450Z] ✅ Tests passed
 📦 Staging changes...
+[2025-09-16T19:27:21.470Z] 💾 Creating commit...
+[2025-09-16T19:27:21.496Z] [main e947c57] feat(user-registration): add weak-password domain error
+ 23 files changed, 302 insertions(+), 37 deletions(-)
+ create mode 100644 coverage/spec-kit-clean-archicteture/src/features/user-registration/domain/errors/weak-password.ts.html
+ create mode 100644 src/features/user-registration/domain/errors/weak-password.ts
+[2025-09-16T19:27:21.496Z] ✅ Successfully committed
+[2025-09-16T19:27:21.497Z] --- Script finished successfully ---
+[2025-09-16T19:27:21.500Z] --- Running validation script for 'create-error-email-send-failed' ---
+[2025-09-16T19:27:21.504Z] 🔍 Running lint check...
+[2025-09-16T19:27:21.579Z] yarn run v1.22.22
+[2025-09-16T19:27:21.589Z] [ERROR] warning ../../package.json: No license field
+[2025-09-16T19:27:21.593Z] $ eslint .
+[2025-09-16T19:27:22.083Z] /Users/thiagobutignon/dev/spec-kit-clean-archicteture/coverage/block-navigation.js
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+✖ 1 problem (0 errors, 1 warning)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+[2025-09-16T19:27:22.092Z] Done in 0.52s.
+[2025-09-16T19:27:22.098Z] ✅ Lint passed
+🧪 Running tests with coverage...
+[2025-09-16T19:27:22.172Z] yarn run v1.22.22
+[2025-09-16T19:27:22.182Z] [ERROR] warning ../../package.json: No license field
+[2025-09-16T19:27:22.187Z] $ vitest --passWithNoTests --coverage
+[2025-09-16T19:27:22.527Z] 
+[2025-09-16T19:27:22.527Z] RUN  v3.2.4 /Users/thiagobutignon/dev/spec-kit-clean-archicteture
+[2025-09-16T19:27:22.527Z] Coverage enabled with v8
+[2025-09-16T19:27:22.607Z] No test files found, exiting with code 0
+[2025-09-16T19:27:22.607Z] [ERROR] include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+[2025-09-16T19:27:22.607Z] % Coverage report from v8
+[2025-09-16T19:27:22.609Z] -------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T19:27:22.609Z] File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T19:27:22.609Z] All files          |       0 |    83.33 |   83.33 |       0 |
+[2025-09-16T19:27:22.609Z] ...n-archicteture |       0 |    66.66 |   66.66 |       0 |
+[2025-09-16T19:27:22.609Z] execute-steps.ts |       0 |      100 |     100 |       0 | 3-265
+[2025-09-16T19:27:22.609Z] logger.ts        |       0 |        0 |       0 |       0 | 1-46
+[2025-09-16T19:27:22.609Z] ...ementation.ts |       0 |      100 |     100 |       0 | 3-293
+[2025-09-16T19:27:22.609Z] .../domain/errors |       0 |      100 |     100 |       0 |                   
+  ...-not-found.ts |       0 |      100 |     100 |       0 | 5-10              
+ ...le/domain/test |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:22.609Z] ...e-use-case.ts |       0 |        0 |       0 |       0 | 1-30
+[2025-09-16T19:27:22.609Z] ...main/use-cases |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:22.609Z] ...er-profile.ts |       0 |        0 |       0 |       0 |                   
+ .../domain/errors |       0 |      100 |     100 |       0 |
+[2025-09-16T19:27:22.609Z] ...end-failed.ts |       0 |      100 |     100 |       0 | 5-10              
+  invalid-email.ts |       0 |      100 |     100 |       0 | 5-10              
+  ...ady-exists.ts |       0 |      100 |     100 |       0 | 5-10
+[2025-09-16T19:27:22.609Z] weak-password.ts |       0 |      100 |     100 |       0 | 5-10              
+ ...main/use-cases |       0 |        0 |       0 |       0 |                   
+  register-user.ts |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:22.609Z] ...come-email.ts |       0 |        0 |       0 |       0 |
+[2025-09-16T19:27:22.609Z] -------------------|---------|----------|---------|---------|-------------------
+[2025-09-16T19:27:22.664Z] Done in 0.49s.
+[2025-09-16T19:27:22.671Z] ✅ Tests passed
+📦 Staging changes...

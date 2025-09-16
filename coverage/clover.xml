@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1758050841398" clover="3.2.0">
-  <project timestamp="1758050841398" name="All files">
-    <metrics statements="445" coveredstatements="0" conditionals="11" coveredconditionals="9" methods="11" coveredmethods="9" elements="467" coveredelements="18" complexity="0" loc="445" ncloc="445" packages="6" files="11" classes="11"/>
+<coverage generated="1758050842621" clover="3.2.0">
+  <project timestamp="1758050842621" name="All files">
+    <metrics statements="451" coveredstatements="0" conditionals="12" coveredconditionals="10" methods="12" coveredmethods="10" elements="475" coveredelements="20" complexity="0" loc="451" ncloc="451" packages="6" files="12" classes="12"/>
     <package name="spec-kit-clean-archicteture">
       <metrics statements="407" coveredstatements="0" conditionals="3" coveredconditionals="2" methods="3" coveredmethods="2"/>
       <file name="execute-steps.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/execute-steps.ts">
@@ -460,7 +460,16 @@
       </file>
     </package>
     <package name="spec-kit-clean-archicteture.src.features.user-registration.domain.errors">
-      <metrics statements="18" coveredstatements="0" conditionals="3" coveredconditionals="3" methods="3" coveredmethods="3"/>
+      <metrics statements="24" coveredstatements="0" conditionals="4" coveredconditionals="4" methods="4" coveredmethods="4"/>
+      <file name="email-send-failed.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/user-registration/domain/errors/email-send-failed.ts">
+        <metrics statements="6" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+        <line num="5" count="0" type="stmt"/>
+        <line num="6" count="0" type="stmt"/>
+        <line num="7" count="0" type="stmt"/>
+        <line num="8" count="0" type="stmt"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="10" count="0" type="stmt"/>
+      </file>
       <file name="invalid-email.ts" path="/Users/thiagobutignon/dev/spec-kit-clean-archicteture/src/features/user-registration/domain/errors/invalid-email.ts">
         <metrics statements="6" coveredstatements="0" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
         <line num="5" count="0" type="stmt"/>
