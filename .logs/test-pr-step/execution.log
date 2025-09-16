@@ -1,0 +1,6 @@
+[2025-09-16T21:50:33.942Z] --- Running validation script for 'test-pr' ---
+[2025-09-16T21:50:33.951Z] Testing PR step
+Would create PR from feat/test-feature to staging
+[2025-09-16T21:50:33.951Z] Title: Test PR Creation
+Success!
+[2025-09-16T21:50:33.952Z] --- Script finished successfully ---

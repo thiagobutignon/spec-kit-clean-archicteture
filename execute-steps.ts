@@ -11,7 +11,7 @@ $.shell = '/bin/bash';
 
 interface Step {
   id: string;
-  type: 'create_file' | 'refactor_file' | 'delete_file' | 'folder';
+  type: 'create_file' | 'refactor_file' | 'delete_file' | 'folder' | 'branch' | 'pull_request';
   status: 'PENDING' | 'SUCCESS' | 'FAILED' | 'SKIPPED';
   rlhf_score: number | null;
   execution_log: string;
@@ -22,6 +22,10 @@ interface Step {
       basePath?: string;
       folders?: string[];
     };
+    branch_name?: string;
+    target_branch?: string;
+    source_branch?: string;
+    title?: string;
   };
   validation_script?: string;
 }
@@ -133,6 +137,12 @@ class StepExecutor {
       case 'folder':
         await this.handleFolderStep(step);
         break;
+      case 'branch':
+        await this.handleBranchStep(step);
+        break;
+      case 'pull_request':
+        await this.handlePullRequestStep(step);
+        break;
       default:
         throw new Error(`Unknown step type: '${(step as any).type}'`);
     }
@@ -202,6 +212,36 @@ class StepExecutor {
 
     await fs.writeFile(path, newFileContent);
     console.log(chalk.green(`   ✅ Successfully applied refactoring to ${path}`));
+  }
+
+  private async handleBranchStep(step: Step): Promise<void> {
+    const branchName = step.action?.branch_name;
+    if (!branchName) {
+      throw new Error("Branch step is missing 'action.branch_name'.");
+    }
+
+    console.log(chalk.cyan(`   🌿 Managing branch: ${branchName}`));
+
+    // The validation script will handle the actual git operations
+    // This method just ensures the configuration is correct
+    console.log(chalk.blue(`   📝 Branch configuration validated. Will be created/checked out by validation script.`));
+  }
+
+  private async handlePullRequestStep(step: Step): Promise<void> {
+    const { target_branch, source_branch, title } = step.action || {};
+
+    if (!target_branch || !source_branch) {
+      throw new Error("Pull request step is missing required 'action.target_branch' or 'action.source_branch'.");
+    }
+
+    console.log(chalk.cyan(`   🔄 Preparing pull request from ${source_branch} to ${target_branch}`));
+
+    if (title) {
+      console.log(chalk.blue(`   📋 PR Title: ${title}`));
+    }
+
+    // The validation script will handle the actual PR creation
+    console.log(chalk.blue(`   📝 PR configuration validated. Will be created by validation script.`));
   }
 
 private async runValidationScript(scriptContent: string, stepId: string): Promise<string> {
