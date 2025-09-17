@@ -22,7 +22,7 @@ Your goal is to act as a Principal Engineer performing a final architectural rev
 
 ## 3. Input Parameters
 
-- **YAML Plan:** The complete, potentially revised YAML content from the `/05-reflect-domain-lessons` step.
+- **YAML Plan:** The complete, potentially revised YAML content from the `/04-reflect-domain-lessons` step.
 - **Note:** This YAML should be saved at `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml`
 
 ## 4. Evaluation Principles (The Constitution)

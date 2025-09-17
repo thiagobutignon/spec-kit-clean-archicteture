@@ -9,8 +9,17 @@ export function resolveLogDirectory(
   contextPath: string,
   subDirectory?: string
 ): string {
-  // Try to extract spec folder path (e.g., spec/001-user-registration)
-  const specMatch = contextPath.match(/(spec\/\d{3}-[\w-]+)/);
+  // Validate input
+  if (!contextPath) {
+    throw new Error('Context path is required for resolveLogDirectory');
+  }
+
+  if (typeof contextPath !== 'string') {
+    throw new Error(`Context path must be a string, received: ${typeof contextPath}`);
+  }
+
+  // Try to extract spec folder path (e.g., spec/001-user-registration or spec/1234-feature)
+  const specMatch = contextPath.match(/(spec\/\d+-[\w-]+)/);
 
   if (specMatch) {
     // We're in a spec structure, use the spec's logs folder
@@ -33,8 +42,17 @@ export function resolveDebugDirectory(
   contextPath: string,
   subDirectory?: string
 ): string {
-  // Try to extract spec folder path
-  const specMatch = contextPath.match(/(spec\/\d{3}-[\w-]+)/);
+  // Validate input
+  if (!contextPath) {
+    throw new Error('Context path is required for resolveDebugDirectory');
+  }
+
+  if (typeof contextPath !== 'string') {
+    throw new Error(`Context path must be a string, received: ${typeof contextPath}`);
+  }
+
+  // Try to extract spec folder path (e.g., spec/001-user-registration or spec/1234-feature)
+  const specMatch = contextPath.match(/(spec\/\d+-[\w-]+)/);
 
   if (specMatch) {
     // We're in a spec structure, use the spec's debug folder
@@ -55,7 +73,11 @@ export function resolveDebugDirectory(
  */
 export function resolveRLHFDirectory(contextPath?: string): string {
   if (contextPath) {
-    const specMatch = contextPath.match(/(spec\/\d{3}-[\w-]+)/);
+    if (typeof contextPath !== 'string') {
+      throw new Error(`Context path must be a string, received: ${typeof contextPath}`);
+    }
+
+    const specMatch = contextPath.match(/(spec\/\d+-[\w-]+)/);
     if (specMatch) {
       return path.join(specMatch[1], 'metrics');
     }

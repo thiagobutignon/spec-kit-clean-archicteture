@@ -22,7 +22,7 @@ Your goal is to act as an automated build engineer. You will receive a final, fu
 
 ## 3. Input Parameters
 
-- **YAML Plan:** The complete, approved YAML content from the `/04-evaluate-domain-results` step.
+- **YAML Plan:** The complete, approved YAML content from the `/05-evaluate-domain-results` step.
 - **Working Directory:** All files should be created relative to `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/`
   - Example: When the plan says to create `src/features/user-registration/domain/usecases/register-user.ts`,
     you should actually create it at `spec/001-user-registration/domain/src/features/user-registration/domain/usecases/register-user.ts`

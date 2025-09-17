@@ -172,7 +172,7 @@ steps:
 After generating your YAML plan, proceed to architectural reflection:
 
 ```bash
-/05-reflect-domain-lessons from yaml: <your-generated-yaml>
+/04-reflect-domain-lessons from yaml: <your-generated-yaml>
 ```
 
 This will refine your YAML plan using Clean Architecture principles and DDD patterns to optimize for RLHF score.
