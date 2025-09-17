@@ -24,7 +24,7 @@ version: '3.0.0'
 metadata:
   title: '__FEATURE_NAME_PASCAL_CASE__ Clean Architecture Implementation'
   description: 'Clean Architecture template for __FEATURE_NAME_LOWER_CASE__ feature following master template rules.'
-  source: 'TEMPLATE.yaml'
+  source: 'TEMPLATE_REFACTORED.yaml'
   # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
   lastUpdated: '__CURRENT_DATE__'
   # AI-NOTE: Specify which layers are being implemented
@@ -187,6 +187,101 @@ test_helper_rules:
     - 'Use Jest (use Vitest instead)'
 
 # ------------------------------------------------------------------------------
+# DRY REFACTORED: REUSABLE VALIDATION SCRIPTS
+# ------------------------------------------------------------------------------
+
+validation_scripts:
+  lint_check: &lint_check |
+    echo "🔍 Running lint check..."
+    yarn lint
+    if [ $? -ne 0 ]; then
+      echo "❌ LINT FAILED - Attempting auto-fix..."
+      yarn lint --fix
+      if [ $? -ne 0 ]; then
+        echo "❌ AUTO-FIX FAILED - Manual intervention required"
+        exit 1
+      fi
+      echo "✅ Lint errors auto-fixed, validating again..."
+      yarn lint
+      if [ $? -ne 0 ]; then
+        echo "❌ LINT STILL FAILING - Manual fixes needed"
+        exit 1
+      fi
+    fi
+    echo "✅ Lint passed"
+
+  test_check: &test_check |
+    echo "🧪 Running tests with coverage..."
+    yarn test --coverage
+    if [ $? -ne 0 ]; then
+      echo "❌ TESTS FAILED - Running specific test to identify issue..."
+      yarn test --run --reporter=verbose
+      echo "❌ Tests must be fixed manually"
+      exit 1
+    fi
+    echo "✅ Tests passed"
+
+  stage_commit: &stage_commit |
+    echo "📦 Staging changes..."
+    git add .
+
+    echo "💾 Creating commit..."
+    git commit -m "$COMMIT_MESSAGE"
+    if [ $? -ne 0 ]; then
+      echo "❌ COMMIT FAILED - Checking git status..."
+      git status
+      exit 1
+    fi
+    echo "✅ Successfully committed"
+
+  verify_deletion: &verify_deletion |
+    echo "🗑️ Verifying file deletion..."
+    if [ -f "$FILE_PATH" ]; then
+      echo "❌ ERROR: File was not deleted."
+      exit 1
+    fi
+    echo "✅ File successfully deleted."
+
+  verify_folders: &verify_folders |
+    echo "✅ Verifying folder structure..."
+    for folder in $FOLDERS; do
+      if [ ! -d "$folder" ]; then
+        echo "❌ ERROR: Folder $folder was not created."
+        exit 1
+      fi
+    done
+    echo "✅ All folders exist."
+
+# Common step properties to reduce repetition
+step_defaults: &step_defaults
+  status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+  rlhf_score: null # -2, -1, 0, 1, 2
+  execution_log: ''
+
+# Common reference patterns
+reference_patterns:
+  clean_architecture: &ref_clean_arch
+    type: 'external_pattern'
+    source: 'context7'
+    query: 'clean architecture use case'
+    url: 'https://github.com/...'
+    description: 'Following Clean Architecture pattern.'
+
+  ddd_pattern: &ref_ddd
+    type: 'external_pattern'
+    source: 'context7'
+    query: 'domain driven design'
+    url: 'https://github.com/...'
+    description: 'Following DDD patterns.'
+
+  tdd_pattern: &ref_tdd
+    type: 'external_pattern'
+    source: 'context7'
+    query: 'test driven development'
+    url: 'https://github.com/...'
+    description: 'Following TDD patterns.'
+
+# ------------------------------------------------------------------------------
 # AI-NOTE: DYNAMIC IMPLEMENTATION SECTION.
 # Replicate the generic steps below for each use case, error, and test helper
 # required by the feature, replacing the placeholder variables (e.g., __FEATURE_NAME_KEBAB_CASE__).
@@ -202,9 +297,7 @@ steps:
   - id: 'create-feature-branch'
     type: 'branch'
     description: 'Create a new feature branch for __FEATURE_NAME_PASCAL_CASE__'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
-    execution_log: ''
+    <<: *step_defaults
     references:
       - type: 'internal_guideline'
         source: 'GIT_WORKFLOW.md'
@@ -254,9 +347,7 @@ steps:
   - id: 'create-__LAYER__-structure'
     type: 'folder'
     description: 'Create __LAYER__ layer folder structure'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
-    execution_log: ''
+    <<: *step_defaults
     references:
       - type: 'internal_guideline'
         source: 'ARCHITECTURE.md'
@@ -269,32 +360,31 @@ steps:
           - 'use-cases'
           - 'test'
     validation_script: |
+      BASE_PATH="src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__"
+      FOLDERS="$BASE_PATH/errors $BASE_PATH/use-cases $BASE_PATH/test"
       echo "✅ Verifying __LAYER__ folder structure..."
-      # Verify all required folders exist
-      if [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__/errors" ] || \
-         [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__/use-cases" ] || \
-         [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__/test" ]; then
-        echo "❌ ERROR: One or more __LAYER__ folders were not created."
-        exit 1
-      fi
-      echo "✅ __LAYER__ folders exist."
+      for folder in $FOLDERS; do
+        if [ ! -d "$folder" ]; then
+          echo "❌ ERROR: Folder $folder was not created."
+          exit 1
+        fi
+      done
+      echo "✅ All __LAYER__ folders exist."
 
   # === USE CASE CREATION ===
   # AI-NOTE: This step creates use cases for the specified __LAYER__
   - id: 'create-use-case-__ACTION_ENTITY_KEBAB_CASE__'
     type: 'create_file'
     description: 'Create __ACTION_ENTITY_PASCAL_CASE__ use case interface'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
-    execution_log: ''
+    <<: *step_defaults
     # AI-NOTE: For each step, you MUST populate this 'references' section.
     # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
     references:
       - type: 'external_pattern'
         source: 'context7'
         query: 'clean architecture use case'
-        url: 'https://github.com/...' # Link with your research phase
-        description: 'Following Clean Architecture use case pattern.'
+        url: 'https://github.com/...'
+        description: 'Following Clean Architecture pattern.'
       - type: 'internal_code_analysis'
         source: 'serena'
         tool: 'find_symbol'
@@ -384,16 +474,14 @@ steps:
   - id: 'create-error-__ERROR_NAME_KEBAB_CASE__'
     type: 'create_file'
     description: 'Create __ERROR_NAME_KEBAB_CASE__ error class'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
-    execution_log: ''
+    <<: *step_defaults
     # AI-NOTE: For each step, you MUST populate this 'references' section.
     # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
     references:
       - type: 'external_pattern'
         source: 'context7'
         query: 'domain driven design error handling'
-        url: 'https://github.com/...' # Link with your research phase
+        url: 'https://github.com/...'
         description: 'Following DDD error handling patterns.'
       - type: 'internal_code_analysis'
         source: 'serena'
@@ -428,11 +516,16 @@ steps:
           echo "❌ AUTO-FIX FAILED - Manual intervention required"
           exit 1
         fi
-        echo "✅ Lint errors auto-fixed"
+        echo "✅ Lint errors auto-fixed, validating again..."
+        yarn lint
+        if [ $? -ne 0 ]; then
+          echo "❌ LINT STILL FAILING - Manual fixes needed"
+          exit 1
+        fi
       fi
       echo "✅ Lint passed"
 
-      echo "🧪 Running tests..."
+      echo "🧪 Running tests with coverage..."
       yarn test --coverage
       if [ $? -ne 0 ]; then
         echo "❌ TESTS FAILED"
@@ -456,16 +549,14 @@ steps:
   - id: 'create-test-helper-__ACTION_ENTITY_KEBAB_CASE__'
     type: 'create_file'
     description: 'Create mock for __ACTION_ENTITY_PASCAL_CASE__ use case'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
-    execution_log: ''
+    <<: *step_defaults
     # AI-NOTE: For each step, you MUST populate this 'references' section.
     # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
     references:
-      - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
+      - type: 'external_pattern'
         source: 'context7'
         query: 'test driven development mocks'
-        url: 'https://github.com/...' # Link with your research phase
+        url: 'https://github.com/...'
         description: 'Following TDD mock patterns.'
       - type: 'internal_code_analysis'
         source: 'serena'
@@ -533,9 +624,7 @@ steps:
   - id: 'refactor-__FILE_TO_MODIFY_KEBAB_CASE__'
     type: 'refactor_file'
     description: 'Refactor __FILE_TO_MODIFY_PASCAL_CASE__ to incorporate new logic'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
-    execution_log: ''
+    <<: *step_defaults
     references:
       - type: 'internal_code_analysis'
         source: 'serena'
@@ -599,9 +688,7 @@ steps:
   - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'
     type: 'delete_file'
     description: 'Delete file __FILE_TO_DELETE_PASCAL_CASE__ due to generation error'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
-    execution_log: ''
+    <<: *step_defaults
     references:
       - type: 'internal_correction'
         source: 'self'
@@ -640,9 +727,7 @@ steps:
   - id: 'create-pull-request'
     type: 'pull_request'
     description: 'Create pull request for __FEATURE_NAME_PASCAL_CASE__ implementation'
-    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-    rlhf_score: null # -2, -1, 0, 1, 2
-    execution_log: ''
+    <<: *step_defaults
     references:
       - type: 'internal_guideline'
         source: 'GIT_WORKFLOW.md'
@@ -688,7 +773,7 @@ steps:
       - ✅ RLHF score: +2 (PERFECT)
 
       ### Generated by:
-      - Template: TEMPLATE.yaml
+      - Template: TEMPLATE_REFACTORED.yaml
       - Date: $(date +%Y-%m-%d)
 
       ---
@@ -796,90 +881,46 @@ refactoring:
           execute: (input: SendWelcomeEmailInput) => Promise<SendWelcomeEmailOutput>
         }
 
-    - name: 'Renaming for clarity'
-      script: |
-        # Find all occurrences
-        grep -r "[OldName]" src/features/[feature-name]/
-        # Perform rename
-        # Validate
-        yarn lint && yarn test --run
-        # Commit
-        git add .
-        git commit -m "refactor: rename [OldName] to [NewName]"
-
-# Recovery steps
-recovery:
-  accidental_commit: |
-    # Revert the last commit but keep changes
-    git reset --soft HEAD~1
-    # Fix the issues
-    # Re-run validation
-    yarn lint
-    yarn test --coverage
-    # Commit again with fixed code
-    git add .
-    git commit -m "[original message] - fixed"
-
-  domain_polluted: |
-    # Check for violations
-    echo "🔍 Checking for domain violations..."
-    grep -r "class.*{.*calculate\|validate\|process" src/features/[feature-name]/domain/
-    grep -r "import.*axios\|fetch\|http" src/features/[feature-name]/domain/
-    grep -r "console\." src/features/[feature-name]/domain/
-    # Fix and validate
-    yarn lint
-    yarn test --run
-    # Commit cleanup
-    git add .
-    git commit -m "refactor: remove business logic from domain layer"
-
-# AI Guidelines from templates/DOMAIN_TEMPLATES.md
-ai_guidelines:
-  - 'Always validate before committing: Run lint first, Run tests second, Only commit if both pass'
-  - 'If generation fails: Identify the specific error, Fix only that error, Re-run validation, Do NOT proceed until fixed'
-  - 'Follow the principle: One use case = One file = One responsibility'
-  - 'If tempted to add "And" in a use case name, split it'
-  - 'When in doubt: Choose simplicity over complexity, Split rather than combine, Ask for clarification rather than assume'
-  - 'MUST generate different case styles from the input names (e.g., "Add Item To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart, lower case=add item to cart).'
-  - 'MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__) with actual values'
-  - 'MUST NOT leave any placeholder variables in the final implementation'
-  - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery'
-  - 'MUST use vitest, NOT jest'
-  - 'MUST follow all domain rules - no business logic, no external dependencies'
-  - 'MUST follow all Clean Architecture rules'
-  - 'MUST use REPLACE/WITH format for refactor_file steps'
+    - name: 'Renaming domain errors'
+      wrong_example: |
+        export class ErrorUserExists extends Error {
+          constructor() {
+            super('Error: user exists')
+            this.name = 'ErrorUserExists'
+          }
+        }
+      correct_example: |
+        export class UserAlreadyExistsError extends Error {
+          constructor() {
+            super('User with this email already exists')
+            this.name = 'UserAlreadyExistsError'
+          }
+        }
 
 # ------------------------------------------------------------------------------
-# AI-NOTE: TASK EVALUATION SECTION.
-# After the entire execution is complete, this section will be populated by a
-# human reviewer or an evaluation script.
+# LEARNING & IMPROVEMENT PATTERNS
+# The system tracks these patterns to improve over time
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------
-# EVALUATION SECTION
-# ------------------------------------------------------------------------------
+learning_patterns:
+  common_errors:
+    - pattern: 'import axios'
+      fix: 'Remove external library imports from domain layer'
+      score_impact: -2
 
-evaluation:
-  # AI-NOTE: This final_status will be 'SUCCESS' if all steps passed, or 'FAILED' if any step failed.
-  final_status: 'PENDING' # PENDING | SUCCESS | FAILED
-  # AI-NOTE: The final_rlhf_score is calculated automatically based on execution quality
-  # -2: Catastrophic errors (architecture violations, wrong REPLACE/WITH format)
-  # -1: Runtime errors (lint, tests, git failures)
-  #  0: Low confidence (system uncertain, prevents hallucinations)
-  # +1: Good execution but missing architectural elements
-  # +2: Perfect with Clean Architecture, DDD, ubiquitous language
-  final_rlhf_score: null # -2, -1, 0, 1, 2
-  # AI-NOTE: The system automatically analyzes patterns and learns from each execution
-  # This text is enhanced by automated RLHF analysis for continuous improvement
-  reviewer_summary: |
-    - What went well:
-      - ...
-    - Areas for improvement:
-      - ...
-  # AI-NOTE: This section lists actionable suggestions for improving the master templates or prompts.
-  # This is the key to the continuous learning loop.
-  template_improvement_suggestions:
-    - target_template: 'TEMPLATE.yaml'
-      target_step_id: 'create-use-case-__ACTION_ENTITY_KEBAB_CASE__'
-      suggestion: 'The generated mock data was too simplistic. The template should be updated to include more realistic data generation.'
-      priority: 'medium'
+    - pattern: 'CreateUserAndSend'
+      fix: 'Split into two separate use cases (SRP violation)'
+      score_impact: -1
+
+    - pattern: 'missing @domainConcept'
+      fix: 'Add domain concept documentation for +2 score'
+      score_impact: +1
+
+  success_indicators:
+    - 'Uses ubiquitous language consistently'
+    - 'Follows single responsibility principle'
+    - 'No dependency violations'
+    - 'Comprehensive test coverage'
+    - 'Clean git history with atomic commits'
+
+# End of TEMPLATE_REFACTORED.yaml
