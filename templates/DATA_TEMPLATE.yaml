@@ -163,60 +163,66 @@ test_rules:
 # These sections are critical for proper template validation and AI guidance
 # ------------------------------------------------------------------------------
 
-# Domain layer rules (inherited from TEMPLATE.yaml)
+# Domain layer rules (adapted for data layer - maintains validator compatibility)
 domain_rules:
   allowed:
-    - 'Simple type definitions (Input/Output types)'
-    - 'Use case interfaces (contracts only)'
-    - 'Domain-specific error classes'
-    - 'Test mock functions'
+    - 'Use case implementations (following domain contracts)'
+    - 'Protocol interfaces for external dependencies'
+    - 'Mock/Spy implementations for testing'
+    - 'Data transformation and mapping'
+    - 'Error handling and wrapping'
+    - 'Business logic implementation'
+    - 'Dependency injection patterns'
 
   forbidden:
-    - 'Framework dependencies (React, Next.js, Express)'
-    - 'External libraries (axios, fetch, database clients)'
-    - 'Implementation details of any kind'
+    - 'Direct external library imports (must use protocols)'
+    - 'Framework-specific code (React, Next.js, Express)'
     - 'UI components'
-    - 'HTTP/Database/File system operations'
-    - 'Environment variables'
-    - 'Console.log or any I/O operations'
-    - 'Value objects'
-    - 'Entities'
-    - 'Business rules or business logic'
-    - 'Validation logic'
-    - 'Calculations or computations'
-    - 'Any behavior beyond type definitions and interfaces'
+    - 'Presentation layer concerns'
+    - 'Infrastructure implementations'
+    - 'Database connection details'
+    - 'HTTP client implementations'
+    - 'Implementation before tests (TDD violation)'
+    - 'Console.log or debugging statements'
+    - 'Environment variable access'
 
-# Use case rules (from TEMPLATE.yaml)
+# Use case rules (adapted for data layer implementations)
 use_case_rules:
   should:
-    - 'Define only interfaces/contracts, not implementations'
+    - 'Implement domain use case interfaces (not define them)'
     - 'Have EXACTLY ONE responsibility (one business operation)'
-    - 'Do ONE thing and ONE thing only (never multiple operations)'
-    - 'Return domain types or primitives'
-    - 'Be named with verbs (CreateUser, AuthenticateUser, etc.)'
-    - 'Be framework agnostic'
+    - 'Use dependency injection for all external dependencies'
+    - 'Abstract external dependencies through protocols'
+    - 'Handle errors properly and wrap infrastructure errors'
+    - 'Be framework agnostic (no React, Express, etc.)'
+    - 'Follow the execute method pattern'
+    - 'Have comprehensive test coverage'
 
   should_not:
-    - 'Contain implementation logic'
-    - 'Know about HTTP, databases, or external services'
-    - 'Import from data, presentation, or infrastructure layers'
-    - 'Have side effects'
-    - 'Execute multiple operations (e.g., CreateUserAndSendEmail is wrong)'
+    - 'Import external libraries directly (use protocols)'
+    - 'Contain framework-specific code'
+    - 'Import from presentation or infrastructure layers'
+    - 'Execute multiple use cases in one class'
+    - 'Expose infrastructure implementation details'
+    - 'Be implemented before tests are written (TDD violation)'
 
-# Error rules (from TEMPLATE.yaml)
+# Error rules (adapted for data layer error handling)
 error_rules:
   should:
-    - 'Extend the native Error class'
-    - 'Have descriptive names ending with Error'
-    - 'Contain meaningful error messages'
-    - 'Represent business rule violations'
-    - 'Be thrown when domain invariants are violated'
+    - 'Catch and wrap infrastructure errors appropriately'
+    - 'Re-throw domain errors without modification'
+    - 'Convert technical errors to domain errors when appropriate'
+    - 'Use meaningful error messages for business context'
+    - 'Log errors appropriately without exposing sensitive data'
+    - 'Handle protocol failures gracefully'
 
   should_not:
-    - 'Contain HTTP status codes'
-    - 'Include technical/implementation details'
-    - 'Expose sensitive information'
-    - 'Import external dependencies'
+    - 'Expose infrastructure error details to domain layer'
+    - 'Swallow errors silently'
+    - 'Include sensitive information in error messages'
+    - 'Throw generic errors without context'
+    - 'Let infrastructure errors bubble up unchanged'
+    - 'Include HTTP status codes in domain errors'
 
 # Test helper rules (from TEMPLATE.yaml)
 test_helper_rules:
@@ -682,13 +688,13 @@ steps:
     # 4. The code in REPLACE block must match EXACTLY what's in the file
     template: |
       <<<REPLACE>>>
-      // Código antigo que a IA identificou para ser substituído
+      // Old code that AI identified to be replaced
       export type OldType = {
         fieldA: string;
       }
       <<</REPLACE>>>
       <<<WITH>>>
-      // Novo código
+      // New code
       export type OldType = {
         fieldA: string;
         newFieldB: number;
