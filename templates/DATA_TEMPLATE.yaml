@@ -491,13 +491,21 @@ steps:
         /** Controls the return value for testing different scenarios */
         result = true
 
+        /** Tracks how many times the method was called */
+        callCount = 0
+
+        /** Stores the history of all parameters passed to the method */
+        paramHistory: __ENTITY__Repository.AddParams[] = []
+
         /**
          * Mock implementation of the add method.
          * @param data - The entity data to be added
          * @returns Promise resolving to the controlled test result
          */
         async add (data: __ENTITY__Repository.AddParams): Promise<boolean> {
+          this.callCount++
           this.params = data
+          this.paramHistory.push(data)
           return this.result
         }
       }
@@ -513,13 +521,21 @@ steps:
         /** Controls the return value - true means email exists, false means it doesn't */
         result = false
 
+        /** Tracks how many times the method was called */
+        callCount = 0
+
+        /** Stores the history of all emails checked */
+        emailHistory: string[] = []
+
         /**
          * Mock implementation of email check method.
          * @param email - The email to check for existence
          * @returns Promise resolving to the controlled test result
          */
         async checkByEmail (email: string): Promise<boolean> {
+          this.callCount++
           this.email = email
+          this.emailHistory.push(email)
           return this.result
         }
       }
@@ -581,16 +597,24 @@ steps:
           body: {} as T
         }
 
+        /** Tracks how many times the request method was called */
+        callCount = 0
+
+        /** Stores the history of all request parameters */
+        requestHistory: HttpClient.Params[] = []
+
         /**
          * Mock implementation of the request method.
          * @param data - The request configuration
          * @returns Promise resolving to the controlled test response
          */
         async request (data: HttpClient.Params): Promise<HttpClient.Result<T>> {
+          this.callCount++
           this.url = data.url
           this.method = data.method
           this.body = data.body
           this.headers = data.headers
+          this.requestHistory.push({ ...data })
           return this.response
         }
       }
@@ -646,13 +670,21 @@ steps:
         /** Stores the plaintext passed to hash method */
         plaintext: string
 
+        /** Tracks how many times the hash method was called */
+        callCount = 0
+
+        /** Stores the history of all plaintexts hashed */
+        plaintextHistory: string[] = []
+
         /**
          * Mock implementation of the hash method.
          * @param plaintext - The string to be hashed
          * @returns Promise resolving to the controlled hash digest
          */
         async hash (plaintext: string): Promise<string> {
+          this.callCount++
           this.plaintext = plaintext
+          this.plaintextHistory.push(plaintext)
           return this.digest
         }
       }
@@ -669,6 +701,12 @@ steps:
         /** Controls the comparison result for testing */
         result = true
 
+        /** Tracks how many times the compare method was called */
+        callCount = 0
+
+        /** Stores the history of all comparison operations */
+        comparisonHistory: Array<{ plaintext: string; digest: string }> = []
+
         /**
          * Mock implementation of the compare method.
          * @param plaintext - The plaintext to compare
@@ -676,8 +714,10 @@ steps:
          * @returns Promise resolving to the controlled comparison result
          */
         async compare (plaintext: string, digest: string): Promise<boolean> {
+          this.callCount++
           this.plaintext = plaintext
           this.digest = digest
+          this.comparisonHistory.push({ plaintext, digest })
           return this.result
         }
       }
@@ -731,6 +771,12 @@ steps:
         key: string
         value: any
 
+        /** Tracks how many times the set method was called */
+        callCount = 0
+
+        /** Stores the history of all set operations */
+        setHistory: Array<{ key: string; value: any }> = []
+
         /**
          * Mock implementation of the set method.
          * @param key - The storage key
@@ -738,8 +784,10 @@ steps:
          * @returns Promise that resolves when operation is complete
          */
         async set (key: string, value: any): Promise<void> {
+          this.callCount++
           this.key = key
           this.value = value
+          this.setHistory.push({ key, value })
         }
       }
 
@@ -754,13 +802,21 @@ steps:
         /** Controls the returned value for testing */
         value: any = 'cached_value'
 
+        /** Tracks how many times the get method was called */
+        callCount = 0
+
+        /** Stores the history of all get operations */
+        getHistory: string[] = []
+
         /**
          * Mock implementation of the get method.
          * @param key - The storage key
          * @returns Promise resolving to the controlled cached value
          */
         async get<T = any> (key: string): Promise<T> {
+          this.callCount++
           this.key = key
+          this.getHistory.push(key)
           return this.value as T
         }
       }
@@ -1039,6 +1095,59 @@ steps:
       fi
       echo "✅ TDD Step 3d completed successfully"
 
+  # === TDD STEP 3.5: CREATE PROTOCOL INDEX FILES ===
+  - id: 'create-protocol-index'
+    type: 'create_file'
+    description: 'TDD Step 3.5: Create protocol index exports for better organization'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'external_pattern'
+        source: 'context7'
+        query: 'typescript barrel exports index files'
+        description: 'Following barrel export pattern for clean imports.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: 'export * from'
+        description: 'Consistent with existing index export patterns.'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/index.ts'
+    template: |
+      // Database protocols - Repository patterns for data persistence
+      export * from './db/__ENTITY_KEBAB__-repository'
+
+      // HTTP protocols - Client interfaces for external API communication
+      export * from './http/http-client'
+
+      // Cryptography protocols - Security operations for data protection
+      export * from './cryptography/hasher'
+
+      // Cache protocols - Storage interfaces for performance optimization
+      export * from './cache/storage'
+
+      // Protocol status codes and error types
+      export { HttpStatusCode } from './http/http-status-code'
+    validation_script: |
+      echo "🔍 TDD Step 3.5: Validating protocol index creation..."
+      # Verify index file exists
+      if [ ! -f "src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/index.ts" ]; then
+        echo "❌ ERROR: Protocol index file was not created."
+        exit 1
+      fi
+      echo "✅ Protocol index file created successfully."
+
+      echo "📦 Staging protocol index file..."
+      git add src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/index.ts
+
+      echo "💾 Committing TDD Step 3.5..."
+      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add protocol index exports (TDD Step 3.5: barrel exports)"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED"
+        exit 1
+      fi
+      echo "✅ TDD Step 3.5 completed successfully"
+
   # === TDD STEP 4: CREATE USE CASE IMPLEMENTATION ===
   - id: 'create-usecase-__PREFIX__-__USE_CASE_NAME_KEBAB__'
     type: 'create_file'
@@ -1056,7 +1165,7 @@ steps:
         tool: 'find_symbol'
         query: '__PREFIX__*'
         description: 'Consistent with existing use case implementations.'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/db-add-__ENTITY_KEBAB__.ts'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.ts'
     template: |
       import type { Add__ENTITY__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases'
       import { __ENTITY__Repository, Check__ENTITY__ByEmailRepository, Hasher } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols'
@@ -1108,7 +1217,7 @@ steps:
     validation_script: |
       echo "🔍 TDD Step 4: Validating use case implementation..."
       # Verify implementation file exists
-      if [ ! -f "src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/db-add-__ENTITY_KEBAB__.ts" ]; then
+      if [ ! -f "src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.ts" ]; then
         echo "❌ ERROR: Use case implementation was not created."
         exit 1
       fi
@@ -1141,10 +1250,10 @@ steps:
       echo "✅ Tests passed - TDD GREEN PHASE complete"
 
       echo "📦 Staging implementation..."
-      git add src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/db-add-__ENTITY_KEBAB__.ts
+      git add src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.ts
 
       echo "💾 Committing TDD Step 4..."
-      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement DbAdd__ENTITY__ use case (TDD Step 4: green phase)"
+      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __PREFIX____USE_CASE_NAME__ use case (TDD Step 4: green phase)"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED"
         exit 1
