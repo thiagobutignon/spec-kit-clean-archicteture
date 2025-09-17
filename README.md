@@ -109,13 +109,13 @@ This framework enforces best practices through automated validation:
 
 The intelligent scoring system evaluates code quality in real-time:
 
-| Score | Level | Description |
-|-------|-------|-------------|
-| **+2** | 🏆 PERFECT | Clean Architecture + DDD + Ubiquitous Language |
-| **+1** | ✅ GOOD | Valid implementation following patterns |
-| **0** | ⚠️ LOW CONFIDENCE | Missing references or documentation |
-| **-1** | ❌ RUNTIME ERROR | Lint failures, test failures |
-| **-2** | 💥 CATASTROPHIC | Architecture violations |
+| Score  | Level             | Description                                    |
+| ------ | ----------------- | ---------------------------------------------- |
+| **+2** | 🏆 PERFECT        | Clean Architecture + DDD + Ubiquitous Language |
+| **+1** | ✅ GOOD           | Valid implementation following patterns        |
+| **0**  | ⚠️ LOW CONFIDENCE | Missing references or documentation            |
+| **-1** | ❌ RUNTIME ERROR  | Lint failures, test failures                   |
+| **-2** | 💥 CATASTROPHIC   | Architecture violations                        |
 
 ## 📁 Project Structure
 
@@ -140,6 +140,7 @@ All commands are documented in `.claude/commands/` for AI-assisted development:
 #### Domain Generation Commands
 
 - **`pre-tasks-domain.md`** - Transforms a concept into a structured JSON plan
+
   - **Greenfield/Ideation Input:**
     ```bash
     /pre-tasks-domain create a multi-tenant user authentication system
@@ -150,11 +151,13 @@ All commands are documented in `.claude/commands/` for AI-assisted development:
     ```
 
 - **`validate-domain-json.md`** - JSON validation with score impact assessment (-2 to +2)
+
   ```bash
   /validate-domain-json from json: {...}
   ```
 
 - **`tasks-domain.md`** - Main domain generation with quality guidelines
+
   ```bash
   /tasks-domain create feature from json: {...}
   # or
@@ -162,21 +165,25 @@ All commands are documented in `.claude/commands/` for AI-assisted development:
   ```
 
 - **`reflection-tasks-domain.md`** - Architectural reflection with score optimization
+
   ```bash
   /reflection-tasks-domain from yaml: {...}
   ```
 
 - **`evaluate-tasks-domain.md`** - Pre-execution evaluation with score prediction
+
   ```bash
   /evaluate-tasks-domain from yaml: {...}
   ```
 
 - **`execute-domain.md`** - Execution with real-time RLHF scoring
+
   ```bash
   /execute-domain from yaml: {...}
   ```
 
 - **`fix-failed-step.md`** - Intelligent fix suggestions for failed steps
+
   ```bash
   /fix-failed-step from yaml: {...}
   ```
@@ -189,6 +196,7 @@ All commands are documented in `.claude/commands/` for AI-assisted development:
 ### System Tools
 
 #### Core Executors
+
 - **`execute-steps.ts`** - Main step executor with RLHF scoring
 - **`validate-implementation.ts`** - Template validation with quality indicators
 - **`rlhf-system.ts`** - RLHF scoring engine with pattern learning
@@ -202,6 +210,7 @@ All commands are documented in `.claude/commands/` for AI-assisted development:
 ### Templates
 
 The main template `templates/DOMAIN_TEMPLATE.yaml` includes:
+
 - Ubiquitous language definitions
 - Git workflow automation (branch → implementation → PR)
 - Domain layer structure
@@ -212,6 +221,7 @@ The main template `templates/DOMAIN_TEMPLATE.yaml` includes:
 ### RLHF Learning
 
 The system continuously learns from executions:
+
 - Pattern analysis and caching
 - Success/failure tracking
 - Automatic improvements
@@ -220,12 +230,14 @@ The system continuously learns from executions:
 ## 🌟 Features
 
 ### For Green Field Projects
+
 - Generate complete domain layer from scratch
 - Enforce Clean Architecture from day one
 - Automated test helper generation
 - Git workflow automation
 
 ### For Brown Field Projects
+
 - Gradual refactoring with safety checks
 - Architecture violation detection
 - Rollback capabilities for failed changes
@@ -234,12 +246,14 @@ The system continuously learns from executions:
 ## 🛠️ Advanced Usage
 
 ### Auto-Fix System
+
 ```bash
 # Automatically fix common issues
 npx tsx rlhf-autofix.ts implementation.yaml --validate
 ```
 
 ### Rollback Management
+
 ```bash
 # Create backup before risky operations
 npx tsx rollback-manager.ts backup
@@ -252,6 +266,7 @@ npx tsx rollback-manager.ts rollback-all implementation.yaml
 ```
 
 ### RLHF Analytics
+
 ```bash
 # View dashboard
 npx tsx rlhf-dashboard.ts
@@ -270,6 +285,7 @@ npx tsx rlhf-system.ts apply
 The [Hierarchical Reasoning Model (HRM)](https://github.com/sapientinc/HRM) from Sapient Inc. introduces a revolutionary approach to code analysis through hierarchical reasoning. Unlike traditional RLHF which focuses on model training, our implementation leverages HRM concepts for:
 
 #### 🧠 Hierarchical Code Analysis
+
 ```
 High-Level Planning → Domain Understanding → Use Case Mapping
          ↓                    ↓                    ↓
@@ -283,16 +299,19 @@ Low-Level Execution → Code Generation → Pattern Recognition
 #### 🎯 HRM Application in Clean Architecture
 
 1. **Pattern Recognition Hierarchy**
+
    - **Domain Layer**: Pure business logic patterns (RLHF +2)
    - **Application Layer**: Use case orchestration patterns (RLHF +1)
    - **Infrastructure Layer**: Integration patterns (RLHF 0)
 
 2. **Recursive Reasoning**
+
    - Analyze code at multiple abstraction levels simultaneously
    - Detect architectural violations through hierarchical pattern matching
    - Self-correct based on learned patterns from successful implementations
 
 3. **Adaptive Learning Cycles**
+
    ```typescript
    // HRM-inspired learning cycle
    for (let cycle = 0; cycle < MAX_CYCLES; cycle++) {
@@ -307,14 +326,18 @@ Low-Level Execution → Code Generation → Pattern Recognition
    ```
 
 ### Serena Integration
-The framework integrates with [Serena](https://github.com/sapientinc/HRM) for semantic code search:
+
+The framework integrates with Serena for semantic code search:
+
 - **Hierarchical Symbol Analysis**: Navigate code at different abstraction levels
 - **Pattern Matching**: Find similar patterns across the codebase
 - **Context-Aware Refactoring**: Understand impact across architectural layers
 - **Memory System**: Retain project knowledge for future reasoning
 
 ### Context7 Integration
+
 External library documentation through Context7:
+
 - **Real-time Library Analysis**: Understand external dependencies
 - **Pattern Extraction**: Learn from library best practices
 - **API Mapping**: Connect domain concepts to library implementations
@@ -324,17 +347,18 @@ External library documentation through Context7:
 
 Our HRM implementation differs from traditional ML approaches:
 
-| Traditional RLHF | Our HRM Implementation |
-|------------------|------------------------|
-| Model training required | No training needed |
-| Large datasets needed | Works with single project |
-| GPU intensive | Runs on CPU |
-| Static after training | Continuously adapts |
-| General purpose | Domain-specific |
+| Traditional RLHF        | Our HRM Implementation    |
+| ----------------------- | ------------------------- |
+| Model training required | No training needed        |
+| Large datasets needed   | Works with single project |
+| GPU intensive           | Runs on CPU               |
+| Static after training   | Continuously adapts       |
+| General purpose         | Domain-specific           |
 
 #### Key Innovations:
 
 1. **Hierarchical Pattern Database**
+
    ```yaml
    patterns:
      architectural:
@@ -349,6 +373,7 @@ Our HRM implementation differs from traditional ML approaches:
    ```
 
 2. **Multi-Level Scoring**
+
    - Each hierarchical level contributes to final RLHF score
    - Weighted average based on architectural importance
    - Self-balancing based on project characteristics
@@ -370,11 +395,13 @@ Our HRM implementation differs from traditional ML approaches:
 This project builds upon excellent work from the community:
 
 ### Core Inspiration
+
 - **[GitHub Spec-Kit](https://github.com/github/spec-kit)** - The original specification framework that inspired this project
 - **[Rodrigo Manguinho](https://github.com/rmanguinho)** - Clean Architecture patterns and TDD best practices
 - **[Sapient HRM](https://github.com/sapientinc/HRM)** - Deep search capabilities and semantic understanding
 
 ### Technologies
+
 - **TypeScript** - Type-safe development
 - **YAML** - Configuration and templates
 - **Claude AI** - Intelligent code generation
@@ -406,18 +433,19 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 
 ### The Fundamental Difference:
 
-| Chat-Based AI (GPT, Claude, etc.) | Spec-Kit Clean Architecture |
-|-----------------------------------|------------------------------|
+| Chat-Based AI (GPT, Claude, etc.)                              | Spec-Kit Clean Architecture                                  |
+| -------------------------------------------------------------- | ------------------------------------------------------------ |
 | **Monolithic Output**: Generates entire files/features at once | **Atomic Steps**: Each change is a single, reviewable commit |
-| **Context Decay**: Loses context over long conversations | **Stateless**: YAML file maintains complete state |
-| **No Quality Gates**: Output quality varies | **RLHF Scoring**: Every step validated (-2 to +2) |
-| **Manual Rollback**: Developer must undo changes manually | **Automatic Rollback**: Failed steps can be rolled back |
-| **Opaque Process**: "Black box" generation | **Transparent Pipeline**: Every decision is auditable |
-| **Generic Solutions**: Not aware of your architecture | **Architecture-Aware**: Enforces your specific patterns |
+| **Context Decay**: Loses context over long conversations       | **Stateless**: YAML file maintains complete state            |
+| **No Quality Gates**: Output quality varies                    | **RLHF Scoring**: Every step validated (-2 to +2)            |
+| **Manual Rollback**: Developer must undo changes manually      | **Automatic Rollback**: Failed steps can be rolled back      |
+| **Opaque Process**: "Black box" generation                     | **Transparent Pipeline**: Every decision is auditable        |
+| **Generic Solutions**: Not aware of your architecture          | **Architecture-Aware**: Enforces your specific patterns      |
 
 ### Real-World Example:
 
 **Chat-Based Approach:**
+
 ```
 You: "Create a user registration feature"
 AI: [Generates 500+ lines across 10 files]
@@ -425,13 +453,14 @@ Result: All-or-nothing - if one part is wrong, manual fixes needed
 ```
 
 **Spec-Kit Approach:**
+
 ```yaml
 steps:
-  - id: create-branch        # ✅ Step 1: Git branch created
-  - id: create-use-case      # ✅ Step 2: Use case interface created
-  - id: create-errors        # ✅ Step 3: Error classes created
-  - id: create-test-helper   # ❌ Step 4: Failed - auto-rollback
-  - id: fix-test-helper      # ✅ Step 5: Fixed and continued
+  - id: create-branch # ✅ Step 1: Git branch created
+  - id: create-use-case # ✅ Step 2: Use case interface created
+  - id: create-errors # ✅ Step 3: Error classes created
+  - id: create-test-helper # ❌ Step 4: Failed - auto-rollback
+  - id: fix-test-helper # ✅ Step 5: Fixed and continued
 ```
 
 ## 🏆 Why Use Spec-Kit Clean Architecture?
