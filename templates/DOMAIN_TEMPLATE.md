@@ -66,7 +66,7 @@ The AI is guided by a master prompt that defines its behavior:
 #### Example Invocation with JSON
 
 ```bash
-/tasks-domain create feature from json:
+/03-generate-domain-code create feature from json:
 ``````json
 {
   "featureName": "User Account",

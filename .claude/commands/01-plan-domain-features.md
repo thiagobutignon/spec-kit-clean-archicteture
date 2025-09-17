@@ -31,7 +31,12 @@ The system uses automated scoring to ensure quality:
 
 ## 1. Your Deliverable
 
-Your **only** output for this task is a single, complete, and well-formed **JSON object**. This JSON will serve as the input for the `/tasks-domain` command, which will then generate the final YAML plan.
+Your **only** output for this task is a single, complete, and well-formed **JSON object**. This JSON will serve as the input for the `/03-generate-domain-code` command, which will then generate the final YAML plan.
+
+**OUTPUT LOCATION**:
+- If you need to save this JSON for reference, save it at: `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/plan.json`
+- Example: `spec/001-user-registration/domain/plan.json`
+- The feature number should be sequential (001, 002, 003, etc.)
 
 ## 2. Objective
 
@@ -549,8 +554,8 @@ Your final JSON must follow this structure with COMPLETE examples:
 
 - **ubiquitousLanguage field is RECOMMENDED** - Include it for +2 RLHF score
 - **Placeholders are REQUIRED** for use cases and test helpers to maintain pipeline compatibility
-- **The validate-domain-json phase will check for these placeholders**
-- **The tasks-domain phase will replace placeholders with actual values**
+- **The 02-validate-domain-plan phase will check for these placeholders**
+- **The 03-generate-domain-code phase will replace placeholders with actual values**
 - **Add @domainConcept tags** in templates for higher scores
 - **Use business vocabulary** consistently for perfect execution
 - **Document patterns used** (@pattern tags) for Clean Architecture bonus
@@ -627,3 +632,13 @@ Before outputting the JSON, verify:
 6. **Ensure perfect naming** following business vocabulary
 
 **Remember**: The Domain Layer is the heart of your application. With proper ubiquitous language and Clean Architecture, you can achieve a perfect +2 RLHF score!
+
+## 📍 Next Step
+
+After generating your JSON plan, your next command should be:
+
+```bash
+/02-validate-domain-plan from json: <your-generated-json>
+```
+
+This will validate your JSON plan for completeness and architectural compliance, providing an RLHF score prediction.

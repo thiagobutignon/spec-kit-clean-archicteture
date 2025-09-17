@@ -22,7 +22,10 @@ Your goal is to act as an automated build engineer. You will receive a final, fu
 
 ## 3. Input Parameters
 
-- **YAML Plan:** The complete, approved YAML content from the `/evaluate-tasks-domain` step.
+- **YAML Plan:** The complete, approved YAML content from the `/04-evaluate-domain-results` step.
+- **Working Directory:** All files should be created relative to `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/`
+  - Example: When the plan says to create `src/features/user-registration/domain/usecases/register-user.ts`,
+    you should actually create it at `spec/001-user-registration/domain/src/features/user-registration/domain/usecases/register-user.ts`
 
 ## 4. Prohibited Actions
 
@@ -131,3 +134,22 @@ Aborting execution. The YAML file has been updated with the failure details.
   "failed_step_rlhf_score": -2
 }
 ```
+
+## 📍 Next Step
+
+Based on execution results:
+
+- **If ALL steps SUCCEEDED**: Your domain layer is complete! Consider running RLHF improvements:
+  ```bash
+  /08-apply-domain-improvements
+  ```
+
+- **If ANY step FAILED**: Fix the failed step:
+  ```bash
+  /07-fix-domain-errors from yaml: <your-yaml-with-failed-step>
+  ```
+
+  After fixing, re-run execution:
+  ```bash
+  /06-execute-domain-steps from yaml: <your-fixed-yaml>
+  ```

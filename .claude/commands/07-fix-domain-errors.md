@@ -17,6 +17,8 @@ Your goal is to analyze a failed step in a YAML implementation plan and generate
 
 You will be given the entire content of a YAML file that has one or more steps with `status: 'FAILED'`.
 
+**Working Directory:** All file operations should be relative to `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/`
+
 ## 3. Step-by-Step Execution Plan
 
 1.  **Identify the Failure:** Find the last step in the file with `status: 'FAILED'`.
@@ -221,3 +223,13 @@ If a step failed due to architecture violation:
 ## 6. Your Deliverable
 
 Your **only** output is the complete content of the **updated** YAML file, now containing the new "fix" step at the end.
+
+## 📍 Next Step
+
+After generating the fix, return to execution:
+
+```bash
+/06-execute-domain-steps from yaml: <your-yaml-with-fix>
+```
+
+This will re-execute your plan with the fix applied. If successful, all steps should complete without errors.

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import * as yaml from 'yaml';
 import { RLHFSystem } from './rlhf-system.js';
 import Logger from './logger.js';
+import { resolveLogDirectory } from './utils/log-path-resolver.js';
 
 
 
@@ -69,10 +70,10 @@ class ImplementationValidator {
     private templatePath: string,
     private implementationPath: string,
   ) {
-    this.rlhf = new RLHFSystem();
+    this.rlhf = new RLHFSystem(this.implementationPath);
 
     // Create logs directory for validation
-    const logDir = path.join(process.cwd(), '.logs', 'validation');
+    const logDir = resolveLogDirectory(this.implementationPath, 'validation');
     this.logger = new Logger(logDir);
   }
 

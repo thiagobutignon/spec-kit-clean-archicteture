@@ -206,7 +206,7 @@ Ensure template includes:
 
 ```bash
 # Analyze RLHF data and apply learnings
-/apply-rlhf-learnings
+/08-apply-domain-improvements
 
 # Expected Output:
 {
@@ -281,3 +281,18 @@ graph LR
 4. Ensure 100% Clean Architecture compliance
 
 The system continuously learns to maximize RLHF scores with each execution cycle.
+
+## 📍 Next Step
+
+After applying improvements, you can:
+
+1. **Start a new feature**: Return to the beginning of the pipeline:
+   ```bash
+   /01-plan-domain-features create <new-feature-description>
+   ```
+
+2. **Review improvements**: Check the updated templates and patterns that were applied
+
+3. **Generate reports**: View RLHF score trends and improvement history
+
+The continuous improvement cycle ensures your codebase gets better with each iteration!

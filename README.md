@@ -43,7 +43,7 @@ cd spec-kit-clean-archicteture
 yarn install
 
 # Run domain generation
-npx tsx execute-steps.ts implementation.yaml
+npx tsx execute-steps.ts spec/001-user-registration/domain/implementation.yaml
 
 # View RLHF dashboard
 npx tsx rlhf-dashboard.ts
@@ -55,15 +55,15 @@ Our system models the workflow of a senior engineering team using the Reason-Act
 
 ```mermaid
 graph TD
-    A[Start: User Concept] --> B{/pre-tasks-domain}
-    B -- "Generates Plan" --> C{/validate-domain-json}
-    C -- "Validates Plan" --> D{/tasks-domain}
-    D -- "Generates YAML" --> E{/reflection-tasks-domain}
-    E -- "Refines YAML" --> F{/evaluate-tasks-domain}
+    A[Start: User Concept] --> B{/01-plan-domain-features}
+    B -- "Generates Plan" --> C{/02-validate-domain-plan}
+    C -- "Validates Plan" --> D{/03-generate-domain-code}
+    D -- "Generates YAML" --> E{/05-reflect-domain-lessons}
+    E -- "Refines YAML" --> F{/04-evaluate-domain-results}
     F -- "Approves YAML" --> G[User Review & Approval]
-    G -- "Triggers Execution" --> H{/execute-domain}
+    G -- "Triggers Execution" --> H{/06-execute-domain-steps}
     H -- "Executes Step by Step" --> I[Success: Commits in Git]
-    H -- "On Failure" --> J{/fix-failed-step}
+    H -- "On Failure" --> J{/07-fix-domain-errors}
     J -- "Generates Fix Plan" --> D
 
     style A fill:#f9f,stroke:#333,stroke-width:4px
@@ -81,7 +81,7 @@ graph TD
 
 ## 💾 Stateless and Resumable by Design
 
-Unlike chat-based workflows that lose context, our system is fundamentally stateless. The `implementation.yaml` file **is the state**.
+Unlike chat-based workflows that lose context, our system is fundamentally stateless. The `spec/[FEATURE]/domain/implementation.yaml` file **is the state**.
 
 ### Key Benefits:
 
@@ -139,58 +139,58 @@ All commands are documented in `.claude/commands/` for AI-assisted development:
 
 #### Domain Generation Commands
 
-- **`pre-tasks-domain.md`** - Transforms a concept into a structured JSON plan
+- **`01-plan-domain-features.md`** - Transforms a concept into a structured JSON plan
 
   - **Greenfield/Ideation Input:**
     ```bash
-    /pre-tasks-domain create a multi-tenant user authentication system
+    /01-plan-domain-features create a multi-tenant user authentication system
     ```
   - **Brownfield/Modification Input:**
     ```bash
-    /pre-tasks-domain add email verification to existing user registration
+    /01-plan-domain-features add email verification to existing user registration
     ```
 
-- **`validate-domain-json.md`** - JSON validation with score impact assessment (-2 to +2)
+- **`02-validate-domain-plan.md`** - JSON validation with score impact assessment (-2 to +2)
 
   ```bash
-  /validate-domain-json from json: {...}
+  /02-validate-domain-plan from json: {...}
   ```
 
-- **`tasks-domain.md`** - Main domain generation with quality guidelines
+- **`03-generate-domain-code.md`** - Main domain generation with quality guidelines
 
   ```bash
-  /tasks-domain create feature from json: {...}
+  /03-generate-domain-code create feature from json: {...}
   # or
-  /tasks-domain update yaml: {...} with json: {...}
+  /03-generate-domain-code update yaml: {...} with json: {...}
   ```
 
-- **`reflection-tasks-domain.md`** - Architectural reflection with score optimization
+- **`05-reflect-domain-lessons.md`** - Architectural reflection with score optimization
 
   ```bash
-  /reflection-tasks-domain from yaml: {...}
+  /05-reflect-domain-lessons from yaml: {...}
   ```
 
-- **`evaluate-tasks-domain.md`** - Pre-execution evaluation with score prediction
+- **`04-evaluate-domain-results.md`** - Pre-execution evaluation with score prediction
 
   ```bash
-  /evaluate-tasks-domain from yaml: {...}
+  /04-evaluate-domain-results from yaml: {...}
   ```
 
-- **`execute-domain.md`** - Execution with real-time RLHF scoring
+- **`06-execute-domain-steps.md`** - Execution with real-time RLHF scoring
 
   ```bash
-  /execute-domain from yaml: {...}
+  /06-execute-domain-steps from yaml: {...}
   ```
 
-- **`fix-failed-step.md`** - Intelligent fix suggestions for failed steps
+- **`07-fix-domain-errors.md`** - Intelligent fix suggestions for failed steps
 
   ```bash
-  /fix-failed-step from yaml: {...}
+  /07-fix-domain-errors from yaml: {...}
   ```
 
-- **`apply-rlhf-learnings.md`** - Apply learned patterns for continuous improvement
+- **`08-apply-domain-improvements.md`** - Apply learned patterns for continuous improvement
   ```bash
-  /apply-rlhf-learnings
+  /08-apply-domain-improvements
   ```
 
 ### System Tools
@@ -249,7 +249,7 @@ The system continuously learns from executions:
 
 ```bash
 # Automatically fix common issues
-npx tsx rlhf-autofix.ts implementation.yaml --validate
+npx tsx rlhf-autofix.ts spec/001-user-registration/domain/implementation.yaml --validate
 ```
 
 ### Rollback Management
@@ -262,7 +262,7 @@ npx tsx rollback-manager.ts backup
 npx tsx rollback-manager.ts rollback <step-id>
 
 # Rollback all failed steps
-npx tsx rollback-manager.ts rollback-all implementation.yaml
+npx tsx rollback-manager.ts rollback-all spec/001-user-registration/domain/implementation.yaml
 ```
 
 ### RLHF Analytics
@@ -413,11 +413,11 @@ graph TB
     end
 
     subgraph "🎯 TACTICAL LEVEL (Reasoning Loop)"
-        D --> E[pre-tasks-domain]
-        E -->|JSON Plan| F[validate-domain-json]
-        F -->|RLHF: -2 to +2| G[tasks-domain]
-        G -->|YAML| H[reflection-tasks-domain]
-        H -->|Refined YAML| I[evaluate-tasks-domain]
+        D --> E[01-plan-domain-features]
+        E -->|JSON Plan| F[02-validate-domain-plan]
+        F -->|RLHF: -2 to +2| G[03-generate-domain-code]
+        G -->|YAML| H[05-reflect-domain-lessons]
+        H -->|Refined YAML| I[04-evaluate-domain-results]
 
         I -->|Score < 1| E
 
@@ -437,9 +437,9 @@ graph TB
     end
 
     subgraph "⚡ EXECUTION LEVEL (Action Loop)"
-        K[execute-domain] --> L{Step Status?}
+        K[06-execute-domain-steps] --> L{Step Status?}
         L -->|SUCCESS| M[Next Step]
-        L -->|FAILED| N[fix-failed-step]
+        L -->|FAILED| N[07-fix-domain-errors]
         N --> O[Rollback Manager]
         O --> K
         M --> P[Git Commit]
@@ -487,7 +487,7 @@ graph TB
 #### 2️⃣ **Tactical Layer (Route Planning)**
 ```
 🗺️ Plans specific route before traveling
-├── pre-tasks-domain → Initial proposed route
+├── 01-plan-domain-features → Initial proposed route
 ├── validate → Verifies route validity
 ├── reflection → Optimizes route (improvement algorithm)
 └── evaluate → Confirms optimal route found
@@ -496,7 +496,7 @@ graph TB
 #### 3️⃣ **Execution Layer (Traveling)**
 ```
 🚗 Executes journey step by step
-├── execute-domain → Start journey
+├── 06-execute-domain-steps → Start journey
 ├── Each step → One "city" visited
 ├── Validation → Confirms correct arrival
 └── Commit → Checkpoint saved (no need to redo)

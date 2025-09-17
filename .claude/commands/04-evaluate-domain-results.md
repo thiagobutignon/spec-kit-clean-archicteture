@@ -22,7 +22,8 @@ Your goal is to act as a Principal Engineer performing a final architectural rev
 
 ## 3. Input Parameters
 
-- **YAML Plan:** The complete, potentially revised YAML content from the `/reflection-tasks-domain` step.
+- **YAML Plan:** The complete, potentially revised YAML content from the `/05-reflect-domain-lessons` step.
+- **Note:** This YAML should be saved at `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml`
 
 ## 4. Evaluation Principles (The Constitution)
 
@@ -97,7 +98,7 @@ You must evaluate the **entire plan** as a whole against these core principles. 
 
 ### Example 1: Missing Branch Step
 
-`/evaluate-tasks-domain from yaml:`
+`/04-evaluate-domain-results from yaml:`
 
 ```yaml
 # YAML plan missing the branch creation step
@@ -125,7 +126,7 @@ steps:
 
 ### Example 2: Single Responsibility Violation
 
-`/evaluate-tasks-domain from yaml:`
+`/04-evaluate-domain-results from yaml:`
 
 ```yaml
 # YAML plan where a UseCase violates Single Responsibility Principle
@@ -155,7 +156,7 @@ steps:
 
 ### Example 3: Architecture Violation (RLHF -2)
 
-`/evaluate-tasks-domain from yaml:`
+`/04-evaluate-domain-results from yaml:`
 
 ```yaml
 steps:
@@ -190,3 +191,22 @@ steps:
   "expected_rlhf_score": -2
 }
 ```
+
+## 📍 Next Step
+
+Based on your evaluation results:
+
+- **If score ≥ 1 (APPROVED)**: Proceed to execution:
+  ```bash
+  /06-execute-domain-steps from yaml: <your-approved-yaml>
+  ```
+
+- **If score < 1 (REJECTED)**: Return to reflection to fix issues:
+  ```bash
+  /05-reflect-domain-lessons from yaml: <your-yaml>
+  ```
+
+  Or if issues are in the JSON structure, go back to planning:
+  ```bash
+  /01-plan-domain-features <modify-your-request>
+  ```

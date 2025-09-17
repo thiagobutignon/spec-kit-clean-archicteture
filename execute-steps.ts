@@ -6,6 +6,7 @@ import yaml from 'yaml';
 import 'zx/globals';
 import Logger from './logger';
 import { RLHFSystem } from './rlhf-system';
+import { resolveLogDirectory } from './utils/log-path-resolver';
 
 $.verbose = true;
 $.shell = '/bin/bash';
@@ -45,9 +46,10 @@ class StepExecutor {
   constructor(private implementationPath: string) {
     this.plan = { steps: [] };
 
-    const logDir = path.join(path.dirname(implementationPath), '.logs', path.basename(implementationPath, '.yaml'));
+    // Use the utility function to resolve log directory
+    const logDir = resolveLogDirectory(implementationPath);
     this.logger = new Logger(logDir);
-    this.rlhf = new RLHFSystem();
+    this.rlhf = new RLHFSystem(implementationPath);
   }
 
   private async loadPlan(): Promise<void> {

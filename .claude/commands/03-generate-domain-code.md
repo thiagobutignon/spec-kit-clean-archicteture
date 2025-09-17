@@ -21,7 +21,12 @@ This ensures proper Git workflow from branch creation to PR submission.
 
 ## 1. Your Deliverable
 
-Your **only** output for this task is the complete and valid content of a single YAML file: `{{featureName}}-implementation.yaml`.
+Your **only** output for this task is the complete and valid content of a single YAML file that should be saved at: `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml`.
+
+**IMPORTANT**:
+- Replace `[FEATURE_NUMBER]` with a sequential number (e.g., 001, 002, 003)
+- Replace `[FEATURE_NAME]` with the feature name in kebab-case
+- Example: `spec/001-user-registration/domain/implementation.yaml`
 
 ## 2. Prohibited Actions
 
@@ -38,7 +43,7 @@ Your **only** output for this task is the complete and valid content of a single
 ## 4. Input Parameters
 
 - **Feature Definition:** A single JSON object containing all the necessary information for the feature, including optional `ubiquitousLanguage` field.
-- **Current YAML State (Optional):** The content of the existing `{{featureName}}-implementation.yaml` file, if it already exists from a previous run. If not provided, assume a blank slate.
+- **Current YAML State (Optional):** The content of the existing `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml` file, if it already exists from a previous run. If not provided, assume a blank slate.
 - **Existing YAML (Optional):** The content of a pre-existing `implementation.yaml` file that needs to be updated.
 
 ### IF `Existing YAML` is NOT provided (Create Mode):
@@ -85,7 +90,7 @@ After you provide the final, validated YAML, I (the user) will review it. If it 
 
 ### Example 1: Create Mode (JSON only)
 
-`/tasks-domain create feature from json:`
+`/03-generate-domain-code create feature from json:`
 
 ```json
 {
@@ -95,7 +100,7 @@ After you provide the final, validated YAML, I (the user) will review it. If it 
 
 ### Example 2: Update Mode (YAML + JSON)
 
-`/tasks-domain update yaml:`
+`/03-generate-domain-code update yaml:`
 
 ```yaml
 # ... (conteúdo do YAML gerado anteriormente, que ainda tem placeholders)
@@ -161,3 +166,13 @@ steps:
 - **0**: No references to patterns, missing domain context
 - **+1**: Valid but generic, missing ubiquitous language
 - **+2**: Perfect implementation with all DDD/Clean Architecture principles
+
+## 📍 Next Step
+
+After generating your YAML plan, proceed to architectural reflection:
+
+```bash
+/05-reflect-domain-lessons from yaml: <your-generated-yaml>
+```
+
+This will refine your YAML plan using Clean Architecture principles and DDD patterns to optimize for RLHF score.

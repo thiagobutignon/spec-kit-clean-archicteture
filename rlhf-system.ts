@@ -6,6 +6,7 @@ import * as yaml from 'yaml';
 import { createHash } from 'crypto';
 import chalk from 'chalk';
 import Logger from './logger';
+import { resolveRLHFDirectory, resolveLogDirectory } from './utils/log-path-resolver';
 
 /**
  * Automated RLHF System for Domain Generation
@@ -53,21 +54,33 @@ interface TemplateImprovement {
 }
 
 class RLHFSystem {
-  private dataDir = '.rlhf';
-  private metricsFile = path.join(this.dataDir, 'metrics.json');
-  private patternsFile = path.join(this.dataDir, 'patterns.json');
-  private improvementsFile = path.join(this.dataDir, 'improvements.json');
+  private dataDir: string;
+  private metricsFile: string;
+  private patternsFile: string;
+  private improvementsFile: string;
   private logger: Logger;
   private patternCache = new Map<string, { result: any; timestamp: number }>();
   private cacheExpiry: number;
   private maxCacheSize = 100; // Maximum cache entries
   private cacheStats = { hits: 0, misses: 0, evictions: 0 };
   private progressCallback?: (message: string, percentage: number) => void;
-  private progressFile = path.join(this.dataDir, 'progress.json');
+  private progressFile: string;
 
-  constructor(cacheExpiry?: number) {
+  constructor(contextPath?: string, cacheExpiry?: number) {
+    // Resolve data directory based on context
+    this.dataDir = resolveRLHFDirectory(contextPath);
+    this.metricsFile = path.join(this.dataDir, 'metrics.json');
+    this.patternsFile = path.join(this.dataDir, 'patterns.json');
+    this.improvementsFile = path.join(this.dataDir, 'improvements.json');
+    this.progressFile = path.join(this.dataDir, 'progress.json');
+
     fs.ensureDirSync(this.dataDir);
-    const logDir = path.join(this.dataDir, 'logs');
+
+    // Resolve log directory based on context
+    const logDir = contextPath
+      ? resolveLogDirectory(contextPath, 'rlhf')
+      : path.join(this.dataDir, 'logs');
+
     this.logger = new Logger(logDir);
     this.cacheExpiry = cacheExpiry || 5 * 60 * 1000; // Default 5 minutes
     this.setupCleanupHandlers();
@@ -685,8 +698,10 @@ class RLHFSystem {
 
 // CLI Interface
 async function main() {
-  const rlhf = new RLHFSystem();
   const [command, ...args] = process.argv.slice(2);
+  // Pass the first argument as context if it's a file path
+  const contextPath = args[0] && args[0].endsWith('.yaml') ? args[0] : undefined;
+  const rlhf = new RLHFSystem(contextPath);
 
   switch (command) {
     case 'analyze':
