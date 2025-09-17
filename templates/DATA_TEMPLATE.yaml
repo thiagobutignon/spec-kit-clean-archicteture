@@ -41,16 +41,16 @@ metadata:
       definition: '__IMPLEMENTATION_BUSINESS_RESPONSIBILITY__'
     - term: '__EXTERNAL_DEPENDENCY__'
       definition: '__DEPENDENCY_ABSTRACTION_PURPOSE__'
-  # AI-NOTE: Define protocols needed for +2 RLHF score
-  required_protocols:
-    - category: 'db'
-      protocols: ['__ENTITY__Repository', 'Check__ENTITY__Repository']
-    - category: 'http'
-      protocols: ['HttpClient']
-    - category: 'cryptography'
-      protocols: ['Hasher', 'HashComparer', 'Encrypter', 'Decrypter']
-    - category: 'cache'
-      protocols: ['SetStorage', 'GetStorage']
+# AI-NOTE: Define protocols needed for +2 RLHF score
+required_protocols:
+  - category: 'db'
+    protocols: ['__ENTITY__Repository', 'Check__ENTITY__Repository']
+  - category: 'http'
+    protocols: ['HttpClient']
+  - category: 'cryptography'
+    protocols: ['Hasher', 'HashComparer', 'Encrypter', 'Decrypter']
+  - category: 'cache'
+    protocols: ['SetStorage', 'GetStorage']
 
 # AI-NOTE: Feature-based structure for data layer
 structure:
@@ -459,117 +459,585 @@ steps:
       echo "✅ TDD Step 1 completed successfully"
 
   # === TDD STEP 2: CREATE MOCK/SPY IMPLEMENTATIONS ===
-  - id: 'create-mocks-__PROTOCOL_CATEGORY__'
+  # Database Mock Creation
+  - id: 'create-mocks-db-repository'
     type: 'create_file'
-    description: 'TDD Step 2: Create mock/spy implementations for __PROTOCOL_CATEGORY__'
+    description: 'TDD Step 2a: Create repository spy implementations for database protocols'
     status: 'PENDING'
     rlhf_score: null
     execution_log: ''
     references:
       - type: 'external_pattern'
         source: 'context7'
-        query: 'spy pattern testing typescript'
-        description: 'Following spy pattern for dependency mocking.'
+        query: 'repository spy pattern testing'
+        description: 'Following repository spy pattern for database mocking.'
       - type: 'internal_code_analysis'
         source: 'serena'
         tool: 'find_symbol'
-        query: '*Spy'
-        description: 'Consistent with existing spy implementations.'
-    path: 'tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-__PROTOCOL_CATEGORY__.ts'
+        query: '*RepositorySpy'
+        description: 'Consistent with existing repository spy implementations.'
+    path: 'tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-db-repository.ts'
     template: |
-      import { __PROTOCOL__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols'
+      import { __ENTITY__Repository } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols'
 
       /**
-       * Mock implementation of __PROTOCOL__ for testing purposes.
+       * Mock implementation of __ENTITY__Repository for testing purposes.
        * Implements spy pattern to track method calls and control return values.
        */
-      export class __PROTOCOL__Spy implements __PROTOCOL__ {
-        /** Stores the parameter passed to the method for assertion */
-        __PARAMETER__: __TYPE__
+      export class __ENTITY__RepositorySpy implements __ENTITY__Repository {
+        /** Stores the parameters passed to add method for assertion */
+        params: __ENTITY__Repository.AddParams
 
         /** Controls the return value for testing different scenarios */
-        result = __DEFAULT_MOCK_VALUE__
+        result = true
 
         /**
-         * Mock implementation of the __METHOD__ method.
-         * @param __PARAMETER__ - The parameter to be processed
+         * Mock implementation of the add method.
+         * @param data - The entity data to be added
          * @returns Promise resolving to the controlled test result
          */
-        async __METHOD__ (__PARAMETER__: __TYPE__): Promise<__RETURN_TYPE__> {
-          this.__PARAMETER__ = __PARAMETER__
+        async add (data: __ENTITY__Repository.AddParams): Promise<boolean> {
+          this.params = data
+          return this.result
+        }
+      }
+
+      /**
+       * Mock implementation for checking entity existence by email.
+       * Used to test duplicate email validation scenarios.
+       */
+      export class Check__ENTITY__ByEmailRepositorySpy {
+        /** Stores the email passed to check method for assertion */
+        email: string
+
+        /** Controls the return value - true means email exists, false means it doesn't */
+        result = false
+
+        /**
+         * Mock implementation of email check method.
+         * @param email - The email to check for existence
+         * @returns Promise resolving to the controlled test result
+         */
+        async checkByEmail (email: string): Promise<boolean> {
+          this.email = email
           return this.result
         }
       }
     validation_script: |
-      echo "🔍 TDD Step 2: Validating mock creation..."
+      echo "🔍 TDD Step 2a: Validating database repository mock creation..."
       # Verify mock file exists
-      if [ ! -f "tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-__PROTOCOL_CATEGORY__.ts" ]; then
-        echo "❌ ERROR: Mock file was not created."
+      if [ ! -f "tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-db-repository.ts" ]; then
+        echo "❌ ERROR: Database repository mock file was not created."
         exit 1
       fi
-      echo "✅ Mock file created successfully."
+      echo "✅ Database repository mock file created successfully."
 
-      echo "📦 Staging mock file..."
-      git add tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-__PROTOCOL_CATEGORY__.ts
+      echo "📦 Staging database repository mock file..."
+      git add tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-db-repository.ts
 
-      echo "💾 Committing TDD Step 2..."
-      git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add __PROTOCOL_CATEGORY__ mock implementations (TDD Step 2: spy pattern)"
+      echo "💾 Committing TDD Step 2a..."
+      git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add __ENTITY__Repository mock implementations (TDD Step 2a: db mocks)"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED"
         exit 1
       fi
-      echo "✅ TDD Step 2 completed successfully"
+      echo "✅ TDD Step 2a completed successfully"
 
-  # === TDD STEP 3: CREATE PROTOCOL INTERFACES ===
-  - id: 'create-protocol-__PROTOCOL_NAME_KEBAB__'
+  # HTTP Mock Creation
+  - id: 'create-mocks-http-client'
     type: 'create_file'
-    description: 'TDD Step 3: Create __PROTOCOL_NAME__ protocol interface'
+    description: 'TDD Step 2b: Create HTTP client spy implementation'
     status: 'PENDING'
     rlhf_score: null
     execution_log: ''
     references:
       - type: 'external_pattern'
         source: 'context7'
-        query: 'dependency inversion principle interfaces'
-        description: 'Following DIP for protocol abstractions.'
+        query: 'http client spy pattern testing'
+        description: 'Following HTTP client spy pattern for testing.'
       - type: 'internal_code_analysis'
         source: 'serena'
         tool: 'find_symbol'
-        query: 'interface *'
-        description: 'Consistent with existing protocol interfaces.'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/__CATEGORY__/__PROTOCOL_NAME_KEBAB__.ts'
+        query: '*ClientSpy'
+        description: 'Consistent with existing HTTP client spy implementations.'
+    path: 'tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-http-client.ts'
     template: |
+      import { HttpClient } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols'
+
       /**
-       * Protocol interface for __PROTOCOL_NAME__ operations.
-       * Defines the contract for external dependency implementations.
+       * Mock implementation of HttpClient for testing purposes.
+       * Implements spy pattern to track HTTP requests and control responses.
        */
-      export interface __PROTOCOL_NAME__ {
+      export class HttpClientSpy<T = any> implements HttpClient<T> {
+        /** Stores the request parameters for assertion */
+        url: string
+        method: string
+        body?: any
+        headers?: Record<string, string>
+
+        /** Controls the response for testing different scenarios */
+        response: HttpClient.Result<T> = {
+          statusCode: 200,
+          body: {} as T
+        }
+
         /**
-         * __METHOD__ operation.
-         * @param __PARAM__ - The input parameter for the operation
-         * @returns Promise resolving to __RETURN_TYPE__
+         * Mock implementation of the request method.
+         * @param data - The request configuration
+         * @returns Promise resolving to the controlled test response
          */
-        __METHOD__: (__PARAM__: __PARAM_TYPE__) => Promise<__RETURN_TYPE__>
+        async request (data: HttpClient.Params): Promise<HttpClient.Result<T>> {
+          this.url = data.url
+          this.method = data.method
+          this.body = data.body
+          this.headers = data.headers
+          return this.response
+        }
       }
     validation_script: |
-      echo "🔍 TDD Step 3: Validating protocol creation..."
-      # Verify protocol file exists
-      if [ ! -f "src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/__CATEGORY__/__PROTOCOL_NAME_KEBAB__.ts" ]; then
-        echo "❌ ERROR: Protocol file was not created."
+      echo "🔍 TDD Step 2b: Validating HTTP client mock creation..."
+      # Verify mock file exists
+      if [ ! -f "tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-http-client.ts" ]; then
+        echo "❌ ERROR: HTTP client mock file was not created."
         exit 1
       fi
-      echo "✅ Protocol file created successfully."
+      echo "✅ HTTP client mock file created successfully."
 
-      echo "📦 Staging protocol file..."
-      git add src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/__CATEGORY__/__PROTOCOL_NAME_KEBAB__.ts
+      echo "📦 Staging HTTP client mock file..."
+      git add tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-http-client.ts
 
-      echo "💾 Committing TDD Step 3..."
-      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add __PROTOCOL_NAME_KEBAB__ protocol interface (TDD Step 3: protocols)"
+      echo "💾 Committing TDD Step 2b..."
+      git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add HttpClient mock implementation (TDD Step 2b: http mocks)"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED"
         exit 1
       fi
-      echo "✅ TDD Step 3 completed successfully"
+      echo "✅ TDD Step 2b completed successfully"
+
+  # Cryptography Mock Creation
+  - id: 'create-mocks-cryptography'
+    type: 'create_file'
+    description: 'TDD Step 2c: Create cryptography spy implementations'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'external_pattern'
+        source: 'context7'
+        query: 'cryptography spy pattern testing hasher'
+        description: 'Following cryptography spy pattern for testing.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: '*HashSpy'
+        description: 'Consistent with existing cryptography spy implementations.'
+    path: 'tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-cryptography.ts'
+    template: |
+      import { Hasher, HashComparer } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols'
+
+      /**
+       * Mock implementation of Hasher for testing purposes.
+       * Implements spy pattern to track hash operations.
+       */
+      export class HasherSpy implements Hasher {
+        /** The controlled hash result for testing */
+        digest = 'hashed_password'
+
+        /** Stores the plaintext passed to hash method */
+        plaintext: string
+
+        /**
+         * Mock implementation of the hash method.
+         * @param plaintext - The string to be hashed
+         * @returns Promise resolving to the controlled hash digest
+         */
+        async hash (plaintext: string): Promise<string> {
+          this.plaintext = plaintext
+          return this.digest
+        }
+      }
+
+      /**
+       * Mock implementation of HashComparer for testing purposes.
+       * Implements spy pattern to track comparison operations.
+       */
+      export class HashComparerSpy implements HashComparer {
+        /** Stores the comparison parameters for assertion */
+        plaintext: string
+        digest: string
+
+        /** Controls the comparison result for testing */
+        result = true
+
+        /**
+         * Mock implementation of the compare method.
+         * @param plaintext - The plaintext to compare
+         * @param digest - The hash to compare against
+         * @returns Promise resolving to the controlled comparison result
+         */
+        async compare (plaintext: string, digest: string): Promise<boolean> {
+          this.plaintext = plaintext
+          this.digest = digest
+          return this.result
+        }
+      }
+    validation_script: |
+      echo "🔍 TDD Step 2c: Validating cryptography mock creation..."
+      # Verify mock file exists
+      if [ ! -f "tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-cryptography.ts" ]; then
+        echo "❌ ERROR: Cryptography mock file was not created."
+        exit 1
+      fi
+      echo "✅ Cryptography mock file created successfully."
+
+      echo "📦 Staging cryptography mock file..."
+      git add tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-cryptography.ts
+
+      echo "💾 Committing TDD Step 2c..."
+      git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add Hasher/HashComparer mock implementations (TDD Step 2c: cryptography mocks)"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED"
+        exit 1
+      fi
+      echo "✅ TDD Step 2c completed successfully"
+
+  # Cache Mock Creation
+  - id: 'create-mocks-cache-storage'
+    type: 'create_file'
+    description: 'TDD Step 2d: Create cache storage spy implementations'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'external_pattern'
+        source: 'context7'
+        query: 'cache storage spy pattern testing'
+        description: 'Following cache storage spy pattern for testing.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: '*StorageSpy'
+        description: 'Consistent with existing storage spy implementations.'
+    path: 'tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-cache-storage.ts'
+    template: |
+      import { SetStorage, GetStorage } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols'
+
+      /**
+       * Mock implementation of SetStorage for testing purposes.
+       * Implements spy pattern to track cache set operations.
+       */
+      export class SetStorageSpy implements SetStorage {
+        /** Stores the parameters passed to set method for assertion */
+        key: string
+        value: any
+
+        /**
+         * Mock implementation of the set method.
+         * @param key - The storage key
+         * @param value - The value to store
+         * @returns Promise that resolves when operation is complete
+         */
+        async set (key: string, value: any): Promise<void> {
+          this.key = key
+          this.value = value
+        }
+      }
+
+      /**
+       * Mock implementation of GetStorage for testing purposes.
+       * Implements spy pattern to track cache get operations.
+       */
+      export class GetStorageSpy implements GetStorage {
+        /** Stores the key passed to get method for assertion */
+        key: string
+
+        /** Controls the returned value for testing */
+        value: any = 'cached_value'
+
+        /**
+         * Mock implementation of the get method.
+         * @param key - The storage key
+         * @returns Promise resolving to the controlled cached value
+         */
+        async get<T = any> (key: string): Promise<T> {
+          this.key = key
+          return this.value as T
+        }
+      }
+    validation_script: |
+      echo "🔍 TDD Step 2d: Validating cache storage mock creation..."
+      # Verify mock file exists
+      if [ ! -f "tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-cache-storage.ts" ]; then
+        echo "❌ ERROR: Cache storage mock file was not created."
+        exit 1
+      fi
+      echo "✅ Cache storage mock file created successfully."
+
+      echo "📦 Staging cache storage mock file..."
+      git add tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-cache-storage.ts
+
+      echo "💾 Committing TDD Step 2d..."
+      git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add SetStorage/GetStorage mock implementations (TDD Step 2d: cache mocks)"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED"
+        exit 1
+      fi
+      echo "✅ TDD Step 2d completed successfully"
+
+  # === TDD STEP 3: CREATE PROTOCOL INTERFACES ===
+  # Database Protocol Creation
+  - id: 'create-db-repository-protocol'
+    type: 'create_file'
+    description: 'TDD Step 3a: Create __ENTITY__Repository database protocol interface'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'external_pattern'
+        source: 'context7'
+        query: 'repository pattern database abstraction'
+        description: 'Following repository pattern for database abstraction.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: 'interface *Repository'
+        description: 'Consistent with existing repository interfaces.'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/db/__ENTITY_KEBAB__-repository.ts'
+    template: |
+      /**
+       * Repository pattern interface for __ENTITY__ data operations.
+       * Provides abstraction for database operations.
+       */
+      export interface __ENTITY__Repository {
+        /**
+         * Adds a new __ENTITY__ to the repository.
+         * @param data - The __ENTITY__ data to be added
+         * @returns Promise resolving to true if successful
+         */
+        add: (data: __ENTITY__Repository.AddParams) => Promise<boolean>
+      }
+
+      export namespace __ENTITY__Repository {
+        export type AddParams = {
+          name: string
+          email: string
+          password: string
+        }
+      }
+    validation_script: |
+      echo "🔍 TDD Step 3a: Validating repository protocol creation..."
+      # Verify protocol file exists
+      if [ ! -f "src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/db/__ENTITY_KEBAB__-repository.ts" ]; then
+        echo "❌ ERROR: Repository protocol file was not created."
+        exit 1
+      fi
+      echo "✅ Repository protocol file created successfully."
+
+      echo "📦 Staging repository protocol file..."
+      git add src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/db/__ENTITY_KEBAB__-repository.ts
+
+      echo "💾 Committing TDD Step 3a..."
+      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add __ENTITY__Repository protocol interface (TDD Step 3a: db protocols)"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED"
+        exit 1
+      fi
+      echo "✅ TDD Step 3a completed successfully"
+
+  # HTTP Protocol Creation
+  - id: 'create-http-client-protocol'
+    type: 'create_file'
+    description: 'TDD Step 3b: Create HttpClient HTTP protocol interface'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'external_pattern'
+        source: 'context7'
+        query: 'http client interface abstraction'
+        description: 'Following HTTP client abstraction patterns.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: 'interface *Client'
+        description: 'Consistent with existing HTTP client interfaces.'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/http/http-client.ts'
+    template: |
+      /**
+       * HTTP client protocol interface.
+       * Provides abstraction for HTTP operations.
+       */
+      export interface HttpClient<R = any> {
+        /**
+         * Performs an HTTP request.
+         * @param data - The request configuration
+         * @returns Promise resolving to the HTTP response
+         */
+        request: (data: HttpClient.Params) => Promise<HttpClient.Result<R>>
+      }
+
+      export namespace HttpClient {
+        export type Params = {
+          url: string
+          method: 'get' | 'post' | 'put' | 'delete'
+          body?: any
+          headers?: Record<string, string>
+        }
+
+        export type Result<T = any> = {
+          statusCode: number
+          body?: T
+        }
+      }
+    validation_script: |
+      echo "🔍 TDD Step 3b: Validating HTTP client protocol creation..."
+      # Verify protocol file exists
+      if [ ! -f "src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/http/http-client.ts" ]; then
+        echo "❌ ERROR: HTTP client protocol file was not created."
+        exit 1
+      fi
+      echo "✅ HTTP client protocol file created successfully."
+
+      echo "📦 Staging HTTP client protocol file..."
+      git add src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/http/http-client.ts
+
+      echo "💾 Committing TDD Step 3b..."
+      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add HttpClient protocol interface (TDD Step 3b: http protocols)"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED"
+        exit 1
+      fi
+      echo "✅ TDD Step 3b completed successfully"
+
+  # Cryptography Protocol Creation
+  - id: 'create-cryptography-hasher-protocol'
+    type: 'create_file'
+    description: 'TDD Step 3c: Create Hasher cryptography protocol interface'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'external_pattern'
+        source: 'context7'
+        query: 'cryptography hashing interface abstraction'
+        description: 'Following cryptography abstraction patterns.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: 'interface *Hash*'
+        description: 'Consistent with existing cryptography interfaces.'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/cryptography/hasher.ts'
+    template: |
+      /**
+       * Hasher protocol interface for cryptographic operations.
+       * Provides abstraction for password hashing operations.
+       */
+      export interface Hasher {
+        /**
+         * Hashes a plaintext string.
+         * @param plaintext - The string to be hashed
+         * @returns Promise resolving to the hashed string
+         */
+        hash: (plaintext: string) => Promise<string>
+      }
+
+      /**
+       * Hash comparer protocol interface.
+       * Provides abstraction for hash comparison operations.
+       */
+      export interface HashComparer {
+        /**
+         * Compares a plaintext with a hashed value.
+         * @param plaintext - The plaintext to compare
+         * @param digest - The hashed value to compare against
+         * @returns Promise resolving to true if they match
+         */
+        compare: (plaintext: string, digest: string) => Promise<boolean>
+      }
+    validation_script: |
+      echo "🔍 TDD Step 3c: Validating cryptography protocol creation..."
+      # Verify protocol file exists
+      if [ ! -f "src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/cryptography/hasher.ts" ]; then
+        echo "❌ ERROR: Cryptography protocol file was not created."
+        exit 1
+      fi
+      echo "✅ Cryptography protocol file created successfully."
+
+      echo "📦 Staging cryptography protocol file..."
+      git add src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/cryptography/hasher.ts
+
+      echo "💾 Committing TDD Step 3c..."
+      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add Hasher/HashComparer protocol interfaces (TDD Step 3c: cryptography protocols)"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED"
+        exit 1
+      fi
+      echo "✅ TDD Step 3c completed successfully"
+
+  # Cache Protocol Creation
+  - id: 'create-cache-storage-protocol'
+    type: 'create_file'
+    description: 'TDD Step 3d: Create Storage cache protocol interfaces'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'external_pattern'
+        source: 'context7'
+        query: 'cache storage interface abstraction'
+        description: 'Following cache storage abstraction patterns.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: 'interface *Storage'
+        description: 'Consistent with existing storage interfaces.'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/cache/storage.ts'
+    template: |
+      /**
+       * Set storage protocol interface for cache operations.
+       * Provides abstraction for storing data in cache.
+       */
+      export interface SetStorage {
+        /**
+         * Sets a value in storage.
+         * @param key - The storage key
+         * @param value - The value to store
+         */
+        set: (key: string, value: any) => Promise<void>
+      }
+
+      /**
+       * Get storage protocol interface for cache operations.
+       * Provides abstraction for retrieving data from cache.
+       */
+      export interface GetStorage {
+        /**
+         * Gets a value from storage.
+         * @template T - The expected type of the stored value
+         * @param key - The storage key
+         * @returns The stored value
+         */
+        get: <T = any>(key: string) => Promise<T>
+      }
+    validation_script: |
+      echo "🔍 TDD Step 3d: Validating cache storage protocol creation..."
+      # Verify protocol file exists
+      if [ ! -f "src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/cache/storage.ts" ]; then
+        echo "❌ ERROR: Cache storage protocol file was not created."
+        exit 1
+      fi
+      echo "✅ Cache storage protocol file created successfully."
+
+      echo "📦 Staging cache storage protocol file..."
+      git add src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/cache/storage.ts
+
+      echo "💾 Committing TDD Step 3d..."
+      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add SetStorage/GetStorage protocol interfaces (TDD Step 3d: cache protocols)"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED"
+        exit 1
+      fi
+      echo "✅ TDD Step 3d completed successfully"
 
   # === TDD STEP 4: CREATE USE CASE IMPLEMENTATION ===
   - id: 'create-usecase-__PREFIX__-__USE_CASE_NAME_KEBAB__'
@@ -588,48 +1056,59 @@ steps:
         tool: 'find_symbol'
         query: '__PREFIX__*'
         description: 'Consistent with existing use case implementations.'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.ts'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/db-add-__ENTITY_KEBAB__.ts'
     template: |
-      import type { __DOMAIN_USE_CASE__, __DOMAIN_USE_CASE__Input, __DOMAIN_USE_CASE__Output } from '@/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases'
-      import { __PROTOCOL_1__, __PROTOCOL_2__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols'
+      import type { Add__ENTITY__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases'
+      import { __ENTITY__Repository, Check__ENTITY__ByEmailRepository, Hasher } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols'
 
       /**
-       * Implementation of __DOMAIN_USE_CASE__ use case.
-       * Handles __USE_CASE_DESCRIPTION__.
+       * Implementation of Add__ENTITY__ use case for data layer.
+       * Handles __ENTITY__ creation with password hashing and duplicate email validation.
+       * Follows TDD implementation pattern with protocol abstractions.
        */
-      export class __PREFIX____USE_CASE_NAME__ implements __DOMAIN_USE_CASE__ {
+      export class DbAdd__ENTITY__ implements Add__ENTITY__ {
         /**
-         * Creates an instance of __PREFIX____USE_CASE_NAME__.
-         * @param __DEPENDENCY_1_CAMEL__ - Protocol for __DEPENDENCY_1_DESCRIPTION__
-         * @param __DEPENDENCY_2_CAMEL__ - Protocol for __DEPENDENCY_2_DESCRIPTION__
+         * Creates an instance of DbAdd__ENTITY__.
+         * @param hasher - Protocol for password hashing operations
+         * @param add__ENTITY__Repository - Protocol for adding __ENTITY__ to database
+         * @param check__ENTITY__ByEmailRepository - Protocol for checking email existence
          */
         constructor (
-          private readonly __DEPENDENCY_1_CAMEL__: __PROTOCOL_1__,
-          private readonly __DEPENDENCY_2_CAMEL__: __PROTOCOL_2__
+          private readonly hasher: Hasher,
+          private readonly add__ENTITY__Repository: __ENTITY__Repository,
+          private readonly check__ENTITY__ByEmailRepository: Check__ENTITY__ByEmailRepository
         ) {}
 
         /**
-         * Executes the use case.
-         * @param input - The input data for the use case
-         * @returns Promise resolving to the use case output
-         * @throws {Error} When __ERROR_CONDITION__
+         * Executes the add __ENTITY__ use case.
+         * @param input - The __ENTITY__ data including name, email, and password
+         * @returns Promise resolving to true if successful, false if email already exists
          */
-        async execute (input: __DOMAIN_USE_CASE__Input): Promise<__DOMAIN_USE_CASE__Output> {
-          // Implementation following test specifications
-          const result = await this.__DEPENDENCY_1_CAMEL__.__DEPENDENCY_METHOD__(input)
-
-          // Business logic
-          if (!result) {
-            throw new Error()
+        async add (input: Add__ENTITY__.Params): Promise<Add__ENTITY__.Result> {
+          // Step 1: Check if email already exists (business rule)
+          const emailExists = await this.check__ENTITY__ByEmailRepository.checkByEmail(input.email)
+          if (emailExists) {
+            return false
           }
 
-          return result
+          // Step 2: Hash the password (security requirement)
+          const hashedPassword = await this.hasher.hash(input.password)
+
+          // Step 3: Save to repository with hashed password
+          const __ENTITY_CAMEL__Data = {
+            name: input.name,
+            email: input.email,
+            password: hashedPassword
+          }
+
+          const isAdded = await this.add__ENTITY__Repository.add(__ENTITY_CAMEL__Data)
+          return isAdded
         }
       }
     validation_script: |
       echo "🔍 TDD Step 4: Validating use case implementation..."
       # Verify implementation file exists
-      if [ ! -f "src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.ts" ]; then
+      if [ ! -f "src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/db-add-__ENTITY_KEBAB__.ts" ]; then
         echo "❌ ERROR: Use case implementation was not created."
         exit 1
       fi
@@ -662,10 +1141,10 @@ steps:
       echo "✅ Tests passed - TDD GREEN PHASE complete"
 
       echo "📦 Staging implementation..."
-      git add src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.ts
+      git add src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/db-add-__ENTITY_KEBAB__.ts
 
       echo "💾 Committing TDD Step 4..."
-      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __PREFIX__-__USE_CASE_NAME_KEBAB__ use case (TDD Step 4: green phase)"
+      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement DbAdd__ENTITY__ use case (TDD Step 4: green phase)"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED"
         exit 1
