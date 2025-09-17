@@ -52,45 +52,45 @@ tests/
 
 ### Step 1: Create Test File FIRST
 
-**File**: `tests/data/usecases/{prefix}-{use-case-name}.spec.ts`
+**File**: `tests/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.spec.ts`
 
 ```typescript
-import { {Prefix}{UseCaseName} } from '@/data/usecases'
-import { mock{DomainMethod}Params, throwError } from '@/tests/domain/mocks'
-import { {DependencySpy1}, {DependencySpy2} } from '@/tests/data/mocks'
+import { __PREFIX____USE_CASE_NAME__ } from '@/data/usecases'
+import { mock__DOMAIN_METHOD__Params, throwError } from '@/tests/domain/mocks'
+import { __DEPENDENCY_1__Spy, __DEPENDENCY_2__Spy } from '@/tests/data/mocks'
 
 type SutTypes = {
-  sut: {Prefix}{UseCaseName}
-  {dependency1}Spy: {Dependency1}Spy
-  {dependency2}Spy: {Dependency2}Spy
+  sut: __PREFIX____USE_CASE_NAME__
+  __DEPENDENCY_1_CAMEL__Spy: __DEPENDENCY_1__Spy
+  __DEPENDENCY_2_CAMEL__Spy: __DEPENDENCY_2__Spy
 }
 
 const makeSut = (): SutTypes => {
-  const {dependency1}Spy = new {Dependency1}Spy()
-  const {dependency2}Spy = new {Dependency2}Spy()
-  const sut = new {Prefix}{UseCaseName}({dependency1}Spy, {dependency2}Spy)
+  const __DEPENDENCY_1_CAMEL__Spy = new __DEPENDENCY_1__Spy()
+  const __DEPENDENCY_2_CAMEL__Spy = new __DEPENDENCY_2__Spy()
+  const sut = new __PREFIX____USE_CASE_NAME__(__DEPENDENCY_1_CAMEL__Spy, __DEPENDENCY_2_CAMEL__Spy)
   return {
     sut,
-    {dependency1}Spy,
-    {dependency2}Spy
+    __DEPENDENCY_1_CAMEL__Spy,
+    __DEPENDENCY_2_CAMEL__Spy
   }
 }
 
-describe('{Prefix}{UseCaseName} Usecase', () => {
-  test('Should call {Dependency1} with correct values', async () => {
-    const { sut, {dependency1}Spy } = makeSut()
-    const params = mock{DomainMethod}Params()
+describe('__PREFIX____USE_CASE_NAME__ Usecase', () => {
+  test('Should call __DEPENDENCY_1__ with correct values', async () => {
+    const { sut, __DEPENDENCY_1_CAMEL__Spy } = makeSut()
+    const params = mock__DOMAIN_METHOD__Params()
 
-    await sut.{method}(params)
+    await sut.__METHOD__(params)
 
-    expect({dependency1}Spy.{property}).toBe(params.{field})
+    expect(__DEPENDENCY_1_CAMEL__Spy.__PROPERTY__).toBe(params.__FIELD__)
   })
 
-  test('Should throw if {Dependency1} throws', async () => {
-    const { sut, {dependency1}Spy } = makeSut()
-    jest.spyOn({dependency1}Spy, '{method}').mockImplementationOnce(throwError)
+  test('Should throw if __DEPENDENCY_1__ throws', async () => {
+    const { sut, __DEPENDENCY_1_CAMEL__Spy } = makeSut()
+    jest.spyOn(__DEPENDENCY_1_CAMEL__Spy, '__METHOD__').mockImplementationOnce(throwError)
 
-    const promise = sut.{method}(mock{DomainMethod}Params())
+    const promise = sut.__METHOD__(mock__DOMAIN_METHOD__Params())
 
     await expect(promise).rejects.toThrow()
   })
@@ -98,30 +98,30 @@ describe('{Prefix}{UseCaseName} Usecase', () => {
   test('Should return correct value on success', async () => {
     const { sut } = makeSut()
 
-    const result = await sut.{method}(mock{DomainMethod}Params())
+    const result = await sut.__METHOD__(mock__DOMAIN_METHOD__Params())
 
-    expect(result).toBe({expectedValue})
+    expect(result).toBe(__EXPECTED_VALUE__)
   })
 })
 ```
 
 ### Step 2: Create Mock/Spy Implementations
 
-**File**: `tests/data/mocks/mock-{category}.ts`
+**File**: `tests/data/mocks/mock-__CATEGORY__.ts`
 
 ```typescript
-import { {Protocol} } from '@/data/protocols'
+import { __PROTOCOL__ } from '@/data/protocols'
 import faker from 'faker'
 
-export class {Protocol}Spy implements {Protocol} {
+export class __PROTOCOL__Spy implements __PROTOCOL__ {
   // Store call parameters for assertion
-  {parameter}: {Type}
+  __PARAMETER__: __TYPE__
 
   // Control return value for testing
-  result = {defaultMockValue}
+  result = __DEFAULT_MOCK_VALUE__
 
-  async {method} ({parameter}: {Type}): Promise<{ReturnType}> {
-    this.{parameter} = {parameter}
+  async __METHOD__ (__PARAMETER__: __TYPE__): Promise<__RETURN_TYPE__> {
+    this.__PARAMETER__ = __PARAMETER__
     return this.result
   }
 }
@@ -129,11 +129,11 @@ export class {Protocol}Spy implements {Protocol} {
 
 ### Step 3: Create Protocol Interfaces
 
-**File**: `src/data/protocols/{category}/{protocol-name}.ts`
+**File**: `src/data/protocols/__CATEGORY__/__PROTOCOL_NAME_KEBAB__.ts`
 
 ```typescript
-export interface {ProtocolName} {
-  {method}: ({param}: {ParamType}) => Promise<{ReturnType}>
+export interface __PROTOCOL_NAME__ {
+  __METHOD__: (__PARAM__: __PARAM_TYPE__) => Promise<__RETURN_TYPE__>
 }
 ```
 
@@ -142,10 +142,10 @@ export interface {ProtocolName} {
 ##### Database Protocols (`db/`)
 ```typescript
 // Repository pattern
-export interface {Entity}Repository {
-  add: (data: {Entity}Data) => Promise<boolean>
-  loadById: (id: string) => Promise<{Entity}>
-  update: (id: string, data: Partial<{Entity}Data>) => Promise<boolean>
+export interface __ENTITY__Repository {
+  add: (data: __ENTITY__Data) => Promise<boolean>
+  loadById: (id: string) => Promise<__ENTITY__>
+  update: (id: string, data: Partial<__ENTITY__Data>) => Promise<boolean>
   delete: (id: string) => Promise<boolean>
 }
 ```
@@ -201,21 +201,21 @@ export interface GetStorage {
 
 ### Step 4: Create Use Case Implementation
 
-**File**: `src/data/usecases/{prefix}-{use-case-name}.ts`
+**File**: `src/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.ts`
 
 ```typescript
-import { {DomainUseCase} } from '@/domain/usecases'
-import { {Protocol1}, {Protocol2} } from '@/data/protocols'
+import { __DOMAIN_USE_CASE__ } from '@/domain/usecases'
+import { __PROTOCOL_1__, __PROTOCOL_2__ } from '@/data/protocols'
 
-export class {Prefix}{UseCaseName} implements {DomainUseCase} {
+export class __PREFIX____USE_CASE_NAME__ implements __DOMAIN_USE_CASE__ {
   constructor (
-    private readonly {dependency1}: {Protocol1},
-    private readonly {dependency2}: {Protocol2}
+    private readonly __DEPENDENCY_1_CAMEL__: __PROTOCOL_1__,
+    private readonly __DEPENDENCY_2_CAMEL__: __PROTOCOL_2__
   ) {}
 
-  async {method} (params: {DomainUseCase}.Params): Promise<{DomainUseCase}.Result> {
+  async __METHOD__ (params: __DOMAIN_USE_CASE__.Params): Promise<__DOMAIN_USE_CASE__.Result> {
     // Implementation following test specifications
-    const result = await this.{dependency1}.{method}(params)
+    const result = await this.__DEPENDENCY_1_CAMEL__.__METHOD__(params)
 
     // Business logic
     if (!result) {
@@ -227,9 +227,9 @@ export class {Prefix}{UseCaseName} implements {DomainUseCase} {
 }
 
 // Namespace for type exports
-export namespace {Prefix}{UseCaseName} {
-  export type Params = {DomainUseCase}.Params
-  export type Result = {DomainUseCase}.Result
+export namespace __PREFIX____USE_CASE_NAME__ {
+  export type Params = __DOMAIN_USE_CASE__.Params
+  export type Result = __DOMAIN_USE_CASE__.Result
 }
 ```
 
@@ -255,10 +255,10 @@ export namespace {Prefix}{UseCaseName} {
   - `LocalLoadCurrentAccount`
 
 ### Test Naming
-- Test file: `{prefix}-{use-case-kebab-case}.spec.ts`
-- Mock class: `{Protocol}Spy`
+- Test file: `__PREFIX__-__USE_CASE_KEBAB_CASE__.spec.ts`
+- Mock class: `__PROTOCOL__Spy`
 - Factory function: `makeSut()`
-- Mock data function: `mock{Entity}Params()`
+- Mock data function: `mock__ENTITY__Params()`
 
 ## Common Patterns
 
@@ -332,7 +332,7 @@ export class DbUseCase implements DomainUseCase {
 ### Test Helpers
 ```typescript
 // Mock factory
-export const mockEntity = (): Entity => ({
+export const mock__ENTITY__ = (): __ENTITY__ => ({
   id: faker.datatype.uuid(),
   name: faker.name.findName(),
   email: faker.internet.email()
