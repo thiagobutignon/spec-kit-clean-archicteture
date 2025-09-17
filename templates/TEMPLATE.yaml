@@ -249,36 +249,38 @@ steps:
         echo "💡 Note: You have stashed changes. Run 'git stash pop' to restore them if needed."
       fi
 
-  # === DOMAIN LAYER STRUCTURE ===
-  - id: 'create-domain-structure'
+  # === LAYER STRUCTURE ===
+  # AI-NOTE: __LAYER__ will be replaced with the actual layer name (domain, application, infrastructure, presentation)
+  - id: 'create-__LAYER__-structure'
     type: 'folder'
-    description: 'Create domain layer folder structure'
+    description: 'Create __LAYER__ layer folder structure'
     status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
     rlhf_score: null # -2, -1, 0, 1, 2
     execution_log: ''
     references:
       - type: 'internal_guideline'
         source: 'ARCHITECTURE.md'
-        description: 'Following Clean Architecture domain layer structure.'
+        description: 'Following Clean Architecture __LAYER__ layer structure.'
     action:
       create_folders:
-        basePath: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain'
+        basePath: 'src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__'
         folders:
           - 'errors'
           - 'use-cases'
           - 'test'
     validation_script: |
-      echo "✅ Verifying domain folder structure..."
+      echo "✅ Verifying __LAYER__ folder structure..."
       # Verify all required folders exist
-      if [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/domain/errors" ] || \
-         [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases" ] || \
-         [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/domain/test" ]; then
-        echo "❌ ERROR: One or more domain folders were not created."
+      if [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__/errors" ] || \
+         [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__/use-cases" ] || \
+         [ ! -d "src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__/test" ]; then
+        echo "❌ ERROR: One or more __LAYER__ folders were not created."
         exit 1
       fi
-      echo "✅ Domain folders exist."
+      echo "✅ __LAYER__ folders exist."
 
-  # === DOMAIN LAYER: USE CASE ===
+  # === USE CASE CREATION ===
+  # AI-NOTE: This step creates use cases for the specified __LAYER__
   - id: 'create-use-case-__ACTION_ENTITY_KEBAB_CASE__'
     type: 'create_file'
     description: 'Create __ACTION_ENTITY_PASCAL_CASE__ use case interface'
@@ -298,7 +300,7 @@ steps:
         tool: 'find_symbol'
         query: '*UseCase'
         description: 'Consistent with existing use case interfaces.'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases/__ACTION_ENTITY_KEBAB_CASE__.ts'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__/use-cases/__ACTION_ENTITY_KEBAB_CASE__.ts'
     # AI-NOTE FOR +2 SCORE: Include domain concepts and ubiquitous language in comments
     # Use business terminology, not technical jargon
     # Reference Domain-Driven Design principles when applicable
@@ -377,10 +379,11 @@ steps:
       fi
       echo "✅ Successfully committed"
 
-  # === DOMAIN LAYER: ERROR ===
+  # === ERROR CLASS CREATION ===
+  # AI-NOTE: This step creates error classes for the specified __LAYER__
   - id: 'create-error-__ERROR_NAME_KEBAB_CASE__'
     type: 'create_file'
-    description: 'Create __ERROR_NAME_KEBAB_CASE__ domain error'
+    description: 'Create __ERROR_NAME_KEBAB_CASE__ error class'
     status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
     rlhf_score: null # -2, -1, 0, 1, 2
     execution_log: ''
@@ -397,7 +400,7 @@ steps:
         tool: 'find_symbol'
         query: '*Error'
         description: 'Consistent with existing domain errors.'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/errors/__ERROR_NAME_KEBAB_CASE__.ts'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__/errors/__ERROR_NAME_KEBAB_CASE__.ts'
     # AI-NOTE FOR +2 SCORE: Domain errors should represent business rule violations
     # Use ubiquitous language in error messages
     # Never expose technical details or implementation specifics
@@ -441,14 +444,15 @@ steps:
       git add .
 
       echo "💾 Creating commit..."
-      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add __ERROR_NAME_KEBAB_CASE__ domain error"
+      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add __ERROR_NAME_KEBAB_CASE__ error class"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED"
         exit 1
       fi
       echo "✅ Successfully committed"
 
-  # === DOMAIN LAYER: TEST HELPER ===
+  # === TEST HELPER CREATION ===
+  # AI-NOTE: This step creates test helpers for the specified __LAYER__
   - id: 'create-test-helper-__ACTION_ENTITY_KEBAB_CASE__'
     type: 'create_file'
     description: 'Create mock for __ACTION_ENTITY_PASCAL_CASE__ use case'
@@ -468,7 +472,7 @@ steps:
         tool: 'find_symbol'
         query: 'mock*'
         description: 'Consistent with existing test helpers.'
-    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/test/mock-__ACTION_ENTITY_KEBAB_CASE__-use-case.ts'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__/test/mock-__ACTION_ENTITY_KEBAB_CASE__-use-case.ts'
     template: |
       import { vi } from 'vitest'
       import type { __ACTION_ENTITY_PASCAL_CASE__UseCase, __ACTION_ENTITY_PASCAL_CASE__Input, __ACTION_ENTITY_PASCAL_CASE__Output } from '../use-cases/__ACTION_ENTITY_KEBAB_CASE__'
