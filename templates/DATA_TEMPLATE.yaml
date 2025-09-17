@@ -159,6 +159,91 @@ test_rules:
     - 'Skip error scenarios'
 
 # ------------------------------------------------------------------------------
+# AI-NOTE: MISSING SECTIONS FROM TEMPLATE.yaml - ADDING THEM NOW
+# These sections are critical for proper template validation and AI guidance
+# ------------------------------------------------------------------------------
+
+# Domain layer rules (inherited from TEMPLATE.yaml)
+domain_rules:
+  allowed:
+    - 'Simple type definitions (Input/Output types)'
+    - 'Use case interfaces (contracts only)'
+    - 'Domain-specific error classes'
+    - 'Test mock functions'
+
+  forbidden:
+    - 'Framework dependencies (React, Next.js, Express)'
+    - 'External libraries (axios, fetch, database clients)'
+    - 'Implementation details of any kind'
+    - 'UI components'
+    - 'HTTP/Database/File system operations'
+    - 'Environment variables'
+    - 'Console.log or any I/O operations'
+    - 'Value objects'
+    - 'Entities'
+    - 'Business rules or business logic'
+    - 'Validation logic'
+    - 'Calculations or computations'
+    - 'Any behavior beyond type definitions and interfaces'
+
+# Use case rules (from TEMPLATE.yaml)
+use_case_rules:
+  should:
+    - 'Define only interfaces/contracts, not implementations'
+    - 'Have EXACTLY ONE responsibility (one business operation)'
+    - 'Do ONE thing and ONE thing only (never multiple operations)'
+    - 'Return domain types or primitives'
+    - 'Be named with verbs (CreateUser, AuthenticateUser, etc.)'
+    - 'Be framework agnostic'
+
+  should_not:
+    - 'Contain implementation logic'
+    - 'Know about HTTP, databases, or external services'
+    - 'Import from data, presentation, or infrastructure layers'
+    - 'Have side effects'
+    - 'Execute multiple operations (e.g., CreateUserAndSendEmail is wrong)'
+
+# Error rules (from TEMPLATE.yaml)
+error_rules:
+  should:
+    - 'Extend the native Error class'
+    - 'Have descriptive names ending with Error'
+    - 'Contain meaningful error messages'
+    - 'Represent business rule violations'
+    - 'Be thrown when domain invariants are violated'
+
+  should_not:
+    - 'Contain HTTP status codes'
+    - 'Include technical/implementation details'
+    - 'Expose sensitive information'
+    - 'Import external dependencies'
+
+# Test helper rules (from TEMPLATE.yaml)
+test_helper_rules:
+  should:
+    - 'Create mock/stub implementations of use cases'
+    - 'Generate fake test data'
+    - 'Be pure functions that return consistent data'
+    - 'Help reduce test boilerplate'
+    - 'Use ONLY Vitest (Jest is prohibited)'
+
+  should_not:
+    - 'Make real API calls or database queries'
+    - 'Depend on external services'
+    - 'Contain test assertions (those belong in test files)'
+    - 'Have side effects or maintain state'
+    - 'Use Jest (use Vitest instead)'
+
+# Layer-specific rules (missing section)
+layer_rules:
+  data_layer:
+    primary_responsibility: 'Implement domain use cases through abstract protocols'
+    can_import_from: ['domain']
+    cannot_import_from: ['infrastructure', 'presentation', 'external']
+    must_implement: ['Domain use case interfaces']
+    must_abstract: ['All external dependencies through protocols']
+
+# ------------------------------------------------------------------------------
 # IMPLEMENTATION STEPS - TDD EXECUTION ORDER
 # CRITICAL: These steps MUST be executed in this exact order
 # ------------------------------------------------------------------------------
@@ -573,6 +658,114 @@ steps:
       fi
       echo "✅ TDD Step 4 completed successfully - Full TDD cycle complete!"
 
+  # === REFACTORING STEP (OPTIONAL) ===
+  # OPTIONAL STEP: You can add more steps here for additional use cases, errors, or test helpers as needed.
+  - id: 'refactor-__FILE_TO_MODIFY_KEBAB_CASE__'
+    type: 'refactor_file'
+    description: 'Refactor __FILE_TO_MODIFY_PASCAL_CASE__ to incorporate new logic'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_referencing_symbols'
+        query: '__SYMBOL_BEING_CHANGED__'
+        description: 'Refactoring this file because it is a primary consumer of the changed `__SYMBOL__` interface.'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/path/to/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+    # CRITICAL FOR RLHF SCORE: The template MUST use REPLACE/WITH format for refactor_file steps
+    # Missing these blocks will result in a CATASTROPHIC -2 score
+    # Format requirements:
+    # 1. MUST include <<<REPLACE>>> block with exact code to be replaced
+    # 2. MUST include <<<WITH>>> block with new code
+    # 3. MUST include closing tags: <<</REPLACE>>> and <<</WITH>>>
+    # 4. The code in REPLACE block must match EXACTLY what's in the file
+    template: |
+      <<<REPLACE>>>
+      // Código antigo que a IA identificou para ser substituído
+      export type OldType = {
+        fieldA: string;
+      }
+      <<</REPLACE>>>
+      <<<WITH>>>
+      // Novo código
+      export type OldType = {
+        fieldA: string;
+        newFieldB: number;
+      }
+      <<</WITH>>>
+    validation_script: |
+      echo "🔍 Running lint check..."
+      yarn lint
+      if [ $? -ne 0 ]; then
+        echo "❌ LINT FAILED"
+        exit 1
+      fi
+      echo "✅ Lint passed"
+
+      echo "🧪 Running tests..."
+      yarn test --coverage
+      if [ $? -ne 0 ]; then
+        echo "❌ TESTS FAILED"
+        exit 1
+      fi
+      echo "✅ Tests passed"
+
+      echo "📦 Staging changes..."
+      git add .
+
+      echo "💾 Creating commit..."
+      git commit -m "refactor(__FEATURE_NAME_KEBAB_CASE__): update __FILE_TO_MODIFY_KEBAB_CASE__"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED"
+        exit 1
+      fi
+      echo "✅ Successfully committed"
+
+  # === DELETE STEP (ERROR RECOVERY) ===
+  # AI-NOTE: This step is used by the AI during the self-correction loop.
+  # When a 'create_file' step fails, the AI can generate an instance of this
+  # step to delete the broken artifact before attempting a fix.
+  - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'
+    type: 'delete_file'
+    description: 'Delete file __FILE_TO_DELETE_PASCAL_CASE__ due to generation error'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'internal_correction'
+        source: 'self'
+        description: 'Deleting artifact from failed step.'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/path/to/__FILE_TO_DELETE_KEBAB_CASE__.ts'
+    # AI-NOTE: The validation_script for a delete action should verify the file is gone
+    # and then perform the standard quality checks before committing the deletion.
+    validation_script: |
+      echo "🗑️ Verifying file deletion..."
+      if [ -f "src/features/__FEATURE_NAME_KEBAB_CASE__/data/path/to/__FILE_TO_DELETE_KEBAB_CASE__.ts" ]; then
+        echo "❌ ERROR: File was not deleted."
+        exit 1
+      fi
+      echo "✅ File successfully deleted."
+
+      echo "🔍 Running lint check..."
+      yarn lint
+      if [ $? -ne 0 ]; then
+        echo "❌ LINT FAILED"
+        exit 1
+      fi
+      echo "✅ Lint passed."
+
+      echo "📦 Staging changes..."
+      git add .
+
+      echo "💾 Creating commit..."
+      git commit -m "chore(__FEATURE_NAME_KEBAB_CASE__): delete broken artifact"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED"
+        exit 1
+      fi
+      echo "✅ Successfully committed."
+
   # === FINAL: CREATE PULL REQUEST ===
   - id: 'create-pull-request'
     type: 'pull_request'
@@ -656,6 +849,12 @@ steps:
       fi
 
 # ------------------------------------------------------------------------------
+# AI-NOTE: IMMUTABLE DOCUMENTATION SECTIONS AHEAD.
+# Copy these sections verbatim. The [placeholders] inside the commands
+# are for HUMAN examples and MUST NOT be replaced by the AI.
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # TROUBLESHOOTING & RECOVERY FOR DATA LAYER
 # ------------------------------------------------------------------------------
 
@@ -677,6 +876,155 @@ troubleshooting:
     - 'Check that makeSut factory creates all required dependencies'
     - 'Ensure throwError helper is imported correctly'
     - 'Validate that test scenarios cover all code paths'
+
+  lint_fails:
+    - 'DO NOT commit - Fix all lint errors first'
+    - 'Check for unused imports'
+    - 'Verify proper TypeScript types'
+    - 'Ensure no console.log statements'
+    - 'Run yarn lint --fix to auto-fix when possible'
+
+  tests_fail:
+    - 'DO NOT commit - All tests must pass'
+    - 'Check if mocks match the actual interfaces'
+    - 'Verify Input/Output types are correct'
+    - 'Ensure test coverage meets requirements'
+    - 'Run specific test: yarn test [test-file-path]'
+
+  typescript_fails:
+    - 'Check all type definitions match'
+    - 'Ensure no missing imports'
+    - 'Verify interface implementations are complete'
+    - 'Run yarn tsc --noEmit to check types'
+
+# Refactoring checklist for data layer
+refactoring:
+  before_refactoring: |
+    # Check current status and differences
+    echo "📊 Checking current changes..."
+    git status
+    git diff
+
+    # Ensure clean working directory
+    echo "✅ Saving current work..."
+    git stash save "WIP: before refactoring"
+
+    # Create refactoring branch
+    echo "🌿 Creating refactor branch..."
+    git checkout -b refactor/[feature-name]
+
+    # Run tests to ensure starting point is stable
+    echo "🧪 Validating current state..."
+    yarn test --run
+    if [ $? -ne 0 ]; then
+      echo "❌ Tests failing before refactor - fix first!"
+      exit 1
+    fi
+    echo "✅ Ready to refactor"
+
+  during_refactoring: |
+    # After each change, check what was modified
+    echo "🔍 Reviewing changes..."
+    git diff --stat
+    git diff
+
+    # Validate the change
+    yarn lint && yarn test --run
+
+    # Commit atomically
+    git add -p  # Interactive staging
+    git commit -m "refactor([feature-name]): [specific change description]"
+
+    # Show what was changed
+    git show --stat
+
+  common_scenarios:
+    - name: 'Splitting a use case implementation'
+      wrong_example: |
+        class CreateUserAndSendEmailUseCase implements CreateUserAndSendEmailUseCase {
+          async execute(input: CreateUserAndSendEmailInput): Promise<CreateUserAndSendEmailOutput> {
+            // Multiple responsibilities
+          }
+        }
+      correct_example: |
+        class CreateUserUseCase implements CreateUserUseCase {
+          async execute(input: CreateUserInput): Promise<CreateUserOutput> {
+            // Single responsibility
+          }
+        }
+        class SendWelcomeEmailUseCase implements SendWelcomeEmailUseCase {
+          async execute(input: SendWelcomeEmailInput): Promise<SendWelcomeEmailOutput> {
+            // Single responsibility
+          }
+        }
+
+    - name: 'Protocol abstraction refactoring'
+      script: |
+        # Find direct external imports
+        grep -r "import.*axios\|fetch\|bcrypt" src/features/[feature-name]/data/
+        # Replace with protocol abstractions
+        # Validate
+        yarn lint && yarn test --run
+        # Commit
+        git add .
+        git commit -m "refactor: abstract external dependencies through protocols"
+
+# Recovery steps for data layer
+recovery:
+  accidental_commit: |
+    # Revert the last commit but keep changes
+    git reset --soft HEAD~1
+    # Fix the issues
+    # Re-run validation
+    yarn lint
+    yarn test --coverage
+    # Commit again with fixed code
+    git add .
+    git commit -m "[original message] - fixed"
+
+  data_layer_polluted: |
+    # Check for violations
+    echo "🔍 Checking for data layer violations..."
+    grep -r "import.*axios\|fetch\|http" src/features/[feature-name]/data/
+    grep -r "console\." src/features/[feature-name]/data/
+    grep -r "class.*extends.*Component" src/features/[feature-name]/data/
+    # Fix and validate
+    yarn lint
+    yarn test --run
+    # Commit cleanup
+    git add .
+    git commit -m "refactor: remove data layer violations"
+
+  tdd_order_violation: |
+    # Check if implementation exists before tests
+    echo "🔍 Checking TDD order violations..."
+    if [ -f "src/features/[feature-name]/data/usecases/[use-case].ts" ] && [ ! -f "tests/features/[feature-name]/data/usecases/[use-case].spec.ts" ]; then
+      echo "❌ TDD VIOLATION: Implementation before tests!"
+      echo "🗑️ Deleting implementation to restore TDD order..."
+      rm "src/features/[feature-name]/data/usecases/[use-case].ts"
+      echo "✅ Start over with tests first"
+    fi
+
+# AI Guidelines for data layer (adapted from TEMPLATE.yaml)
+ai_guidelines:
+  - 'STRICT TDD: Always write tests first, implementation last - NO EXCEPTIONS'
+  - 'Always validate before committing: Run lint first, Run tests second, Only commit if both pass'
+  - 'If generation fails: Identify the specific error, Fix only that error, Re-run validation, Do NOT proceed until fixed'
+  - 'Follow the principle: One use case = One file = One responsibility'
+  - 'Protocol abstraction: All external dependencies MUST be abstracted through interfaces'
+  - 'If tempted to add "And" in a use case name, split it'
+  - 'When in doubt: Choose simplicity over complexity, Split rather than combine, Ask for clarification rather than assume'
+  - 'MUST generate different case styles from the input names (e.g., "Add Item To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart, lower case=add item to cart).'
+  - 'MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__) with actual values'
+  - 'MUST NOT leave any placeholder variables in the final implementation'
+  - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery'
+  - 'MUST use vitest, NOT jest'
+  - 'MUST follow TDD order: Test → Mock → Protocol → Implementation'
+  - 'MUST follow all data layer rules - protocol abstractions, no external dependencies'
+  - 'MUST follow all Clean Architecture rules'
+  - 'MUST use REPLACE/WITH format for refactor_file steps'
+  - 'MUST use spy pattern for all dependency mocking'
+  - 'MUST commit each TDD step separately for audit trail'
 
 evaluation:
   final_status: 'PENDING' # PENDING | SUCCESS | FAILED
