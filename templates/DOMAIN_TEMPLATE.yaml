@@ -246,7 +246,7 @@ steps:
       - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
         source: 'context7'
         query: 'awesome system design __CONCEPT__'
-        url: 'https://github.com/...' # Link direto para a fonte que inspirou o design
+        url: 'https://github.com/...' # Link with your research phase
         description: 'This use case follows the Command pattern for handling actions.'
       - type: 'internal_code_analysis'
         source: 'serena'
@@ -349,7 +349,7 @@ steps:
       - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
         source: 'context7'
         query: 'awesome system design __CONCEPT__'
-        url: 'https://github.com/...' # Link direto para a fonte que inspirou o design
+        url: 'https://github.com/...' # Link with your research phase
         description: 'This use case follows the Command pattern for handling actions.'
       - type: 'internal_code_analysis'
         source: 'serena'
@@ -431,7 +431,7 @@ steps:
       - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
         source: 'context7'
         query: 'awesome system design __CONCEPT__'
-        url: 'https://github.com/...' # Link direto para a fonte que inspirou o design
+        url: 'https://github.com/...' # Link with your research phase
         description: 'This use case follows the Command pattern for handling actions.'
       - type: 'internal_code_analysis'
         source: 'serena'

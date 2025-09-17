@@ -202,8 +202,8 @@ steps:
   - id: 'create-feature-branch'
     type: 'branch'
     description: 'Create a new feature branch for __FEATURE_NAME_PASCAL_CASE__'
-    status: 'PENDING'
-    rlhf_score: null
+    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+    rlhf_score: null # -2, -1, 0, 1, 2
     execution_log: ''
     references:
       - type: 'internal_guideline'
@@ -253,8 +253,8 @@ steps:
   - id: 'create-domain-structure'
     type: 'folder'
     description: 'Create domain layer folder structure'
-    status: 'PENDING'
-    rlhf_score: null
+    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+    rlhf_score: null # -2, -1, 0, 1, 2
     execution_log: ''
     references:
       - type: 'internal_guideline'
@@ -282,8 +282,8 @@ steps:
   - id: 'create-use-case-__ACTION_ENTITY_KEBAB_CASE__'
     type: 'create_file'
     description: 'Create __ACTION_ENTITY_PASCAL_CASE__ use case interface'
-    status: 'PENDING'
-    rlhf_score: null
+    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+    rlhf_score: null # -2, -1, 0, 1, 2
     execution_log: ''
     # AI-NOTE: For each step, you MUST populate this 'references' section.
     # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
@@ -291,7 +291,7 @@ steps:
       - type: 'external_pattern'
         source: 'context7'
         query: 'clean architecture use case'
-        url: 'https://github.com/...'
+        url: 'https://github.com/...' # Link with your research phase
         description: 'Following Clean Architecture use case pattern.'
       - type: 'internal_code_analysis'
         source: 'serena'
@@ -381,8 +381,8 @@ steps:
   - id: 'create-error-__ERROR_NAME_KEBAB_CASE__'
     type: 'create_file'
     description: 'Create __ERROR_NAME_KEBAB_CASE__ domain error'
-    status: 'PENDING'
-    rlhf_score: null
+    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+    rlhf_score: null # -2, -1, 0, 1, 2
     execution_log: ''
     # AI-NOTE: For each step, you MUST populate this 'references' section.
     # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
@@ -390,7 +390,7 @@ steps:
       - type: 'external_pattern'
         source: 'context7'
         query: 'domain driven design error handling'
-        url: 'https://github.com/...'
+        url: 'https://github.com/...' # Link with your research phase
         description: 'Following DDD error handling patterns.'
       - type: 'internal_code_analysis'
         source: 'serena'
@@ -452,16 +452,16 @@ steps:
   - id: 'create-test-helper-__ACTION_ENTITY_KEBAB_CASE__'
     type: 'create_file'
     description: 'Create mock for __ACTION_ENTITY_PASCAL_CASE__ use case'
-    status: 'PENDING'
-    rlhf_score: null
+    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+    rlhf_score: null # -2, -1, 0, 1, 2
     execution_log: ''
     # AI-NOTE: For each step, you MUST populate this 'references' section.
     # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
     references:
-      - type: 'external_pattern'
+      - type: 'external_pattern' # 'external_pattern' or 'internal_code_analysis'
         source: 'context7'
         query: 'test driven development mocks'
-        url: 'https://github.com/...'
+        url: 'https://github.com/...' # Link with your research phase
         description: 'Following TDD mock patterns.'
       - type: 'internal_code_analysis'
         source: 'serena'
@@ -529,8 +529,8 @@ steps:
   - id: 'refactor-__FILE_TO_MODIFY_KEBAB_CASE__'
     type: 'refactor_file'
     description: 'Refactor __FILE_TO_MODIFY_PASCAL_CASE__ to incorporate new logic'
-    status: 'PENDING'
-    rlhf_score: null
+    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+    rlhf_score: null # -2, -1, 0, 1, 2
     execution_log: ''
     references:
       - type: 'internal_code_analysis'
@@ -595,8 +595,8 @@ steps:
   - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'
     type: 'delete_file'
     description: 'Delete file __FILE_TO_DELETE_PASCAL_CASE__ due to generation error'
-    status: 'PENDING'
-    rlhf_score: null
+    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+    rlhf_score: null # -2, -1, 0, 1, 2
     execution_log: ''
     references:
       - type: 'internal_correction'
@@ -636,8 +636,8 @@ steps:
   - id: 'create-pull-request'
     type: 'pull_request'
     description: 'Create pull request for __FEATURE_NAME_PASCAL_CASE__ implementation'
-    status: 'PENDING'
-    rlhf_score: null
+    status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+    rlhf_score: null # -2, -1, 0, 1, 2
     execution_log: ''
     references:
       - type: 'internal_guideline'
