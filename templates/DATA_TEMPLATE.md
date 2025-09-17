@@ -56,7 +56,7 @@ tests/
 
 ```typescript
 import { __PREFIX____USE_CASE_NAME__ } from '@/data/usecases'
-import { mock__DOMAIN_METHOD__Params, throwError } from '@/tests/domain/mocks'
+import { mock__DOMAIN_METHOD__Input, throwError } from '@/tests/domain/mocks'
 import { __DEPENDENCY_1__Spy, __DEPENDENCY_2__Spy } from '@/tests/data/mocks'
 
 type SutTypes = {
@@ -79,18 +79,18 @@ const makeSut = (): SutTypes => {
 describe('__PREFIX____USE_CASE_NAME__ Usecase', () => {
   test('Should call __DEPENDENCY_1__ with correct values', async () => {
     const { sut, __DEPENDENCY_1_CAMEL__Spy } = makeSut()
-    const params = mock__DOMAIN_METHOD__Params()
+    const input = mock__DOMAIN_METHOD__Input()
 
-    await sut.__METHOD__(params)
+    await sut.__METHOD__(input)
 
-    expect(__DEPENDENCY_1_CAMEL__Spy.__PROPERTY__).toBe(params.__FIELD__)
+    expect(__DEPENDENCY_1_CAMEL__Spy.__PROPERTY__).toBe(input.__FIELD__)
   })
 
   test('Should throw if __DEPENDENCY_1__ throws', async () => {
     const { sut, __DEPENDENCY_1_CAMEL__Spy } = makeSut()
     jest.spyOn(__DEPENDENCY_1_CAMEL__Spy, '__METHOD__').mockImplementationOnce(throwError)
 
-    const promise = sut.__METHOD__(mock__DOMAIN_METHOD__Params())
+    const promise = sut.__METHOD__(mock__DOMAIN_METHOD__Input())
 
     await expect(promise).rejects.toThrow()
   })
@@ -98,7 +98,7 @@ describe('__PREFIX____USE_CASE_NAME__ Usecase', () => {
   test('Should return correct value on success', async () => {
     const { sut } = makeSut()
 
-    const result = await sut.__METHOD__(mock__DOMAIN_METHOD__Params())
+    const result = await sut.__METHOD__(mock__DOMAIN_METHOD__Input())
 
     expect(result).toBe(__EXPECTED_VALUE__)
   })
@@ -204,7 +204,7 @@ export interface GetStorage {
 **File**: `src/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.ts`
 
 ```typescript
-import { __DOMAIN_USE_CASE__ } from '@/domain/usecases'
+import type { __DOMAIN_USE_CASE__, __DOMAIN_USE_CASE__Input, __DOMAIN_USE_CASE__Output } from '@/domain/usecases'
 import { __PROTOCOL_1__, __PROTOCOL_2__ } from '@/data/protocols'
 
 export class __PREFIX____USE_CASE_NAME__ implements __DOMAIN_USE_CASE__ {
@@ -213,9 +213,9 @@ export class __PREFIX____USE_CASE_NAME__ implements __DOMAIN_USE_CASE__ {
     private readonly __DEPENDENCY_2_CAMEL__: __PROTOCOL_2__
   ) {}
 
-  async __METHOD__ (params: __DOMAIN_USE_CASE__.Params): Promise<__DOMAIN_USE_CASE__.Result> {
+  async __METHOD__ (input: __DOMAIN_USE_CASE__Input): Promise<__DOMAIN_USE_CASE__Output> {
     // Implementation following test specifications
-    const result = await this.__DEPENDENCY_1_CAMEL__.__METHOD__(params)
+    const result = await this.__DEPENDENCY_1_CAMEL__.__METHOD__(input)
 
     // Business logic
     if (!result) {
@@ -224,12 +224,6 @@ export class __PREFIX____USE_CASE_NAME__ implements __DOMAIN_USE_CASE__ {
 
     return result
   }
-}
-
-// Namespace for type exports
-export namespace __PREFIX____USE_CASE_NAME__ {
-  export type Params = __DOMAIN_USE_CASE__.Params
-  export type Result = __DOMAIN_USE_CASE__.Result
 }
 ```
 
@@ -258,7 +252,7 @@ export namespace __PREFIX____USE_CASE_NAME__ {
 - Test file: `__PREFIX__-__USE_CASE_KEBAB_CASE__.spec.ts`
 - Mock class: `__PROTOCOL__Spy`
 - Factory function: `makeSut()`
-- Mock data function: `mock__ENTITY__Params()`
+- Mock data function: `mock__ENTITY__Input()`
 
 ## Common Patterns
 
@@ -274,9 +268,9 @@ export class DbUseCase implements DomainUseCase {
 
 ### Error Handling Pattern
 ```typescript
-async execute (params: Params): Promise<Result> {
+async execute (input: DomainUseCaseInput): Promise<DomainUseCaseOutput> {
   try {
-    const result = await this.dependency.method(params)
+    const result = await this.dependency.method(input)
     if (!result) {
       throw new CustomError()
     }
@@ -295,19 +289,19 @@ async execute (params: Params): Promise<Result> {
 ### Composite Pattern
 ```typescript
 export class DbUseCase implements DomainUseCase {
-  async execute (params: Params): Promise<Result> {
+  async execute (input: DomainUseCaseInput): Promise<DomainUseCaseOutput> {
     // Step 1: Validate
-    const exists = await this.checkRepository.check(params.id)
+    const exists = await this.checkRepository.check(input.id)
     if (!exists) {
       return false
     }
 
     // Step 2: Transform
-    const hashedData = await this.hasher.hash(params.data)
+    const hashedData = await this.hasher.hash(input.data)
 
     // Step 3: Persist
     return await this.saveRepository.save({
-      ...params,
+      ...input,
       data: hashedData
     })
   }
@@ -416,9 +410,9 @@ Following this template correctly will result in:
 describe('DbAddAccount Usecase', () => {
   test('Should call Hasher with correct plaintext', async () => {
     const { sut, hasherSpy } = makeSut()
-    const addAccountParams = mockAddAccountParams()
-    await sut.add(addAccountParams)
-    expect(hasherSpy.plaintext).toBe(addAccountParams.password)
+    const addAccountInput = mockAddAccountInput()
+    await sut.execute(addAccountInput)
+    expect(hasherSpy.plaintext).toBe(addAccountInput.password)
   })
 })
 ```
@@ -445,16 +439,19 @@ export interface Hasher {
 
 ### 4. Implementation (db-add-account.ts)
 ```typescript
+import type { AddAccount, AddAccountInput, AddAccountOutput } from '@/domain/usecases'
+import { Hasher, AddAccountRepository } from '@/data/protocols'
+
 export class DbAddAccount implements AddAccount {
   constructor (
     private readonly hasher: Hasher,
     private readonly addAccountRepository: AddAccountRepository
   ) {}
 
-  async add (accountData: AddAccount.Params): Promise<AddAccount.Result> {
-    const hashedPassword = await this.hasher.hash(accountData.password)
+  async execute (input: AddAccountInput): Promise<AddAccountOutput> {
+    const hashedPassword = await this.hasher.hash(input.password)
     return await this.addAccountRepository.add({
-      ...accountData,
+      ...input,
       password: hashedPassword
     })
   }
