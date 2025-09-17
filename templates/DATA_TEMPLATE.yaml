@@ -33,6 +33,14 @@ metadata:
     - 'Red-Green-Refactor cycle'
     - 'Tests define the contract'
     - 'Mock all external dependencies'
+  # AI-NOTE: Define ubiquitous language for +2 RLHF score (data layer context)
+  ubiquitousLanguage:
+    - term: '__PROTOCOL_NAME__'
+      definition: '__PROTOCOL_BUSINESS_PURPOSE__'
+    - term: '__USE_CASE_IMPLEMENTATION__'
+      definition: '__IMPLEMENTATION_BUSINESS_RESPONSIBILITY__'
+    - term: '__EXTERNAL_DEPENDENCY__'
+      definition: '__DEPENDENCY_ABSTRACTION_PURPOSE__'
   # AI-NOTE: Define protocols needed for +2 RLHF score
   required_protocols:
     - category: 'db'
@@ -784,7 +792,7 @@ steps:
         source: 'GIT_WORKFLOW.md'
         description: 'Following PR process for data layer integration.'
     action:
-      target_branch: 'main'
+      target_branch: 'staging'
       source_branch: 'feat/__FEATURE_NAME_KEBAB_CASE__-data-layer'
       title: 'feat(__FEATURE_NAME_KEBAB_CASE__): implement data layer with TDD'
     validation_script: |
@@ -839,7 +847,7 @@ steps:
       🤖 Generated with spec-kit-clean-architecture"
 
       gh pr create \
-        --base main \
+        --base staging \
         --head feat/__FEATURE_NAME_KEBAB_CASE__-data-layer \
         --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement data layer with TDD" \
         --body "$PR_BODY" \
