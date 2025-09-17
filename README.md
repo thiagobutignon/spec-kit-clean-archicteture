@@ -383,6 +383,169 @@ Our HRM implementation differs from traditional ML approaches:
    - Explains why certain patterns are preferred
    - Provides actionable improvement suggestions
 
+## 🧠 HRM Adapted for Deterministic Development
+
+### 🗺️ The Traveling Salesman Problem in Software Development
+
+#### Why is software development a TSP (Traveling Salesman Problem)?
+
+Software development, especially following Clean Architecture and DDD, is fundamentally a **combinatorial optimization problem** similar to TSP:
+
+1. **Multiple Destinations (Features)**: Each functionality is a "city" to visit
+2. **Order Matters**: The implementation sequence affects the final result
+3. **Complex Dependencies**: Some routes (implementations) block others
+4. **Variable Cost**: Each decision has different costs (time, complexity, technical debt)
+5. **No Easy Return**: Refactoring is expensive, like backtracking in the salesman's path
+
+### 🎯 How HRM Solves the Software TSP
+
+```mermaid
+graph TB
+    subgraph "🧠 STRATEGIC LEVEL (High-Level Planning)"
+        A[User Concept] --> B[Domain Analysis]
+        B --> C[Bounded Contexts Identification]
+        C --> D[Dependency Map]
+
+        style A fill:#e1f5fe
+        style B fill:#b3e5fc
+        style C fill:#81d4fa
+        style D fill:#4fc3f7
+    end
+
+    subgraph "🎯 TACTICAL LEVEL (Reasoning Loop)"
+        D --> E[pre-tasks-domain]
+        E -->|JSON Plan| F[validate-domain-json]
+        F -->|RLHF: -2 to +2| G[tasks-domain]
+        G -->|YAML| H[reflection-tasks-domain]
+        H -->|Refined YAML| I[evaluate-tasks-domain]
+
+        I -->|Score < 1| E
+
+        style E fill:#fff3e0
+        style F fill:#ffe0b2
+        style G fill:#ffcc80
+        style H fill:#ffb74d
+        style I fill:#ffa726
+    end
+
+    subgraph "🚦 HUMAN GATE"
+        I -->|Score ≥ 1| J{Human Approval}
+        J -->|❌ Reject| E
+        J -->|✅ Approve| K
+
+        style J fill:#ffeb3b,stroke:#f57c00,stroke-width:4px
+    end
+
+    subgraph "⚡ EXECUTION LEVEL (Action Loop)"
+        K[execute-domain] --> L{Step Status?}
+        L -->|SUCCESS| M[Next Step]
+        L -->|FAILED| N[fix-failed-step]
+        N --> O[Rollback Manager]
+        O --> K
+        M --> P[Git Commit]
+
+        P --> Q{More Steps?}
+        Q -->|Yes| K
+        Q -->|No| R[PR Created]
+
+        style K fill:#e8f5e9
+        style L fill:#c8e6c9
+        style M fill:#a5d6a7
+        style N fill:#ffcdd2
+        style O fill:#ef9a9a
+        style P fill:#81c784
+        style R fill:#4caf50
+    end
+
+    subgraph "📊 RLHF SYSTEM (Feedback Loop)"
+        S[Pattern Database] --> T[Score Calculator]
+        T --> U[Learning System]
+        U --> V[Template Improvements]
+        V --> S
+
+        K -.->|Execution Metrics| T
+        N -.->|Error Patterns| U
+        R -.->|Success Patterns| U
+
+        style S fill:#f3e5f5
+        style T fill:#e1bee7
+        style U fill:#ce93d8
+        style V fill:#ba68c8
+    end
+```
+
+### 🔄 Detailed Hierarchical Flow
+
+#### 1️⃣ **Strategic Layer (Pathfinding)**
+```
+🧭 Finds the "optimal path" through solution space
+├── Requirements analysis → Identify "cities" (features)
+├── Dependency mapping → Connection graph
+└── Cost estimation → Edge weights
+```
+
+#### 2️⃣ **Tactical Layer (Route Planning)**
+```
+🗺️ Plans specific route before traveling
+├── pre-tasks-domain → Initial proposed route
+├── validate → Verifies route validity
+├── reflection → Optimizes route (improvement algorithm)
+└── evaluate → Confirms optimal route found
+```
+
+#### 3️⃣ **Execution Layer (Traveling)**
+```
+🚗 Executes journey step by step
+├── execute-domain → Start journey
+├── Each step → One "city" visited
+├── Validation → Confirms correct arrival
+└── Commit → Checkpoint saved (no need to redo)
+```
+
+### 📈 TSP Optimization Metrics
+
+#### RLHF Score as Cost Function
+
+| Score | TSP Meaning | Route Impact |
+|-------|-------------|--------------|
+| **+2** | Global Optimal Path | Lowest possible cost, all cities visited perfectly |
+| **+1** | Acceptable Sub-optimal Path | Works but could be more efficient |
+| **0** | Uncertain Path | We don't know if we'll reach the destination |
+| **-1** | Blocked Path | Found obstacle, needs detour |
+| **-2** | Impossible Path | Violates fundamental constraints (e.g., city doesn't exist) |
+
+### 🎯 HRM+TSP Approach Advantages
+
+#### Comparison with Traditional Approaches
+
+| Aspect | Traditional LLM | HRM + TSP (Our Approach) |
+|--------|-----------------|--------------------------|
+| **Predictability** | Low (black box) | High (deterministic) |
+| **Optimization** | Not guaranteed | Active search for optimum |
+| **Recovery** | Redo everything | Rollback to last checkpoint |
+| **Learning** | Not local | Project-specific patterns |
+| **Complexity** | O(2^n) without optimization | O(n²) with heuristics |
+
+### 💡 Key Insights
+
+1. **Determinism vs Probabilism**: By treating it as TSP, we transform a probabilistic problem (LLM generating code) into a deterministic one (following planned route)
+
+2. **Checkpoints as Visited Cities**: Each commit is a permanently visited city - we don't need to revisit
+
+3. **RLHF as Heuristic**: The RLHF score works like the A* heuristic in TSP, guiding toward better solutions
+
+4. **Rollback as Backtracking**: When we find a blocked path, we return to the last valid checkpoint
+
+### 🚀 Conclusion
+
+HRM applied to software development solves the fundamental TSP: **"What is the optimal sequence of implementations that minimizes total cost (time, complexity, technical debt) while visiting all required features?"**
+
+The genius lies in:
+- **Separating planning from execution** (doesn't travel while planning the route)
+- **Saving checkpoints** (doesn't redo already visited cities)
+- **Learning from each journey** (RLHF improves future routes)
+- **Allowing human intervention** (GPS recalculating route)
+
 ## 📊 Performance
 
 - **Pattern Caching**: 5-minute cache with LRU eviction
