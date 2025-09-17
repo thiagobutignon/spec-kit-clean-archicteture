@@ -56,8 +56,9 @@ tests/
 
 ```typescript
 import { __PREFIX____USE_CASE_NAME__ } from '@/data/usecases'
-import { mock__DOMAIN_METHOD__Input, throwError } from '@/tests/domain/mocks'
+import { mock__USE_CASE__Input, throwError } from '@/tests/domain/mocks'
 import { __DEPENDENCY_1__Spy, __DEPENDENCY_2__Spy } from '@/tests/data/mocks'
+import { describe, test, expect, vi } from 'vitest'
 
 type SutTypes = {
   sut: __PREFIX____USE_CASE_NAME__
@@ -79,18 +80,18 @@ const makeSut = (): SutTypes => {
 describe('__PREFIX____USE_CASE_NAME__ Usecase', () => {
   test('Should call __DEPENDENCY_1__ with correct values', async () => {
     const { sut, __DEPENDENCY_1_CAMEL__Spy } = makeSut()
-    const input = mock__DOMAIN_METHOD__Input()
+    const input = mock__USE_CASE__Input()
 
-    await sut.__METHOD__(input)
+    await sut.execute(input)
 
     expect(__DEPENDENCY_1_CAMEL__Spy.__PROPERTY__).toBe(input.__FIELD__)
   })
 
   test('Should throw if __DEPENDENCY_1__ throws', async () => {
     const { sut, __DEPENDENCY_1_CAMEL__Spy } = makeSut()
-    jest.spyOn(__DEPENDENCY_1_CAMEL__Spy, '__METHOD__').mockImplementationOnce(throwError)
+    vi.spyOn(__DEPENDENCY_1_CAMEL__Spy, '__DEPENDENCY_METHOD__').mockImplementationOnce(throwError)
 
-    const promise = sut.__METHOD__(mock__DOMAIN_METHOD__Input())
+    const promise = sut.execute(mock__USE_CASE__Input())
 
     await expect(promise).rejects.toThrow()
   })
@@ -98,7 +99,7 @@ describe('__PREFIX____USE_CASE_NAME__ Usecase', () => {
   test('Should return correct value on success', async () => {
     const { sut } = makeSut()
 
-    const result = await sut.__METHOD__(mock__DOMAIN_METHOD__Input())
+    const result = await sut.execute(mock__USE_CASE__Input())
 
     expect(result).toBe(__EXPECTED_VALUE__)
   })
@@ -111,7 +112,6 @@ describe('__PREFIX____USE_CASE_NAME__ Usecase', () => {
 
 ```typescript
 import { __PROTOCOL__ } from '@/data/protocols'
-import faker from 'faker'
 
 export class __PROTOCOL__Spy implements __PROTOCOL__ {
   // Store call parameters for assertion
@@ -213,9 +213,9 @@ export class __PREFIX____USE_CASE_NAME__ implements __DOMAIN_USE_CASE__ {
     private readonly __DEPENDENCY_2_CAMEL__: __PROTOCOL_2__
   ) {}
 
-  async __METHOD__ (input: __DOMAIN_USE_CASE__Input): Promise<__DOMAIN_USE_CASE__Output> {
+  async execute (input: __DOMAIN_USE_CASE__Input): Promise<__DOMAIN_USE_CASE__Output> {
     // Implementation following test specifications
-    const result = await this.__DEPENDENCY_1_CAMEL__.__METHOD__(input)
+    const result = await this.__DEPENDENCY_1_CAMEL__.__DEPENDENCY_METHOD__(input)
 
     // Business logic
     if (!result) {
@@ -327,9 +327,9 @@ export class DbUseCase implements DomainUseCase {
 ```typescript
 // Mock factory
 export const mock__ENTITY__ = (): __ENTITY__ => ({
-  id: faker.datatype.uuid(),
-  name: faker.name.findName(),
-  email: faker.internet.email()
+  id: 'any_id',
+  name: 'any_name',
+  email: 'any_email@mail.com'
 })
 
 // Error helper
@@ -420,7 +420,7 @@ describe('DbAddAccount Usecase', () => {
 ### 2. Mock Implementation (mock-cryptography.ts)
 ```typescript
 export class HasherSpy implements Hasher {
-  digest = faker.datatype.uuid()
+  digest = 'hashed_password'
   plaintext: string
 
   async hash (plaintext: string): Promise<string> {
