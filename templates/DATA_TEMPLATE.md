@@ -30,11 +30,15 @@ The Data Layer implements the use cases defined in the Domain Layer. This layer 
 - Protocol interfaces
 - Data models (when needed)
 
-## Directory Structure
+## Directory Structure (Feature-Based)
 
 ```
-src/
-├── data/
+src/features/__FEATURE_NAME_KEBAB_CASE__/
+├── domain/               # Domain layer (interfaces only)
+│   ├── errors/
+│   ├── use-cases/
+│   └── test/
+├── data/                 # Data layer (implementations)
 │   ├── protocols/        # Abstract interfaces for external dependencies
 │   │   ├── db/           # Database protocol interfaces
 │   │   ├── http/         # HTTP client protocol interfaces
@@ -42,7 +46,8 @@ src/
 │   │   └── cryptography/ # Cryptography protocol interfaces
 │   ├── usecases/         # Use case implementations
 │   └── models/           # Data-specific models (optional)
-tests/
+│
+tests/features/__FEATURE_NAME_KEBAB_CASE__/
 └── data/
     ├── mocks/            # Mock implementations for testing
     └── usecases/         # Use case tests
@@ -52,12 +57,12 @@ tests/
 
 ### Step 1: Create Test File FIRST
 
-**File**: `tests/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.spec.ts`
+**File**: `tests/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.spec.ts`
 
 ```typescript
-import { __PREFIX____USE_CASE_NAME__ } from '@/data/usecases'
-import { mock__USE_CASE__Input, throwError } from '@/tests/domain/mocks'
-import { __DEPENDENCY_1__Spy, __DEPENDENCY_2__Spy } from '@/tests/data/mocks'
+import { __PREFIX____USE_CASE_NAME__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases'
+import { mock__USE_CASE__Input, throwError } from '@/tests/features/__FEATURE_NAME_KEBAB_CASE__/domain/mocks'
+import { __DEPENDENCY_1__Spy, __DEPENDENCY_2__Spy } from '@/tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks'
 import { describe, test, expect, vi } from 'vitest'
 
 type SutTypes = {
@@ -108,10 +113,10 @@ describe('__PREFIX____USE_CASE_NAME__ Usecase', () => {
 
 ### Step 2: Create Mock/Spy Implementations
 
-**File**: `tests/data/mocks/mock-__CATEGORY__.ts`
+**File**: `tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-__CATEGORY__.ts`
 
 ```typescript
-import { __PROTOCOL__ } from '@/data/protocols'
+import { __PROTOCOL__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols'
 
 export class __PROTOCOL__Spy implements __PROTOCOL__ {
   // Store call parameters for assertion
@@ -129,7 +134,7 @@ export class __PROTOCOL__Spy implements __PROTOCOL__ {
 
 ### Step 3: Create Protocol Interfaces
 
-**File**: `src/data/protocols/__CATEGORY__/__PROTOCOL_NAME_KEBAB__.ts`
+**File**: `src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/__CATEGORY__/__PROTOCOL_NAME_KEBAB__.ts`
 
 ```typescript
 export interface __PROTOCOL_NAME__ {
@@ -201,11 +206,11 @@ export interface GetStorage {
 
 ### Step 4: Create Use Case Implementation
 
-**File**: `src/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.ts`
+**File**: `src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.ts`
 
 ```typescript
-import type { __DOMAIN_USE_CASE__, __DOMAIN_USE_CASE__Input, __DOMAIN_USE_CASE__Output } from '@/domain/usecases'
-import { __PROTOCOL_1__, __PROTOCOL_2__ } from '@/data/protocols'
+import type { __DOMAIN_USE_CASE__, __DOMAIN_USE_CASE__Input, __DOMAIN_USE_CASE__Output } from '@/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases'
+import { __PROTOCOL_1__, __PROTOCOL_2__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols'
 
 export class __PREFIX____USE_CASE_NAME__ implements __DOMAIN_USE_CASE__ {
   constructor (
@@ -439,8 +444,8 @@ export interface Hasher {
 
 ### 4. Implementation (db-add-account.ts)
 ```typescript
-import type { AddAccount, AddAccountInput, AddAccountOutput } from '@/domain/usecases'
-import { Hasher, AddAccountRepository } from '@/data/protocols'
+import type { AddAccount, AddAccountInput, AddAccountOutput } from '@/features/user-registration/domain/use-cases'
+import { Hasher, AddAccountRepository } from '@/features/user-registration/data/protocols'
 
 export class DbAddAccount implements AddAccount {
   constructor (
