@@ -1,89 +1,158 @@
-# Task: Fix a Failed Step in an Implementation Plan
+---
+title: "Fix Failed Domain Steps"
+description: "Analyze and generate corrective steps for failed YAML implementation plan steps with RLHF score recovery"
+category: "domain"
+stage: "error-recovery"
+priority: 7
+tags:
+  - error-fixing
+  - recovery
+  - rlhf-scoring
+  - workflow-repair
+  - architecture-fix
+parameters:
+  input:
+    type: "yaml"
+    description: "YAML plan with failed step(s) from /06-execute-domain-steps"
+    required: true
+  working_directory:
+    type: "path"
+    pattern: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/"
+    description: "Base path for all file operations"
+  output:
+    type: "yaml"
+    description: "Updated YAML with fix step appended"
+    location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml"
+rlhf_score_recovery:
+  from_catastrophic:
+    current: -2
+    target: 2
+    strategy: "Remove violations, add domain documentation"
+  from_runtime:
+    current: -1
+    target: 1
+    strategy: "Fix errors, improve implementation"
+  from_low_confidence:
+    current: 0
+    target: 2
+    strategy: "Add references, enhance documentation"
+failure_categories:
+  branch_failures:
+    - "branch already exists"
+    - "uncommitted changes"
+    - "permission denied"
+  pr_failures:
+    - "nothing to commit"
+    - "gh: command not found"
+    - "PR already exists"
+  code_failures:
+    - "lint errors"
+    - "type errors"
+    - "test failures"
+    - "import violation"
+    - "REPLACE/WITH syntax"
+previous_command: "/06-execute-domain-steps from yaml: <yaml>"
+next_command: "/06-execute-domain-steps from yaml: <yaml-with-fix>"
+---
 
-## 🤖 RLHF Scoring Awareness
+# Task: Fix Failed Domain Steps
 
-When fixing failed steps, understand the RLHF score impact:
-- **-2 (CATASTROPHIC)**: Architecture violations, wrong REPLACE/WITH format
-- **-1 (RUNTIME ERROR)**: The current failure level - lint/test/git failures
-- **0 (LOW CONFIDENCE)**: Missing references or unclear fixes
-- **+1 (GOOD)**: Valid fix but could be improved
-- **+2 (PERFECT)**: Fix that includes domain documentation and best practices
+## 🤖 RLHF Score Recovery Strategy
+
+When fixing failed steps, understand the score impact and recovery path:
+
+| Current Score | Level | Target Score | Recovery Strategy |
+|---------------|-------|--------------|-------------------|
+| **-2** | CATASTROPHIC | +2 | Remove violations + add domain docs |
+| **-1** | RUNTIME ERROR | +1 | Fix errors + improve implementation |
+| **0** | LOW CONFIDENCE | +2 | Add references + enhance documentation |
 
 ## 1. Your Objective
 
-Your goal is to analyze a failed step in a YAML implementation plan and generate a **new step** to correct the issue.
+Analyze a failed step in a YAML implementation plan and generate a **new corrective step** to fix the issue while improving the RLHF score.
 
 ## 2. Context
 
-You will be given the entire content of a YAML file that has one or more steps with `status: 'FAILED'`.
-
-**Working Directory:** All file operations should be relative to `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/`
+| Input | Description |
+|-------|-------------|
+| **YAML with Failures** | Contains steps with `status: 'FAILED'` |
+| **Working Directory** | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/` |
+| **Fix Strategy** | Append new fix step, preserve failed step |
 
 ## 3. Step-by-Step Execution Plan
 
-1.  **Identify the Failure:** Find the last step in the file with `status: 'FAILED'`.
-2.  **Analyze the Error:** Read the `execution_log` of the failed step to understand the root cause of the failure (e.g., linting error, test failure, commit error, branch conflict, PR creation failure).
-    - Check the `rlhf_score` to understand severity (-2 for catastrophic, -1 for runtime errors).
-3.  **Analyze the Step Type:** Check if it's a regular step (`create_file`, `refactor_file`) or a workflow step (`branch`, `pull_request`).
-4.  **Formulate a Correction:** Based on your analysis, decide on the best course of action:
+```mermaid
+graph TD
+    A[Identify Failed Step] --> B[Analyze Error Type]
+    B --> C{Step Category?}
+    C -->|Code Step| D[Analyze Code Failure]
+    C -->|Workflow Step| E[Analyze Workflow Failure]
+    D --> F[Generate Code Fix]
+    E --> G[Generate Workflow Fix]
+    F --> H[Add Domain Documentation]
+    G --> H
+    H --> I[Append Fix Step]
+    I --> J[Preserve Failed Step]
+    style A fill:#FFE4B5
+    style F fill:#90EE90
+    style G fill:#87CEEB
+    style H fill:#DDA0DD
+```
 
-    **For Code Steps:**
-    a. **Refactoring the broken code:** If the original code was flawed.
-    b. **Creating a missing dependency:** If a file was missing.
-    c. **Deleting the broken artifact:** If the original step was fundamentally wrong.
+### Execution Steps:
 
-    **For Workflow Steps:**
-    a. **Branch conflicts:** Create a fix step to resolve conflicts or switch branches.
-    b. **PR failures:** Create a fix step to push missing commits or fix PR configuration.
-    c. **Permission issues:** Add a step to configure git credentials or permissions.
-
-5.  **Generate the Fix Step (Aim for RLHF +2):**
-    a. Create a **new step object** in the YAML structure.
-    b. The new step's `id` should be descriptive, like `fix-for-[id-of-failed-step]`.
-    c. The `type` of the new step should be appropriate for the fix:
-       - Code fixes: `refactor_file`, `create_file`, `delete_file`
-       - Workflow fixes: `branch`, `pull_request`, or a custom script in `validation_script`
-    d. Populate the appropriate fields based on step type:
-       - For file steps: `path` and `template`
-       - For branch/PR steps: `action` with appropriate configuration
-    e. **CRITICAL for RLHF +1/+2**: Populate the `references` section to explain _why_ this fix is correct.
-    f. **For RLHF +2**: If fixing domain code, include JSDoc comments with `@domainConcept` tags.
-6.  **Append the New Step:** Add the newly generated step object to the **end of the `steps` array** in the YAML file.
-7.  **Do Not Modify the Failed Step:** The original step with `status: 'FAILED'` **MUST** remain in the file untouched as a historical record.
+1. **Identify the Failure**: Find last step with `status: 'FAILED'`
+2. **Analyze the Error**:
+   - Read `execution_log` for root cause
+   - Check `rlhf_score` for severity
+3. **Analyze Step Type**:
+   - Regular steps: `create_file`, `refactor_file`
+   - Workflow steps: `branch`, `pull_request`
+4. **Formulate Correction**:
+   - **Code Steps**: Refactor, create dependency, or delete artifact
+   - **Workflow Steps**: Resolve conflicts, fix PR config, or configure permissions
+5. **Generate Fix Step** (Target RLHF +2):
+   - Create descriptive `id`: `fix-for-[failed-step-id]`
+   - Choose appropriate `type` for fix
+   - **Add `references` for +1 score**
+   - **Add JSDoc with `@domainConcept` for +2 score**
+6. **Append New Step**: Add to end of `steps` array
+7. **Preserve History**: Keep failed step untouched
 
 ## 4. Common Failure Scenarios and Solutions
 
-### Branch Step Failures
-
-| Error | Likely Cause | Fix Strategy |
-|-------|--------------|--------------|
-| "branch already exists" | Branch name conflict | Add fix step to checkout existing branch |
-| "uncommitted changes" | Dirty working directory | Add fix step to stash changes |
-| "permission denied" | Git permissions | Add fix step to configure credentials |
-
-### Pull Request Step Failures
-
-| Error | Likely Cause | Fix Strategy |
-|-------|--------------|--------------|
-| "nothing to commit" | No changes to push | Add fix step to create meaningful change |
-| "gh: command not found" | GitHub CLI not installed | Add fix step with git push fallback |
-| "PR already exists" | Duplicate PR | Add fix step to update existing PR |
-
-### Code Step Failures
+### 🌿 Branch Step Failures
 
 | Error | Likely Cause | Fix Strategy | RLHF Impact |
 |-------|--------------|--------------|-------------|
-| "lint errors" | Code style issues | Refactor file with fixes | -1 → +1 |
-| "type errors" | TypeScript issues | Fix type definitions | -1 → +1 |
-| "test failures" | Breaking changes | Update test or implementation | -1 → +1 |
-| "import violation" | External deps in domain | Remove external dependencies | -2 → +2 |
-| "REPLACE/WITH syntax" | Wrong template format | Fix template syntax | -2 → +1 |
+| **"branch already exists"** | Name conflict | Checkout existing branch | 0 → +1 |
+| **"uncommitted changes"** | Dirty working directory | Stash changes first | -1 → +1 |
+| **"permission denied"** | Git permissions | Configure credentials | -1 → +1 |
+
+### 🔄 Pull Request Step Failures
+
+| Error | Likely Cause | Fix Strategy | RLHF Impact |
+|-------|--------------|--------------|-------------|
+| **"nothing to commit"** | No changes | Create meaningful change | 0 → +1 |
+| **"gh: command not found"** | GitHub CLI missing | Use git push fallback | -1 → +1 |
+| **"PR already exists"** | Duplicate PR | Update existing PR | 0 → +1 |
+
+### 💻 Code Step Failures
+
+| Error | Likely Cause | Fix Strategy | RLHF Impact |
+|-------|--------------|--------------|-------------|
+| **"lint errors"** | Code style issues | Refactor with fixes | -1 → +1 |
+| **"type errors"** | TypeScript issues | Fix type definitions | -1 → +1 |
+| **"test failures"** | Breaking changes | Update test/implementation | -1 → +1 |
+| **"import violation"** | External deps in domain | Remove dependencies | -2 → +2 |
+| **"REPLACE/WITH syntax"** | Wrong template format | Fix template syntax | -2 → +1 |
 
 ## 5. Example Fix Steps
 
-### Example 1: Fixing a Failed Branch Step
+### Example 1: 🌿 Fixing Failed Branch Step
 
-If the branch step failed because the branch already exists:
+<details>
+<summary>Branch Already Exists Fix</summary>
 
 ```yaml
 - id: 'fix-for-create-feature-branch'
@@ -108,10 +177,12 @@ If the branch step failed because the branch already exists:
       source: 'self'
       description: 'Branch already exists, switching to checkout instead of create'
 ```
+</details>
 
-### Example 2: Fixing a Failed PR Step
+### Example 2: 🔄 Fixing Failed PR Step
 
-If the PR step failed because GitHub CLI is not installed:
+<details>
+<summary>GitHub CLI Not Available Fix</summary>
 
 ```yaml
 - id: 'fix-for-create-pull-request'
@@ -136,10 +207,12 @@ If the PR step failed because GitHub CLI is not installed:
       source: 'self'
       description: 'GitHub CLI not available, using git push with manual PR instructions'
 ```
+</details>
 
-### Example 3: Fixing a Failed Code Step (Lint Error - Aiming for RLHF +2)
+### Example 3: 🏆 Fixing Lint Error (Target RLHF +2)
 
-If a create_file step failed due to lint errors:
+<details>
+<summary>Lint Error Fix with Domain Documentation</summary>
 
 ```yaml
 - id: 'fix-for-create-use-case-get-user'
@@ -178,10 +251,12 @@ If a create_file step failed due to lint errors:
       source: 'ddd_best_practices'
       description: 'Added JSDoc with @domainConcept for RLHF +2 score'
 ```
+</details>
 
-### Example 4: Fixing a Catastrophic Error (RLHF -2)
+### Example 4: 🚨 Fixing Catastrophic Error (RLHF -2 → +2)
 
-If a step failed due to architecture violation:
+<details>
+<summary>Architecture Violation Fix</summary>
 
 ```yaml
 - id: 'fix-for-create-use-case-with-axios'
@@ -219,10 +294,46 @@ If a step failed due to architecture violation:
       source: 'clean_architecture'
       description: 'Removed axios import - external deps not allowed in domain layer (was RLHF -2)'
 ```
+</details>
 
-## 6. Your Deliverable
+## 6. Fix Step Requirements
 
-Your **only** output is the complete content of the **updated** YAML file, now containing the new "fix" step at the end.
+### Mandatory Fields
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| **id** | Descriptive identifier | `fix-for-[failed-step-id]` |
+| **type** | Step type | `refactor_file`, `branch`, etc. |
+| **description** | Clear explanation | "Fix lint errors in use case" |
+| **status** | Always PENDING | `'PENDING'` |
+| **rlhf_score** | Initially null | `null` |
+| **execution_log** | Initially empty | `''` |
+
+### Type-Specific Fields
+
+| Step Type | Required Fields |
+|-----------|----------------|
+| **File Steps** | `path`, `template` |
+| **Branch Steps** | `action.branch_name` |
+| **PR Steps** | `action.target_branch`, `action.source_branch` |
+
+### RLHF Score Boosters
+
+| Addition | Score Impact | Example |
+|----------|--------------|---------|
+| **References** | 0 → +1 | Explain why fix is correct |
+| **JSDoc Comments** | +1 → +2 | Add `@domainConcept` tags |
+| **Validation Script** | +0.5 | Include verification steps |
+| **Clean Architecture** | -2 → +2 | Remove all violations |
+
+## 7. Your Deliverable
+
+Your **only** output is the complete **updated YAML file** with:
+- Original failed step preserved (untouched)
+- New fix step appended at the end
+- All fields properly formatted
+- References explaining the fix
+- Domain documentation for +2 score
 
 ## 📍 Next Step
 
@@ -232,4 +343,10 @@ After generating the fix, return to execution:
 /06-execute-domain-steps from yaml: <your-yaml-with-fix>
 ```
 
-This will re-execute your plan with the fix applied. If successful, all steps should complete without errors.
+This will re-execute your plan with the fix applied. The execution will:
+1. Skip already successful steps
+2. Skip the failed step (preserved for history)
+3. Execute your new fix step
+4. Continue with remaining steps
+
+> 💡 **Pro Tip**: Always aim for RLHF +2 when fixing errors. Add domain documentation, references, and validation scripts to turn a failure into an opportunity for excellence!

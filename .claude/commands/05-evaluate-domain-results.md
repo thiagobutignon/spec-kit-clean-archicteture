@@ -1,104 +1,228 @@
+---
+title: "Evaluate Domain YAML Plan"
+description: "Principal engineer architectural review to validate YAML plans against engineering principles before execution"
+category: "domain"
+stage: "evaluation"
+priority: 5
+tags:
+  - architectural-review
+  - quality-assurance
+  - rlhf-scoring
+  - solid-principles
+  - clean-architecture
+parameters:
+  input:
+    type: "yaml"
+    description: "Complete YAML plan from /04-reflect-domain-lessons"
+    location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml"
+    required: true
+  output_approved:
+    type: "json"
+    format: '{"status": "APPROVED", "score": 5, "report": "string", "violations": [], "expected_rlhf_score": 2}'
+  output_rejected:
+    type: "json"
+    format: '{"status": "REJECTED", "score": 1-4, "report": "string", "violations": ["string"], "expected_rlhf_score": -2 to 1}'
+scoring_correlation:
+  score_5:
+    evaluation: "Perfect"
+    expected_rlhf: 2
+    description: "All principles met, proper workflow order"
+  score_4:
+    evaluation: "Good"
+    expected_rlhf: 1
+    description: "Minor issues like branch naming"
+  score_3:
+    evaluation: "Fair"
+    expected_rlhf: 0
+    description: "Missing non-critical elements"
+  score_2:
+    evaluation: "Poor"
+    expected_rlhf: -1
+    description: "Major violations, missing workflow steps"
+  score_1:
+    evaluation: "Critical"
+    expected_rlhf: -2
+    description: "Multiple severe violations"
+evaluation_principles:
+  - "Git Workflow Compliance"
+  - "Clean Architecture"
+  - "SOLID Principles"
+  - "Simplicity (KISS & YAGNI)"
+  - "Test-Driven Development"
+  - "Atomic Commits"
+  - "Ubiquitous Language"
+  - "REPLACE/WITH Syntax"
+previous_command: "/04-reflect-domain-lessons from yaml: <refined-yaml>"
+next_command_approved: "/06-execute-domain-steps from yaml: <approved-yaml>"
+next_command_rejected: "/04-reflect-domain-lessons from yaml: <yaml> OR /01-plan-domain-features"
+---
+
 # Task: Evaluate Domain YAML Plan
 
 ## 🤖 RLHF Score Correlation
 
 The evaluation score directly correlates with expected RLHF execution scores:
-- **Score 5**: Likely RLHF +2 (Perfect execution with DDD/Clean Architecture)
-- **Score 4**: Likely RLHF +1 (Good execution, minor improvements possible)
-- **Score 3**: Likely RLHF 0 (Uncertain quality, missing best practices)
-- **Score 2**: Likely RLHF -1 (Runtime errors expected)
-- **Score 1**: Likely RLHF -2 (Catastrophic architecture violations)
+
+| Score | Evaluation | Expected RLHF | Description |
+|-------|------------|---------------|-------------|
+| **5** | PERFECT | +2 | All principles met, proper workflow order |
+| **4** | GOOD | +1 | Good execution, minor improvements possible |
+| **3** | FAIR | 0 | Uncertain quality, missing best practices |
+| **2** | POOR | -1 | Runtime errors expected |
+| **1** | CRITICAL | -2 | Catastrophic architecture violations |
 
 ## 1. Your Deliverable
 
 Your output is a JSON object representing a final quality evaluation.
 
-- If the plan passes: `{"status": "APPROVED", "score": 5, "report": "The plan adheres to all engineering principles.", "violations": [], "expected_rlhf_score": 2}`.
-- If the plan fails: `{"status": "REJECTED", "score": 1, "report": "...", "violations": ["violation 1", "violation 2"], "expected_rlhf_score": -2}`.
+### ✅ Approved Plan:
+```json
+{
+  "status": "APPROVED",
+  "score": 5,
+  "report": "The plan adheres to all engineering principles.",
+  "violations": [],
+  "expected_rlhf_score": 2
+}
+```
+
+### ❌ Rejected Plan:
+```json
+{
+  "status": "REJECTED",
+  "score": 1,
+  "report": "...",
+  "violations": ["violation 1", "violation 2"],
+  "expected_rlhf_score": -2
+}
+```
 
 ## 2. Objective
 
-Your goal is to act as a Principal Engineer performing a final architectural review on an implementation plan. You are the last line of defense before the plan is executed. You must evaluate the provided YAML plan against a strict set of non-negotiable engineering principles.
+Act as a **Principal Engineer** performing a final architectural review on an implementation plan. You are the last line of defense before execution. Evaluate the YAML plan against a strict set of non-negotiable engineering principles.
 
 ## 3. Input Parameters
 
-- **YAML Plan:** The complete, potentially revised YAML content from the `/04-reflect-domain-lessons` step.
-- **Note:** This YAML should be saved at `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml`
+| Parameter | Type | Location | Description |
+|-----------|------|----------|-------------|
+| **YAML Plan** | YAML | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml` | Complete, potentially revised YAML from /04-reflect-domain-lessons |
 
 ## 4. Evaluation Principles (The Constitution)
 
-You must evaluate the **entire plan** as a whole against these core principles. For each principle, you must determine if the plan honors or violates it.
+Evaluate the **entire plan** against these core principles. Each violation impacts the score and RLHF prediction.
 
-- **[ ] Git Workflow Compliance:**
+### 📋 Git Workflow Compliance
 
-  - Does the plan start with a `branch` type step as the FIRST step?
-  - Does the branch name follow the convention `feat/[feature-name]-domain`?
-  - Does the plan end with a `pull_request` type step as the LAST step?
-  - Is the PR targeting the correct branch (usually `staging`)?
-  - Are all commits atomic and well-described?
+| Check | Requirement | Impact if Wrong |
+|-------|-------------|-----------------|
+| **First Step** | Must be type `branch` | Score ≤ 2 |
+| **Branch Name** | Format: `feat/[feature-name]-domain` | Score ≤ 4 |
+| **Last Step** | Must be type `pull_request` | Score ≤ 2 |
+| **PR Target** | Usually `staging` branch | Score ≤ 3 |
+| **Commit Quality** | Atomic and well-described | Score ≤ 4 |
 
-- **[ ] Clean Architecture (RLHF -2 if violated):**
+### 🏛️ Clean Architecture (RLHF -2 if violated)
 
-  - Does the plan strictly maintain the separation of concerns?
-  - Are there any steps that suggest putting data access logic or UI concerns inside a `domain` layer file? (Ex: a `template` that includes `import { PrismaClient }` would be a critical violation).
-  - Check for external dependencies: axios, fetch, express, redis, keycloak (all cause RLHF -2).
+| Violation | Example | Impact |
+|-----------|---------|--------|
+| **External Dependencies** | `import axios from 'axios'` | RLHF -2, Score = 1 |
+| **Database in Domain** | `import { PrismaClient }` | RLHF -2, Score = 1 |
+| **Framework Dependencies** | `import express` | RLHF -2, Score = 1 |
+| **UI Concerns** | `import React` | RLHF -2, Score = 1 |
 
-- **[ ] SOLID Principles:**
+### 🎯 SOLID Principles
 
-  - **Single Responsibility (S):** Look at the `description` and `template` of each `create-use-case` step. Does any use case appear to have more than one responsibility? (Ex: "Create User and Send Welcome Email" is a violation).
-  - **Open/Closed (O):** Does the plan favor composition and abstraction, or does it encourage modifying existing classes for new features? (Harder to check, but look for excessive `refactor_file` steps where a new class might be better).
+| Principle | Check | Example Violation | Impact |
+|-----------|-------|-------------------|--------|
+| **Single Responsibility** | One purpose per use case | "Create User and Send Email" | Score ≤ 3 |
+| **Open/Closed** | Favor composition | Excessive refactors | Score ≤ 4 |
+| **Interface Segregation** | Focused interfaces | Bloated interfaces | Score ≤ 3 |
+| **Dependency Inversion** | Depend on abstractions | Concrete dependencies | Score ≤ 2 |
 
-- **[ ] Simplicity (KISS & YAGNI):**
+### 💡 Simplicity (KISS & YAGNI)
 
-  - Does the plan introduce complexity that wasn't requested?
-  - Does it include use cases or errors that are not directly related to the feature goal? (YAGNI - You Ain't Gonna Need It).
-  - Is the proposed solution the simplest one that could possibly work?
+| Check | Question | Impact |
+|-------|----------|--------|
+| **Complexity** | Is solution simplest possible? | Score ≤ 4 |
+| **YAGNI** | Features not requested? | Score ≤ 3 |
+| **Over-engineering** | Unnecessary abstractions? | Score ≤ 3 |
 
-- **[ ] TDD (Test-Driven Development):**
+### 🧪 Test-Driven Development
 
-  - Is there a `create-test-helper` step for every `create-use-case` step? A missing test helper is a critical violation.
-  - Do test helpers include realistic mock data for RLHF +1/+2 scoring?
+| Requirement | Check | Impact |
+|-------------|-------|--------|
+| **Test Helpers** | One per use case | Missing = Score ≤ 2 |
+| **Mock Quality** | Realistic test data | Poor mocks = Score ≤ 4 |
+| **Coverage** | All use cases covered | Gaps = Score ≤ 3 |
 
-- **[ ] Atomic Commits:**
-  - Does each step in the plan represent a single, logical, atomic change?
-  - Does the commit message in each `validation_script` accurately and concisely describe the action of that single step?
+### 📝 Atomic Commits
 
-- **[ ] Ubiquitous Language (RLHF +2 requirement):**
-  - If `ubiquitousLanguage` field exists, are all domain terms used consistently?
-  - Do use case names, error names, and types align with the established vocabulary?
-  - Are domain concepts documented with JSDoc comments including `@domainConcept` tags?
+| Check | Requirement | Impact |
+|-------|-------------|--------|
+| **Granularity** | Single logical change per step | Score ≤ 4 |
+| **Messages** | Accurate and concise | Score ≤ 4 |
+| **Order** | Dependencies before dependents | Score ≤ 2 |
 
-- **[ ] REPLACE/WITH Syntax (RLHF -2 if wrong):**
-  - For all `refactor_file` steps, verify the template contains exactly one `<<<REPLACE>>>` and one `<<<WITH>>>` block.
-  - Incorrect syntax will cause catastrophic execution failure.
+### 📚 Ubiquitous Language (RLHF +2 requirement)
+
+| Check | Requirement | Impact |
+|-------|-------------|--------|
+| **Consistency** | Terms used uniformly | Score ≤ 4 |
+| **Business Alignment** | Matches domain vocabulary | Score ≤ 3 |
+| **Documentation** | @domainConcept tags present | Limits to +1 |
+
+### ⚠️ REPLACE/WITH Syntax (RLHF -2 if wrong)
+
+| Check | Requirement | Impact |
+|-------|-------------|--------|
+| **Format** | Exactly one <<<REPLACE>>> and <<<WITH>>> | RLHF -2, Score = 1 |
+| **Matching** | REPLACE content must match existing | Score ≤ 2 |
+| **Syntax** | Correct delimiters | RLHF -2, Score = 1 |
 
 ## 5. Step-by-Step Execution Plan
 
-1.  **Parse Input:** Receive the YAML plan.
-2.  **Verify Step Order:** Check that:
-    a. First step is type `branch`
-    b. Second step is type `folder`
-    c. Last step is type `pull_request`
-    d. Domain implementation steps are in the middle
-3.  **Evaluate Against Principles:** Systematically review the entire `steps` array against each principle in the "Evaluation Principles" checklist.
-4.  **Document Violations:** For every principle that is violated, write a clear and concise message explaining the violation and referencing the specific step `id` that caused it.
-5.  **Calculate Score and RLHF Prediction:**
-    - 5: Perfect - all principles met, proper workflow order (Expected RLHF: +2)
-    - 4: Good - minor issues (e.g., branch naming) (Expected RLHF: +1)
-    - 3: Fair - missing non-critical elements (Expected RLHF: 0)
-    - 2: Poor - major violations (e.g., missing branch/PR steps) (Expected RLHF: -1)
-    - 1: Critical - multiple severe violations (Expected RLHF: -2)
-6.  **Generate Report:**
-    a. If there are no violations, produce the `APPROVED` JSON report with a score of 5 and `expected_rlhf_score` of 2.
-    b. If there are any violations, produce the `REJECTED` JSON report, including the list of violations, score, and predicted `expected_rlhf_score`.
+```mermaid
+graph TD
+    A[Parse YAML Input] --> B[Verify Step Order]
+    B --> C[Check Git Workflow]
+    C --> D[Evaluate Architecture]
+    D --> E[Assess SOLID]
+    E --> F[Review Simplicity]
+    F --> G[Validate TDD]
+    G --> H[Check Atomicity]
+    H --> I[Verify Language]
+    I --> J[Validate Syntax]
+    J --> K{Violations?}
+    K -->|No| L[Generate APPROVED]
+    K -->|Yes| M[Generate REJECTED]
+    L --> N[Score = 5]
+    M --> O[Score = 1-4]
+    style L fill:#90EE90
+    style M fill:#FFB6C1
+```
 
----
+### Execution Steps:
 
-## Example Invocations
+1. **Parse Input**: Receive and load YAML plan
+2. **Verify Step Order**:
+   - First step = `branch`
+   - Second step = `folder`
+   - Last step = `pull_request`
+3. **Evaluate Against Principles**: Systematic review of entire `steps` array
+4. **Document Violations**: Clear messages with specific step `id` references
+5. **Calculate Score and RLHF Prediction**:
+   - Apply scoring correlation table
+   - Predict RLHF outcome
+6. **Generate Report**:
+   - APPROVED if score = 5
+   - REJECTED if score < 5
 
-### Example 1: Missing Branch Step
+## 6. Example Evaluations
 
-`/04-evaluate-domain-results from yaml:`
+### Example 1: ❌ Missing Branch Step (Score: 2)
+
+<details>
+<summary>Input YAML with Missing Branch</summary>
 
 ```yaml
 # YAML plan missing the branch creation step
@@ -108,9 +232,9 @@ steps:
     description: "Create domain folder structure"
     # ... (other steps but no branch as first step)
 ```
+</details>
 
-**Expected Output:**
-
+**Output:**
 ```json
 {
   "status": "REJECTED",
@@ -124,12 +248,12 @@ steps:
 }
 ```
 
-### Example 2: Single Responsibility Violation
+### Example 2: ⚠️ Single Responsibility Violation (Score: 3)
 
-`/04-evaluate-domain-results from yaml:`
+<details>
+<summary>Input YAML with SRP Violation</summary>
 
 ```yaml
-# YAML plan where a UseCase violates Single Responsibility Principle
 steps:
   - id: "create-feature-branch"
     type: "branch"
@@ -139,9 +263,9 @@ steps:
     description: "Creates a new user and sends a welcome email"
     # ...
 ```
+</details>
 
-**Expected Output:**
-
+**Output:**
 ```json
 {
   "status": "REJECTED",
@@ -154,9 +278,10 @@ steps:
 }
 ```
 
-### Example 3: Architecture Violation (RLHF -2)
+### Example 3: 🚨 Architecture Violation (Score: 1)
 
-`/04-evaluate-domain-results from yaml:`
+<details>
+<summary>Input YAML with External Dependency</summary>
 
 ```yaml
 steps:
@@ -173,13 +298,10 @@ steps:
         execute(input: FetchUserInput): Promise<FetchUserOutput>;
       }
     # ...
-  - id: "create-pull-request"
-    type: "pull_request"
-    # ...
 ```
+</details>
 
-**Expected Output:**
-
+**Output:**
 ```json
 {
   "status": "REJECTED",
@@ -192,21 +314,38 @@ steps:
 }
 ```
 
-## 📍 Next Step
+## 7. Violation Severity Matrix
+
+| Severity | Score | RLHF | Examples | Recovery |
+|----------|-------|------|----------|----------|
+| **CRITICAL** | 1 | -2 | External deps, wrong syntax | Complete redesign |
+| **MAJOR** | 2 | -1 | Missing workflow steps | Add required steps |
+| **MODERATE** | 3 | 0 | SOLID violations | Refactor structure |
+| **MINOR** | 4 | +1 | Naming issues | Simple fixes |
+| **NONE** | 5 | +2 | Perfect plan | Ready to execute |
+
+## 📍 Next Steps
 
 Based on your evaluation results:
 
-- **If score ≥ 1 (APPROVED)**: Proceed to execution:
-  ```bash
-  /06-execute-domain-steps from yaml: <your-approved-yaml>
-  ```
+### ✅ If APPROVED (Score = 5):
+Proceed to execution:
+```bash
+/06-execute-domain-steps from yaml: <your-approved-yaml>
+```
 
-- **If score < 1 (REJECTED)**: Return to reflection to fix issues:
-  ```bash
-  /05-reflect-domain-lessons from yaml: <your-yaml>
-  ```
+### ❌ If REJECTED (Score < 5):
 
-  Or if issues are in the JSON structure, go back to planning:
-  ```bash
-  /01-plan-domain-features <modify-your-request>
-  ```
+#### For architectural issues:
+Return to reflection to fix issues:
+```bash
+/04-reflect-domain-lessons from yaml: <your-yaml>
+```
+
+#### For structural issues:
+Go back to planning:
+```bash
+/01-plan-domain-features <modify-your-request>
+```
+
+> 💡 **Pro Tip**: Address violations in order of severity. Fix CRITICAL issues first, then MAJOR, MODERATE, and finally MINOR. A perfect score of 5 ensures smooth execution with RLHF +2!

@@ -1,87 +1,166 @@
+---
+title: "Execute Domain YAML Plan"
+description: "Automated build engineer execution of approved YAML plans with real-time RLHF scoring"
+category: "domain"
+stage: "execution"
+priority: 6
+tags:
+  - automation
+  - execution
+  - rlhf-scoring
+  - build-engineer
+  - git-workflow
+parameters:
+  input:
+    type: "yaml"
+    description: "Complete approved YAML plan from /05-evaluate-domain-results"
+    required: true
+  working_directory:
+    type: "path"
+    pattern: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/"
+    example: "spec/001-user-registration/domain/"
+  output_success:
+    type: "json"
+    format: '{"status": "SUCCESS", "message": "string", "commit_hashes": ["string"], "final_rlhf_score": number}'
+  output_failure:
+    type: "json"
+    format: '{"status": "FAILED", "failed_step_id": "string", "error_log": "string", "failed_step_rlhf_score": number}'
+rlhf_scoring:
+  catastrophic:
+    score: -2
+    emoji: "💥"
+    causes: ["Architecture violations", "Wrong REPLACE/WITH format"]
+  runtime_error:
+    score: -1
+    emoji: "❌"
+    causes: ["Lint failures", "Test failures", "Git errors"]
+  low_confidence:
+    score: 0
+    emoji: "⚠️"
+    causes: ["Missing references", "Unclear implementation"]
+  good:
+    score: 1
+    emoji: "✅"
+    causes: ["Valid implementation following patterns"]
+  perfect:
+    score: 2
+    emoji: "🏆"
+    causes: ["Clean Architecture + DDD + ubiquitous language"]
+execution_script: "npx tsx execute-steps.ts"
+previous_command: "/05-evaluate-domain-results from yaml: <yaml>"
+next_command_success: "/08-apply-domain-improvements"
+next_command_failure: "/07-fix-domain-errors from yaml: <yaml-with-failed-step>"
+---
+
 # Task: Execute Domain YAML Plan
 
 ## 🤖 RLHF Scoring During Execution
 
 The execute-steps.ts script automatically calculates RLHF scores for each step:
-- **-2 (CATASTROPHIC)**: Architecture violations, wrong REPLACE/WITH format
-- **-1 (RUNTIME ERROR)**: Lint failures, test failures, git errors
-- **0 (LOW CONFIDENCE)**: Missing references, unclear implementation
-- **+1 (GOOD)**: Valid implementation following patterns
-- **+2 (PERFECT)**: Clean Architecture + DDD + ubiquitous language
+
+| Score | Level | Emoji | Meaning |
+|-------|-------|-------|---------|
+| **+2** | PERFECT | 🏆 | Clean Architecture + DDD + ubiquitous language |
+| **+1** | GOOD | ✅ | Valid implementation following patterns |
+| **0** | LOW CONFIDENCE | ⚠️ | Missing references, unclear implementation |
+| **-1** | RUNTIME ERROR | ❌ | Lint failures, test failures, git errors |
+| **-2** | CATASTROPHIC | 💥 | Architecture violations, wrong REPLACE/WITH format |
 
 ## 1. Your Deliverable
 
 Your output is a stream of logs from the execution process, followed by a final JSON status report.
 
-- If successful: `{"status": "SUCCESS", "message": "All steps executed successfully.", "commit_hashes": ["hash1", "hash2", ...], "final_rlhf_score": 2}`.
-- If failed: `{"status": "FAILED", "failed_step_id": "...", "error_log": "...", "commit_hashes": ["hash1", ...], "failed_step_rlhf_score": -1}`.
+### ✅ Success Output:
+```json
+{
+  "status": "SUCCESS",
+  "message": "All steps executed successfully.",
+  "commit_hashes": ["hash1", "hash2", ...],
+  "final_rlhf_score": 2
+}
+```
+
+### ❌ Failure Output:
+```json
+{
+  "status": "FAILED",
+  "failed_step_id": "...",
+  "error_log": "...",
+  "commit_hashes": ["hash1", ...],
+  "failed_step_rlhf_score": -1
+}
+```
 
 ## 2. Objective
 
-Your goal is to act as an automated build engineer. You will receive a final, fully approved YAML implementation plan. Your **only** job is to execute the steps in this plan, one by one, exactly as they are written.
+Act as an **automated build engineer**. Execute the approved YAML implementation plan step by step, exactly as written, without modifications.
 
 ## 3. Input Parameters
 
-- **YAML Plan:** The complete, approved YAML content from the `/05-evaluate-domain-results` step.
-- **Working Directory:** All files should be created relative to `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/`
-  - Example: When the plan says to create `src/features/user-registration/domain/usecases/register-user.ts`,
-    you should actually create it at `spec/001-user-registration/domain/src/features/user-registration/domain/usecases/register-user.ts`
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| **YAML Plan** | Complete approved YAML from /05-evaluate-domain-results | Full YAML content |
+| **Working Directory** | Base path for all file operations | `spec/001-user-registration/domain/` |
 
-## 4. Prohibited Actions
+### ⚠️ Important Path Resolution:
+When the plan specifies:
+```
+path: "src/features/user-registration/domain/usecases/register-user.ts"
+```
 
-- You **MUST NOT** modify the logic of any step.
-- You **MUST NOT** skip any steps unless their `status` is already `SUCCESS` or `SKIPPED`.
-- You **MUST NOT** attempt to fix any failures. Your job is to execute and report. If a step fails, you stop and report the failure.
+Actually create at:
+```
+spec/001-user-registration/domain/src/features/user-registration/domain/usecases/register-user.ts
+```
+
+## 4. Prohibited Actions ❌
+
+| Action | Status | Reason |
+|--------|--------|--------|
+| Modify step logic | ❌ FORBIDDEN | Execute as-is only |
+| Skip pending steps | ❌ FORBIDDEN | All must be attempted |
+| Fix failures | ❌ FORBIDDEN | Report only, no fixes |
+| Change order | ❌ FORBIDDEN | Sequential execution required |
 
 ## 5. Step-by-Step Execution Plan
 
-1.  **Initialize:** Announce the start of the execution process.
-2.  **Load Script:** Load the `execute-steps.ts` script from the project's toolchain.
-3.  **Execute Script:** Run the script, passing the input YAML plan to it.
-    ```bash
-    npx tsx execute-steps.ts {{path_to_input_yaml}}
-    ```
-4.  **Stream Output:** Stream the `stdout` and `stderr` from the script directly to the user in real-time. This provides visibility into the linting, testing, and committing process for each step. The output will include RLHF scores with visual indicators:
-    - 🏆 = Perfect (+2)
-    - ✅ = Good (+1)
-    - ⚠️ = Low confidence (0)
-    - ❌ = Runtime error (-1)
-    - 💥 = Catastrophic (-2)
-5.  **Monitor Exit Code:** Wait for the `execute-steps.ts` script to complete.
-6.  **Generate Final Report:**
-    a. **If the script's exit code is 0 (success):** The entire plan was executed successfully. Create the SUCCESS JSON report, including:
-       - List of all Git commit hashes created
-       - Final RLHF score (0-2) calculated as average of all step scores
-       - Suggestion to run `npx tsx rlhf-system.ts report` for learning insights
-    b. **If the script's exit code is not 0 (failure):** The execution failed on a specific step. Create the FAILED JSON report, including:
-       - The `id` of the step that failed
-       - The RLHF score of the failed step (usually -2 or -1)
-       - Error log with context
-       - Guidance based on the score (e.g., "Check Clean Architecture violations" for -2)
-
----
-
-## Example Invocation
-
-`/domain-execute from yaml:`
-
-```yaml
-# ... (o YAML completo e aprovado)
-steps:
-  - id: "create-structure"
-    type: "folder"
-    status: "PENDING"
-    # ...
-  - id: "create-use-case-create-user"
-    type: "create_file"
-    status: "PENDING"
-    # ...
+```mermaid
+graph TD
+    A[Initialize Execution] --> B[Load execute-steps.ts]
+    B --> C[Run Script with YAML]
+    C --> D[Stream Output]
+    D --> E{Monitor Exit Code}
+    E -->|0| F[Generate SUCCESS Report]
+    E -->|Non-0| G[Generate FAILED Report]
+    F --> H[Include RLHF Score]
+    G --> I[Include Error Context]
+    style F fill:#90EE90
+    style G fill:#FFB6C1
 ```
 
-**Expected Output (Success with RLHF Scoring):**
+### Execution Steps:
+
+1. **Initialize**: Announce start of execution
+2. **Load Script**: Load `execute-steps.ts` from toolchain
+3. **Execute Script**:
+   ```bash
+   npx tsx execute-steps.ts {{path_to_input_yaml}}
+   ```
+4. **Stream Output**: Real-time stdout/stderr with RLHF scores
+5. **Monitor Exit Code**: Wait for completion
+6. **Generate Report**:
+   - Exit 0 → SUCCESS report with scores
+   - Exit non-0 → FAILED report with guidance
+
+## 6. Execution Output Examples
+
+### Example 1: ✅ Successful Execution
+
+<details>
+<summary>Success Output with RLHF Scoring</summary>
 
 ```
-🚀 Loading implementation file: ...
+🚀 Loading implementation file: spec/001-user-registration/domain/implementation.yaml
 🚀 Starting execution of 2 steps...
 
 ▶️  Processing Step 1/2: create-structure
@@ -106,11 +185,15 @@ steps:
   "final_rlhf_score": 1.5
 }
 ```
+</details>
 
-**Expected Output (Failure with RLHF Scoring):**
+### Example 2: ❌ Failed Execution (Architecture Violation)
+
+<details>
+<summary>Failure Output with RLHF -2</summary>
 
 ```
-🚀 Loading implementation file: ...
+🚀 Loading implementation file: spec/001-user-registration/domain/implementation.yaml
 🚀 Starting execution of 2 steps...
 
 ▶️  Processing Step 1/2: create-structure
@@ -134,22 +217,79 @@ Aborting execution. The YAML file has been updated with the failure details.
   "failed_step_rlhf_score": -2
 }
 ```
+</details>
 
-## 📍 Next Step
+## 7. RLHF Score Guidance
+
+| Score | Guidance | Action Required |
+|-------|----------|-----------------|
+| **-2** | Check Clean Architecture violations | Major refactoring needed |
+| **-1** | Fix runtime errors (lint/test) | Correct syntax and logic |
+| **0** | Add missing documentation/references | Enhance clarity |
+| **+1** | Working solution, can be improved | Add DDD patterns |
+| **+2** | Excellence achieved | No action needed |
+
+## 8. Script Capabilities
+
+The `execute-steps.ts` script provides:
+
+| Feature | Description |
+|---------|-------------|
+| **Atomic Commits** | Each step = one Git commit |
+| **Lint Checks** | Automatic TypeScript validation |
+| **Architecture Validation** | Detects domain layer violations |
+| **RLHF Scoring** | Real-time score calculation |
+| **Progress Tracking** | Visual step-by-step progress |
+| **Error Recovery** | Updates YAML with failure state |
+
+## 9. Common Execution Scenarios
+
+### Scenario 1: Partial Execution
+If execution fails at step 5 of 10:
+- Steps 1-4: Committed successfully
+- Step 5: Failed and marked in YAML
+- Steps 6-10: Remain PENDING
+- Action: Fix step 5, re-run from step 5
+
+### Scenario 2: Architecture Violation
+If external dependency detected:
+- Immediate CATASTROPHIC failure (-2)
+- No commit created for failed step
+- Clear error message with violation
+- Action: Return to planning phase
+
+### Scenario 3: Perfect Execution
+If all steps succeed with +2:
+- All commits created atomically
+- Final score = 2.0
+- Ready for production
+- Action: Consider improvements
+
+## 📍 Next Steps
 
 Based on execution results:
 
-- **If ALL steps SUCCEEDED**: Your domain layer is complete! Consider running RLHF improvements:
-  ```bash
-  /08-apply-domain-improvements
-  ```
+### ✅ If SUCCESS:
+Your domain layer is complete! Consider running RLHF improvements:
+```bash
+/08-apply-domain-improvements
+```
 
-- **If ANY step FAILED**: Fix the failed step:
-  ```bash
-  /07-fix-domain-errors from yaml: <your-yaml-with-failed-step>
-  ```
+Or generate a learning report:
+```bash
+npx tsx rlhf-system.ts report
+```
 
-  After fixing, re-run execution:
-  ```bash
-  /06-execute-domain-steps from yaml: <your-fixed-yaml>
-  ```
+### ❌ If FAILED:
+
+#### For error fixes:
+```bash
+/07-fix-domain-errors from yaml: <your-yaml-with-failed-step>
+```
+
+#### After fixing, re-run:
+```bash
+/06-execute-domain-steps from yaml: <your-fixed-yaml>
+```
+
+> 💡 **Pro Tip**: The execution script maintains state in the YAML. Failed steps are marked, allowing you to fix and resume from the failure point without re-executing successful steps!
