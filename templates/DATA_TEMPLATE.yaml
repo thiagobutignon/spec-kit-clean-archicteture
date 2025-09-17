@@ -1,0 +1,717 @@
+# AI-NOTE: This YAML file is specifically for generating DATA LAYER following TDD principles.
+# This implements the business rules from Domain Layer through abstract protocols.
+# CRITICAL: Data Layer is the implementation layer for use cases defined in Domain Layer.
+#
+# INTELLIGENT RLHF SCORING SYSTEM:
+# The system uses Reinforcement Learning from Human Feedback to score execution quality:
+# -2: CATASTROPHIC - Architecture violations, implementation before tests, incorrect TDD order
+# -1: RUNTIME ERROR - Lint failures, test failures, git operation problems
+#  0: LOW CONFIDENCE - System is uncertain, avoids hallucinations
+# +1: GOOD - Task complete but missing TDD elements or architectural patterns
+# +2: PERFECT - Exceptional TDD execution, Clean Architecture, protocol abstractions
+#
+# QUALITY INDICATORS FOR +2 SCORE:
+# - STRICT TDD ORDER: Test → Mock → Protocol → Implementation (NON-NEGOTIABLE)
+# - Protocol abstractions for all external dependencies
+# - Comprehensive test coverage with spy pattern
+# - Feature-based architecture structure
+# - No direct external library imports
+# - Perfect JSDoc documentation
+#
+version: '3.0.0'
+# AI-NOTE: Update these fields to describe the specific feature and data layer implementation.
+metadata:
+  title: '__FEATURE_NAME_PASCAL_CASE__ Data Layer Implementation'
+  description: 'TDD implementation of use cases for __FEATURE_NAME_LOWER_CASE__ feature following Clean Architecture principles.'
+  source: 'DATA_TEMPLATE.yaml'
+  # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
+  lastUpdated: '__CURRENT_DATE__'
+  # AI-NOTE: Data layer specifically implements domain use cases
+  layer: 'data'
+  tdd_principles:
+    - 'Test First - Never write implementation before tests'
+    - 'Red-Green-Refactor cycle'
+    - 'Tests define the contract'
+    - 'Mock all external dependencies'
+  # AI-NOTE: Define protocols needed for +2 RLHF score
+  required_protocols:
+    - category: 'db'
+      protocols: ['__ENTITY__Repository', 'Check__ENTITY__Repository']
+    - category: 'http'
+      protocols: ['HttpClient']
+    - category: 'cryptography'
+      protocols: ['Hasher', 'HashComparer', 'Encrypter', 'Decrypter']
+    - category: 'cache'
+      protocols: ['SetStorage', 'GetStorage']
+
+# AI-NOTE: Feature-based structure for data layer
+structure:
+  basePath: 'src/features/__FEATURE_NAME_KEBAB_CASE__'
+  data_layer:
+    folders:
+      - 'protocols/db'           # Database protocol interfaces
+      - 'protocols/http'         # HTTP client protocol interfaces
+      - 'protocols/cache'        # Cache protocol interfaces
+      - 'protocols/cryptography' # Cryptography protocol interfaces
+      - 'usecases'              # Use case implementations
+      - 'models'                # Data-specific models (optional)
+  test_structure:
+    basePath: 'tests/features/__FEATURE_NAME_KEBAB_CASE__'
+    folders:
+      - 'data/mocks'            # Mock implementations for testing
+      - 'data/usecases'         # Use case tests
+
+# ------------------------------------------------------------------------------
+# ARCHITECTURAL RULES SECTION
+# These rules define the Data Layer boundaries and dependencies
+# ------------------------------------------------------------------------------
+
+architecture:
+  # Data Layer dependency rules
+  dependency_rules:
+    data:
+      can_import_from: ['domain']  # Only domain interfaces and types
+      cannot_import_from: ['infrastructure', 'presentation', 'external']
+      must_use_protocols: true    # All external deps through protocols
+
+  # Data Layer principles
+  principles:
+    - "Implementation: Business logic implementation through abstract protocols"
+    - "TDD: Tests first, implementation last - NO EXCEPTIONS"
+    - "Protocols: All external dependencies abstracted through interfaces"
+    - "Independence: No direct imports of external libraries or frameworks"
+
+# ------------------------------------------------------------------------------
+# AI-NOTE: IMMUTABLE SECTIONS AHEAD.
+# TDD and Data Layer rules are critical for correct implementation.
+# ------------------------------------------------------------------------------
+
+# Data layer specific rules
+data_layer_rules:
+  tdd_execution_order:
+    1: 'Generate test files (.spec.ts) - FIRST AND MANDATORY'
+    2: 'Generate mock/spy implementations - SECOND'
+    3: 'Generate protocol interfaces - THIRD'
+    4: 'Generate use case implementations - FOURTH AND LAST'
+
+  forbidden_violations:
+    - 'NEVER generate implementation before tests'
+    - 'NEVER import external libraries directly'
+    - 'NEVER skip the spy/mock generation step'
+    - 'NEVER create protocols without corresponding mocks'
+
+  allowed:
+    - 'Use case implementations following domain contracts'
+    - 'Protocol interfaces for external dependencies'
+    - 'Mock/Spy implementations for testing'
+    - 'Data models for transformation (when needed)'
+
+  forbidden:
+    - 'Direct imports from axios, fetch, bcrypt, jwt, etc.'
+    - 'Framework-specific code (React, Express, etc.)'
+    - 'Business logic in domain layer (that belongs here)'
+    - 'Implementation before tests (TDD violation)'
+
+# Protocol rules
+protocol_rules:
+  should:
+    - 'Abstract all external dependencies'
+    - 'Be categorized by concern (db, http, cache, crypto)'
+    - 'Have corresponding mock implementations'
+    - 'Use generic interfaces for flexibility'
+    - 'Be well documented with JSDoc'
+
+  should_not:
+    - 'Expose implementation details'
+    - 'Import external libraries'
+    - 'Contain business logic'
+    - 'Be specific to one implementation'
+
+# Use case implementation rules
+usecase_implementation_rules:
+  should:
+    - 'Implement domain use case interfaces'
+    - 'Use dependency injection pattern'
+    - 'Follow error handling patterns'
+    - 'Have comprehensive test coverage'
+    - 'Use execute method as standard'
+
+  should_not:
+    - 'Import external libraries directly'
+    - 'Contain framework-specific code'
+    - 'Be tested after implementation'
+    - 'Skip error scenarios in tests'
+
+# Test rules (specific to data layer)
+test_rules:
+  should:
+    - 'Use Spy pattern for dependency mocking'
+    - 'Test all dependency interactions'
+    - 'Cover error scenarios with throwError helper'
+    - 'Use makeSut factory pattern'
+    - 'Test parameter passing and return values'
+    - 'Use vitest framework only'
+
+  should_not:
+    - 'Make real external calls'
+    - 'Use Jest (vitest only)'
+    - 'Test implementation details'
+    - 'Skip error scenarios'
+
+# ------------------------------------------------------------------------------
+# IMPLEMENTATION STEPS - TDD EXECUTION ORDER
+# CRITICAL: These steps MUST be executed in this exact order
+# ------------------------------------------------------------------------------
+
+steps:
+  # === GIT WORKFLOW ===
+  - id: 'create-feature-branch'
+    type: 'branch'
+    description: 'Create a new feature branch for __FEATURE_NAME_PASCAL_CASE__ data layer'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'internal_guideline'
+        source: 'GIT_WORKFLOW.md'
+        description: 'Following git branching best practices for data layer development.'
+    action:
+      branch_name: 'feat/__FEATURE_NAME_KEBAB_CASE__-data-layer'
+    validation_script: |
+      echo "🌿 Creating data layer feature branch..."
+      # Check if we are on a clean state
+      if [ -n "$(git status --porcelain)" ]; then
+        echo "⚠️ Warning: You have uncommitted changes. Stashing them..."
+        git stash save "Auto-stash before creating data layer branch for __FEATURE_NAME_KEBAB_CASE__"
+      fi
+
+      # Create and checkout new feature branch
+      BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-data-layer"
+
+      # Check if branch already exists
+      if git show-ref --quiet refs/heads/$BRANCH_NAME; then
+        echo "⚠️ Branch $BRANCH_NAME already exists. Checking out..."
+        git checkout $BRANCH_NAME
+      else
+        echo "🌿 Creating new branch: $BRANCH_NAME"
+        git checkout -b $BRANCH_NAME
+      fi
+
+      # Verify we're on the correct branch
+      CURRENT=$(git branch --show-current)
+      if [ "$CURRENT" != "$BRANCH_NAME" ]; then
+        echo "❌ ERROR: Failed to switch to branch $BRANCH_NAME"
+        exit 1
+      fi
+
+      echo "✅ Successfully created and switched to branch: $BRANCH_NAME"
+
+  # === DATA LAYER STRUCTURE ===
+  - id: 'create-data-structure'
+    type: 'folder'
+    description: 'Create data layer folder structure'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'internal_guideline'
+        source: 'ARCHITECTURE.md'
+        description: 'Following feature-based data layer structure.'
+    action:
+      create_folders:
+        basePath: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data'
+        folders:
+          - 'protocols/db'
+          - 'protocols/http'
+          - 'protocols/cache'
+          - 'protocols/cryptography'
+          - 'usecases'
+          - 'models'
+    validation_script: |
+      echo "✅ Verifying data layer folder structure..."
+      # Verify all required folders exist
+      BASE_PATH="src/features/__FEATURE_NAME_KEBAB_CASE__/data"
+      if [ ! -d "$BASE_PATH/protocols/db" ] || \
+         [ ! -d "$BASE_PATH/protocols/http" ] || \
+         [ ! -d "$BASE_PATH/protocols/cache" ] || \
+         [ ! -d "$BASE_PATH/protocols/cryptography" ] || \
+         [ ! -d "$BASE_PATH/usecases" ] || \
+         [ ! -d "$BASE_PATH/models" ]; then
+        echo "❌ ERROR: One or more data layer folders were not created."
+        exit 1
+      fi
+      echo "✅ Data layer folders exist."
+
+  # === TEST STRUCTURE ===
+  - id: 'create-test-structure'
+    type: 'folder'
+    description: 'Create test folder structure for data layer'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'internal_guideline'
+        source: 'TESTING.md'
+        description: 'Following TDD structure for data layer tests.'
+    action:
+      create_folders:
+        basePath: 'tests/features/__FEATURE_NAME_KEBAB_CASE__/data'
+        folders:
+          - 'mocks'
+          - 'usecases'
+    validation_script: |
+      echo "✅ Verifying test folder structure..."
+      # Verify all required test folders exist
+      BASE_PATH="tests/features/__FEATURE_NAME_KEBAB_CASE__/data"
+      if [ ! -d "$BASE_PATH/mocks" ] || \
+         [ ! -d "$BASE_PATH/usecases" ]; then
+        echo "❌ ERROR: One or more test folders were not created."
+        exit 1
+      fi
+      echo "✅ Test folders exist."
+
+  # === TDD STEP 1: CREATE TEST FILE FIRST ===
+  - id: 'create-test-__PREFIX__-__USE_CASE_NAME_KEBAB__'
+    type: 'create_file'
+    description: 'TDD Step 1: Create test file for __PREFIX____USE_CASE_NAME__ use case'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'external_pattern'
+        source: 'context7'
+        query: 'test driven development best practices'
+        url: 'https://github.com/...'
+        description: 'Following TDD red-green-refactor cycle.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: '*.spec.ts'
+        description: 'Consistent with existing test patterns.'
+    path: 'tests/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.spec.ts'
+    template: |
+      import { __PREFIX____USE_CASE_NAME__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases'
+      import { mock__USE_CASE__Input, throwError } from '@/tests/features/__FEATURE_NAME_KEBAB_CASE__/domain/mocks'
+      import { __DEPENDENCY_1__Spy, __DEPENDENCY_2__Spy } from '@/tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks'
+      import { describe, test, expect, vi } from 'vitest'
+
+      type SutTypes = {
+        sut: __PREFIX____USE_CASE_NAME__
+        __DEPENDENCY_1_CAMEL__Spy: __DEPENDENCY_1__Spy
+        __DEPENDENCY_2_CAMEL__Spy: __DEPENDENCY_2__Spy
+      }
+
+      const makeSut = (): SutTypes => {
+        const __DEPENDENCY_1_CAMEL__Spy = new __DEPENDENCY_1__Spy()
+        const __DEPENDENCY_2_CAMEL__Spy = new __DEPENDENCY_2__Spy()
+        const sut = new __PREFIX____USE_CASE_NAME__(__DEPENDENCY_1_CAMEL__Spy, __DEPENDENCY_2_CAMEL__Spy)
+        return {
+          sut,
+          __DEPENDENCY_1_CAMEL__Spy,
+          __DEPENDENCY_2_CAMEL__Spy
+        }
+      }
+
+      describe('__PREFIX____USE_CASE_NAME__ Usecase', () => {
+        test('Should call __DEPENDENCY_1__ with correct values', async () => {
+          const { sut, __DEPENDENCY_1_CAMEL__Spy } = makeSut()
+          const input = mock__USE_CASE__Input()
+
+          await sut.execute(input)
+
+          expect(__DEPENDENCY_1_CAMEL__Spy.__PROPERTY__).toBe(input.__FIELD__)
+        })
+
+        test('Should throw if __DEPENDENCY_1__ throws', async () => {
+          const { sut, __DEPENDENCY_1_CAMEL__Spy } = makeSut()
+          vi.spyOn(__DEPENDENCY_1_CAMEL__Spy, '__DEPENDENCY_METHOD__').mockImplementationOnce(throwError)
+
+          const promise = sut.execute(mock__USE_CASE__Input())
+
+          await expect(promise).rejects.toThrow()
+        })
+
+        test('Should return correct value on success', async () => {
+          const { sut } = makeSut()
+
+          const result = await sut.execute(mock__USE_CASE__Input())
+
+          expect(result).toBe(__EXPECTED_VALUE__)
+        })
+      })
+    validation_script: |
+      echo "🔍 TDD Step 1: Validating test file creation..."
+      # Verify test file exists
+      if [ ! -f "tests/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.spec.ts" ]; then
+        echo "❌ ERROR: Test file was not created."
+        exit 1
+      fi
+      echo "✅ Test file created successfully."
+
+      echo "📦 Staging test file..."
+      git add tests/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.spec.ts
+
+      echo "💾 Committing TDD Step 1..."
+      git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add __PREFIX__-__USE_CASE_NAME_KEBAB__ test file
+
+TDD Step 1: Create test file first (red phase)
+- Add comprehensive test scenarios
+- Use spy pattern for dependencies
+- Follow makeSut factory pattern"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED"
+        exit 1
+      fi
+      echo "✅ TDD Step 1 completed successfully"
+
+  # === TDD STEP 2: CREATE MOCK/SPY IMPLEMENTATIONS ===
+  - id: 'create-mocks-__PROTOCOL_CATEGORY__'
+    type: 'create_file'
+    description: 'TDD Step 2: Create mock/spy implementations for __PROTOCOL_CATEGORY__'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'external_pattern'
+        source: 'context7'
+        query: 'spy pattern testing typescript'
+        description: 'Following spy pattern for dependency mocking.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: '*Spy'
+        description: 'Consistent with existing spy implementations.'
+    path: 'tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-__PROTOCOL_CATEGORY__.ts'
+    template: |
+      import { __PROTOCOL__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols'
+
+      /**
+       * Mock implementation of __PROTOCOL__ for testing purposes.
+       * Implements spy pattern to track method calls and control return values.
+       */
+      export class __PROTOCOL__Spy implements __PROTOCOL__ {
+        /** Stores the parameter passed to the method for assertion */
+        __PARAMETER__: __TYPE__
+
+        /** Controls the return value for testing different scenarios */
+        result = __DEFAULT_MOCK_VALUE__
+
+        /**
+         * Mock implementation of the __METHOD__ method.
+         * @param __PARAMETER__ - The parameter to be processed
+         * @returns Promise resolving to the controlled test result
+         */
+        async __METHOD__ (__PARAMETER__: __TYPE__): Promise<__RETURN_TYPE__> {
+          this.__PARAMETER__ = __PARAMETER__
+          return this.result
+        }
+      }
+    validation_script: |
+      echo "🔍 TDD Step 2: Validating mock creation..."
+      # Verify mock file exists
+      if [ ! -f "tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-__PROTOCOL_CATEGORY__.ts" ]; then
+        echo "❌ ERROR: Mock file was not created."
+        exit 1
+      fi
+      echo "✅ Mock file created successfully."
+
+      echo "📦 Staging mock file..."
+      git add tests/features/__FEATURE_NAME_KEBAB_CASE__/data/mocks/mock-__PROTOCOL_CATEGORY__.ts
+
+      echo "💾 Committing TDD Step 2..."
+      git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add __PROTOCOL_CATEGORY__ mock implementations
+
+TDD Step 2: Create spy implementations
+- Implement spy pattern for testing
+- Track method calls and parameters
+- Control return values for scenarios"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED"
+        exit 1
+      fi
+      echo "✅ TDD Step 2 completed successfully"
+
+  # === TDD STEP 3: CREATE PROTOCOL INTERFACES ===
+  - id: 'create-protocol-__PROTOCOL_NAME_KEBAB__'
+    type: 'create_file'
+    description: 'TDD Step 3: Create __PROTOCOL_NAME__ protocol interface'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'external_pattern'
+        source: 'context7'
+        query: 'dependency inversion principle interfaces'
+        description: 'Following DIP for protocol abstractions.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: 'interface *'
+        description: 'Consistent with existing protocol interfaces.'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/__CATEGORY__/__PROTOCOL_NAME_KEBAB__.ts'
+    template: |
+      /**
+       * Protocol interface for __PROTOCOL_NAME__ operations.
+       * Defines the contract for external dependency implementations.
+       */
+      export interface __PROTOCOL_NAME__ {
+        /**
+         * __METHOD__ operation.
+         * @param __PARAM__ - The input parameter for the operation
+         * @returns Promise resolving to __RETURN_TYPE__
+         */
+        __METHOD__: (__PARAM__: __PARAM_TYPE__) => Promise<__RETURN_TYPE__>
+      }
+    validation_script: |
+      echo "🔍 TDD Step 3: Validating protocol creation..."
+      # Verify protocol file exists
+      if [ ! -f "src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/__CATEGORY__/__PROTOCOL_NAME_KEBAB__.ts" ]; then
+        echo "❌ ERROR: Protocol file was not created."
+        exit 1
+      fi
+      echo "✅ Protocol file created successfully."
+
+      echo "📦 Staging protocol file..."
+      git add src/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols/__CATEGORY__/__PROTOCOL_NAME_KEBAB__.ts
+
+      echo "💾 Committing TDD Step 3..."
+      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add __PROTOCOL_NAME_KEBAB__ protocol interface
+
+TDD Step 3: Create protocol abstractions
+- Define contract for external dependencies
+- Abstract implementation details
+- Enable dependency injection"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED"
+        exit 1
+      fi
+      echo "✅ TDD Step 3 completed successfully"
+
+  # === TDD STEP 4: CREATE USE CASE IMPLEMENTATION ===
+  - id: 'create-usecase-__PREFIX__-__USE_CASE_NAME_KEBAB__'
+    type: 'create_file'
+    description: 'TDD Step 4: Create __PREFIX____USE_CASE_NAME__ implementation (GREEN PHASE)'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'external_pattern'
+        source: 'context7'
+        query: 'clean architecture use case implementation'
+        description: 'Following Clean Architecture use case implementation.'
+      - type: 'internal_code_analysis'
+        source: 'serena'
+        tool: 'find_symbol'
+        query: '__PREFIX__*'
+        description: 'Consistent with existing use case implementations.'
+    path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.ts'
+    template: |
+      import type { __DOMAIN_USE_CASE__, __DOMAIN_USE_CASE__Input, __DOMAIN_USE_CASE__Output } from '@/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases'
+      import { __PROTOCOL_1__, __PROTOCOL_2__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/data/protocols'
+
+      /**
+       * Implementation of __DOMAIN_USE_CASE__ use case.
+       * Handles __USE_CASE_DESCRIPTION__.
+       */
+      export class __PREFIX____USE_CASE_NAME__ implements __DOMAIN_USE_CASE__ {
+        /**
+         * Creates an instance of __PREFIX____USE_CASE_NAME__.
+         * @param __DEPENDENCY_1_CAMEL__ - Protocol for __DEPENDENCY_1_DESCRIPTION__
+         * @param __DEPENDENCY_2_CAMEL__ - Protocol for __DEPENDENCY_2_DESCRIPTION__
+         */
+        constructor (
+          private readonly __DEPENDENCY_1_CAMEL__: __PROTOCOL_1__,
+          private readonly __DEPENDENCY_2_CAMEL__: __PROTOCOL_2__
+        ) {}
+
+        /**
+         * Executes the use case.
+         * @param input - The input data for the use case
+         * @returns Promise resolving to the use case output
+         * @throws {Error} When __ERROR_CONDITION__
+         */
+        async execute (input: __DOMAIN_USE_CASE__Input): Promise<__DOMAIN_USE_CASE__Output> {
+          // Implementation following test specifications
+          const result = await this.__DEPENDENCY_1_CAMEL__.__DEPENDENCY_METHOD__(input)
+
+          // Business logic
+          if (!result) {
+            throw new Error()
+          }
+
+          return result
+        }
+      }
+    validation_script: |
+      echo "🔍 TDD Step 4: Validating use case implementation..."
+      # Verify implementation file exists
+      if [ ! -f "src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.ts" ]; then
+        echo "❌ ERROR: Use case implementation was not created."
+        exit 1
+      fi
+      echo "✅ Use case implementation created successfully."
+
+      echo "🔍 Running lint check..."
+      yarn lint
+      if [ $? -ne 0 ]; then
+        echo "❌ LINT FAILED - Attempting auto-fix..."
+        yarn lint --fix
+        if [ $? -ne 0 ]; then
+          echo "❌ AUTO-FIX FAILED - Manual intervention required"
+          exit 1
+        fi
+        echo "✅ Lint errors auto-fixed, validating again..."
+        yarn lint
+        if [ $? -ne 0 ]; then
+          echo "❌ LINT STILL FAILING - Manual fixes needed"
+          exit 1
+        fi
+      fi
+      echo "✅ Lint passed"
+
+      echo "🧪 Running tests with coverage..."
+      yarn test --coverage
+      if [ $? -ne 0 ]; then
+        echo "❌ TESTS FAILED - TDD cycle incomplete"
+        exit 1
+      fi
+      echo "✅ Tests passed - TDD GREEN PHASE complete"
+
+      echo "📦 Staging implementation..."
+      git add src/features/__FEATURE_NAME_KEBAB_CASE__/data/usecases/__PREFIX__-__USE_CASE_NAME_KEBAB__.ts
+
+      echo "💾 Committing TDD Step 4..."
+      git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __PREFIX__-__USE_CASE_NAME_KEBAB__ use case
+
+TDD Step 4: Create implementation (green phase)
+- Implement domain use case interface
+- Use dependency injection pattern
+- Make tests pass"
+      if [ $? -ne 0 ]; then
+        echo "❌ COMMIT FAILED"
+        exit 1
+      fi
+      echo "✅ TDD Step 4 completed successfully - Full TDD cycle complete!"
+
+  # === FINAL: CREATE PULL REQUEST ===
+  - id: 'create-pull-request'
+    type: 'pull_request'
+    description: 'Create pull request for __FEATURE_NAME_PASCAL_CASE__ data layer implementation'
+    status: 'PENDING'
+    rlhf_score: null
+    execution_log: ''
+    references:
+      - type: 'internal_guideline'
+        source: 'GIT_WORKFLOW.md'
+        description: 'Following PR process for data layer integration.'
+    action:
+      target_branch: 'main'
+      source_branch: 'feat/__FEATURE_NAME_KEBAB_CASE__-data-layer'
+      title: 'feat(__FEATURE_NAME_KEBAB_CASE__): implement data layer with TDD'
+    validation_script: |
+      echo "🚀 Preparing to create pull request for data layer..."
+
+      # Push the current branch to remote
+      echo "📤 Pushing branch to remote..."
+      git push --set-upstream origin feat/__FEATURE_NAME_KEBAB_CASE__-data-layer
+      if [ $? -ne 0 ]; then
+        echo "❌ ERROR: Failed to push branch to remote"
+        exit 1
+      fi
+
+      # Check if gh CLI is available
+      if ! command -v gh &> /dev/null; then
+        echo "⚠️ GitHub CLI (gh) is not installed."
+        echo "📋 Please create PR manually"
+        exit 0
+      fi
+
+      # Create the pull request
+      echo "🔄 Creating pull request..."
+      PR_BODY="## Summary
+
+      Implementation of Data Layer for __FEATURE_NAME_PASCAL_CASE__ feature following strict TDD principles.
+
+      ### TDD Execution Order Followed:
+      1. ✅ **Test First** - Created comprehensive test files (.spec.ts)
+      2. ✅ **Mock/Spy** - Implemented spy pattern for all dependencies
+      3. ✅ **Protocols** - Created abstract interfaces for external dependencies
+      4. ✅ **Implementation** - Implemented use cases making tests pass
+
+      ### Changes included:
+      - Data layer with use case implementations
+      - Protocol abstractions for external dependencies
+      - Comprehensive test coverage with spy pattern
+      - Feature-based architecture structure
+
+      ### Architecture Compliance:
+      - ✅ Clean Architecture principles
+      - ✅ TDD Red-Green-Refactor cycle
+      - ✅ Protocol abstractions (no direct external imports)
+      - ✅ All tests passing
+      - ✅ Lint checks passed
+      - ✅ RLHF score: +2 (PERFECT)
+
+      ### Generated by:
+      - Template: DATA_TEMPLATE.yaml
+      - Date: $(date +%Y-%m-%d)
+
+      ---
+      🤖 Generated with spec-kit-clean-architecture"
+
+      gh pr create \
+        --base main \
+        --head feat/__FEATURE_NAME_KEBAB_CASE__-data-layer \
+        --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement data layer with TDD" \
+        --body "$PR_BODY" \
+        --assignee @me
+
+      if [ $? -eq 0 ]; then
+        echo "✅ Pull request created successfully!"
+        PR_URL=$(gh pr view --json url -q .url)
+        echo "📎 Pull Request URL: $PR_URL"
+        gh pr view --web
+      else
+        echo "⚠️ Could not create PR automatically. Please create manually."
+      fi
+
+# ------------------------------------------------------------------------------
+# TROUBLESHOOTING & RECOVERY FOR DATA LAYER
+# ------------------------------------------------------------------------------
+
+troubleshooting:
+  tdd_violations:
+    - 'CRITICAL: Never create implementation before tests'
+    - 'If implementation exists before tests: Delete implementation, start over'
+    - 'TDD Order is non-negotiable: Test → Mock → Protocol → Implementation'
+    - 'Each step must be committed separately for audit trail'
+
+  protocol_issues:
+    - 'Ensure all external dependencies are abstracted'
+    - 'Check that mocks implement the same interface as protocols'
+    - 'Verify no direct imports from external libraries'
+    - 'Protocol interfaces should be in correct category folders'
+
+  test_failures:
+    - 'Verify spy implementations match protocol interfaces'
+    - 'Check that makeSut factory creates all required dependencies'
+    - 'Ensure throwError helper is imported correctly'
+    - 'Validate that test scenarios cover all code paths'
+
+evaluation:
+  final_status: 'PENDING' # PENDING | SUCCESS | FAILED
+  final_rlhf_score: null # -2, -1, 0, 1, 2
+  tdd_compliance_score: null # 0-100% based on TDD order adherence
+  reviewer_summary: |
+    - TDD Execution:
+      - Test-first approach: ...
+      - Mock/Spy quality: ...
+      - Protocol abstractions: ...
+    - Architecture Compliance:
+      - Clean Architecture: ...
+      - Dependency rules: ...
+  template_improvement_suggestions:
+    - target_template: 'DATA_TEMPLATE.yaml'
+      target_step_id: 'create-test-__PREFIX__-__USE_CASE_NAME_KEBAB__'
+      suggestion: 'Consider adding more specific test scenarios for edge cases.'
+      priority: 'medium'
