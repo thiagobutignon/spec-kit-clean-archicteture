@@ -97,6 +97,20 @@ architecture:
     - "Separation: Business rules are the core, everything else is detail"
 
 # ------------------------------------------------------------------------------
+# AI-NOTE: IMMUTABLE SECTIONS AHEAD.
+# The sections from here until 'steps' are architectural rules.
+# You MUST copy them verbatim into the implementation file without ANY modification.
+#
+# AUTOMATED LEARNING SYSTEM:
+# The RLHF system automatically:
+# - Tracks success/failure patterns across executions
+# - Identifies common error types and their fixes
+# - Applies improvements when confidence > 80%
+# - Generates learning reports with actionable insights
+# - Prevents hallucinations with score 0 for uncertain cases
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # LAYER-SPECIFIC RULES
 # Currently only Domain layer is implemented
 # ------------------------------------------------------------------------------
@@ -171,6 +185,12 @@ test_helper_rules:
     - 'Contain test assertions (those belong in test files)'
     - 'Have side effects or maintain state'
     - 'Use Jest (use Vitest instead)'
+
+# ------------------------------------------------------------------------------
+# AI-NOTE: DYNAMIC IMPLEMENTATION SECTION.
+# Replicate the generic steps below for each use case, error, and test helper
+# required by the feature, replacing the placeholder variables (e.g., __FEATURE_NAME_KEBAB_CASE__).
+# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 # IMPLEMENTATION STEPS
@@ -265,6 +285,8 @@ steps:
     status: 'PENDING'
     rlhf_score: null
     execution_log: ''
+    # AI-NOTE: For each step, you MUST populate this 'references' section.
+    # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
     references:
       - type: 'external_pattern'
         source: 'context7'
@@ -277,6 +299,9 @@ steps:
         query: '*UseCase'
         description: 'Consistent with existing use case interfaces.'
     path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/use-cases/__ACTION_ENTITY_KEBAB_CASE__.ts'
+    # AI-NOTE FOR +2 SCORE: Include domain concepts and ubiquitous language in comments
+    # Use business terminology, not technical jargon
+    # Reference Domain-Driven Design principles when applicable
     template: |
       /**
        * Input parameters for __ACTION_ENTITY_PASCAL_CASE__UseCase
@@ -359,6 +384,8 @@ steps:
     status: 'PENDING'
     rlhf_score: null
     execution_log: ''
+    # AI-NOTE: For each step, you MUST populate this 'references' section.
+    # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
     references:
       - type: 'external_pattern'
         source: 'context7'
@@ -371,6 +398,9 @@ steps:
         query: '*Error'
         description: 'Consistent with existing domain errors.'
     path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/domain/errors/__ERROR_NAME_KEBAB_CASE__.ts'
+    # AI-NOTE FOR +2 SCORE: Domain errors should represent business rule violations
+    # Use ubiquitous language in error messages
+    # Never expose technical details or implementation specifics
     template: |
       /**
        * Domain error thrown when __ERROR_DESCRIPTION__
@@ -425,6 +455,8 @@ steps:
     status: 'PENDING'
     rlhf_score: null
     execution_log: ''
+    # AI-NOTE: For each step, you MUST populate this 'references' section.
+    # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
     references:
       - type: 'external_pattern'
         source: 'context7'
@@ -493,6 +525,7 @@ steps:
       echo "✅ Successfully committed"
 
   # === REFACTORING STEP (OPTIONAL) ===
+  # OPTIONAL STEP: You can add more steps here for additional use cases, errors, or test helpers as needed.
   - id: 'refactor-__FILE_TO_MODIFY_KEBAB_CASE__'
     type: 'refactor_file'
     description: 'Refactor __FILE_TO_MODIFY_PASCAL_CASE__ to incorporate new logic'
@@ -506,7 +539,13 @@ steps:
         query: '__SYMBOL_BEING_CHANGED__'
         description: 'Refactoring affected files.'
     path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/path/to/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
-    # CRITICAL: MUST use REPLACE/WITH format for refactor_file steps
+    # CRITICAL FOR RLHF SCORE: The template MUST use REPLACE/WITH format for refactor_file steps
+    # Missing these blocks will result in a CATASTROPHIC -2 score
+    # Format requirements:
+    # 1. MUST include <<<REPLACE>>> block with exact code to be replaced
+    # 2. MUST include <<<WITH>>> block with new code
+    # 3. MUST include closing tags: <<</REPLACE>>> and <<</WITH>>>
+    # 4. The code in REPLACE block must match EXACTLY what's in the file
     template: |
       <<<REPLACE>>>
       // Old code to be replaced
@@ -550,6 +589,9 @@ steps:
       echo "✅ Successfully committed"
 
   # === DELETE STEP (ERROR RECOVERY) ===
+  # AI-NOTE: This step is used by the AI during the self-correction loop.
+  # When a 'create_file' step fails, the AI can generate an instance of this
+  # step to delete the broken artifact before attempting a fix.
   - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'
     type: 'delete_file'
     description: 'Delete file __FILE_TO_DELETE_PASCAL_CASE__ due to generation error'
@@ -561,6 +603,8 @@ steps:
         source: 'self'
         description: 'Deleting artifact from failed step.'
     path: 'src/features/__FEATURE_NAME_KEBAB_CASE__/path/to/__FILE_TO_DELETE_KEBAB_CASE__.ts'
+    # AI-NOTE: The validation_script for a delete action should verify the file is gone
+    # and then perform the standard quality checks before committing the deletion.
     validation_script: |
       echo "🗑️ Verifying file deletion..."
       if [ -f "src/features/__FEATURE_NAME_KEBAB_CASE__/path/to/__FILE_TO_DELETE_KEBAB_CASE__.ts" ]; then
@@ -661,6 +705,12 @@ steps:
       else
         echo "⚠️ Could not create PR automatically. Please create manually."
       fi
+
+# ------------------------------------------------------------------------------
+# AI-NOTE: IMMUTABLE DOCUMENTATION SECTIONS AHEAD.
+# Copy these sections verbatim. The [placeholders] inside the commands
+# are for HUMAN examples and MUST NOT be replaced by the AI.
+# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 # TROUBLESHOOTING & RECOVERY
@@ -779,41 +829,53 @@ recovery:
     git add .
     git commit -m "refactor: remove business logic from domain layer"
 
-# AI Guidelines
+# AI Guidelines from templates/DOMAIN_TEMPLATES.md
 ai_guidelines:
   - 'Always validate before committing: Run lint first, Run tests second, Only commit if both pass'
-  - 'If generation fails: Identify the specific error, Fix only that error, Re-run validation'
+  - 'If generation fails: Identify the specific error, Fix only that error, Re-run validation, Do NOT proceed until fixed'
   - 'Follow the principle: One use case = One file = One responsibility'
   - 'If tempted to add "And" in a use case name, split it'
-  - 'When in doubt: Choose simplicity over complexity'
-  - 'MUST generate different case styles from input names'
-  - 'MUST replace ALL placeholder variables with actual values'
-  - 'MUST NOT leave any placeholder variables in final implementation'
-  - 'MUST NOT replace [placeholders] in documentation sections'
+  - 'When in doubt: Choose simplicity over complexity, Split rather than combine, Ask for clarification rather than assume'
+  - 'MUST generate different case styles from the input names (e.g., "Add Item To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart, lower case=add item to cart).'
+  - 'MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__) with actual values'
+  - 'MUST NOT leave any placeholder variables in the final implementation'
+  - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery'
   - 'MUST use vitest, NOT jest'
+  - 'MUST follow all domain rules - no business logic, no external dependencies'
   - 'MUST follow all Clean Architecture rules'
   - 'MUST use REPLACE/WITH format for refactor_file steps'
+
+# ------------------------------------------------------------------------------
+# AI-NOTE: TASK EVALUATION SECTION.
+# After the entire execution is complete, this section will be populated by a
+# human reviewer or an evaluation script.
+# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 # EVALUATION SECTION
 # ------------------------------------------------------------------------------
 
 evaluation:
+  # AI-NOTE: This final_status will be 'SUCCESS' if all steps passed, or 'FAILED' if any step failed.
   final_status: 'PENDING' # PENDING | SUCCESS | FAILED
-  # RLHF Score calculation:
+  # AI-NOTE: The final_rlhf_score is calculated automatically based on execution quality
   # -2: Catastrophic errors (architecture violations, wrong REPLACE/WITH format)
   # -1: Runtime errors (lint, tests, git failures)
   #  0: Low confidence (system uncertain, prevents hallucinations)
   # +1: Good execution but missing architectural elements
   # +2: Perfect with Clean Architecture, DDD, ubiquitous language
-  final_rlhf_score: null
+  final_rlhf_score: null # -2, -1, 0, 1, 2
+  # AI-NOTE: The system automatically analyzes patterns and learns from each execution
+  # This text is enhanced by automated RLHF analysis for continuous improvement
   reviewer_summary: |
     - What went well:
       - ...
     - Areas for improvement:
       - ...
+  # AI-NOTE: This section lists actionable suggestions for improving the master templates or prompts.
+  # This is the key to the continuous learning loop.
   template_improvement_suggestions:
     - target_template: 'TEMPLATE.yaml'
-      target_step_id: ''
-      suggestion: ''
-      priority: ''
+      target_step_id: 'create-use-case-__ACTION_ENTITY_KEBAB_CASE__'
+      suggestion: 'The generated mock data was too simplistic. The template should be updated to include more realistic data generation.'
+      priority: 'medium'
