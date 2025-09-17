@@ -355,9 +355,9 @@ steps:
       git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add __PREFIX__-__USE_CASE_NAME_KEBAB__ test file
 
 TDD Step 1: Create test file first (red phase)
-- Add comprehensive test scenarios
-- Use spy pattern for dependencies
-- Follow makeSut factory pattern"
+* Add comprehensive test scenarios
+* Use spy pattern for dependencies
+* Follow makeSut factory pattern"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED"
         exit 1
@@ -422,9 +422,9 @@ TDD Step 1: Create test file first (red phase)
       git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add __PROTOCOL_CATEGORY__ mock implementations
 
 TDD Step 2: Create spy implementations
-- Implement spy pattern for testing
-- Track method calls and parameters
-- Control return values for scenarios"
+* Implement spy pattern for testing
+* Track method calls and parameters
+* Control return values for scenarios"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED"
         exit 1
@@ -478,9 +478,9 @@ TDD Step 2: Create spy implementations
       git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add __PROTOCOL_NAME_KEBAB__ protocol interface
 
 TDD Step 3: Create protocol abstractions
-- Define contract for external dependencies
-- Abstract implementation details
-- Enable dependency injection"
+* Define contract for external dependencies
+* Abstract implementation details
+* Enable dependency injection"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED"
         exit 1
@@ -584,9 +584,9 @@ TDD Step 3: Create protocol abstractions
       git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __PREFIX__-__USE_CASE_NAME_KEBAB__ use case
 
 TDD Step 4: Create implementation (green phase)
-- Implement domain use case interface
-- Use dependency injection pattern
-- Make tests pass"
+* Implement domain use case interface
+* Use dependency injection pattern
+* Make tests pass"
       if [ $? -ne 0 ]; then
         echo "❌ COMMIT FAILED"
         exit 1
