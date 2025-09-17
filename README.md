@@ -10,6 +10,17 @@
 
 Spec-Kit Clean Architecture is an evolution of [GitHub's Spec-Kit](https://github.com/github/spec-kit), enhanced with intelligent RLHF (Reinforcement Learning from Human Feedback) scoring system for deterministic software development. This framework ensures your code follows Clean Architecture, DDD, TDD, and SOLID principles through automated validation and continuous improvement.
 
+## 🎯 The Core Problem: Beyond the Black Box
+
+Current AI coding assistants operate as a "black box": a prompt goes in, a large volume of code comes out. This process lacks the predictability, auditability, and quality control required for professional software engineering. Key failures include:
+
+- **Lack of Predictability:** The same prompt can yield different results, making automation unreliable.
+- **No Atomic Changes:** Large, monolithic code dumps make reviews difficult and rollbacks impossible.
+- **Absence of Quality Gates:** Code is generated without guarantees that it adheres to architectural principles or coding standards.
+- **Ignoring Existing Context:** Solutions often fail in brownfield projects because they don't deeply understand the existing codebase.
+
+**Spec-Kit Clean Architecture was built to solve this.** We replace the black box with a transparent, step-by-step, and fully validated engineering workflow.
+
 ### 🎯 Key Features
 
 - **🤖 Intelligent RLHF Scoring System** (-2 to +2) for automated quality assessment
@@ -37,6 +48,50 @@ npx tsx execute-steps.ts implementation.yaml
 # View RLHF dashboard
 npx tsx rlhf-dashboard.ts
 ```
+
+## 🔄 The ReAct Lifecycle: From Concept to Commit
+
+Our system models the workflow of a senior engineering team using the Reason-Act (ReAct) framework. Each feature is built through a series of auditable, single-responsibility commands:
+
+```mermaid
+graph TD
+    A[Start: User Concept] --> B{/pre-tasks-domain}
+    B -- "Generates Plan" --> C{/validate-domain-json}
+    C -- "Validates Plan" --> D{/tasks-domain}
+    D -- "Generates YAML" --> E{/reflection-tasks-domain}
+    E -- "Refines YAML" --> F{/evaluate-tasks-domain}
+    F -- "Approves YAML" --> G[User Review & Approval]
+    G -- "Triggers Execution" --> H{/execute-domain}
+    H -- "Executes Step by Step" --> I[Success: Commits in Git]
+    H -- "On Failure" --> J{/fix-failed-step}
+    J -- "Generates Fix Plan" --> D
+
+    style A fill:#f9f,stroke:#333,stroke-width:4px
+    style I fill:#9f9,stroke:#333,stroke-width:4px
+    style G fill:#ff9,stroke:#333,stroke-width:2px
+```
+
+### Three Critical Phases:
+
+1. **Reasoning Loop (Phases A-F):** The AI researches, plans, validates, and refines a detailed implementation plan (the YAML). This entire loop operates on configuration data, not code.
+
+2. **User Approval (Phase G):** A human engineer reviews the final, approved plan. This is the critical "go/no-go" decision point.
+
+3. **Action Loop (Phases H-J):** Only after approval does the system act on the codebase, executing the plan step-by-step, with a built-in loop for fixing failures.
+
+## 💾 Stateless and Resumable by Design
+
+Unlike chat-based workflows that lose context, our system is fundamentally stateless. The `implementation.yaml` file **is the state**.
+
+### Key Benefits:
+
+- **Resumable Execution:** If the `execute-steps.ts` script fails or is interrupted on step 7, the YAML file is saved with step 7 marked as `FAILED`. You can simply re-run the script, and it will automatically skip the first 6 successful steps and retry from step 7.
+
+- **No Context Overload:** The AI doesn't need to hold the entire project history in its context window. Each command (`/pre-tasks`, `/evaluate`, etc.) is a discrete task that operates on a well-defined input (JSON or YAML), making the process scalable and predictable.
+
+- **Audit Trail:** Every step, success, or failure is recorded in the YAML with timestamps, RLHF scores, and execution logs. This creates a complete audit trail of the development process.
+
+- **Parallel Development:** Multiple developers can work on different features simultaneously, each with their own YAML state file, without interference.
 
 ## 📖 Architecture Principles
 
@@ -84,14 +139,52 @@ All commands are documented in `.claude/commands/` for AI-assisted development:
 
 #### Domain Generation Commands
 
-- **`pre-tasks-domain.md`** - Planning phase for domain layer generation with RLHF scoring awareness
+- **`pre-tasks-domain.md`** - Transforms a concept into a structured JSON plan
+  - **Greenfield/Ideation Input:**
+    ```bash
+    /pre-tasks-domain create a multi-tenant user authentication system
+    ```
+  - **Brownfield/Modification Input:**
+    ```bash
+    /pre-tasks-domain add email verification to existing user registration
+    ```
+
 - **`validate-domain-json.md`** - JSON validation with score impact assessment (-2 to +2)
+  ```bash
+  /validate-domain-json from json: {...}
+  ```
+
 - **`tasks-domain.md`** - Main domain generation with quality guidelines
+  ```bash
+  /tasks-domain create feature from json: {...}
+  # or
+  /tasks-domain update yaml: {...} with json: {...}
+  ```
+
 - **`reflection-tasks-domain.md`** - Architectural reflection with score optimization
+  ```bash
+  /reflection-tasks-domain from yaml: {...}
+  ```
+
 - **`evaluate-tasks-domain.md`** - Pre-execution evaluation with score prediction
+  ```bash
+  /evaluate-tasks-domain from yaml: {...}
+  ```
+
 - **`execute-domain.md`** - Execution with real-time RLHF scoring
+  ```bash
+  /execute-domain from yaml: {...}
+  ```
+
 - **`fix-failed-step.md`** - Intelligent fix suggestions for failed steps
+  ```bash
+  /fix-failed-step from yaml: {...}
+  ```
+
 - **`apply-rlhf-learnings.md`** - Apply learned patterns for continuous improvement
+  ```bash
+  /apply-rlhf-learnings
+  ```
 
 ### System Tools
 
@@ -309,6 +402,38 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 - **Discussions**: [GitHub Discussions](https://github.com/thiagobutignon/spec-kit-clean-archicteture/discussions)
 - **Documentation**: [Wiki](https://github.com/thiagobutignon/spec-kit-clean-archicteture/wiki)
 
+## ❓ Why Not Just Use Chat-Based AI?
+
+### The Fundamental Difference:
+
+| Chat-Based AI (GPT, Claude, etc.) | Spec-Kit Clean Architecture |
+|-----------------------------------|------------------------------|
+| **Monolithic Output**: Generates entire files/features at once | **Atomic Steps**: Each change is a single, reviewable commit |
+| **Context Decay**: Loses context over long conversations | **Stateless**: YAML file maintains complete state |
+| **No Quality Gates**: Output quality varies | **RLHF Scoring**: Every step validated (-2 to +2) |
+| **Manual Rollback**: Developer must undo changes manually | **Automatic Rollback**: Failed steps can be rolled back |
+| **Opaque Process**: "Black box" generation | **Transparent Pipeline**: Every decision is auditable |
+| **Generic Solutions**: Not aware of your architecture | **Architecture-Aware**: Enforces your specific patterns |
+
+### Real-World Example:
+
+**Chat-Based Approach:**
+```
+You: "Create a user registration feature"
+AI: [Generates 500+ lines across 10 files]
+Result: All-or-nothing - if one part is wrong, manual fixes needed
+```
+
+**Spec-Kit Approach:**
+```yaml
+steps:
+  - id: create-branch        # ✅ Step 1: Git branch created
+  - id: create-use-case      # ✅ Step 2: Use case interface created
+  - id: create-errors        # ✅ Step 3: Error classes created
+  - id: create-test-helper   # ❌ Step 4: Failed - auto-rollback
+  - id: fix-test-helper      # ✅ Step 5: Fixed and continued
+```
+
 ## 🏆 Why Use Spec-Kit Clean Architecture?
 
 1. **Deterministic Development**: Predictable, repeatable results
@@ -318,6 +443,7 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 5. **Safe Refactoring**: Rollback capabilities protect your code
 6. **Developer Experience**: Visual feedback and progress tracking
 7. **Best Practices**: Enforces TDD, DDD, SOLID automatically
+8. **Enterprise Ready**: Audit trails, approval workflows, resumable execution
 
 ---
 
