@@ -27,7 +27,7 @@ metadata:
   # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
   lastUpdated: '__CURRENT_DATE__'
   # AI-NOTE: Data layer specifically implements domain use cases
-  layer: 'data'
+  layers: ['data']
   tdd_principles:
     - 'Test First - Never write implementation before tests'
     - 'Red-Green-Refactor cycle'
@@ -165,34 +165,6 @@ test_rules:
     - 'Use Jest (vitest only)'
     - 'Test implementation details'
     - 'Skip error scenarios'
-
-# ------------------------------------------------------------------------------
-# AI-NOTE: MISSING SECTIONS FROM TEMPLATE.yaml - ADDING THEM NOW
-# These sections are critical for proper template validation and AI guidance
-# ------------------------------------------------------------------------------
-
-# Domain layer rules (adapted for data layer - maintains validator compatibility)
-domain_rules:
-  allowed:
-    - 'Use case implementations (following domain contracts)'
-    - 'Protocol interfaces for external dependencies'
-    - 'Mock/Spy implementations for testing'
-    - 'Data transformation and mapping'
-    - 'Error handling and wrapping'
-    - 'Business logic implementation'
-    - 'Dependency injection patterns'
-
-  forbidden:
-    - 'Direct external library imports (must use protocols)'
-    - 'Framework-specific code (React, Next.js, Express)'
-    - 'UI components'
-    - 'Presentation layer concerns'
-    - 'Infrastructure implementations'
-    - 'Database connection details'
-    - 'HTTP client implementations'
-    - 'Implementation before tests (TDD violation)'
-    - 'Console.log or debugging statements'
-    - 'Environment variable access'
 
 # Use case rules (adapted for data layer implementations)
 use_case_rules:
@@ -1627,6 +1599,7 @@ ai_guidelines:
   - 'MUST use REPLACE/WITH format for refactor_file steps'
   - 'MUST use spy pattern for all dependency mocking'
   - 'MUST commit each TDD step separately for audit trail'
+
 
 evaluation:
   final_status: 'PENDING' # PENDING | SUCCESS | FAILED
