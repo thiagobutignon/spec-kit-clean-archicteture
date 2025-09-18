@@ -1,0 +1,470 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Regent Template Schema",
+  "description": "Schema for validating .regent template files for clean architecture generation",
+  "type": "object",
+  "required": [
+    "version",
+    "metadata",
+    "structure",
+    "architecture",
+    "rules",
+    "validation_scripts",
+    "step_defaults",
+    "steps",
+    "troubleshooting",
+    "refactoring"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of the template"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["title", "description", "source", "lastUpdated", "layers"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title of the template"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of what the template generates"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source file name"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "description": "Last update date in YYYY-MM-DD format"
+        },
+        "layers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["domain", "data", "infra", "presentation", "validation", "main"]
+          },
+          "description": "Architectural layers implemented by this template (at least one required)"
+        },
+        "ubiquitousLanguage": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["term", "definition"],
+            "properties": {
+              "term": {
+                "type": "string",
+                "description": "Domain term"
+              },
+              "definition": {
+                "type": "string",
+                "description": "Business definition of the term"
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "Domain-driven design ubiquitous language definitions"
+        }
+      },
+      "additionalProperties": false
+    },
+    "structure": {
+      "type": "object",
+      "required": ["basePath", "layers"],
+      "properties": {
+        "basePath": {
+          "type": "string",
+          "description": "Base path for feature files"
+        },
+        "layers": {
+          "type": "object",
+          "required": ["domain"],
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "folders": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "architecture": {
+      "type": "object",
+      "required": ["dependency_rules", "principles"],
+      "properties": {
+        "dependency_rules": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["can_import_from", "cannot_import_from"],
+            "properties": {
+              "can_import_from": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "cannot_import_from": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "principles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "rules": {
+      "type": "object",
+      "required": ["domain", "use_case", "error", "test_helper", "reference_patterns", "learning_patterns", "required_protocols"],
+      "properties": {
+        "domain": {
+          "type": "object",
+          "required": ["allowed", "forbidden"],
+          "properties": {
+            "allowed": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "forbidden": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "use_case": {
+          "type": "object",
+          "required": ["should", "should_not"],
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "error": {
+          "type": "object",
+          "required": ["should", "should_not"],
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "test_helper": {
+          "type": "object",
+          "required": ["should", "should_not"],
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "reference_patterns": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["type", "source", "description"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["external_pattern", "internal_guideline", "internal_code_analysis", "internal_correction", "quality_improvement", "architecture_fix", "external_documentation"]
+              },
+              "source": {
+                "type": "string"
+              },
+              "query": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "tool": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "learning_patterns": {
+          "type": "object",
+          "required": ["common_errors", "success_indicators"],
+          "properties": {
+            "common_errors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["pattern", "fix", "score_impact"],
+                "properties": {
+                  "pattern": {
+                    "type": "string"
+                  },
+                  "fix": {
+                    "type": "string"
+                  },
+                  "score_impact": {
+                    "type": ["number", "string"]
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "success_indicators": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "required_protocols": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of required protocols or interfaces that must be implemented"
+        }
+      },
+      "additionalProperties": false
+    },
+    "validation_scripts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "step_defaults": {
+      "type": "object",
+      "required": ["status", "rlhf_score", "execution_log"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PENDING", "SUCCESS", "FAILED", "SKIPPED"]
+        },
+        "rlhf_score": {
+          "type": ["number", "null"],
+          "minimum": -2,
+          "maximum": 2
+        },
+        "execution_log": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "description"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the step"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["branch", "folder", "create_file", "create_multiple_files", "refactor_file", "delete_file", "pull_request"],
+            "description": "Type of step to execute"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of the step"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "SUCCESS", "FAILED", "SKIPPED"],
+            "default": "PENDING"
+          },
+          "rlhf_score": {
+            "type": ["number", "null"],
+            "minimum": -2,
+            "maximum": 2,
+            "default": null
+          },
+          "execution_log": {
+            "type": "string",
+            "default": ""
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "source", "description"],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "query": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "tool": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "action": {
+            "type": "object",
+            "description": "Action-specific configuration"
+          },
+          "path": {
+            "type": "string",
+            "description": "File path for file operations"
+          },
+          "template": {
+            "type": "string",
+            "description": "Template content for file creation/modification"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "template"],
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "template": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "validation_script": {
+            "type": "string",
+            "description": "Bash script to validate the step"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "troubleshooting": {
+      "type": "object",
+      "required": ["lint_fails", "tests_fail", "typescript_fails"],
+      "properties": {
+        "lint_fails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tests_fail": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "typescript_fails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "refactoring": {
+      "type": "object",
+      "required": ["before_refactoring", "during_refactoring", "common_scenarios"],
+      "properties": {
+        "before_refactoring": {
+          "type": "string"
+        },
+        "during_refactoring": {
+          "type": "string"
+        },
+        "common_scenarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "wrong_example": {
+                "type": "string"
+              },
+              "correct_example": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

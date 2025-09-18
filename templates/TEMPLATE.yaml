@@ -24,16 +24,18 @@ version: '3.0.0'
 metadata:
   title: '__FEATURE_NAME_PASCAL_CASE__ Clean Architecture Implementation'
   description: 'Clean Architecture template for __FEATURE_NAME_LOWER_CASE__ feature following master template rules.'
-  source: 'TEMPLATE_REFACTORED.yaml'
+  source: 'TEMPLATE.yaml'
   # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
   lastUpdated: '__CURRENT_DATE__'
   # AI-NOTE: Specify which layers are being implemented
   layers:
     - 'domain'
     # Future layers will be added here:
-    # - 'application'
-    # - 'infrastructure'
+    # - 'data'
+    # - 'infra'
     # - 'presentation'
+    # - 'validation'
+    # - 'main'
   # AI-NOTE: Define ubiquitous language for +2 RLHF score
   ubiquitousLanguage:
     - term: '__ENTITY_NAME__'
@@ -77,9 +79,9 @@ architecture:
   dependency_rules:
     domain:
       can_import_from: []  # Domain imports nothing
-      cannot_import_from: ['application', 'infrastructure', 'presentation', 'external']
+      cannot_import_from: ['main', 'infra', 'presentation', 'validation']
     # Future layer rules will be added here:
-    # application:
+    # data:
     #   can_import_from: ['domain']
     #   cannot_import_from: ['infrastructure', 'presentation', 'external']
     # infrastructure:
@@ -111,80 +113,134 @@ architecture:
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# LAYER-SPECIFIC RULES
-# Currently only Domain layer is implemented
+# RULES SECTION
+# All architectural and pattern rules consolidated
 # ------------------------------------------------------------------------------
 
-# Domain layer rules
-domain_rules:
-  allowed:
-    - 'Simple type definitions (Input/Output types)'
-    - 'Use case interfaces (contracts only)'
-    - 'Domain-specific error classes'
-    - 'Test mock functions'
+rules:
+  # Domain layer rules
+  domain:
+    allowed:
+      - 'Simple type definitions (Input/Output types)'
+      - 'Use case interfaces (contracts only)'
+      - 'Domain-specific error classes'
+      - 'Test mock functions'
 
-  forbidden:
-    - 'Framework dependencies (React, Next.js, Express)'
-    - 'External libraries (axios, fetch, database clients)'
-    - 'Implementation details of any kind'
-    - 'UI components'
-    - 'HTTP/Database/File system operations'
-    - 'Environment variables'
-    - 'Console.log or any I/O operations'
-    - 'Value objects'
-    - 'Entities'
-    - 'Business rules or business logic'
-    - 'Validation logic'
-    - 'Calculations or computations'
-    - 'Any behavior beyond type definitions and interfaces'
+    forbidden:
+      - 'Framework dependencies (React, Next.js, Express)'
+      - 'External libraries (axios, fetch, database clients)'
+      - 'Implementation details of any kind'
+      - 'UI components'
+      - 'HTTP/Database/File system operations'
+      - 'Environment variables'
+      - 'Console.log or any I/O operations'
+      - 'Value objects'
+      - 'Entities'
+      - 'Business rules or business logic'
+      - 'Validation logic'
+      - 'Calculations or computations'
+      - 'Any behavior beyond type definitions and interfaces'
 
-# Use case rules
-use_case_rules:
-  should:
-    - 'Define only interfaces/contracts, not implementations'
-    - 'Have EXACTLY ONE responsibility (one business operation)'
-    - 'Do ONE thing and ONE thing only (never multiple operations)'
-    - 'Return domain types or primitives'
-    - 'Be named with verbs (CreateUser, AuthenticateUser, etc.)'
-    - 'Be framework agnostic'
+  # Use case rules
+  use_case:
+    should:
+      - 'Define only interfaces/contracts, not implementations'
+      - 'Have EXACTLY ONE responsibility (one business operation)'
+      - 'Do ONE thing and ONE thing only (never multiple operations)'
+      - 'Return domain types or primitives'
+      - 'Be named with verbs (CreateUser, AuthenticateUser, etc.)'
+      - 'Be framework agnostic'
 
-  should_not:
-    - 'Contain implementation logic'
-    - 'Know about HTTP, databases, or external services'
-    - 'Import from data, presentation, or infrastructure layers'
-    - 'Have side effects'
-    - 'Execute multiple operations (e.g., CreateUserAndSendEmail is wrong)'
+    should_not:
+      - 'Contain implementation logic'
+      - 'Know about HTTP, databases, or external services'
+      - 'Import from data, presentation, or infrastructure layers'
+      - 'Have side effects'
+      - 'Execute multiple operations (e.g., CreateUserAndSendEmail is wrong)'
 
-# Error rules
-error_rules:
-  should:
-    - 'Extend the native Error class'
-    - 'Have descriptive names ending with Error'
-    - 'Contain meaningful error messages'
-    - 'Represent business rule violations'
-    - 'Be thrown when domain invariants are violated'
+  # Error rules
+  error:
+    should:
+      - 'Extend the native Error class'
+      - 'Have descriptive names ending with Error'
+      - 'Contain meaningful error messages'
+      - 'Represent business rule violations'
+      - 'Be thrown when domain invariants are violated'
 
-  should_not:
-    - 'Contain HTTP status codes'
-    - 'Include technical/implementation details'
-    - 'Expose sensitive information'
-    - 'Import external dependencies'
+    should_not:
+      - 'Contain HTTP status codes'
+      - 'Include technical/implementation details'
+      - 'Expose sensitive information'
+      - 'Import external dependencies'
 
-# Test helper rules
-test_helper_rules:
-  should:
-    - 'Create mock/stub implementations of use cases'
-    - 'Generate fake test data'
-    - 'Be pure functions that return consistent data'
-    - 'Help reduce test boilerplate'
-    - 'Use ONLY Vitest (Jest is prohibited)'
+  # Test helper rules
+  test_helper:
+    should:
+      - 'Create mock/stub implementations of use cases'
+      - 'Generate fake test data'
+      - 'Be pure functions that return consistent data'
+      - 'Help reduce test boilerplate'
+      - 'Use ONLY Vitest (Jest is prohibited)'
 
-  should_not:
-    - 'Make real API calls or database queries'
-    - 'Depend on external services'
-    - 'Contain test assertions (those belong in test files)'
-    - 'Have side effects or maintain state'
-    - 'Use Jest (use Vitest instead)'
+    should_not:
+      - 'Make real API calls or database queries'
+      - 'Depend on external services'
+      - 'Contain test assertions (those belong in test files)'
+      - 'Have side effects or maintain state'
+      - 'Use Jest (use Vitest instead)'
+
+  # Reference patterns
+  reference_patterns:
+    clean_architecture:
+      type: 'external_pattern'
+      source: 'context7'
+      query: 'clean architecture use case'
+      url: 'https://github.com/...'
+      description: 'Following Clean Architecture pattern.'
+
+    ddd_pattern:
+      type: 'external_pattern'
+      source: 'context7'
+      query: 'domain driven design'
+      url: 'https://github.com/...'
+      description: 'Following DDD patterns.'
+
+    tdd_pattern:
+      type: 'external_pattern'
+      source: 'context7'
+      query: 'test driven development'
+      url: 'https://github.com/...'
+      description: 'Following TDD patterns.'
+
+  # Learning patterns
+  learning_patterns:
+    common_errors:
+      - pattern: 'import axios'
+        fix: 'Remove external library imports from domain layer'
+        score_impact: -2
+
+      - pattern: 'CreateUserAndSend'
+        fix: 'Split into two separate use cases (SRP violation)'
+        score_impact: -1
+
+      - pattern: 'missing @domainConcept'
+        fix: 'Add domain concept documentation for +2 score'
+        score_impact: +1
+
+    success_indicators:
+      - 'Uses ubiquitous language consistently'
+      - 'Follows single responsibility principle'
+      - 'No dependency violations'
+      - 'Comprehensive test coverage'
+      - 'Clean git history with atomic commits'
+
+  # Required protocols
+  required_protocols:
+    - 'All use cases must define clear input/output interfaces'
+    - 'All errors must extend native Error class'
+    - 'All test helpers must be pure functions'
+    - 'All domain types must be immutable'
+    - 'All business rules must be documented with @domainConcept'
 
 # ------------------------------------------------------------------------------
 # DRY REFACTORED: REUSABLE VALIDATION SCRIPTS
@@ -257,29 +313,6 @@ step_defaults: &step_defaults
   status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
   rlhf_score: null # -2, -1, 0, 1, 2
   execution_log: ''
-
-# Common reference patterns
-reference_patterns:
-  clean_architecture: &ref_clean_arch
-    type: 'external_pattern'
-    source: 'context7'
-    query: 'clean architecture use case'
-    url: 'https://github.com/...'
-    description: 'Following Clean Architecture pattern.'
-
-  ddd_pattern: &ref_ddd
-    type: 'external_pattern'
-    source: 'context7'
-    query: 'domain driven design'
-    url: 'https://github.com/...'
-    description: 'Following DDD patterns.'
-
-  tdd_pattern: &ref_tdd
-    type: 'external_pattern'
-    source: 'context7'
-    query: 'test driven development'
-    url: 'https://github.com/...'
-    description: 'Following TDD patterns.'
 
 # ------------------------------------------------------------------------------
 # AI-NOTE: DYNAMIC IMPLEMENTATION SECTION.
@@ -773,7 +806,7 @@ steps:
       - ✅ RLHF score: +2 (PERFECT)
 
       ### Generated by:
-      - Template: TEMPLATE_REFACTORED.yaml
+      - Template: TEMPLATE.yaml
       - Date: $(date +%Y-%m-%d)
 
       ---
@@ -902,25 +935,4 @@ refactoring:
 # The system tracks these patterns to improve over time
 # ------------------------------------------------------------------------------
 
-learning_patterns:
-  common_errors:
-    - pattern: 'import axios'
-      fix: 'Remove external library imports from domain layer'
-      score_impact: -2
-
-    - pattern: 'CreateUserAndSend'
-      fix: 'Split into two separate use cases (SRP violation)'
-      score_impact: -1
-
-    - pattern: 'missing @domainConcept'
-      fix: 'Add domain concept documentation for +2 score'
-      score_impact: +1
-
-  success_indicators:
-    - 'Uses ubiquitous language consistently'
-    - 'Follows single responsibility principle'
-    - 'No dependency violations'
-    - 'Comprehensive test coverage'
-    - 'Clean git history with atomic commits'
-
-# End of TEMPLATE_REFACTORED.yaml
+# End of TEMPLATE.yaml
