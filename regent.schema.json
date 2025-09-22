@@ -12,10 +12,9 @@
       }
     },
     "templateString": {
-      "description": "Template string that may contain placeholders during design but must be replaced in implementation",
+      "description": "Template string for step templates. During template design, may contain __PLACEHOLDERS__. In final implementation, placeholders must be replaced with actual values.",
       "type": "string",
-      "pattern": "^(?!.*__[A-Z_]+__.*$|.*__$|^__).*$|^.*__[A-Z_]+__.*$",
-      "$comment": "Either contains no placeholders OR is a valid template with proper placeholder format"
+      "$comment": "Pattern explanation: Allows any string. Use noPlaceholders definition for fields that must not contain placeholders in final implementation. Placeholders follow the pattern __[A-Z_]+__ (e.g., __FEATURE_NAME__, __USE_CASE__)"
     },
     "semanticVersion": {
       "description": "Strict semantic versioning format",
@@ -579,6 +578,14 @@
             "type": "string",
             "description": "Bash script to validate the step"
           },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "Array of step IDs that must complete successfully before this step can execute. Steps will wait for all dependencies to finish with SUCCESS status."
+          },
           "error_handling": {
             "type": "object",
             "description": "Error handling configuration for the step",
@@ -608,7 +615,14 @@
                 "items": {
                   "type": "string"
                 },
-                "description": "Step IDs to rollback on failure"
+                "uniqueItems": true,
+                "description": "Step IDs to rollback on failure. Execution order: LIFO (Last In, First Out) - steps are rolled back in reverse order of execution. Example: if steps A->B->C were executed, rollback order is C->B->A."
+              },
+              "on_rollback_failure": {
+                "type": "string",
+                "enum": ["continue", "stop", "alert"],
+                "default": "stop",
+                "description": "Action to take if rollback itself fails. 'continue': proceed with remaining rollbacks, 'stop': halt all rollbacks, 'alert': stop and require manual intervention"
               }
             }
           }
