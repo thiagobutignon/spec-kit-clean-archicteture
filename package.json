@@ -11,7 +11,8 @@
     "test": "vitest --passWithNoTests",
     "templates:validate": "tsx src/schemas/validate-any-template.ts",
     "templates:to-markdown": "tsx src/tools/yaml-to-markdown.ts templates/ docs/templates/",
-    "templates:validate-all": "for f in templates/*.yaml; do echo \"Validating $f...\"; tsx src/schemas/validate-any-template.ts \"$f\" || exit 1; done"
+    "templates:validate-all": "for f in templates/*.yaml; do echo \"Validating $f...\"; tsx src/schemas/validate-any-template.ts \"$f\" || exit 1; done",
+    "regent:validate": "tsx validate-regent.ts"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
@@ -26,6 +27,7 @@
     "zx": "^8.8.1"
   },
   "dependencies": {
+    "ajv": "^8.17.1",
     "chalk": "^5.6.2",
     "fs-extra": "^11.3.2",
     "zod": "^3.23.0"

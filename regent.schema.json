@@ -10,6 +10,17 @@
       "not": {
         "pattern": "__[A-Z_]+__"
       }
+    },
+    "templateString": {
+      "description": "Template string that may contain placeholders during design but must be replaced in implementation",
+      "type": "string",
+      "pattern": "^(?!.*__[A-Z_]+__.*$|.*__$|^__).*$|^.*__[A-Z_]+__.*$",
+      "$comment": "Either contains no placeholders OR is a valid template with proper placeholder format"
+    },
+    "semanticVersion": {
+      "description": "Strict semantic versioning format",
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
     }
   },
   "$comment": "Required properties are explicitly listed. Properties like validation_scripts, step_defaults, ai_guidelines, evaluation, and learning_patterns are OPTIONAL and can be omitted.",
@@ -25,10 +36,9 @@
   ],
   "properties": {
     "version": {
-      "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+$",
-      "description": "Semantic version of the template (e.g., 1.0.0, 2.1.3)",
-      "examples": ["1.0.0", "2.1.3", "3.0.0"]
+      "$ref": "#/$defs/semanticVersion",
+      "description": "Semantic version of the template following SemVer 2.0.0 specification",
+      "examples": ["1.0.0", "2.1.3", "3.0.0-alpha.1", "1.0.0-beta+exp.sha.5114f85"]
     },
     "metadata": {
       "type": "object",
@@ -216,40 +226,47 @@
         },
         "data": {
           "type": "object",
+          "required": ["should", "should_not"],
           "properties": {
             "should": {
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "minItems": 1
             },
             "should_not": {
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "minItems": 1
             }
           }
         },
         "infra": {
           "type": "object",
+          "required": ["should", "should_not"],
           "properties": {
             "should": {
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "minItems": 1
             },
             "should_not": {
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "minItems": 1
             }
           }
         },
         "presentation": {
           "type": "object",
+          "required": ["backend_should", "frontend_should", "should_not"],
           "properties": {
             "backend_should": {
               "type": "array",
@@ -273,6 +290,7 @@
         },
         "validation": {
           "type": "object",
+          "required": ["should", "should_not"],
           "properties": {
             "should": {
               "type": "array",
@@ -290,6 +308,7 @@
         },
         "main": {
           "type": "object",
+          "required": ["backend_should", "frontend_should", "should_not"],
           "properties": {
             "backend_should": {
               "type": "array",
@@ -448,8 +467,7 @@
     },
     "step_defaults": {
       "type": "object",
-      "required": ["status", "rlhf_score", "execution_log"],
-      "description": "Optional default values for step properties",
+      "description": "Optional default values for step properties. When provided, all properties within are optional.",
       "properties": {
         "status": {
           "type": "string",
@@ -560,6 +578,39 @@
           "validation_script": {
             "type": "string",
             "description": "Bash script to validate the step"
+          },
+          "error_handling": {
+            "type": "object",
+            "description": "Error handling configuration for the step",
+            "properties": {
+              "retry_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5,
+                "default": 0,
+                "description": "Number of retry attempts on failure"
+              },
+              "retry_delay": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 60000,
+                "default": 1000,
+                "description": "Delay in milliseconds between retry attempts"
+              },
+              "fallback_strategy": {
+                "type": "string",
+                "enum": ["skip", "abort", "manual", "rollback"],
+                "default": "abort",
+                "description": "Strategy when all retries fail"
+              },
+              "rollback_steps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Step IDs to rollback on failure"
+              }
+            }
           }
         },
         "additionalProperties": false

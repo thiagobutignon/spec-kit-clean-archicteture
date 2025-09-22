@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync, readdirSync } from 'fs'
+import { readdirSync, readFileSync, writeFileSync } from 'fs'
+import { basename, join } from 'path'
 import { parse } from 'yaml'
-import { join, basename, extname } from 'path'
 
 /**
  * Converts YAML templates to Markdown with frontmatter

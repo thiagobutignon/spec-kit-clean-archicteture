@@ -1,0 +1,17 @@
+{
+  // 1. Associa a extensão .regent com a linguagem YAML
+  "files.associations": {
+    "*.regent": "yaml"
+  },
+
+  // 2. Aplica seu schema de validação a todos os arquivos .regent
+  "yaml.schemas": {
+    // O caminho para o seu arquivo de schema (ajuste se necessário)
+    "./regent.schema.json": [
+      "*.regent"
+    ]
+},
+"cSpell.words": [
+    "RLHF"
+]
+}
