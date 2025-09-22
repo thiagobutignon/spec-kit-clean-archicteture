@@ -12,11 +12,15 @@
     "templates:validate": "tsx src/schemas/validate-any-template.ts",
     "templates:to-markdown": "tsx src/tools/yaml-to-markdown.ts templates/ docs/templates/",
     "templates:validate-all": "for f in templates/*.yaml; do echo \"Validating $f...\"; tsx src/schemas/validate-any-template.ts \"$f\" || exit 1; done",
-    "regent:validate": "tsx validate-regent.ts"
+    "regent:validate": "tsx validate-regent.ts",
+    "regent:validate:all": "tsx validate-regent.ts templates/",
+    "validate": "tsx validate-regent.ts",
+    "validate:all": "tsx validate-regent.ts templates/ --verbose"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@vitest/coverage-v8": "^3.2.4",
+    "ajv-formats": "^3.0.1",
     "eslint": "^9.35.0",
     "globals": "^16.4.0",
     "tsx": "^4.20.5",

@@ -79,15 +79,22 @@
             "properties": {
               "term": {
                 "type": "string",
-                "description": "Domain term"
+                "description": "Domain term",
+                "examples": ["User", "Account", "Authentication"]
               },
               "definition": {
                 "type": "string",
-                "description": "Business definition of the term"
+                "description": "Business definition of the term",
+                "examples": [
+                  "A person who has registered in the system",
+                  "The representation of a user's identity and permissions",
+                  "The process of verifying a user's identity"
+                ]
               }
             },
             "additionalProperties": false
           },
+          "$comment": "Example: [{term: 'User', definition: 'A person who has registered in the system'}]",
           "description": "Domain-driven design ubiquitous language definitions"
         }
       },
@@ -142,7 +149,9 @@
               }
             },
             "workflow_diagram": {
-              "type": "string"
+              "type": "string",
+              "$comment": "Mermaid diagram showing the execution flow. Example: 'graph TD\\n  A[Start] --> B[Process]\\n  B --> C[End]'",
+              "description": "Mermaid diagram defining the workflow execution order"
             },
             "git_workflow_per_layer": {
               "type": "object",
@@ -549,6 +558,7 @@
           },
           "action": {
             "type": "object",
+            "$comment": "Step-specific configuration. Example for branch: {branch_name: 'feat/auth'}. Example for folder: {create_folders: {basePath: 'src', folders: ['models']}}",
             "description": "Action-specific configuration"
           },
           "path": {
