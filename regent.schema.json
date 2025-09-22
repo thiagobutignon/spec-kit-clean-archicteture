@@ -9,8 +9,6 @@
     "structure",
     "architecture",
     "rules",
-    "validation_scripts",
-    "step_defaults",
     "steps",
     "troubleshooting",
     "refactoring"
@@ -102,6 +100,38 @@
       "type": "object",
       "required": ["dependency_rules", "principles"],
       "properties": {
+        "folder_structure": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "execution_order": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string"
+            },
+            "sequence": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "workflow_diagram": {
+              "type": "string"
+            },
+            "git_workflow_per_layer": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
         "dependency_rules": {
           "type": "object",
           "additionalProperties": {
@@ -124,17 +154,15 @@
           }
         },
         "principles": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "type": "object",
+          "additionalProperties": true
         }
       },
       "additionalProperties": false
     },
     "rules": {
       "type": "object",
-      "required": ["domain", "use_case", "error", "test_helper", "reference_patterns", "learning_patterns", "required_protocols"],
+      "required": ["domain", "error", "test_helper", "reference_patterns", "learning_patterns", "required_protocols"],
       "properties": {
         "domain": {
           "type": "object",
@@ -151,13 +179,29 @@
               "items": {
                 "type": "string"
               }
+            },
+            "use_case": {
+              "type": "object",
+              "properties": {
+                "should": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "should_not": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
             }
           },
           "additionalProperties": false
         },
-        "use_case": {
+        "data": {
           "type": "object",
-          "required": ["should", "should_not"],
           "properties": {
             "should": {
               "type": "array",
@@ -171,8 +215,87 @@
                 "type": "string"
               }
             }
-          },
-          "additionalProperties": false
+          }
+        },
+        "infra": {
+          "type": "object",
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "presentation": {
+          "type": "object",
+          "properties": {
+            "backend_should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "frontend_should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "validation": {
+          "type": "object",
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "main": {
+          "type": "object",
+          "properties": {
+            "backend_should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "frontend_should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
         },
         "error": {
           "type": "object",
@@ -273,11 +396,28 @@
           "additionalProperties": false
         },
         "required_protocols": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "List of required protocols or interfaces that must be implemented"
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          ],
+          "description": "Required protocols or interfaces that must be implemented"
+        },
+        "documentation": {
+          "type": "object",
+          "additionalProperties": true
         }
       },
       "additionalProperties": false
@@ -464,6 +604,82 @@
         }
       },
       "additionalProperties": false
+    },
+    "learning_patterns": {
+      "type": "object",
+      "properties": {
+        "common_errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["pattern", "fix", "score_impact"],
+            "properties": {
+              "pattern": {
+                "type": "string"
+              },
+              "fix": {
+                "type": "string"
+              },
+              "score_impact": {
+                "type": ["number", "string"]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "success_indicators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "Learning patterns for continuous improvement"
+    },
+    "ai_guidelines": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Guidelines for AI system when processing templates"
+    },
+    "evaluation": {
+      "type": "object",
+      "properties": {
+        "final_status": {
+          "type": "string",
+          "enum": ["PENDING", "SUCCESS", "FAILED"]
+        },
+        "final_rlhf_score": {
+          "type": ["number", "null"],
+          "minimum": -2,
+          "maximum": 2
+        },
+        "reviewer_summary": {
+          "type": "string"
+        },
+        "template_improvement_suggestions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "target_template": {
+                "type": "string"
+              },
+              "target_step_id": {
+                "type": "string"
+              },
+              "suggestion": {
+                "type": "string"
+              },
+              "priority": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "additionalProperties": false

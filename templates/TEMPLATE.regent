@@ -1,0 +1,1694 @@
+  # AI-NOTE: This YAML file is the single source of truth for generating clean architecture layers.
+  # This is the MASTER TEMPLATE that will evolve to support all architectural layers.
+  # Currently supports: Domain Layer
+  # Future support: Application, Infrastructure, Presentation Layers
+  #
+  # INTELLIGENT RLHF SCORING SYSTEM:
+  # The system uses Reinforcement Learning from Human Feedback to score execution quality:
+  # -2: CATASTROPHIC - Architecture violations, incorrect REPLACE/WITH format in refactor steps
+  # -1: RUNTIME ERROR - Lint failures, test failures, git operation problems
+  #  0: LOW CONFIDENCE - System is uncertain, avoids hallucinations
+  # +1: GOOD - Task complete but missing architectural elements
+  # +2: PERFECT - Exceptional quality with Clean Architecture, DDD principles, ubiquitous language
+  #
+  # QUALITY INDICATORS FOR +2 SCORE:
+  # - Uses ubiquitous language terminology
+  # - Follows Domain-Driven Design principles
+  # - Applies Clean Architecture concepts
+  # - Implements patterns: Aggregate Root, Value Objects, Domain Events
+  # - Perfect branch naming convention
+  # - Comprehensive PR descriptions
+  #
+  version: '3.0.0'
+  # AI-NOTE: Update these fields to describe the specific feature and layers.
+  metadata:
+    title: '__FEATURE_NAME_PASCAL_CASE__ Clean Architecture Implementation'
+    description: 'Clean Architecture template for __FEATURE_NAME_LOWER_CASE__ feature following master template rules.'
+    source: 'TEMPLATE.yaml'
+    # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
+    lastUpdated: '__CURRENT_DATE__'
+    # AI-NOTE: Specify which layers are being implemented
+    layers:
+      - 'domain'
+      # Future layers will be added here:
+      # - 'data'
+      # - 'infra'
+      # - 'presentation'
+      # - 'validation'
+      # - 'main'
+    # AI-NOTE: Define ubiquitous language for +2 RLHF score
+    ubiquitousLanguage:
+      - term: '__ENTITY_NAME__'
+        definition: '__ENTITY_DEFINITION_IN_BUSINESS_CONTEXT__'
+      - term: '__VALUE_OBJECT_NAME__'
+        definition: '__VALUE_OBJECT_BUSINESS_MEANING__'
+      - term: '__DOMAIN_EVENT__'
+        definition: '__EVENT_BUSINESS_SIGNIFICANCE__'
+
+  # AI-NOTE: Feature-based structure for Clean Architecture
+  structure:
+    basePath: 'src/features/__FEATURE_NAME_KEBAB_CASE__'
+    # Each feature contains its own layers following Clean Architecture
+    layers:
+      domain:
+        folders:
+          - 'models'      # Feature type definitions (e.g., AccountModel, SurveyModel)
+          - 'usecases'    # Feature use case interfaces with namespace pattern
+
+      data:
+        folders:
+          - 'protocols'   # Feature data layer protocols/interfaces
+          - 'usecases'    # Feature use case implementations
+          - 'models'      # Feature data transfer objects
+
+      infra:
+        folders:
+          - 'repositories'  # Feature repository implementations
+          - 'http'          # Feature HTTP client implementations
+          - 'cache'         # Feature cache implementations
+          - 'gateways'      # Feature external service gateways
+
+      presentation:
+        folders:
+          - 'controllers'   # Feature HTTP/GraphQL controllers
+          - 'pages'         # Feature React pages
+          - 'components'    # Feature React components
+          - 'protocols'     # Feature presentation protocols
+          - 'helpers'       # Feature presentation helpers
+
+      validation:
+        folders:
+          - 'validators'    # Feature validation rules
+          - 'protocols'     # Feature validation protocols
+          - 'schemas'       # Feature validation schemas
+
+      main:
+        folders:
+          - 'factories'     # Feature factory methods
+          - 'routes'        # Feature route definitions
+          - 'composers'     # Feature dependency composers
+
+  # ------------------------------------------------------------------------------
+  # ARCHITECTURAL RULES SECTION
+  # These rules define the Clean Architecture boundaries and dependencies
+  # ------------------------------------------------------------------------------
+
+  architecture:
+    folder_structure:
+      domain: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/domain'
+      data: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/data'
+      infra: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/infra'
+      presentation: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/presentation'
+      validation: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/validation'
+      main: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+
+    execution_order:
+      description: 'Layers must be implemented in this specific order to respect dependencies'
+      sequence:
+        1: 'domain'     # Core business logic - no dependencies
+        2: 'data'       # Implements domain interfaces
+        3: 'infra'      # Implements data protocols
+        4: 'validation' # Validation rules for inputs
+        5: 'presentation' # Controllers and views
+        6: 'main'       # Dependency injection and composition
+
+      workflow_diagram: |
+        ```mermaid
+        graph TD
+          Start([Start Feature Implementation])
+
+          %% Domain Layer
+          D1[Create Branch: feat/FEATURE_NAME/domain]
+          D2[Create Domain Structure]
+          D3[Create Models]
+          D4[Run: yarn lint]
+          D5[Run: yarn test:unit]
+          D6[Git Add & Commit Models]
+          D7[Create Use Cases]
+          D8[Run: yarn lint]
+          D9[Run: yarn test:unit]
+          D10[Git Add & Commit Use Cases]
+          D11[Create Mocks]
+          D12[Run: yarn test:unit]
+          D13[Git Add & Commit Mocks]
+          D14[Create PR: Domain Layer]
+
+          %% Data Layer
+          DT1[Create Branch: feat/FEATURE_NAME/data]
+          DT2[Create Data Structure]
+          DT3[Write Unit Tests - RED]
+          DT4[Git Commit: test(data): add failing tests]
+          DT5[Create Protocols]
+          DT6[Implement Use Cases]
+          DT7[Run: yarn test - GREEN]
+          DT8[Run: yarn lint]
+          DT9[Git Commit: feat(data): implement use cases]
+          DT10[Create PR: Data Layer]
+
+          %% Infra Layer
+          I1[Create Branch: feat/FEATURE_NAME/infra]
+          I2[Create Infra Structure]
+          I3[Write Integration Tests - RED]
+          I4[Git Commit: test(infra): add failing integration tests]
+          I5[Create Adapters]
+          I6[Create Repositories]
+          I7[Run: yarn test - GREEN]
+          I8[Run: yarn lint]
+          I9[Git Commit: feat(infra): implement adapters and repositories]
+          I10[Create PR: Infra Layer]
+
+          %% Validation Layer
+          V1[Create Branch: feat/FEATURE_NAME/validation]
+          V2[Create Validation Structure]
+          V3[Write Unit Tests - RED]
+          V4[Git Commit: test(validation): add failing tests]
+          V5[Create Validators]
+          V6[Create Validation Composite]
+          V7[Run: yarn test - GREEN]
+          V8[Run: yarn lint]
+          V9[Git Commit: feat(validation): implement validators]
+          V10[Create PR: Validation Layer]
+
+          %% Presentation Layer - Backend
+          PB1[Create Branch: feat/FEATURE_NAME/presentation-backend]
+          PB2[Create Presentation Structure]
+          PB3[Write Controller Tests - RED]
+          PB4[Git Commit: test(presentation): add failing controller tests]
+          PB5[Create Controllers]
+          PB6[Create Middlewares]
+          PB7[Run: yarn test - GREEN]
+          PB8[Run: yarn lint]
+          PB9[Git Commit: feat(presentation): implement controllers]
+          PB10[Create PR: Presentation Backend]
+
+          %% Presentation Layer - Frontend
+          PF1[Create Branch: feat/FEATURE_NAME/presentation-frontend]
+          PF2[Create Pages Structure]
+          PF3[Write Hook Tests - RED]
+          PF4[Git Commit: test(hooks): add failing hook tests]
+          PF5[Create Custom Hooks]
+          PF6[Run: yarn test hooks - GREEN]
+          PF7[Git Commit: feat(hooks): implement custom hooks]
+          PF8[Install Shadcn Components]
+          PF9[Write Component Tests - GREEN]
+          PF10[Create Pages/Components]
+          PF11[Run: yarn test - Verify GREEN]
+          PF12[Run: yarn lint]
+          PF13[Git Commit: feat(components): implement pages and components with tests]
+          PF14[Style with Tailwind CSS]
+          PF15[Run: yarn test - Coverage 80%+]
+          PF16[Run: yarn lint]
+          PF17[Git Commit: style(presentation): add tailwind styles]
+          PF18[Create PR: Presentation Frontend]
+
+          %% Main Layer - Backend
+          MB1[Create Branch: feat/FEATURE_NAME/main-backend]
+          MB2[Create Factories]
+          MB3[Wire Dependencies with DI Container]
+          MB4[Create Swagger Documentation]
+          MB5[Define OpenAPI Schemas]
+          MB6[Configure API Docs Route]
+          MB7[Configure Observability - Prometheus Metrics]
+          MB8[Setup Health Checks]
+          MB9[Write Integration Tests - RED]
+          MB10[Git Commit: test(main): add failing integration tests]
+          MB11[Implement Main Composer]
+          MB12[Run: npm test - GREEN]
+          MB13[Run: npm run lint]
+          MB14[Git Commit: feat(main): implement DI, factories and API documentation]
+          MB15[Create PR: Main Backend]
+
+          %% Main Layer - Frontend
+          MF1[Create Branch: feat/FEATURE_NAME/main-frontend]
+          MF2[Setup Next.js App Router]
+          MF3[Configure Context Providers]
+          MF4[Create Factory Functions]
+          MF5[Wire Dependencies]
+          MF6[Configure Observability - Web Vitals]
+          MF7[Setup Error Boundaries]
+          MF8[Write E2E Tests - Cypress/Playwright]
+          MF9[Run: yarn test:e2e - GREEN]
+          MF10[Run: yarn lint]
+          MF11[Git Commit: feat(main): setup app configuration and providers]
+          MF12[Create PR: Main Frontend]
+
+          %% Observability Layer (Cross-Cutting)
+          O1[Create Branch: feat/FEATURE_NAME/observability]
+          O2[Setup Prometheus Exporters]
+          O3[Configure Grafana Dashboards]
+          O4[Add Custom Metrics]
+          O5[Setup Alerts]
+          O6[Configure Logging - Winston/Pino]
+          O7[Add Distributed Tracing]
+          O8[Test Monitoring Stack]
+          O9[Git Commit: feat(observability): setup monitoring and alerting]
+          O10[Create PR: Observability]
+
+          End([Feature Complete])
+
+          %% Flow
+          Start --> D1
+          D1 --> D2 --> D3 --> D4 --> D5 --> D6
+          D6 --> D7 --> D8 --> D9 --> D10
+          D10 --> D11 --> D12 --> D13 --> D14
+
+          D14 --> DT1
+          DT1 --> DT2 --> DT3 --> DT4 --> DT5 --> DT6 --> DT7 --> DT8 --> DT9 --> DT10
+
+          DT10 --> I1
+          I1 --> I2 --> I3 --> I4 --> I5 --> I6 --> I7 --> I8 --> I9 --> I10
+
+          I10 --> V1
+          V1 --> V2 --> V3 --> V4 --> V5 --> V6 --> V7 --> V8 --> V9 --> V10
+
+          V10 --> PB1
+          PB1 --> PB2 --> PB3 --> PB4 --> PB5 --> PB6 --> PB7 --> PB8 --> PB9 --> PB10
+
+          PB10 --> PF1
+          PF1 --> PF2 --> PF3 --> PF4 --> PF5 --> PF6 --> PF7 --> PF8 --> PF9 --> PF10 --> PF11 --> PF12 --> PF13 --> PF14 --> PF15 --> PF16 --> PF17 --> PF18
+
+          PF18 --> MB1
+          MB1 --> MB2 --> MB3 --> MB4 --> MB5 --> MB6 --> MB7 --> MB8 --> MB9 --> MB10 --> MB11 --> MB12 --> MB13 --> MB14 --> MB15
+
+          MB15 --> MF1
+          MF1 --> MF2 --> MF3 --> MF4 --> MF5 --> MF6 --> MF7 --> MF8 --> MF9 --> MF10 --> MF11 --> MF12
+
+          MF12 --> O1
+          O1 --> O2 --> O3 --> O4 --> O5 --> O6 --> O7 --> O8 --> O9 --> O10
+
+          O10 --> End
+
+          classDef domain fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px
+          classDef data fill:#E3F2FD,stroke:#2196F3,stroke-width:2px
+          classDef infra fill:#FFF3E0,stroke:#FF9800,stroke-width:2px
+          classDef validation fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
+          classDef presentation fill:#FCE4EC,stroke:#E91E63,stroke-width:2px
+          classDef main fill:#E0F2F1,stroke:#009688,stroke-width:2px
+
+          class D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14 domain
+          class DT1,DT2,DT3,DT4,DT5,DT6,DT7,DT8,DT9,DT10 data
+          class I1,I2,I3,I4,I5,I6,I7,I8,I9,I10 infra
+          class V1,V2,V3,V4,V5,V6,V7,V8,V9,V10 validation
+          class PB1,PB2,PB3,PB4,PB5,PB6,PB7,PB8,PB9,PB10 presentation
+          class PF1,PF2,PF3,PF4,PF5,PF6,PF7,PF8,PF9,PF10,PF11,PF12,PF13,PF14,PF15,PF16,PF17,PF18 presentation
+          class M1,M2,M3,M4,M5,M6 main
+        ```
+
+      git_workflow_per_layer:
+        domain:
+          - 'git checkout -b feat/__FEATURE_NAME__/domain'
+          - 'Create folder structure: domain/models, domain/usecases'
+          - 'Create models → yarn lint → yarn test:unit → git add → git commit -m "feat(domain): add __MODEL__ model"'
+          - 'Create use cases → yarn lint → yarn test:unit → git add → git commit -m "feat(domain): add __USE_CASE__ interface"'
+          - 'Create mocks → yarn test:unit → git add → git commit -m "test(domain): add __USE_CASE__ mocks"'
+          - 'git push origin feat/__FEATURE_NAME__/domain'
+          - 'gh pr create --base main --title "feat(domain): implement __FEATURE__ domain layer"'
+
+        data:
+          - 'git checkout -b feat/__FEATURE_NAME__/data'
+          - 'Create folder structure: data/protocols, data/usecases'
+          - 'Write unit tests (TDD - RED phase) → yarn test (expect failure) → git commit -m "test(data): add failing tests for __USE_CASE__"'
+          - 'Create protocols → git commit -m "feat(data): add __PROTOCOL__ protocol"'
+          - 'Implement use cases → yarn test (GREEN phase) → yarn lint → git commit -m "feat(data): implement __USE_CASE__"'
+          - 'Refactor if needed → yarn test → yarn lint → git commit -m "refactor(data): improve __USE_CASE__ implementation"'
+          - 'git push origin feat/__FEATURE_NAME__/data'
+          - 'gh pr create --base main --title "feat(data): implement __FEATURE__ data layer"'
+
+        infra:
+          - 'git checkout -b feat/__FEATURE_NAME__/infra'
+          - 'Create folder structure: infra/http, infra/cache, infra/db, infra/cryptography'
+          - 'Write integration tests with mocks (TDD - RED) → yarn test (expect failure) → git commit -m "test(infra): add failing tests for __ADAPTER__"'
+          - 'Implement adapters (HTTP, Cache, DB) → yarn test (GREEN) → yarn lint → git commit -m "feat(infra): implement __ADAPTER__ adapter"'
+          - 'Implement repositories → yarn test → yarn lint → git commit -m "feat(infra): implement __REPOSITORY__ repository"'
+          - 'Refactor if needed → yarn test → yarn lint → git commit -m "refactor(infra): improve __ADAPTER__ implementation"'
+          - 'git push origin feat/__FEATURE_NAME__/infra'
+          - 'gh pr create --base main --title "feat(infra): implement __FEATURE__ infrastructure"'
+
+        validation:
+          - 'git checkout -b feat/__FEATURE_NAME__/validation'
+          - 'Create folder structure: validation/validators, validation/protocols, validation/errors'
+          - 'Write unit tests for validators (TDD - RED) → yarn test (expect failure) → git commit -m "test(validation): add failing tests for __VALIDATOR__"'
+          - 'Create individual validators (Required, Email, MinLength, etc.) → yarn test → yarn lint → git commit -m "feat(validation): implement __VALIDATOR__ validator"'
+          - 'Create ValidationComposite → yarn test (GREEN) → yarn lint → git commit -m "feat(validation): implement validation composite"'
+          - 'Create ValidationBuilder if needed → yarn test → yarn lint → git commit -m "feat(validation): add validation builder"'
+          - 'git push origin feat/__FEATURE_NAME__/validation'
+          - 'gh pr create --base main --title "feat(validation): implement __FEATURE__ validation"'
+
+        presentation_backend:
+          - 'git checkout -b feat/__FEATURE_NAME__/presentation-backend'
+          - 'Create folder structure: presentation/controllers, presentation/middlewares, presentation/helpers'
+          - 'Write controller tests (TDD - RED) → yarn test (expect failure) → git commit -m "test(presentation): add failing tests for __CONTROLLER__"'
+          - 'Implement controllers → yarn test (GREEN) → yarn lint → git commit -m "feat(presentation): implement __CONTROLLER__ controller"'
+          - 'Implement middlewares if needed → yarn test → yarn lint → git commit -m "feat(presentation): add __MIDDLEWARE__ middleware"'
+          - 'git push origin feat/__FEATURE_NAME__/presentation-backend'
+          - 'gh pr create --base main --title "feat(presentation-backend): implement __FEATURE__ controllers"'
+
+        presentation_frontend:
+          - 'git checkout -b feat/__FEATURE_NAME__/presentation-frontend'
+          - 'Create folder structure: app/__FEATURE__/page.tsx, components/__FEATURE__, hooks/'
+          - 'Write custom hook tests (TDD - RED) → yarn test (expect failure) → git commit -m "test(hooks): add failing tests for use__HOOK__"'
+          - 'Implement custom hooks (useState, useEffect, useContext, etc.) → yarn test (GREEN) → yarn lint → git commit -m "feat(hooks): implement use__HOOK__ custom hook"'
+          - 'Install Shadcn components needed → npx shadcn-ui add [component] → git commit -m "feat(ui): add shadcn __COMPONENT__"'
+          - 'Write component tests → Implement components with hooks → yarn test (GREEN) → yarn lint → git commit -m "feat(components): implement __COMPONENT__ with hooks"'
+          - 'Style components with Tailwind CSS → verify responsive design → yarn test → yarn lint → git commit -m "style(presentation): add tailwind styles for __COMPONENT__"'
+          - 'Run full test suite with coverage → yarn test --coverage (must be 80%+) → yarn lint → git commit -m "test(presentation): achieve 80% coverage for __FEATURE__"'
+          - 'git push origin feat/__FEATURE_NAME__/presentation-frontend'
+          - 'gh pr create --base main --title "feat(presentation-frontend): implement __FEATURE__ UI with Next.js, Hooks and Shadcn"'
+
+        main:
+          - 'git checkout -b feat/__FEATURE_NAME__/main'
+          - 'Create factories → git commit -m "feat(main): add __FACTORY__ factory"'
+          - 'Wire dependencies → git commit -m "feat(main): wire __FEATURE__ dependencies"'
+          - 'gh pr create --base main --title "feat(main): complete __FEATURE__ integration"'  
+
+    dependency_rules:
+      domain:
+        can_import_from: []  # Domain layer is the core - imports nothing
+        cannot_import_from: ['data', 'infra', 'presentation', 'validation', 'main']
+
+      data:
+        can_import_from: ['domain']  # Data layer implements domain interfaces
+        cannot_import_from: ['infra', 'presentation', 'validation', 'main']
+
+      infra:
+        can_import_from: ['data', 'domain']  # Infrastructure implements data protocols
+        cannot_import_from: ['presentation', 'main']
+
+      presentation:
+        can_import_from: ['domain', 'validation']  # Presentation uses domain models and validation
+        cannot_import_from: ['data', 'infra', 'main']
+
+      validation:
+        can_import_from: ['presentation/protocols']  # Validation implements presentation protocols
+        cannot_import_from: ['domain', 'data', 'infra', 'main']
+
+      main:
+        can_import_from: ['data', 'domain', 'infra', 'presentation', 'validation']  # Main layer composes everything
+        cannot_import_from: []  # Main is the composition root
+
+    # Clean Architecture principles and practices
+    principles:
+      core_principles:
+        - "Independence: Business rules don't know about outside world"
+        - "Testability: Business rules can be tested without UI, Database, Web Server, etc."
+        - "Flexibility: UI, Database, and any external agency are plugins"
+        - "Separation: Business rules are the core, everything else is detail"
+        - "Dependency Rule: Dependencies point inward toward the domain"
+
+      design_patterns:
+        domain:
+          - "Interface Pattern: Define contracts for use cases"
+          - "ES2015 Modules: Use import/export for code organization"
+          - "Type Exports: Separate types for Input and Output"
+          - "Single Method Pattern: One execute() method per use case"
+          - "Port Pattern: Define boundaries for external communication"
+          - "DTO Pattern: Simple data transfer objects without behavior"
+
+        data:
+          - "Implementation Pattern: Concrete implementations of domain use cases"
+          - "Repository Pattern: Define protocols for data persistence"
+          - "Protocol Pattern: Abstractions for external dependencies (HTTP, DB, Crypto)"
+          - "Dependency Injection: Constructor injection of protocols"
+          - "Prefix Pattern: Use 'Db' or 'Remote' prefix for implementations"
+
+        infra:
+          - "Adapter Pattern: Implement data protocols (FetchHttpClient, PrismaAdapter)"
+          - "Single HTTP Client: One FetchClient for all HTTP operations"
+          - "ORM Pattern: Prisma for PostgreSQL + pgvector support"
+          - "Cache Pattern: Redis adapter for caching strategies"
+          - "Helper Pattern: Database and cache helpers for connections"
+
+        presentation:
+          backend:
+            - "Controller Pattern: Express controllers for REST API"
+            - "Middleware Pattern: Express middleware pipeline"
+            - "Helper Pattern: HTTP response helpers (ok, badRequest, etc.)"
+            - "Protocol Pattern: Define controller and validation interfaces"
+          frontend:
+            - "Server Components: Next.js App Router with RSC"
+            - "Component Composition: Shadcn/ui reusable components"
+            - "Context API: State management without external libraries"
+            - "Custom Hooks: Encapsulate business logic and state"
+            - "Tailwind CSS: Utility-first styling approach"
+
+        validation:
+          - "Composite Pattern: Combine multiple field validators (ValidationComposite)"
+          - "Builder Pattern: Fluent interface for validation construction (ValidationBuilder)"
+          - "Factory Pattern: Create validation composites (makeLoginValidation, makeSignupValidation)"
+
+        main:
+          backend:
+            - "Factory Pattern: Create controllers with all dependencies (makeLoginController)"
+            - "Decorator Pattern: Add logging and monitoring (LogControllerDecorator)"
+            - "Adapter Pattern: Express route and middleware adapters"
+            - "Composition Root: Wire up controllers, middlewares, and routes"
+            - "Configuration Pattern: Centralized app, env, and swagger config"
+          frontend:
+            - "Factory Pattern: Create pages with props (makeLogin, makeSignup)"
+            - "Factory Pattern: Create use cases with HTTP clients (makeRemoteAuthentication)"
+            - "Builder Pattern: Validation composition (ValidationBuilder)"
+            - "Adapter Pattern: Current account adapter for state management"
+            - "Proxy Pattern: Private route protection"
+            - "Composition Root: Main index.tsx with router setup"
+
+      testing_strategy:
+        domain:
+          approach: "Unit Tests - Pure functions and business logic"
+          coverage_target: "100%"
+          tools: ["Vitest", "Testing Library"]
+          practices:
+            - "Use fixed test data helpers instead of faker"
+            - "Create mock factories with deterministic data"
+            - "Test domain models and use case interfaces"
+            - "Use mockAddAccountParams() with fixed values"
+            - "Keep test helpers in tests/domain/mocks directory"
+            - "No external dependencies or randomness in tests"
+
+        data:
+          approach: "Unit Tests with Mocks"
+          coverage_target: "95%"
+          tools: ["Vitest", "vi.spyOn", "vi.fn"]
+          practices:
+            - "Create spy classes (HasherSpy, RepositorySpy)"
+            - "Use makeSut() factory for test setup"
+            - "Mock protocol implementations with classes"
+            - "Use vi.spyOn() for spying on methods"
+            - "Test error cases with throwError helper"
+            - "Verify method calls and parameters"
+            - "Use fixed test data from mocks directory"
+
+        infra:
+          approach: "Integration Tests"
+          coverage_target: "80%"
+          tools: ["Vitest", "Prisma test database", "Module mocking"]
+          practices:
+            - "Use vi.mock() to mock external modules (bcrypt, jsonwebtoken)"
+            - "Test with Prisma test client and PostgreSQL"
+            - "Clean database between tests with Prisma reset"
+            - "Use makeSut() factory pattern"
+            - "Mock localStorage with jsdom or happy-dom"
+            - "Use vi.mock() for Fetch API mocking"
+            - "Use fixed test data - no faker"
+
+        presentation:
+          backend:
+            approach: "Unit Tests for Controllers and Middlewares"
+            coverage_target: "90%"
+            tools: ["Vitest", "HTTP helpers (ok, badRequest, serverError)"]
+            practices:
+              - "Use spy classes (AuthenticationSpy, ValidationSpy)"
+              - "Test controller handle() method"
+              - "Use makeSut() factory with dependency injection"
+              - "Test HTTP response helpers (ok, badRequest, unauthorized)"
+              - "Mock requests with fixed data"
+              - "Test error scenarios with throwError helper"
+          frontend:
+            approach: "Component and Page Tests"
+            coverage_target: "85%"
+            tools: ["Vitest", "@testing-library/react", "fireEvent", "screen"]
+            practices:
+              - "Use renderWithHistory for page tests"
+              - "Test with fireEvent.submit/click/focus"
+              - "Use screen queries (getByTestId, getByRole)"
+              - "Create test helpers (populateField, testStatusForField)"
+              - "Use ValidationStub for mocking validation"
+              - "Test initial state and user interactions"
+              - "Use fixed test data instead of faker"
+
+        validation:
+          approach: "Unit Tests - Validation logic"
+          coverage_target: "100%"
+          tools: ["Vitest", "ValidationSpy for mocking"]
+          practices:
+            - "Test each validator independently (RequiredField, Email, MinLength)"
+            - "Test ValidationComposite with multiple validators"
+            - "Use makeSut() factory for validator creation"
+            - "Test specific error types (MissingParamError, InvalidFieldError)"
+            - "Test validation factories return correct composites"
+            - "Test edge cases (empty fields, invalid formats)"
+            - "Use fixed field names and error messages"
+
+        main:
+          approach: "E2E and Integration Tests"
+          coverage_target: "70%"
+          tools: ["Vitest", "Playwright", "MSW"]
+          practices:
+            - "Test complete user flows with Playwright"
+            - "Test factory functions with Vitest"
+            - "Mock HTTP layer with MSW"
+            - "Verify dependency wiring"
+            - "Use fixed test data for E2E scenarios"
+            - "No faker in integration tests"
+
+      best_practices:
+        - "SOLID Principles: Single Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, Dependency Inversion"
+        - "DRY: Don't Repeat Yourself - Extract common logic"
+        - "KISS: Keep It Simple, Silly - Avoid over-engineering"
+        - "YAGNI: You Aren't Gonna Need It - Build only what's needed"
+        - "SOC: Separation of Concerns - Each layer has its responsibility"
+        - "Small Commits: Make atomic, focused commits"
+        - "Composition over Inheritance: Favor object composition"
+        - "Conventional Commits: Use semantic commit messages"
+        - "TDD: Write tests first, then implementation"
+        - "Clean Code: Self-documenting, readable code"
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: IMMUTABLE SECTIONS AHEAD.
+  # The sections from here until 'steps' are architectural rules.
+  # You MUST copy them verbatim into the implementation file without ANY modification.
+  #
+  # AUTOMATED LEARNING SYSTEM:
+  # The RLHF system automatically:
+  # - Tracks success/failure patterns across executions
+  # - Identifies common error types and their fixes
+  # - Applies improvements when confidence > 80%
+  # - Generates learning reports with actionable insights
+  # - Prevents hallucinations with score 0 for uncertain cases
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # RULES SECTION
+  # All architectural and pattern rules consolidated
+  # ------------------------------------------------------------------------------
+
+  rules:
+    # Domain layer rules (modern approach)
+    domain:
+      allowed:
+        - 'Type definitions and interfaces (Models)'
+        - 'Use case interfaces with single execute() method'
+        - 'Separate Input and Output types for each use case'
+        - 'Simple data models without behavior'
+        - 'JSDoc documentation for all public interfaces'
+        - 'ES2015 module exports (export type, export interface)'
+
+      forbidden:
+        - 'Multiple methods in a single use case interface'
+        - 'Combined operations (e.g., CreateUserAndSendEmail)'
+        - 'Framework dependencies (React, Next.js, Express)'
+        - 'External libraries (HTTP or database clients)'
+        - 'Implementation details of any kind'
+        - 'UI components or presentation logic'
+        - 'HTTP/Database/File system operations'
+        - 'Environment variables or configuration'
+        - 'Console.log or any I/O operations'
+        - 'Business logic implementation'
+        - 'Validation implementations'
+        - 'Error throwing or handling'
+        - 'Dependency injection'
+        - 'Complex domain entities with behavior'
+      use_case:
+        should:
+          - 'Have only ONE execute() method per interface'
+          - 'Define separate Input and Output types'
+          - 'Have EXACTLY ONE responsibility (one business operation)'
+          - 'Be named with single verb describing ONE action (CreateUser, not CreateUserAndSendEmail)'
+          - 'Include comprehensive JSDoc documentation'
+          - 'Return Promise<Output> from execute method'
+          - 'Be framework agnostic'
+          - 'Follow naming convention: VerbNoun (e.g., CreateUser, LoadSurvey, AuthenticateUser)'
+        should_not:
+          - 'Have multiple methods (no createUser() AND readUser() in same interface)'
+          - 'Combine multiple operations (CreateUserAndSendEmail violates SRP)'
+          - 'Contain implementation logic'
+          - 'Know about HTTP, databases, or external services'
+          - 'Import from data, presentation, or infrastructure layers'
+          - 'Have side effects'
+          - 'Use generic method names like handle(), process(), or run()'
+
+    # Data layer rules
+    data:
+      should:
+        - 'Implement domain use case interfaces'
+        - 'Use constructor injection for dependencies'
+        - 'Define protocols for external dependencies'
+        - 'Use prefix naming (DbAddAccount, RemoteAuthentication)'
+        - 'Handle errors and status codes appropriately'
+        - 'Keep business logic minimal (only orchestration)'
+        - 'Return domain types, not infrastructure types'
+
+      should_not:
+        - 'Import from infrastructure layer directly'
+        - 'Contain complex business logic (belongs in domain)'
+        - 'Expose infrastructure details to domain'
+        - 'Use concrete implementations instead of protocols'
+        - 'Have direct database or HTTP calls (use protocols)'
+
+    # Infrastructure layer rules
+    infra:
+      should:
+        - 'Implement data layer protocols'
+        - 'Use native Fetch API instead of axios'
+        - 'Use Prisma ORM for database operations'
+        - 'Support PostgreSQL with pgvector extension'
+        - 'Use Redis for caching when needed'
+        - 'Provide single FetchHttpClient for all HTTP needs'
+        - 'Handle connection management and retries'
+        - 'Use environment variables for configuration'
+
+      should_not:
+        - 'Import from domain or use case layers'
+        - 'Contain business logic'
+        - 'Use multiple HTTP client implementations'
+        - 'Expose database-specific types to other layers'
+        - 'Use axios or other HTTP libraries (use Fetch API)'
+        - 'Use MongoDB (use Prisma with PostgreSQL)'
+
+    # Presentation layer rules
+    presentation:
+      backend_should:
+        - 'Use Express for HTTP server and routing'
+        - 'Implement Controller interface with handle method'
+        - 'Return standardized HTTP responses (ok, badRequest, etc.)'
+        - 'Use middlewares for cross-cutting concerns'
+        - 'Handle errors gracefully with try/catch'
+        - 'Validate requests before processing'
+
+      frontend_should:
+        - 'Use Next.js 15+ with App Router'
+        - 'Use Shadcn/ui components with Tailwind CSS'
+        - 'Use Context API for state management'
+        - 'Create custom hooks for business logic'
+        - 'Use Server Components where possible'
+        - 'Implement error boundaries for error handling'
+
+      should_not:
+        - 'Use React with custom CSS/SASS (use Next.js + Tailwind)'
+        - 'Use Recoil or Redux (use Context API)'
+        - 'Use GraphQL (use REST with Express)'
+        - 'Import from data or infra layers directly'
+        - 'Contain business logic (belongs in use cases)'
+        - 'Make direct HTTP calls (use data layer)'
+
+    # Error rules
+    error:
+      should:
+        - 'Extend the native Error class'
+        - 'Have descriptive names ending with Error'
+        - 'Contain meaningful error messages'
+        - 'Represent business rule violations'
+        - 'Be thrown when domain invariants are violated'
+
+      should_not:
+        - 'Contain HTTP status codes'
+        - 'Include technical/implementation details'
+        - 'Expose sensitive information'
+        - 'Import external dependencies'
+
+    # Test helper rules
+    test_helper:
+      should:
+        - 'Create mock/stub implementations of use cases'
+        - 'Generate fake test data'
+        - 'Be pure functions that return consistent data'
+        - 'Help reduce test boilerplate'
+        - 'Use ONLY Vitest (Jest is prohibited)'
+
+      should_not:
+        - 'Make real API calls or database queries'
+        - 'Depend on external services'
+        - 'Contain test assertions (those belong in test files)'
+        - 'Have side effects or maintain state'
+        - 'Use Jest (use Vitest instead)'
+
+    # Validation rules
+    validation:
+      should:
+        - 'Implement FieldValidation interface for field validators'
+        - 'Use ValidationComposite to combine multiple validators'
+        - 'Use ValidationBuilder for fluent validation construction'
+        - 'Create factory functions for validation composites'
+        - 'Validate individual fields with specific rules'
+        - 'Return descriptive error messages'
+        - 'Support chaining of validation rules'
+        - 'Use static build() method for composite creation'
+      should_not:
+        - 'Import from domain layer'
+        - 'Import from data or infra layers'
+        - 'Contain business logic (only validation rules)'
+        - 'Throw exceptions (return Error objects instead)'
+        - 'Access external services or databases'
+        - 'Use async validation (keep validators synchronous)'
+
+    # Main layer rules
+    main:
+      backend_should:
+        - 'Create factory functions for controllers'
+        - 'Wire up all dependencies using composition'
+        - 'Apply decorators for cross-cutting concerns (logging, monitoring)'
+        - 'Configure Express routes and middlewares'
+        - 'Setup Swagger documentation'
+        - 'Handle environment configuration'
+        - 'Use adapters for framework integration'
+        - 'Return decorated controllers from factories'
+      frontend_should:
+        - 'Create factory functions for React pages/components'
+        - 'Compose use cases with HTTP clients and validators'
+        - 'Use React.FC for page factories (makeLogin, makeSignup)'
+        - 'Setup routing with React Router'
+        - 'Configure protected routes with proxies'
+        - 'Manage global state adapters (CurrentAccountAdapter)'
+        - 'Build validation composites for forms'
+        - 'Initialize app in index.tsx with all providers'
+      should_not:
+        - 'Contain business logic (only wiring)'
+        - 'Have direct database or API calls'
+        - 'Include complex algorithms or calculations'
+        - 'Store application state'
+        - 'Define new interfaces or types (only use existing ones)'
+
+    # Reference patterns
+    reference_patterns:
+      clean_architecture:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'clean architecture use case'
+        url: 'https://github.com/...'
+        description: 'Following Clean Architecture pattern.'
+
+      ddd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'domain driven design'
+        url: 'https://github.com/...'
+        description: 'Following DDD patterns.'
+
+      tdd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'test driven development'
+        url: 'https://github.com/...'
+        description: 'Following TDD patterns.'
+
+    # Learning patterns
+    learning_patterns:
+      common_errors:
+        - pattern: 'import axios'
+          fix: 'Use Fetch API instead of axios in infra layer'
+          score_impact: -2
+
+        - pattern: 'CreateUserAndSend'
+          fix: 'Split into two separate use cases (SRP violation)'
+          score_impact: -1
+
+        - pattern: 'missing @domainConcept'
+          fix: 'Add domain concept documentation for +2 score'
+          score_impact: +1
+
+      success_indicators:
+        - 'Uses ubiquitous language consistently'
+        - 'Follows single responsibility principle'
+        - 'No dependency violations'
+        - 'Comprehensive test coverage'
+        - 'Clean git history with atomic commits'
+
+    # Required protocols for all layers
+    required_protocols:
+      # Domain Layer
+      domain:
+        - 'All use cases must have single execute() method'
+        - 'All use cases must define separate Input and Output types'
+        - 'All domain types must be immutable'
+        - 'No use case can perform multiple operations (SRP)'
+        - 'All models must be simple DTOs without behavior'
+
+      # Data Layer
+      data:
+        - 'All implementations must inject dependencies via constructor'
+        - 'All protocols must be interfaces, not concrete classes'
+        - 'All implementations must use Db or Remote prefix'
+        - 'Must return domain types, not infrastructure types'
+        - 'Must handle errors and map status codes appropriately'
+
+      # Infrastructure Layer
+      infra:
+        - 'All adapters must implement data layer protocols'
+        - 'HTTP clients must use Fetch API, not axios'
+        - 'Database repositories must use Prisma with PostgreSQL'
+        - 'All external configs must come from environment variables'
+        - 'Must not expose infrastructure types to other layers'
+
+      # Presentation Layer
+      presentation:
+        - 'Controllers must implement handle() method'
+        - 'Controllers must return HTTP helpers (ok, badRequest, etc.)'
+        - 'React components must use function components with hooks'
+        - 'Pages must receive dependencies as props'
+        - 'Middlewares must implement handle() with next parameter'
+
+      # Validation Layer
+      validation:
+        - 'All validators must implement FieldValidation interface'
+        - 'Validators must return Error or undefined'
+        - 'ValidationComposite must use static build() method'
+        - 'Validation must be synchronous (no async/await)'
+        - 'Factory functions must return ValidationComposite'
+
+      # Main Layer
+      main:
+        - 'All factories must return configured instances'
+        - 'Factory functions must wire all dependencies'
+        - 'No business logic allowed (only composition)'
+        - 'Routes must use adapter pattern for framework integration'
+        - 'Must not define new types (use existing from other layers)'
+
+      # Cross-cutting Concerns
+      general:
+        - 'All public interfaces must have JSDoc documentation'
+        - 'All errors must extend native Error class'
+        - 'All test helpers must be pure functions'
+        - 'All tests must use Vitest, not Jest'
+        - 'No use of faker - fixed test data only'
+
+    # Documentation standards (JSDoc)
+    documentation:
+      # Domain Layer Documentation
+      domain:
+        use_case_interface:
+          - '@description - Clear description of the use case purpose'
+          - '@example - Usage example with execute() method'
+          - '@see - Reference to related use cases or documentation'
+        input_output_types:
+          - '@typedef - Define Input and Output types'
+          - '@property - Document each field with type and constraints'
+          - '@example - Show valid input/output instances'
+        model_type:
+          - '@typedef - Define the domain model'
+          - '@property - Document each property with business rules'
+          - '@example - Show valid model instance'
+
+      # Data Layer Documentation
+      data:
+        protocol_interface:
+          - '@interface - Define protocol contracts'
+          - '@method - Document each method signature'
+          - '@throws - Document possible errors'
+        implementation_class:
+          - '@class - Describe the use case implementation'
+          - '@implements - List implemented interfaces'
+          - '@constructor - Document dependency injection'
+          - '@method - Document orchestration logic'
+
+      # Infrastructure Layer Documentation
+      infra:
+        adapter_class:
+          - '@class - Describe the adapter purpose'
+          - '@implements - Protocol being implemented'
+          - '@dependency - External libraries used'
+        database_repository:
+          - '@class - Repository implementation'
+          - '@method - Document CRUD operations'
+          - '@throws - Database-specific errors'
+        http_client:
+          - '@class - HTTP client implementation'
+          - '@method - Document request/response handling'
+          - '@throws - Network-related errors'
+
+      # Presentation Layer Documentation
+      presentation:
+        controller:
+          - '@class - Controller description'
+          - '@route - HTTP route and method'
+          - '@param - Request parameters'
+          - '@returns - HTTP response format'
+          - '@throws - HTTP error responses'
+        middleware:
+          - '@function - Middleware purpose'
+          - '@param - Request, Response, Next'
+          - '@throws - Authorization/validation errors'
+        react_component:
+          - '@component - Component description'
+          - '@props - Component properties'
+          - '@state - Component state (if any)'
+          - '@returns - JSX element'
+
+      # Validation Layer Documentation
+      validation:
+        validator_class:
+          - '@class - Validator description'
+          - '@implements - FieldValidation interface'
+          - '@method - validate() method logic'
+          - '@returns - Error or undefined'
+        composite:
+          - '@class - ValidationComposite'
+          - '@method - Combines multiple validators'
+          - '@returns - First error found or undefined'
+
+      # Main Layer Documentation
+      main:
+        factory:
+          - '@function - Factory function description'
+          - '@returns - Configured instance with dependencies'
+          - '@example - How to use the factory'
+        route:
+          - '@function - Route configuration'
+          - '@param - Express router instance'
+          - '@middleware - Applied middlewares'
+        composition:
+          - '@function - Dependency composition'
+          - '@returns - Fully configured component'
+
+      example_template: |
+        /**
+        * @description Creates a new user account in the system
+        * @example
+        * const createUser = new CreateUserImpl(userRepository)
+        * const result = await createUser.execute({
+        *   name: 'John Doe',
+        *   email: 'john@example.com',
+        *   password: 'securePassword123'
+        * })
+        * @see {@link AuthenticateUser} for user login
+        */
+        export interface CreateUser {
+          execute(input: CreateUserInput): Promise<CreateUserOutput>
+        }
+
+        /**
+        * @typedef {Object} CreateUserInput
+        * @property {string} name - User's full name (min 3 chars)
+        * @property {string} email - Valid email address
+        * @property {string} password - Password (min 8 chars)
+        */
+        export type CreateUserInput = {
+          name: string
+          email: string
+          password: string
+        }
+
+        /**
+        * @typedef {Object} CreateUserOutput
+        * @property {string} id - Generated user ID
+        * @property {string} name - User's name
+        * @property {string} email - User's email
+        * @property {Date} createdAt - Account creation timestamp
+        */
+        export type CreateUserOutput = {
+          id: string
+          name: string
+          email: string
+          createdAt: Date
+        }
+
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: DYNAMIC IMPLEMENTATION SECTION.
+  # Replicate the generic steps below for each use case, error, and test helper
+  # required by the feature, replacing the placeholder variables (e.g., __FEATURE_NAME_KEBAB_CASE__).
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # IMPLEMENTATION STEPS
+  # Steps for generating the architectural layers
+  # ------------------------------------------------------------------------------
+
+  steps:
+    # === GIT WORKFLOW ===
+    - id: 'create-feature-branch'
+      type: 'branch'
+      description: 'Create a new feature branch for __FEATURE_NAME_PASCAL_CASE__'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Following git branching best practices for feature development.'
+      action:
+        branch_name: 'feat/__FEATURE_NAME_KEBAB_CASE__'
+      validation_script: |
+        echo "🌿 Creating feature branch..."
+        # Check if we are on a clean state
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "⚠️ Warning: You have uncommitted changes. Stashing them..."
+          # AI-NOTE: Replace ONLY __FEATURE_NAME_KEBAB_CASE__, keep the shell variable syntax intact
+          git stash save "Auto-stash before creating feature branch for __FEATURE_NAME_KEBAB_CASE__"
+        fi
+
+        # Get current branch to use as base
+        # AI-NOTE: DO NOT replace $CURRENT_BRANCH - this is a shell variable
+        CURRENT_BRANCH=$(git branch --show-current)
+        echo "📍 Current branch: $CURRENT_BRANCH"
+
+        # Create and checkout new feature branch
+        # AI-NOTE: Replace __FEATURE_NAME_KEBAB_CASE__ but keep $BRANCH_NAME as shell variable
+        BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__"
+
+        # Check if branch already exists
+        # AI-NOTE: DO NOT replace $BRANCH_NAME below - it's a shell variable reference
+        if git show-ref --quiet refs/heads/$BRANCH_NAME; then
+          echo "⚠️ Branch $BRANCH_NAME already exists. Checking out..."
+          git checkout $BRANCH_NAME
+        else
+          echo "🌿 Creating new branch: $BRANCH_NAME"
+          git checkout -b $BRANCH_NAME
+        fi
+
+        # Verify we're on the correct branch
+        # AI-NOTE: DO NOT replace $CURRENT or $BRANCH_NAME - these are shell variables
+        CURRENT=$(git branch --show-current)
+        if [ "$CURRENT" != "$BRANCH_NAME" ]; then
+          echo "❌ ERROR: Failed to switch to branch $BRANCH_NAME"
+          exit 1
+        fi
+
+        echo "✅ Successfully created and switched to branch: $BRANCH_NAME"
+
+        # If we had stashed changes, inform the user
+        if git stash list | grep -q "Auto-stash before creating feature branch"; then
+          echo "💡 Note: You have stashed changes. Run 'git stash pop' to restore them if needed."
+        fi
+
+    # === LAYER STRUCTURE ===
+    # AI-NOTE: __LAYER__ will be replaced with the actual layer name (domain, application, infrastructure, presentation)
+    - id: 'create-__LAYER__-structure'
+      type: 'folder'
+      description: 'Create __LAYER__ layer folder structure' #Domain, Data, Infra, Presentation, Validation, Main
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'ARCHITECTURE.md'
+          description: 'Following Clean Architecture __LAYER__ layer structure.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__'
+          folders:
+            - 'errors'
+            - 'use-cases'
+            - 'test'
+      validation_script: |
+        # AI-NOTE: Replace __FEATURE_NAME_KEBAB_CASE__ and __LAYER__ placeholders
+        # AI-NOTE: DO NOT replace $BASE_PATH, $FOLDERS, $folder - these are shell variables
+        BASE_PATH="__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__"
+        FOLDERS="$BASE_PATH/errors $BASE_PATH/use-cases $BASE_PATH/test"
+        echo "✅ Verifying __LAYER__ folder structure..."
+        # AI-NOTE: $folder is the loop variable - keep as-is
+        for folder in $FOLDERS; do
+          if [ ! -d "$folder" ]; then
+            echo "❌ ERROR: Folder $folder was not created."
+            exit 1
+          fi
+        done
+        echo "✅ All __LAYER__ folders exist."
+
+    # === USE CASE CREATION ===
+    # AI-NOTE: This step creates use cases for the specified __LAYER__
+    - id: 'create-use-case-__ACTION_ENTITY_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create __ACTION_ENTITY_PASCAL_CASE__ use case interface'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''    # AI-NOTE: For each step, you MUST populate this 'references' section.
+      # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture use case'
+          url: 'https://github.com/...'
+          description: 'Following Clean Architecture pattern.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*UseCase'
+          description: 'Consistent with existing use case interfaces.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__/use-cases/__ACTION_ENTITY_KEBAB_CASE__.ts'
+      # AI-NOTE FOR +2 SCORE: Include domain concepts and ubiquitous language in comments
+      # Use business terminology, not technical jargon
+      # Reference Domain-Driven Design principles when applicable
+      template: |
+        /**
+        * Input parameters for __ACTION_ENTITY_PASCAL_CASE__UseCase
+        * Following Clean Architecture principles - pure domain types
+        * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+        */
+        export type __ACTION_ENTITY_PASCAL_CASE__Input = {
+          __USE_CASE_INPUT_FIELDS__
+        }
+
+        /**
+        * Output type for __ACTION_ENTITY_PASCAL_CASE__UseCase
+        * Represents the business outcome of the operation
+        * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+        */
+        export type __ACTION_ENTITY_PASCAL_CASE__Output = {
+          __USE_CASE_OUTPUT_FIELDS__
+        }
+
+        /**
+        * __ACTION_ENTITY_PASCAL_CASE__UseCase interface
+        * @description __USE_CASE_DESCRIPTION__
+        * @pattern Command Pattern - Single Responsibility Principle
+        * @layer Domain Layer - Framework agnostic business interface
+        */
+        export interface __ACTION_ENTITY_PASCAL_CASE__UseCase {
+          /**
+          * Execute the __ACTION_ENTITY_LOWER_CASE__ operation
+          * @param input - The input parameters
+          * @returns Promise with the operation output
+          * @throws Domain errors when business rules are violated
+          */
+          execute: (input: __ACTION_ENTITY_PASCAL_CASE__Input) => Promise<__ACTION_ENTITY_PASCAL_CASE__Output>
+        }
+      validation_script: |
+        # AI-NOTE: These are shell functions - DO NOT replace any $ variables within them
+        run_lint_check() {
+          echo "🔍 Running lint check..."
+          yarn lint || { yarn lint --fix && yarn lint; } || exit 1
+          echo "✅ Lint passed"
+        }
+
+        run_test_check() {
+          echo "🧪 Running tests with coverage..."
+          yarn test --coverage || exit 1
+          echo "✅ Tests passed"
+        }
+
+        # AI-NOTE: $1 is a positional parameter - DO NOT replace
+        stage_and_commit() {
+          echo "📦 Staging changes..."
+          git add .
+          echo "💾 Creating commit..."
+          git commit -m "$1" || exit 1
+          echo "✅ Successfully committed"
+        }
+
+        # Execute validation sequence
+        run_lint_check
+        run_test_check
+        stage_and_commit "feat(__FEATURE_NAME_KEBAB_CASE__): add __ACTION_ENTITY_KEBAB_CASE__ use case"
+
+    # === ERROR CLASS CREATION ===
+    # AI-NOTE: This step creates error classes for the specified __LAYER__
+    - id: 'create-error-__ERROR_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create __ERROR_NAME_KEBAB_CASE__ error class'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''    # AI-NOTE: For each step, you MUST populate this 'references' section.
+      # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'domain driven design error handling'
+          url: 'https://github.com/...'
+          description: 'Following DDD error handling patterns.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*Error'
+          description: 'Consistent with existing domain errors.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__/errors/__ERROR_NAME_KEBAB_CASE__.ts'
+      # AI-NOTE FOR +2 SCORE: Domain errors should represent business rule violations
+      # Use ubiquitous language in error messages
+      # Never expose technical details or implementation specifics
+      template: |
+        /**
+        * Domain error thrown when __ERROR_DESCRIPTION__
+        * Represents a business rule violation in the __FEATURE_NAME__ bounded context
+        * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+        * @pattern Domain Error - Clean Architecture principle
+        * @extends Error
+        */
+        export class __ERROR_NAME_PASCAL_CASE__Error extends Error {
+          constructor() {
+            super('__ERROR_MESSAGE__')
+            this.name = '__ERROR_NAME_PASCAL_CASE__Error'
+          }
+        }
+      validation_script: |
+        echo "🔍 Running lint check..."
+        yarn lint
+        # AI-NOTE: $? is the exit code of the last command - DO NOT replace
+        if [ $? -ne 0 ]; then
+          echo "❌ LINT FAILED - Attempting auto-fix..."
+          yarn lint --fix
+          if [ $? -ne 0 ]; then
+            echo "❌ AUTO-FIX FAILED - Manual intervention required"
+            exit 1
+          fi
+          echo "✅ Lint errors auto-fixed, validating again..."
+          yarn lint
+          if [ $? -ne 0 ]; then
+            echo "❌ LINT STILL FAILING - Manual fixes needed"
+            exit 1
+          fi
+        fi
+        echo "✅ Lint passed"
+
+        echo "🧪 Running tests with coverage..."
+        yarn test --coverage
+        # AI-NOTE: $? is the exit code - DO NOT replace
+        if [ $? -ne 0 ]; then
+          echo "❌ TESTS FAILED"
+          exit 1
+        fi
+        echo "✅ Tests passed"
+
+        echo "📦 Staging changes..."
+        git add .
+
+        echo "💾 Creating commit..."
+        git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): add __ERROR_NAME_KEBAB_CASE__ error class"
+        if [ $? -ne 0 ]; then
+          echo "❌ COMMIT FAILED"
+          exit 1
+        fi
+        echo "✅ Successfully committed"
+
+    # === TEST HELPER CREATION ===
+    # AI-NOTE: This step creates test helpers for the specified __LAYER__
+    - id: 'create-test-helper-__ACTION_ENTITY_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create mock for __ACTION_ENTITY_PASCAL_CASE__ use case'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''    # AI-NOTE: For each step, you MUST populate this 'references' section.
+      # Use 'context7' for external design patterns and 'serena' for internal codebase analysis.
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development mocks'
+          url: 'https://github.com/...'
+          description: 'Following TDD mock patterns.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: 'mock*'
+          description: 'Consistent with existing test helpers.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__LAYER__/test/mock-__ACTION_ENTITY_KEBAB_CASE__-use-case.ts'
+      template: |
+        import { vi } from 'vitest'
+        import type { __ACTION_ENTITY_PASCAL_CASE__UseCase, __ACTION_ENTITY_PASCAL_CASE__Input, __ACTION_ENTITY_PASCAL_CASE__Output } from '../use-cases/__ACTION_ENTITY_KEBAB_CASE__'
+
+        /**
+        * Creates a mock instance of __ACTION_ENTITY_PASCAL_CASE__Input
+        * @returns Mock input for testing
+        */
+        export const mock__ACTION_ENTITY_PASCAL_CASE__Input = (): __ACTION_ENTITY_PASCAL_CASE__Input => ({
+          __MOCK_INPUT_DATA__
+        })
+
+        /**
+        * Creates a mock instance of __ACTION_ENTITY_PASCAL_CASE__Output
+        * @returns Mock output for testing
+        */
+        export const mock__ACTION_ENTITY_PASCAL_CASE__Output = (): __ACTION_ENTITY_PASCAL_CASE__Output => ({
+          __MOCK_OUTPUT_DATA__
+        })
+
+        /**
+        * Creates a mock instance of __ACTION_ENTITY_PASCAL_CASE__UseCase
+        * @returns Mocked use case with vitest functions
+        */
+        export const mock__ACTION_ENTITY_PASCAL_CASE__UseCase = (): __ACTION_ENTITY_PASCAL_CASE__UseCase => ({
+          execute: vi.fn()
+        })
+      validation_script: |
+        echo "🔍 Running lint check..."
+        yarn lint
+        # AI-NOTE: $? is the exit code - DO NOT replace
+        if [ $? -ne 0 ]; then
+          echo "❌ LINT FAILED"
+          exit 1
+        fi
+        echo "✅ Lint passed"
+
+        echo "🧪 Running tests..."
+        yarn test --coverage
+        # AI-NOTE: $? is the exit code - DO NOT replace
+        if [ $? -ne 0 ]; then
+          echo "❌ TESTS FAILED"
+          exit 1
+        fi
+        echo "✅ Tests passed"
+
+        echo "📦 Staging changes..."
+        git add .
+
+        echo "💾 Creating commit..."
+        git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add __ACTION_ENTITY_KEBAB_CASE__ use case test helpers"
+        if [ $? -ne 0 ]; then
+          echo "❌ COMMIT FAILED"
+          exit 1
+        fi
+        echo "✅ Successfully committed"
+
+    # === REFACTORING STEP (OPTIONAL) ===
+    # OPTIONAL STEP: You can add more steps here for additional use cases, errors, or test helpers as needed.
+    - id: 'refactor-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'refactor_file'
+      description: 'Refactor __FILE_TO_MODIFY_PASCAL_CASE__ to incorporate new logic'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_referencing_symbols'
+          query: '__SYMBOL_BEING_CHANGED__'
+          description: 'Refactoring affected files.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/path/to/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+      # CRITICAL FOR RLHF SCORE: The template MUST use REPLACE/WITH format for refactor_file steps
+      # Missing these blocks will result in a CATASTROPHIC -2 score
+      # Format requirements:
+      # 1. MUST include <<<REPLACE>>> block with exact code to be replaced
+      # 2. MUST include <<<WITH>>> block with new code
+      # 3. MUST include closing tags: <<</REPLACE>>> and <<</WITH>>>
+      # 4. The code in REPLACE block must match EXACTLY what's in the file
+      template: |
+        <<<REPLACE>>>
+        // Old code to be replaced
+        export type OldType = {
+          fieldA: string;
+        }
+        <<</REPLACE>>>
+        <<<WITH>>>
+        // New code
+        export type OldType = {
+          fieldA: string;
+          newFieldB: number;
+        }
+        <<</WITH>>>
+      validation_script: |
+        echo "🔍 Running lint check..."
+        yarn lint
+        # AI-NOTE: $? is the exit code - DO NOT replace
+        if [ $? -ne 0 ]; then
+          echo "❌ LINT FAILED"
+          exit 1
+        fi
+        echo "✅ Lint passed"
+
+        echo "🧪 Running tests..."
+        yarn test --coverage
+        # AI-NOTE: $? is the exit code - DO NOT replace
+        if [ $? -ne 0 ]; then
+          echo "❌ TESTS FAILED"
+          exit 1
+        fi
+        echo "✅ Tests passed"
+
+        echo "📦 Staging changes..."
+        git add .
+
+        echo "💾 Creating commit..."
+        git commit -m "refactor(__FEATURE_NAME_KEBAB_CASE__): update __FILE_TO_MODIFY_KEBAB_CASE__"
+        if [ $? -ne 0 ]; then
+          echo "❌ COMMIT FAILED"
+          exit 1
+        fi
+        echo "✅ Successfully committed"
+
+    # === DELETE STEP (ERROR RECOVERY) ===
+    # AI-NOTE: This step is used by the AI during the self-correction loop.
+    # When a 'create_file' step fails, the AI can generate an instance of this
+    # step to delete the broken artifact before attempting a fix.
+    - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'
+      type: 'delete_file'
+      description: 'Delete file __FILE_TO_DELETE_PASCAL_CASE__ due to generation error'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_correction'
+          source: 'self'
+          description: 'Deleting artifact from failed step.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/path/to/__FILE_TO_DELETE_KEBAB_CASE__.ts'
+      # AI-NOTE: The validation_script for a delete action should verify the file is gone
+      # and then perform the standard quality checks before committing the deletion.
+      validation_script: |
+        echo "🗑️ Verifying file deletion..."
+        if [ -f "__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/path/to/__FILE_TO_DELETE_KEBAB_CASE__.ts" ]; then
+          echo "❌ ERROR: File was not deleted."
+          exit 1
+        fi
+        echo "✅ File successfully deleted."
+
+        echo "🔍 Running lint check..."
+        yarn lint
+        if [ $? -ne 0 ]; then
+          echo "❌ LINT FAILED"
+          exit 1
+        fi
+        echo "✅ Lint passed."
+
+        echo "📦 Staging changes..."
+        git add .
+
+        echo "💾 Creating commit..."
+        git commit -m "chore(__FEATURE_NAME_KEBAB_CASE__): delete broken artifact"
+        if [ $? -ne 0 ]; then
+          echo "❌ COMMIT FAILED"
+          exit 1
+        fi
+        echo "✅ Successfully committed."
+
+    # === FINAL: CREATE PULL REQUEST ===
+    - id: 'create-pull-request'
+      type: 'pull_request'
+      description: 'Create pull request for __FEATURE_NAME_PASCAL_CASE__ implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Following PR process for feature integration.'
+      action:
+        target_branch: 'main'
+        source_branch: 'feat/__FEATURE_NAME_KEBAB_CASE__'
+        title: 'feat(__FEATURE_NAME_KEBAB_CASE__): implement clean architecture layers'
+      validation_script: |
+        echo "🚀 Preparing to create pull request..."
+
+        # Push the current branch to remote
+        echo "📤 Pushing branch to remote..."
+        git push --set-upstream origin feat/__FEATURE_NAME_KEBAB_CASE__
+        if [ $? -ne 0 ]; then
+          echo "❌ ERROR: Failed to push branch to remote"
+          exit 1
+        fi
+
+        # Check if gh CLI is available
+        if ! command -v gh &> /dev/null; then
+          echo "⚠️ GitHub CLI (gh) is not installed."
+          echo "📋 Please create PR manually"
+          exit 0
+        fi
+
+        # Create the pull request
+        echo "🔄 Creating pull request..."
+        PR_BODY="## Summary
+
+        Implementation of Clean Architecture layers for __FEATURE_NAME_PASCAL_CASE__ feature.
+
+        ### Changes included:
+        - Domain layer with use case interfaces
+        - Domain errors
+        - Test helpers and mocks
+
+        ### Architecture Compliance:
+        - ✅ Clean Architecture principles
+        - ✅ No dependency violations
+        - ✅ All tests passing
+        - ✅ Lint checks passed
+        - ✅ RLHF score: +2 (PERFECT)
+
+        ### Generated by:
+        - Template: TEMPLATE.yaml
+        - Date: $(date +%Y-%m-%d)
+
+        ---
+        🤖 Generated with spec-kit-clean-architecture"
+
+        gh pr create \
+          --base main \
+          --head feat/__FEATURE_NAME_KEBAB_CASE__ \
+          --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement clean architecture layers" \
+          --body "$PR_BODY" \
+          --assignee @me
+
+        if [ $? -eq 0 ]; then
+          echo "✅ Pull request created successfully!"
+          PR_URL=$(gh pr view --json url -q .url)
+          echo "📎 Pull Request URL: $PR_URL"
+          gh pr view --web
+        else
+          echo "⚠️ Could not create PR automatically. Please create manually."
+        fi
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: IMMUTABLE DOCUMENTATION SECTIONS AHEAD.
+  # Copy these sections verbatim. The [placeholders] inside the commands
+  # are for HUMAN examples and MUST NOT be replaced by the AI.
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # TROUBLESHOOTING & RECOVERY
+  # ------------------------------------------------------------------------------
+
+  troubleshooting:
+    lint_fails:
+      - 'DO NOT commit - Fix all lint errors first'
+      - 'Check for unused imports'
+      - 'Verify proper TypeScript types'
+      - 'Ensure no console.log statements'
+      - 'Run yarn lint --fix to auto-fix when possible'
+
+    tests_fail:
+      - 'DO NOT commit - All tests must pass'
+      - 'Check if mocks match the actual interfaces'
+      - 'Verify Input/Output types are correct'
+      - 'Ensure test coverage meets requirements'
+      - 'Run specific test: yarn test [test-file-path]'
+
+    typescript_fails:
+      - 'Check all type definitions match'
+      - 'Ensure no missing imports'
+      - 'Verify interface implementations are complete'
+      - 'Run yarn tsc --noEmit to check types'
+
+  # Refactoring checklist
+  refactoring:
+    before_refactoring: |
+      # Check current status and differences
+      echo "📊 Checking current changes..."
+      git status
+      git diff
+
+      # Ensure clean working directory
+      echo "✅ Saving current work..."
+      git stash save "WIP: before refactoring"
+
+      # Create refactoring branch
+      echo "🌿 Creating refactor branch..."
+      git checkout -b refactor/[feature-name]
+
+      # Run tests to ensure starting point is stable
+      echo "🧪 Validating current state..."
+      yarn test --run
+      if [ $? -ne 0 ]; then
+        echo "❌ Tests failing before refactor - fix first!"
+        exit 1
+      fi
+      echo "✅ Ready to refactor"
+
+    during_refactoring: |
+      # After each change, check what was modified
+      echo "🔍 Reviewing changes..."
+      git diff --stat
+      git diff
+
+      # Validate the change
+      yarn lint && yarn test --run
+
+      # Commit atomically
+      git add -p  # Interactive staging
+      git commit -m "refactor([feature-name]): [specific change description]"
+
+      # Show what was changed
+      git show --stat
+
+    common_scenarios:
+      - name: 'Splitting a use case'
+        wrong_example: |
+          interface CreateUserAndSendEmail {
+            execute: (input: CreateUserAndSendEmailInput) => Promise<CreateUserAndSendEmailOutput>
+          }
+        correct_example: |
+          interface CreateUser{
+            execute: (input: CreateUserInput) => Promise<CreateUserOutput>
+          }
+          interface SendWelcomeEmail {
+            execute: (input: SendWelcomeEmailInput) => Promise<SendWelcomeEmailOutput>
+          }
+
+      - name: 'Renaming domain errors'
+        wrong_example: |
+          export class ErrorUserExists extends Error {
+            constructor() {
+              super('Error: user exists')
+              this.name = 'ErrorUserExists'
+            }
+          }
+        correct_example: |
+          export class UserAlreadyExistsError extends Error {
+            constructor() {
+              super('User with this email already exists')
+              this.name = 'UserAlreadyExistsError'
+            }
+          }
+
+  # ------------------------------------------------------------------------------
+  # LEARNING & IMPROVEMENT PATTERNS
+  # The system tracks these patterns to improve over time
+  # ------------------------------------------------------------------------------
+  learning_patterns:
+    common_errors:
+      - pattern: 'import axios'
+        fix: 'Remove external library imports from domain layer'
+        score_impact: -2
+
+      - pattern: 'CreateUserAndSend'
+        fix: 'Split into two separate use cases (SRP violation)'
+        score_impact: -1
+
+      - pattern: 'missing @domainConcept'
+        fix: 'Add domain concept documentation for +2 score'
+        score_impact: +1
+
+    success_indicators:
+      - 'Uses ubiquitous language consistently'
+      - 'Follows single responsibility principle'
+      - 'No dependency violations'
+      - 'Comprehensive test coverage'
+      - 'Clean git history with atomic commits'
+
+  # AI Guidelines from templates/DOMAIN_TEMPLATES.md
+  ai_guidelines:
+    - 'Always validate before committing: Run lint first, Run tests second, Only commit if both pass'
+    - 'If generation fails: Identify the specific error, Fix only that error, Re-run validation, Do NOT proceed until fixed'
+    - 'Follow the principle: One use case = One file = One responsibility'
+    - 'If tempted to add "And" in a use case name, split it'
+    - 'When in doubt: Choose simplicity over complexity, Split rather than combine, Ask for clarification rather than assume'
+    - 'MUST generate different case styles from the input names (e.g., "Add Item To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart, lower case=add item to cart).'
+    - 'MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__) with actual values'
+    - 'MUST NOT leave any placeholder variables in the final implementation'
+    - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery' # Adicionar esta regra para clareza extra
+    - 'MUST use vitest, NOT jest'
+    - 'MUST follow all domain rules - no business logic, no external dependencies'
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: TASK EVALUATION SECTION.
+  # After the entire execution is complete, this section will be populated by a
+  # human reviewer or an evaluation script.
+  # ------------------------------------------------------------------------------
+
+  evaluation:
+    # AI-NOTE: This final_status will be 'SUCCESS' if all steps passed, or 'FAILED' if any step failed.
+    final_status: 'PENDING' # PENDING | SUCCESS | FAILED
+    # AI-NOTE: The final_rlhf_score is calculated automatically based on execution quality
+    # -2: Catastrophic errors (architecture violations, wrong REPLACE/WITH format)
+    # -1: Runtime errors (lint, tests, git failures)
+    #  0: Low confidence (system uncertain, prevents hallucinations)
+    # +1: Good execution but missing DDD elements
+    # +2: Perfect with Clean Architecture, DDD, ubiquitous language
+    final_rlhf_score: null # -2, -1, 0, 1, 2
+    # AI-NOTE: The system automatically analyzes patterns and learns from each execution
+    # This text is enhanced by automated RLHF analysis for continuous improvement
+    reviewer_summary: |
+      - What went well:
+        - ...
+      - Areas for improvement:
+        - ...
+    # AI-NOTE: This section lists actionable suggestions for improving the master templates or prompts.
+    # This is the key to the continuous learning loop.
+    template_improvement_suggestions:
+      - target_template: 'domain.template.yaml'
+        target_step_id: 'create-use-case-__ACTION_ENTITY_KEBAB_CASE__'
+        suggestion: 'The generated mock data was too simplistic. The template should be updated to include more realistic data generation.'
+        priority: 'medium'
+
+  # End of TEMPLATE.yaml
