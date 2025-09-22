@@ -380,7 +380,10 @@
                     "type": "string"
                   },
                   "score_impact": {
-                    "type": ["number", "string"]
+                    "type": "number",
+                    "minimum": -2,
+                    "maximum": 2,
+                    "description": "Impact on RLHF score (-2 to +2)"
                   }
                 },
                 "additionalProperties": false
@@ -426,11 +429,13 @@
       "type": "object",
       "additionalProperties": {
         "type": "string"
-      }
+      },
+      "description": "Optional validation scripts for various checks (lint, tests, etc.)"
     },
     "step_defaults": {
       "type": "object",
       "required": ["status", "rlhf_score", "execution_log"],
+      "description": "Optional default values for step properties",
       "properties": {
         "status": {
           "type": "string",
@@ -489,7 +494,9 @@
               "required": ["type", "source", "description"],
               "properties": {
                 "type": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": ["external_pattern", "internal_guideline", "internal_code_analysis", "internal_correction", "quality_improvement", "architecture_fix", "external_documentation"],
+                  "description": "Type of reference for the step"
                 },
                 "source": {
                   "type": "string"
@@ -621,7 +628,10 @@
                 "type": "string"
               },
               "score_impact": {
-                "type": ["number", "string"]
+                "type": "number",
+                "minimum": -2,
+                "maximum": 2,
+                "description": "Impact on RLHF score (-2 to +2)"
               }
             },
             "additionalProperties": false
@@ -674,7 +684,9 @@
                 "type": "string"
               },
               "priority": {
-                "type": "string"
+                "type": "string",
+                "enum": ["low", "medium", "high", "critical"],
+                "description": "Priority level for the improvement suggestion"
               }
             }
           }
