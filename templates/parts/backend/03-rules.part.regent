@@ -40,11 +40,11 @@
         - 'HTTP/Database/File system operations'
         - 'Environment variables or configuration'
         - 'Console.log or any I/O operations'
-        - 'Business logic implementation'
+        - 'Implementation of business logic (only interfaces allowed)'
         - 'Validation implementations'
         - 'Error throwing or handling'
         - 'Dependency injection'
-        - 'Complex domain entities with behavior'
+        - 'Domain entities with methods/behavior (use simple data structures)'
       use_case:
         should:
           - 'Have only ONE execute() method per interface'
@@ -120,7 +120,7 @@
         - 'Contain business logic (belongs in use cases)'
         - 'Make direct HTTP calls (use data layer)'
         - 'Expose internal implementation details'
-        - 'Use custom middleware instead of Express middleware'
+        - 'Implement middleware that does not follow the Express middleware signature (req, res, next)'
 
     # Error rules
     error:
