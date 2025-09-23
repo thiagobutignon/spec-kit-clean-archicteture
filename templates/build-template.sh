@@ -18,7 +18,7 @@ OUTPUT_DIR="templates"
 TEMP_FILE="templates/.template.tmp"
 
 # Target types
-TARGETS=("backend" "frontend")
+TARGETS=("backend" "frontend" "fullstack")
 
 echo -e "${YELLOW}Building templates from modular parts...${NC}"
 
@@ -124,7 +124,8 @@ echo "# Generated at: $(date '+%Y-%m-%d %H:%M:%S')" >> "$COMBINED_TEMP"
 echo "# =============================================" >> "$COMBINED_TEMP"
 echo "" >> "$COMBINED_TEMP"
 
-# Add all parts from all directories
+# Add all parts from all directories (excluding fullstack from combined)
+# Combined template only includes backend and frontend, not fullstack
 for dir in shared backend frontend; do
     if [ -d "$PARTS_DIR/$dir" ]; then
         for part in $PARTS_DIR/$dir/*.part.regent; do
