@@ -1,0 +1,445 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Fullstack Architecture Configuration",
+  "description": "Schema for Next.js 15 fullstack architecture Clean Architecture rules and unified workflow",
+  "type": "object",
+  "required": ["architecture"],
+  "properties": {
+    "architecture": {
+      "type": "object",
+      "required": ["folder_structure", "execution_order", "dependency_rules", "principles"],
+      "properties": {
+        "folder_structure": {
+          "type": "object",
+          "required": ["use_case_slice", "feature_shared", "feature_main", "global_shared", "app_router", "api_routes"],
+          "properties": {
+            "use_case_slice": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__$",
+              "description": "Path to fullstack use case slice directory"
+            },
+            "feature_shared": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared$",
+              "description": "Path to feature-specific shared fullstack code"
+            },
+            "feature_main": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main$",
+              "description": "Path to feature main integration for fullstack"
+            },
+            "global_shared": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/shared$",
+              "description": "Path to global shared fullstack code"
+            },
+            "app_router": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/app$",
+              "description": "Path to Next.js App Router directory"
+            },
+            "api_routes": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/app/api$",
+              "description": "Path to Next.js API Routes directory"
+            }
+          }
+        },
+        "execution_order": {
+          "type": "object",
+          "required": ["description", "approach", "sequence_per_use_case", "workflow_diagram", "git_workflow_per_use_case"],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Explanation of vertical slice development approach for fullstack"
+            },
+            "approach": {
+              "type": "string",
+              "description": "Fullstack development approach description"
+            },
+            "sequence_per_use_case": {
+              "type": "object",
+              "required": ["1", "2", "3", "4", "5", "6", "7"],
+              "properties": {
+                "1": {
+                  "type": "string",
+                  "const": "domain"
+                },
+                "2": {
+                  "type": "string",
+                  "const": "data"
+                },
+                "3": {
+                  "type": "string",
+                  "const": "validation"
+                },
+                "4": {
+                  "type": "string",
+                  "const": "presentation_backend"
+                },
+                "5": {
+                  "type": "string",
+                  "const": "presentation_frontend"
+                },
+                "6": {
+                  "type": "string",
+                  "const": "main"
+                },
+                "7": {
+                  "type": "string",
+                  "const": "integration"
+                }
+              }
+            },
+            "workflow_diagram": {
+              "type": "string",
+              "description": "Mermaid diagram showing the vertical slice workflow for fullstack"
+            },
+            "git_workflow_per_use_case": {
+              "type": "object",
+              "required": [
+                "description",
+                "example_use_case",
+                "workflow_steps",
+                "domain_slice_shared",
+                "data_slice_backend",
+                "data_slice_frontend",
+                "validation_slice_shared",
+                "presentation_backend",
+                "presentation_frontend_actions",
+                "presentation_frontend_hooks",
+                "presentation_frontend_components",
+                "main_backend",
+                "main_frontend",
+                "feature_integration",
+                "app_integration",
+                "integration_testing",
+                "finalization",
+                "benefits"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "description": "Description of vertical slice development for fullstack"
+                },
+                "example_use_case": {
+                  "type": "string",
+                  "description": "Example fullstack use case for reference"
+                },
+                "workflow_steps": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Initial fullstack workflow setup steps"
+                },
+                "domain_slice_shared": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Shared domain slice implementation steps"
+                },
+                "data_slice_backend": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Backend data slice implementation steps"
+                },
+                "data_slice_frontend": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend data slice implementation steps"
+                },
+                "validation_slice_shared": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Shared validation slice implementation steps"
+                },
+                "presentation_backend": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Backend presentation layer implementation steps"
+                },
+                "presentation_frontend_actions": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend Server Actions implementation steps"
+                },
+                "presentation_frontend_hooks": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend custom hooks implementation steps"
+                },
+                "presentation_frontend_components": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend React components implementation steps"
+                },
+                "main_backend": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Backend main layer implementation steps"
+                },
+                "main_frontend": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend main layer implementation steps"
+                },
+                "feature_integration": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Feature-level integration steps"
+                },
+                "app_integration": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Next.js App Router and API Routes integration steps"
+                },
+                "integration_testing": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Fullstack integration and E2E testing steps"
+                },
+                "finalization": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Final fullstack steps and PR creation"
+                },
+                "benefits": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Benefits of vertical slice development for fullstack"
+                }
+              }
+            }
+          }
+        },
+        "dependency_rules": {
+          "type": "object",
+          "required": ["domain", "data", "validation", "presentation", "main"],
+          "properties": {
+            "domain": {
+              "$ref": "#/definitions/dependencyRule"
+            },
+            "data": {
+              "$ref": "#/definitions/dependencyRule"
+            },
+            "validation": {
+              "$ref": "#/definitions/dependencyRule"
+            },
+            "presentation": {
+              "$ref": "#/definitions/dependencyRule"
+            },
+            "main": {
+              "$ref": "#/definitions/dependencyRule"
+            }
+          }
+        },
+        "principles": {
+          "type": "object",
+          "required": ["core_principles", "communication_patterns", "design_patterns", "testing_strategy", "best_practices"],
+          "properties": {
+            "core_principles": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1,
+              "description": "Core Clean Architecture principles for fullstack"
+            },
+            "communication_patterns": {
+              "type": "object",
+              "required": ["server_actions", "api_routes", "shared_validation"],
+              "properties": {
+                "server_actions": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Server Actions communication patterns"
+                },
+                "api_routes": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "API Routes communication patterns"
+                },
+                "shared_validation": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Shared validation patterns between frontend and backend"
+                }
+              }
+            },
+            "design_patterns": {
+              "type": "object",
+              "required": ["domain", "data", "validation", "presentation", "main"],
+              "properties": {
+                "domain": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Shared domain layer design patterns"
+                },
+                "data": {
+                  "$ref": "#/definitions/splitPatterns"
+                },
+                "validation": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Shared validation layer design patterns"
+                },
+                "presentation": {
+                  "$ref": "#/definitions/splitPatterns"
+                },
+                "main": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Main layer design patterns for fullstack"
+                }
+              }
+            },
+            "testing_strategy": {
+              "type": "object",
+              "required": ["domain", "data", "validation", "presentation", "main"],
+              "properties": {
+                "domain": {
+                  "$ref": "#/definitions/testingLayer"
+                },
+                "data": {
+                  "$ref": "#/definitions/splitTestingLayer"
+                },
+                "validation": {
+                  "$ref": "#/definitions/testingLayer"
+                },
+                "presentation": {
+                  "$ref": "#/definitions/splitTestingLayer"
+                },
+                "main": {
+                  "$ref": "#/definitions/testingLayer"
+                }
+              }
+            },
+            "best_practices": {
+              "type": "object",
+              "required": ["development", "architecture", "testing", "deployment"],
+              "properties": {
+                "development": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Development best practices for fullstack"
+                },
+                "architecture": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Architecture best practices for fullstack"
+                },
+                "testing": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Testing best practices for fullstack"
+                },
+                "deployment": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Deployment best practices for fullstack"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "dependencyRule": {
+      "type": "object",
+      "required": ["can_import_from", "cannot_import_from", "notes"],
+      "properties": {
+        "can_import_from": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "cannot_import_from": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes about this layer's dependencies"
+        }
+      }
+    },
+    "testingLayer": {
+      "type": "object",
+      "required": ["approach", "coverage_target", "tools", "practices"],
+      "properties": {
+        "approach": {
+          "type": "string",
+          "description": "Testing approach for this fullstack layer"
+        },
+        "coverage_target": {
+          "type": "string",
+          "pattern": "^\\d{1,3}%$",
+          "description": "Target test coverage percentage"
+        },
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Testing tools and libraries"
+        },
+        "practices": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Testing best practices for this layer"
+        }
+      }
+    },
+    "splitTestingLayer": {
+      "type": "object",
+      "required": ["backend", "frontend"],
+      "properties": {
+        "backend": {
+          "$ref": "#/definitions/testingLayer"
+        },
+        "frontend": {
+          "$ref": "#/definitions/testingLayer"
+        }
+      }
+    },
+    "splitPatterns": {
+      "type": "object",
+      "required": ["backend", "frontend"],
+      "properties": {
+        "backend": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "frontend": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}
