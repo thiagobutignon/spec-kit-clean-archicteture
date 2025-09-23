@@ -6,14 +6,15 @@
 
   // 2. Aplica seu schema de validação a todos os arquivos .regent
   "yaml.schemas": {
-    // Schema para arquivos completos .regent
-    "./regent.schema.json": [
-      "*.regent",
-      "templates/*.regent"
-    ],
-    // Schema específico para o header part
+    // Schema específico para o header part (deve vir primeiro para ter prioridade)
     "./templates/parts/00-header-part.schema.json": [
       "templates/parts/00-header.part.regent"
+    ],
+    // Schema para arquivos completos .regent (excluindo .part.regent)
+    "./regent.schema.json": [
+      "templates/template.regent",
+      "*.regent",
+      "!*.part.regent"
     ]
 },
 "cSpell.words": [
