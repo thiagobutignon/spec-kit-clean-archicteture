@@ -1656,7 +1656,7 @@
     - 'MUST generate different case styles from the input names (e.g., "Add Item To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart, lower case=add item to cart).'
     - 'MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__) with actual values'
     - 'MUST NOT leave any placeholder variables in the final implementation'
-    - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery' # Adicionar esta regra para clareza extra
+    - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery'
     - 'MUST use vitest, NOT jest'
     - 'MUST follow all domain rules - no business logic, no external dependencies'
 
