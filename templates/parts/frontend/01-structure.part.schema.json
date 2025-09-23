@@ -35,45 +35,72 @@
           "required": ["basePath", "folders", "files"],
           "additionalProperties": false
         },
-        "features": {
+        "feature_module": {
           "type": "object",
-          "description": "Clean Architecture features structure",
+          "description": "Feature Module with Use Case Slices",
           "properties": {
             "basePath": {
               "type": "string",
-              "description": "Base path for features",
+              "description": "Base path for feature module",
               "pattern": ".*__PROJECT_NAME__.*/src/features/.*__FEATURE_NAME_KEBAB_CASE__.*"
             },
-            "layers": {
+            "use_case_slice": {
               "type": "object",
               "properties": {
-                "domain": {
-                  "$ref": "#/definitions/layer"
+                "basePath": {
+                  "type": "string",
+                  "pattern": ".*__USE_CASE_NAME_KEBAB_CASE__.*"
                 },
-                "data": {
-                  "$ref": "#/definitions/layer"
-                },
-                "infra": {
-                  "$ref": "#/definitions/layer"
-                },
-                "presentation": {
-                  "$ref": "#/definitions/layer"
-                },
-                "validation": {
-                  "$ref": "#/definitions/layer"
-                },
-                "main": {
-                  "$ref": "#/definitions/layer"
-                },
-                "tests": {
-                  "$ref": "#/definitions/layer"
+                "layers": {
+                  "type": "object",
+                  "properties": {
+                    "domain": { "$ref": "#/definitions/layer" },
+                    "data": { "$ref": "#/definitions/layer" },
+                    "presentation": { "$ref": "#/definitions/layer" },
+                    "validation": { "$ref": "#/definitions/layer" },
+                    "main": { "$ref": "#/definitions/layer" },
+                    "tests": { "$ref": "#/definitions/layer" }
+                  },
+                  "additionalProperties": false
                 }
               },
-              "required": ["domain", "data", "infra", "presentation", "validation", "main", "tests"],
+              "additionalProperties": false
+            },
+            "feature_shared": {
+              "type": "object",
+              "properties": {
+                "basePath": {
+                  "type": "string"
+                },
+                "layers": {
+                  "type": "object",
+                  "properties": {
+                    "domain": { "$ref": "#/definitions/layer" },
+                    "infra": { "$ref": "#/definitions/layer" },
+                    "presentation": { "$ref": "#/definitions/layer" }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
+            "feature_main": {
+              "type": "object",
+              "properties": {
+                "basePath": {
+                  "type": "string"
+                },
+                "folders": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
               "additionalProperties": false
             }
           },
-          "required": ["basePath", "layers"],
+          "required": ["basePath"],
           "additionalProperties": false
         },
         "shared": {
@@ -114,7 +141,7 @@
           "additionalProperties": false
         }
       },
-      "required": ["app", "features", "shared"],
+      "required": ["app", "feature_module", "shared"],
       "additionalProperties": false
     },
     "integration": {
@@ -123,33 +150,50 @@
       "properties": {
         "use_case_example": {
           "type": "object",
-          "description": "Example of isolated use case implementation",
+          "description": "Example of hybrid architecture workflow",
           "properties": {
-            "shared_models": {
+            "create_feature_structure": {
               "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "items": { "type": "string" }
             },
-            "create_user_files": {
+            "create_slice_directory": {
               "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "items": { "type": "string" }
             },
-            "modify_files": {
+            "create_slice_files": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "feature_shared_files": {
               "type": "array",
               "items": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string"
-                  },
-                  "action": {
-                    "type": "string"
+                "oneOf": [
+                  { "type": "string" },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "create_if_not_exists": { "type": "string" },
+                      "modify": { "type": "string" },
+                      "action": { "type": "string" }
+                    }
                   }
-                },
-                "required": ["file", "action"]
+                ]
+              }
+            },
+            "integrate_app_router": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  { "type": "string" },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "create_if_not_exists": { "type": "string" },
+                      "modify": { "type": "string" },
+                      "action": { "type": "string" }
+                    }
+                  }
+                ]
               }
             }
           },
@@ -182,13 +226,25 @@
               "type": "string",
               "description": "Path to import handlers from"
             },
-            "shared_ui": {
+            "use_case_composite": {
               "type": "string",
-              "description": "Path to shared UI components"
+              "description": "Path to use case composite"
             },
-            "shared_hooks": {
+            "feature_shared_model": {
               "type": "string",
-              "description": "Path to shared React hooks"
+              "description": "Path to feature shared model"
+            },
+            "used_by_slices": {
+              "type": "string",
+              "description": "Pattern for slice usage"
+            },
+            "global_shared_ui": {
+              "type": "string",
+              "description": "Path to global shared UI components"
+            },
+            "global_shared_hooks": {
+              "type": "string",
+              "description": "Path to global shared React hooks"
             }
           },
           "additionalProperties": false

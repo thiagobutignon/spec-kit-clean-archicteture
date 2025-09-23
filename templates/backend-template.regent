@@ -2,7 +2,7 @@
 # GENERATED FILE - DO NOT EDIT DIRECTLY
 # Target: backend
 # Built from parts in templates/parts
-# Generated at: 2025-09-23 16:59:20
+# Generated at: 2025-09-23 17:07:59
 # To modify, edit the part files and rebuild
 # =============================================
 
@@ -57,8 +57,8 @@ metadata:
 
 
 # --- From: backend/01-structure.part.regent ---
-  # AI-NOTE: Feature-based structure designed for AI to work on atomic "Use Case Slices"
-  # Each use case is isolated in its own files, allowing safe atomic operations
+  # AI-NOTE: Hybrid Architecture - "Feature Module with Use Case Slices"
+  # Features are modules containing atomic use case slices for domain cohesion and generation safety
 
   structure:
     # Main application structure (entry point)
@@ -66,69 +66,65 @@ metadata:
       basePath: '__PROJECT_NAME__/src'
       folders:
         - 'main'           # Application bootstrap and configuration
-        - 'shared'         # Shared code with Clean Architecture layers
+        - 'shared'         # Truly generic, app-wide shared code
         - 'features'       # Feature modules
 
-    # Feature module: Contains all code for a specific business domain (e.g., users, products)
-    # Designed for AI to work on one use case at a time without affecting others
-    features:
+    # Feature Module: Container for a business domain (e.g., user, product)
+    # __FEATURE_NAME_KEBAB_CASE__ = user, product, etc.
+    feature_module:
       basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__'
-      layers:
-        # Domain Layer: Core business rules and types
-        domain:
-          folders:
-            - 'models'        # Shared models for this feature (e.g., user-model.ts)
-            - 'usecases'      # Interfaces for each use case (e.g., create-user.ts, delete-user.ts)
-            - 'repositories'  # Interfaces for data persistence (e.g., user-repository.ts)
 
-        # Data Layer: Implements the domain use cases
-        data:
-          folders:
-            - 'usecases'      # Implementations for each use case (e.g., db-create-user.ts)
-            - 'protocols'     # Data layer specific protocols
+      # 1. Use Case Slices: Each folder is self-contained, atomic use case
+      # __USE_CASE_NAME_KEBAB_CASE__ = create-user, delete-user, etc.
+      use_case_slice:
+        basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+        layers:
+          domain:
+            folders:
+              - 'usecases'      # Interface for this specific use case
+          data:
+            folders:
+              - 'usecases'      # Implementation for this specific use case
+          presentation:
+            folders:
+              - 'controllers'   # Controller for this specific use case
+          validation:
+            folders:
+              - 'validators'    # Validator for this specific use case
+              - 'schemas'       # Schema for this specific use case
+          main:
+            folders:
+              - 'factories'     # Factory for this specific use case
+          tests:
+            folders:
+              - 'unit'          # Unit tests for this use case
+              - 'integration'   # Integration tests for this use case
 
-        # Infra Layer: External concerns like databases
-        infra:
-          folders:
-            - 'db'            # Concrete repository implementations (e.g., user-prisma-repository.ts)
-          files:
-            - 'index.ts'      # Feature infra exports
+      # 2. Feature-Specific Shared: Code shared ONLY within this feature
+      feature_shared:
+        basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+        layers:
+          domain:
+            folders:
+              - 'models'        # e.g., user-model.ts (shared by all user use cases)
+              - 'repositories'  # e.g., user-repository.ts (interface)
+              - 'errors'        # e.g., user-not-found-error.ts
+              - 'value-objects' # e.g., email-value-object.ts
+          infra:
+            folders:
+              - 'db'            # e.g., user-prisma-repository.ts (implementation)
+          presentation:
+            folders:
+              - 'protocols'     # e.g., user-http-protocols.ts
+              - 'errors'        # e.g., user-http-errors.ts
 
-        # Presentation Layer: Controllers and HTTP definitions
-        presentation:
-          folders:
-            - 'controllers'   # A controller for each use case (e.g., create-user-controller.ts)
-            - 'errors'        # Feature HTTP error definitions
-            - 'helpers'       # Feature HTTP helpers
-            - 'middlewares'   # Feature HTTP middlewares
-            - 'protocols'     # Feature HTTP protocols/interfaces
-
-        # Validation Layer: Input validation per use case
-        validation:
-          folders:
-            - 'validators'    # Validation for each use case (e.g., create-user-validator.ts)
-            - 'protocols'     # Validation protocols
-            - 'schemas'       # Validation schemas per use case
-
-        # Main Layer: Dependency injection and routing for the feature
-        main:
-          folders:
-            - 'adapters'      # Adapters for external concerns
-            - 'config'        # Feature configuration files
-            - 'decorators'    # Feature decorators
-            - 'docs'          # Feature documentation
-            - 'factories'     # A factory for each controller (e.g., create-user-controller-factory.ts)
-            - 'middlewares'   # Feature global middlewares
-            - 'routes'        # Route definitions for the feature (e.g., user-routes.ts)
-
-        tests:
-          folders:
-            - 'data'          # Feature data layer tests
-            - 'domain'        # Feature domain layer tests mocks only
-            - 'infra'         # Feature infrastructure layer tests
-            - 'presentation'  # Feature presentation layer tests
-            - 'validation'    # Feature validation layer tests
-            - 'main'          # Feature main layer tests
+      # 3. Feature Main/Integration: Connects all slices to main application
+      feature_main:
+        basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+        folders:
+          - 'routes'        # e.g., user-routes.ts (aggregates all use case routes)
+          - 'config'        # Feature-level configuration
+          - 'docs'          # Feature documentation
 
   # Integration between features and main application
   integration:
@@ -180,44 +176,65 @@ metadata:
             - 'decorators'      # Shared decorators
             - 'factories'       # Shared factories
 
-    # Example of isolated use case implementation
+    # Example of Hybrid Architecture workflow
     use_case_example:
-      # Example: Adding "create-user" use case to users feature
-      # AI works on these files atomically, without affecting other use cases
+      # Task: "Generate create-user use case for user feature"
+      # __FEATURE_NAME_KEBAB_CASE__ = user
+      # __USE_CASE_NAME_KEBAB_CASE__ = create-user
 
-      # STEP 1: Check/Create shared feature models (only if not exists)
-      shared_models:
-        - 'src/features/users/domain/models/user-model.ts'
-        - 'src/features/users/domain/repositories/user-repository.ts'
+      # STEP 1: Create Feature directories (if not exist)
+      create_feature_structure:
+        - 'src/features/user/'
+        - 'src/features/user/shared/'     # Feature-specific shared code
+        - 'src/features/user/main/'       # Feature integration
 
-      # STEP 2: Create isolated use case files (atomic operation)
-      create_user_files:
-        - 'src/features/users/domain/usecases/create-user.ts'           # Interface
-        - 'src/features/users/data/usecases/db-create-user.ts'          # Implementation
-        - 'src/features/users/validation/validators/create-user-validator.ts'
-        - 'src/features/users/presentation/controllers/create-user-controller.ts'
-        - 'src/features/users/main/factories/create-user-controller-factory.ts'
+      # STEP 2: Create Use Case Slice directory (isolated)
+      create_slice_directory:
+        - 'src/features/user/create-user/' # Self-contained use case
 
-      # STEP 3: Controlled modifications (append only)
-      modify_files:
-        - file: 'src/features/users/domain/repositories/user-repository.ts'
+      # STEP 3: Create NEW files (totally isolated within slice)
+      create_slice_files:
+        - 'src/features/user/create-user/domain/usecases/create-user.ts'
+        - 'src/features/user/create-user/data/usecases/db-create-user.ts'
+        - 'src/features/user/create-user/presentation/controllers/create-user-controller.ts'
+        - 'src/features/user/create-user/validation/validators/create-user-validator.ts'
+        - 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+        - 'src/features/user/create-user/main/factories/create-user-controller-factory.ts'
+
+      # STEP 4: Check/Modify FEATURE-SPECIFIC shared code
+      feature_shared_files:
+        - create_if_not_exists: 'src/features/user/shared/domain/models/user-model.ts'
+        - create_if_not_exists: 'src/features/user/shared/domain/repositories/user-repository.ts'
+        - modify: 'src/features/user/shared/domain/repositories/user-repository.ts'
           action: 'Add add() method to interface'
-        - file: 'src/features/users/main/routes/user-routes.ts'
-          action: 'Add POST /users route importing create-user factory'
+        - create_if_not_exists: 'src/features/user/shared/infra/db/user-prisma-repository.ts'
+        - modify: 'src/features/user/shared/infra/db/user-prisma-repository.ts'
+          action: 'Implement add() method'
 
-      # RESULT: Isolated blast radius
-      # If AI fails on create-user, delete-user and update-user remain untouched
-      # Easy rollback: just revert the specific commit for this use case
+      # STEP 5: Integrate route
+      integrate_route:
+        - create_if_not_exists: 'src/features/user/main/routes/user-routes.ts'
+        - modify: 'src/features/user/main/routes/user-routes.ts'
+          action: 'Add POST /users route importing from ../create-user/main/factories'
+
+      # RESULT: Perfect isolation
+      # - Use case slice is completely isolated in its own directory
+      # - Feature-specific shared code stays within the feature
+      # - Global shared remains unpolluted
+      # - Zero risk of affecting other use cases (delete-user, update-user)
 
     example_integration:
       # How features connect to the main application
-      feature_route: 'src/features/users/main/routes/user-routes.ts'
+      feature_route: 'src/features/user/main/routes/user-routes.ts'
       imports_to: 'src/main/routes/index.ts'
 
-      feature_factory: 'src/features/users/main/factories/create-user-controller-factory.ts'
-      used_in: 'src/features/users/main/routes/user-routes.ts'
+      use_case_factory: 'src/features/user/create-user/main/factories/create-user-controller-factory.ts'
+      used_in: 'src/features/user/main/routes/user-routes.ts'
 
-      shared_protocol: 'src/shared/protocols/http.ts'
-      used_by_features: 'src/features/*/presentation/protocols'
+      feature_shared_model: 'src/features/user/shared/domain/models/user-model.ts'
+      used_by_slices: 'src/features/user/*/domain/usecases/*.ts'
+
+      global_shared_protocol: 'src/shared/protocols/http.ts'
+      used_by_features: 'src/features/*/shared/presentation/protocols'
 
 

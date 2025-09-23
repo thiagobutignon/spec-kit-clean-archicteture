@@ -28,49 +28,76 @@
           "required": ["basePath", "folders"],
           "additionalProperties": false
         },
-        "features": {
+        "feature_module": {
           "type": "object",
-          "description": "Feature-based Clean Architecture",
+          "description": "Feature Module with Use Case Slices",
           "properties": {
             "basePath": {
               "type": "string",
-              "description": "Base path for features",
+              "description": "Base path for feature module",
               "pattern": ".*__PROJECT_NAME__.*/src/features/.*__FEATURE_NAME_KEBAB_CASE__.*"
             },
-            "layers": {
+            "use_case_slice": {
               "type": "object",
               "properties": {
-                "domain": {
-                  "$ref": "#/definitions/layer"
+                "basePath": {
+                  "type": "string",
+                  "pattern": ".*__USE_CASE_NAME_KEBAB_CASE__.*"
                 },
-                "data": {
-                  "$ref": "#/definitions/layer"
-                },
-                "infra": {
-                  "$ref": "#/definitions/layer"
-                },
-                "presentation": {
-                  "$ref": "#/definitions/layer"
-                },
-                "validation": {
-                  "$ref": "#/definitions/layer"
-                },
-                "main": {
-                  "$ref": "#/definitions/layer"
-                },
-                "tests": {
-                  "$ref": "#/definitions/layer"
+                "layers": {
+                  "type": "object",
+                  "properties": {
+                    "domain": { "$ref": "#/definitions/layer" },
+                    "data": { "$ref": "#/definitions/layer" },
+                    "presentation": { "$ref": "#/definitions/layer" },
+                    "validation": { "$ref": "#/definitions/layer" },
+                    "main": { "$ref": "#/definitions/layer" },
+                    "tests": { "$ref": "#/definitions/layer" }
+                  },
+                  "additionalProperties": false
                 }
               },
-              "required": ["domain", "data", "infra", "presentation", "validation", "main", "tests"],
+              "additionalProperties": false
+            },
+            "feature_shared": {
+              "type": "object",
+              "properties": {
+                "basePath": {
+                  "type": "string"
+                },
+                "layers": {
+                  "type": "object",
+                  "properties": {
+                    "domain": { "$ref": "#/definitions/layer" },
+                    "infra": { "$ref": "#/definitions/layer" },
+                    "presentation": { "$ref": "#/definitions/layer" }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
+            "feature_main": {
+              "type": "object",
+              "properties": {
+                "basePath": {
+                  "type": "string"
+                },
+                "folders": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
               "additionalProperties": false
             }
           },
-          "required": ["basePath", "layers"],
+          "required": ["basePath"],
           "additionalProperties": false
         }
       },
-      "required": ["app", "features"],
+      "required": ["app", "feature_module"],
       "additionalProperties": false
     },
     "integration": {
@@ -130,33 +157,50 @@
         },
         "use_case_example": {
           "type": "object",
-          "description": "Example of isolated use case implementation",
+          "description": "Example of hybrid architecture workflow",
           "properties": {
-            "shared_models": {
+            "create_feature_structure": {
               "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "items": { "type": "string" }
             },
-            "create_user_files": {
+            "create_slice_directory": {
               "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "items": { "type": "string" }
             },
-            "modify_files": {
+            "create_slice_files": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "feature_shared_files": {
               "type": "array",
               "items": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string"
-                  },
-                  "action": {
-                    "type": "string"
+                "oneOf": [
+                  { "type": "string" },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "create_if_not_exists": { "type": "string" },
+                      "modify": { "type": "string" },
+                      "action": { "type": "string" }
+                    }
                   }
-                },
-                "required": ["file", "action"]
+                ]
+              }
+            },
+            "integrate_route": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  { "type": "string" },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "create_if_not_exists": { "type": "string" },
+                      "modify": { "type": "string" },
+                      "action": { "type": "string" }
+                    }
+                  }
+                ]
               }
             }
           },
