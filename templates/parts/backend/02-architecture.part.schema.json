@@ -1,0 +1,381 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Backend Architecture Configuration",
+  "description": "Schema for backend architecture Clean Architecture rules and workflow",
+  "type": "object",
+  "required": ["architecture"],
+  "properties": {
+    "architecture": {
+      "type": "object",
+      "required": ["folder_structure", "execution_order", "dependency_rules", "principles"],
+      "properties": {
+        "folder_structure": {
+          "type": "object",
+          "required": ["use_case_slice", "feature_shared", "feature_main", "global_shared", "main_server"],
+          "properties": {
+            "use_case_slice": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__$",
+              "description": "Path to use case slice directory"
+            },
+            "feature_shared": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared$",
+              "description": "Path to feature-specific shared code"
+            },
+            "feature_main": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main$",
+              "description": "Path to feature main integration"
+            },
+            "global_shared": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/shared$",
+              "description": "Path to global shared code"
+            },
+            "main_server": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/main$",
+              "description": "Path to main server directory"
+            }
+          }
+        },
+        "execution_order": {
+          "type": "object",
+          "required": ["description", "approach", "sequence_per_use_case", "workflow_diagram", "git_workflow_per_use_case"],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Explanation of vertical slice development approach"
+            },
+            "approach": {
+              "type": "string",
+              "description": "Development approach description"
+            },
+            "sequence_per_use_case": {
+              "type": "object",
+              "required": ["1", "2", "3", "4", "5", "6", "7"],
+              "properties": {
+                "1": {
+                  "type": "string",
+                  "const": "domain"
+                },
+                "2": {
+                  "type": "string",
+                  "const": "data"
+                },
+                "3": {
+                  "type": "string",
+                  "const": "infra"
+                },
+                "4": {
+                  "type": "string",
+                  "const": "validation"
+                },
+                "5": {
+                  "type": "string",
+                  "const": "presentation"
+                },
+                "6": {
+                  "type": "string",
+                  "const": "main"
+                },
+                "7": {
+                  "type": "string",
+                  "const": "integration"
+                }
+              }
+            },
+            "workflow_diagram": {
+              "type": "string",
+              "description": "Mermaid diagram showing the vertical slice workflow"
+            },
+            "git_workflow_per_use_case": {
+              "type": "object",
+              "required": ["description", "example_use_case", "workflow_steps", "domain_slice", "data_slice", "infra_slice_if_needed", "validation_slice", "presentation_slice", "main_slice", "feature_integration", "integration_testing", "finalization", "benefits"],
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "description": "Description of vertical slice development"
+                },
+                "example_use_case": {
+                  "type": "string",
+                  "description": "Example use case for reference"
+                },
+                "workflow_steps": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Initial workflow setup steps"
+                },
+                "domain_slice": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Domain slice implementation steps"
+                },
+                "data_slice": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Data slice implementation steps"
+                },
+                "infra_slice_if_needed": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Infrastructure slice steps (conditional)"
+                },
+                "validation_slice": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Validation slice implementation steps"
+                },
+                "presentation_slice": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Presentation slice implementation steps"
+                },
+                "main_slice": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Main slice implementation steps"
+                },
+                "feature_integration": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Feature integration steps"
+                },
+                "integration_testing": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Integration and E2E testing steps"
+                },
+                "finalization": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Final steps and PR creation"
+                },
+                "benefits": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Benefits of vertical slice development"
+                }
+              }
+            }
+          }
+        },
+        "dependency_rules": {
+          "type": "object",
+          "required": ["domain", "data", "infra", "presentation", "validation", "main"],
+          "properties": {
+            "domain": {
+              "type": "object",
+              "required": ["can_import_from", "cannot_import_from"],
+              "properties": {
+                "can_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "cannot_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            },
+            "data": {
+              "type": "object",
+              "required": ["can_import_from", "cannot_import_from"],
+              "properties": {
+                "can_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "cannot_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            },
+            "infra": {
+              "type": "object",
+              "required": ["can_import_from", "cannot_import_from"],
+              "properties": {
+                "can_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "cannot_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            },
+            "presentation": {
+              "type": "object",
+              "required": ["can_import_from", "cannot_import_from"],
+              "properties": {
+                "can_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "cannot_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            },
+            "validation": {
+              "type": "object",
+              "required": ["can_import_from", "cannot_import_from"],
+              "properties": {
+                "can_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "cannot_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            },
+            "main": {
+              "type": "object",
+              "required": ["can_import_from", "cannot_import_from"],
+              "properties": {
+                "can_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "cannot_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "principles": {
+          "type": "object",
+          "required": ["core_principles", "design_patterns", "testing_strategy", "best_practices"],
+          "properties": {
+            "core_principles": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1,
+              "description": "Core Clean Architecture principles"
+            },
+            "design_patterns": {
+              "type": "object",
+              "required": ["domain", "data", "infra", "presentation", "validation", "main"],
+              "properties": {
+                "domain": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Domain layer design patterns"
+                },
+                "data": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Data layer design patterns"
+                },
+                "infra": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Infrastructure layer design patterns"
+                },
+                "presentation": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Presentation layer design patterns for backend"
+                },
+                "validation": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Validation layer design patterns"
+                },
+                "main": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Main layer design patterns for backend"
+                }
+              }
+            },
+            "testing_strategy": {
+              "type": "object",
+              "required": ["domain", "data", "infra", "presentation", "validation", "main"],
+              "properties": {
+                "domain": {
+                  "$ref": "#/definitions/testingLayer"
+                },
+                "data": {
+                  "$ref": "#/definitions/testingLayer"
+                },
+                "infra": {
+                  "$ref": "#/definitions/testingLayer"
+                },
+                "presentation": {
+                  "$ref": "#/definitions/testingLayer"
+                },
+                "validation": {
+                  "$ref": "#/definitions/testingLayer"
+                },
+                "main": {
+                  "$ref": "#/definitions/testingLayer"
+                }
+              }
+            },
+            "best_practices": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1,
+              "description": "General best practices for the backend architecture"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "testingLayer": {
+      "type": "object",
+      "required": ["approach", "coverage_target", "tools", "practices"],
+      "properties": {
+        "approach": {
+          "type": "string",
+          "description": "Testing approach for this layer"
+        },
+        "coverage_target": {
+          "type": "string",
+          "pattern": "^\\d{1,3}%$",
+          "description": "Target test coverage percentage"
+        },
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Testing tools and libraries"
+        },
+        "practices": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Testing best practices for this layer"
+        }
+      }
+    }
+  }
+}
