@@ -19,7 +19,7 @@
       sequence_per_use_case:
         1: 'domain'     # Use case interface and models
         2: 'data'       # Use case implementation
-        3: 'infra'      # Repository implementation (if needed)
+        3: 'infra'      # Repository implementation (only if new repository needed in feature/shared)
         4: 'validation' # Input validation for the use case
         5: 'presentation' # Controller for the use case
         6: 'main'       # Factory and route integration
@@ -175,11 +175,13 @@
           - 'git add → git commit -m "feat(data): implement __USE_CASE__"'
 
         infra_slice_if_needed:
+          - 'IMPORTANT: Infra layer is NOT in use case slice - it goes in feature/shared'
           - 'Check if repository exists in: src/features/__FEATURE_NAME__/shared/infra/db/'
-          - 'If new repository needed:'
+          - 'Only create new repository if needed for this use case:'
           - '  Create: src/features/__FEATURE_NAME__/shared/infra/db/__ENTITY__-repository.ts'
           - '  Write repository tests → yarn test:unit → yarn lint'
-          - '  git add → git commit -m "feat(infra): add __ENTITY__ repository"'
+          - '  git add → git commit -m "feat(infra): add __ENTITY__ repository for __FEATURE__"'
+          - 'If repository already exists, skip this step entirely'
 
         validation_slice:
           - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/validation/validators/__USE_CASE__-validator.ts'
@@ -227,26 +229,32 @@
       domain:
         can_import_from: []  # Domain layer is the core - imports nothing
         cannot_import_from: ['data', 'infra', 'presentation', 'validation', 'main']
+        notes: 'Domain defines business rules and contracts - must remain framework agnostic'
 
       data:
         can_import_from: ['domain']  # Data layer implements domain interfaces
         cannot_import_from: ['infra', 'presentation', 'validation', 'main']
+        notes: 'Data orchestrates use cases but delegates infrastructure concerns to infra layer'
 
       infra:
         can_import_from: ['data', 'domain']  # Infrastructure implements data protocols
         cannot_import_from: ['presentation', 'main']
+        notes: 'Infrastructure provides concrete implementations for data layer protocols'
 
       presentation:
         can_import_from: ['domain', 'validation']  # Presentation uses domain models and validation
         cannot_import_from: ['data', 'infra', 'main']
+        notes: 'Presentation handles HTTP concerns - uses domain models and validation rules'
 
       validation:
-        can_import_from: ['presentation/protocols']  # Validation implements presentation protocols
-        cannot_import_from: ['domain', 'data', 'infra', 'main']
+        can_import_from: []  # Validation layer is independent - no imports
+        cannot_import_from: ['domain', 'data', 'infra', 'presentation', 'main']
+        notes: 'Validation is pure - implements generic validation interfaces, not presentation-specific'
 
       main:
         can_import_from: ['data', 'domain', 'infra', 'presentation', 'validation']  # Main layer composes everything
         cannot_import_from: []  # Main is the composition root
+        notes: 'Main is the composition root - wires all dependencies and creates factories'
 
     # Clean Architecture principles and practices
     principles:
