@@ -11,10 +11,9 @@
       "*.regent",
       "templates/*.regent"
     ],
-    // Schema para arquivos parciais .part.regent
-    "./regent-part.schema.json": [
-      "*.part.regent",
-      "templates/parts/*.part.regent"
+    // Schema específico para o header part
+    "./templates/parts/00-header-part.schema.json": [
+      "templates/parts/00-header.part.regent"
     ]
 },
 "cSpell.words": [
