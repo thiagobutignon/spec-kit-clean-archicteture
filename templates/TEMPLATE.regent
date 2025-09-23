@@ -70,7 +70,7 @@
 
       presentation:
         folders:
-          - 'controllers'   # Feature HTTP/GraphQL controllers
+          - 'controllers'   # Feature HTTP controllers
           - 'pages'         # Feature React pages
           - 'components'    # Feature React components
           - 'protocols'     # Feature presentation protocols
