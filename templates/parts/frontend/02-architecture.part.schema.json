@@ -1,0 +1,403 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Frontend Architecture Configuration",
+  "description": "Schema for React/Next.js frontend architecture Clean Architecture rules and workflow",
+  "type": "object",
+  "required": ["architecture"],
+  "properties": {
+    "architecture": {
+      "type": "object",
+      "required": ["folder_structure", "execution_order", "dependency_rules", "principles"],
+      "properties": {
+        "folder_structure": {
+          "type": "object",
+          "required": ["use_case_slice", "feature_shared", "feature_main", "global_shared", "app_router"],
+          "properties": {
+            "use_case_slice": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__$",
+              "description": "Path to frontend use case slice directory"
+            },
+            "feature_shared": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared$",
+              "description": "Path to feature-specific shared frontend code"
+            },
+            "feature_main": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main$",
+              "description": "Path to feature main integration for frontend"
+            },
+            "global_shared": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/shared$",
+              "description": "Path to global shared frontend code"
+            },
+            "app_router": {
+              "type": "string",
+              "pattern": "^__PROJECT_NAME__/src/app$",
+              "description": "Path to Next.js App Router directory"
+            }
+          }
+        },
+        "execution_order": {
+          "type": "object",
+          "required": ["description", "approach", "sequence_per_use_case", "workflow_diagram", "git_workflow_per_use_case"],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Explanation of vertical slice development approach for frontend"
+            },
+            "approach": {
+              "type": "string",
+              "description": "Frontend development approach description"
+            },
+            "sequence_per_use_case": {
+              "type": "object",
+              "required": ["1", "2", "3", "4", "5", "6"],
+              "properties": {
+                "1": {
+                  "type": "string",
+                  "const": "domain"
+                },
+                "2": {
+                  "type": "string",
+                  "const": "data"
+                },
+                "3": {
+                  "type": "string",
+                  "const": "validation"
+                },
+                "4": {
+                  "type": "string",
+                  "const": "presentation"
+                },
+                "5": {
+                  "type": "string",
+                  "const": "main"
+                },
+                "6": {
+                  "type": "string",
+                  "const": "integration"
+                }
+              }
+            },
+            "workflow_diagram": {
+              "type": "string",
+              "description": "Mermaid diagram showing the vertical slice workflow for frontend"
+            },
+            "git_workflow_per_use_case": {
+              "type": "object",
+              "required": [
+                "description",
+                "example_use_case",
+                "workflow_steps",
+                "domain_slice",
+                "data_slice",
+                "validation_slice",
+                "presentation_slice_actions",
+                "presentation_slice_hooks",
+                "presentation_slice_components",
+                "main_slice",
+                "feature_integration",
+                "app_router_integration",
+                "integration_testing",
+                "finalization",
+                "benefits"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "description": "Description of vertical slice development for frontend"
+                },
+                "example_use_case": {
+                  "type": "string",
+                  "description": "Example frontend use case for reference"
+                },
+                "workflow_steps": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Initial frontend workflow setup steps"
+                },
+                "domain_slice": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend domain slice implementation steps"
+                },
+                "data_slice": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend data slice implementation steps"
+                },
+                "validation_slice": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend validation slice implementation steps"
+                },
+                "presentation_slice_actions": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Server Actions implementation steps"
+                },
+                "presentation_slice_hooks": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Custom hooks implementation steps"
+                },
+                "presentation_slice_components": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "React components implementation steps"
+                },
+                "main_slice": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend main slice implementation steps"
+                },
+                "feature_integration": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Feature page integration steps"
+                },
+                "app_router_integration": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Next.js App Router integration steps"
+                },
+                "integration_testing": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend integration and E2E testing steps"
+                },
+                "finalization": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Final frontend steps and PR creation"
+                },
+                "benefits": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Benefits of vertical slice development for frontend"
+                }
+              }
+            }
+          }
+        },
+        "dependency_rules": {
+          "type": "object",
+          "required": ["domain", "data", "validation", "presentation", "main"],
+          "properties": {
+            "domain": {
+              "type": "object",
+              "required": ["can_import_from", "cannot_import_from"],
+              "properties": {
+                "can_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "cannot_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            },
+            "data": {
+              "type": "object",
+              "required": ["can_import_from", "cannot_import_from"],
+              "properties": {
+                "can_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "cannot_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            },
+            "validation": {
+              "type": "object",
+              "required": ["can_import_from", "cannot_import_from"],
+              "properties": {
+                "can_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "cannot_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            },
+            "presentation": {
+              "type": "object",
+              "required": ["can_import_from", "cannot_import_from"],
+              "properties": {
+                "can_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "cannot_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            },
+            "main": {
+              "type": "object",
+              "required": ["can_import_from", "cannot_import_from"],
+              "properties": {
+                "can_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "cannot_import_from": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "principles": {
+          "type": "object",
+          "required": ["core_principles", "design_patterns", "testing_strategy", "best_practices"],
+          "properties": {
+            "core_principles": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1,
+              "description": "Core Clean Architecture principles for frontend"
+            },
+            "design_patterns": {
+              "type": "object",
+              "required": ["domain", "data", "validation", "presentation", "main"],
+              "properties": {
+                "domain": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend domain layer design patterns"
+                },
+                "data": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend data layer design patterns"
+                },
+                "validation": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend validation layer design patterns"
+                },
+                "presentation": {
+                  "$ref": "#/definitions/presentationPatterns"
+                },
+                "main": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Frontend main layer design patterns"
+                }
+              }
+            },
+            "testing_strategy": {
+              "type": "object",
+              "required": ["domain", "data", "validation", "presentation", "main"],
+              "properties": {
+                "domain": {
+                  "$ref": "#/definitions/testingLayer"
+                },
+                "data": {
+                  "$ref": "#/definitions/testingLayer"
+                },
+                "validation": {
+                  "$ref": "#/definitions/testingLayer"
+                },
+                "presentation": {
+                  "$ref": "#/definitions/testingLayer"
+                },
+                "main": {
+                  "$ref": "#/definitions/testingLayer"
+                }
+              }
+            },
+            "best_practices": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1,
+              "description": "General best practices for frontend architecture"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "testingLayer": {
+      "type": "object",
+      "required": ["approach", "coverage_target", "tools", "practices"],
+      "properties": {
+        "approach": {
+          "type": "string",
+          "description": "Testing approach for this frontend layer"
+        },
+        "coverage_target": {
+          "type": "string",
+          "pattern": "^\\d{1,3}%$",
+          "description": "Target test coverage percentage"
+        },
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Frontend testing tools and libraries"
+        },
+        "practices": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Testing best practices for this frontend layer"
+        }
+      }
+    },
+    "presentationPatterns": {
+      "type": "object",
+      "required": ["actions", "components", "hooks"],
+      "properties": {
+        "actions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Server Actions patterns"
+        },
+        "components": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "React components patterns"
+        },
+        "hooks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Custom hooks patterns"
+        }
+      }
+    }
+  }
+}
