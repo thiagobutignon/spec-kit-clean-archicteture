@@ -24,6 +24,7 @@
           domain:
             folders:
               - 'usecases'      # Interface for this specific use case
+              - 'errors'        # Use case specific domain errors
             # Unit tests: create-user.ts + create-user.spec.ts (side by side)
           data:
             folders:
@@ -32,6 +33,7 @@
           presentation:
             folders:
               - 'controllers'   # Controller for this specific use case
+              - 'errors'        # HTTP errors specific to this use case
             # Unit tests: create-user-controller.ts + create-user-controller.spec.ts
           validation:
             folders:
@@ -145,6 +147,7 @@
         # Domain layer with unit tests
         - 'src/features/user/create-user/domain/usecases/create-user.ts'
         - 'src/features/user/create-user/domain/usecases/create-user.spec.ts'
+        - 'src/features/user/create-user/domain/errors/create-user-errors.ts'
 
         # Data layer with unit tests
         - 'src/features/user/create-user/data/usecases/db-create-user.ts'
@@ -153,6 +156,7 @@
         # Presentation layer with unit tests
         - 'src/features/user/create-user/presentation/controllers/create-user-controller.ts'
         - 'src/features/user/create-user/presentation/controllers/create-user-controller.spec.ts'
+        - 'src/features/user/create-user/presentation/errors/create-user-http-errors.ts'
 
         # Validation layer with unit tests
         - 'src/features/user/create-user/validation/validators/create-user-validator.ts'

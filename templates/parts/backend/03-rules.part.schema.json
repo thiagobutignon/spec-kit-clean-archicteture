@@ -1,0 +1,240 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Backend Rules Configuration",
+  "description": "Schema for Clean Architecture rules and patterns specific to backend development",
+  "type": "object",
+  "required": ["rules"],
+  "properties": {
+    "rules": {
+      "type": "object",
+      "required": ["domain", "data", "infra", "presentation", "error", "test_helper", "validation", "main", "reference_patterns", "learning_patterns", "required_protocols", "documentation"],
+      "properties": {
+        "domain": {
+          "$ref": "#/definitions/layerRules"
+        },
+        "data": {
+          "$ref": "#/definitions/layerRules"
+        },
+        "infra": {
+          "$ref": "#/definitions/layerRules"
+        },
+        "presentation": {
+          "$ref": "#/definitions/layerRules"
+        },
+        "error": {
+          "$ref": "#/definitions/layerRules"
+        },
+        "test_helper": {
+          "$ref": "#/definitions/layerRules"
+        },
+        "validation": {
+          "$ref": "#/definitions/layerRules"
+        },
+        "main": {
+          "$ref": "#/definitions/layerRules"
+        },
+        "reference_patterns": {
+          "type": "object",
+          "required": ["clean_architecture", "ddd_pattern", "tdd_pattern"],
+          "properties": {
+            "clean_architecture": {
+              "$ref": "#/definitions/externalPattern"
+            },
+            "ddd_pattern": {
+              "$ref": "#/definitions/externalPattern"
+            },
+            "tdd_pattern": {
+              "$ref": "#/definitions/externalPattern"
+            }
+          }
+        },
+        "learning_patterns": {
+          "type": "object",
+          "required": ["common_errors", "success_indicators"],
+          "properties": {
+            "common_errors": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/errorPattern"
+              },
+              "minItems": 1
+            },
+            "success_indicators": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          }
+        },
+        "required_protocols": {
+          "type": "object",
+          "required": ["domain", "data", "infra", "presentation", "validation", "main", "general"],
+          "properties": {
+            "domain": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "data": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "infra": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "presentation": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "validation": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "main": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "general": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          }
+        },
+        "documentation": {
+          "type": "object",
+          "required": ["domain", "data", "infra", "presentation", "validation", "main", "example_template"],
+          "properties": {
+            "domain": {
+              "$ref": "#/definitions/documentationLayer"
+            },
+            "data": {
+              "$ref": "#/definitions/documentationLayer"
+            },
+            "infra": {
+              "$ref": "#/definitions/documentationLayer"
+            },
+            "presentation": {
+              "$ref": "#/definitions/documentationLayer"
+            },
+            "validation": {
+              "$ref": "#/definitions/documentationLayer"
+            },
+            "main": {
+              "$ref": "#/definitions/documentationLayer"
+            },
+            "example_template": {
+              "type": "string",
+              "description": "Example JSDoc template for backend code"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "layerRules": {
+      "type": "object",
+      "required": ["should", "should_not"],
+      "properties": {
+        "allowed": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of allowed patterns for this layer"
+        },
+        "forbidden": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of forbidden patterns for this layer"
+        },
+        "should": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "What this layer should do"
+        },
+        "should_not": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "What this layer should not do"
+        },
+        "use_case": {
+          "type": "object",
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "should_not": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          }
+        }
+      }
+    },
+    "externalPattern": {
+      "type": "object",
+      "required": ["type", "source", "query", "url", "description"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "external_pattern"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source of the pattern reference"
+        },
+        "query": {
+          "type": "string",
+          "description": "Search query for the pattern"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL reference for the pattern"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the pattern"
+        }
+      }
+    },
+    "errorPattern": {
+      "type": "object",
+      "required": ["pattern", "fix", "score_impact"],
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "Error pattern to identify"
+        },
+        "fix": {
+          "type": "string",
+          "description": "How to fix this error"
+        },
+        "score_impact": {
+          "type": "integer",
+          "description": "Impact on quality score"
+        }
+      }
+    },
+    "documentationLayer": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" },
+        "minItems": 1
+      },
+      "description": "Documentation rules for each component type in the layer"
+    }
+  }
+}
