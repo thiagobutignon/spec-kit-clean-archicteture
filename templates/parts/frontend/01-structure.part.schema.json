@@ -59,7 +59,7 @@
                     "presentation": { "$ref": "#/definitions/layer" },
                     "validation": { "$ref": "#/definitions/layer" },
                     "main": { "$ref": "#/definitions/layer" },
-                    "tests": { "$ref": "#/definitions/layer" }
+                    "__tests__": { "$ref": "#/definitions/layer" }
                   },
                   "additionalProperties": false
                 }

@@ -24,23 +24,29 @@
           domain:
             folders:
               - 'usecases'      # Interface for this specific use case
+            # Unit tests: create-user.ts + create-user.spec.ts (side by side)
           data:
             folders:
               - 'usecases'      # Implementation for this specific use case
+            # Unit tests: db-create-user.ts + db-create-user.spec.ts (side by side)
           presentation:
             folders:
               - 'controllers'   # Controller for this specific use case
+            # Unit tests: create-user-controller.ts + create-user-controller.spec.ts
           validation:
             folders:
               - 'validators'    # Validator for this specific use case
               - 'schemas'       # Schema for this specific use case
+            # Unit tests: create-user-validator.spec.ts + create-user-schema.spec.ts
           main:
             folders:
               - 'factories'     # Factory for this specific use case
-          tests:
+            # Unit tests: create-user-controller-factory.spec.ts
+          # Integration and E2E tests only (not unit tests)
+          __tests__:
             folders:
-              - 'unit'          # Unit tests for this use case
-              - 'integration'   # Integration tests for this use case
+              - 'integration'   # Tests that cross layers
+              - 'e2e'          # End-to-end tests
 
       # 2. Feature-Specific Shared: Code shared ONLY within this feature
       feature_shared:
@@ -134,14 +140,32 @@
       create_slice_directory:
         - 'src/features/user/create-user/' # Self-contained use case
 
-      # STEP 3: Create NEW files (totally isolated within slice)
+      # STEP 3: Create NEW files (totally isolated within slice) WITH TESTS
       create_slice_files:
+        # Domain layer with unit tests
         - 'src/features/user/create-user/domain/usecases/create-user.ts'
+        - 'src/features/user/create-user/domain/usecases/create-user.spec.ts'
+
+        # Data layer with unit tests
         - 'src/features/user/create-user/data/usecases/db-create-user.ts'
+        - 'src/features/user/create-user/data/usecases/db-create-user.spec.ts'
+
+        # Presentation layer with unit tests
         - 'src/features/user/create-user/presentation/controllers/create-user-controller.ts'
+        - 'src/features/user/create-user/presentation/controllers/create-user-controller.spec.ts'
+
+        # Validation layer with unit tests
         - 'src/features/user/create-user/validation/validators/create-user-validator.ts'
+        - 'src/features/user/create-user/validation/validators/create-user-validator.spec.ts'
         - 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+        - 'src/features/user/create-user/validation/schemas/create-user-schema.spec.ts'
+
+        # Main layer with unit tests
         - 'src/features/user/create-user/main/factories/create-user-controller-factory.ts'
+        - 'src/features/user/create-user/main/factories/create-user-controller-factory.spec.ts'
+
+        # Integration tests (cross-layer)
+        - 'src/features/user/create-user/__tests__/integration/create-user.integration.spec.ts'
 
       # STEP 4: Check/Modify FEATURE-SPECIFIC shared code
       feature_shared_files:

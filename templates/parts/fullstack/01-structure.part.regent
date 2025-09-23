@@ -88,12 +88,16 @@ structure:
             - 'factories'     # Dependency injection
             - 'routes'        # API route definitions
 
-        # Tests
-        tests:
+        # Integration and E2E tests only (not unit tests)
+        __tests__:
           folders:
-            - 'unit'          # Unit tests
-            - 'integration'   # Integration tests
+            - 'integration'   # Tests that cross layers
             - 'e2e'           # E2E tests (Playwright)
+        # Note: Unit tests are placed side by side with source files:
+        # - domain/usecases/create-user.ts + create-user.spec.ts
+        # - data/usecases/db-create-user.ts + db-create-user.spec.ts
+        # - presentation/components/create-user-form.tsx + create-user-form.spec.tsx
+        # - presentation/handlers/create-user-handler.ts + create-user-handler.spec.ts
 
     # 2. Feature-Specific Shared: Code shared within this feature
     feature_shared:
@@ -217,35 +221,52 @@ integration:
     create_slice_directory:
       - 'src/features/user/create-user/'
 
-    # STEP 3: Create slice files (Frontend + Backend)
+    # STEP 3: Create slice files (Frontend + Backend) WITH TESTS
     create_slice_files:
-      # Domain (shared)
+      # Domain (shared) with unit tests
       - 'src/features/user/create-user/domain/entities/user.ts'
+      - 'src/features/user/create-user/domain/entities/user.spec.ts'
       - 'src/features/user/create-user/domain/usecases/create-user.ts'
+      - 'src/features/user/create-user/domain/usecases/create-user.spec.ts'
       - 'src/features/user/create-user/domain/types/create-user-dto.ts'
 
-      # Data
+      # Data with unit tests
       - 'src/features/user/create-user/data/usecases/db-create-user.ts'
+      - 'src/features/user/create-user/data/usecases/db-create-user.spec.ts'
       - 'src/features/user/create-user/data/mappers/user-mapper.ts'
+      - 'src/features/user/create-user/data/mappers/user-mapper.spec.ts'
 
-      # Infrastructure
+      # Infrastructure with unit tests
       - 'src/features/user/create-user/infra/db/create-user-repository.ts'
+      - 'src/features/user/create-user/infra/db/create-user-repository.spec.ts'
 
-      # Validation (shared frontend/backend)
+      # Validation (shared frontend/backend) with unit tests
       - 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+      - 'src/features/user/create-user/validation/schemas/create-user-schema.spec.ts'
 
-      # Presentation - Frontend
+      # Presentation - Frontend with unit tests
       - 'src/features/user/create-user/presentation/components/create-user-form.tsx'
+      - 'src/features/user/create-user/presentation/components/create-user-form.spec.tsx'
       - 'src/features/user/create-user/presentation/hooks/use-create-user.ts'
+      - 'src/features/user/create-user/presentation/hooks/use-create-user.spec.ts'
       - 'src/features/user/create-user/presentation/actions/create-user-action.ts'
+      - 'src/features/user/create-user/presentation/actions/create-user-action.spec.ts'
 
-      # Presentation - Backend
+      # Presentation - Backend with unit tests
       - 'src/features/user/create-user/presentation/handlers/create-user-handler.ts'
+      - 'src/features/user/create-user/presentation/handlers/create-user-handler.spec.ts'
 
-      # Main
+      # Main with unit tests
       - 'src/features/user/create-user/main/composites/create-user-page.tsx'
+      - 'src/features/user/create-user/main/composites/create-user-page.spec.tsx'
       - 'src/features/user/create-user/main/factories/create-user-factory.ts'
+      - 'src/features/user/create-user/main/factories/create-user-factory.spec.ts'
       - 'src/features/user/create-user/main/routes/create-user-route.ts'
+      - 'src/features/user/create-user/main/routes/create-user-route.spec.ts'
+
+      # Integration and E2E tests
+      - 'src/features/user/create-user/__tests__/integration/create-user.integration.spec.ts'
+      - 'src/features/user/create-user/__tests__/e2e/create-user.e2e.spec.ts'
 
     # STEP 4: Feature shared files
     feature_shared_files:
