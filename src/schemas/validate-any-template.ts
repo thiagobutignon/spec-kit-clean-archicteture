@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 import { readFileSync } from 'fs'
-import { parse } from 'yaml'
 import { resolve } from 'path'
+import { parse } from 'yaml'
 import {
-  validateTemplate,
+  calculateQualityScore,
   detectTemplateType,
-  validateWorkflowOrder,
   findPlaceholders,
-  calculateQualityScore
+  validateTemplate,
+  validateWorkflowOrder
 } from './unified-template-schema'
 
 /**

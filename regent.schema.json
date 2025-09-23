@@ -1,0 +1,787 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Regent Template Schema",
+  "description": "Schema for validating .regent template files for clean architecture generation. Note: validation_scripts and step_defaults are OPTIONAL properties that provide additional configuration when needed.",
+  "type": "object",
+  "$defs": {
+    "noPlaceholders": {
+      "description": "String that should not contain unreplaced placeholders",
+      "type": "string",
+      "not": {
+        "pattern": "__[A-Z_]+__"
+      }
+    },
+    "templateString": {
+      "description": "Template string for step templates. During template design, may contain __PLACEHOLDERS__. In final implementation, placeholders must be replaced with actual values.",
+      "type": "string",
+      "$comment": "Pattern explanation: Allows any string. Use noPlaceholders definition for fields that must not contain placeholders in final implementation. Placeholders follow the pattern __[A-Z_]+__ (e.g., __FEATURE_NAME__, __USE_CASE__)"
+    },
+    "semanticVersion": {
+      "description": "Strict semantic versioning format",
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    }
+  },
+  "$comment": "Required properties are explicitly listed. Properties like validation_scripts, step_defaults, ai_guidelines, evaluation, and learning_patterns are OPTIONAL and can be omitted.",
+  "required": [
+    "version",
+    "metadata",
+    "structure",
+    "architecture",
+    "rules",
+    "steps",
+    "troubleshooting",
+    "refactoring"
+  ],
+  "properties": {
+    "version": {
+      "$ref": "#/$defs/semanticVersion",
+      "description": "Semantic version of the template following SemVer 2.0.0 specification",
+      "examples": ["1.0.0", "2.1.3", "3.0.0-alpha.1", "1.0.0-beta+exp.sha.5114f85"]
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["title", "description", "source", "lastUpdated", "layers"],
+      "properties": {
+        "title": {
+          "$comment": "Should not contain placeholders in final implementation",
+          "type": "string",
+          "description": "Title of the template (placeholders should be replaced in implementation)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of what the template generates"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source file name"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Last update date in YYYY-MM-DD format (e.g., 2024-01-15)",
+          "examples": ["2024-01-15", "2023-12-31"]
+        },
+        "layers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["domain", "data", "infra", "presentation", "validation", "main"]
+          },
+          "description": "Architectural layers implemented by this template (at least one required)"
+        },
+        "ubiquitousLanguage": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["term", "definition"],
+            "properties": {
+              "term": {
+                "type": "string",
+                "description": "Domain term",
+                "examples": ["User", "Account", "Authentication"]
+              },
+              "definition": {
+                "type": "string",
+                "description": "Business definition of the term",
+                "examples": [
+                  "A person who has registered in the system",
+                  "The representation of a user's identity and permissions",
+                  "The process of verifying a user's identity"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "$comment": "Example: [{term: 'User', definition: 'A person who has registered in the system'}]",
+          "description": "Domain-driven design ubiquitous language definitions"
+        }
+      },
+      "additionalProperties": false
+    },
+    "structure": {
+      "type": "object",
+      "required": ["basePath", "layers"],
+      "properties": {
+        "basePath": {
+          "type": "string",
+          "description": "Base path for feature files"
+        },
+        "layers": {
+          "type": "object",
+          "required": ["domain"],
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "folders": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "architecture": {
+      "type": "object",
+      "required": ["dependency_rules", "principles"],
+      "properties": {
+        "folder_structure": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "execution_order": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string"
+            },
+            "sequence": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "workflow_diagram": {
+              "type": "string",
+              "$comment": "Mermaid diagram showing the execution flow. Example: 'graph TD\\n  A[Start] --> B[Process]\\n  B --> C[End]'",
+              "description": "Mermaid diagram defining the workflow execution order"
+            },
+            "git_workflow_per_layer": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "dependency_rules": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["can_import_from", "cannot_import_from"],
+            "properties": {
+              "can_import_from": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "cannot_import_from": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "principles": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "rules": {
+      "type": "object",
+      "required": ["domain", "error", "test_helper", "reference_patterns", "learning_patterns", "required_protocols"],
+      "properties": {
+        "domain": {
+          "type": "object",
+          "required": ["allowed", "forbidden"],
+          "properties": {
+            "allowed": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "forbidden": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "use_case": {
+              "type": "object",
+              "properties": {
+                "should": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "should_not": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "data": {
+          "type": "object",
+          "required": ["should", "should_not"],
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          }
+        },
+        "infra": {
+          "type": "object",
+          "required": ["should", "should_not"],
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          }
+        },
+        "presentation": {
+          "type": "object",
+          "required": ["backend_should", "frontend_should", "should_not"],
+          "properties": {
+            "backend_should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "frontend_should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "validation": {
+          "type": "object",
+          "required": ["should", "should_not"],
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "main": {
+          "type": "object",
+          "required": ["backend_should", "frontend_should", "should_not"],
+          "properties": {
+            "backend_should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "frontend_should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "error": {
+          "type": "object",
+          "required": ["should", "should_not"],
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "test_helper": {
+          "type": "object",
+          "required": ["should", "should_not"],
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "should_not": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "reference_patterns": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["type", "source", "description"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["external_pattern", "internal_guideline", "internal_code_analysis", "internal_correction", "quality_improvement", "architecture_fix", "external_documentation"]
+              },
+              "source": {
+                "type": "string"
+              },
+              "query": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "tool": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "learning_patterns": {
+          "type": "object",
+          "required": ["common_errors", "success_indicators"],
+          "properties": {
+            "common_errors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["pattern", "fix", "score_impact"],
+                "properties": {
+                  "pattern": {
+                    "type": "string"
+                  },
+                  "fix": {
+                    "type": "string"
+                  },
+                  "score_impact": {
+                    "type": "number",
+                    "minimum": -2,
+                    "maximum": 2,
+                    "description": "Impact on RLHF score (-2 to +2)"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "success_indicators": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "required_protocols": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          ],
+          "description": "Required protocols or interfaces that must be implemented"
+        },
+        "documentation": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "validation_scripts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Optional validation scripts for various checks (lint, tests, etc.)"
+    },
+    "step_defaults": {
+      "type": "object",
+      "description": "Optional default values for step properties. When provided, all properties within are optional.",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PENDING", "SUCCESS", "FAILED", "SKIPPED"]
+        },
+        "rlhf_score": {
+          "type": ["number", "null"],
+          "minimum": -2,
+          "maximum": 2
+        },
+        "execution_log": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "description"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the step"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["branch", "folder", "create_file", "create_multiple_files", "refactor_file", "delete_file", "pull_request"],
+            "description": "Type of step to execute"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of the step"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "SUCCESS", "FAILED", "SKIPPED"],
+            "default": "PENDING"
+          },
+          "rlhf_score": {
+            "type": ["number", "null"],
+            "minimum": -2,
+            "maximum": 2,
+            "default": null
+          },
+          "execution_log": {
+            "type": "string",
+            "default": ""
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "source", "description"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["external_pattern", "internal_guideline", "internal_code_analysis", "internal_correction", "quality_improvement", "architecture_fix", "external_documentation"],
+                  "description": "Type of reference for the step"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "query": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "tool": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "action": {
+            "type": "object",
+            "$comment": "Step-specific configuration. Example for branch: {branch_name: 'feat/auth'}. Example for folder: {create_folders: {basePath: 'src', folders: ['models']}}",
+            "description": "Action-specific configuration"
+          },
+          "path": {
+            "type": "string",
+            "description": "File path for file operations"
+          },
+          "template": {
+            "type": "string",
+            "description": "Template content for file creation/modification"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "template"],
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "template": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "validation_script": {
+            "type": "string",
+            "description": "Bash script to validate the step"
+          },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "Array of step IDs that must complete successfully before this step can execute. Steps will wait for all dependencies to finish with SUCCESS status."
+          },
+          "error_handling": {
+            "type": "object",
+            "description": "Error handling configuration for the step",
+            "properties": {
+              "retry_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5,
+                "default": 0,
+                "description": "Number of retry attempts on failure"
+              },
+              "retry_delay": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 60000,
+                "default": 1000,
+                "description": "Delay in milliseconds between retry attempts"
+              },
+              "fallback_strategy": {
+                "type": "string",
+                "enum": ["skip", "abort", "manual", "rollback"],
+                "default": "abort",
+                "description": "Strategy when all retries fail"
+              },
+              "rollback_steps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true,
+                "description": "Step IDs to rollback on failure. Execution order: LIFO (Last In, First Out) - steps are rolled back in reverse order of execution. Example: if steps A->B->C were executed, rollback order is C->B->A."
+              },
+              "on_rollback_failure": {
+                "type": "string",
+                "enum": ["continue", "stop", "alert"],
+                "default": "stop",
+                "description": "Action to take if rollback itself fails. 'continue': proceed with remaining rollbacks, 'stop': halt all rollbacks, 'alert': stop and require manual intervention"
+              }
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "troubleshooting": {
+      "type": "object",
+      "required": ["lint_fails", "tests_fail", "typescript_fails"],
+      "properties": {
+        "lint_fails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tests_fail": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "typescript_fails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "refactoring": {
+      "type": "object",
+      "required": ["before_refactoring", "during_refactoring", "common_scenarios"],
+      "properties": {
+        "before_refactoring": {
+          "type": "string"
+        },
+        "during_refactoring": {
+          "type": "string"
+        },
+        "common_scenarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "wrong_example": {
+                "type": "string"
+              },
+              "correct_example": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "learning_patterns": {
+      "type": "object",
+      "properties": {
+        "common_errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["pattern", "fix", "score_impact"],
+            "properties": {
+              "pattern": {
+                "type": "string"
+              },
+              "fix": {
+                "type": "string"
+              },
+              "score_impact": {
+                "type": "number",
+                "minimum": -2,
+                "maximum": 2,
+                "description": "Impact on RLHF score (-2 to +2)"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "success_indicators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "Learning patterns for continuous improvement"
+    },
+    "ai_guidelines": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Guidelines for AI system when processing templates"
+    },
+    "evaluation": {
+      "type": "object",
+      "properties": {
+        "final_status": {
+          "type": "string",
+          "enum": ["PENDING", "SUCCESS", "FAILED"]
+        },
+        "final_rlhf_score": {
+          "type": ["number", "null"],
+          "minimum": -2,
+          "maximum": 2
+        },
+        "reviewer_summary": {
+          "type": "string"
+        },
+        "template_improvement_suggestions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "target_template": {
+                "type": "string"
+              },
+              "target_step_id": {
+                "type": "string"
+              },
+              "suggestion": {
+                "type": "string"
+              },
+              "priority": {
+                "type": "string",
+                "enum": ["low", "medium", "high", "critical"],
+                "description": "Priority level for the improvement suggestion"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
