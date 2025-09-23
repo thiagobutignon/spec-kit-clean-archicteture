@@ -45,6 +45,17 @@
         - 'Error throwing or handling'
         - 'Dependency injection'
         - 'Domain entities with methods/behavior (use simple data structures)'
+
+      should:
+        - 'Define business entities and value objects'
+        - 'Contain only interfaces and types'
+        - 'Be framework-agnostic'
+        - 'Follow domain-driven design principles'
+
+      should_not:
+        - 'Import from other layers'
+        - 'Contain implementation details'
+        - 'Have framework dependencies'
       use_case:
         should:
           - 'Have only ONE execute() method per interface'
