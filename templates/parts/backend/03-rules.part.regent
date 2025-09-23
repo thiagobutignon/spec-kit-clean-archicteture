@@ -50,14 +50,14 @@
           - 'Have only ONE execute() method per interface'
           - 'Define separate Input and Output types'
           - 'Have EXACTLY ONE responsibility (one business operation)'
-          - 'Be named with single verb describing ONE action (CreateUser, not CreateUserAndSendEmail)'
+          - 'Be named with single verb describing ONE action (__USE_CASE_NAME__, not __USE_CASE_NAME__And__OTHER_ACTION__)'
           - 'Include comprehensive JSDoc documentation'
           - 'Return Promise<Output> from execute method'
           - 'Be framework agnostic'
-          - 'Follow naming convention: VerbNoun (e.g., CreateUser, LoadSurvey, AuthenticateUser)'
+          - 'Follow naming convention: VerbNoun (e.g., __USE_CASE_EXAMPLE_1__, __USE_CASE_EXAMPLE_2__, __USE_CASE_EXAMPLE_3__)'
         should_not:
-          - 'Have multiple methods (no createUser() AND readUser() in same interface)'
-          - 'Combine multiple operations (CreateUserAndSendEmail violates SRP)'
+          - 'Have multiple methods (no __METHOD_1__() AND __METHOD_2__() in same interface)'
+          - 'Combine multiple operations (__USE_CASE_NAME__And__OTHER_ACTION__ violates SRP)'
           - 'Contain implementation logic'
           - 'Know about HTTP, databases, or external services'
           - 'Import from data, presentation, or infrastructure layers'
@@ -70,7 +70,7 @@
         - 'Implement domain use case interfaces'
         - 'Use constructor injection for dependencies'
         - 'Define protocols for external dependencies'
-        - 'Use prefix naming (DbAddAccount, RemoteAuthentication)'
+        - 'Use prefix naming (Db__USE_CASE_NAME__, Remote__USE_CASE_NAME__)'
         - 'Handle errors and status codes appropriately'
         - 'Keep business logic minimal (only orchestration)'
         - 'Return domain types, not infrastructure types'
@@ -225,7 +225,7 @@
           fix: 'Use Fetch API instead of axios in infra layer'
           score_impact: -2
 
-        - pattern: 'CreateUserAndSend'
+        - pattern: '__USE_CASE_NAME__And__OTHER_ACTION__'
           fix: 'Split into two separate use cases (SRP violation)'
           score_impact: -1
 
@@ -280,7 +280,7 @@
         - 'Validators must return Error or undefined'
         - 'ValidationComposite must use static build() method'
         - 'Validation must be synchronous (no async/await)'
-        - 'Factory functions must return ValidationComposite'
+        - 'Factory functions must return ValidationComposite (make__USE_CASE_NAME__Validation)'
 
       # Main Layer
       main:
@@ -388,44 +388,44 @@
 
       example_template: |
         /**
-        * @description Creates a new user account in the system
+        * @description __USE_CASE_DESCRIPTION__
         * @example
-        * const createUser = new CreateUserImpl(userRepository)
-        * const result = await createUser.execute({
-        *   name: 'John Doe',
-        *   email: 'john@example.com',
-        *   password: 'securePassword123'
+        * const __USE_CASE_NAME_CAMEL_CASE__ = new __USE_CASE_NAME_PASCAL_CASE__Impl(__DEPENDENCY_NAME__)
+        * const result = await __USE_CASE_NAME_CAMEL_CASE__.execute({
+        *   __INPUT_FIELD_1__: '__EXAMPLE_VALUE_1__',
+        *   __INPUT_FIELD_2__: '__EXAMPLE_VALUE_2__',
+        *   __INPUT_FIELD_3__: '__EXAMPLE_VALUE_3__'
         * })
-        * @see {@link AuthenticateUser} for user login
+        * @see {@link __RELATED_USE_CASE__} for __RELATED_DESCRIPTION__
         */
-        export interface CreateUser {
-          execute(input: CreateUserInput): Promise<CreateUserOutput>
+        export interface __USE_CASE_NAME_PASCAL_CASE__ {
+          execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output>
         }
 
         /**
-        * @typedef {Object} CreateUserInput
-        * @property {string} name - User's full name (min 3 chars)
-        * @property {string} email - Valid email address
-        * @property {string} password - Password (min 8 chars)
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Input
+        * @property {string} __INPUT_FIELD_1__ - __FIELD_1_DESCRIPTION__ (__FIELD_1_CONSTRAINTS__)
+        * @property {string} __INPUT_FIELD_2__ - __FIELD_2_DESCRIPTION__
+        * @property {string} __INPUT_FIELD_3__ - __FIELD_3_DESCRIPTION__ (__FIELD_3_CONSTRAINTS__)
         */
-        export type CreateUserInput = {
-          name: string
-          email: string
-          password: string
+        export type __USE_CASE_NAME_PASCAL_CASE__Input = {
+          __INPUT_FIELD_1__: string
+          __INPUT_FIELD_2__: string
+          __INPUT_FIELD_3__: string
         }
 
         /**
-        * @typedef {Object} CreateUserOutput
-        * @property {string} id - Generated user ID
-        * @property {string} name - User's name
-        * @property {string} email - User's email
-        * @property {Date} createdAt - Account creation timestamp
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Output
+        * @property {string} __OUTPUT_FIELD_1__ - __OUTPUT_FIELD_1_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_2__ - __OUTPUT_FIELD_2_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_3__ - __OUTPUT_FIELD_3_DESCRIPTION__
+        * @property {Date} __TIMESTAMP_FIELD__ - __TIMESTAMP_DESCRIPTION__
         */
-        export type CreateUserOutput = {
-          id: string
-          name: string
-          email: string
-          createdAt: Date
+        export type __USE_CASE_NAME_PASCAL_CASE__Output = {
+          __OUTPUT_FIELD_1__: string
+          __OUTPUT_FIELD_2__: string
+          __OUTPUT_FIELD_3__: string
+          __TIMESTAMP_FIELD__: Date
         }
 
 # ============= END RULES BACKEND SECTION =============
