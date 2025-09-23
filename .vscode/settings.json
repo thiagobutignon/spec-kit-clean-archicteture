@@ -6,13 +6,17 @@
 
   // 2. Aplica seu schema de validação a todos os arquivos .regent
   "yaml.schemas": {
-    // Schemas para arquivos part (padrão genérico para todos os parts)
-    "./templates/parts/*.part.schema.json": [
-      "templates/parts/*.part.regent"
+    // Schema específico para o header part compartilhado
+    "./templates/parts/shared/00-header.part.schema.json": [
+      "templates/parts/shared/00-header.part.regent"
     ],
-    // Schema específico para o header part
-    "./templates/parts/00-header.part.schema.json": [
-      "templates/parts/00-header.part.regent"
+    // Schema específico para backend structure part
+    "./templates/parts/backend/01-structure.part.schema.json": [
+      "templates/parts/backend/01-structure.part.regent"
+    ],
+    // Schema específico para frontend structure part
+    "./templates/parts/frontend/01-structure.part.schema.json": [
+      "templates/parts/frontend/01-structure.part.regent"
     ],
     // Schema para arquivos completos .regent (excluindo .part.regent)
     "./regent.schema.json": [

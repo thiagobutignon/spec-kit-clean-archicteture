@@ -1,0 +1,198 @@
+# ============= BEGIN STRUCTURE NEXT.JS 15 + CLEAN ARCHITECTURE =============
+  # AI-NOTE: Hybrid Architecture - "Feature Module with Use Case Slices"
+  # Features are modules containing atomic use case slices for domain cohesion and generation safety
+
+structure:
+  # App Router centralized (MUST be in src/app)
+  app:
+    basePath: '__PROJECT_NAME__/src/app'
+    folders:
+      - '(features)'              # Route group for features
+      - '__FEATURE_NAME__'        # Feature routes
+      - 'api/__FEATURE_NAME__'   # Feature API routes
+      - '_components'             # Private app components
+    files:
+      - 'layout.tsx'
+      - 'page.tsx'
+      - 'loading.tsx'             # File, not folder
+      - 'error.tsx'               # File, not folder
+      - 'not-found.tsx'           # File, not folder
+
+  # Feature Module: Container for a business domain (e.g., user, product)
+  # __FEATURE_NAME_KEBAB_CASE__ = user, product, etc.
+  feature_module:
+    basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__'
+
+    # 1. Use Case Slices: Each folder is self-contained, atomic use case
+    # __USE_CASE_NAME_KEBAB_CASE__ = create-user, get-users, etc.
+    use_case_slice:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+      layers:
+        domain:
+          folders:
+            - 'usecases'      # Interface for this specific use case
+        data:
+          folders:
+            - 'usecases'      # Implementation for this specific use case
+        presentation:
+          folders:
+            - 'actions'       # Server Action for this use case
+            - 'components'    # Components for this use case
+            - 'hooks'         # Hooks for this use case
+        validation:
+          folders:
+            - 'schemas'       # Schema for this specific use case
+            - 'validators'    # Validator for this specific use case
+        main:
+          folders:
+            - 'composites'    # Composite component for this use case
+        tests:
+          folders:
+            - 'unit'          # Unit tests for this use case
+            - 'integration'   # Integration tests for this use case
+
+    # 2. Feature-Specific Shared: Code shared ONLY within this feature
+    feature_shared:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+      layers:
+        domain:
+          folders:
+            - 'entities'      # e.g., user-entity.ts (shared by all user use cases)
+            - 'models'        # e.g., user-model.ts
+            - 'repositories'  # e.g., user-repository.ts (interface)
+            - 'errors'        # e.g., user-not-found-error.ts
+            - 'value-objects' # e.g., email-value-object.ts
+        infra:
+          folders:
+            - 'api'           # e.g., user-api-client.ts (implementation)
+            - 'services'      # e.g., user-external-service.ts
+        presentation:
+          folders:
+            - 'ui'            # Feature-specific UI components
+            - 'styles'        # Feature-specific styles
+            - 'providers'     # Feature-specific context providers
+
+    # 3. Feature Main/Integration: Connects all slices to App Router
+    feature_main:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+      folders:
+        - 'pages'         # e.g., user-page-composer.tsx (aggregates use case composites)
+        - 'config'        # Feature-level configuration
+        - 'docs'          # Feature documentation
+
+  # Shared code with Clean Architecture layers
+  shared:
+    basePath: '__PROJECT_NAME__/src/shared'
+    layers:
+      domain:
+        folders:
+          - 'errors'          # Base error classes
+          - 'protocols'       # Domain contracts/interfaces
+          - 'types'           # Shared domain types
+          - 'value-objects'   # Shared value objects
+
+      data:
+        folders:
+          - 'protocols'       # Data layer protocols
+          - 'helpers'         # Data transformation helpers
+          - 'models'          # Shared DTOs
+
+      infra:
+        folders:
+          - 'cache'           # Next.js cache utilities
+          - 'http'            # Fetch wrappers and interceptors
+          - 'storage'         # LocalStorage/SessionStorage adapters
+          - 'cookies'         # Cookie management utilities
+          - 'telemetry'       # Analytics and monitoring
+
+      presentation:
+        folders:
+          - 'components'      # Shared UI components
+          - 'hooks'           # Shared React hooks
+          - 'providers'       # Shared context providers
+          - 'ui'              # Shared shadcn/ui components
+          - 'styles'          # Global styles and utilities
+          - 'helpers'         # Presentation helpers
+
+      validation:
+        folders:
+          - 'schemas'         # Shared Zod/Yup schemas
+          - 'validators'      # Shared validation functions
+          - 'protocols'       # Validation interfaces
+
+      main:
+        folders:
+          - 'adapters'        # Shared adapters
+          - 'builders'        # Shared builders
+          - 'composites'      # Shared composites
+          - 'decorators'      # Shared decorators
+          - 'factories'       # Shared factories
+          - 'lib'             # Utility functions
+
+# Example of Hybrid Architecture workflow for Next.js
+integration:
+  use_case_example:
+    # Task: "Generate create-user use case for user feature"
+    # __FEATURE_NAME_KEBAB_CASE__ = user
+    # __USE_CASE_NAME_KEBAB_CASE__ = create-user
+
+    # STEP 1: Create Feature directories (if not exist)
+    create_feature_structure:
+      - 'src/features/user/'
+      - 'src/features/user/shared/'     # Feature-specific shared code
+      - 'src/features/user/main/'       # Feature integration
+
+    # STEP 2: Create Use Case Slice directory (isolated)
+    create_slice_directory:
+      - 'src/features/user/create-user/' # Self-contained use case
+
+    # STEP 3: Create NEW files (totally isolated within slice)
+    create_slice_files:
+      - 'src/features/user/create-user/domain/usecases/create-user.ts'
+      - 'src/features/user/create-user/data/usecases/remote-create-user.ts'
+      - 'src/features/user/create-user/presentation/actions/create-user-action.ts'
+      - 'src/features/user/create-user/presentation/components/create-user-form.tsx'
+      - 'src/features/user/create-user/presentation/hooks/use-create-user.ts'
+      - 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+      - 'src/features/user/create-user/validation/validators/create-user-validator.ts'
+      - 'src/features/user/create-user/main/composites/create-user-composite.tsx'
+
+    # STEP 4: Check/Modify FEATURE-SPECIFIC shared code
+    feature_shared_files:
+      - create_if_not_exists: 'src/features/user/shared/domain/models/user-model.ts'
+      - create_if_not_exists: 'src/features/user/shared/domain/repositories/user-repository.ts'
+      - modify: 'src/features/user/shared/domain/repositories/user-repository.ts'
+        action: 'Add create() method to interface'
+      - create_if_not_exists: 'src/features/user/shared/infra/api/user-api-client.ts'
+      - modify: 'src/features/user/shared/infra/api/user-api-client.ts'
+        action: 'Implement create() method for API calls'
+
+    # STEP 5: Integrate with App Router
+    integrate_app_router:
+      - create_if_not_exists: 'src/features/user/main/pages/user-page-composer.tsx'
+      - modify: 'src/features/user/main/pages/user-page-composer.tsx'
+        action: 'Import and compose CreateUserComposite'
+      - modify: 'src/app/(features)/user/page.tsx'
+        action: 'Import and render UserPageComposer from feature/main'
+
+    # RESULT: Perfect isolation for Next.js
+    # - Use case slice is completely isolated in its own directory
+    # - Feature-specific shared code stays within the feature
+    # - App Router imports only from feature/main
+    # - Zero risk of affecting other use cases
+
+  example_integration:
+    # How features connect to the App Router
+    app_route: 'src/app/(features)/user/page.tsx'
+    imports_from: 'src/features/user/main/pages/user-page-composer.tsx'
+
+    use_case_composite: 'src/features/user/create-user/main/composites/create-user-composite.tsx'
+    used_in: 'src/features/user/main/pages/user-page-composer.tsx'
+
+    feature_shared_model: 'src/features/user/shared/domain/models/user-model.ts'
+    used_by_slices: 'src/features/user/*/domain/usecases/*.ts'
+
+    global_shared_ui: 'src/shared/presentation/components'
+    global_shared_hooks: 'src/shared/presentation/hooks'
+
+# ============= END STRUCTURE NEXT.JS 15 + CLEAN ARCHITECTURE =============

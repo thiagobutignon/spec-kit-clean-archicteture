@@ -1,0 +1,247 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Backend Structure Part Schema",
+  "description": "Schema for backend structure with feature-based Clean Architecture",
+  "type": "object",
+  "properties": {
+    "structure": {
+      "type": "object",
+      "description": "Backend application and features structure",
+      "properties": {
+        "app": {
+          "type": "object",
+          "description": "Main application structure",
+          "properties": {
+            "basePath": {
+              "type": "string",
+              "description": "Base path for the main application",
+              "pattern": ".*__PROJECT_NAME__.*/src"
+            },
+            "folders": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": ["basePath", "folders"],
+          "additionalProperties": false
+        },
+        "feature_module": {
+          "type": "object",
+          "description": "Feature Module with Use Case Slices",
+          "properties": {
+            "basePath": {
+              "type": "string",
+              "description": "Base path for feature module",
+              "pattern": ".*__PROJECT_NAME__.*/src/features/.*__FEATURE_NAME_KEBAB_CASE__.*"
+            },
+            "use_case_slice": {
+              "type": "object",
+              "properties": {
+                "basePath": {
+                  "type": "string",
+                  "pattern": ".*__USE_CASE_NAME_KEBAB_CASE__.*"
+                },
+                "layers": {
+                  "type": "object",
+                  "properties": {
+                    "domain": { "$ref": "#/definitions/layer" },
+                    "data": { "$ref": "#/definitions/layer" },
+                    "presentation": { "$ref": "#/definitions/layer" },
+                    "validation": { "$ref": "#/definitions/layer" },
+                    "main": { "$ref": "#/definitions/layer" },
+                    "tests": { "$ref": "#/definitions/layer" }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
+            "feature_shared": {
+              "type": "object",
+              "properties": {
+                "basePath": {
+                  "type": "string"
+                },
+                "layers": {
+                  "type": "object",
+                  "properties": {
+                    "domain": { "$ref": "#/definitions/layer" },
+                    "infra": { "$ref": "#/definitions/layer" },
+                    "presentation": { "$ref": "#/definitions/layer" }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
+            "feature_main": {
+              "type": "object",
+              "properties": {
+                "basePath": {
+                  "type": "string"
+                },
+                "folders": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": ["basePath"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["app", "feature_module"],
+      "additionalProperties": false
+    },
+    "integration": {
+      "type": "object",
+      "description": "Integration configuration between features and main application",
+      "properties": {
+        "main_server": {
+          "type": "object",
+          "properties": {
+            "basePath": {
+              "type": "string"
+            },
+            "folders": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "files": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "shared": {
+          "type": "object",
+          "properties": {
+            "basePath": {
+              "type": "string"
+            },
+            "layers": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "$ref": "#/definitions/layer"
+                },
+                "data": {
+                  "$ref": "#/definitions/layer"
+                },
+                "infra": {
+                  "$ref": "#/definitions/layer"
+                },
+                "presentation": {
+                  "$ref": "#/definitions/layer"
+                },
+                "main": {
+                  "$ref": "#/definitions/layer"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "use_case_example": {
+          "type": "object",
+          "description": "Example of hybrid architecture workflow",
+          "properties": {
+            "create_feature_structure": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "create_slice_directory": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "create_slice_files": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "feature_shared_files": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  { "type": "string" },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "create_if_not_exists": { "type": "string" },
+                      "modify": { "type": "string" },
+                      "action": { "type": "string" }
+                    }
+                  }
+                ]
+              }
+            },
+            "integrate_route": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  { "type": "string" },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "create_if_not_exists": { "type": "string" },
+                      "modify": { "type": "string" },
+                      "action": { "type": "string" }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "example_integration": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["structure"],
+  "additionalProperties": true,
+  "definitions": {
+    "layer": {
+      "type": "object",
+      "properties": {
+        "folders": {
+          "type": "array",
+          "description": "List of folders for this layer",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "files": {
+          "type": "array",
+          "description": "List of files for this layer",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
