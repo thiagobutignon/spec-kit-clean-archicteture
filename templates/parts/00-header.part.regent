@@ -1,4 +1,5 @@
 # AI-NOTE: This YAML file is the single source of truth for generating clean architecture layers.
+  # PLACEHOLDER DOCUMENTATION: See ../PLACEHOLDER_REGISTRY.md for complete list of placeholders and their usage.
   # This is the MASTER TEMPLATE that will evolve to support all architectural layers.
   # Currently supports: Domain Layer
   # Future support: Application, Infrastructure, Presentation Layers
