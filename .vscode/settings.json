@@ -18,6 +18,10 @@
     "./templates/parts/frontend/01-structure.part.schema.json": [
       "templates/parts/frontend/01-structure.part.regent"
     ],
+    // Schema específico para fullstack structure part
+    "./templates/parts/fullstack/01-structure.part.schema.json": [
+      "templates/parts/fullstack/01-structure.part.regent"
+    ],
     // Schema para arquivos completos .regent (excluindo .part.regent)
     "./regent.schema.json": [
       "templates/template.regent",

@@ -1,20 +1,20 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Frontend Structure Part Schema",
-  "description": "Schema for Next.js 15 + Clean Architecture frontend structure",
+  "title": "Fullstack Next.js 15 Structure Part Schema",
+  "description": "Schema for fullstack Next.js 15 with unified frontend and backend",
   "type": "object",
   "properties": {
     "structure": {
       "type": "object",
-      "description": "Next.js 15 App Router + Clean Architecture structure",
+      "description": "Fullstack Next.js 15 application structure",
       "properties": {
         "app": {
           "type": "object",
-          "description": "Next.js 15 App Router structure",
+          "description": "Next.js 15 App Router with API Routes",
           "properties": {
             "basePath": {
               "type": "string",
-              "description": "Base path for the App Router",
+              "description": "Base path for App Router",
               "pattern": ".*__PROJECT_NAME__.*/src/app"
             },
             "folders": {
@@ -37,7 +37,7 @@
         },
         "feature_module": {
           "type": "object",
-          "description": "Feature Module with Use Case Slices",
+          "description": "Feature Module with Use Case Slices for fullstack",
           "properties": {
             "basePath": {
               "type": "string",
@@ -56,6 +56,7 @@
                   "properties": {
                     "domain": { "$ref": "#/definitions/layer" },
                     "data": { "$ref": "#/definitions/layer" },
+                    "infra": { "$ref": "#/definitions/layer" },
                     "presentation": { "$ref": "#/definitions/layer" },
                     "validation": { "$ref": "#/definitions/layer" },
                     "main": { "$ref": "#/definitions/layer" },
@@ -105,7 +106,7 @@
         },
         "shared": {
           "type": "object",
-          "description": "Shared code with Clean Architecture layers",
+          "description": "Global shared code",
           "properties": {
             "basePath": {
               "type": "string",
@@ -115,24 +116,12 @@
             "layers": {
               "type": "object",
               "properties": {
-                "domain": {
-                  "$ref": "#/definitions/layer"
-                },
-                "data": {
-                  "$ref": "#/definitions/layer"
-                },
-                "infra": {
-                  "$ref": "#/definitions/layer"
-                },
-                "presentation": {
-                  "$ref": "#/definitions/layer"
-                },
-                "validation": {
-                  "$ref": "#/definitions/layer"
-                },
-                "main": {
-                  "$ref": "#/definitions/layer"
-                }
+                "domain": { "$ref": "#/definitions/layer" },
+                "data": { "$ref": "#/definitions/layer" },
+                "infra": { "$ref": "#/definitions/layer" },
+                "presentation": { "$ref": "#/definitions/layer" },
+                "validation": { "$ref": "#/definitions/layer" },
+                "main": { "$ref": "#/definitions/layer" }
               },
               "additionalProperties": false
             }
@@ -146,11 +135,10 @@
     },
     "integration": {
       "type": "object",
-      "description": "Integration examples between App Router and features",
+      "description": "Integration examples for fullstack Next.js",
       "properties": {
         "use_case_example": {
           "type": "object",
-          "description": "Example of hybrid architecture workflow",
           "properties": {
             "create_feature_structure": {
               "type": "array",
@@ -180,7 +168,7 @@
                 ]
               }
             },
-            "integrate_app_router": {
+            "integrate_nextjs": {
               "type": "array",
               "items": {
                 "oneOf": [
@@ -199,52 +187,20 @@
           },
           "additionalProperties": false
         },
-        "example_integration": {
+        "example_flow": {
           "type": "object",
           "properties": {
-            "app_route": {
-              "type": "string",
-              "description": "Example app route path"
+            "frontend": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
             },
-            "imports_from": {
-              "type": "string",
-              "description": "Path to import components from"
+            "backend": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
             },
-            "server_action": {
-              "type": "string",
-              "description": "Path to server action"
-            },
-            "used_in": {
-              "type": "string",
-              "description": "Where the server action is used"
-            },
-            "api_route": {
-              "type": "string",
-              "description": "API route path"
-            },
-            "imports_handler_from": {
-              "type": "string",
-              "description": "Path to import handlers from"
-            },
-            "use_case_composite": {
-              "type": "string",
-              "description": "Path to use case composite"
-            },
-            "feature_shared_model": {
-              "type": "string",
-              "description": "Path to feature shared model"
-            },
-            "used_by_slices": {
-              "type": "string",
-              "description": "Pattern for slice usage"
-            },
-            "global_shared_ui": {
-              "type": "string",
-              "description": "Path to global shared UI components"
-            },
-            "global_shared_hooks": {
-              "type": "string",
-              "description": "Path to global shared React hooks"
+            "benefits": {
+              "type": "array",
+              "items": { "type": "string" }
             }
           },
           "additionalProperties": false

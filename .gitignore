@@ -2,3 +2,5 @@ node_modules
 
 # macOS
 .DS_Store
+# Generated combined template - do not edit directly
+templates/template.regent
