@@ -1,0 +1,473 @@
+# ============= BEGIN RULES FRONTEND SECTION =============
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: IMMUTABLE SECTIONS AHEAD.
+  # The sections from here until 'steps' are architectural rules.
+  # You MUST copy them verbatim into the implementation file without ANY modification.
+  #
+  # AUTOMATED LEARNING SYSTEM:
+  # The RLHF system automatically:
+  # - Tracks success/failure patterns across executions
+  # - Identifies common error types and their fixes
+  # - Applies improvements when confidence > 80%
+  # - Generates learning reports with actionable insights
+  # - Prevents hallucinations with score 0 for uncertain cases
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # RULES SECTION
+  # All architectural and pattern rules consolidated
+  # ------------------------------------------------------------------------------
+
+  rules:
+    # Domain layer rules (modern approach)
+    domain:
+      allowed:
+        - 'Type definitions and interfaces (Models)'
+        - 'Use case interfaces with single execute() method'
+        - 'Separate Input and Output types for each use case'
+        - 'Simple data models without behavior'
+        - 'JSDoc documentation for all public interfaces'
+        - 'ES2015 module exports (export type, export interface)'
+
+      forbidden:
+        - 'Multiple methods in a single use case interface'
+        - 'Combined operations (e.g., __USE_CASE_NAME__And__OTHER_ACTION__)'
+        - 'Framework dependencies (React, Next.js hooks, third-party libraries)'
+        - 'External libraries (HTTP clients, validation libraries)'
+        - 'Implementation details of any kind'
+        - 'React components or UI logic'
+        - 'HTTP/API calls or browser APIs'
+        - 'Environment variables or client configuration'
+        - 'Console.log or any side effects'
+        - 'Implementation of business logic (only interfaces allowed)'
+        - 'Validation implementations'
+        - 'Error throwing or handling'
+        - 'Dependency injection'
+        - 'Domain entities with methods/behavior (use simple data structures)'
+      use_case:
+        should:
+          - 'Have only ONE execute() method per interface'
+          - 'Define separate Input and Output types'
+          - 'Have EXACTLY ONE responsibility (one business operation)'
+          - 'Be named with single verb describing ONE action (CreateUser, not CreateUserAndSendEmail)'
+          - 'Include comprehensive JSDoc documentation'
+          - 'Return Promise<Output> from execute method'
+          - 'Be framework agnostic'
+          - 'Follow naming convention: VerbNoun (e.g., CreateUser, LoadSurvey, AuthenticateUser)'
+        should_not:
+          - 'Have multiple methods (no createUser() AND readUser() in same interface)'
+          - 'Combine multiple operations (CreateUserAndSendEmail violates SRP)'
+          - 'Contain implementation logic'
+          - 'Know about HTTP, databases, or external services'
+          - 'Import from data, presentation, or infrastructure layers'
+          - 'Have side effects'
+          - 'Use generic method names like handle(), process(), or run()'
+
+    # Data layer rules
+    data:
+      should:
+        - 'Implement domain use case interfaces'
+        - 'Use constructor injection for dependencies'
+        - 'Define protocols for external dependencies'
+        - 'Use prefix naming (Remote__USE_CASE_NAME__, Api__USE_CASE_NAME__)'
+        - 'Handle errors and status codes appropriately'
+        - 'Keep business logic minimal (only orchestration)'
+        - 'Return domain types, not infrastructure types'
+
+      should_not:
+        - 'Import from infrastructure layer directly'
+        - 'Contain complex business logic (belongs in domain)'
+        - 'Expose infrastructure details to domain'
+        - 'Use concrete implementations instead of protocols'
+        - 'Have direct API calls or browser APIs (use protocols)'
+
+    # Infrastructure layer rules (Frontend-specific)
+    infra:
+      should:
+        - 'Implement data layer protocols for frontend'
+        - 'Use native Fetch API for HTTP requests'
+        - 'Use browser localStorage/sessionStorage adapters'
+        - 'Implement cache strategies (React Query, SWR, or similar)'
+        - 'Handle network retry logic and offline scenarios'
+        - 'Use environment variables for API endpoints'
+        - 'Implement request/response interceptors'
+        - 'Handle CORS and authentication headers'
+
+      should_not:
+        - 'Import from domain or use case layers'
+        - 'Contain business logic'
+        - 'Use multiple HTTP client implementations'
+        - 'Expose HTTP-specific types to other layers'
+        - 'Use axios or other HTTP libraries (use Fetch API)'
+        - 'Access browser APIs directly from other layers'
+
+    # Presentation layer rules (Frontend-specific)
+    presentation:
+      actions:
+        should:
+          - 'Use Next.js 15+ Server Actions for form submission'
+          - 'Implement proper error handling with redirect/revalidate'
+          - 'Use Zod schemas for server-side validation'
+          - 'Return ActionResult<T> or FormState for form feedback'
+          - 'Handle authentication and authorization'
+        should_not:
+          - 'Contain business logic (delegate to use cases)'
+          - 'Make direct database calls'
+          - 'Import from infra layer directly'
+
+      components:
+        should:
+          - 'Use Shadcn/ui components with Tailwind CSS'
+          - 'Prefer Server Components over Client Components'
+          - 'Use "use client" directive only when necessary'
+          - 'Follow atomic design principles (atoms, molecules, organisms)'
+          - 'Implement proper error boundaries'
+          - 'Use TypeScript for props and state'
+        should_not:
+          - 'Use custom CSS/SASS (use Tailwind CSS)'
+          - 'Contain business logic (use custom hooks)'
+          - 'Make direct API calls (use Server Actions or hooks)'
+
+      hooks:
+        should:
+          - 'Use React hooks for state management and side effects'
+          - 'Implement custom hooks for reusable logic'
+          - 'Use Context API for feature-specific state'
+          - 'Handle loading, error, and success states'
+          - 'Follow hooks rules (no conditional calls)'
+        should_not:
+          - 'Use Redux or external state managers (use Context API)'
+          - 'Contain business logic (delegate to use cases)'
+          - 'Make direct API calls (use data layer)'
+
+    # Error rules
+    error:
+      should:
+        - 'Extend the native Error class'
+        - 'Have descriptive names ending with Error'
+        - 'Contain meaningful error messages'
+        - 'Represent business rule violations'
+        - 'Be thrown when domain invariants are violated'
+
+      should_not:
+        - 'Contain HTTP status codes'
+        - 'Include technical/implementation details'
+        - 'Expose sensitive information'
+        - 'Import external dependencies'
+
+    # Test helper rules
+    test_helper:
+      should:
+        - 'Create mock/stub implementations of use cases'
+        - 'Generate fake test data'
+        - 'Be pure functions that return consistent data'
+        - 'Help reduce test boilerplate'
+        - 'Use ONLY Vitest (Jest is prohibited)'
+
+      should_not:
+        - 'Make real API calls or database queries'
+        - 'Depend on external services'
+        - 'Contain test assertions (those belong in test files)'
+        - 'Have side effects or maintain state'
+        - 'Use Jest (use Vitest instead)'
+
+    # Validation rules (Frontend-specific)
+    validation:
+      schemas:
+        should:
+          - 'Use Zod for schema definition and validation'
+          - 'Define schemas that match domain models'
+          - 'Support both client and server-side validation'
+          - 'Include proper error messages for form fields'
+          - 'Export schemas for reuse across components'
+        should_not:
+          - 'Import from domain layer'
+          - 'Contain business logic (only validation rules)'
+          - 'Use other validation libraries (use Zod)'
+
+      validators:
+        should:
+          - 'Implement reusable field validators'
+          - 'Support synchronous validation for forms'
+          - 'Return user-friendly error messages'
+          - 'Follow Zod patterns and conventions'
+        should_not:
+          - 'Import from data or infra layers'
+          - 'Throw exceptions (return validation results)'
+          - 'Access external services for validation'
+          - 'Use async validation (prefer synchronous)'
+
+    # Main layer rules (Frontend-specific)
+    main:
+      composites:
+        should:
+          - 'Create composite components that wire all dependencies'
+          - 'Compose Server Actions with validation schemas'
+          - 'Wire use cases with data layer and validation'
+          - 'Export fully configured components ready for App Router'
+          - 'Handle error states and loading states'
+        should_not:
+          - 'Contain business logic (only composition)'
+          - 'Make direct API calls'
+          - 'Define new interfaces or types'
+
+      pages:
+        should:
+          - 'Create page composers that aggregate feature composites'
+          - 'Use Next.js 15 App Router patterns (layout, page, loading, error)'
+          - 'Implement proper SEO metadata and structured data'
+          - 'Handle authentication and route protection'
+          - 'Export React.FC components for App Router integration'
+        should_not:
+          - 'Contain business logic (delegate to composites)'
+          - 'Have direct state management (use providers)'
+          - 'Include complex algorithms or calculations'
+          - 'Store application state directly'
+
+    # Reference patterns
+    reference_patterns:
+      clean_architecture:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'clean architecture use case'
+        url: 'https://github.com/...'
+        description: 'Following Clean Architecture pattern.'
+
+      ddd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'domain driven design'
+        url: 'https://github.com/...'
+        description: 'Following DDD patterns.'
+
+      tdd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'test driven development'
+        url: 'https://github.com/...'
+        description: 'Following TDD patterns.'
+
+    # Learning patterns (Frontend-specific)
+    learning_patterns:
+      common_errors:
+        - pattern: 'import axios'
+          fix: 'Use Fetch API instead of axios in frontend infra layer'
+          score_impact: -2
+
+        - pattern: '"use client" everywhere'
+          fix: 'Prefer Server Components, use "use client" only when necessary'
+          score_impact: -1
+
+        - pattern: 'useState for server state'
+          fix: 'Use Server Actions and revalidation instead of client state'
+          score_impact: -1
+
+        - pattern: '__USE_CASE_NAME__And__OTHER_ACTION__'
+          fix: 'Split into two separate use cases (SRP violation)'
+          score_impact: -1
+
+        - pattern: 'missing Zod validation'
+          fix: 'Add Zod schema validation for forms and Server Actions'
+          score_impact: -2
+
+      success_indicators:
+        - 'Uses ubiquitous language consistently'
+        - 'Follows single responsibility principle'
+        - 'No dependency violations between layers'
+        - 'Proper Server Component vs Client Component usage'
+        - 'Comprehensive test coverage with Vitest'
+        - 'Clean git history with atomic commits'
+        - 'Effective use of Next.js App Router patterns'
+        - 'Strong TypeScript typing throughout'
+
+    # Required protocols for all layers
+    required_protocols:
+      # Domain Layer
+      domain:
+        - 'All use cases must have single execute() method'
+        - 'All use cases must define separate Input and Output types'
+        - 'All domain types must be immutable'
+        - 'No use case can perform multiple operations (SRP)'
+        - 'All models must be simple DTOs without behavior'
+
+      # Data Layer
+      data:
+        - 'All implementations must inject dependencies via constructor'
+        - 'All protocols must be interfaces, not concrete classes'
+        - 'All implementations must use Db or Remote prefix'
+        - 'Must return domain types, not infrastructure types'
+        - 'Must handle errors and map status codes appropriately'
+
+      # Infrastructure Layer
+      infra:
+        - 'All adapters must implement data layer protocols'
+        - 'HTTP clients must use Fetch API, not axios'
+        - 'Browser storage adapters must use localStorage/sessionStorage'
+        - 'All external configs must come from environment variables'
+        - 'Must not expose infrastructure types to other layers'
+
+      # Presentation Layer
+      presentation:
+        - 'Server Actions must return ActionResult<T> or FormState'
+        - 'React components must use function components with hooks'
+        - 'Pages must be Server Components by default'
+        - 'Custom hooks must follow React hooks rules'
+        - 'Components must receive dependencies as props'
+
+      # Validation Layer
+      validation:
+        - 'All schemas must use Zod for validation'
+        - 'Schemas must match domain model structure'
+        - 'Validation must be synchronous for forms'
+        - 'Must support both client and server validation'
+        - 'Error messages must be user-friendly'
+
+      # Main Layer
+      main:
+        - 'All composites must return configured components'
+        - 'Composite functions must wire all dependencies'
+        - 'No business logic allowed (only composition)'
+        - 'Pages must use Next.js App Router patterns'
+        - 'Must not define new types (use existing from other layers)'
+
+      # Cross-cutting Concerns
+      general:
+        - 'All public interfaces must have JSDoc documentation'
+        - 'All errors must extend native Error class'
+        - 'All test helpers must be pure functions'
+        - 'All tests must use Vitest, not Jest'
+        - 'No use of faker - fixed test data only'
+        - 'All components must be properly typed with TypeScript'
+        - 'Use "use client" directive only when necessary'
+
+    # Documentation standards (JSDoc)
+    documentation:
+      # Domain Layer Documentation
+      domain:
+        use_case_interface:
+          - '@description - Clear description of the use case purpose'
+          - '@example - Usage example with execute() method'
+          - '@see - Reference to related use cases or documentation'
+        input_output_types:
+          - '@typedef - Define Input and Output types'
+          - '@property - Document each field with type and constraints'
+          - '@example - Show valid input/output instances'
+        model_type:
+          - '@typedef - Define the domain model'
+          - '@property - Document each property with business rules'
+          - '@example - Show valid model instance'
+
+      # Data Layer Documentation
+      data:
+        protocol_interface:
+          - '@interface - Define protocol contracts'
+          - '@method - Document each method signature'
+          - '@throws - Document possible errors'
+        implementation_class:
+          - '@class - Describe the use case implementation'
+          - '@implements - List implemented interfaces'
+          - '@constructor - Document dependency injection'
+          - '@method - Document orchestration logic'
+
+      # Infrastructure Layer Documentation
+      infra:
+        api_client:
+          - '@class - Describe the API client purpose'
+          - '@implements - Protocol being implemented'
+          - '@dependency - External libraries used (Fetch API)'
+        storage_adapter:
+          - '@class - Browser storage adapter implementation'
+          - '@method - Document storage operations'
+          - '@throws - Storage-related errors'
+        http_client:
+          - '@class - HTTP client implementation for frontend'
+          - '@method - Document request/response handling'
+          - '@throws - Network-related errors'
+
+      # Presentation Layer Documentation
+      presentation:
+        server_action:
+          - '@function - Server Action description'
+          - '@param - Form data or action parameters'
+          - '@returns - ActionResult<T> or FormState'
+          - '@throws - Validation or business errors'
+        react_component:
+          - '@component - Component description'
+          - '@props - Component properties with TypeScript types'
+          - '@state - Component state (if Client Component)'
+          - '@returns - JSX.Element'
+        custom_hook:
+          - '@hook - Custom hook description'
+          - '@param - Hook parameters'
+          - '@returns - Hook return value with types'
+          - '@example - Usage example'
+
+      # Validation Layer Documentation
+      validation:
+        zod_schema:
+          - '@schema - Zod schema description'
+          - '@property - Document each field with validation rules'
+          - '@example - Show valid and invalid examples'
+          - '@returns - Parsed data or validation errors'
+        validator_function:
+          - '@function - Field validator description'
+          - '@param - Value to validate'
+          - '@returns - Validation result or error message'
+
+      # Main Layer Documentation
+      main:
+        composite:
+          - '@component - Composite component description'
+          - '@returns - Configured component with all dependencies'
+          - '@example - How to use the composite'
+        page_composer:
+          - '@component - Page composer description'
+          - '@param - Page props and metadata'
+          - '@returns - Next.js page component'
+        composition:
+          - '@function - Dependency composition for frontend'
+          - '@returns - Fully configured React component'
+
+      example_template: |
+        /**
+        * @description __USE_CASE_DESCRIPTION__
+        * @example
+        * const __USE_CASE_NAME_CAMEL_CASE__ = new __USE_CASE_NAME_PASCAL_CASE__Impl(__DEPENDENCY_NAME__)
+        * const result = await __USE_CASE_NAME_CAMEL_CASE__.execute({
+        *   __INPUT_FIELD_1__: '__EXAMPLE_VALUE_1__',
+        *   __INPUT_FIELD_2__: '__EXAMPLE_VALUE_2__',
+        *   __INPUT_FIELD_3__: '__EXAMPLE_VALUE_3__'
+        * })
+        * @see {@link __RELATED_USE_CASE__} for __RELATED_DESCRIPTION__
+        */
+        export interface __USE_CASE_NAME_PASCAL_CASE__ {
+          execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output>
+        }
+
+        /**
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Input
+        * @property {string} __INPUT_FIELD_1__ - __FIELD_1_DESCRIPTION__ (__FIELD_1_CONSTRAINTS__)
+        * @property {string} __INPUT_FIELD_2__ - __FIELD_2_DESCRIPTION__
+        * @property {string} __INPUT_FIELD_3__ - __FIELD_3_DESCRIPTION__ (__FIELD_3_CONSTRAINTS__)
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Input = {
+          __INPUT_FIELD_1__: string
+          __INPUT_FIELD_2__: string
+          __INPUT_FIELD_3__: string
+        }
+
+        /**
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Output
+        * @property {string} __OUTPUT_FIELD_1__ - __OUTPUT_FIELD_1_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_2__ - __OUTPUT_FIELD_2_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_3__ - __OUTPUT_FIELD_3_DESCRIPTION__
+        * @property {Date} __TIMESTAMP_FIELD__ - __TIMESTAMP_DESCRIPTION__
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Output = {
+          __OUTPUT_FIELD_1__: string
+          __OUTPUT_FIELD_2__: string
+          __OUTPUT_FIELD_3__: string
+          __TIMESTAMP_FIELD__: Date
+        }
+# ============= END RULES FRONTEND SECTION =============
