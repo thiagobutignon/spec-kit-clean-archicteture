@@ -128,6 +128,40 @@
           },
           "additionalProperties": false
         },
+        "use_case_example": {
+          "type": "object",
+          "description": "Example of isolated use case implementation",
+          "properties": {
+            "shared_models": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "create_user_files": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "modify_files": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string"
+                  },
+                  "action": {
+                    "type": "string"
+                  }
+                },
+                "required": ["file", "action"]
+              }
+            }
+          },
+          "additionalProperties": false
+        },
         "example_integration": {
           "type": "object",
           "additionalProperties": {
