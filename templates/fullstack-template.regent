@@ -2,7 +2,7 @@
 # GENERATED FILE - DO NOT EDIT DIRECTLY
 # Target: fullstack
 # Built from parts in templates/parts
-# Generated at: 2025-09-23 17:59:54
+# Generated at: 2025-09-23 18:19:16
 # To modify, edit the part files and rebuild
 # =============================================
 
@@ -113,12 +113,12 @@ structure:
             - 'dto'           # Data transfer objects
             - 'mappers'       # Data mappers
 
-        # Infrastructure Layer: External integrations
+        # Infrastructure Layer: Use case specific adapters only
+        # Note: Concrete repository implementations live in feature_shared/infra
         infra:
           folders:
-            - 'db'            # Database operations (Prisma, Drizzle, etc.)
-            - 'cache'         # Cache operations (Redis, Next.js cache)
-            - 'external'      # External API calls
+            - 'cache'         # Use case specific cache strategies
+            - 'external'      # External API calls specific to this use case
 
         # Presentation Layer: UI and API handlers
         presentation:
@@ -186,7 +186,7 @@ structure:
       basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
       folders:
         - 'pages'             # Page composers for App Router
-        - 'api'               # API route aggregation
+        - 'api-routes'        # API route aggregation (handlers for src/app/api)
         - 'config'            # Feature configuration
         - 'docs'              # Feature documentation
 
@@ -294,9 +294,8 @@ integration:
       - 'src/features/user/create-user/data/mappers/user-mapper.ts'
       - 'src/features/user/create-user/data/mappers/user-mapper.spec.ts'
 
-      # Infrastructure with unit tests
-      - 'src/features/user/create-user/infra/db/create-user-repository.ts'
-      - 'src/features/user/create-user/infra/db/create-user-repository.spec.ts'
+      # Note: Repository implementation lives in shared/infra/db
+      # Use case will receive repository interface via dependency injection
 
       # Validation (shared frontend/backend) with unit tests
       - 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
@@ -347,7 +346,7 @@ integration:
 
       # Feature main integration
       - create_if_not_exists: 'src/features/user/main/pages/user-pages.tsx'
-      - create_if_not_exists: 'src/features/user/main/api/user-api-routes.ts'
+      - create_if_not_exists: 'src/features/user/main/api-routes/user-api-routes.ts'
 
   example_flow:
     # Frontend Flow
@@ -365,8 +364,9 @@ integration:
       2_handler: 'src/features/user/create-user/presentation/handlers/create-user-handler.ts'
       3_validation: 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
       4_use_case: 'src/features/user/create-user/data/usecases/db-create-user.ts'
-      5_repository: 'src/features/user/create-user/infra/db/create-user-repository.ts'
-      6_database: 'src/features/user/shared/infra/db/prisma-user-repository.ts'
+      5_repository_interface: 'src/features/user/shared/domain/repositories/user-repository.ts'
+      6_repository_impl: 'src/features/user/shared/infra/db/prisma-user-repository.ts'
+      7_factory_injection: 'src/features/user/create-user/main/factories/create-user-factory.ts'
 
     # Benefits
     benefits:
