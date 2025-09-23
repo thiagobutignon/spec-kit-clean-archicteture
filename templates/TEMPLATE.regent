@@ -2,7 +2,7 @@
 # GENERATED FILE - DO NOT EDIT DIRECTLY
 # Combined template (backend + frontend)
 # Built from parts in templates/parts
-# Generated at: 2025-09-23 16:55:51
+# Generated at: 2025-09-23 16:59:20
 # =============================================
 
 
@@ -222,6 +222,8 @@ metadata:
 
 
 # --- From: frontend/01-structure.part.regent ---
+  # AI-NOTE: Feature-based structure designed for AI to work on atomic "Use Case Slices"
+  # Each use case is isolated in its own files, allowing safe atomic operations
 
 structure:
   # App Router centralized (MUST be in src/app)
@@ -239,40 +241,46 @@ structure:
       - 'error.tsx'               # File, not folder
       - 'not-found.tsx'           # File, not folder
 
-  # Features with Clean Architecture
+  # Feature module: Contains all code for a specific business domain (e.g., users, products)
+  # Designed for AI to work on one use case at a time without affecting others
   features:
     basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__'
     layers:
+      # Domain Layer: Core business rules and types
       domain:
         folders:
           - 'entities'      # Business entities
           - 'errors'        # Domain errors
-          - 'models'        # Types/Interfaces
-          - 'usecases'      # Use cases (interfaces)
+          - 'models'        # Shared models for this feature (e.g., user-model.ts)
+          - 'repositories'  # Interfaces for data persistence (e.g., user-repository.ts)
+          - 'usecases'      # Interfaces for each use case (e.g., create-user.ts, get-user.ts)
           - 'value-objects' # Value objects
 
+      # Data Layer: Implements the domain use cases
       data:
         folders:
           - 'models'        # DTOs
-          - 'protocols'     # Contracts/Interfaces
-          - 'usecases'      # Use case implementations
+          - 'protocols'     # Data layer specific protocols
+          - 'usecases'      # Implementations for each use case (e.g., remote-create-user.ts)
 
+      # Infra Layer: External concerns like APIs
       infra:
         folders:
-          - 'api'           # Feature-specific API integrations
-          - 'services'      # Feature-specific external services
+          - 'api'           # API client implementations (e.g., user-api-client.ts)
+          - 'services'      # External service integrations
         files:
           - 'index.ts'      # Feature infra exports
 
+      # Presentation Layer: UI components and actions per use case
       presentation:
         folders:
-          # Server-side
-          - 'actions'       # Server Actions ('use server')
-          - 'server-components' # Server Components (default)
+          # Server-side (per use case)
+          - 'actions'       # Server Actions per use case (e.g., create-user-action.ts)
+          - 'server-components' # Server Components per use case (e.g., user-list.tsx)
 
-          # Client-side
-          - 'client-components' # Client Components ('use client')
-          - 'hooks'         # React Hooks
+          # Client-side (per use case)
+          - 'client-components' # Client Components per use case (e.g., create-user-form.tsx)
+          - 'hooks'         # React Hooks per use case (e.g., use-create-user.ts)
           - 'providers'     # Context Providers
 
           # UI/Styling
@@ -281,21 +289,23 @@ structure:
 
           # DO NOT put 'app' here - it stays in src/app
 
+      # Validation Layer: Input validation per use case
       validation:
         folders:
           - 'errors'        # Validation errors
           - 'protocols'     # Validation interfaces
-          - 'schemas'       # Zod/Yup schemas
-          - 'validators'    # Validation implementations
+          - 'schemas'       # Schemas per use case (e.g., create-user-schema.ts)
+          - 'validators'    # Validators per use case (e.g., create-user-validator.ts)
 
+      # Main Layer: Composition and configuration
       main:
         folders:
-          - 'adapters'      # Adapters
+          - 'adapters'      # Adapters for external concerns
           - 'builders'      # Builders
-          - 'composites'    # Composition
+          - 'composites'    # Composition per use case (e.g., create-user-composite.tsx)
           - 'config'        # Feature configuration
           - 'decorators'    # Decorators
-          - 'factories'     # Factory methods
+          - 'factories'     # Factory methods per use case
           - 'lib'           # Feature utilities
 
       tests:
@@ -354,23 +364,52 @@ structure:
           - 'factories'       # Shared factories
           - 'lib'             # Utility functions
 
-# How to connect feature with App Router:
+# Example of isolated use case implementation
 integration:
-  example:
-    # 1. Feature route in App Router
+  use_case_example:
+    # Example: Adding "create-user" use case to users feature
+    # AI works on these files atomically, without affecting other use cases
+
+    # STEP 1: Check/Create shared feature models (only if not exists)
+    shared_models:
+      - 'src/features/users/domain/models/user-model.ts'
+      - 'src/features/users/domain/repositories/user-repository.ts'
+
+    # STEP 2: Create isolated use case files (atomic operation)
+    create_user_files:
+      - 'src/features/users/domain/usecases/create-user.ts'                    # Interface
+      - 'src/features/users/data/usecases/remote-create-user.ts'              # Implementation
+      - 'src/features/users/validation/schemas/create-user-schema.ts'         # Zod schema
+      - 'src/features/users/validation/validators/create-user-validator.ts'   # Validator
+      - 'src/features/users/presentation/actions/create-user-action.ts'       # Server Action
+      - 'src/features/users/presentation/client-components/create-user-form.tsx' # Form component
+      - 'src/features/users/presentation/hooks/use-create-user.ts'           # React Hook
+      - 'src/features/users/main/composites/create-user-composite.tsx'       # Composition
+
+    # STEP 3: Controlled modifications (append only)
+    modify_files:
+      - file: 'src/app/(features)/users/page.tsx'
+        action: 'Import and render CreateUserComposite from feature'
+      - file: 'src/features/users/domain/repositories/user-repository.ts'
+        action: 'Add create() method to interface'
+      - file: 'src/features/users/infra/api/user-api-client.ts'
+        action: 'Implement create() method for API calls'
+
+    # RESULT: Isolated blast radius
+    # If AI fails on create-user, get-user and update-user remain untouched
+    # Easy rollback: just revert the specific commit for this use case
+
+  example_integration:
+    # How features connect to the App Router
     app_route: 'src/app/(features)/users/page.tsx'
+    imports_from: 'src/features/users/main/composites/create-user-composite.tsx'
 
-    # 2. Import components from feature
-    imports_from: 'src/features/users/presentation/server-components'
+    server_action: 'src/features/users/presentation/actions/create-user-action.ts'
+    used_in: 'src/features/users/presentation/client-components/create-user-form.tsx'
 
-    # 3. Feature Server Action
-    server_action: 'src/features/users/presentation/actions/create-user.ts'
-
-    # 4. API Route
     api_route: 'src/app/api/users/route.ts'
     imports_handler_from: 'src/features/users/main/factories'
 
-    # 5. Shared components
     shared_ui: 'src/shared/presentation/components'
     shared_hooks: 'src/shared/presentation/hooks'
 
