@@ -1,0 +1,496 @@
+# ============= BEGIN ARCHITECTURE FULLSTACK SECTION =============
+
+  # ------------------------------------------------------------------------------
+  # FULLSTACK ARCHITECTURAL RULES SECTION - NEXT.JS 15 UNIFIED STACK
+  # These rules define Clean Architecture for integrated frontend + backend development
+  # ------------------------------------------------------------------------------
+
+  architecture:
+    folder_structure:
+      use_case_slice: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+      feature_shared: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+      feature_main: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+      global_shared: '__PROJECT_NAME__/src/shared'
+      app_router: '__PROJECT_NAME__/src/app'
+      api_routes: '__PROJECT_NAME__/src/app/api'
+
+    execution_order:
+      description: 'Fullstack use cases are implemented vertically, covering both frontend and backend atomically'
+      approach: 'Unified Vertical Slice Architecture - One complete fullstack feature at a time'
+      sequence_per_use_case:
+        1: 'domain'      # Shared business logic (frontend + backend)
+        2: 'data'        # Use case implementations for both client and server
+        3: 'validation'  # Shared Zod schemas (client + server validation)
+        4: 'presentation_backend'  # API handlers and middleware
+        5: 'presentation_frontend' # Server Actions, components, and hooks
+        6: 'main'        # Factories and composition
+        7: 'integration' # Connect to App Router and API Routes
+
+      workflow_diagram: |
+        ```mermaid
+        graph TD
+          Start([Start Fullstack Use Case])
+
+          %% Branch Creation
+          B1[Create Branch: feat/__FEATURE_NAME__/__USE_CASE_NAME__]
+
+          %% Use Case Slice Directory
+          UC1[Create Fullstack Use Case Directory Structure]
+
+          %% Domain Slice (Shared)
+          D1[Create Domain Entities & Interfaces]
+          D2[Write Domain Tests - TDD Red]
+          D3[Run: npm test - Expect Failure]
+          D4[Git Commit: 'test(domain): add __USE_CASE__ shared domain tests']
+
+          %% Data Slice - Backend
+          DTB1[Create Backend Use Case Implementation]
+          DTB2[Write Backend Data Tests]
+          DTB3[Run: npm test - Green]
+          DTB4[Git Commit: 'feat(data-backend): implement __USE_CASE__ server logic']
+
+          %% Data Slice - Frontend
+          DTF1[Create Frontend API Client]
+          DTF2[Write API Client Tests with MSW]
+          DTF3[Run: npm test - Green]
+          DTF4[Git Commit: 'feat(data-frontend): implement __USE_CASE__ api client']
+
+          %% Validation Slice (Shared)
+          V1[Create Shared Zod Schemas]
+          V2[Write Validation Tests]
+          V3[Run: npm test - Green]
+          V4[Git Commit: 'feat(validation): add __USE_CASE__ shared schemas']
+
+          %% Backend Presentation
+          PB1[Create API Route Handler]
+          PB2[Write Handler Tests]
+          PB3[Run: npm test - Green]
+          PB4[Git Commit: 'feat(api): add __USE_CASE__ endpoint']
+
+          %% Frontend Presentation - Server Actions
+          PSA1[Create Server Actions]
+          PSA2[Write Server Action Tests]
+          PSA3[Run: npm test - Green]
+          PSA4[Git Commit: 'feat(actions): add __USE_CASE__ server actions']
+
+          %% Frontend Presentation - Hooks
+          PH1[Create Custom Hooks]
+          PH2[Write Hook Tests]
+          PH3[Run: npm test - Green]
+          PH4[Git Commit: 'feat(hooks): add use-__USE_CASE__ hook']
+
+          %% Frontend Presentation - Components
+          PC1[Create UI Components]
+          PC2[Write Component Tests]
+          PC3[Run: npm test - Green]
+          PC4[Git Commit: 'feat(components): add __USE_CASE__ UI components']
+
+          %% Main - Backend Factory
+          MBF1[Create Backend Factory]
+          MBF2[Wire Backend Dependencies]
+          MBF3[Write Factory Tests]
+          MBF4[Run: npm test - Green]
+          MBF5[Git Commit: 'feat(main-backend): add __USE_CASE__ factory']
+
+          %% Main - Frontend Composite
+          MFC1[Create Frontend Composite]
+          MFC2[Wire Frontend Dependencies]
+          MFC3[Write Composite Tests]
+          MFC4[Run: npm test - Green]
+          MFC5[Git Commit: 'feat(main-frontend): add __USE_CASE__ composite']
+
+          %% Feature Integration
+          FI1[Update Feature Page Composer]
+          FI2[Update Feature API Routes]
+          FI3[Test Feature Integration]
+          FI4[Git Commit: 'feat(feature): integrate __USE_CASE__ in feature main']
+
+          %% App Integration
+          AI1[Update App Router Page]
+          AI2[Update API Route Registration]
+          AI3[Test App Integration]
+          AI4[Git Commit: 'feat(app): integrate __USE_CASE__ in app router']
+
+          %% Testing
+          IT1[Write Integration Tests]
+          IT2[Run: npm run test:integration]
+          IT3[Write E2E Tests with Playwright]
+          IT4[Run: npm run test:e2e]
+          IT5[Git Commit: 'test(e2e): add __USE_CASE__ fullstack e2e tests']
+
+          %% Final Steps
+          F1[Run All Tests]
+          F2[Run: npm run lint]
+          F3[Run: npm run type-check]
+          F4[Run: npm run build]
+          F5[Git Push: Push Branch]
+          F6[Create PR: '__FEATURE__/__USE_CASE__ Fullstack Implementation']
+
+          End([Fullstack Use Case Complete])
+
+          %% Flow - Vertical Development Through Fullstack Layers
+          Start --> B1
+          B1 --> UC1
+
+          %% Domain Flow (Shared)
+          UC1 --> D1 --> D2 --> D3 --> D4
+
+          %% Data Flow - Backend First, Then Frontend
+          D4 --> DTB1 --> DTB2 --> DTB3 --> DTB4
+          DTB4 --> DTF1 --> DTF2 --> DTF3 --> DTF4
+
+          %% Validation Flow (Shared)
+          DTF4 --> V1 --> V2 --> V3 --> V4
+
+          %% Backend Presentation Flow
+          V4 --> PB1 --> PB2 --> PB3 --> PB4
+
+          %% Frontend Presentation Flow
+          PB4 --> PSA1 --> PSA2 --> PSA3 --> PSA4
+          PSA4 --> PH1 --> PH2 --> PH3 --> PH4
+          PH4 --> PC1 --> PC2 --> PC3 --> PC4
+
+          %% Main Flow - Backend Then Frontend
+          PC4 --> MBF1 --> MBF2 --> MBF3 --> MBF4 --> MBF5
+          MBF5 --> MFC1 --> MFC2 --> MFC3 --> MFC4 --> MFC5
+
+          %% Integration Flows
+          MFC5 --> FI1 --> FI2 --> FI3 --> FI4
+          FI4 --> AI1 --> AI2 --> AI3 --> AI4
+
+          %% Testing Flow
+          AI4 --> IT1 --> IT2 --> IT3 --> IT4 --> IT5
+
+          %% Final Flow
+          IT5 --> F1 --> F2 --> F3 --> F4 --> F5 --> F6 --> End
+
+          classDef branch fill:#FFF9C4,stroke:#F57C00,stroke-width:2px
+          classDef domain fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px
+          classDef dataBackend fill:#E3F2FD,stroke:#2196F3,stroke-width:2px
+          classDef dataFrontend fill:#BBDEFB,stroke:#1976D2,stroke-width:2px
+          classDef validation fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
+          classDef presentationBackend fill:#FCE4EC,stroke:#E91E63,stroke-width:2px
+          classDef presentationFrontend fill:#F8BBD9,stroke:#C2185B,stroke-width:2px
+          classDef mainBackend fill:#E0F2F1,stroke:#009688,stroke-width:2px
+          classDef mainFrontend fill:#B2DFDB,stroke:#00695C,stroke-width:2px
+          classDef integration fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
+          classDef testing fill:#FFEBEE,stroke:#F44336,stroke-width:2px
+          classDef final fill:#E8EAF6,stroke:#3F51B5,stroke-width:2px
+
+          class B1,UC1 branch
+          class D1,D2,D3,D4 domain
+          class DTB1,DTB2,DTB3,DTB4 dataBackend
+          class DTF1,DTF2,DTF3,DTF4 dataFrontend
+          class V1,V2,V3,V4 validation
+          class PB1,PB2,PB3,PB4 presentationBackend
+          class PSA1,PSA2,PSA3,PSA4,PH1,PH2,PH3,PH4,PC1,PC2,PC3,PC4 presentationFrontend
+          class MBF1,MBF2,MBF3,MBF4,MBF5 mainBackend
+          class MFC1,MFC2,MFC3,MFC4,MFC5 mainFrontend
+          class FI1,FI2,FI3,FI4,AI1,AI2,AI3,AI4 integration
+          class IT1,IT2,IT3,IT4,IT5 testing
+          class F1,F2,F3,F4,F5,F6 final
+        ```
+
+      git_workflow_per_use_case:
+        description: 'Fullstack vertical slice development - complete frontend + backend feature at once'
+        example_use_case: 'create-user with form submission and API endpoint'
+
+        workflow_steps:
+          - 'git checkout -b feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'Create fullstack use case slice directory: src/features/__FEATURE_NAME__/__USE_CASE_NAME__'
+
+        domain_slice_shared:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/entities/__ENTITY__.ts'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/usecases/__USE_CASE__.ts'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/types/__USE_CASE__-dto.ts'
+          - 'Write domain tests (TDD - RED) → npm test (expect failure)'
+          - 'git add → git commit -m "test(domain): add failing tests for __USE_CASE__ shared domain"'
+          - 'Implement domain logic → npm test → npm run lint'
+          - 'git add → git commit -m "feat(domain): add __USE_CASE__ shared domain logic"'
+
+        data_slice_backend:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/data/usecases/db-__USE_CASE__.ts'
+          - 'Implement server-side use case → npm test → npm run lint'
+          - 'git add → git commit -m "feat(data-backend): implement __USE_CASE__ server logic"'
+
+        data_slice_frontend:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/data/usecases/remote-__USE_CASE__.ts'
+          - 'Implement API client → npm test (with MSW) → npm run lint'
+          - 'git add → git commit -m "feat(data-frontend): implement __USE_CASE__ api client"'
+
+        validation_slice_shared:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/validation/schemas/__USE_CASE__-schema.ts'
+          - 'Create shared Zod schemas for both client and server validation'
+          - 'Write validation tests → npm test → npm run lint'
+          - 'git add → git commit -m "feat(validation): add __USE_CASE__ shared schemas"'
+
+        presentation_backend:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/handlers/__USE_CASE__-handler.ts'
+          - 'Write API handler tests → npm test → npm run lint'
+          - 'git add → git commit -m "feat(api): add __USE_CASE__ endpoint handler"'
+
+        presentation_frontend_actions:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/actions/__USE_CASE__-action.ts'
+          - 'Write server action tests → npm test → npm run lint'
+          - 'git add → git commit -m "feat(actions): add __USE_CASE__ server actions"'
+
+        presentation_frontend_hooks:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/hooks/use-__USE_CASE__.ts'
+          - 'Write hook tests (React Testing Library) → npm test → npm run lint'
+          - 'git add → git commit -m "feat(hooks): add use-__USE_CASE__ hook"'
+
+        presentation_frontend_components:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/components/__USE_CASE__-form.tsx'
+          - 'Write component tests (React Testing Library) → npm test → npm run lint'
+          - 'git add → git commit -m "feat(components): add __USE_CASE__ form component"'
+
+        main_backend:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/main/factories/__USE_CASE__-factory.ts'
+          - 'Wire backend dependencies → npm test → npm run lint'
+          - 'git add → git commit -m "feat(main-backend): add __USE_CASE__ backend factory"'
+
+        main_frontend:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/main/composites/__USE_CASE__-composite.tsx'
+          - 'Wire frontend dependencies → npm test → npm run lint'
+          - 'git add → git commit -m "feat(main-frontend): add __USE_CASE__ frontend composite"'
+
+        feature_integration:
+          - 'Update: src/features/__FEATURE_NAME__/main/pages/__FEATURE__-page-composer.tsx'
+          - 'Update: src/features/__FEATURE_NAME__/main/api-routes/__FEATURE__-api-routes.ts'
+          - 'Test feature integration → npm test'
+          - 'git add → git commit -m "feat(feature): integrate __USE_CASE__ in feature main"'
+
+        app_integration:
+          - 'Update: src/app/(features)/__FEATURE_NAME__/page.tsx (frontend)'
+          - 'Update: src/app/api/__FEATURE_NAME__/route.ts (backend)'
+          - 'Test app integration → npm run dev → manual test both frontend and API'
+          - 'git add → git commit -m "feat(app): integrate __USE_CASE__ in app router and api"'
+
+        integration_testing:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__tests__/integration/__USE_CASE__.integration.spec.ts'
+          - 'Write fullstack integration tests → npm run test:integration'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__tests__/e2e/__USE_CASE__.e2e.spec.ts'
+          - 'Write E2E tests covering entire user flow → npm run test:e2e'
+          - 'git add → git commit -m "test(e2e): add __USE_CASE__ fullstack integration and e2e tests"'
+
+        finalization:
+          - 'Run full test suite → npm test'
+          - 'Run linting → npm run lint'
+          - 'Run type checking → npm run type-check'
+          - 'Run build → npm run build'
+          - 'git push origin feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'gh pr create --base main --title "feat(__FEATURE__): implement __USE_CASE__ fullstack feature"'
+
+        benefits:
+          - 'Single codebase: Frontend and backend developed together atomically'
+          - 'Shared validation: Zod schemas work on both client and server'
+          - 'Type safety: End-to-end TypeScript across the entire stack'
+          - 'Server Actions: Seamless client-server communication with progressive enhancement'
+          - 'API Routes: RESTful endpoints available when needed'
+          - 'Unified testing: Integration tests cover the complete user journey'
+
+    dependency_rules:
+      domain:
+        can_import_from: []  # Domain layer is the core - imports nothing
+        cannot_import_from: ['data', 'infra', 'presentation', 'validation', 'main']
+        notes: 'Shared between frontend and backend - must remain framework agnostic'
+
+      data:
+        can_import_from: ['domain']  # Data layer implements domain interfaces
+        cannot_import_from: ['presentation', 'validation', 'main']
+        notes: 'Split into backend (db operations) and frontend (api calls) implementations'
+
+      validation:
+        can_import_from: ['domain']  # Zod schemas validate domain entities and DTOs
+        cannot_import_from: ['data', 'presentation', 'main']
+        notes: 'Shared Zod schemas used by both frontend forms and backend validation'
+
+      presentation:
+        can_import_from: ['domain', 'validation']  # Presentation uses domain and validation
+        cannot_import_from: ['data', 'main']
+        notes: 'Split into backend (handlers) and frontend (actions, hooks, components)'
+
+      main:
+        can_import_from: ['data', 'domain', 'presentation', 'validation']  # Main layer composes everything
+        cannot_import_from: []  # Main is the composition root
+        notes: 'Split into backend (factories) and frontend (composites) composition'
+
+    # Clean Architecture principles adapted for Next.js fullstack
+    principles:
+      core_principles:
+        - "Unified Development: Frontend and backend share domain logic and validation"
+        - "Type Safety: End-to-end TypeScript from database to UI components"
+        - "Framework Independence: Business rules don't depend on Next.js specifics"
+        - "Testability: Each layer can be tested in isolation and integration"
+        - "Dependency Rule: Dependencies point inward toward the shared domain"
+
+      communication_patterns:
+        server_actions:
+          - "Progressive Enhancement: Forms work without JavaScript enabled"
+          - "Type Safety: Shared schemas ensure type safety across client-server boundary"
+          - "Error Handling: Unified error types from domain layer"
+          - "Validation: Same Zod schemas validate on both client and server"
+
+        api_routes:
+          - "RESTful Design: Standard HTTP methods and status codes"
+          - "Content Negotiation: Support for JSON and form data"
+          - "Middleware: Shared validation and authentication logic"
+          - "Error Responses: Consistent error format across all endpoints"
+
+        shared_validation:
+          - "Zod Schemas: Runtime validation that generates TypeScript types"
+          - "Client Validation: Immediate feedback in forms"
+          - "Server Validation: Security validation on all inputs"
+          - "Error Mapping: Transform validation errors to user-friendly messages"
+
+      design_patterns:
+        domain:
+          - "Shared Entities: Domain models used by both frontend and backend"
+          - "Interface Pattern: Use case contracts implemented differently per side"
+          - "DTO Pattern: Data transfer objects for API communication"
+          - "Error Types: Domain errors handled consistently across stack"
+          - "Value Objects: Shared validation logic for domain concepts"
+
+        data:
+          backend:
+            - "Repository Pattern: Database operations through interfaces"
+            - "Unit of Work: Transaction management for complex operations"
+            - "Query Objects: Complex queries encapsulated in objects"
+            - "Mapper Pattern: Transform database models to domain entities"
+          frontend:
+            - "API Client Pattern: HTTP requests through typed interfaces"
+            - "Cache Strategy: Next.js cache integration for performance"
+            - "Optimistic Updates: Immediate UI feedback with rollback"
+            - "Error Recovery: Retry logic and fallback strategies"
+
+        validation:
+          - "Schema Composition: Build complex schemas from simple ones"
+          - "Conditional Validation: Rules that depend on other fields"
+          - "Transform Pipeline: Parse and transform input data"
+          - "Error Aggregation: Collect all validation errors at once"
+          - "Client-Server Sync: Ensure validation rules match exactly"
+
+        presentation:
+          backend:
+            - "Handler Pattern: Request/response processing in API routes"
+            - "Middleware Chain: Cross-cutting concerns like auth and logging"
+            - "Response Builders: Consistent API response formats"
+            - "Content Type Handling: Support multiple input/output formats"
+          frontend:
+            - "Server Actions: Form handling with progressive enhancement"
+            - "Custom Hooks: Encapsulate state and side effects"
+            - "Component Composition: Build complex UIs from simple parts"
+            - "Error Boundaries: Graceful error handling in React tree"
+
+        main:
+          - "Dependency Injection: Wire dependencies at composition root"
+          - "Factory Pattern: Create complete feature implementations"
+          - "Adapter Pattern: Bridge between layers and frameworks"
+          - "Configuration: Environment-based feature toggles"
+
+      testing_strategy:
+        domain:
+          approach: "Unit Tests - Pure business logic"
+          coverage_target: "100%"
+          tools: ["Vitest"]
+          practices:
+            - "Test shared domain logic used by both frontend and backend"
+            - "Use fixed test data helpers instead of randomized data"
+            - "Test domain entities and use case interfaces"
+            - "Ensure domain tests run in both Node.js and browser environments"
+            - "Mock external dependencies at domain boundaries"
+
+        data:
+          backend:
+            approach: "Unit Tests with Database Integration"
+            coverage_target: "95%"
+            tools: ["Vitest", "Prisma test client", "Docker"]
+            practices:
+              - "Use test database with Docker for integration tests"
+              - "Test repository implementations with real database"
+              - "Mock external APIs and services"
+              - "Test transaction handling and rollback scenarios"
+          frontend:
+            approach: "Unit Tests with MSW"
+            coverage_target: "90%"
+            tools: ["Vitest", "MSW", "@testing-library/react"]
+            practices:
+              - "Mock API calls with MSW handlers"
+              - "Test optimistic updates and error recovery"
+              - "Verify request payloads and headers"
+              - "Test cache strategies and invalidation"
+
+        validation:
+          approach: "Unit Tests - Shared schema validation"
+          coverage_target: "100%"
+          tools: ["Vitest", "Zod"]
+          practices:
+            - "Test Zod schemas with both valid and invalid data"
+            - "Verify schemas work identically on client and server"
+            - "Test complex conditional validation rules"
+            - "Test schema composition and transformation"
+            - "Verify TypeScript type generation from schemas"
+
+        presentation:
+          backend:
+            approach: "Integration Tests - API endpoints"
+            coverage_target: "90%"
+            tools: ["Vitest", "Supertest", "MSW"]
+            practices:
+              - "Test complete request/response cycles"
+              - "Test authentication and authorization"
+              - "Test error handling and status codes"
+              - "Test middleware chain execution"
+          frontend:
+            approach: "Component and Integration Tests"
+            coverage_target: "85%"
+            tools: ["Vitest", "@testing-library/react", "React Hook Form"]
+            practices:
+              - "Test component rendering and user interactions"
+              - "Test Server Actions with form submissions"
+              - "Test custom hooks with React Testing Library"
+              - "Test error states and loading states"
+              - "Test accessibility with jest-axe"
+
+        main:
+          approach: "E2E and Integration Tests"
+          coverage_target: "80%"
+          tools: ["Playwright", "Vitest"]
+          practices:
+            - "Test complete user flows from UI to database"
+            - "Test both Server Actions and API Routes paths"
+            - "Test responsive design and mobile interactions"
+            - "Test progressive enhancement (JavaScript disabled)"
+            - "Test performance and Core Web Vitals"
+            - "Use page object model for maintainable E2E tests"
+
+      best_practices:
+        development:
+          - "Shared First: Start with domain and validation, then split implementation"
+          - "Type Safety: Use TypeScript strict mode across entire stack"
+          - "Error Handling: Consistent error types from domain to UI"
+          - "Performance: Leverage Next.js optimizations (SSR, SSG, caching)"
+          - "Security: Validate inputs on both client and server"
+
+        architecture:
+          - "Layer Separation: Keep business rules independent of frameworks"
+          - "Dependency Direction: Always point toward the domain core"
+          - "Interface Segregation: Define minimal, focused interfaces"
+          - "Single Responsibility: Each class/function has one reason to change"
+          - "Open/Closed: Open for extension, closed for modification"
+
+        testing:
+          - "Test Pyramid: More unit tests, fewer integration tests, minimal E2E"
+          - "Fast Feedback: Unit tests run in milliseconds"
+          - "Isolated Tests: Each test can run independently"
+          - "Deterministic: Tests produce same results every time"
+          - "Readable: Tests serve as documentation for behavior"
+
+        deployment:
+          - "Environment Parity: Development, staging, and production match"
+          - "Immutable Builds: Same artifact deployed across environments"
+          - "Health Checks: Monitor both frontend and backend health"
+          - "Rollback Strategy: Ability to quickly revert problematic deployments"
+          - "Feature Flags: Control feature rollout independently"
+
+# ============= END ARCHITECTURE FULLSTACK SECTION =============
