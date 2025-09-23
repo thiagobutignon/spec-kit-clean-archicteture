@@ -1,0 +1,127 @@
+# ============= BEGIN STRUCTURE BACKEND SECTION =============
+  # AI-NOTE: Feature-based structure for Clean Architecture
+
+  structure:
+    # Main application structure (entry point)
+    app:
+      basePath: '__PROJECT_NAME__/src'
+      folders:
+        - 'main'           # Application bootstrap and configuration
+        - 'shared'         # Shared code with Clean Architecture layers
+        - 'features'       # Feature modules
+
+    # Feature-based Clean Architecture
+    features:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__'
+      # Each feature contains its own layers following Clean Architecture
+      layers:
+        domain:
+          folders:
+            - 'models'      # Feature type definitions (e.g., AccountModel, SurveyModel)
+            - 'usecases'    # Feature use case interfaces with namespace pattern
+
+        data:
+          folders:
+            - 'protocols'   # Feature data layer protocols/interfaces
+            - 'usecases'    # Feature use case implementations
+
+        infra:
+          folders:
+            - 'db'            # Feature-specific database repositories
+          files:
+            - 'index.ts'      # Feature infra exports
+
+        presentation:
+          folders:
+            - 'controllers'   # Feature HTTP controllers
+            - 'errors'        # Feature HTTP error definitions
+            - 'helpers'       # Feature HTTP helpers
+            - 'middlewares'   # Feature HTTP middlewares
+            - 'protocols'      # Feature HTTP protocols/interfaces
+
+        validation:
+          folders:
+            - 'validators'    # Feature validation rules
+            - 'protocols'     # Feature validation protocols
+
+        main:
+          folders:
+            - 'adapters'     # Feature factory methods
+            - 'config'       # Feature configuration files
+            - 'decorators'    # Feature decorators
+            - 'docs'         # Feature documentation
+            - 'factories'     # Feature factory methods
+            - 'middlewares'   # Feature global middlewares
+            - 'routes'        # Feature route definitions
+
+        tests:
+          folders:
+            - 'data'          # Feature data layer tests
+            - 'domain'        # Feature domain layer tests mocks only
+            - 'infra'         # Feature infrastructure layer tests
+            - 'presentation'  # Feature presentation layer tests
+            - 'validation'    # Feature validation layer tests
+            - 'main'          # Feature main layer tests
+
+  # Integration between features and main application
+  integration:
+    main_server:
+      basePath: '__PROJECT_NAME__/src/main'
+      folders:
+        - 'config'          # Server configuration (express, fastify, etc)
+        - 'routes'          # Route aggregation from all features
+        - 'middlewares'     # Global middlewares
+        - 'adapters'        # Framework adapters
+        - 'docs'            # API documentation (Swagger, etc)
+      files:
+        - 'server.ts'       # Main server file
+        - 'app.ts'          # Application setup
+
+    shared:
+      basePath: '__PROJECT_NAME__/src/shared'
+      layers:
+        domain:
+          folders:
+            - 'errors'          # Base error classes
+            - 'protocols'       # Domain contracts/interfaces
+            - 'types'           # Shared domain types
+            - 'value-objects'   # Shared value objects
+
+        data:
+          folders:
+            - 'protocols'       # Data layer protocols
+            - 'helpers'         # Data transformation helpers
+
+        infra:
+          folders:
+            - 'cryptography'    # Shared encryption/hashing adapters (bcrypt, jwt)
+            - 'http'            # Shared HTTP clients and adapters
+            - 'validators'      # Shared validators (email, cpf, etc)
+            - 'cache'           # Shared cache implementations (Redis, memory)
+            - 'telemetry'       # Shared logging and monitoring
+            - 'messaging'       # Shared message queue adapters
+
+        presentation:
+          folders:
+            - 'protocols'       # Presentation protocols
+            - 'helpers'         # Presentation helpers
+            - 'middlewares'     # Shared middlewares
+
+        main:
+          folders:
+            - 'adapters'        # Shared adapters
+            - 'decorators'      # Shared decorators
+            - 'factories'       # Shared factories
+
+    example_integration:
+      # How features connect to the main application
+      feature_route: 'src/features/users/main/routes/user-routes.ts'
+      imports_to: 'src/main/routes/index.ts'
+
+      feature_factory: 'src/features/users/main/factories/user-controller-factory.ts'
+      used_in: 'src/features/users/main/routes/user-routes.ts'
+
+      shared_protocol: 'src/shared/protocols/http.ts'
+      used_by_features: 'src/features/*/presentation/protocols'
+
+# ============= END STRUCTURE BACKEND SECTION =============

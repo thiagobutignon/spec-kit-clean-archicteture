@@ -1,0 +1,154 @@
+# ============= BEGIN STRUCTURE NEXT.JS 15 + CLEAN ARCHITECTURE =============
+
+structure:
+  # App Router centralized (MUST be in src/app)
+  app:
+    basePath: '__PROJECT_NAME__/src/app'
+    folders:
+      - '(features)'              # Route group for features
+      - '__FEATURE_NAME__'        # Feature routes
+      - 'api/__FEATURE_NAME__'   # Feature API routes
+      - '_components'             # Private app components
+    files:
+      - 'layout.tsx'
+      - 'page.tsx'
+      - 'loading.tsx'             # File, not folder
+      - 'error.tsx'               # File, not folder
+      - 'not-found.tsx'           # File, not folder
+
+  # Features with Clean Architecture
+  features:
+    basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__'
+    layers:
+      domain:
+        folders:
+          - 'entities'      # Business entities
+          - 'errors'        # Domain errors
+          - 'models'        # Types/Interfaces
+          - 'usecases'      # Use cases (interfaces)
+          - 'value-objects' # Value objects
+
+      data:
+        folders:
+          - 'models'        # DTOs
+          - 'protocols'     # Contracts/Interfaces
+          - 'usecases'      # Use case implementations
+
+      infra:
+        folders:
+          - 'api'           # Feature-specific API integrations
+          - 'services'      # Feature-specific external services
+        files:
+          - 'index.ts'      # Feature infra exports
+
+      presentation:
+        folders:
+          # Server-side
+          - 'actions'       # Server Actions ('use server')
+          - 'server-components' # Server Components (default)
+
+          # Client-side
+          - 'client-components' # Client Components ('use client')
+          - 'hooks'         # React Hooks
+          - 'providers'     # Context Providers
+
+          # UI/Styling
+          - 'ui'            # shadcn/ui components
+          - 'styles'        # CSS Modules or Tailwind classes
+
+          # DO NOT put 'app' here - it stays in src/app
+
+      validation:
+        folders:
+          - 'errors'        # Validation errors
+          - 'protocols'     # Validation interfaces
+          - 'schemas'       # Zod/Yup schemas
+          - 'validators'    # Validation implementations
+
+      main:
+        folders:
+          - 'adapters'      # Adapters
+          - 'builders'      # Builders
+          - 'composites'    # Composition
+          - 'config'        # Feature configuration
+          - 'decorators'    # Decorators
+          - 'factories'     # Factory methods
+          - 'lib'           # Feature utilities
+
+      tests:
+        folders:
+          - 'unit'          # Unit tests
+          - 'integration'   # Integration tests
+          - 'e2e'           # E2E tests
+          - 'mocks'         # Mocks and fixtures
+
+  # Shared code with Clean Architecture layers
+  shared:
+    basePath: '__PROJECT_NAME__/src/shared'
+    layers:
+      domain:
+        folders:
+          - 'errors'          # Base error classes
+          - 'protocols'       # Domain contracts/interfaces
+          - 'types'           # Shared domain types
+          - 'value-objects'   # Shared value objects
+
+      data:
+        folders:
+          - 'protocols'       # Data layer protocols
+          - 'helpers'         # Data transformation helpers
+          - 'models'          # Shared DTOs
+
+      infra:
+        folders:
+          - 'cache'           # Next.js cache utilities
+          - 'http'            # Fetch wrappers and interceptors
+          - 'storage'         # LocalStorage/SessionStorage adapters
+          - 'cookies'         # Cookie management utilities
+          - 'telemetry'       # Analytics and monitoring
+
+      presentation:
+        folders:
+          - 'components'      # Shared UI components
+          - 'hooks'           # Shared React hooks
+          - 'providers'       # Shared context providers
+          - 'ui'              # Shared shadcn/ui components
+          - 'styles'          # Global styles and utilities
+          - 'helpers'         # Presentation helpers
+
+      validation:
+        folders:
+          - 'schemas'         # Shared Zod/Yup schemas
+          - 'validators'      # Shared validation functions
+          - 'protocols'       # Validation interfaces
+
+      main:
+        folders:
+          - 'adapters'        # Shared adapters
+          - 'builders'        # Shared builders
+          - 'composites'      # Shared composites
+          - 'decorators'      # Shared decorators
+          - 'factories'       # Shared factories
+          - 'lib'             # Utility functions
+
+# How to connect feature with App Router:
+integration:
+  example:
+    # 1. Feature route in App Router
+    app_route: 'src/app/(features)/users/page.tsx'
+
+    # 2. Import components from feature
+    imports_from: 'src/features/users/presentation/server-components'
+
+    # 3. Feature Server Action
+    server_action: 'src/features/users/presentation/actions/create-user.ts'
+
+    # 4. API Route
+    api_route: 'src/app/api/users/route.ts'
+    imports_handler_from: 'src/features/users/main/factories'
+
+    # 5. Shared components
+    shared_ui: 'src/shared/presentation/components'
+    shared_hooks: 'src/shared/presentation/hooks'
+
+# ============= END STRUCTURE NEXT.JS 15 + CLEAN ARCHITECTURE =============

@@ -1,0 +1,190 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Frontend Structure Part Schema",
+  "description": "Schema for Next.js 15 + Clean Architecture frontend structure",
+  "type": "object",
+  "properties": {
+    "structure": {
+      "type": "object",
+      "description": "Next.js 15 App Router + Clean Architecture structure",
+      "properties": {
+        "app": {
+          "type": "object",
+          "description": "Next.js 15 App Router structure",
+          "properties": {
+            "basePath": {
+              "type": "string",
+              "description": "Base path for the App Router",
+              "pattern": ".*__PROJECT_NAME__.*/src/app"
+            },
+            "folders": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            },
+            "files": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": ["basePath", "folders", "files"],
+          "additionalProperties": false
+        },
+        "features": {
+          "type": "object",
+          "description": "Clean Architecture features structure",
+          "properties": {
+            "basePath": {
+              "type": "string",
+              "description": "Base path for features",
+              "pattern": ".*__PROJECT_NAME__.*/src/features/.*__FEATURE_NAME_KEBAB_CASE__.*"
+            },
+            "layers": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "$ref": "#/definitions/layer"
+                },
+                "data": {
+                  "$ref": "#/definitions/layer"
+                },
+                "infra": {
+                  "$ref": "#/definitions/layer"
+                },
+                "presentation": {
+                  "$ref": "#/definitions/layer"
+                },
+                "validation": {
+                  "$ref": "#/definitions/layer"
+                },
+                "main": {
+                  "$ref": "#/definitions/layer"
+                },
+                "tests": {
+                  "$ref": "#/definitions/layer"
+                }
+              },
+              "required": ["domain", "data", "infra", "presentation", "validation", "main", "tests"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["basePath", "layers"],
+          "additionalProperties": false
+        },
+        "shared": {
+          "type": "object",
+          "description": "Shared code with Clean Architecture layers",
+          "properties": {
+            "basePath": {
+              "type": "string",
+              "description": "Base path for shared code",
+              "pattern": ".*__PROJECT_NAME__.*/src/shared"
+            },
+            "layers": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "$ref": "#/definitions/layer"
+                },
+                "data": {
+                  "$ref": "#/definitions/layer"
+                },
+                "infra": {
+                  "$ref": "#/definitions/layer"
+                },
+                "presentation": {
+                  "$ref": "#/definitions/layer"
+                },
+                "validation": {
+                  "$ref": "#/definitions/layer"
+                },
+                "main": {
+                  "$ref": "#/definitions/layer"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": ["basePath", "layers"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["app", "features", "shared"],
+      "additionalProperties": false
+    },
+    "integration": {
+      "type": "object",
+      "description": "Integration examples between App Router and features",
+      "properties": {
+        "example": {
+          "type": "object",
+          "properties": {
+            "app_route": {
+              "type": "string",
+              "description": "Example app route path"
+            },
+            "imports_from": {
+              "type": "string",
+              "description": "Path to import components from"
+            },
+            "server_action": {
+              "type": "string",
+              "description": "Path to server action"
+            },
+            "api_route": {
+              "type": "string",
+              "description": "API route path"
+            },
+            "imports_handler_from": {
+              "type": "string",
+              "description": "Path to import handlers from"
+            },
+            "shared_ui": {
+              "type": "string",
+              "description": "Path to shared UI components"
+            },
+            "shared_hooks": {
+              "type": "string",
+              "description": "Path to shared React hooks"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["structure"],
+  "additionalProperties": true,
+  "definitions": {
+    "layer": {
+      "type": "object",
+      "properties": {
+        "folders": {
+          "type": "array",
+          "description": "List of folders for this layer",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "files": {
+          "type": "array",
+          "description": "List of files for this layer",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

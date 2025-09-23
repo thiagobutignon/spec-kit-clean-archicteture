@@ -1,0 +1,169 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Backend Structure Part Schema",
+  "description": "Schema for backend structure with feature-based Clean Architecture",
+  "type": "object",
+  "properties": {
+    "structure": {
+      "type": "object",
+      "description": "Backend application and features structure",
+      "properties": {
+        "app": {
+          "type": "object",
+          "description": "Main application structure",
+          "properties": {
+            "basePath": {
+              "type": "string",
+              "description": "Base path for the main application",
+              "pattern": ".*__PROJECT_NAME__.*/src"
+            },
+            "folders": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": ["basePath", "folders"],
+          "additionalProperties": false
+        },
+        "features": {
+          "type": "object",
+          "description": "Feature-based Clean Architecture",
+          "properties": {
+            "basePath": {
+              "type": "string",
+              "description": "Base path for features",
+              "pattern": ".*__PROJECT_NAME__.*/src/features/.*__FEATURE_NAME_KEBAB_CASE__.*"
+            },
+            "layers": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "$ref": "#/definitions/layer"
+                },
+                "data": {
+                  "$ref": "#/definitions/layer"
+                },
+                "infra": {
+                  "$ref": "#/definitions/layer"
+                },
+                "presentation": {
+                  "$ref": "#/definitions/layer"
+                },
+                "validation": {
+                  "$ref": "#/definitions/layer"
+                },
+                "main": {
+                  "$ref": "#/definitions/layer"
+                },
+                "tests": {
+                  "$ref": "#/definitions/layer"
+                }
+              },
+              "required": ["domain", "data", "infra", "presentation", "validation", "main", "tests"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["basePath", "layers"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["app", "features"],
+      "additionalProperties": false
+    },
+    "integration": {
+      "type": "object",
+      "description": "Integration configuration between features and main application",
+      "properties": {
+        "main_server": {
+          "type": "object",
+          "properties": {
+            "basePath": {
+              "type": "string"
+            },
+            "folders": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "files": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "shared": {
+          "type": "object",
+          "properties": {
+            "basePath": {
+              "type": "string"
+            },
+            "layers": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "$ref": "#/definitions/layer"
+                },
+                "data": {
+                  "$ref": "#/definitions/layer"
+                },
+                "infra": {
+                  "$ref": "#/definitions/layer"
+                },
+                "presentation": {
+                  "$ref": "#/definitions/layer"
+                },
+                "main": {
+                  "$ref": "#/definitions/layer"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "example_integration": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["structure"],
+  "additionalProperties": true,
+  "definitions": {
+    "layer": {
+      "type": "object",
+      "properties": {
+        "folders": {
+          "type": "array",
+          "description": "List of folders for this layer",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "files": {
+          "type": "array",
+          "description": "List of files for this layer",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
