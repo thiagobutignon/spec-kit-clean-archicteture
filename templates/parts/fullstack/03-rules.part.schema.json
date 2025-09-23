@@ -1,0 +1,518 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Fullstack Rules Configuration",
+  "description": "Schema for Clean Architecture rules and patterns specific to Next.js 15 fullstack development",
+  "type": "object",
+  "required": ["rules"],
+  "properties": {
+    "rules": {
+      "type": "object",
+      "required": ["domain", "data", "infra", "presentation", "error", "test_helper", "validation", "main", "reference_patterns", "learning_patterns", "required_protocols", "documentation"],
+      "properties": {
+        "domain": {
+          "$ref": "#/definitions/sharedLayerRules"
+        },
+        "data": {
+          "$ref": "#/definitions/splitLayerRules"
+        },
+        "infra": {
+          "$ref": "#/definitions/splitLayerRules"
+        },
+        "presentation": {
+          "$ref": "#/definitions/fullstackPresentationRules"
+        },
+        "error": {
+          "$ref": "#/definitions/layerRules"
+        },
+        "test_helper": {
+          "$ref": "#/definitions/layerRules"
+        },
+        "validation": {
+          "$ref": "#/definitions/fullstackValidationRules"
+        },
+        "main": {
+          "$ref": "#/definitions/fullstackMainRules"
+        },
+        "reference_patterns": {
+          "type": "object",
+          "required": ["clean_architecture", "ddd_pattern", "tdd_pattern"],
+          "properties": {
+            "clean_architecture": {
+              "$ref": "#/definitions/externalPattern"
+            },
+            "ddd_pattern": {
+              "$ref": "#/definitions/externalPattern"
+            },
+            "tdd_pattern": {
+              "$ref": "#/definitions/externalPattern"
+            }
+          }
+        },
+        "learning_patterns": {
+          "type": "object",
+          "required": ["common_errors", "success_indicators"],
+          "properties": {
+            "common_errors": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/errorPattern"
+              },
+              "minItems": 1
+            },
+            "success_indicators": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          }
+        },
+        "required_protocols": {
+          "type": "object",
+          "required": ["domain", "data", "infra", "presentation", "validation", "main", "general"],
+          "properties": {
+            "domain": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "data": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "infra": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "presentation": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "validation": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "main": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "general": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          }
+        },
+        "documentation": {
+          "type": "object",
+          "required": ["domain", "data", "infra", "presentation", "validation", "main", "example_template"],
+          "properties": {
+            "domain": {
+              "$ref": "#/definitions/documentationLayer"
+            },
+            "data": {
+              "$ref": "#/definitions/documentationLayer"
+            },
+            "infra": {
+              "$ref": "#/definitions/documentationLayer"
+            },
+            "presentation": {
+              "$ref": "#/definitions/documentationLayer"
+            },
+            "validation": {
+              "$ref": "#/definitions/documentationLayer"
+            },
+            "main": {
+              "$ref": "#/definitions/documentationLayer"
+            },
+            "example_template": {
+              "type": "string",
+              "description": "Example JSDoc template for fullstack code"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "layerRules": {
+      "type": "object",
+      "required": ["should", "should_not"],
+      "properties": {
+        "allowed": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of allowed patterns for this layer"
+        },
+        "forbidden": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of forbidden patterns for this layer"
+        },
+        "should": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "What this layer should do"
+        },
+        "should_not": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "What this layer should not do"
+        },
+        "use_case": {
+          "type": "object",
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "should_not": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          }
+        }
+      }
+    },
+    "sharedLayerRules": {
+      "type": "object",
+      "required": ["shared_purpose", "allowed", "forbidden", "use_case"],
+      "properties": {
+        "shared_purpose": {
+          "type": "string",
+          "description": "Purpose of shared component between frontend and backend"
+        },
+        "allowed": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "List of allowed patterns for this shared layer"
+        },
+        "forbidden": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "List of forbidden patterns for this shared layer"
+        },
+        "use_case": {
+          "type": "object",
+          "required": ["should", "should_not"],
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "should_not": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          }
+        }
+      }
+    },
+    "splitLayerRules": {
+      "type": "object",
+      "required": ["split_purpose", "backend", "frontend"],
+      "properties": {
+        "split_purpose": {
+          "type": "string",
+          "description": "Purpose of split component between frontend and backend"
+        },
+        "backend": {
+          "type": "object",
+          "required": ["should", "should_not"],
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "should_not": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          }
+        },
+        "frontend": {
+          "type": "object",
+          "required": ["should", "should_not"],
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "should_not": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          }
+        }
+      }
+    },
+    "fullstackPresentationRules": {
+      "type": "object",
+      "required": ["split_purpose", "backend", "frontend"],
+      "properties": {
+        "split_purpose": {
+          "type": "string",
+          "description": "Purpose of split presentation layer"
+        },
+        "backend": {
+          "type": "object",
+          "required": ["handlers"],
+          "properties": {
+            "handlers": {
+              "type": "object",
+              "required": ["should", "should_not"],
+              "properties": {
+                "should": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                },
+                "should_not": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                }
+              }
+            }
+          }
+        },
+        "frontend": {
+          "type": "object",
+          "required": ["actions", "components", "hooks"],
+          "properties": {
+            "actions": {
+              "type": "object",
+              "required": ["should", "should_not"],
+              "properties": {
+                "should": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                },
+                "should_not": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                }
+              }
+            },
+            "components": {
+              "type": "object",
+              "required": ["should", "should_not"],
+              "properties": {
+                "should": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                },
+                "should_not": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                }
+              }
+            },
+            "hooks": {
+              "type": "object",
+              "required": ["should", "should_not"],
+              "properties": {
+                "should": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                },
+                "should_not": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "fullstackValidationRules": {
+      "type": "object",
+      "required": ["shared_purpose", "schemas", "validators"],
+      "properties": {
+        "shared_purpose": {
+          "type": "string",
+          "description": "Purpose of shared validation layer"
+        },
+        "schemas": {
+          "type": "object",
+          "required": ["should", "should_not"],
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "should_not": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          }
+        },
+        "validators": {
+          "type": "object",
+          "required": ["should", "should_not"],
+          "properties": {
+            "should": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "should_not": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          }
+        }
+      }
+    },
+    "fullstackMainRules": {
+      "type": "object",
+      "required": ["split_purpose", "backend", "frontend"],
+      "properties": {
+        "split_purpose": {
+          "type": "string",
+          "description": "Purpose of split main layer"
+        },
+        "backend": {
+          "type": "object",
+          "required": ["factories"],
+          "properties": {
+            "factories": {
+              "type": "object",
+              "required": ["should", "should_not"],
+              "properties": {
+                "should": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                },
+                "should_not": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                }
+              }
+            }
+          }
+        },
+        "frontend": {
+          "type": "object",
+          "required": ["composites", "pages"],
+          "properties": {
+            "composites": {
+              "type": "object",
+              "required": ["should", "should_not"],
+              "properties": {
+                "should": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                },
+                "should_not": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                }
+              }
+            },
+            "pages": {
+              "type": "object",
+              "required": ["should", "should_not"],
+              "properties": {
+                "should": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                },
+                "should_not": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "externalPattern": {
+      "type": "object",
+      "required": ["type", "source", "query", "url", "description"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "external_pattern"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source of the pattern reference"
+        },
+        "query": {
+          "type": "string",
+          "description": "Search query for the pattern"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL reference for the pattern"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the pattern"
+        }
+      }
+    },
+    "errorPattern": {
+      "type": "object",
+      "required": ["pattern", "fix", "score_impact"],
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "Error pattern to identify"
+        },
+        "fix": {
+          "type": "string",
+          "description": "How to fix this error"
+        },
+        "score_impact": {
+          "type": "integer",
+          "description": "Impact on quality score"
+        }
+      }
+    },
+    "documentationLayer": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" },
+        "minItems": 1
+      },
+      "description": "Documentation rules for each component type in the layer"
+    }
+  }
+}

@@ -22,6 +22,30 @@
     "./templates/parts/fullstack/01-structure.part.schema.json": [
       "templates/parts/fullstack/01-structure.part.regent"
     ],
+    // Schema específico para backend architecture part
+    "./templates/parts/backend/02-architecture.part.schema.json": [
+      "templates/parts/backend/02-architecture.part.regent"
+    ],
+    // Schema específico para frontend architecture part
+    "./templates/parts/frontend/02-architecture.part.schema.json": [
+      "templates/parts/frontend/02-architecture.part.regent"
+    ],
+    // Schema específico para fullstack architecture part
+    "./templates/parts/fullstack/02-architecture.part.schema.json": [
+      "templates/parts/fullstack/02-architecture.part.regent"
+    ],
+    // Schema específico para backend rules part
+    "./templates/parts/backend/03-rules.part.schema.json": [
+      "templates/parts/backend/03-rules.part.regent"
+    ],
+    // Schema específico para frontend rules part
+    "./templates/parts/frontend/03-rules.part.schema.json": [
+      "templates/parts/frontend/03-rules.part.regent"
+    ],
+    // Schema específico para fullstack rules part
+    "./templates/parts/fullstack/03-rules.part.schema.json": [
+      "templates/parts/fullstack/03-rules.part.regent"
+    ],
     // Schema para arquivos completos .regent (excluindo .part.regent)
     "./regent.schema.json": [
       "templates/template.regent",
@@ -30,7 +54,11 @@
     ]
 },
 "cSpell.words": [
-    "RLHF"
+    "RLHF",
+    "axios",
+    "Vitest",
+    "Shadcn",
+    "pgvector"
 ],
 "files.watcherExclude": {
   "**/.git/objects/**": true,
