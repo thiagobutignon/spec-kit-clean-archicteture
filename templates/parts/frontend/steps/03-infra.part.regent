@@ -1,0 +1,1479 @@
+# ============= BEGIN INFRA STEPS FRONTEND SECTION =============
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: INFRASTRUCTURE LAYER IMPLEMENTATION STEPS FOR FRONTEND (TDD)
+  # These steps implement infra layer following RED-GREEN-REFACTOR cycle
+  # Specific to frontend with Fetch API, Cache, Storage, and Next.js 15 patterns
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # INFRASTRUCTURE LAYER STEPS SECTION
+  # Steps for generating infrastructure layer artifacts in frontend features
+  # Following Test-Driven Development (RED-GREEN-REFACTOR) methodology
+  # Using Fetch API, localStorage, sessionStorage, and frontend-specific patterns
+  # ------------------------------------------------------------------------------
+
+  infra_steps:
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create feature branch for __USE_CASE_NAME_PASCAL_CASE__ frontend infrastructure layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Following Git Flow pattern for feature development.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'git workflow feature branch naming conventions'
+          url: 'https://github.com/...'
+          description: 'Git Flow and feature branch best practices.'
+      run_scripts:
+        description: 'Create and checkout feature branch for infra layer development'
+        scripts:
+          - name: 'Create feature branch'
+            command: 'git checkout -b feat/__FEATURE_NAME_KEBAB_CASE__-infra-__USE_CASE_NAME_KEBAB_CASE__-frontend'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Verify branch creation'
+            command: 'git branch --show-current'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Push feature branch'
+            command: 'git push -u origin feat/__FEATURE_NAME_KEBAB_CASE__-infra-__USE_CASE_NAME_KEBAB_CASE__-frontend'
+            workingDirectory: '__PROJECT_NAME__'
+      validation_script: |
+        current_branch=$(git branch --show-current)
+        expected_branch="feat/__FEATURE_NAME_KEBAB_CASE__-infra-__USE_CASE_NAME_KEBAB_CASE__-frontend"
+        if [ "$current_branch" != "$expected_branch" ]; then
+          echo "❌ ERROR: Expected branch $expected_branch, but current branch is $current_branch"
+          exit 1
+        fi
+        echo "✅ Feature branch created successfully: $current_branch"
+
+    # === STEP 2: CREATE INFRA STRUCTURE (RED PHASE) ===
+    - id: 'create-infra-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'Create infrastructure layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ frontend use case'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FRONTEND_ARCHITECTURE.md'
+          description: 'Following Clean Architecture infrastructure layer structure for frontend.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture infrastructure layer frontend fetch api cache storage'
+          url: 'https://github.com/...'
+          description: 'Infrastructure layer patterns for frontend with browser APIs.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra'
+          folders:
+            - 'http'         # HTTP client implementations (Fetch API)
+            - 'cache'        # Cache implementations (localStorage, sessionStorage)
+            - 'storage'      # Storage adapters for browsers
+
+    # === STEP 3: CREATE FAILING TESTS (RED PHASE) ===
+    - id: 'create-infra-failing-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create failing tests for FetchHttpAdapter infrastructure implementation (RED)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development red phase vitest frontend fetch api mocking'
+          url: 'https://github.com/...'
+          description: 'TDD RED phase patterns for frontend infrastructure with Vitest.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/http/fetch-http-adapter.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach, vi, afterEach, type MockedFunction } from 'vitest'
+        import type { HttpClient, HttpRequest, HttpResponse } from '@/data/protocols/http'
+        import { FetchHttpAdapter } from './fetch-http-adapter'
+
+        /**
+         * TDD Tests for FetchHttpAdapter infrastructure implementation
+         * Following RED-GREEN-REFACTOR cycle for frontend HTTP operations
+         *
+         * @testType Unit Test - Infrastructure Layer with Mocked Fetch
+         * @phase RED - These tests should FAIL initially
+         */
+        describe('FetchHttpAdapter (TDD RED Phase)', () => {
+          let sut: FetchHttpAdapter
+          let mockFetch: MockedFunction<typeof fetch>
+
+          beforeEach(() => {
+            mockFetch = vi.fn()
+            global.fetch = mockFetch
+            sut = new FetchHttpAdapter()
+          })
+
+          afterEach(() => {
+            vi.restoreAllMocks()
+          })
+
+          describe('RED Phase - These should FAIL', () => {
+            it('should implement HttpClient interface', () => {
+              // RED: This will fail because FetchHttpAdapter doesn't exist yet
+              expect(sut).toBeInstanceOf(FetchHttpAdapter)
+              expect(typeof sut.request).toBe('function')
+            })
+
+            it('should make GET request with correct parameters', async () => {
+              // RED: This will fail because implementation doesn't exist
+              const httpRequest: HttpRequest = {
+                url: '/api/test',
+                method: 'get',
+                headers: {
+                  'Accept': 'application/json'
+                }
+              }
+
+              const mockResponse = {
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                headers: new Headers(),
+                json: () => Promise.resolve({ data: 'test' })
+              }
+
+              mockFetch.mockResolvedValueOnce(mockResponse as any)
+
+              const result = await sut.request(httpRequest)
+
+              expect(mockFetch).toHaveBeenCalledWith('/api/test', {
+                method: 'get',
+                headers: {
+                  'Accept': 'application/json'
+                },
+                body: undefined
+              })
+
+              expect(result).toEqual({
+                statusCode: 200,
+                body: { data: 'test' }
+              })
+            })
+
+            it('should make POST request with body', async () => {
+              // RED: This will fail because implementation doesn't exist
+              const requestBody = {
+                __INPUT_FIELD_1__: 'test-value-1',
+                __INPUT_FIELD_2__: 'test-value-2'
+              }
+
+              const httpRequest: HttpRequest = {
+                url: '/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__',
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: requestBody
+              }
+
+              const mockResponse = {
+                ok: true,
+                status: 201,
+                statusText: 'Created',
+                headers: new Headers(),
+                json: () => Promise.resolve({ id: '123', success: true })
+              }
+
+              mockFetch.mockResolvedValueOnce(mockResponse as any)
+
+              const result = await sut.request(httpRequest)
+
+              expect(mockFetch).toHaveBeenCalledWith(
+                'https://api.example.com/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__',
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                  },
+                  body: JSON.stringify(requestBody)
+                }
+              )
+
+              expect(result).toEqual({
+                data: { id: '123', success: true },
+                status: 201,
+                statusText: 'Created',
+                headers: {}
+              })
+            })
+
+            it('should handle request timeout', async () => {
+              // RED: This will fail because timeout logic doesn't exist
+              const httpRequest: HttpRequest = {
+                url: '/api/slow',
+                method: 'GET'
+              }
+
+              const timeoutError = new Error('Request timeout')
+              mockFetch.mockRejectedValueOnce(timeoutError)
+
+              await expect(sut.request(httpRequest)).rejects.toThrow('Request timeout after 30000ms')
+            })
+
+            it('should handle network errors', async () => {
+              // RED: This will fail because error handling doesn't exist
+              const httpRequest: HttpRequest = {
+                url: '/api/network-error',
+                method: 'GET'
+              }
+
+              const networkError = new Error('fetch failed')
+              mockFetch.mockRejectedValueOnce(networkError)
+
+              await expect(sut.request(httpRequest)).rejects.toThrow('Network error: fetch failed')
+            })
+
+            it('should handle request cancellation', async () => {
+              // RED: This will fail because AbortSignal handling doesn't exist
+              const controller = new AbortController()
+              const httpRequest: HttpRequest = {
+                url: '/api/cancel-me',
+                method: 'GET',
+                signal: controller.signal
+              }
+
+              const abortError = new Error('AbortError')
+              abortError.name = 'AbortError'
+              mockFetch.mockRejectedValueOnce(abortError)
+
+              await expect(sut.request(httpRequest)).rejects.toThrow('Request was cancelled')
+            })
+
+            it('should parse different content types', async () => {
+              // RED: This will fail because content type parsing doesn't exist
+              const httpRequest: HttpRequest = {
+                url: '/api/text',
+                method: 'GET'
+              }
+
+              const mockResponse = {
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                headers: new Headers({
+                  'content-type': 'text/plain'
+                }),
+                text: () => Promise.resolve('plain text response')
+              }
+
+              mockFetch.mockResolvedValueOnce(mockResponse as any)
+
+              const result = await sut.request<string>(httpRequest)
+
+              expect(result.data).toBe('plain text response')
+            })
+          })
+
+          describe('Configuration Tests (RED Phase)', () => {
+            it('should handle custom base URL configuration', () => {
+              // RED: Will fail if constructor doesn't handle base URL
+              const customClient = new Fetch__USE_CASE_NAME_PASCAL_CASE__Client(
+                'https://custom.api.com',
+                10000
+              )
+
+              expect(customClient).toBeDefined()
+            })
+
+            it('should handle default configuration', () => {
+              // RED: Will fail if default constructor doesn't work
+              const defaultClient = new Fetch__USE_CASE_NAME_PASCAL_CASE__Client()
+
+              expect(defaultClient).toBeDefined()
+            })
+          })
+
+          describe('Type Safety Tests (RED Phase)', () => {
+            it('should ensure request type compatibility', () => {
+              // RED: Will fail if types are not properly defined
+              const validRequest: HttpRequest = {
+                url: '/test',
+                method: 'POST',
+                headers: {
+                  'Custom-Header': 'value'
+                },
+                body: {
+                  data: 'test'
+                },
+                signal: new AbortController().signal
+              }
+
+              expect(validRequest).toBeDefined()
+            })
+
+            it('should ensure response type compatibility', async () => {
+              // RED: Will fail if return type is not correct
+              const httpRequest: HttpRequest = {
+                url: '/api/typed',
+                method: 'GET'
+              }
+
+              const mockResponse = {
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                headers: new Headers(),
+                json: () => Promise.resolve({ typed: 'data' })
+              }
+
+              mockFetch.mockResolvedValueOnce(mockResponse as any)
+
+              const result: HttpResponse<{ typed: string }> = await sut.request(httpRequest)
+
+              // TypeScript should enforce these types
+              expect(result.data.typed).toBe('data')
+              expect(typeof result.status).toBe('number')
+              expect(typeof result.statusText).toBe('string')
+              expect(typeof result.headers).toBe('object')
+            })
+          })
+        })
+
+      validation_script: |
+        run_failing_tests() {
+          echo "🔴 RED PHASE: Running failing tests..."
+          npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra --reporter=verbose || {
+            echo "✅ Tests are failing as expected (RED phase)"
+            return 0
+          }
+          echo "❌ ERROR: Tests should be failing in RED phase!"
+          exit 1
+        }
+
+        stage_red_phase() {
+          git add .
+          git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add failing tests for __USE_CASE_NAME_KEBAB_CASE__ infra layer (RED)"
+          echo "✅ RED phase committed"
+        }
+
+        run_failing_tests
+        stage_red_phase
+
+    # === STEP 4: CREATE HTTP CLIENT IMPLEMENTATION (GREEN PHASE) ===
+    - id: 'create-http-client-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create FetchHttpAdapter implementation to make tests pass (GREEN)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'fetch api adapter implementation typescript frontend http'
+          url: 'https://github.com/...'
+          description: 'Fetch API adapter implementation patterns for frontend.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: 'FetchHttpAdapter'
+          description: 'Consistent with existing HTTP adapter implementations.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/http/fetch-http-adapter.ts'
+      template: |
+        import type { HttpClient, HttpRequest, HttpResponse, HttpStatusCode } from '@/data/protocols/http'
+
+        /**
+         * Fetch API implementation of HttpClient protocol
+         * Concrete adapter for HTTP operations using native Fetch API
+         *
+         * @implementation Infrastructure Layer - HTTP Adapter
+         * @pattern Adapter Pattern - Fetch API implementation
+         * @layer Infrastructure - External service communication
+         */
+        export class FetchHttpAdapter implements HttpClient {
+          /**
+           * Execute HTTP request using Fetch API
+           *
+           * @param data - HTTP request configuration
+           * @returns Promise with HTTP response following HttpClient protocol
+           */
+          async request(data: HttpRequest): Promise<HttpResponse> {
+            let response: Response
+
+            try {
+              response = await fetch(data.url, {
+                method: data.method,
+                body: data.body ? JSON.stringify(data.body) : undefined,
+                headers: data.headers
+              })
+            } catch (error) {
+              // Handle network errors - return as if it was a server error
+              return {
+                statusCode: 500,
+                body: undefined
+              }
+            }
+
+            let body: any
+            try {
+              body = await response.json()
+            } catch (error) {
+              // If JSON parsing fails, return undefined body
+              body = undefined
+            }
+
+            return {
+              statusCode: response.status,
+              body
+            }
+          }
+        }
+
+    # === STEP 5: RUN PASSING TESTS (GREEN PHASE) ===
+    - id: 'run-passing-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Verify all tests pass with HTTP client implementation (GREEN phase)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to verify GREEN phase completion'
+        scripts:
+          - name: 'Run passing tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/http --coverage'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit GREEN phase'
+            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ HTTP client (GREEN)"'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 6: CREATE CACHE IMPLEMENTATION (GREEN PHASE) ===
+    - id: 'create-cache-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create browser cache adapter for __USE_CASE_NAME_PASCAL_CASE__ (GREEN)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'browser cache implementation localStorage sessionStorage typescript'
+          url: 'https://github.com/...'
+          description: 'Browser storage and cache implementation patterns.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/cache/browser-cache-adapter.ts'
+      template: |
+        /**
+         * Generic cache interface for browser storage operations
+         */
+        export interface CacheClient {
+          get<T = unknown>(key: string): Promise<T | null>
+          set<T = unknown>(key: string, value: T, ttl?: number): Promise<void>
+          invalidate(key: string): Promise<void>
+        }
+
+        /**
+         * Browser cache implementation using localStorage/sessionStorage
+         * Provides caching capabilities for frontend operations
+         *
+         * @implementation Infrastructure Layer - Cache Adapter
+         * @pattern Adapter Pattern - Browser storage implementation
+         * @layer Infrastructure - Browser storage communication
+         */
+        export class BrowserCacheAdapter implements CacheClient {
+          private readonly storage: Storage
+
+          constructor() {
+            this.storage = typeof window !== 'undefined' ? window.localStorage : {} as Storage
+          }
+
+          async get<T = unknown>(key: string): Promise<T | null> {
+            try {
+              const item = this.storage.getItem(key)
+              if (!item) return null
+
+              const { data, expiresAt } = JSON.parse(item)
+              if (expiresAt && Date.now() > expiresAt) {
+                await this.invalidate(key)
+                return null
+              }
+
+              return data as T
+            } catch {
+              return null
+            }
+          }
+
+          async set<T = unknown>(key: string, value: T, ttl?: number): Promise<void> {
+            try {
+              const item = {
+                data: value,
+                expiresAt: ttl ? Date.now() + ttl : null
+              }
+              this.storage.setItem(key, JSON.stringify(item))
+            } catch {
+              // Silent failure
+            }
+          }
+
+          async invalidate(key: string): Promise<void> {
+            try {
+              this.storage.removeItem(key)
+            } catch {
+              // Silent failure
+            }
+          }
+        }
+
+    # === STEP 7: CREATE STORAGE ADAPTER (GREEN PHASE) ===
+    - id: 'create-storage-adapter-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create storage adapter for __USE_CASE_NAME_PASCAL_CASE__ persistence'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'browser storage adapter patterns typescript frontend'
+          url: 'https://github.com/...'
+          description: 'Browser storage adapter patterns for persistence.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/storage/browser-storage-adapter.ts'
+      template: |
+        /**
+         * Browser storage adapter for persistent data
+         * Simple localStorage wrapper following the established patterns
+         *
+         * @implementation Infrastructure Layer - Storage Adapter
+         * @pattern Adapter Pattern - Browser storage implementation
+         * @layer Infrastructure - Persistent storage operations
+         */
+        export class BrowserStorageAdapter {
+          private readonly storage: Storage
+
+          constructor() {
+            this.storage = typeof window !== 'undefined' ? window.localStorage : {} as Storage
+          }
+
+          set(key: string, value: any): void {
+            try {
+              this.storage.setItem(key, JSON.stringify(value))
+            } catch {
+              // Silent failure
+            }
+          }
+
+          get<T = unknown>(key: string): T | null {
+            try {
+              const item = this.storage.getItem(key)
+              return item ? JSON.parse(item) : null
+            } catch {
+              return null
+            }
+          }
+
+          remove(key: string): void {
+            try {
+              this.storage.removeItem(key)
+            } catch {
+              // Silent failure
+            }
+          }
+        }
+
+    # === STEP 8: REFACTOR IMPLEMENTATION (REFACTOR PHASE) ===
+    - id: 'refactor-infra-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Add error handling and validation to HTTP adapter (REFACTOR)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'http client error handling frontend typescript'
+          url: 'https://github.com/...'
+          description: 'Error handling patterns for HTTP clients.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/http/fetch-http-adapter.ts'
+      template: |
+        import type { HttpClient, HttpRequest, HttpResponse } from '@/data/protocols/http'
+
+        /**
+         * Enhanced Fetch API implementation with better error handling
+         * Refactored for production use following established patterns
+         *
+         * @implementation Infrastructure Layer - HTTP Adapter (Refactored)
+         * @pattern Adapter Pattern - Enhanced Fetch API implementation
+         * @layer Infrastructure - Robust external service communication
+         */
+        export class FetchHttpAdapter implements HttpClient {
+          async request(data: HttpRequest): Promise<HttpResponse> {
+            let response: Response
+
+            try {
+              response = await fetch(data.url, {
+                method: data.method,
+                body: data.body ? JSON.stringify(data.body) : undefined,
+                headers: data.headers
+              })
+            } catch (error) {
+              // Network errors, CORS, etc.
+              return {
+                statusCode: 500,
+                body: undefined
+              }
+            }
+
+            // Handle different response types
+            let body: any
+            try {
+              const contentType = response.headers.get('content-type')
+              if (contentType?.includes('application/json')) {
+                body = await response.json()
+              } else {
+                body = await response.text()
+              }
+            } catch (error) {
+              body = undefined
+            }
+
+            return {
+              statusCode: response.status,
+              body
+            }
+          }
+        }
+
+    # === STEP 9: CREATE INTEGRATION TESTS (REFACTOR PHASE) ===
+    - id: 'create-integration-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create integration tests for complete infrastructure layer (REFACTOR)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'integration testing infrastructure layer http cache storage vitest'
+          url: 'https://github.com/...'
+          description: 'Integration testing patterns for infrastructure layer.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/__tests__/infrastructure.integration.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+        import { Fetch__USE_CASE_NAME_PASCAL_CASE__Client } from '../http/fetch-__USE_CASE_NAME_KEBAB_CASE__-client'
+        import { Browser__USE_CASE_NAME_PASCAL_CASE__Cache } from '../cache/browser-__USE_CASE_NAME_KEBAB_CASE__-cache'
+        import { Browser__USE_CASE_NAME_PASCAL_CASE__Storage } from '../storage/browser-__USE_CASE_NAME_KEBAB_CASE__-storage'
+        import type { HttpRequest } from '../../data/protocols/__USE_CASE_NAME_KEBAB_CASE__-http-client'
+
+        /**
+         * Integration tests for __USE_CASE_NAME_PASCAL_CASE__ infrastructure layer
+         * Tests complete infrastructure functionality with HTTP, cache, and storage
+         *
+         * @testType Integration Test - Complete Infrastructure Flow
+         * @coverage End-to-end infrastructure layer functionality
+         */
+        describe('__USE_CASE_NAME_PASCAL_CASE__ Infrastructure Integration', () => {
+          let httpClient: Fetch__USE_CASE_NAME_PASCAL_CASE__Client
+          let cache: Browser__USE_CASE_NAME_PASCAL_CASE__Cache
+          let storage: Browser__USE_CASE_NAME_PASCAL_CASE__Storage
+          let mockFetch: ReturnType<typeof vi.fn>
+
+          // Mock localStorage and sessionStorage
+          const localStorageMock = {
+            getItem: vi.fn(),
+            setItem: vi.fn(),
+            removeItem: vi.fn(),
+            clear: vi.fn(),
+            length: 0,
+            key: vi.fn()
+          }
+
+          beforeEach(() => {
+            mockFetch = vi.fn()
+            global.fetch = mockFetch
+
+            // Mock browser storage
+            Object.defineProperty(window, 'localStorage', {
+              value: localStorageMock,
+              writable: true
+            })
+
+            Object.defineProperty(window, 'sessionStorage', {
+              value: localStorageMock,
+              writable: true
+            })
+
+            httpClient = new Fetch__USE_CASE_NAME_PASCAL_CASE__Client({
+              baseUrl: 'https://test.api.com',
+              timeout: 5000
+            })
+
+            cache = new Browser__USE_CASE_NAME_PASCAL_CASE__Cache('local')
+            storage = new Browser__USE_CASE_NAME_PASCAL_CASE__Storage('local')
+          })
+
+          afterEach(() => {
+            vi.clearAllMocks()
+          })
+
+          describe('HTTP Client Integration', () => {
+            it('should handle complete HTTP request flow', async () => {
+              const request: HttpRequest = {
+                url: '/api/test',
+                method: 'POST',
+                headers: {
+                  'Custom-Header': 'test-value'
+                },
+                body: {
+                  data: 'integration-test'
+                }
+              }
+
+              const mockResponse = {
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                headers: new Headers({
+                  'content-type': 'application/json'
+                }),
+                json: () => Promise.resolve({
+                  id: 'integration-123',
+                  success: true,
+                  message: 'Integration test successful'
+                })
+              }
+
+              mockFetch.mockResolvedValueOnce(mockResponse)
+
+              const result = await httpClient.request(request)
+
+              expect(result).toEqual({
+                data: {
+                  id: 'integration-123',
+                  success: true,
+                  message: 'Integration test successful'
+                },
+                status: 200,
+                statusText: 'OK',
+                headers: {
+                  'content-type': 'application/json'
+                }
+              })
+
+              expect(mockFetch).toHaveBeenCalledWith('https://test.api.com/api/test', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  'Custom-Header': 'test-value'
+                },
+                body: JSON.stringify({ data: 'integration-test' }),
+                signal: undefined
+              })
+            })
+
+            it('should handle HTTP errors with retry logic', async () => {
+              const request: HttpRequest = {
+                url: '/api/retry-test',
+                method: 'GET'
+              }
+
+              const clientWithRetries = new Fetch__USE_CASE_NAME_PASCAL_CASE__Client({
+                baseUrl: 'https://test.api.com',
+                retries: 2,
+                retryDelay: 100
+              })
+
+              // Mock network error
+              const networkError = new Error('fetch failed')
+              mockFetch
+                .mockRejectedValueOnce(networkError)
+                .mockRejectedValueOnce(networkError)
+                .mockResolvedValueOnce({
+                  ok: true,
+                  status: 200,
+                  statusText: 'OK',
+                  headers: new Headers(),
+                  json: () => Promise.resolve({ success: true })
+                })
+
+              const result = await clientWithRetries.request(request)
+
+              expect(result.data).toEqual({ success: true })
+              expect(mockFetch).toHaveBeenCalledTimes(3) // Initial + 2 retries
+            })
+          })
+
+          describe('Cache Integration', () => {
+            it('should cache and retrieve data correctly', async () => {
+              const testData = {
+                id: 'cache-test-123',
+                value: 'integration-cache-data'
+              }
+
+              localStorageMock.getItem.mockReturnValue(null) // Not cached initially
+
+              // Cache the data
+              await cache.set('test-key', testData, 5000) // 5 second TTL
+
+              expect(localStorageMock.setItem).toHaveBeenCalledWith(
+                '__USE_CASE_NAME_KEBAB_CASE__:test-key',
+                expect.stringContaining('"data":{"id":"cache-test-123","value":"integration-cache-data"}')
+              )
+
+              // Mock cached data retrieval
+              localStorageMock.getItem.mockReturnValue(JSON.stringify({
+                data: testData,
+                cachedAt: Date.now(),
+                expiresAt: Date.now() + 5000
+              }))
+
+              const cachedData = await cache.get('test-key')
+
+              expect(cachedData).toEqual(testData)
+              expect(localStorageMock.getItem).toHaveBeenCalledWith(
+                '__USE_CASE_NAME_KEBAB_CASE__:test-key'
+              )
+            })
+
+            it('should handle cache expiration', async () => {
+              const expiredData = JSON.stringify({
+                data: { expired: true },
+                cachedAt: Date.now() - 10000,
+                expiresAt: Date.now() - 5000 // Expired 5 seconds ago
+              })
+
+              localStorageMock.getItem.mockReturnValue(expiredData)
+
+              const result = await cache.get('expired-key')
+
+              expect(result).toBeNull()
+              expect(localStorageMock.removeItem).toHaveBeenCalledWith(
+                '__USE_CASE_NAME_KEBAB_CASE__:expired-key'
+              )
+            })
+          })
+
+          describe('Storage Integration', () => {
+            it('should store and retrieve data persistently', async () => {
+              const testData = {
+                id: 'storage-test-456',
+                persistentValue: 'integration-storage-data'
+              }
+
+              localStorageMock.getItem.mockReturnValue(null) // Not stored initially
+
+              // Store the data
+              await storage.store('persistent-key', testData)
+
+              expect(localStorageMock.setItem).toHaveBeenCalledWith(
+                '__USE_CASE_NAME_KEBAB_CASE__-storage:persistent-key',
+                expect.stringContaining('"data":{"id":"storage-test-456","persistentValue":"integration-storage-data"}')
+              )
+
+              // Mock stored data retrieval
+              localStorageMock.getItem.mockReturnValue(JSON.stringify({
+                data: testData,
+                storedAt: new Date().toISOString(),
+                version: '1.0'
+              }))
+
+              const storedData = await storage.retrieve('persistent-key')
+
+              expect(storedData).toEqual(testData)
+              expect(localStorageMock.getItem).toHaveBeenCalledWith(
+                '__USE_CASE_NAME_KEBAB_CASE__-storage:persistent-key'
+              )
+            })
+
+            it('should check data existence correctly', async () => {
+              localStorageMock.getItem.mockReturnValue('some-data')
+
+              const exists = await storage.exists('test-key')
+
+              expect(exists).toBe(true)
+              expect(localStorageMock.getItem).toHaveBeenCalledWith(
+                '__USE_CASE_NAME_KEBAB_CASE__-storage:test-key'
+              )
+            })
+          })
+
+          describe('Cross-Component Integration', () => {
+            it('should integrate HTTP client with cache for optimized requests', async () => {
+              // Simulate a complete flow: HTTP request -> cache result -> retrieve from cache
+              const apiData = {
+                id: 'integration-789',
+                fromApi: true,
+                timestamp: Date.now()
+              }
+
+              // First request: Cache miss, fetch from API
+              localStorageMock.getItem.mockReturnValue(null)
+
+              mockFetch.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: () => Promise.resolve(apiData)
+              })
+
+              const request: HttpRequest = {
+                url: '/api/cached-data',
+                method: 'GET'
+              }
+
+              // Fetch from API
+              const apiResponse = await httpClient.request(request)
+              expect(apiResponse.data).toEqual(apiData)
+
+              // Cache the result
+              await cache.set('api-data', apiResponse.data, 30000)
+
+              // Second request: Cache hit
+              localStorageMock.getItem.mockReturnValue(JSON.stringify({
+                data: apiData,
+                cachedAt: Date.now(),
+                expiresAt: Date.now() + 30000
+              }))
+
+              const cachedResult = await cache.get('api-data')
+
+              expect(cachedResult).toEqual(apiData)
+              expect(mockFetch).toHaveBeenCalledTimes(1) // Only called once, second time from cache
+            })
+
+            it('should handle storage persistence across browser sessions', async () => {
+              const sessionData = {
+                userId: 'user-123',
+                sessionId: 'session-456',
+                preferences: {
+                  theme: 'dark',
+                  language: 'en'
+                }
+              }
+
+              // Store session data
+              await storage.store('user-session', sessionData)
+
+              expect(localStorageMock.setItem).toHaveBeenCalledWith(
+                '__USE_CASE_NAME_KEBAB_CASE__-storage:user-session',
+                expect.stringContaining('"userId":"user-123"')
+              )
+
+              // Simulate browser refresh - retrieve session data
+              localStorageMock.getItem.mockReturnValue(JSON.stringify({
+                data: sessionData,
+                storedAt: new Date().toISOString(),
+                version: '1.0'
+              }))
+
+              const retrievedSession = await storage.retrieve('user-session')
+
+              expect(retrievedSession).toEqual(sessionData)
+              expect(retrievedSession?.preferences.theme).toBe('dark')
+            })
+          })
+
+          describe('Error Handling Integration', () => {
+            it('should handle complete failure gracefully', async () => {
+              // Simulate complete infrastructure failure
+              mockFetch.mockRejectedValue(new Error('Complete network failure'))
+              localStorageMock.getItem.mockImplementation(() => {
+                throw new Error('Storage not available')
+              })
+
+              const request: HttpRequest = {
+                url: '/api/fail',
+                method: 'GET'
+              }
+
+              // HTTP should fail
+              await expect(httpClient.request(request)).rejects.toThrow('Network error')
+
+              // Cache should fail gracefully (return null)
+              const cacheResult = await cache.get('fail-key')
+              expect(cacheResult).toBeNull()
+
+              // Storage should throw error
+              await expect(storage.retrieve('fail-key')).rejects.toThrow()
+            })
+          })
+        })
+
+    # === STEP 10: FINAL VALIDATION (REFACTOR PHASE) ===
+    - id: 'validate-refactored-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Run all tests and validations after refactoring (REFACTOR phase complete)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      run_scripts:
+        description: 'Complete TDD cycle validation and commit refactored code'
+        scripts:
+          - name: 'Run all infrastructure layer tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra --coverage --reporter=verbose'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'TypeScript compilation check'
+            command: 'npx tsc --noEmit --project tsconfig.json'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'ESLint validation'
+            command: 'npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit refactored implementation'
+            command: 'git add . && git commit -m "refactor(__FEATURE_NAME_KEBAB_CASE__): improve __USE_CASE_NAME_KEBAB_CASE__ infra layer design (REFACTOR)"'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 11: VALIDATE COMPLETE INFRASTRUCTURE LAYER ===
+    - id: 'validate-complete-infrastructure-layer-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Final validation of complete frontend infrastructure layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      run_scripts:
+        description: 'Run comprehensive validation of frontend infrastructure layer'
+        scripts:
+          - name: 'Complete test suite'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra --coverage --run'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'TypeScript strict compilation'
+            command: 'npx tsc --noEmit --strict --project tsconfig.json'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'ESLint with strict rules'
+            command: 'npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra --max-warnings 0'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Clean Architecture validation'
+            command: 'npm run arch:check -- --layer=infra --feature=__FEATURE_NAME_KEBAB_CASE__ --use-case=__USE_CASE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Bundle size analysis'
+            command: 'npm run analyze -- --feature=__FEATURE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Performance analysis'
+            command: 'npm run perf:analyze -- --infra-layer'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Final commit'
+            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): complete __USE_CASE_NAME_KEBAB_CASE__ frontend infrastructure layer with TDD"'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 12: OPEN PULL REQUEST ===
+    - id: 'open-pull-request-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Open Pull Request for frontend infrastructure layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'PULL_REQUEST_TEMPLATE.md'
+          description: 'Following PR template and code review guidelines.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'pull request best practices code review checklist infrastructure'
+          url: 'https://github.com/...'
+          description: 'PR and code review best practices for infrastructure layer.'
+      run_scripts:
+        description: 'Create pull request with comprehensive description and checklist'
+        scripts:
+          - name: 'Push final changes'
+            command: 'git push origin feat/__FEATURE_NAME_KEBAB_CASE__-infra-__USE_CASE_NAME_KEBAB_CASE__-frontend'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Create Pull Request'
+            command: |
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ frontend infrastructure layer with TDD" \
+                --body "## Summary
+
+              Implements complete frontend infrastructure layer for __USE_CASE_NAME_PASCAL_CASE__ use case following Clean Architecture and TDD methodology.
+
+              ### 🚀 Features Implemented
+              - ✅ Fetch__USE_CASE_NAME_PASCAL_CASE__Client implementation with native Fetch API
+              - ✅ Browser cache implementation with localStorage/sessionStorage
+              - ✅ Storage adapter for persistent data management
+              - ✅ Complete TDD cycle (RED-GREEN-REFACTOR) with comprehensive tests
+              - ✅ Error handling with retry logic and timeout management
+              - ✅ Type-safe implementation with TypeScript
+              - ✅ Integration tests with realistic browser scenarios
+              - ✅ Request cancellation and timeout handling
+              - ✅ Cache expiration and storage persistence
+
+              ### 🧪 Test Coverage
+              - Unit tests for HTTP client with mocked fetch
+              - Unit tests for cache and storage implementations
+              - Integration tests with complete infrastructure flow
+              - Error scenario testing (network, timeout, storage failures)
+              - Browser compatibility and edge case testing
+              - Complete TDD methodology validation
+
+              ### 🏗️ Architecture Compliance
+              - ✅ Clean Architecture layers respected
+              - ✅ Infrastructure layer implements data layer protocols
+              - ✅ Native browser APIs used (Fetch, localStorage, sessionStorage)
+              - ✅ No dependencies on external HTTP libraries (axios forbidden)
+              - ✅ Proper error transformation to domain-appropriate errors
+              - ✅ Environment configuration support
+
+              ### 📋 Code Review Checklist
+              - [ ] All tests passing (npm run test)
+              - [ ] TypeScript compilation clean (npx tsc --noEmit)
+              - [ ] ESLint validation passed (npm run lint)
+              - [ ] Clean Architecture principles followed
+              - [ ] No dependency violations between layers
+              - [ ] Fetch API used instead of axios
+              - [ ] Browser storage implementations robust
+              - [ ] Error handling comprehensive and appropriate
+              - [ ] Code follows project conventions and patterns
+              - [ ] Documentation and JSDoc comments present
+              - [ ] Performance optimizations implemented
+              - [ ] Security best practices followed
+
+              ### 🔍 Review Focus Areas
+              1. **HTTP Client Implementation**: Review Fetch__USE_CASE_NAME_PASCAL_CASE__Client structure and API communication logic
+              2. **Cache Strategy**: Validate cache implementation with TTL and expiration handling
+              3. **Storage Persistence**: Ensure storage adapter handles browser storage correctly
+              4. **Error Handling**: Verify error transformation and retry logic
+              5. **Architecture**: Confirm Clean Architecture compliance and dependency directions
+              6. **Browser Compatibility**: Check for cross-browser support and edge cases
+
+              ### 📊 Metrics
+              - Test Coverage: Aiming for >95% coverage
+              - TypeScript: Strict compilation with no any types
+              - ESLint: Zero warnings/errors
+              - Bundle Size Impact: Minimal (infrastructure utilities only)
+              - Performance: Optimized HTTP client with retry and caching
+
+              ### 🌐 Browser Support
+              - Modern browsers with Fetch API support
+              - Graceful fallback for storage unavailability
+              - Request cancellation support with AbortController
+              - Timeout handling for slow networks
+
+              ---
+              🤖 Generated with TDD methodology and Clean Architecture best practices" \
+                --draft
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Display PR URL'
+            command: 'gh pr view --web'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 13: AI CODE REVIEW ===
+    - id: 'ai-code-review-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'AI-powered code review and quality analysis for frontend infrastructure layer'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'CODE_REVIEW_GUIDELINES.md'
+          description: 'Automated code review standards and quality gates.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'automated code review infrastructure clean architecture typescript frontend'
+          url: 'https://github.com/...'
+          description: 'AI code review patterns and quality metrics for infrastructure.'
+      ai_review_prompts:
+        architecture_review: |
+          Please review this frontend infrastructure layer implementation for Clean Architecture compliance:
+
+          📁 Files to Review:
+          - src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/http/fetch-__USE_CASE_NAME_KEBAB_CASE__-client.ts
+          - src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/cache/browser-__USE_CASE_NAME_KEBAB_CASE__-cache.ts
+          - src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/storage/browser-__USE_CASE_NAME_KEBAB_CASE__-storage.ts
+
+          🎯 Review Criteria:
+          1. **Clean Architecture Compliance**: Verify dependency direction (infra → data, no domain imports)
+          2. **Frontend Patterns**: Confirm native browser API usage, no external HTTP libraries
+          3. **Error Handling**: Evaluate error transformation and browser-specific error cases
+          4. **Type Safety**: Check TypeScript usage and browser API type compatibility
+          5. **Testing Strategy**: Review TDD implementation and browser testing approach
+
+          🔍 Focus Areas:
+          - No imports from domain or outer layers
+          - Implements data layer protocols correctly
+          - Uses Fetch API instead of axios or other HTTP libraries
+          - Proper browser storage handling (localStorage/sessionStorage)
+          - Error handling transforms infrastructure errors to domain errors
+          - Browser compatibility and graceful degradation
+          - Request timeout and cancellation support
+
+          Please provide specific feedback on architecture violations and improvement suggestions.
+
+        browser_compatibility_review: |
+          Please perform a comprehensive browser compatibility review for this frontend infrastructure:
+
+          🎯 Compatibility Areas:
+          1. **Fetch API Usage**: Verify proper Fetch API implementation and polyfill requirements
+          2. **Storage APIs**: Check localStorage and sessionStorage usage patterns
+          3. **Error Handling**: Evaluate browser-specific error scenarios
+          4. **Performance**: Assess impact on different browsers and devices
+          5. **Security**: Review CORS, CSP, and browser security implications
+
+          🔍 Specific Checks:
+          - Fetch API feature detection and fallback strategies
+          - Storage quota handling and storage unavailability
+          - AbortController support for request cancellation
+          - Memory leak prevention in browser environment
+          - HTTPS requirements and mixed content issues
+          - Browser cache management and cache headers
+
+          Please provide actionable feedback with specific browser compatibility improvements.
+
+        performance_review: |
+          Please perform a performance analysis for this frontend infrastructure layer:
+
+          🎯 Performance Metrics:
+          1. **Network Performance**: HTTP client efficiency and optimization
+          2. **Memory Usage**: Browser storage and cache memory management
+          3. **Bundle Size**: Infrastructure code impact on bundle size
+          4. **Runtime Performance**: Execution efficiency in browser environment
+          5. **Cache Strategy**: Cache effectiveness and invalidation performance
+
+          🔍 Specific Analysis:
+          - HTTP request batching and connection reuse
+          - Cache hit/miss ratios and storage efficiency
+          - Memory leaks in event listeners and timeouts
+          - Bundle tree-shaking and dead code elimination
+          - Browser storage performance with large datasets
+          - Network retry logic and exponential backoff
+
+          Please provide performance optimization recommendations with measurable improvements.
+
+        security_review: |
+          Please review the security aspects of this frontend infrastructure implementation:
+
+          📋 Security Areas to Evaluate:
+          1. **Data Protection**: Sensitive data handling in storage and cache
+          2. **Network Security**: HTTPS requirements and secure communication
+          3. **Browser Security**: XSS prevention and secure storage practices
+          4. **Error Exposure**: Information disclosure in error messages
+          5. **Configuration Security**: Environment variable and API key handling
+
+          🛡️ Security Checks:
+          - No sensitive data logged in development or production
+          - Secure storage practices (no plaintext passwords/tokens)
+          - Proper CORS configuration and origin validation
+          - Error messages don't expose system internals
+          - Environment variables properly scoped and secured
+          - Cache doesn't store sensitive information inappropriately
+
+          Please provide security improvements with specific mitigation strategies.
+
+      run_scripts:
+        description: 'Execute AI code review process for infrastructure layer'
+        scripts:
+          - name: 'Run automated architecture validation'
+            command: 'npm run arch:validate -- --layer=infra --feature=__FEATURE_NAME_KEBAB_CASE__ --use-case=__USE_CASE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Generate code coverage report'
+            command: 'npm run test:coverage -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Security analysis'
+            command: 'npm run security:check -- --infra-layer'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Performance analysis'
+            command: 'npm run perf:analyze -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Bundle size impact analysis'
+            command: 'npm run analyze:bundle -- --feature=__FEATURE_NAME_KEBAB_CASE__ --layer=infra'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 14: CLEANUP AND MERGE ===
+    - id: 'cleanup-and-merge-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Final cleanup, review approval, and merge frontend infrastructure layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'MERGE_GUIDELINES.md'
+          description: 'Merge process and cleanup procedures.'
+      run_scripts:
+        description: 'Complete PR merge and cleanup process'
+        scripts:
+          - name: 'Final validation before merge'
+            command: 'npm run validate:all -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Browser compatibility check'
+            command: 'npm run test:browsers -- --infra-layer'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Security final scan'
+            command: 'npm run security:scan -- --layer=infra'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Merge Pull Request'
+            command: 'gh pr merge --squash --delete-branch'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Switch back to main branch'
+            command: 'git checkout main'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Pull latest changes'
+            command: 'git pull origin main'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Cleanup local branch'
+            command: 'git branch -d feat/__FEATURE_NAME_KEBAB_CASE__-infra-__USE_CASE_NAME_KEBAB_CASE__-frontend'
+            workingDirectory: '__PROJECT_NAME__'
+      validation_script: |
+        echo "✅ Verifying merge completion..."
+        current_branch=$(git branch --show-current)
+        if [ "$current_branch" != "main" ]; then
+          echo "❌ ERROR: Not on main branch after merge"
+          exit 1
+        fi
+
+        if git show-branch feat/__FEATURE_NAME_KEBAB_CASE__-infra-__USE_CASE_NAME_KEBAB_CASE__-frontend 2>/dev/null; then
+          echo "❌ ERROR: Feature branch still exists after cleanup"
+          exit 1
+        fi
+
+        echo "✅ Frontend infrastructure layer implementation successfully merged and cleaned up"
+        echo "🎉 __USE_CASE_NAME_PASCAL_CASE__ infrastructure layer is ready for use!"
+
+    # === OPTIONAL: BROWNFIELD REFACTORING STEPS ===
+    # These steps can be used to refactor existing frontend code to Clean Architecture
+    - id: 'refactor-existing-__USE_CASE_NAME_KEBAB_CASE__-infra-1'
+      type: 'conditional_refactor'
+      description: 'Refactor existing axios usage to Fetch API implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: 'check_existing_axios_usage'
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'refactoring axios to fetch api clean architecture frontend'
+          url: 'https://github.com/...'
+          description: 'Brownfield refactoring patterns for HTTP clients.'
+      refactor_pattern:
+        find_pattern: |
+          <<<FIND>>>
+          // Legacy axios usage pattern
+          import axios from 'axios'
+
+          const response = await axios.post('/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__', {
+            __INPUT_FIELD_1__: data.__INPUT_FIELD_1__,
+            __INPUT_FIELD_2__: data.__INPUT_FIELD_2__
+          }, {
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            timeout: 30000
+          })
+
+          return response.data
+          <<</FIND>>>
+        replace_pattern: |
+          <<<REPLACE>>>
+          // Refactored to use Clean Architecture infrastructure layer
+          import { Fetch__USE_CASE_NAME_PASCAL_CASE__Client } from '../infra/http/fetch-__USE_CASE_NAME_KEBAB_CASE__-client'
+
+          const httpClient = new Fetch__USE_CASE_NAME_PASCAL_CASE__Client()
+
+          const response = await httpClient.request({
+            url: '/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: {
+              __INPUT_FIELD_1__: data.__INPUT_FIELD_1__,
+              __INPUT_FIELD_2__: data.__INPUT_FIELD_2__
+            }
+          })
+
+          return response.data
+          <<</REPLACE>>>
+
+    - id: 'refactor-existing-__USE_CASE_NAME_KEBAB_CASE__-infra-2'
+      type: 'conditional_refactor'
+      description: 'Refactor direct localStorage usage to storage adapter pattern'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: 'check_direct_localstorage_usage'
+      refactor_pattern:
+        find_pattern: |
+          <<<FIND>>>
+          // Legacy direct localStorage usage
+          const saveUserPreferences = (preferences: UserPreferences) => {
+            localStorage.setItem('user-preferences', JSON.stringify(preferences))
+          }
+
+          const loadUserPreferences = (): UserPreferences | null => {
+            const stored = localStorage.getItem('user-preferences')
+            return stored ? JSON.parse(stored) : null
+          }
+
+          const clearUserPreferences = () => {
+            localStorage.removeItem('user-preferences')
+          }
+          <<</FIND>>>
+        replace_pattern: |
+          <<<REPLACE>>>
+          // Refactored to use Clean Architecture storage adapter
+          import { Browser__USE_CASE_NAME_PASCAL_CASE__Storage } from '../infra/storage/browser-__USE_CASE_NAME_KEBAB_CASE__-storage'
+
+          const storage = new Browser__USE_CASE_NAME_PASCAL_CASE__Storage()
+
+          const saveUserPreferences = async (preferences: UserPreferences) => {
+            await storage.store('user-preferences', preferences)
+          }
+
+          const loadUserPreferences = async (): Promise<UserPreferences | null> => {
+            return await storage.retrieve<UserPreferences>('user-preferences')
+          }
+
+          const clearUserPreferences = async () => {
+            await storage.remove('user-preferences')
+          }
+          <<</REPLACE>>>
+
+    - id: 'refactor-existing-__USE_CASE_NAME_KEBAB_CASE__-infra-3'
+      type: 'conditional_refactor'
+      description: 'Refactor manual cache management to cache adapter pattern'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: 'check_manual_cache_management'
+      refactor_pattern:
+        find_pattern: |
+          <<<FIND>>>
+          // Legacy manual cache management
+          const CACHE_KEY = '__USE_CASE_NAME_KEBAB_CASE__-cache'
+          const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+          const getCachedData = () => {
+            const cached = localStorage.getItem(CACHE_KEY)
+            if (!cached) return null
+
+            const { data, timestamp } = JSON.parse(cached)
+            if (Date.now() - timestamp > CACHE_TTL) {
+              localStorage.removeItem(CACHE_KEY)
+              return null
+            }
+
+            return data
+          }
+
+          const setCachedData = (data: any) => {
+            const cacheItem = {
+              data,
+              timestamp: Date.now()
+            }
+            localStorage.setItem(CACHE_KEY, JSON.stringify(cacheItem))
+          }
+          <<</FIND>>>
+        replace_pattern: |
+          <<<REPLACE>>>
+          // Refactored to use Clean Architecture cache adapter
+          import { Browser__USE_CASE_NAME_PASCAL_CASE__Cache } from '../infra/cache/browser-__USE_CASE_NAME_KEBAB_CASE__-cache'
+
+          const cache = new Browser__USE_CASE_NAME_PASCAL_CASE__Cache()
+          const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+          const getCachedData = async () => {
+            return await cache.get('__USE_CASE_NAME_KEBAB_CASE__-data')
+          }
+
+          const setCachedData = async (data: any) => {
+            await cache.set('__USE_CASE_NAME_KEBAB_CASE__-data', data, CACHE_TTL)
+          }
+          <<</REPLACE>>>
+
+# ============= END INFRA STEPS FRONTEND SECTION =============
