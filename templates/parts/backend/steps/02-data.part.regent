@@ -13,7 +13,40 @@
   # ------------------------------------------------------------------------------
 
   data_steps:
-    # === STEP 1: CREATE DATA STRUCTURE ===
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-data-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create and checkout feature branch for __USE_CASE_NAME_PASCAL_CASE__ data implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Git branching strategy and naming conventions for data layer'
+      run_scripts:
+        description: 'Create feature branch with proper naming convention for data layer'
+        scripts:
+          - name: 'Create data feature branch'
+            command: |
+              # Stash any uncommitted changes
+              git stash save "WIP: Before creating __USE_CASE_NAME_KEBAB_CASE__-data branch"
+
+              # Ensure we're on the main branch and up to date
+              git checkout main || git checkout master
+              git pull origin main || git pull origin master
+
+              # Create and checkout new feature branch
+              BRANCH_NAME="feat/__USE_CASE_NAME_KEBAB_CASE__-data-layer"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
+
+              echo "✅ Created and checked out branch: $BRANCH_NAME"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: CREATE DATA STRUCTURE ===
     - id: 'create-data-structure-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'folder'
       description: 'Create data layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ use case'
@@ -48,7 +81,7 @@
         done
         echo "✅ All data folders exist for __USE_CASE_NAME_PASCAL_CASE__ use case."
 
-    # === STEP 2: CREATE TEST FIRST (TDD RED PHASE) ===
+    # === STEP 3: CREATE TEST FIRST (TDD RED PHASE) ===
     - id: 'create-data-test-red-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create failing test for __USE_CASE_NAME_PASCAL_CASE__ data implementation (TDD RED)'
@@ -170,22 +203,24 @@
           })
         })
       validation_script: |
-        echo "🔴 Running TDD RED phase - tests should FAIL..."
+        echo "🔴 TDD RED phase: Running tests (expecting failures)..."
         npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db-__USE_CASE_NAME_KEBAB_CASE__.spec.ts --no-coverage
 
-        # AI-NOTE: We expect tests to fail at this point (RED phase)
+        # AI-NOTE: In RED phase, tests MUST fail because implementation doesn't exist yet
         if [ $? -eq 0 ]; then
-          echo "⚠️  WARNING: Tests passed but they should fail in RED phase"
-          echo "   Please verify test implementation"
+          echo "❌ UNEXPECTED: Tests passed in RED phase"
+          echo "   This indicates the test implementation may be incorrect"
+          echo "   RED phase requires failing tests before implementation"
+          exit 1
         else
-          echo "✅ RED phase complete - tests are failing as expected"
-          echo "   Ready to implement the data layer (GREEN phase)"
+          echo "✅ RED phase successful: Tests failing as expected"
+          echo "   Next: Implement data layer to make tests pass (GREEN phase)"
         fi
 
         git add .
         git commit -m "test(data): add failing tests for __USE_CASE_NAME_KEBAB_CASE__ (TDD RED phase)"
 
-    # === STEP 3: CREATE REPOSITORY PROTOCOL (IF NEEDED) ===
+    # === STEP 4: CREATE REPOSITORY PROTOCOL (IF NEEDED) ===
     - id: 'create-repository-protocol-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'conditional_file'
       description: 'Create repository protocol if data layer needs database access'
@@ -235,7 +270,7 @@
           updatedAt: Date
         }
 
-    # === STEP 4: CREATE DATA IMPLEMENTATION (TDD GREEN PHASE) ===
+    # === STEP 5: CREATE DATA IMPLEMENTATION (TDD GREEN PHASE) ===
     - id: 'create-data-implementation-green-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create __USE_CASE_NAME_PASCAL_CASE__ data implementation to make tests pass (TDD GREEN)'
@@ -326,16 +361,18 @@
           }
         }
       validation_script: |
-        echo "🟢 Running TDD GREEN phase - making tests pass..."
+        echo "🟢 TDD GREEN phase: Running tests (expecting all to pass)..."
 
-        # Run the tests - they should pass now
+        # Run tests with implementation - must pass to complete GREEN phase
         npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db-__USE_CASE_NAME_KEBAB_CASE__.spec.ts
 
         if [ $? -eq 0 ]; then
-          echo "✅ GREEN phase complete - all tests passing!"
+          echo "✅ GREEN phase successful: All tests passing!"
+          echo "   Implementation correctly satisfies test requirements"
         else
-          echo "❌ Tests still failing - implementation needs adjustment"
-          echo "   Review the test failures and adjust implementation"
+          echo "❌ GREEN phase failed: Tests still failing"
+          echo "   Implementation does not satisfy test requirements"
+          echo "   Review test failures and adjust data layer implementation"
           exit 1
         fi
 
@@ -345,7 +382,7 @@
         git add .
         git commit -m "feat(data): implement __USE_CASE_NAME_KEBAB_CASE__ data layer (TDD GREEN phase)"
 
-    # === STEP 5: REFACTOR AND OPTIMIZE (TDD REFACTOR PHASE) ===
+    # === STEP 6: REFACTOR AND OPTIMIZE (TDD REFACTOR PHASE) ===
     - id: 'refactor-data-implementation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Refactor data implementation while keeping tests green (TDD REFACTOR)'
@@ -389,7 +426,7 @@
               git commit -m "refactor(data): optimize __USE_CASE_NAME_KEBAB_CASE__ implementation (TDD REFACTOR phase)" || echo "No changes to commit"
             workingDirectory: '__PROJECT_NAME__'
 
-    # === STEP 6: CREATE REPOSITORY IMPLEMENTATION (IF NEEDED) ===
+    # === STEP 7: CREATE REPOSITORY IMPLEMENTATION (IF NEEDED) ===
     - id: 'create-repository-implementation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'conditional_file'
       description: 'Create repository implementation in feature shared infra'
@@ -464,7 +501,7 @@
           }
         }
 
-    # === STEP 7: INTEGRATION TEST FOR DATA LAYER ===
+    # === STEP 8: INTEGRATION TEST FOR DATA LAYER ===
     - id: 'create-data-integration-test-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create integration test for data layer with real dependencies'
@@ -560,5 +597,290 @@
 
         git add .
         git commit -m "test(data): add integration tests for __USE_CASE_NAME_KEBAB_CASE__"
+
+    # === STEP 9: REFACTOR FOR BROWNFIELD (CONDITIONAL MULTI-STEP) ===
+    # AI-NOTE: When brownfield refactoring is needed, the AI should dynamically generate
+    # multiple steps based on the specific files that need refactoring. Each file should
+    # have its own step for better tracking and granular control.
+    #
+    # RULE: For each file requiring refactoring, create a separate step with:
+    # - Unique ID: refactor-{index}-{filename}
+    # - Clear description of what changes are needed
+    # - Specific validation for that file's refactoring
+    # - Rollback point for each major refactoring
+    #
+    # EXAMPLE PATTERN:
+    # If 3 files need refactoring, generate:
+    # Step 9a: refactor-1-user-controller
+    # Step 9b: refactor-2-user-service
+    # Step 9c: refactor-3-user-repository
+    - id: 'refactor-rollback-point-data-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create rollback point before starting data layer brownfield refactoring'
+      condition: 'check_if_brownfield_refactor_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Best practices for safe data layer refactoring with rollback points'
+      run_scripts:
+        description: 'Create git tag for rollback before data layer refactoring'
+        scripts:
+          - name: 'Create data refactor rollback tag'
+            command: |
+              # Create rollback point before data layer refactoring
+              git tag "before-refactor-data-__USE_CASE_NAME_KEBAB_CASE__" || {
+                echo "⚠️  Failed to create rollback tag"
+                exit 1
+              }
+              echo "✅ Created data rollback point: before-refactor-data-__USE_CASE_NAME_KEBAB_CASE__"
+              echo "   To rollback: git reset --hard before-refactor-data-__USE_CASE_NAME_KEBAB_CASE__"
+              # Document files that need refactoring
+              echo "📋 Data layer files identified for refactoring:"
+              # AI should list files here based on analysis
+            workingDirectory: '__PROJECT_NAME__'
+
+    # AI-NOTE: The following is a template that should be duplicated for each file
+    # that needs refactoring. The AI should generate one step per file.
+    - id: 'refactor-data-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor __FILE_TO_MODIFY_KEBAB_CASE__ data layer to Clean Architecture'
+      condition: 'check_if_data_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture data layer refactoring patterns for backend'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Analyze current data layer file structure and dependencies'
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+      template: |
+        <<<FIND>>>
+        // The AI should identify the exact code block that needs refactoring
+        // This will be the original data layer code that violates Clean Architecture
+        [ORIGINAL_DATA_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        // TODO: Refactor this data layer file to comply with Clean Architecture
+        // Estimated effort: __EFFORT__ (hours)
+        // SPECIFIC DATA LAYER REFACTORING TASKS FOR THIS FILE:
+        // 1. Extract business logic to domain layer (if any leaked)
+        // 2. Move infrastructure concerns to infrastructure layer
+        // 3. Implement proper repository patterns
+        // 4. Add proper error handling and validation
+        // 5. Implement dependency injection for repositories
+        // 6. Update imports to follow Clean Architecture boundaries
+        // 7. Add unit tests for refactored data layer code
+        // 8. Ensure data layer only orchestrates, no business logic
+        // DATA LAYER DEPENDENCIES TO UPDATE:
+        // - [AI should list specific data layer dependencies]
+        // FILES THAT IMPORT THIS DATA LAYER:
+        // - [AI should list dependent files]
+        */
+        // NEW REFACTORED DATA LAYER CODE:
+        [REFACTORED_DATA_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # === STEP 10: DELETE OBSOLETE DATA FILES (CONDITIONAL) ===
+    - id: 'delete-data-file-__FILE_TO_DELETE_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Delete obsolete data layer files when refactoring to Clean Architecture'
+      condition: 'check_if_data_file_deletion_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Safe file deletion during data layer refactoring'
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__.ts'
+      template: ''
+      validation_script: |
+        echo "🗑️  Deleting obsolete data layer file: __FILE_TO_DELETE_KEBAB_CASE__.ts"
+        if [ -f "__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__.ts" ]; then
+          rm "__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__.ts"
+          echo "✅ Deleted obsolete file"
+          git add -A
+          git commit -m "refactor(data): remove obsolete __FILE_TO_DELETE_KEBAB_CASE__ file"
+        else
+          echo "ℹ️  File already deleted or does not exist"
+        fi
+
+    # === STEP 11: CREATE PULL REQUEST ===
+    - id: 'create-pull-request-data-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create pull request for __USE_CASE_NAME_PASCAL_CASE__ data implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'PR_TEMPLATE.md'
+          description: 'Pull request template and review checklist for data layer'
+      run_scripts:
+        description: 'Push branch and create pull request for data layer'
+        scripts:
+          - name: 'Push and create data PR'
+            command: |
+              BRANCH_NAME="feat/__USE_CASE_NAME_KEBAB_CASE__-data-layer"
+
+              # Push the branch
+              git push -u origin "$BRANCH_NAME" || {
+                echo "❌ Failed to push branch to remote"
+                exit 1
+              }
+
+              # Create PR using GitHub CLI if available
+              if command -v gh &> /dev/null; then
+                gh pr create \
+                  --title "feat(__USE_CASE_NAME_KEBAB_CASE__): implement data layer with TDD" \
+                  --body "## Summary
+
+                Implements data layer for __USE_CASE_NAME_PASCAL_CASE__ use case following Clean Architecture and TDD methodology.
+
+                ## Data Layer Components Implemented
+                - ✅ **Use Case Implementation**: Db__USE_CASE_NAME_PASCAL_CASE__ with dependency injection
+                - ✅ **Repository Protocol**: Abstract interface for database operations
+                - ✅ **Repository Implementation**: Prisma-based concrete implementation
+                - ✅ **Input Validation**: Data integrity and business rule validation
+                - ✅ **Error Handling**: Proper error propagation to domain layer
+                - ✅ **Integration Tests**: Tests with real database dependencies
+
+                ## TDD Methodology Applied
+                - 🔴 **RED**: Failing tests written first for data layer
+                - 🟢 **GREEN**: Minimal implementation to make tests pass
+                - ♻️  **REFACTOR**: Code optimization while maintaining test coverage
+
+                ## Testing Strategy
+                - [ ] Unit tests pass (>90% coverage)
+                - [ ] Integration tests pass with real database
+                - [ ] Error scenarios properly handled
+                - [ ] Business rules validation working
+                - [ ] Repository abstraction properly implemented
+
+                ## Architecture Compliance
+                - [ ] Dependency Inversion Principle followed
+                - [ ] No business logic in data layer (orchestration only)
+                - [ ] Proper separation between domain and infrastructure
+                - [ ] Repository pattern correctly implemented
+                - [ ] Input/output mapping between layers
+
+                ## Performance & Reliability
+                - [ ] Database operations optimized
+                - [ ] Transaction support implemented
+                - [ ] Proper error handling and logging
+                - [ ] Input validation prevents invalid data
+
+                ## Checklist
+                - [ ] Code follows Clean Architecture principles
+                - [ ] All tests pass with adequate coverage
+                - [ ] Documentation is updated
+                - [ ] No breaking changes introduced
+                - [ ] Repository abstraction is properly defined
+                - [ ] Error handling covers all edge cases" \
+                  --assignee @me \
+                  --label "enhancement,data-layer,clean-architecture,tdd"
+
+                echo "✅ Pull request created successfully"
+              else
+                echo "📝 Push successful. Please create PR manually at:"
+                echo "   https://github.com/__GITHUB_ORG__/__PROJECT_NAME__/compare/$BRANCH_NAME"
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 10: TRIGGER AI CODE REVIEW ===
+    - id: 'trigger-ai-review-data-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Trigger AI-powered code review with Claude for data layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'claude-cli'
+          query: 'claude code review data layer clean architecture'
+          url: 'https://claude.ai/docs/code-review'
+          description: 'AI-powered code review using Claude for data layer patterns'
+      run_scripts:
+        description: 'Run Claude AI code review on the data implementation'
+        scripts:
+          - name: 'Trigger Claude data review'
+            command: |
+              BRANCH_NAME="feat/__USE_CASE_NAME_KEBAB_CASE__-data-layer"
+
+              # Check if Claude CLI is available
+              if command -v claude &> /dev/null; then
+                echo "🤖 Starting AI code review with Claude for data layer..."
+
+                claude /review \
+                  --branch "$BRANCH_NAME" \
+                  --focus "clean-architecture,data-patterns,tdd,dependency-injection" \
+                  --checklist ".github/data_review_checklist.md" \
+                  --output "review-data-__USE_CASE_NAME_KEBAB_CASE__.md"
+
+                echo "✅ AI data review complete. Check review-data-__USE_CASE_NAME_KEBAB_CASE__.md"
+
+                # Add review as PR comment if gh CLI is available
+                if command -v gh &> /dev/null && [ -f "review-data-__USE_CASE_NAME_KEBAB_CASE__.md" ]; then
+                  gh pr comment --body-file "review-data-__USE_CASE_NAME_KEBAB_CASE__.md"
+                  echo "✅ Review posted to PR"
+                fi
+              else
+                echo "⚠️  Claude CLI not installed. Skipping AI review."
+                echo "   Install with: npm install -g @anthropic/claude-cli"
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 11: POST-MERGE CLEANUP ===
+    - id: 'post-merge-cleanup-data-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Cleanup after data PR merge'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Post-merge cleanup procedures for data layer'
+      run_scripts:
+        description: 'Clean up local and remote branches after data merge'
+        scripts:
+          - name: 'Post-merge data cleanup'
+            command: |
+              BRANCH_NAME="feat/__USE_CASE_NAME_KEBAB_CASE__-data-layer"
+
+              # Check if PR is merged
+              if command -v gh &> /dev/null; then
+                PR_STATE=$(gh pr view "$BRANCH_NAME" --json state -q .state 2>/dev/null || echo "UNKNOWN")
+
+                if [ "$PR_STATE" = "MERGED" ]; then
+                  echo "🧹 Starting post-merge cleanup for data layer..."
+
+                  # Switch to main branch
+                  git checkout main || git checkout master
+                  git pull origin main || git pull origin master
+
+                  # Delete local branch
+                  git branch -d "$BRANCH_NAME"
+
+                  # Delete remote branch
+                  git push origin --delete "$BRANCH_NAME"
+
+                  # Clean up review files
+                  rm -f review-data-__USE_CASE_NAME_KEBAB_CASE__.md
+
+                  echo "✅ Data cleanup complete. Branch deleted locally and remotely."
+                else
+                  echo "⏳ Data PR not yet merged. Skipping cleanup."
+                fi
+              else
+                echo "⚠️  GitHub CLI not available. Please clean up branches manually after merge."
+              fi
+            workingDirectory: '__PROJECT_NAME__'
 
 # ============= END DATA STEPS BACKEND SECTION =============
