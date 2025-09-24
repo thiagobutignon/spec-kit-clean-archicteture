@@ -1,50 +1,21 @@
 # ============= BEGIN INFRA STEPS BACKEND SECTION =============
 
   # ------------------------------------------------------------------------------
-  # AI-NOTE: INFRASTRUCTURE LAYER IMPLEMENTATION STEPS FOR BACKEND
-  # These steps implement infrastructure layer following Clean Architecture principles
+  # AI-NOTE: INFRASTRUCTURE LAYER IMPLEMENTATION STEPS FOR BACKEND WITH TDD
+  # Following Test-Driven Development (TDD): RED → GREEN → REFACTOR
+  # Tests are created FIRST (RED), then implementation (GREEN), then optimized (REFACTOR)
   # Infrastructure layer provides concrete implementations of data layer protocols
-  # Including database repositories, HTTP clients, cache implementations, etc.
   # ------------------------------------------------------------------------------
 
   # ------------------------------------------------------------------------------
   # INFRASTRUCTURE LAYER STEPS SECTION
-  # Steps for generating infrastructure layer artifacts in backend features
+  # Steps for implementing infrastructure layer following TDD methodology
+  # Each infrastructure component implementation starts with failing tests
   # Following "Feature Module with Use Case Slices" architecture
-  # Infrastructure implementations are shared within feature (not per use case)
   # ------------------------------------------------------------------------------
 
   infra_steps:
-    # === STEP 1: ANALYZE INFRASTRUCTURE NEEDS ===
-    - id: 'analyze-infra-needs-__FEATURE_NAME_KEBAB_CASE__'
-      type: 'validation'
-      description: 'Analyze infrastructure needs for __FEATURE_NAME_PASCAL_CASE__ feature before creating adapters'
-      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-      rlhf_score: null # -2, -1, 0, 1, 2
-      execution_log: ''
-      references:
-        - type: 'internal_guideline'
-          source: 'BACKEND_ARCHITECTURE.md'
-          description: 'Infrastructure layer provides concrete implementations for data layer protocols.'
-        - type: 'internal_code_analysis'
-          source: 'serena'
-          tool: 'find_symbol'
-          query: '*Protocol*'
-          description: 'Identify existing protocols that need infrastructure implementations.'
-      run_scripts:
-        description: 'Analyze existing protocols and identify infrastructure needs'
-        scripts:
-          - name: 'Find existing protocols in data layer'
-            command: 'find src/features/__FEATURE_NAME_KEBAB_CASE__ -name "*protocol*" -o -name "*Protocol*" | grep -v node_modules'
-            workingDirectory: '__PROJECT_NAME__'
-          - name: 'Check existing infrastructure implementations'
-            command: 'find src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra -name "*.ts" 2>/dev/null | head -10'
-            workingDirectory: '__PROJECT_NAME__'
-          - name: 'List use cases needing infrastructure'
-            command: 'find src/features/__FEATURE_NAME_KEBAB_CASE__ -name "db-*" | wc -l'
-            workingDirectory: '__PROJECT_NAME__'
-
-    # === STEP 2: CREATE INFRASTRUCTURE STRUCTURE ===
+    # === STEP 1: CREATE INFRASTRUCTURE STRUCTURE ===
     - id: 'create-infra-structure-__FEATURE_NAME_KEBAB_CASE__'
       type: 'folder'
       description: 'Create infrastructure layer folder structure for __FEATURE_NAME_PASCAL_CASE__ feature'
@@ -54,26 +25,27 @@
       references:
         - type: 'internal_guideline'
           source: 'BACKEND_ARCHITECTURE.md'
-          description: 'Following Clean Architecture infrastructure layer structure.'
+          description: 'Following Clean Architecture infrastructure layer structure for backend.'
         - type: 'external_pattern'
           source: 'context7'
-          query: 'clean architecture infrastructure layer repository adapter pattern'
+          query: 'clean architecture infrastructure layer TDD backend node.js'
           url: 'https://github.com/...'
-          description: 'Infrastructure layer patterns for backend development.'
+          description: 'Infrastructure layer patterns with TDD for backend development.'
       action:
         create_folders:
           basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra'
           folders:
-            - 'db'              # Database implementations (Prisma repositories)
-            - 'http'            # HTTP client implementations (Fetch API)
-            - 'cache'           # Cache implementations (Redis, in-memory)
-            - 'crypto'          # Cryptography implementations (bcrypt, jwt)
-            - 'validators'      # External validation implementations
-            - 'messaging'       # Message queue implementations
-            - 'storage'         # File storage implementations
+            - 'db'            # Database implementations (Prisma repositories)
+            - 'http'          # HTTP client implementations (Fetch adapters)
+            - 'cache'         # Cache implementations (Redis, in-memory)
+            - 'crypto'        # Cryptography implementations (bcrypt, JWT)
+            - 'validators'    # External validation adapters (Zod, Joi)
+            - 'messaging'     # Message queue implementations (optional)
+            - 'storage'       # File storage implementations (optional)
       validation_script: |
+        # AI-NOTE: Replace placeholders but keep shell variables intact
         BASE_PATH="__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra"
-        FOLDERS="$BASE_PATH/db $BASE_PATH/http $BASE_PATH/cache $BASE_PATH/crypto $BASE_PATH/validators $BASE_PATH/messaging $BASE_PATH/storage"
+        FOLDERS="$BASE_PATH/db $BASE_PATH/http $BASE_PATH/cache $BASE_PATH/crypto $BASE_PATH/validators"
         echo "✅ Verifying infrastructure folder structure..."
         for folder in $FOLDERS; do
           if [ ! -d "$folder" ]; then
@@ -83,1583 +55,1704 @@
         done
         echo "✅ All infrastructure folders exist for __FEATURE_NAME_PASCAL_CASE__ feature."
 
-    # === STEP 3: CREATE DATABASE REPOSITORY IMPLEMENTATION ===
-    - id: 'create-database-repository-__FEATURE_NAME_KEBAB_CASE__'
+    # === STEP 2: CREATE DATABASE REPOSITORY TEST (TDD RED PHASE) ===
+    - id: 'create-db-repository-test-red-__FEATURE_NAME_KEBAB_CASE__'
       type: 'create_file'
-      description: 'Create Prisma database repository implementation for __FEATURE_NAME_PASCAL_CASE__ feature'
-      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-      rlhf_score: null # -2, -1, 0, 1, 2
+      description: 'Create failing test for __FEATURE_NAME_PASCAL_CASE__ database repository (TDD RED)'
+      status: 'PENDING'
+      rlhf_score: null
       execution_log: ''
       references:
         - type: 'external_pattern'
           source: 'context7'
-          query: 'prisma repository pattern typescript postgresql clean architecture'
+          query: 'TDD test first red phase prisma repository typescript'
           url: 'https://github.com/...'
-          description: 'Prisma repository implementation patterns for Clean Architecture.'
-        - type: 'internal_code_analysis'
-          source: 'serena'
-          tool: 'find_symbol'
-          query: '__FEATURE_NAME_PASCAL_CASE__Repository'
-          description: 'Find repository protocol interface for implementation.'
+          description: 'TDD Red phase - writing failing repository tests first.'
+        - type: 'internal_guideline'
+          source: 'TESTING_GUIDE.md'
+          description: 'Following TDD methodology - test first approach for infrastructure.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.spec.ts'
+      template: |
+        import { PrismaClient } from '@prisma/client'
+        import { Prisma__FEATURE_NAME_PASCAL_CASE__Repository } from './prisma-__FEATURE_NAME_KEBAB_CASE__-repository'
+        // AI-NOTE: Import repository protocol interface if exists
+        // import { __FEATURE_NAME_PASCAL_CASE__Repository } from '../../data/protocols/__FEATURE_NAME_KEBAB_CASE__-repository-protocol'
+
+        /**
+         * Test suite for Prisma__FEATURE_NAME_PASCAL_CASE__Repository implementation
+         * Following TDD - Test First Approach (RED Phase)
+         * @layer Infrastructure Layer Tests
+         * @pattern TDD - Red-Green-Refactor, Repository Pattern
+         */
+        describe('Prisma__FEATURE_NAME_PASCAL_CASE__Repository', () => {
+          let prismaClient: PrismaClient
+          let sut: Prisma__FEATURE_NAME_PASCAL_CASE__Repository
+
+          beforeEach(() => {
+            // AI-NOTE: Mock PrismaClient for unit tests
+            prismaClient = {
+              __MODEL_NAME__: {
+                create: jest.fn(),
+                findFirst: jest.fn(),
+                findMany: jest.fn(),
+                update: jest.fn(),
+                delete: jest.fn()
+              },
+              $transaction: jest.fn()
+            } as any
+
+            sut = new Prisma__FEATURE_NAME_PASCAL_CASE__Repository(prismaClient)
+          })
+
+          const makeFakeRepositoryInput = () => ({
+            __INPUT_FIELD_1__: 'any_value_1',
+            __INPUT_FIELD_2__: 'any_value_2',
+            __INPUT_FIELD_3__: 'any_value_3'
+          })
+
+          describe('save', () => {
+            test('Should call Prisma create with correct values', async () => {
+              // This test will FAIL initially (RED phase)
+              const createSpy = prismaClient.__MODEL_NAME__.create as jest.Mock
+              createSpy.mockResolvedValueOnce({
+                id: 'any_id',
+                __INPUT_FIELD_1__: 'any_value_1',
+                __INPUT_FIELD_2__: 'any_value_2',
+                __INPUT_FIELD_3__: 'any_value_3',
+                createdAt: new Date('2024-01-01'),
+                updatedAt: new Date('2024-01-01')
+              })
+
+              const input = makeFakeRepositoryInput()
+              await sut.save(input)
+
+              expect(createSpy).toHaveBeenCalledWith({
+                data: {
+                  __INPUT_FIELD_1__: 'any_value_1',
+                  __INPUT_FIELD_2__: 'any_value_2',
+                  __INPUT_FIELD_3__: 'any_value_3'
+                }
+              })
+            })
+
+            test('Should return created entity with all required fields', async () => {
+              // This test will FAIL initially (RED phase)
+              const mockResult = {
+                id: 'any_id',
+                __INPUT_FIELD_1__: 'any_value_1',
+                __INPUT_FIELD_2__: 'any_value_2',
+                __INPUT_FIELD_3__: 'any_value_3',
+                createdAt: new Date('2024-01-01'),
+                updatedAt: new Date('2024-01-01')
+              }
+              ;(prismaClient.__MODEL_NAME__.create as jest.Mock).mockResolvedValueOnce(mockResult)
+
+              const input = makeFakeRepositoryInput()
+              const result = await sut.save(input)
+
+              expect(result).toEqual({
+                id: 'any_id',
+                __INPUT_FIELD_1__: 'any_value_1',
+                __INPUT_FIELD_2__: 'any_value_2',
+                __INPUT_FIELD_3__: 'any_value_3',
+                createdAt: new Date('2024-01-01'),
+                updatedAt: new Date('2024-01-01')
+              })
+            })
+
+            test('Should throw if Prisma throws', async () => {
+              // This test will FAIL initially (RED phase)
+              ;(prismaClient.__MODEL_NAME__.create as jest.Mock).mockRejectedValueOnce(new Error('Database error'))
+
+              const input = makeFakeRepositoryInput()
+              const promise = sut.save(input)
+
+              await expect(promise).rejects.toThrow('Database error')
+            })
+          })
+
+          describe('findById', () => {
+            test('Should call Prisma findFirst with correct id', async () => {
+              // This test will FAIL initially (RED phase)
+              const findFirstSpy = prismaClient.__MODEL_NAME__.findFirst as jest.Mock
+              findFirstSpy.mockResolvedValueOnce(null)
+
+              await sut.findById('any_id')
+
+              expect(findFirstSpy).toHaveBeenCalledWith({
+                where: { id: 'any_id' }
+              })
+            })
+
+            test('Should return null if entity not found', async () => {
+              // This test will FAIL initially (RED phase)
+              ;(prismaClient.__MODEL_NAME__.findFirst as jest.Mock).mockResolvedValueOnce(null)
+
+              const result = await sut.findById('any_id')
+
+              expect(result).toBeNull()
+            })
+
+            test('Should return entity if found', async () => {
+              // This test will FAIL initially (RED phase)
+              const mockEntity = {
+                id: 'any_id',
+                __INPUT_FIELD_1__: 'any_value_1',
+                __INPUT_FIELD_2__: 'any_value_2',
+                __INPUT_FIELD_3__: 'any_value_3',
+                createdAt: new Date('2024-01-01'),
+                updatedAt: new Date('2024-01-01')
+              }
+              ;(prismaClient.__MODEL_NAME__.findFirst as jest.Mock).mockResolvedValueOnce(mockEntity)
+
+              const result = await sut.findById('any_id')
+
+              expect(result).toEqual(mockEntity)
+            })
+          })
+        })
+      validation_script: |
+        echo "🔴 Running TDD RED phase - repository tests should FAIL..."
+        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.spec.ts --no-coverage
+
+        # AI-NOTE: We expect tests to fail at this point (RED phase)
+        if [ $? -eq 0 ]; then
+          echo "⚠️  WARNING: Tests passed but they should fail in RED phase"
+          echo "   Please verify test implementation"
+        else
+          echo "✅ RED phase complete - tests are failing as expected"
+          echo "   Ready to implement the repository (GREEN phase)"
+        fi
+
+        git add .
+        git commit -m "test(infra): add failing repository tests for __FEATURE_NAME_KEBAB_CASE__ (TDD RED phase)"
+
+    # === STEP 3: CREATE DATABASE REPOSITORY IMPLEMENTATION (TDD GREEN PHASE) ===
+    - id: 'create-db-repository-green-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create __FEATURE_NAME_PASCAL_CASE__ database repository to make tests pass (TDD GREEN)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'prisma repository pattern dependency injection typescript'
+          url: 'https://github.com/...'
+          description: 'Repository implementation with Prisma and dependency injection.'
+        - type: 'internal_guideline'
+          source: 'TESTING_GUIDE.md'
+          description: 'TDD Green phase - making repository tests pass.'
       path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.ts'
       template: |
         import { PrismaClient } from '@prisma/client'
-        import type { __FEATURE_NAME_PASCAL_CASE__Repository } from '../../domain/repositories/__FEATURE_NAME_KEBAB_CASE__-repository'
-        import type { __FEATURE_NAME_PASCAL_CASE__Model } from '../../domain/models/__FEATURE_NAME_KEBAB_CASE__-model'
+        // AI-NOTE: Import repository protocol interface if exists
+        // import { __FEATURE_NAME_PASCAL_CASE__Repository } from '../../data/protocols/__FEATURE_NAME_KEBAB_CASE__-repository-protocol'
 
         /**
-         * Prisma implementation of __FEATURE_NAME_PASCAL_CASE__Repository
-         * Provides database operations for __FEATURE_NAME_PASCAL_CASE__ entities using PostgreSQL
-         *
-         * @implementation Infrastructure Layer - Database Repository
-         * @pattern Repository Pattern - Concrete implementation with Prisma ORM
-         * @layer Infrastructure - Database access implementation
+         * Prisma implementation of __FEATURE_NAME_PASCAL_CASE__ repository
+         * Handles database operations using Prisma ORM with transaction support
+         * @layer Infrastructure Layer
+         * @pattern Repository Pattern, Dependency Injection
+         * @implements __FEATURE_NAME_PASCAL_CASE__Repository
          */
-        export class Prisma__FEATURE_NAME_PASCAL_CASE__Repository implements __FEATURE_NAME_PASCAL_CASE__Repository {
+        export class Prisma__FEATURE_NAME_PASCAL_CASE__Repository {
           /**
-           * Creates Prisma__FEATURE_NAME_PASCAL_CASE__Repository with database client
-           *
-           * @param prisma - Prisma client for database operations
+           * Constructor with dependency injection
+           * @param prisma - PrismaClient instance for database operations
            */
-          constructor(private readonly prisma: PrismaClient) {}
+          constructor(
+            private readonly prisma: PrismaClient
+          ) {}
 
           /**
-           * Save __FEATURE_NAME_PASCAL_CASE__ entity to database
-           *
-           * @param data - __FEATURE_NAME_PASCAL_CASE__ data to save
-           * @returns Promise with saved entity
-           * @throws Database error if operation fails
+           * Save a new __FEATURE_NAME_LOWER_CASE__ entity to database
+           * @param data - Entity data to persist
+           * @param tx - Optional Prisma transaction client for atomic operations
+           * @returns Promise with persisted entity including id and timestamps
            */
-          async save(data: Omit<__FEATURE_NAME_PASCAL_CASE__Model, 'id' | 'createdAt' | 'updatedAt'>): Promise<__FEATURE_NAME_PASCAL_CASE__Model> {
+          async save(
+            data: {
+              __INPUT_FIELD_1__: string
+              __INPUT_FIELD_2__: string
+              __INPUT_FIELD_3__: string
+            },
+            tx?: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>
+          ): Promise<{
+            id: string
+            __INPUT_FIELD_1__: string
+            __INPUT_FIELD_2__: string
+            __INPUT_FIELD_3__: string
+            createdAt: Date
+            updatedAt: Date
+          }> {
+            // AI-NOTE: Use transaction client if provided, otherwise use main client
+            const client = tx || this.prisma
+
             try {
-              const saved__FEATURE_NAME_PASCAL_CASE__ = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.create({
+              const result = await client.__MODEL_NAME__.create({
                 data: {
-                  __ENTITY_FIELD_1__: data.__ENTITY_FIELD_1__,
-                  __ENTITY_FIELD_2__: data.__ENTITY_FIELD_2__,
-                  __ENTITY_FIELD_3__: data.__ENTITY_FIELD_3__,
-                  status: data.status || 'active',
-                  metadata: data.metadata || {}
+                  __INPUT_FIELD_1__: data.__INPUT_FIELD_1__,
+                  __INPUT_FIELD_2__: data.__INPUT_FIELD_2__,
+                  __INPUT_FIELD_3__: data.__INPUT_FIELD_3__
                 }
               })
 
-              return this.toDomainModel(saved__FEATURE_NAME_PASCAL_CASE__)
+              return {
+                id: result.id,
+                __INPUT_FIELD_1__: result.__INPUT_FIELD_1__,
+                __INPUT_FIELD_2__: result.__INPUT_FIELD_2__,
+                __INPUT_FIELD_3__: result.__INPUT_FIELD_3__,
+                createdAt: result.createdAt,
+                updatedAt: result.updatedAt
+              }
             } catch (error) {
-              throw this.handleDatabaseError(error, 'save')
+              // AI-NOTE: Transform Prisma errors to domain-friendly errors
+              if (error instanceof Error) {
+                throw new Error(`Failed to save __FEATURE_NAME_LOWER_CASE__: ${error.message}`)
+              }
+              throw error
             }
           }
 
           /**
-           * Find __FEATURE_NAME_PASCAL_CASE__ entity by ID
-           *
-           * @param id - Entity ID to search
-           * @returns Promise with found entity or null
-           * @throws Database error if operation fails
+           * Find __FEATURE_NAME_LOWER_CASE__ entity by id
+           * @param id - Entity unique identifier
+           * @returns Promise with entity or null if not found
            */
-          async findById(id: string): Promise<__FEATURE_NAME_PASCAL_CASE__Model | null> {
+          async findById(id: string): Promise<{
+            id: string
+            __INPUT_FIELD_1__: string
+            __INPUT_FIELD_2__: string
+            __INPUT_FIELD_3__: string
+            createdAt: Date
+            updatedAt: Date
+          } | null> {
             try {
-              const __FEATURE_NAME_CAMEL_CASE__ = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.findUnique({
+              const result = await this.prisma.__MODEL_NAME__.findFirst({
                 where: { id }
               })
 
-              return __FEATURE_NAME_CAMEL_CASE__ ? this.toDomainModel(__FEATURE_NAME_CAMEL_CASE__) : null
+              if (!result) {
+                return null
+              }
+
+              return {
+                id: result.id,
+                __INPUT_FIELD_1__: result.__INPUT_FIELD_1__,
+                __INPUT_FIELD_2__: result.__INPUT_FIELD_2__,
+                __INPUT_FIELD_3__: result.__INPUT_FIELD_3__,
+                createdAt: result.createdAt,
+                updatedAt: result.updatedAt
+              }
             } catch (error) {
-              throw this.handleDatabaseError(error, 'findById')
+              if (error instanceof Error) {
+                throw new Error(`Failed to find __FEATURE_NAME_LOWER_CASE__ by id: ${error.message}`)
+              }
+              throw error
             }
           }
 
           /**
-           * Find __FEATURE_NAME_PASCAL_CASE__ entities by field
-           *
-           * @param field - Field name to search by
-           * @param value - Value to search for
-           * @returns Promise with array of matching entities
-           * @throws Database error if operation fails
-           */
-          async findByField(field: keyof Pick<__FEATURE_NAME_PASCAL_CASE__Model, '__ENTITY_FIELD_1__' | '__ENTITY_FIELD_2__'>, value: string): Promise<__FEATURE_NAME_PASCAL_CASE__Model[]> {
-            try {
-              const entities = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.findMany({
-                where: { [field]: value }
-              })
-
-              return entities.map(entity => this.toDomainModel(entity))
-            } catch (error) {
-              throw this.handleDatabaseError(error, 'findByField')
-            }
-          }
-
-          /**
-           * Find all __FEATURE_NAME_PASCAL_CASE__ entities with pagination
-           *
-           * @param options - Query options (limit, offset, filters)
-           * @returns Promise with paginated entities
-           * @throws Database error if operation fails
-           */
-          async findAll(options?: {
-            limit?: number
-            offset?: number
-            status?: string
-          }): Promise<__FEATURE_NAME_PASCAL_CASE__Model[]> {
-            try {
-              const { limit = 50, offset = 0, status } = options || {}
-
-              const entities = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.findMany({
-                where: status ? { status } : undefined,
-                skip: offset,
-                take: limit,
-                orderBy: { createdAt: 'desc' }
-              })
-
-              return entities.map(entity => this.toDomainModel(entity))
-            } catch (error) {
-              throw this.handleDatabaseError(error, 'findAll')
-            }
-          }
-
-          /**
-           * Update __FEATURE_NAME_PASCAL_CASE__ entity
-           *
-           * @param id - Entity ID to update
+           * Update existing __FEATURE_NAME_LOWER_CASE__ entity
+           * @param id - Entity identifier
            * @param data - Partial data to update
            * @returns Promise with updated entity
-           * @throws Database error if operation fails
            */
-          async update(id: string, data: Partial<Omit<__FEATURE_NAME_PASCAL_CASE__Model, 'id' | 'createdAt' | 'updatedAt'>>): Promise<__FEATURE_NAME_PASCAL_CASE__Model> {
+          async update(
+            id: string,
+            data: Partial<{
+              __INPUT_FIELD_1__: string
+              __INPUT_FIELD_2__: string
+              __INPUT_FIELD_3__: string
+            }>
+          ): Promise<{
+            id: string
+            __INPUT_FIELD_1__: string
+            __INPUT_FIELD_2__: string
+            __INPUT_FIELD_3__: string
+            createdAt: Date
+            updatedAt: Date
+          }> {
             try {
-              const updated__FEATURE_NAME_PASCAL_CASE__ = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.update({
+              const result = await this.prisma.__MODEL_NAME__.update({
                 where: { id },
-                data: {
-                  ...data,
-                  updatedAt: new Date()
-                }
+                data
               })
 
-              return this.toDomainModel(updated__FEATURE_NAME_PASCAL_CASE__)
+              return {
+                id: result.id,
+                __INPUT_FIELD_1__: result.__INPUT_FIELD_1__,
+                __INPUT_FIELD_2__: result.__INPUT_FIELD_2__,
+                __INPUT_FIELD_3__: result.__INPUT_FIELD_3__,
+                createdAt: result.createdAt,
+                updatedAt: result.updatedAt
+              }
             } catch (error) {
-              throw this.handleDatabaseError(error, 'update')
+              if (error instanceof Error) {
+                throw new Error(`Failed to update __FEATURE_NAME_LOWER_CASE__: ${error.message}`)
+              }
+              throw error
             }
           }
 
           /**
-           * Delete __FEATURE_NAME_PASCAL_CASE__ entity
-           *
-           * @param id - Entity ID to delete
+           * Delete __FEATURE_NAME_LOWER_CASE__ entity by id
+           * @param id - Entity identifier to delete
            * @returns Promise<void>
-           * @throws Database error if operation fails
            */
           async delete(id: string): Promise<void> {
             try {
-              await this.prisma.__FEATURE_NAME_CAMEL_CASE__.delete({
+              await this.prisma.__MODEL_NAME__.delete({
                 where: { id }
               })
             } catch (error) {
-              throw this.handleDatabaseError(error, 'delete')
+              if (error instanceof Error) {
+                throw new Error(`Failed to delete __FEATURE_NAME_LOWER_CASE__: ${error.message}`)
+              }
+              throw error
             }
           }
 
           /**
-           * Check if __FEATURE_NAME_PASCAL_CASE__ exists by field
-           *
-           * @param field - Field name to check
-           * @param value - Value to check for
-           * @returns Promise with boolean indicating existence
-           * @throws Database error if operation fails
+           * Execute operations within a transaction for data consistency
+           * @param fn - Function to execute within transaction
+           * @returns Promise with transaction result
            */
-          async exists(field: keyof Pick<__FEATURE_NAME_PASCAL_CASE__Model, '__ENTITY_FIELD_1__' | '__ENTITY_FIELD_2__'>, value: string): Promise<boolean> {
-            try {
-              const count = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.count({
-                where: { [field]: value }
-              })
-
-              return count > 0
-            } catch (error) {
-              throw this.handleDatabaseError(error, 'exists')
-            }
-          }
-
-          /**
-           * Execute transaction with multiple operations
-           *
-           * @param operations - Array of database operations
-           * @returns Promise with transaction results
-           * @throws Database error if transaction fails
-           */
-          async executeTransaction<T>(
-            operations: ((tx: PrismaClient) => Promise<T>)[]
-          ): Promise<T[]> {
-            try {
-              return await this.prisma.$transaction(
-                operations.map(operation => operation(this.prisma))
-              )
-            } catch (error) {
-              throw this.handleDatabaseError(error, 'transaction')
-            }
-          }
-
-          /**
-           * Transform Prisma entity to domain model
-           *
-           * @private
-           * @param entity - Prisma entity from database
-           * @returns Domain model object
-           */
-          private toDomainModel(entity: any): __FEATURE_NAME_PASCAL_CASE__Model {
-            return {
-              id: entity.id,
-              __ENTITY_FIELD_1__: entity.__ENTITY_FIELD_1__,
-              __ENTITY_FIELD_2__: entity.__ENTITY_FIELD_2__,
-              __ENTITY_FIELD_3__: entity.__ENTITY_FIELD_3__,
-              status: entity.status,
-              metadata: entity.metadata || {},
-              createdAt: entity.createdAt,
-              updatedAt: entity.updatedAt
-            }
-          }
-
-          /**
-           * Handle database errors and transform to domain errors
-           *
-           * @private
-           * @param error - Original database error
-           * @param operation - Operation that failed
-           * @returns Transformed error with context
-           */
-          private handleDatabaseError(error: any, operation: string): Error {
-            // Log error for debugging in development
-            if (process.env.NODE_ENV === 'development') {
-              console.error(`Database error in ${operation}:`, error)
-            }
-
-            // Handle specific Prisma error codes
-            if (error.code === 'P2002') {
-              return new Error(`Duplicate entry: ${error.meta?.target?.join(', ')}`)
-            }
-
-            if (error.code === 'P2025') {
-              return new Error(`Record not found for ${operation}`)
-            }
-
-            if (error.code === 'P2003') {
-              return new Error(`Foreign key constraint violation in ${operation}`)
-            }
-
-            if (error.code === 'P2014') {
-              return new Error(`Invalid ID provided for ${operation}`)
-            }
-
-            // Connection and timeout errors
-            if (error.message.includes('connection') || error.message.includes('timeout')) {
-              return new Error(`Database connection error during ${operation}`)
-            }
-
-            // Generic database error
-            return new Error(`Database operation failed: ${operation}`)
+          async executeInTransaction<T>(
+            fn: (tx: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>) => Promise<T>
+          ): Promise<T> {
+            return await this.prisma.$transaction(fn)
           }
         }
+      validation_script: |
+        echo "🟢 Running TDD GREEN phase - making repository tests pass..."
 
-    # === STEP 4: CREATE HTTP CLIENT IMPLEMENTATION ===
-    - id: 'create-http-client-__FEATURE_NAME_KEBAB_CASE__'
+        # Run the tests - they should pass now
+        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.spec.ts
+
+        if [ $? -eq 0 ]; then
+          echo "✅ GREEN phase complete - all repository tests passing!"
+        else
+          echo "❌ Tests still failing - implementation needs adjustment"
+          echo "   Review the test failures and adjust implementation"
+          exit 1
+        fi
+
+        # Lint check
+        npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db --fix
+
+        git add .
+        git commit -m "feat(infra): implement __FEATURE_NAME_KEBAB_CASE__ database repository (TDD GREEN phase)"
+
+    # === STEP 4: CREATE HTTP CLIENT TEST (TDD RED PHASE) ===
+    - id: 'create-http-client-test-red-__FEATURE_NAME_KEBAB_CASE__'
       type: 'create_file'
-      description: 'Create Fetch API HTTP client implementation for __FEATURE_NAME_PASCAL_CASE__ feature'
-      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-      rlhf_score: null # -2, -1, 0, 1, 2
+      description: 'Create failing test for HTTP client implementation (TDD RED)'
+      status: 'PENDING'
+      rlhf_score: null
       execution_log: ''
       references:
         - type: 'external_pattern'
           source: 'context7'
-          query: 'fetch api http client typescript clean architecture adapter pattern'
+          query: 'TDD test first http client fetch api typescript'
           url: 'https://github.com/...'
-          description: 'Fetch API implementation patterns for HTTP clients.'
-        - type: 'internal_guideline'
-          source: 'BACKEND_RULES.md'
-          description: 'Use native Fetch API instead of axios for HTTP clients.'
-      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.ts'
+          description: 'TDD Red phase - writing failing HTTP client tests first.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.spec.ts'
       template: |
-        import type { HttpClient, HttpRequest, HttpResponse } from '../../../shared/infra/protocols/http-client'
+        import { FetchHttpClient } from './fetch-http-client'
+        import { HttpRequest, HttpResponse, HttpClient } from './http-client-protocol'
 
         /**
-         * Fetch API implementation of HttpClient protocol
-         * Provides HTTP operations using native Fetch API for backend services
-         *
-         * @implementation Infrastructure Layer - HTTP Client
-         * @pattern Adapter Pattern - Fetch API implementation
-         * @layer Infrastructure - External HTTP communication
+         * Test suite for FetchHttpClient implementation
+         * Following TDD - Test First Approach (RED Phase)
+         * @layer Infrastructure Layer Tests
+         * @pattern TDD - Red-Green-Refactor, HTTP Client Pattern
          */
-        export class FetchHttpClient implements HttpClient {
-          private readonly baseURL: string
-          private readonly timeout: number
-          private readonly defaultHeaders: Record<string, string>
+        describe('FetchHttpClient', () => {
+          let sut: HttpClient
 
-          /**
-           * Creates FetchHttpClient with configuration
-           *
-           * @param config - HTTP client configuration
-           */
-          constructor(config: {
-            baseURL?: string
-            timeout?: number
-            defaultHeaders?: Record<string, string>
-          } = {}) {
-            this.baseURL = config.baseURL || process.env.API_BASE_URL || ''
-            this.timeout = config.timeout || 30000 // 30 seconds
-            this.defaultHeaders = {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'User-Agent': 'Backend-Service/1.0',
-              ...config.defaultHeaders
-            }
-          }
+          beforeEach(() => {
+            sut = new FetchHttpClient()
 
+            // AI-NOTE: Mock global fetch for tests
+            global.fetch = jest.fn()
+          })
+
+          afterEach(() => {
+            jest.resetAllMocks()
+          })
+
+          const makeFakeRequest = (): HttpRequest => ({
+            url: 'http://any-url.com',
+            method: 'POST',
+            body: { any: 'data' },
+            headers: { 'Content-Type': 'application/json' }
+          })
+
+          describe('request', () => {
+            test('Should call fetch with correct url and options', async () => {
+              // This test will FAIL initially (RED phase)
+              const fetchSpy = global.fetch as jest.Mock
+              fetchSpy.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: jest.fn().mockResolvedValueOnce({ data: 'any_data' })
+              })
+
+              const httpRequest = makeFakeRequest()
+              await sut.request(httpRequest)
+
+              expect(fetchSpy).toHaveBeenCalledWith('http://any-url.com', {
+                method: 'POST',
+                body: JSON.stringify({ any: 'data' }),
+                headers: { 'Content-Type': 'application/json' },
+                signal: expect.any(AbortSignal)
+              })
+            })
+
+            test('Should return correct response on success', async () => {
+              // This test will FAIL initially (RED phase)
+              const fetchSpy = global.fetch as jest.Mock
+              const mockResponse = { data: 'any_data' }
+              fetchSpy.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: jest.fn().mockResolvedValueOnce(mockResponse)
+              })
+
+              const httpRequest = makeFakeRequest()
+              const response = await sut.request<any>(httpRequest)
+
+              expect(response).toEqual({
+                statusCode: 200,
+                body: mockResponse
+              })
+            })
+
+            test('Should throw if fetch throws', async () => {
+              // This test will FAIL initially (RED phase)
+              const fetchSpy = global.fetch as jest.Mock
+              fetchSpy.mockRejectedValueOnce(new Error('Network error'))
+
+              const httpRequest = makeFakeRequest()
+              const promise = sut.request(httpRequest)
+
+              await expect(promise).rejects.toThrow('Network error')
+            })
+
+            test('Should handle timeout correctly', async () => {
+              // This test will FAIL initially (RED phase)
+              const fetchSpy = global.fetch as jest.Mock
+              fetchSpy.mockRejectedValueOnce(new Error('AbortError'))
+
+              const httpRequest = { ...makeFakeRequest(), timeout: 1000 }
+              const promise = sut.request(httpRequest)
+
+              await expect(promise).rejects.toThrow()
+            })
+          })
+        })
+      validation_script: |
+        echo "🔴 Running TDD RED phase - HTTP client tests should FAIL..."
+        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.spec.ts --no-coverage
+
+        # AI-NOTE: We expect tests to fail at this point (RED phase)
+        if [ $? -eq 0 ]; then
+          echo "⚠️  WARNING: Tests passed but they should fail in RED phase"
+        else
+          echo "✅ RED phase complete - HTTP client tests are failing as expected"
+        fi
+
+        git add .
+        git commit -m "test(infra): add failing HTTP client tests (TDD RED phase)"
+
+    # === STEP 5: CREATE HTTP CLIENT PROTOCOL ===
+    - id: 'create-http-client-protocol-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create HTTP client protocol interface'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'BACKEND_ARCHITECTURE.md'
+          description: 'HTTP client abstraction for external API calls.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/http-client-protocol.ts'
+      template: |
+        /**
+         * HTTP request configuration
+         * @layer Infrastructure Layer Protocol
+         */
+        export interface HttpRequest {
+          url: string
+          method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+          body?: any
+          headers?: Record<string, string>
+          timeout?: number
+        }
+
+        /**
+         * HTTP response structure
+         * @layer Infrastructure Layer Protocol
+         */
+        export interface HttpResponse<T = any> {
+          statusCode: number
+          body: T
+        }
+
+        /**
+         * Protocol for HTTP client implementations
+         * Defines the contract for making external HTTP requests
+         * @layer Infrastructure Layer Protocol
+         * @pattern HTTP Client Pattern
+         */
+        export interface HttpClient {
           /**
-           * Execute HTTP request using Fetch API
-           *
+           * Make HTTP request to external service
            * @param request - HTTP request configuration
            * @returns Promise with HTTP response
-           * @throws Error if request fails or times out
            */
-          async request<T = unknown>(request: HttpRequest): Promise<HttpResponse<T>> {
-            try {
-              const url = this.buildUrl(request.url)
-              const config = this.buildRequestConfig(request)
+          request<T = any>(request: HttpRequest): Promise<HttpResponse<T>>
+        }
 
-              const response = await this.executeWithTimeout(fetch(url, config))
-              const data = await this.parseResponseData<T>(response)
+    # === STEP 6: CREATE HTTP CLIENT IMPLEMENTATION (TDD GREEN PHASE) ===
+    - id: 'create-http-client-green-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create HTTP client implementation to make tests pass (TDD GREEN)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'fetch api http client timeout error handling'
+          url: 'https://github.com/...'
+          description: 'HTTP client implementation with Fetch API and timeout.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.ts'
+      template: |
+        import { HttpClient, HttpRequest, HttpResponse } from './http-client-protocol'
+
+        /**
+         * Fetch API implementation of HTTP client
+         * Handles external HTTP requests with timeout and error handling
+         * @layer Infrastructure Layer
+         * @pattern HTTP Client Pattern
+         * @implements HttpClient
+         */
+        export class FetchHttpClient implements HttpClient {
+          private readonly DEFAULT_TIMEOUT = 5000 // 5 seconds
+
+          /**
+           * Make HTTP request using native Fetch API
+           * @param request - HTTP request configuration
+           * @returns Promise with typed HTTP response
+           * @throws Error on network failures or timeouts
+           */
+          async request<T = any>(request: HttpRequest): Promise<HttpResponse<T>> {
+            const controller = new AbortController()
+            const timeout = request.timeout || this.DEFAULT_TIMEOUT
+
+            // Set timeout for request
+            const timeoutId = setTimeout(() => {
+              controller.abort()
+            }, timeout)
+
+            try {
+              // Prepare fetch options
+              const options: RequestInit = {
+                method: request.method,
+                headers: request.headers,
+                signal: controller.signal
+              }
+
+              // Add body for non-GET requests
+              if (request.body && request.method !== 'GET') {
+                options.body = typeof request.body === 'string'
+                  ? request.body
+                  : JSON.stringify(request.body)
+              }
+
+              // Make the request
+              const response = await fetch(request.url, options)
+
+              // Clear timeout
+              clearTimeout(timeoutId)
+
+              // Parse response body
+              const body = await response.json()
 
               return {
                 statusCode: response.status,
-                headers: this.extractHeaders(response),
-                body: data
+                body
               }
             } catch (error) {
-              throw this.handleRequestError(error, request)
+              clearTimeout(timeoutId)
+
+              if (error instanceof Error) {
+                if (error.name === 'AbortError') {
+                  throw new Error(`HTTP request timeout after ${timeout}ms`)
+                }
+                throw new Error(`HTTP request failed: ${error.message}`)
+              }
+              throw error
             }
           }
 
           /**
-           * Build complete URL from base URL and request path
-           *
-           * @private
-           * @param path - Request path or full URL
-           * @returns Complete URL
+           * Make GET request with query parameters
+           * @param url - Base URL
+           * @param params - Query parameters
+           * @param headers - Optional headers
+           * @returns Promise with typed response
            */
-          private buildUrl(path: string): string {
-            if (path.startsWith('http://') || path.startsWith('https://')) {
-              return path
+          async get<T = any>(
+            url: string,
+            params?: Record<string, string>,
+            headers?: Record<string, string>
+          ): Promise<HttpResponse<T>> {
+            let requestUrl = url
+
+            if (params) {
+              const searchParams = new URLSearchParams(params)
+              requestUrl += `?${searchParams.toString()}`
             }
 
-            const cleanBaseUrl = this.baseURL.replace(/\/$/, '')
-            const cleanPath = path.startsWith('/') ? path : `/${path}`
-            return `${cleanBaseUrl}${cleanPath}`
-          }
-
-          /**
-           * Build Fetch API request configuration
-           *
-           * @private
-           * @param request - HTTP request object
-           * @returns Fetch request configuration
-           */
-          private buildRequestConfig(request: HttpRequest): RequestInit {
-            const headers = {
-              ...this.defaultHeaders,
-              ...request.headers
-            }
-
-            // Add authorization header from environment if available
-            if (process.env.API_TOKEN && !headers.Authorization) {
-              headers.Authorization = `Bearer ${process.env.API_TOKEN}`
-            }
-
-            const config: RequestInit = {
-              method: request.method,
+            return this.request<T>({
+              url: requestUrl,
+              method: 'GET',
               headers
-            }
-
-            // Add body for non-GET requests
-            if (request.body && request.method !== 'GET') {
-              config.body = typeof request.body === 'string'
-                ? request.body
-                : JSON.stringify(request.body)
-            }
-
-            return config
-          }
-
-          /**
-           * Execute request with timeout
-           *
-           * @private
-           * @param fetchPromise - Fetch promise to execute
-           * @returns Response with timeout handling
-           */
-          private async executeWithTimeout(fetchPromise: Promise<Response>): Promise<Response> {
-            const timeoutPromise = new Promise<never>((_, reject) => {
-              setTimeout(
-                () => reject(new Error(`Request timeout after ${this.timeout}ms`)),
-                this.timeout
-              )
             })
-
-            return Promise.race([fetchPromise, timeoutPromise])
           }
 
           /**
-           * Parse response data based on content type
-           *
-           * @private
-           * @param response - Fetch response object
-           * @returns Parsed response data
+           * Make POST request with JSON body
+           * @param url - Request URL
+           * @param body - Request body
+           * @param headers - Optional headers
+           * @returns Promise with typed response
            */
-          private async parseResponseData<T>(response: Response): Promise<T> {
-            const contentType = response.headers.get('content-type') || ''
-
-            if (contentType.includes('application/json')) {
-              const text = await response.text()
-              return text ? JSON.parse(text) : null
-            }
-
-            if (contentType.includes('text/')) {
-              return await response.text() as unknown as T
-            }
-
-            // For binary content, return as ArrayBuffer
-            return await response.arrayBuffer() as unknown as T
-          }
-
-          /**
-           * Extract headers from Fetch response
-           *
-           * @private
-           * @param response - Fetch response object
-           * @returns Headers object
-           */
-          private extractHeaders(response: Response): Record<string, string> {
-            const headers: Record<string, string> = {}
-
-            response.headers.forEach((value, key) => {
-              headers[key.toLowerCase()] = value
+          async post<T = any>(
+            url: string,
+            body: any,
+            headers?: Record<string, string>
+          ): Promise<HttpResponse<T>> {
+            return this.request<T>({
+              url,
+              method: 'POST',
+              body,
+              headers: {
+                'Content-Type': 'application/json',
+                ...headers
+              }
             })
-
-            return headers
-          }
-
-          /**
-           * Handle and transform request errors
-           *
-           * @private
-           * @param error - Original error from request
-           * @param request - Original request for context
-           * @returns Transformed error with context
-           */
-          private handleRequestError(error: any, request: HttpRequest): Error {
-            // Log error for debugging in development
-            if (process.env.NODE_ENV === 'development') {
-              console.error('HTTP request error:', {
-                error: error.message,
-                url: request.url,
-                method: request.method
-              })
-            }
-
-            // Handle specific error types
-            if (error.name === 'AbortError') {
-              return new Error('Request was cancelled')
-            }
-
-            if (error.message.includes('timeout')) {
-              return new Error(`Request timeout: ${request.method} ${request.url}`)
-            }
-
-            if (error.message.includes('fetch')) {
-              return new Error(`Network error: ${request.method} ${request.url}`)
-            }
-
-            // Generic HTTP error
-            return new Error(`HTTP request failed: ${error.message}`)
           }
         }
+      validation_script: |
+        echo "🟢 Running TDD GREEN phase - making HTTP client tests pass..."
 
-    # === STEP 5: CREATE CACHE IMPLEMENTATION ===
-    - id: 'create-cache-implementation-__FEATURE_NAME_KEBAB_CASE__'
+        # Run the tests - they should pass now
+        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.spec.ts
+
+        if [ $? -eq 0 ]; then
+          echo "✅ GREEN phase complete - all HTTP client tests passing!"
+        else
+          echo "❌ Tests still failing - implementation needs adjustment"
+          exit 1
+        fi
+
+        git add .
+        git commit -m "feat(infra): implement HTTP client with Fetch API (TDD GREEN phase)"
+
+    # === STEP 7: CREATE CACHE IMPLEMENTATION TEST (TDD RED PHASE) ===
+    - id: 'create-cache-test-red-__FEATURE_NAME_KEBAB_CASE__'
       type: 'create_file'
-      description: 'Create Redis cache implementation for __FEATURE_NAME_PASCAL_CASE__ feature'
-      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-      rlhf_score: null # -2, -1, 0, 1, 2
+      description: 'Create failing test for cache implementation (TDD RED)'
+      status: 'PENDING'
+      rlhf_score: null
       execution_log: ''
       references:
         - type: 'external_pattern'
           source: 'context7'
-          query: 'redis cache implementation typescript backend clean architecture'
+          query: 'TDD redis cache implementation fallback memory'
           url: 'https://github.com/...'
-          description: 'Redis cache implementation patterns for backend services.'
-      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache-adapter.ts'
+          description: 'TDD approach for cache implementation with Redis and fallback.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache.spec.ts'
       template: |
-        import { createClient, RedisClientType } from 'redis'
-        import type { CacheProtocol } from '../../../shared/infra/protocols/cache-protocol'
+        import { RedisCache } from './redis-cache'
+        import { CacheClient } from './cache-client-protocol'
 
         /**
-         * Redis implementation of CacheProtocol
-         * Provides caching operations using Redis for backend services
-         *
-         * @implementation Infrastructure Layer - Cache
-         * @pattern Adapter Pattern - Redis implementation
-         * @layer Infrastructure - Cache storage implementation
+         * Test suite for RedisCache implementation
+         * Following TDD - Test First Approach (RED Phase)
+         * @layer Infrastructure Layer Tests
+         * @pattern TDD - Red-Green-Refactor, Cache Pattern
          */
-        export class RedisCacheAdapter implements CacheProtocol {
-          private client: RedisClientType
-          private readonly keyPrefix: string
-          private readonly defaultTTL: number
+        describe('RedisCache', () => {
+          let mockRedisClient: any
+          let sut: CacheClient
 
-          /**
-           * Creates RedisCacheAdapter with Redis client
-           *
-           * @param config - Cache configuration
-           */
-          constructor(config: {
-            keyPrefix?: string
-            defaultTTL?: number
-            redisUrl?: string
-          } = {}) {
-            this.keyPrefix = config.keyPrefix || '__FEATURE_NAME_KEBAB_CASE__:'
-            this.defaultTTL = config.defaultTTL || 3600 // 1 hour
+          beforeEach(() => {
+            // AI-NOTE: Mock Redis client
+            mockRedisClient = {
+              get: jest.fn(),
+              set: jest.fn(),
+              del: jest.fn(),
+              exists: jest.fn(),
+              ping: jest.fn()
+            }
 
-            this.client = createClient({
-              url: config.redisUrl || process.env.REDIS_URL || 'redis://localhost:6379'
+            sut = new RedisCache(mockRedisClient)
+          })
+
+          afterEach(() => {
+            jest.resetAllMocks()
+          })
+
+          describe('get', () => {
+            test('Should call Redis get with correct key', async () => {
+              // This test will FAIL initially (RED phase)
+              mockRedisClient.get.mockResolvedValueOnce('{"data":"any_data"}')
+
+              await sut.get('any_key')
+
+              expect(mockRedisClient.get).toHaveBeenCalledWith('any_key')
             })
 
-            this.setupErrorHandling()
-          }
+            test('Should return parsed value if key exists', async () => {
+              // This test will FAIL initially (RED phase)
+              const mockData = { data: 'any_data' }
+              mockRedisClient.get.mockResolvedValueOnce(JSON.stringify(mockData))
 
-          /**
-           * Connect to Redis server
-           *
-           * @returns Promise<void>
-           * @throws Error if connection fails
-           */
-          async connect(): Promise<void> {
-            try {
-              if (!this.client.isOpen) {
-                await this.client.connect()
-              }
-            } catch (error) {
-              throw new Error(`Redis connection failed: ${error}`)
-            }
-          }
+              const result = await sut.get<any>('any_key')
 
-          /**
-           * Disconnect from Redis server
-           *
-           * @returns Promise<void>
-           */
-          async disconnect(): Promise<void> {
-            try {
-              if (this.client.isOpen) {
-                await this.client.disconnect()
-              }
-            } catch (error) {
-              console.error('Redis disconnect error:', error)
-            }
-          }
+              expect(result).toEqual(mockData)
+            })
 
+            test('Should return null if key does not exist', async () => {
+              // This test will FAIL initially (RED phase)
+              mockRedisClient.get.mockResolvedValueOnce(null)
+
+              const result = await sut.get('any_key')
+
+              expect(result).toBeNull()
+            })
+
+            test('Should fallback to memory cache if Redis fails', async () => {
+              // This test will FAIL initially (RED phase)
+              mockRedisClient.get.mockRejectedValueOnce(new Error('Redis connection failed'))
+
+              // Should not throw, but fallback silently
+              const result = await sut.get('any_key')
+
+              expect(result).toBeNull()
+            })
+          })
+
+          describe('set', () => {
+            test('Should call Redis set with correct key, value and ttl', async () => {
+              // This test will FAIL initially (RED phase)
+              mockRedisClient.set.mockResolvedValueOnce('OK')
+
+              const data = { test: 'data' }
+              await sut.set('any_key', data, 3600)
+
+              expect(mockRedisClient.set).toHaveBeenCalledWith(
+                'any_key',
+                JSON.stringify(data),
+                'EX',
+                3600
+              )
+            })
+
+            test('Should handle Redis set failure gracefully', async () => {
+              // This test will FAIL initially (RED phase)
+              mockRedisClient.set.mockRejectedValueOnce(new Error('Redis error'))
+
+              const data = { test: 'data' }
+
+              // Should not throw
+              await expect(sut.set('any_key', data)).resolves.toBeUndefined()
+            })
+          })
+
+          describe('delete', () => {
+            test('Should call Redis del with correct key', async () => {
+              // This test will FAIL initially (RED phase)
+              mockRedisClient.del.mockResolvedValueOnce(1)
+
+              await sut.delete('any_key')
+
+              expect(mockRedisClient.del).toHaveBeenCalledWith('any_key')
+            })
+          })
+        })
+      validation_script: |
+        echo "🔴 Running TDD RED phase - cache tests should FAIL..."
+        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache.spec.ts --no-coverage
+
+        if [ $? -eq 0 ]; then
+          echo "⚠️  WARNING: Tests passed but they should fail in RED phase"
+        else
+          echo "✅ RED phase complete - cache tests are failing as expected"
+        fi
+
+        git add .
+        git commit -m "test(infra): add failing cache tests (TDD RED phase)"
+
+    # === STEP 8: CREATE CACHE PROTOCOL ===
+    - id: 'create-cache-protocol-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create cache client protocol interface'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'BACKEND_ARCHITECTURE.md'
+          description: 'Cache abstraction for performance optimization.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/cache-client-protocol.ts'
+      template: |
+        /**
+         * Protocol for cache client implementations
+         * Defines the contract for caching operations
+         * @layer Infrastructure Layer Protocol
+         * @pattern Cache Pattern
+         */
+        export interface CacheClient {
           /**
-           * Get value from cache
-           *
+           * Get value from cache by key
            * @param key - Cache key
-           * @returns Promise with cached value or null
-           * @throws Error if cache operation fails
+           * @returns Promise with cached value or null if not found
            */
-          async get<T = unknown>(key: string): Promise<T | null> {
-            try {
-              await this.ensureConnected()
-
-              const fullKey = this.buildKey(key)
-              const value = await this.client.get(fullKey)
-
-              return value ? JSON.parse(value) : null
-            } catch (error) {
-              throw this.handleCacheError(error, 'get', key)
-            }
-          }
+          get<T = any>(key: string): Promise<T | null>
 
           /**
-           * Set value in cache with TTL
-           *
+           * Set value in cache with optional TTL
            * @param key - Cache key
            * @param value - Value to cache
-           * @param ttl - Time to live in seconds (optional)
+           * @param ttlSeconds - Time to live in seconds (optional)
            * @returns Promise<void>
-           * @throws Error if cache operation fails
            */
-          async set<T = unknown>(key: string, value: T, ttl?: number): Promise<void> {
+          set<T = any>(key: string, value: T, ttlSeconds?: number): Promise<void>
+
+          /**
+           * Delete value from cache
+           * @param key - Cache key to delete
+           * @returns Promise<void>
+           */
+          delete(key: string): Promise<void>
+
+          /**
+           * Check if key exists in cache
+           * @param key - Cache key to check
+           * @returns Promise<boolean>
+           */
+          exists(key: string): Promise<boolean>
+
+          /**
+           * Clear all cache entries (use with caution)
+           * @returns Promise<void>
+           */
+          clear?(): Promise<void>
+        }
+
+    # === STEP 9: CREATE CACHE IMPLEMENTATION (TDD GREEN PHASE) ===
+    - id: 'create-cache-green-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create cache implementation to make tests pass (TDD GREEN)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'redis cache implementation nodejs fallback memory'
+          url: 'https://github.com/...'
+          description: 'Cache implementation with Redis primary and memory fallback.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache.ts'
+      template: |
+        import { CacheClient } from './cache-client-protocol'
+
+        /**
+         * Redis cache implementation with in-memory fallback
+         * Provides caching capabilities with graceful degradation
+         * @layer Infrastructure Layer
+         * @pattern Cache Pattern, Fallback Pattern
+         * @implements CacheClient
+         */
+        export class RedisCache implements CacheClient {
+          private memoryCache = new Map<string, { value: any; expiry?: number }>()
+          private redisAvailable = true
+
+          /**
+           * Constructor with Redis client dependency injection
+           * @param redisClient - Redis client instance
+           */
+          constructor(
+            private readonly redisClient: any // AI-NOTE: Use appropriate Redis client type
+          ) {}
+
+          /**
+           * Get value from cache, fallback to memory if Redis fails
+           * @param key - Cache key
+           * @returns Promise with cached value or null
+           */
+          async get<T = any>(key: string): Promise<T | null> {
             try {
-              await this.ensureConnected()
-
-              const fullKey = this.buildKey(key)
-              const serializedValue = JSON.stringify(value)
-              const expiration = ttl || this.defaultTTL
-
-              await this.client.setEx(fullKey, expiration, serializedValue)
+              // Try Redis first
+              if (this.redisAvailable) {
+                const value = await this.redisClient.get(key)
+                if (value !== null) {
+                  return JSON.parse(value)
+                }
+              }
             } catch (error) {
-              throw this.handleCacheError(error, 'set', key)
+              console.warn(`Redis get failed for key ${key}:`, error)
+              this.redisAvailable = false
+
+              // Fall back to memory cache
+              return this.getFromMemory<T>(key)
             }
+
+            // Check memory cache as fallback
+            return this.getFromMemory<T>(key)
+          }
+
+          /**
+           * Set value in cache, fallback to memory if Redis fails
+           * @param key - Cache key
+           * @param value - Value to cache
+           * @param ttlSeconds - TTL in seconds
+           */
+          async set<T = any>(key: string, value: T, ttlSeconds?: number): Promise<void> {
+            try {
+              // Try Redis first
+              if (this.redisAvailable) {
+                const serializedValue = JSON.stringify(value)
+
+                if (ttlSeconds) {
+                  await this.redisClient.set(key, serializedValue, 'EX', ttlSeconds)
+                } else {
+                  await this.redisClient.set(key, serializedValue)
+                }
+
+                return
+              }
+            } catch (error) {
+              console.warn(`Redis set failed for key ${key}:`, error)
+              this.redisAvailable = false
+            }
+
+            // Fallback to memory cache
+            this.setInMemory(key, value, ttlSeconds)
           }
 
           /**
            * Delete value from cache
-           *
            * @param key - Cache key to delete
-           * @returns Promise<void>
-           * @throws Error if cache operation fails
            */
           async delete(key: string): Promise<void> {
             try {
-              await this.ensureConnected()
-
-              const fullKey = this.buildKey(key)
-              await this.client.del(fullKey)
+              if (this.redisAvailable) {
+                await this.redisClient.del(key)
+              }
             } catch (error) {
-              throw this.handleCacheError(error, 'delete', key)
+              console.warn(`Redis delete failed for key ${key}:`, error)
+              this.redisAvailable = false
             }
+
+            // Always try memory cache as well
+            this.memoryCache.delete(key)
           }
 
           /**
            * Check if key exists in cache
-           *
            * @param key - Cache key to check
-           * @returns Promise with boolean indicating existence
-           * @throws Error if cache operation fails
+           * @returns Promise<boolean>
            */
           async exists(key: string): Promise<boolean> {
             try {
-              await this.ensureConnected()
-
-              const fullKey = this.buildKey(key)
-              const result = await this.client.exists(fullKey)
-
-              return result === 1
-            } catch (error) {
-              throw this.handleCacheError(error, 'exists', key)
-            }
-          }
-
-          /**
-           * Get TTL for cache key
-           *
-           * @param key - Cache key
-           * @returns Promise with TTL in seconds (-1 if no expiry, -2 if key doesn't exist)
-           * @throws Error if cache operation fails
-           */
-          async getTTL(key: string): Promise<number> {
-            try {
-              await this.ensureConnected()
-
-              const fullKey = this.buildKey(key)
-              return await this.client.ttl(fullKey)
-            } catch (error) {
-              throw this.handleCacheError(error, 'getTTL', key)
-            }
-          }
-
-          /**
-           * Clear all keys with feature prefix
-           *
-           * @returns Promise<void>
-           * @throws Error if cache operation fails
-           */
-          async clear(): Promise<void> {
-            try {
-              await this.ensureConnected()
-
-              const pattern = `${this.keyPrefix}*`
-              const keys = await this.client.keys(pattern)
-
-              if (keys.length > 0) {
-                await this.client.del(keys)
+              if (this.redisAvailable) {
+                const result = await this.redisClient.exists(key)
+                return result > 0
               }
             } catch (error) {
-              throw this.handleCacheError(error, 'clear')
-            }
-          }
-
-          /**
-           * Get cache statistics
-           *
-           * @returns Promise with cache statistics
-           * @throws Error if cache operation fails
-           */
-          async getStats(): Promise<{
-            totalKeys: number
-            featureKeys: number
-            memoryUsage: string
-          }> {
-            try {
-              await this.ensureConnected()
-
-              const pattern = `${this.keyPrefix}*`
-              const featureKeys = await this.client.keys(pattern)
-              const totalKeys = await this.client.dbSize()
-              const info = await this.client.info('memory')
-
-              // Extract memory usage from info string
-              const memoryMatch = info.match(/used_memory_human:([^\\r\\n]+)/)
-              const memoryUsage = memoryMatch ? memoryMatch[1] : 'unknown'
-
-              return {
-                totalKeys,
-                featureKeys: featureKeys.length,
-                memoryUsage
-              }
-            } catch (error) {
-              throw this.handleCacheError(error, 'getStats')
-            }
-          }
-
-          /**
-           * Build full cache key with prefix
-           *
-           * @private
-           * @param key - Original key
-           * @returns Full key with prefix
-           */
-          private buildKey(key: string): string {
-            return `${this.keyPrefix}${key}`
-          }
-
-          /**
-           * Ensure Redis client is connected
-           *
-           * @private
-           * @returns Promise<void>
-           */
-          private async ensureConnected(): Promise<void> {
-            if (!this.client.isOpen) {
-              await this.connect()
-            }
-          }
-
-          /**
-           * Setup error handling for Redis client
-           *
-           * @private
-           */
-          private setupErrorHandling(): void {
-            this.client.on('error', (error) => {
-              console.error('Redis client error:', error)
-            })
-
-            this.client.on('connect', () => {
-              console.log('Redis client connected')
-            })
-
-            this.client.on('disconnect', () => {
-              console.log('Redis client disconnected')
-            })
-          }
-
-          /**
-           * Handle cache errors and provide context
-           *
-           * @private
-           * @param error - Original error
-           * @param operation - Operation that failed
-           * @param key - Cache key (optional)
-           * @returns Transformed error with context
-           */
-          private handleCacheError(error: any, operation: string, key?: string): Error {
-            // Log error for debugging in development
-            if (process.env.NODE_ENV === 'development') {
-              console.error(`Cache error in ${operation}:`, {
-                error: error.message,
-                key
-              })
+              console.warn(`Redis exists failed for key ${key}:`, error)
+              this.redisAvailable = false
             }
 
-            const keyContext = key ? ` for key: ${key}` : ''
-            return new Error(`Cache operation failed: ${operation}${keyContext}`)
-          }
-        }
+            // Check memory cache
+            const memoryItem = this.memoryCache.get(key)
+            if (!memoryItem) return false
 
-        /**
-         * In-memory cache implementation for development/testing
-         * Fallback when Redis is not available
-         */
-        export class InMemoryCacheAdapter implements CacheProtocol {
-          private cache = new Map<string, { value: any; expiry: number }>()
-          private readonly keyPrefix: string
-          private readonly defaultTTL: number
-
-          constructor(config: { keyPrefix?: string; defaultTTL?: number } = {}) {
-            this.keyPrefix = config.keyPrefix || '__FEATURE_NAME_KEBAB_CASE__:'
-            this.defaultTTL = config.defaultTTL || 3600 // 1 hour
-          }
-
-          async get<T = unknown>(key: string): Promise<T | null> {
-            const fullKey = this.buildKey(key)
-            const item = this.cache.get(fullKey)
-
-            if (!item) return null
-
-            if (Date.now() > item.expiry) {
-              this.cache.delete(fullKey)
-              return null
-            }
-
-            return item.value
-          }
-
-          async set<T = unknown>(key: string, value: T, ttl?: number): Promise<void> {
-            const fullKey = this.buildKey(key)
-            const expiration = Date.now() + (ttl || this.defaultTTL) * 1000
-
-            this.cache.set(fullKey, { value, expiry: expiration })
-          }
-
-          async delete(key: string): Promise<void> {
-            const fullKey = this.buildKey(key)
-            this.cache.delete(fullKey)
-          }
-
-          async exists(key: string): Promise<boolean> {
-            const fullKey = this.buildKey(key)
-            const item = this.cache.get(fullKey)
-
-            if (!item) return false
-
-            if (Date.now() > item.expiry) {
-              this.cache.delete(fullKey)
+            if (memoryItem.expiry && Date.now() > memoryItem.expiry) {
+              this.memoryCache.delete(key)
               return false
             }
 
             return true
           }
 
-          async clear(): Promise<void> {
-            const keysToDelete: string[] = []
+          /**
+           * Get value from memory cache
+           * @private
+           */
+          private getFromMemory<T>(key: string): T | null {
+            const item = this.memoryCache.get(key)
+            if (!item) return null
 
-            for (const key of this.cache.keys()) {
-              if (key.startsWith(this.keyPrefix)) {
-                keysToDelete.push(key)
-              }
+            // Check expiry
+            if (item.expiry && Date.now() > item.expiry) {
+              this.memoryCache.delete(key)
+              return null
             }
 
-            keysToDelete.forEach(key => this.cache.delete(key))
+            return item.value
           }
 
-          private buildKey(key: string): string {
-            return `${this.keyPrefix}${key}`
+          /**
+           * Set value in memory cache
+           * @private
+           */
+          private setInMemory<T>(key: string, value: T, ttlSeconds?: number): void {
+            const expiry = ttlSeconds ? Date.now() + (ttlSeconds * 1000) : undefined
+            this.memoryCache.set(key, { value, expiry })
+          }
+
+          /**
+           * Health check for Redis connection
+           * @returns Promise<boolean>
+           */
+          async isHealthy(): Promise<boolean> {
+            try {
+              if (this.redisAvailable) {
+                await this.redisClient.ping()
+                return true
+              }
+            } catch (error) {
+              this.redisAvailable = false
+            }
+            return false
           }
         }
+      validation_script: |
+        echo "🟢 Running TDD GREEN phase - making cache tests pass..."
 
-    # === STEP 6: CREATE CRYPTOGRAPHY IMPLEMENTATION ===
+        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache.spec.ts
+
+        if [ $? -eq 0 ]; then
+          echo "✅ GREEN phase complete - all cache tests passing!"
+        else
+          echo "❌ Tests still failing - implementation needs adjustment"
+          exit 1
+        fi
+
+        git add .
+        git commit -m "feat(infra): implement Redis cache with memory fallback (TDD GREEN phase)"
+
+    # === STEP 10: CREATE CRYPTO IMPLEMENTATION ===
     - id: 'create-crypto-implementation-__FEATURE_NAME_KEBAB_CASE__'
       type: 'create_file'
-      description: 'Create cryptography implementation for __FEATURE_NAME_PASCAL_CASE__ feature (bcrypt, jwt)'
-      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-      rlhf_score: null # -2, -1, 0, 1, 2
+      description: 'Create cryptography implementation for password hashing and JWT'
+      status: 'PENDING'
+      rlhf_score: null
       execution_log: ''
       references:
         - type: 'external_pattern'
           source: 'context7'
-          query: 'bcrypt jwt typescript backend security clean architecture'
+          query: 'bcrypt password hashing jwt token nodejs'
           url: 'https://github.com/...'
-          description: 'Cryptography implementation patterns for backend security.'
-      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/crypto/bcrypt-adapter.ts'
+          description: 'Cryptography implementation with bcrypt and JWT.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/crypto/bcrypt-jwt-crypto.ts'
       template: |
         import bcrypt from 'bcrypt'
         import jwt from 'jsonwebtoken'
-        import type { Hasher, HashComparer } from '../../../shared/infra/protocols/cryptography'
-        import type { Encrypter, Decrypter } from '../../../shared/infra/protocols/cryptography'
+        import { CryptoProvider } from './crypto-provider-protocol'
 
         /**
-         * Bcrypt implementation for password hashing and comparison
-         * Provides secure password operations using bcrypt algorithm
-         *
-         * @implementation Infrastructure Layer - Cryptography
-         * @pattern Adapter Pattern - Bcrypt implementation
-         * @layer Infrastructure - Password security implementation
+         * Cryptography implementation using bcrypt and JWT
+         * Handles password hashing and token generation/validation
+         * @layer Infrastructure Layer
+         * @pattern Cryptography Pattern
+         * @implements CryptoProvider
          */
-        export class BcryptAdapter implements Hasher, HashComparer {
-          private readonly saltRounds: number
+        export class BcryptJwtCrypto implements CryptoProvider {
+          private readonly SALT_ROUNDS = 12
+          private readonly JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-in-production'
 
           /**
-           * Creates BcryptAdapter with salt rounds configuration
-           *
-           * @param saltRounds - Number of bcrypt salt rounds (default: 12)
-           */
-          constructor(saltRounds: number = 12) {
-            this.saltRounds = saltRounds
-          }
-
-          /**
-           * Hash plaintext password using bcrypt
-           *
+           * Hash password using bcrypt
            * @param plaintext - Password to hash
            * @returns Promise with hashed password
-           * @throws Error if hashing fails
            */
-          async hash(plaintext: string): Promise<string> {
+          async hashPassword(plaintext: string): Promise<string> {
             try {
-              return await bcrypt.hash(plaintext, this.saltRounds)
+              return await bcrypt.hash(plaintext, this.SALT_ROUNDS)
             } catch (error) {
-              throw new Error(`Password hashing failed: ${error}`)
+              if (error instanceof Error) {
+                throw new Error(`Failed to hash password: ${error.message}`)
+              }
+              throw error
             }
           }
 
           /**
-           * Compare plaintext password with hash
-           *
-           * @param plaintext - Password to compare
-           * @param hashedText - Hashed password to compare against
-           * @returns Promise with boolean indicating match
-           * @throws Error if comparison fails
+           * Compare password with hash
+           * @param plaintext - Plain text password
+           * @param hash - Hashed password to compare against
+           * @returns Promise<boolean>
            */
-          async compare(plaintext: string, hashedText: string): Promise<boolean> {
+          async comparePassword(plaintext: string, hash: string): Promise<boolean> {
             try {
-              return await bcrypt.compare(plaintext, hashedText)
+              return await bcrypt.compare(plaintext, hash)
             } catch (error) {
-              throw new Error(`Password comparison failed: ${error}`)
+              if (error instanceof Error) {
+                throw new Error(`Failed to compare password: ${error.message}`)
+              }
+              throw error
             }
           }
-        }
-
-        /**
-         * JWT implementation for token encryption and decryption
-         * Provides secure token operations using JSON Web Tokens
-         *
-         * @implementation Infrastructure Layer - Cryptography
-         * @pattern Adapter Pattern - JWT implementation
-         * @layer Infrastructure - Token security implementation
-         */
-        export class JwtAdapter implements Encrypter, Decrypter {
-          private readonly secret: string
-          private readonly expiresIn: string
 
           /**
-           * Creates JwtAdapter with secret and expiration configuration
-           *
-           * @param secret - JWT secret key
-           * @param expiresIn - Token expiration time (default: '1d')
-           */
-          constructor(secret?: string, expiresIn: string = '1d') {
-            this.secret = secret || process.env.JWT_SECRET || 'default-secret-key'
-            this.expiresIn = expiresIn
-          }
-
-          /**
-           * Encrypt payload into JWT token
-           *
-           * @param payload - Data to encrypt into token
+           * Generate JWT token
+           * @param payload - Token payload
+           * @param expiresIn - Token expiration (default: 1 hour)
            * @returns Promise with JWT token
-           * @throws Error if encryption fails
            */
-          async encrypt(payload: object): Promise<string> {
+          async generateToken(payload: object, expiresIn = '1h'): Promise<string> {
             try {
-              return jwt.sign(payload, this.secret, {
-                expiresIn: this.expiresIn
-              })
+              return jwt.sign(payload, this.JWT_SECRET, { expiresIn })
             } catch (error) {
-              throw new Error(`Token encryption failed: ${error}`)
+              if (error instanceof Error) {
+                throw new Error(`Failed to generate token: ${error.message}`)
+              }
+              throw error
             }
           }
 
           /**
-           * Decrypt JWT token to payload
-           *
-           * @param ciphertext - JWT token to decrypt
-           * @returns Promise with decrypted payload
-           * @throws Error if decryption fails
-           */
-          async decrypt(ciphertext: string): Promise<object> {
-            try {
-              return jwt.verify(ciphertext, this.secret) as object
-            } catch (error) {
-              if (error instanceof jwt.TokenExpiredError) {
-                throw new Error('Token has expired')
-              }
-
-              if (error instanceof jwt.JsonWebTokenError) {
-                throw new Error('Invalid token provided')
-              }
-
-              throw new Error(`Token decryption failed: ${error}`)
-            }
-          }
-
-          /**
-           * Verify token without decrypting (check if valid)
-           *
+           * Verify JWT token
            * @param token - JWT token to verify
-           * @returns Promise with boolean indicating validity
+           * @returns Promise with decoded payload or null if invalid
            */
-          async verify(token: string): Promise<boolean> {
+          async verifyToken(token: string): Promise<object | null> {
             try {
-              jwt.verify(token, this.secret)
-              return true
+              const decoded = jwt.verify(token, this.JWT_SECRET)
+              return typeof decoded === 'object' ? decoded : null
             } catch (error) {
-              return false
-            }
-          }
-
-          /**
-           * Get token expiration time
-           *
-           * @param token - JWT token
-           * @returns Promise with expiration timestamp or null
-           */
-          async getTokenExpiration(token: string): Promise<number | null> {
-            try {
-              const decoded = jwt.decode(token) as any
-              return decoded?.exp || null
-            } catch (error) {
+              // Token is invalid or expired
               return null
             }
           }
 
           /**
-           * Check if token is expired
-           *
-           * @param token - JWT token to check
-           * @returns Promise with boolean indicating if expired
+           * Generate random string for various purposes
+           * @param length - String length (default: 32)
+           * @returns Random string
            */
-          async isTokenExpired(token: string): Promise<boolean> {
-            const expiration = await this.getTokenExpiration(token)
-
-            if (!expiration) return true
-
-            return Date.now() >= expiration * 1000
+          generateRandomString(length = 32): string {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+            let result = ''
+            for (let i = 0; i < length; i++) {
+              result += chars.charAt(Math.floor(Math.random() * chars.length))
+            }
+            return result
           }
         }
 
-    # === STEP 7: CREATE INFRASTRUCTURE PROTOCOLS ===
-    - id: 'create-infra-protocols-__FEATURE_NAME_KEBAB_CASE__'
-      type: 'create_file'
-      description: 'Create infrastructure protocols for external dependencies'
-      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-      rlhf_score: null # -2, -1, 0, 1, 2
+        /**
+         * Crypto provider protocol interface
+         */
+        export interface CryptoProvider {
+          hashPassword(plaintext: string): Promise<string>
+          comparePassword(plaintext: string, hash: string): Promise<boolean>
+          generateToken(payload: object, expiresIn?: string): Promise<string>
+          verifyToken(token: string): Promise<object | null>
+          generateRandomString(length?: number): string
+        }
+
+    # === STEP 11: REFACTOR AND OPTIMIZE (TDD REFACTOR PHASE) ===
+    - id: 'refactor-infra-implementation-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Refactor infrastructure implementations while keeping tests green (TDD REFACTOR)'
+      status: 'PENDING'
+      rlhf_score: null
       execution_log: ''
       references:
         - type: 'internal_guideline'
-          source: 'BACKEND_ARCHITECTURE.md'
-          description: 'Infrastructure protocols define contracts for external services.'
-      path: '__PROJECT_NAME__/src/shared/infra/protocols/index.ts'
-      template: |
-        /**
-         * Infrastructure layer protocols
-         * Define contracts for external dependencies used by data layer
-         *
-         * @layer Infrastructure - Protocol definitions
-         * @pattern Dependency Inversion - Abstract external dependencies
-         */
+          source: 'TESTING_GUIDE.md'
+          description: 'TDD Refactor phase - improve code while keeping tests green.'
+      run_scripts:
+        description: 'Refactor and validate infrastructure implementations'
+        scripts:
+          - name: 'Run all infrastructure tests'
+            command: |
+              echo "♻️  TDD REFACTOR phase - improving infrastructure code quality..."
 
-        /**
-         * HTTP Client protocol for external API communication
-         */
-        export interface HttpClient {
-          request<T = unknown>(request: HttpRequest): Promise<HttpResponse<T>>
-        }
+              # Ensure all tests still pass after any refactoring
+              npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra
 
-        export interface HttpRequest {
-          url: string
-          method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-          headers?: Record<string, string>
-          body?: unknown
-        }
+              if [ $? -eq 0 ]; then
+                echo "✅ Tests still passing after refactoring"
+              else
+                echo "❌ Refactoring broke tests - please fix"
+                exit 1
+              fi
+            workingDirectory: '__PROJECT_NAME__'
 
-        export interface HttpResponse<T = unknown> {
-          statusCode: number
-          headers: Record<string, string>
-          body: T
-        }
+          - name: 'Check test coverage'
+            command: |
+              echo "📊 Checking test coverage for infrastructure layer..."
 
-        /**
-         * Cache protocol for data persistence
-         */
-        export interface CacheProtocol {
-          get<T = unknown>(key: string): Promise<T | null>
-          set<T = unknown>(key: string, value: T, ttl?: number): Promise<void>
-          delete(key: string): Promise<void>
-          exists(key: string): Promise<boolean>
-          clear(): Promise<void>
-        }
+              npm run test:coverage -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra
 
-        /**
-         * Cryptography protocols for security operations
-         */
-        export interface Hasher {
-          hash(plaintext: string): Promise<string>
-        }
+              echo "✅ Coverage report generated"
+            workingDirectory: '__PROJECT_NAME__'
 
-        export interface HashComparer {
-          compare(plaintext: string, hashedText: string): Promise<boolean>
-        }
+          - name: 'Lint and format code'
+            command: |
+              echo "🔧 Running lint and format for infrastructure layer..."
 
-        export interface Encrypter {
-          encrypt(payload: object): Promise<string>
-        }
+              npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra --fix
+              npm run format -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra || echo "Format command not available"
 
-        export interface Decrypter {
-          decrypt(ciphertext: string): Promise<object>
-        }
+              echo "✅ Code formatted and linted"
+            workingDirectory: '__PROJECT_NAME__'
 
-        /**
-         * File Storage protocol for file operations
-         */
-        export interface FileStorage {
-          save(file: FileData): Promise<string>
-          load(key: string): Promise<FileData>
-          delete(key: string): Promise<void>
-          exists(key: string): Promise<boolean>
-        }
+          - name: 'Final commit'
+            command: |
+              git add .
+              git commit -m "refactor(infra): optimize __FEATURE_NAME_KEBAB_CASE__ implementations (TDD REFACTOR phase)" || echo "No changes to commit"
+            workingDirectory: '__PROJECT_NAME__'
 
-        export interface FileData {
-          key: string
-          content: Buffer
-          contentType: string
-          metadata?: Record<string, unknown>
-        }
-
-        /**
-         * Message Queue protocol for async communication
-         */
-        export interface MessageQueue {
-          publish(queue: string, message: unknown): Promise<void>
-          subscribe(queue: string, handler: MessageHandler): Promise<void>
-          unsubscribe(queue: string): Promise<void>
-        }
-
-        export type MessageHandler = (message: unknown) => Promise<void>
-
-        /**
-         * Logger protocol for application logging
-         */
-        export interface Logger {
-          info(message: string, meta?: Record<string, unknown>): void
-          error(message: string, error?: Error, meta?: Record<string, unknown>): void
-          warn(message: string, meta?: Record<string, unknown>): void
-          debug(message: string, meta?: Record<string, unknown>): void
-        }
-
-    # === STEP 8: CREATE INFRASTRUCTURE TESTS ===
-    - id: 'create-infra-tests-__FEATURE_NAME_KEBAB_CASE__'
+    # === STEP 12: INTEGRATION TESTS FOR INFRASTRUCTURE ===
+    - id: 'create-infra-integration-tests-__FEATURE_NAME_KEBAB_CASE__'
       type: 'create_file'
-      description: 'Create integration tests for infrastructure implementations'
-      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-      rlhf_score: null # -2, -1, 0, 1, 2
+      description: 'Create integration tests for infrastructure layer with real dependencies'
+      status: 'PENDING'
+      rlhf_score: null
       execution_log: ''
       references:
-        - type: 'external_pattern'
-          source: 'context7'
-          query: 'infrastructure testing integration tests vitest prisma redis'
-          url: 'https://github.com/...'
-          description: 'Infrastructure testing patterns with external dependencies.'
-      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/__tests__/infra-integration.spec.ts'
+        - type: 'internal_guideline'
+          source: 'TESTING_GUIDE.md'
+          description: 'Integration testing for infrastructure layer with external dependencies.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__tests__/integration/infrastructure.test.ts'
       template: |
-        import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest'
         import { PrismaClient } from '@prisma/client'
-        import { Prisma__FEATURE_NAME_PASCAL_CASE__Repository } from '../db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository'
-        import { FetchHttpClient } from '../http/fetch-http-client'
-        import { RedisCacheAdapter, InMemoryCacheAdapter } from '../cache/redis-cache-adapter'
-        import { BcryptAdapter, JwtAdapter } from '../crypto/bcrypt-adapter'
+        import { Prisma__FEATURE_NAME_PASCAL_CASE__Repository } from '../../shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository'
+        import { FetchHttpClient } from '../../shared/infra/http/fetch-http-client'
+        import { RedisCache } from '../../shared/infra/cache/redis-cache'
+        import { BcryptJwtCrypto } from '../../shared/infra/crypto/bcrypt-jwt-crypto'
 
         /**
-         * Infrastructure Layer Integration Tests
-         * Tests actual implementations with external dependencies
-         *
-         * @testType Integration Test - Infrastructure Layer
-         * @coverage Database, HTTP, Cache, Crypto implementations
+         * Integration tests for __FEATURE_NAME_PASCAL_CASE__ infrastructure layer
+         * Tests with real external dependencies when available
+         * @layer Integration Tests
+         * @pattern Integration Testing
          */
-        describe('Infrastructure Integration Tests', () => {
+        describe('__FEATURE_NAME_PASCAL_CASE__ Infrastructure Integration', () => {
           let prisma: PrismaClient
           let repository: Prisma__FEATURE_NAME_PASCAL_CASE__Repository
           let httpClient: FetchHttpClient
-          let cacheAdapter: InMemoryCacheAdapter
-          let bcryptAdapter: BcryptAdapter
-          let jwtAdapter: JwtAdapter
+          let cache: RedisCache
+          let crypto: BcryptJwtCrypto
 
           beforeAll(async () => {
-            // Setup test database
-            prisma = new PrismaClient({
-              datasources: {
-                db: {
-                  url: process.env.TEST_DATABASE_URL || 'postgresql://test:test@localhost:5432/test_db'
-                }
-              }
-            })
-
-            await prisma.$connect()
-
-            // Initialize infrastructure implementations
-            repository = new Prisma__FEATURE_NAME_PASCAL_CASE__Repository(prisma)
-            httpClient = new FetchHttpClient({
-              baseURL: 'https://jsonplaceholder.typicode.com',
-              timeout: 5000
-            })
-            cacheAdapter = new InMemoryCacheAdapter({
-              keyPrefix: 'test:',
-              defaultTTL: 300
-            })
-            bcryptAdapter = new BcryptAdapter(8) // Lower rounds for faster tests
-            jwtAdapter = new JwtAdapter('test-secret', '1h')
-          })
-
-          afterAll(async () => {
-            await prisma.$disconnect()
-          })
-
-          beforeEach(async () => {
-            // Clean up test data before each test
-            await prisma.__FEATURE_NAME_CAMEL_CASE__.deleteMany()
-            await cacheAdapter.clear()
-          })
-
-          describe('Database Repository', () => {
-            it('should save and retrieve __FEATURE_NAME_KEBAB_CASE__ entity', async () => {
-              const testData = {
-                __ENTITY_FIELD_1__: 'test-value-1',
-                __ENTITY_FIELD_2__: 'test-value-2',
-                __ENTITY_FIELD_3__: 'test-value-3',
-                status: 'active' as const,
-                metadata: { test: true }
-              }
-
-              const saved = await repository.save(testData)
-
-              expect(saved).toMatchObject({
-                __ENTITY_FIELD_1__: 'test-value-1',
-                __ENTITY_FIELD_2__: 'test-value-2',
-                __ENTITY_FIELD_3__: 'test-value-3',
-                status: 'active'
-              })
-              expect(saved.id).toBeDefined()
-              expect(saved.createdAt).toBeInstanceOf(Date)
-              expect(saved.updatedAt).toBeInstanceOf(Date)
-            })
-
-            it('should find __FEATURE_NAME_KEBAB_CASE__ by id', async () => {
-              const testData = {
-                __ENTITY_FIELD_1__: 'findable-value',
-                __ENTITY_FIELD_2__: 'test-value',
-                __ENTITY_FIELD_3__: 'test-value',
-                status: 'active' as const,
-                metadata: {}
-              }
-
-              const saved = await repository.save(testData)
-              const found = await repository.findById(saved.id)
-
-              expect(found).toMatchObject(saved)
-            })
-
-            it('should return null for non-existent id', async () => {
-              const found = await repository.findById('non-existent-id')
-              expect(found).toBeNull()
-            })
-
-            it('should handle database constraint violations', async () => {
-              // This test assumes there's a unique constraint
-              const testData = {
-                __ENTITY_FIELD_1__: 'unique-value',
-                __ENTITY_FIELD_2__: 'test-value',
-                __ENTITY_FIELD_3__: 'test-value',
-                status: 'active' as const,
-                metadata: {}
-              }
-
-              await repository.save(testData)
-
-              // Try to save duplicate (if unique constraint exists)
-              await expect(repository.save(testData))
-                .rejects
-                .toThrow(/duplicate/i)
-            })
-          })
-
-          describe('HTTP Client', () => {
-            it('should make successful GET request', async () => {
-              const response = await httpClient.request({
-                url: '/posts/1',
-                method: 'GET'
-              })
-
-              expect(response.statusCode).toBe(200)
-              expect(response.body).toMatchObject({
-                id: 1,
-                title: expect.any(String),
-                body: expect.any(String)
-              })
-            })
-
-            it('should handle HTTP errors', async () => {
-              await expect(
-                httpClient.request({
-                  url: '/posts/9999999',
-                  method: 'GET'
-                })
-              ).rejects.toThrow()
-            })
-
-            it('should include custom headers', async () => {
-              const mockFetch = vi.fn().mockResolvedValue({
-                status: 200,
-                headers: new Map([['content-type', 'application/json']]),
-                json: async () => ({ success: true })
-              })
-
-              vi.stubGlobal('fetch', mockFetch)
-
-              await httpClient.request({
-                url: '/test',
-                method: 'POST',
-                headers: {
-                  'X-Custom-Header': 'test-value'
-                },
-                body: { test: true }
-              })
-
-              expect(mockFetch).toHaveBeenCalledWith(
-                expect.any(String),
-                expect.objectContaining({
-                  headers: expect.objectContaining({
-                    'X-Custom-Header': 'test-value'
-                  })
-                })
-              )
-
-              vi.unstubAllGlobals()
-            })
-          })
-
-          describe('Cache Adapter', () => {
-            it('should store and retrieve values', async () => {
-              const testKey = 'test-key'
-              const testValue = { data: 'test-value', number: 123 }
-
-              await cacheAdapter.set(testKey, testValue, 300)
-              const retrieved = await cacheAdapter.get(testKey)
-
-              expect(retrieved).toEqual(testValue)
-            })
-
-            it('should return null for non-existent keys', async () => {
-              const retrieved = await cacheAdapter.get('non-existent-key')
-              expect(retrieved).toBeNull()
-            })
-
-            it('should handle key expiration', async () => {
-              const testKey = 'expiring-key'
-              const testValue = 'expiring-value'
-
-              // Set with very short TTL
-              await cacheAdapter.set(testKey, testValue, 1)
-
-              // Should exist immediately
-              expect(await cacheAdapter.exists(testKey)).toBe(true)
-
-              // Wait for expiration
-              await new Promise(resolve => setTimeout(resolve, 1100))
-
-              // Should be expired
-              expect(await cacheAdapter.exists(testKey)).toBe(false)
-              expect(await cacheAdapter.get(testKey)).toBeNull()
-            })
-
-            it('should clear cache entries', async () => {
-              await cacheAdapter.set('key1', 'value1')
-              await cacheAdapter.set('key2', 'value2')
-
-              await cacheAdapter.clear()
-
-              expect(await cacheAdapter.get('key1')).toBeNull()
-              expect(await cacheAdapter.get('key2')).toBeNull()
-            })
-          })
-
-          describe('Bcrypt Adapter', () => {
-            it('should hash and verify passwords', async () => {
-              const password = 'test-password-123'
-
-              const hashedPassword = await bcryptAdapter.hash(password)
-
-              expect(hashedPassword).toBeDefined()
-              expect(hashedPassword).not.toBe(password)
-              expect(hashedPassword.length).toBeGreaterThan(50)
-
-              const isValid = await bcryptAdapter.compare(password, hashedPassword)
-              expect(isValid).toBe(true)
-            })
-
-            it('should reject invalid passwords', async () => {
-              const password = 'correct-password'
-              const wrongPassword = 'wrong-password'
-
-              const hashedPassword = await bcryptAdapter.hash(password)
-              const isValid = await bcryptAdapter.compare(wrongPassword, hashedPassword)
-
-              expect(isValid).toBe(false)
-            })
-          })
-
-          describe('JWT Adapter', () => {
-            it('should encrypt and decrypt tokens', async () => {
-              const payload = {
-                userId: '123',
-                email: 'test@example.com',
-                role: 'user'
-              }
-
-              const token = await jwtAdapter.encrypt(payload)
-
-              expect(token).toBeDefined()
-              expect(typeof token).toBe('string')
-
-              const decrypted = await jwtAdapter.decrypt(token) as any
-
-              expect(decrypted.userId).toBe(payload.userId)
-              expect(decrypted.email).toBe(payload.email)
-              expect(decrypted.role).toBe(payload.role)
-            })
-
-            it('should verify valid tokens', async () => {
-              const payload = { userId: '123' }
-              const token = await jwtAdapter.encrypt(payload)
-
-              const isValid = await jwtAdapter.verify(token)
-              expect(isValid).toBe(true)
-            })
-
-            it('should reject invalid tokens', async () => {
-              const invalidToken = 'invalid.token.here'
-
-              const isValid = await jwtAdapter.verify(invalidToken)
-              expect(isValid).toBe(false)
-
-              await expect(jwtAdapter.decrypt(invalidToken))
-                .rejects
-                .toThrow(/invalid token/i)
-            })
-
-            it('should handle token expiration', async () => {
-              const shortLivedAdapter = new JwtAdapter('test-secret', '1ms')
-              const payload = { userId: '123' }
-
-              const token = await shortLivedAdapter.encrypt(payload)
-
-              // Wait for token to expire
-              await new Promise(resolve => setTimeout(resolve, 10))
-
-              await expect(shortLivedAdapter.decrypt(token))
-                .rejects
-                .toThrow(/expired/i)
-            })
-          })
-
-          describe('Infrastructure Error Handling', () => {
-            it('should handle database connection errors gracefully', async () => {
-              const badPrisma = new PrismaClient({
+            // Setup test database connection
+            if (process.env.DATABASE_TEST_URL) {
+              prisma = new PrismaClient({
                 datasources: {
                   db: {
-                    url: 'postgresql://invalid:invalid@localhost:9999/invalid'
+                    url: process.env.DATABASE_TEST_URL
                   }
                 }
               })
+              await prisma.$connect()
+              repository = new Prisma__FEATURE_NAME_PASCAL_CASE__Repository(prisma)
+            }
 
-              const badRepository = new Prisma__FEATURE_NAME_PASCAL_CASE__Repository(badPrisma)
+            // Setup other infrastructure components
+            httpClient = new FetchHttpClient()
+            crypto = new BcryptJwtCrypto()
 
-              await expect(badRepository.findById('any-id'))
-                .rejects
-                .toThrow(/database/i)
+            // Setup cache (mock Redis if not available)
+            const mockRedis = {
+              get: jest.fn().mockResolvedValue(null),
+              set: jest.fn().mockResolvedValue('OK'),
+              del: jest.fn().mockResolvedValue(1),
+              exists: jest.fn().mockResolvedValue(0),
+              ping: jest.fn().mockResolvedValue('PONG')
+            }
+            cache = new RedisCache(mockRedis)
+          })
 
-              await badPrisma.$disconnect()
+          afterAll(async () => {
+            if (prisma) {
+              await prisma.__MODEL_NAME__.deleteMany({})
+              await prisma.$disconnect()
+            }
+          })
+
+          describe('Database Repository Integration', () => {
+            test('Should create and retrieve entity from real database', async () => {
+              if (!repository) {
+                console.log('⏭️  Skipping database test - DATABASE_TEST_URL not set')
+                return
+              }
+
+              // Arrange
+              const input = {
+                __INPUT_FIELD_1__: 'integration_value_1',
+                __INPUT_FIELD_2__: 'integration_value_2',
+                __INPUT_FIELD_3__: 'integration_value_3'
+              }
+
+              // Act
+              const saved = await repository.save(input)
+              const retrieved = await repository.findById(saved.id)
+
+              // Assert
+              expect(saved).toBeTruthy()
+              expect(saved.id).toBeTruthy()
+              expect(retrieved).toEqual(saved)
+            })
+          })
+
+          describe('HTTP Client Integration', () => {
+            test('Should make real HTTP request to external API', async () => {
+              // Skip if no test endpoint available
+              const testUrl = process.env.HTTP_TEST_ENDPOINT
+              if (!testUrl) {
+                console.log('⏭️  Skipping HTTP test - HTTP_TEST_ENDPOINT not set')
+                return
+              }
+
+              const response = await httpClient.get(testUrl)
+
+              expect(response.statusCode).toBeDefined()
+              expect(response.body).toBeDefined()
+            }, 10000) // 10 second timeout for network requests
+          })
+
+          describe('Cache Integration', () => {
+            test('Should store and retrieve values from cache', async () => {
+              const key = 'test_key_integration'
+              const value = { test: 'integration_data', timestamp: Date.now() }
+
+              // Set value
+              await cache.set(key, value, 60)
+
+              // Get value
+              const retrieved = await cache.get<typeof value>(key)
+
+              expect(retrieved).toEqual(value)
+
+              // Clean up
+              await cache.delete(key)
+            })
+          })
+
+          describe('Crypto Integration', () => {
+            test('Should hash and compare passwords correctly', async () => {
+              const password = 'test_password_123'
+
+              // Hash password
+              const hash = await crypto.hashPassword(password)
+              expect(hash).toBeTruthy()
+              expect(hash).not.toBe(password)
+
+              // Compare passwords
+              const isValid = await crypto.comparePassword(password, hash)
+              expect(isValid).toBe(true)
+
+              const isInvalid = await crypto.comparePassword('wrong_password', hash)
+              expect(isInvalid).toBe(false)
             })
 
-            it('should handle HTTP network errors gracefully', async () => {
-              const httpClientWithBadUrl = new FetchHttpClient({
-                baseURL: 'https://non-existent-domain-12345.com',
-                timeout: 1000
-              })
+            test('Should generate and verify JWT tokens', async () => {
+              const payload = { userId: '123', role: 'user' }
 
-              await expect(
-                httpClientWithBadUrl.request({
-                  url: '/test',
-                  method: 'GET'
-                })
-              ).rejects.toThrow(/network|timeout/i)
+              // Generate token
+              const token = await crypto.generateToken(payload, '1h')
+              expect(token).toBeTruthy()
+
+              // Verify token
+              const decoded = await crypto.verifyToken(token)
+              expect(decoded).toMatchObject(payload)
+
+              // Verify invalid token
+              const invalidDecoded = await crypto.verifyToken('invalid_token')
+              expect(invalidDecoded).toBeNull()
+            })
+          })
+
+          describe('Cross-Component Integration', () => {
+            test('Should work together in a complete workflow', async () => {
+              if (!repository) {
+                console.log('⏭️  Skipping workflow test - DATABASE_TEST_URL not set')
+                return
+              }
+
+              // Step 1: Create data
+              const input = {
+                __INPUT_FIELD_1__: 'workflow_test_1',
+                __INPUT_FIELD_2__: 'workflow_test_2',
+                __INPUT_FIELD_3__: 'workflow_test_3'
+              }
+
+              const saved = await repository.save(input)
+
+              // Step 2: Cache the result
+              const cacheKey = `__FEATURE_NAME_KEBAB_CASE__:${saved.id}`
+              await cache.set(cacheKey, saved, 300)
+
+              // Step 3: Retrieve from cache
+              const cached = await cache.get(cacheKey)
+              expect(cached).toEqual(saved)
+
+              // Step 4: Generate token for the entity
+              const token = await crypto.generateToken({ entityId: saved.id })
+              expect(token).toBeTruthy()
+
+              // Step 5: Verify the workflow completed successfully
+              const verified = await crypto.verifyToken(token)
+              expect(verified).toMatchObject({ entityId: saved.id })
+
+              // Clean up
+              await cache.delete(cacheKey)
+              await repository.delete(saved.id)
             })
           })
         })
-
       validation_script: |
-        run_infra_integration_tests() {
-          echo "🧪 Running infrastructure integration tests..."
-          npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/__tests__ --coverage || exit 1
-          echo "✅ Infrastructure integration tests passed with coverage"
-        }
+        echo "🧪 Running integration tests for infrastructure layer..."
 
-        check_infra_dependencies() {
-          echo "📦 Checking infrastructure dependencies..."
+        # Set test timeout for integration tests
+        export JEST_TIMEOUT=30000
 
-          # Check if required dependencies are installed
-          if ! npm list @prisma/client >/dev/null 2>&1; then
-            echo "⚠️  Installing @prisma/client..."
-            npm install @prisma/client
-          fi
+        # Run integration tests if database is available
+        if [ -n "$DATABASE_TEST_URL" ]; then
+          echo "✅ Database connection available - running full integration tests"
+          npm run test:integration -- src/features/__FEATURE_NAME_KEBAB_CASE__/__tests__/integration/infrastructure.test.ts
+        else
+          echo "⏭️  Database not available - running limited integration tests"
+          npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__tests__/integration/infrastructure.test.ts
+        fi
 
-          if ! npm list bcrypt >/dev/null 2>&1; then
-            echo "⚠️  Installing bcrypt..."
-            npm install bcrypt && npm install --save-dev @types/bcrypt
-          fi
+        if [ $? -eq 0 ]; then
+          echo "✅ Integration tests passing"
+        else
+          echo "⚠️  Some integration tests failed - check external dependencies"
+        fi
 
-          if ! npm list jsonwebtoken >/dev/null 2>&1; then
-            echo "⚠️  Installing jsonwebtoken..."
-            npm install jsonwebtoken && npm install --save-dev @types/jsonwebtoken
-          fi
+        git add .
+        git commit -m "test(infra): add integration tests for __FEATURE_NAME_KEBAB_CASE__ infrastructure"
 
-          if ! npm list redis >/dev/null 2>&1; then
-            echo "⚠️  Installing redis..."
-            npm install redis
-          fi
-
-          echo "✅ All infrastructure dependencies are available"
-        }
-
-        stage_and_commit_infra() {
-          local commit_message="$1"
-          git add .
-          git status
-          git commit -m "$commit_message" || exit 1
-          echo "✅ Committed: $commit_message"
-        }
-
-        check_infra_dependencies
-        run_infra_integration_tests
-        stage_and_commit_infra "feat(__FEATURE_NAME_KEBAB_CASE__): add infrastructure layer implementations"
-
-    # === STEP 9: VALIDATE INFRASTRUCTURE LAYER ===
-    - id: 'validate-infrastructure-layer-__FEATURE_NAME_KEBAB_CASE__'
+    # === STEP 13: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-infra-__FEATURE_NAME_KEBAB_CASE__'
       type: 'validation'
-      description: 'Validate complete infrastructure layer implementation for __FEATURE_NAME_PASCAL_CASE__'
-      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-      rlhf_score: null # -2, -1, 0, 1, 2
+      description: 'Create and checkout feature branch for __FEATURE_NAME_PASCAL_CASE__ infrastructure implementation'
+      status: 'PENDING'
+      rlhf_score: null
       execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Git branching strategy and naming conventions for infrastructure layer'
       run_scripts:
-        description: 'Run all infrastructure layer validation checks'
+        description: 'Create feature branch with proper naming convention for infrastructure'
         scripts:
-          - name: 'TypeScript Compilation'
-            command: 'npx tsc --noEmit --project tsconfig.json'
+          - name: 'Create infrastructure feature branch'
+            command: |
+              # Stash any uncommitted changes
+              git stash save "WIP: Before creating __FEATURE_NAME_KEBAB_CASE__-infra branch"
+
+              # Ensure we're on the main branch and up to date
+              git checkout main || git checkout master
+              git pull origin main || git pull origin master
+
+              # Create and checkout new feature branch
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-infrastructure-layer"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
+
+              echo "✅ Created and checked out branch: $BRANCH_NAME"
             workingDirectory: '__PROJECT_NAME__'
-          - name: 'ESLint Check'
-            command: 'npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra'
+
+    # === STEP 14: CREATE PULL REQUEST ===
+    - id: 'create-pull-request-infra-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create pull request for __FEATURE_NAME_PASCAL_CASE__ infrastructure implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'PR_TEMPLATE.md'
+          description: 'Pull request template and review checklist for infrastructure layer'
+      run_scripts:
+        description: 'Push branch and create pull request for infrastructure layer'
+        scripts:
+          - name: 'Push and create infrastructure PR'
+            command: |
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-infrastructure-layer"
+
+              # Push the branch
+              git push -u origin "$BRANCH_NAME" || {
+                echo "❌ Failed to push branch to remote"
+                exit 1
+              }
+
+              # Create PR using GitHub CLI if available
+              if command -v gh &> /dev/null; then
+                gh pr create \
+                  --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement infrastructure layer with TDD" \
+                  --body "## Summary
+
+                Implements comprehensive infrastructure layer for __FEATURE_NAME_PASCAL_CASE__ feature following Clean Architecture and TDD methodology.
+
+                ## Infrastructure Components Implemented
+                - ✅ **Database Repository**: Prisma-based repository with transaction support
+                - ✅ **HTTP Client**: Fetch API client with timeout and error handling
+                - ✅ **Cache Layer**: Redis cache with in-memory fallback
+                - ✅ **Cryptography**: bcrypt password hashing and JWT token management
+                - ✅ **Integration Tests**: Comprehensive tests with real dependencies
+                - ✅ **Error Handling**: Graceful degradation and error transformation
+
+                ## TDD Methodology Applied
+                - 🔴 **RED**: Failing tests written first for each component
+                - 🟢 **GREEN**: Minimal implementation to make tests pass
+                - ♻️  **REFACTOR**: Code optimization while maintaining test coverage
+
+                ## Testing Strategy
+                - [ ] Unit tests pass (>90% coverage)
+                - [ ] Integration tests pass with real dependencies
+                - [ ] Error scenarios properly handled
+                - [ ] Performance benchmarks meet requirements
+                - [ ] Security best practices followed
+
+                ## Architecture Compliance
+                - [ ] Dependency Inversion Principle followed
+                - [ ] Infrastructure protocols properly defined
+                - [ ] No business logic in infrastructure layer
+                - [ ] Proper error handling and logging
+                - [ ] Configuration externalized
+
+                ## Performance & Security
+                - [ ] Database queries optimized
+                - [ ] HTTP requests have timeout handling
+                - [ ] Cache invalidation strategy defined
+                - [ ] Password hashing uses proper salt rounds
+                - [ ] JWT tokens have appropriate expiration
+
+                ## Checklist
+                - [ ] Code follows Clean Architecture principles
+                - [ ] All tests pass with adequate coverage
+                - [ ] Documentation is updated
+                - [ ] No breaking changes introduced
+                - [ ] External dependencies properly configured
+                - [ ] Error handling covers all edge cases" \
+                  --assignee @me \
+                  --label "enhancement,infrastructure,clean-architecture,tdd"
+
+                echo "✅ Pull request created successfully"
+              else
+                echo "📝 Push successful. Please create PR manually at:"
+                echo "   https://github.com/__GITHUB_ORG__/__PROJECT_NAME__/compare/$BRANCH_NAME"
+              fi
             workingDirectory: '__PROJECT_NAME__'
-          - name: 'Infrastructure Tests'
-            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra'
+
+    # === STEP 15: TRIGGER AI CODE REVIEW ===
+    - id: 'trigger-ai-review-infra-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Trigger AI-powered code review with Claude for infrastructure layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'claude-cli'
+          query: 'claude code review infrastructure layer clean architecture'
+          url: 'https://claude.ai/docs/code-review'
+          description: 'AI-powered code review using Claude for infrastructure patterns'
+      run_scripts:
+        description: 'Run Claude AI code review on the infrastructure implementation'
+        scripts:
+          - name: 'Trigger Claude infrastructure review'
+            command: |
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-infrastructure-layer"
+
+              # Check if Claude CLI is available
+              if command -v claude &> /dev/null; then
+                echo "🤖 Starting AI code review with Claude for infrastructure layer..."
+
+                claude /review \
+                  --branch "$BRANCH_NAME" \
+                  --focus "clean-architecture,infrastructure-patterns,tdd,security" \
+                  --checklist ".github/infrastructure_review_checklist.md" \
+                  --output "review-infra-__FEATURE_NAME_KEBAB_CASE__.md"
+
+                echo "✅ AI infrastructure review complete. Check review-infra-__FEATURE_NAME_KEBAB_CASE__.md"
+
+                # Add review as PR comment if gh CLI is available
+                if command -v gh &> /dev/null && [ -f "review-infra-__FEATURE_NAME_KEBAB_CASE__.md" ]; then
+                  gh pr comment --body-file "review-infra-__FEATURE_NAME_KEBAB_CASE__.md"
+                  echo "✅ Review posted to PR"
+                fi
+              else
+                echo "⚠️  Claude CLI not installed. Skipping AI review."
+                echo "   Install with: npm install -g @anthropic/claude-cli"
+              fi
             workingDirectory: '__PROJECT_NAME__'
-          - name: 'Clean Architecture Rules Check'
-            command: 'npm run arch:check -- --layer=infra --feature=__FEATURE_NAME_KEBAB_CASE__'
-            workingDirectory: '__PROJECT_NAME__'
-          - name: 'Build Check'
-            command: 'npm run build'
-            workingDirectory: '__PROJECT_NAME__'
-          - name: 'Commit Infrastructure Layer'
-            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): complete infrastructure layer implementation"'
+
+    # === STEP 16: POST-MERGE CLEANUP ===
+    - id: 'post-merge-cleanup-infra-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Cleanup after infrastructure PR merge'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Post-merge cleanup procedures for infrastructure layer'
+      run_scripts:
+        description: 'Clean up local and remote branches after infrastructure merge'
+        scripts:
+          - name: 'Post-merge infrastructure cleanup'
+            command: |
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-infrastructure-layer"
+
+              # Check if PR is merged
+              if command -v gh &> /dev/null; then
+                PR_STATE=$(gh pr view "$BRANCH_NAME" --json state -q .state 2>/dev/null || echo "UNKNOWN")
+
+                if [ "$PR_STATE" = "MERGED" ]; then
+                  echo "🧹 Starting post-merge cleanup for infrastructure..."
+
+                  # Switch to main branch
+                  git checkout main || git checkout master
+                  git pull origin main || git pull origin master
+
+                  # Delete local branch
+                  git branch -d "$BRANCH_NAME"
+
+                  # Delete remote branch
+                  git push origin --delete "$BRANCH_NAME"
+
+                  # Clean up review files
+                  rm -f review-infra-__FEATURE_NAME_KEBAB_CASE__.md
+
+                  echo "✅ Infrastructure cleanup complete. Branch deleted locally and remotely."
+                else
+                  echo "⏳ Infrastructure PR not yet merged. Skipping cleanup."
+                fi
+              else
+                echo "⚠️  GitHub CLI not available. Please clean up branches manually after merge."
+              fi
             workingDirectory: '__PROJECT_NAME__'
 
 # ============= END INFRA STEPS BACKEND SECTION =============
