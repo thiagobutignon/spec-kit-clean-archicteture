@@ -594,7 +594,120 @@
         git add .
         git commit -m "test(data): add integration tests for __USE_CASE_NAME_KEBAB_CASE__"
 
-    # === STEP 9: CREATE PULL REQUEST ===
+    # === STEP 9: REFACTOR FOR BROWNFIELD (CONDITIONAL MULTI-STEP) ===
+    # AI-NOTE: When brownfield refactoring is needed, the AI should dynamically generate
+    # multiple steps based on the specific files that need refactoring. Each file should
+    # have its own step for better tracking and granular control.
+    #
+    # RULE: For each file requiring refactoring, create a separate step with:
+    # - Unique ID: refactor-{index}-{filename}
+    # - Clear description of what changes are needed
+    # - Specific validation for that file's refactoring
+    # - Rollback point for each major refactoring
+    #
+    # EXAMPLE PATTERN:
+    # If 3 files need refactoring, generate:
+    # Step 9a: refactor-1-user-controller
+    # Step 9b: refactor-2-user-service
+    # Step 9c: refactor-3-user-repository
+    - id: 'refactor-rollback-point-data-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create rollback point before starting data layer brownfield refactoring'
+      condition: 'check_if_brownfield_refactor_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Best practices for safe data layer refactoring with rollback points'
+      run_scripts:
+        description: 'Create git tag for rollback before data layer refactoring'
+        scripts:
+          - name: 'Create data refactor rollback tag'
+            command: |
+              # Create rollback point before data layer refactoring
+              git tag "before-refactor-data-__USE_CASE_NAME_KEBAB_CASE__" || {
+                echo "⚠️  Failed to create rollback tag"
+                exit 1
+              }
+              echo "✅ Created data rollback point: before-refactor-data-__USE_CASE_NAME_KEBAB_CASE__"
+              echo "   To rollback: git reset --hard before-refactor-data-__USE_CASE_NAME_KEBAB_CASE__"
+              # Document files that need refactoring
+              echo "📋 Data layer files identified for refactoring:"
+              # AI should list files here based on analysis
+            workingDirectory: '__PROJECT_NAME__'
+
+    # AI-NOTE: The following is a template that should be duplicated for each file
+    # that needs refactoring. The AI should generate one step per file.
+    - id: 'refactor-data-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor __FILE_TO_MODIFY_KEBAB_CASE__ data layer to Clean Architecture'
+      condition: 'check_if_data_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture data layer refactoring patterns for backend'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Analyze current data layer file structure and dependencies'
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+      template: |
+        <<<FIND>>>
+        // The AI should identify the exact code block that needs refactoring
+        // This will be the original data layer code that violates Clean Architecture
+        [ORIGINAL_DATA_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        // TODO: Refactor this data layer file to comply with Clean Architecture
+        // Estimated effort: __EFFORT__ (hours)
+        // SPECIFIC DATA LAYER REFACTORING TASKS FOR THIS FILE:
+        // 1. Extract business logic to domain layer (if any leaked)
+        // 2. Move infrastructure concerns to infrastructure layer
+        // 3. Implement proper repository patterns
+        // 4. Add proper error handling and validation
+        // 5. Implement dependency injection for repositories
+        // 6. Update imports to follow Clean Architecture boundaries
+        // 7. Add unit tests for refactored data layer code
+        // 8. Ensure data layer only orchestrates, no business logic
+        // DATA LAYER DEPENDENCIES TO UPDATE:
+        // - [AI should list specific data layer dependencies]
+        // FILES THAT IMPORT THIS DATA LAYER:
+        // - [AI should list dependent files]
+        */
+        // NEW REFACTORED DATA LAYER CODE:
+        [REFACTORED_DATA_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # === STEP 10: DELETE OBSOLETE DATA FILES (CONDITIONAL) ===
+    - id: 'delete-data-file-__FILE_TO_DELETE_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Delete obsolete data layer files when refactoring to Clean Architecture'
+      condition: 'check_if_data_file_deletion_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Safe file deletion during data layer refactoring'
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__.ts'
+      template: ''
+      validation_script: |
+        echo "🗑️  Deleting obsolete data layer file: __FILE_TO_DELETE_KEBAB_CASE__.ts"
+        if [ -f "__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__.ts" ]; then
+          rm "__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__.ts"
+          echo "✅ Deleted obsolete file"
+          git add -A
+          git commit -m "refactor(data): remove obsolete __FILE_TO_DELETE_KEBAB_CASE__ file"
+        else
+          echo "ℹ️  File already deleted or does not exist"
+        fi
+
+    # === STEP 11: CREATE PULL REQUEST ===
     - id: 'create-pull-request-data-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Create pull request for __USE_CASE_NAME_PASCAL_CASE__ data implementation'

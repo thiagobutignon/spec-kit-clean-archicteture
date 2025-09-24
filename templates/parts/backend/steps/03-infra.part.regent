@@ -1582,7 +1582,120 @@
         git add .
         git commit -m "test(infra): add integration tests for __FEATURE_NAME_KEBAB_CASE__ infrastructure"
 
-    # === STEP 14: CREATE PULL REQUEST ===
+    # === STEP 14: REFACTOR FOR BROWNFIELD (CONDITIONAL MULTI-STEP) ===
+    # AI-NOTE: When brownfield refactoring is needed, the AI should dynamically generate
+    # multiple steps based on the specific files that need refactoring. Each file should
+    # have its own step for better tracking and granular control.
+    #
+    # RULE: For each file requiring refactoring, create a separate step with:
+    # - Unique ID: refactor-{index}-{filename}
+    # - Clear description of what changes are needed
+    # - Specific validation for that file's refactoring
+    # - Rollback point for each major refactoring
+    #
+    # EXAMPLE PATTERN:
+    # If 3 files need refactoring, generate:
+    # Step 14a: refactor-1-user-controller
+    # Step 14b: refactor-2-user-service
+    # Step 14c: refactor-3-user-repository
+    - id: 'refactor-rollback-point-infra-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create rollback point before starting infrastructure layer brownfield refactoring'
+      condition: 'check_if_brownfield_refactor_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Best practices for safe infrastructure layer refactoring with rollback points'
+      run_scripts:
+        description: 'Create git tag for rollback before infrastructure layer refactoring'
+        scripts:
+          - name: 'Create infrastructure refactor rollback tag'
+            command: |
+              # Create rollback point before infrastructure layer refactoring
+              git tag "before-refactor-infra-__FEATURE_NAME_KEBAB_CASE__" || {
+                echo "⚠️  Failed to create rollback tag"
+                exit 1
+              }
+              echo "✅ Created infrastructure rollback point: before-refactor-infra-__FEATURE_NAME_KEBAB_CASE__"
+              echo "   To rollback: git reset --hard before-refactor-infra-__FEATURE_NAME_KEBAB_CASE__"
+              # Document files that need refactoring
+              echo "📋 Infrastructure layer files identified for refactoring:"
+              # AI should list files here based on analysis
+            workingDirectory: '__PROJECT_NAME__'
+
+    # AI-NOTE: The following is a template that should be duplicated for each file
+    # that needs refactoring. The AI should generate one step per file.
+    - id: 'refactor-infra-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor __FILE_TO_MODIFY_KEBAB_CASE__ infrastructure layer to Clean Architecture'
+      condition: 'check_if_infra_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture infrastructure layer refactoring patterns for backend'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Analyze current infrastructure layer file structure and dependencies'
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+      template: |
+        <<<FIND>>>
+        // The AI should identify the exact code block that needs refactoring
+        // This will be the original infrastructure code that violates Clean Architecture
+        [ORIGINAL_INFRA_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        // TODO: Refactor this infrastructure layer file to comply with Clean Architecture
+        // Estimated effort: __EFFORT__ (hours)
+        // SPECIFIC INFRASTRUCTURE LAYER REFACTORING TASKS FOR THIS FILE:
+        // 1. Extract any leaked business logic to domain layer
+        // 2. Ensure proper abstraction with data layer protocols
+        // 3. Implement proper dependency injection patterns
+        // 4. Add proper error handling and logging
+        // 5. Ensure infrastructure only handles external concerns
+        // 6. Update imports to follow Clean Architecture boundaries
+        // 7. Add unit tests for refactored infrastructure code
+        // 8. Ensure proper separation from business logic
+        // INFRASTRUCTURE LAYER DEPENDENCIES TO UPDATE:
+        // - [AI should list specific infrastructure dependencies]
+        // FILES THAT DEPEND ON THIS INFRASTRUCTURE:
+        // - [AI should list dependent files]
+        */
+        // NEW REFACTORED INFRASTRUCTURE LAYER CODE:
+        [REFACTORED_INFRA_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # === STEP 15: DELETE OBSOLETE INFRASTRUCTURE FILES (CONDITIONAL) ===
+    - id: 'delete-infra-file-__FILE_TO_DELETE_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Delete obsolete infrastructure layer files when refactoring to Clean Architecture'
+      condition: 'check_if_infra_file_deletion_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Safe file deletion during infrastructure layer refactoring'
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__.ts'
+      template: ''
+      validation_script: |
+        echo "🗑️  Deleting obsolete infrastructure layer file: __FILE_TO_DELETE_KEBAB_CASE__.ts"
+        if [ -f "__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__.ts" ]; then
+          rm "__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__.ts"
+          echo "✅ Deleted obsolete file"
+          git add -A
+          git commit -m "refactor(infra): remove obsolete __FILE_TO_DELETE_KEBAB_CASE__ file"
+        else
+          echo "ℹ️  File already deleted or does not exist"
+        fi
+
+    # === STEP 16: CREATE PULL REQUEST ===
     - id: 'create-pull-request-infra-__FEATURE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Create pull request for __FEATURE_NAME_PASCAL_CASE__ infrastructure implementation'
@@ -1665,7 +1778,7 @@
               fi
             workingDirectory: '__PROJECT_NAME__'
 
-    # === STEP 15: TRIGGER AI CODE REVIEW ===
+    # === STEP 17: TRIGGER AI CODE REVIEW ===
     - id: 'trigger-ai-review-infra-__FEATURE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Trigger AI-powered code review with Claude for infrastructure layer'
@@ -1708,7 +1821,7 @@
               fi
             workingDirectory: '__PROJECT_NAME__'
 
-    # === STEP 16: POST-MERGE CLEANUP ===
+    # === STEP 18: POST-MERGE CLEANUP ===
     - id: 'post-merge-cleanup-infra-__FEATURE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Cleanup after infrastructure PR merge'
