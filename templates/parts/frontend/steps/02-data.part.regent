@@ -1,0 +1,1367 @@
+# ============= BEGIN DATA STEPS FRONTEND SECTION =============
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: DATA LAYER IMPLEMENTATION STEPS FOR FRONTEND (TDD)
+  # These steps implement data layer following RED-GREEN-REFACTOR cycle
+  # Specific to frontend with Remote prefix, Fetch API, and Next.js 15 patterns
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # DATA LAYER STEPS SECTION
+  # Steps for generating data layer artifacts in frontend features
+  # Following Test-Driven Development (RED-GREEN-REFACTOR) methodology
+  # Using Remote prefix, Fetch API, and frontend-specific patterns
+  # ------------------------------------------------------------------------------
+
+  data_steps:
+    # === STEP 1: CREATE DATA STRUCTURE (RED PHASE) ===
+    - id: 'create-data-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'Create data layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ frontend use case'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FRONTEND_ARCHITECTURE.md'
+          description: 'Following Clean Architecture data layer structure for frontend.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture data layer frontend typescript fetch api'
+          url: 'https://github.com/...'
+          description: 'Data layer patterns for frontend with Fetch API.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+          folders:
+            - 'usecases'     # Use case implementations (Remote prefix)
+            - 'protocols'    # HTTP/API protocol interfaces
+
+    # === STEP 2: CREATE PROTOCOL INTERFACES (RED PHASE) ===
+    - id: 'create-data-protocols-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create HTTP/API protocol interfaces for __USE_CASE_NAME_PASCAL_CASE__ data layer (RED)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'dependency inversion protocol interfaces http api frontend'
+          url: 'https://github.com/...'
+          description: 'Protocol interfaces for HTTP/API dependencies.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*Protocol'
+          description: 'Consistent with existing protocol naming patterns.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/protocols/__USE_CASE_NAME_KEBAB_CASE__-http-client.ts'
+      template: |
+        /**
+         * HTTP client protocol for __USE_CASE_NAME_PASCAL_CASE__ frontend operations
+         * Abstracts HTTP/API communication from the data layer
+         *
+         * @protocol HTTP Client Protocol
+         * @layer Data Layer - Protocol Interface
+         * @pattern Dependency Inversion - Abstract HTTP operations
+         */
+        export interface __USE_CASE_NAME_PASCAL_CASE__HttpClient {
+          /**
+           * Perform HTTP request for __USE_CASE_NAME_PASCAL_CASE__ operation
+           *
+           * @param request - HTTP request parameters
+           * @returns Promise with HTTP response data
+           * @throws Will throw HttpError for network or API errors
+           */
+          request<T = unknown>(request: HttpRequest): Promise<HttpResponse<T>>
+        }
+
+        /**
+         * HTTP request parameters for frontend API calls
+         */
+        export interface HttpRequest {
+          url: string
+          method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+          headers?: Record<string, string>
+          body?: unknown
+          signal?: AbortSignal // For request cancellation
+        }
+
+        /**
+         * HTTP response structure for frontend API responses
+         */
+        export interface HttpResponse<T = unknown> {
+          data: T
+          status: number
+          statusText: string
+          headers: Record<string, string>
+        }
+
+        /**
+         * Cache protocol for frontend data layer (optional)
+         */
+        export interface __USE_CASE_NAME_PASCAL_CASE__CacheClient {
+          /**
+           * Get cached data
+           */
+          get<T = unknown>(key: string): Promise<T | null>
+
+          /**
+           * Set cached data with TTL
+           */
+          set<T = unknown>(key: string, value: T, ttl?: number): Promise<void>
+
+          /**
+           * Invalidate cached data
+           */
+          invalidate(key: string): Promise<void>
+        }
+
+    # === STEP 3: CREATE FAILING TESTS (RED PHASE) ===
+    - id: 'create-data-failing-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create failing tests for Remote__USE_CASE_NAME_PASCAL_CASE__ data implementation (RED)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development red phase vitest frontend mocking'
+          url: 'https://github.com/...'
+          description: 'TDD RED phase patterns for frontend with Vitest.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach, vi, type MockedFunction } from 'vitest'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__,
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__HttpClient,
+          HttpRequest,
+          HttpResponse
+        } from '../protocols/__USE_CASE_NAME_KEBAB_CASE__-http-client'
+        import { Remote__USE_CASE_NAME_PASCAL_CASE__ } from './remote-__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * TDD Tests for Remote__USE_CASE_NAME_PASCAL_CASE__ data layer implementation
+         * Following RED-GREEN-REFACTOR cycle for frontend data operations
+         *
+         * @testType Integration Test - Data Layer with Mocked HTTP
+         * @phase RED - These tests should FAIL initially
+         */
+        describe('Remote__USE_CASE_NAME_PASCAL_CASE__ (TDD RED Phase)', () => {
+          let sut: Remote__USE_CASE_NAME_PASCAL_CASE__
+          let httpClientMock: {
+            request: MockedFunction<__USE_CASE_NAME_PASCAL_CASE__HttpClient['request']>
+          }
+
+          beforeEach(() => {
+            httpClientMock = {
+              request: vi.fn()
+            }
+            sut = new Remote__USE_CASE_NAME_PASCAL_CASE__(httpClientMock)
+          })
+
+          describe('RED Phase - These should FAIL', () => {
+            it('should implement __USE_CASE_NAME_PASCAL_CASE__ interface', () => {
+              // RED: This will fail because Remote__USE_CASE_NAME_PASCAL_CASE__ doesn't exist yet
+              expect(sut).toBeInstanceOf(Remote__USE_CASE_NAME_PASCAL_CASE__)
+              expect(typeof sut.execute).toBe('function')
+            })
+
+            it('should make HTTP request with correct parameters', async () => {
+              // RED: This will fail because implementation doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'test-value-1',
+                __INPUT_FIELD_2__: 'test-value-2'
+              }
+
+              const expectedResponse: HttpResponse<any> = {
+                data: {
+                  __OUTPUT_FIELD_1__: 'response-1',
+                  __OUTPUT_FIELD_2__: 'response-2',
+                  __OUTPUT_FIELD_3__: 123,
+                  __TIMESTAMP_FIELD__: '2024-01-01T00:00:00.000Z',
+                  success: true
+                },
+                status: 200,
+                statusText: 'OK',
+                headers: {}
+              }
+
+              httpClientMock.request.mockResolvedValueOnce(expectedResponse)
+
+              await sut.execute(input)
+
+              expect(httpClientMock.request).toHaveBeenCalledWith({
+                url: '/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__',
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+                },
+                body: input
+              })
+            })
+
+            it('should return domain output type from HTTP response', async () => {
+              // RED: This will fail because transformation doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'test-value-1',
+                __INPUT_FIELD_2__: 'test-value-2'
+              }
+
+              const httpResponse: HttpResponse<any> = {
+                data: {
+                  __OUTPUT_FIELD_1__: 'api-response-1',
+                  __OUTPUT_FIELD_2__: 'api-response-2',
+                  __OUTPUT_FIELD_3__: 456,
+                  __TIMESTAMP_FIELD__: '2024-01-01T00:00:00.000Z',
+                  success: true
+                },
+                status: 200,
+                statusText: 'OK',
+                headers: {}
+              }
+
+              httpClientMock.request.mockResolvedValueOnce(httpResponse)
+
+              const result = await sut.execute(input)
+
+              const expectedOutput: __USE_CASE_NAME_PASCAL_CASE__Output = {
+                __OUTPUT_FIELD_1__: 'api-response-1',
+                __OUTPUT_FIELD_2__: 'api-response-2',
+                __OUTPUT_FIELD_3__: 456,
+                __TIMESTAMP_FIELD__: new Date('2024-01-01T00:00:00.000Z'),
+                success: true
+              }
+
+              expect(result).toEqual(expectedOutput)
+            })
+
+            it('should handle HTTP errors appropriately', async () => {
+              // RED: This will fail because error handling doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'error-trigger',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              const httpError = new Error('Network Error')
+              httpClientMock.request.mockRejectedValueOnce(httpError)
+
+              await expect(sut.execute(input)).rejects.toThrow('Failed to execute __USE_CASE_NAME_PASCAL_CASE__')
+            })
+
+            it('should handle 404 responses gracefully', async () => {
+              // RED: This will fail because status code handling doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'not-found',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              const notFoundResponse: HttpResponse<any> = {
+                data: { error: 'Not found' },
+                status: 404,
+                statusText: 'Not Found',
+                headers: {}
+              }
+
+              httpClientMock.request.mockResolvedValueOnce(notFoundResponse)
+
+              await expect(sut.execute(input)).rejects.toThrow('Resource not found')
+            })
+
+            it('should handle validation errors from API', async () => {
+              // RED: This will fail because validation error handling doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: '',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              const validationResponse: HttpResponse<any> = {
+                data: {
+                  error: 'Validation failed',
+                  details: ['__INPUT_FIELD_1__ is required']
+                },
+                status: 400,
+                statusText: 'Bad Request',
+                headers: {}
+              }
+
+              httpClientMock.request.mockResolvedValueOnce(validationResponse)
+
+              await expect(sut.execute(input)).rejects.toThrow('Validation failed')
+            })
+          })
+
+          describe('Type Safety Tests (RED Phase)', () => {
+            it('should ensure input type compatibility', () => {
+              // RED: Will fail if types are not properly defined
+              const validInput: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'string-value',
+                __INPUT_FIELD_2__: 'another-string',
+                __INPUT_FIELD_3__: 'optional-field'
+              }
+
+              expect(validInput).toBeDefined()
+            })
+
+            it('should ensure output type compatibility', async () => {
+              // RED: Will fail if return type is not correct
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'test',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              httpClientMock.request.mockResolvedValueOnce({
+                data: {
+                  __OUTPUT_FIELD_1__: 'result',
+                  __OUTPUT_FIELD_2__: 'result',
+                  __OUTPUT_FIELD_3__: 1,
+                  __TIMESTAMP_FIELD__: '2024-01-01T00:00:00.000Z',
+                  success: true
+                },
+                status: 200,
+                statusText: 'OK',
+                headers: {}
+              })
+
+              const result = await sut.execute(input)
+
+              // TypeScript should enforce these types
+              expect(typeof result.__OUTPUT_FIELD_1__).toBe('string')
+              expect(typeof result.__OUTPUT_FIELD_3__).toBe('number')
+              expect(result.__TIMESTAMP_FIELD__).toBeInstanceOf(Date)
+              expect(typeof result.success).toBe('boolean')
+            })
+          })
+        })
+
+      validation_script: |
+        run_failing_tests() {
+          echo "🔴 RED PHASE: Running failing tests..."
+          npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data --reporter=verbose || {
+            echo "✅ Tests are failing as expected (RED phase)"
+            return 0
+          }
+          echo "❌ ERROR: Tests should be failing in RED phase!"
+          exit 1
+        }
+
+        stage_red_phase() {
+          git add .
+          git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add failing tests for __USE_CASE_NAME_KEBAB_CASE__ data layer (RED)"
+          echo "✅ RED phase committed"
+        }
+
+        run_failing_tests
+        stage_red_phase
+
+    # === STEP 4: CREATE DATA IMPLEMENTATION (GREEN PHASE) ===
+    - id: 'create-data-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create Remote__USE_CASE_NAME_PASCAL_CASE__ implementation to make tests pass (GREEN)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture data layer implementation frontend fetch api'
+          url: 'https://github.com/...'
+          description: 'Data layer implementation patterns for frontend.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: 'Remote*'
+          description: 'Consistent with existing Remote implementations.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__,
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__HttpClient,
+          HttpResponse
+        } from '../protocols/__USE_CASE_NAME_KEBAB_CASE__-http-client'
+
+        /**
+         * Remote implementation of __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Handles HTTP/API communication for frontend data operations
+         *
+         * @implementation Data Layer - Remote HTTP Implementation
+         * @pattern Repository Pattern - Frontend HTTP variant
+         * @layer Data Layer - Implements domain use case via HTTP
+         */
+        export class Remote__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
+          /**
+           * Creates Remote__USE_CASE_NAME_PASCAL_CASE__ with HTTP client dependency
+           *
+           * @param httpClient - HTTP client for API communication
+           */
+          constructor(
+            private readonly httpClient: __USE_CASE_NAME_PASCAL_CASE__HttpClient
+          ) {}
+
+          /**
+           * Execute __USE_CASE_NAME_PASCAL_CASE__ via HTTP API call
+           *
+           * @param input - Use case input parameters
+           * @returns Promise with use case output
+           * @throws Error if HTTP request fails or API returns error
+           */
+          async execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output> {
+            try {
+              // Validate input before making HTTP request
+              this.validateInput(input)
+
+              // Make HTTP request to backend API
+              const response = await this.httpClient.request<any>({
+                url: `/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__`,
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+                },
+                body: input
+              })
+
+              // Handle different HTTP status codes
+              this.validateHttpResponse(response)
+
+              // Transform HTTP response to domain output
+              return this.transformToDomainOutput(response)
+
+            } catch (error) {
+              // Transform infrastructure errors to domain errors
+              throw this.handleError(error, input)
+            }
+          }
+
+          /**
+           * Validate input parameters
+           *
+           * @private
+           * @param input - Input to validate
+           * @throws Error if validation fails
+           */
+          private validateInput(input: __USE_CASE_NAME_PASCAL_CASE__Input): void {
+            if (!input.__INPUT_FIELD_1__) {
+              throw new Error('Missing required field: __INPUT_FIELD_1__')
+            }
+
+            if (!input.__INPUT_FIELD_2__) {
+              throw new Error('Missing required field: __INPUT_FIELD_2__')
+            }
+
+            // Additional validation rules can be added here
+          }
+
+          /**
+           * Validate HTTP response status
+           *
+           * @private
+           * @param response - HTTP response to validate
+           * @throws Error if response indicates error
+           */
+          private validateHttpResponse(response: HttpResponse<any>): void {
+            if (response.status === 404) {
+              throw new Error('Resource not found')
+            }
+
+            if (response.status === 400) {
+              const errorMessage = response.data?.error || 'Validation failed'
+              throw new Error(errorMessage)
+            }
+
+            if (response.status >= 400) {
+              throw new Error(`HTTP Error: ${response.status} ${response.statusText}`)
+            }
+          }
+
+          /**
+           * Transform HTTP response data to domain output type
+           *
+           * @private
+           * @param response - HTTP response from API
+           * @returns Domain output object
+           */
+          private transformToDomainOutput(response: HttpResponse<any>): __USE_CASE_NAME_PASCAL_CASE__Output {
+            const data = response.data
+
+            return {
+              __OUTPUT_FIELD_1__: data.__OUTPUT_FIELD_1__,
+              __OUTPUT_FIELD_2__: data.__OUTPUT_FIELD_2__,
+              __OUTPUT_FIELD_3__: data.__OUTPUT_FIELD_3__,
+              __TIMESTAMP_FIELD__: new Date(data.__TIMESTAMP_FIELD__),
+              success: data.success || true
+            }
+          }
+
+          /**
+           * Handle and transform errors to domain-appropriate errors
+           *
+           * @private
+           * @param error - Original error from HTTP operation
+           * @param input - Original input for context
+           * @returns Domain-appropriate error
+           */
+          private handleError(error: any, input: __USE_CASE_NAME_PASCAL_CASE__Input): Error {
+            // Log error for debugging (in development)
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Remote__USE_CASE_NAME_PASCAL_CASE__ error:', error, 'Input:', input)
+            }
+
+            // Return domain-appropriate error
+            if (error.message.includes('Network')) {
+              return new Error('Network error occurred. Please check your connection.')
+            }
+
+            if (error.message.includes('404')) {
+              return new Error('Resource not found')
+            }
+
+            if (error.message.includes('Validation')) {
+              return new Error('Validation failed')
+            }
+
+            // Default error transformation
+            return new Error(`Failed to execute __USE_CASE_NAME_PASCAL_CASE__: ${error.message}`)
+          }
+        }
+
+    # === STEP 5: RUN PASSING TESTS (GREEN PHASE) ===
+    - id: 'run-passing-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Verify all tests pass with implementation (GREEN phase)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to verify GREEN phase completion'
+        scripts:
+          - name: 'Run passing tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data --coverage'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit GREEN phase'
+            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ data layer (GREEN)"'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 6: REFACTOR IMPLEMENTATION (REFACTOR PHASE) ===
+    - id: 'refactor-data-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Refactor Remote__USE_CASE_NAME_PASCAL_CASE__ for better design (REFACTOR)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'refactoring patterns clean code frontend typescript'
+          url: 'https://github.com/...'
+          description: 'Refactoring patterns for cleaner code.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__,
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__HttpClient,
+          HttpResponse
+        } from '../protocols/__USE_CASE_NAME_KEBAB_CASE__-http-client'
+
+        /**
+         * Remote implementation of __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Refactored for better maintainability and error handling
+         *
+         * @implementation Data Layer - Remote HTTP Implementation (Refactored)
+         * @pattern Repository Pattern - Frontend HTTP variant with improved design
+         * @layer Data Layer - Clean, testable, maintainable implementation
+         */
+        export class Remote__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
+          private static readonly API_ENDPOINT = '/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+          private static readonly REQUEST_HEADERS = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          } as const
+
+          /**
+           * Creates Remote__USE_CASE_NAME_PASCAL_CASE__ with HTTP client dependency
+           *
+           * @param httpClient - HTTP client for API communication
+           */
+          constructor(
+            private readonly httpClient: __USE_CASE_NAME_PASCAL_CASE__HttpClient
+          ) {}
+
+          /**
+           * Execute __USE_CASE_NAME_PASCAL_CASE__ via HTTP API call
+           *
+           * @param input - Use case input parameters
+           * @returns Promise with use case output
+           * @throws Error if HTTP request fails or API returns error
+           */
+          async execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output> {
+            // Input validation
+            InputValidator.validate(input)
+
+            try {
+              // Make HTTP request
+              const response = await this.makeHttpRequest(input)
+
+              // Validate and transform response
+              return ResponseTransformer.transform(response)
+
+            } catch (error) {
+              throw ErrorHandler.handle(error, input)
+            }
+          }
+
+          /**
+           * Make HTTP request to backend API
+           *
+           * @private
+           * @param input - Request input
+           * @returns HTTP response
+           */
+          private async makeHttpRequest(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<HttpResponse<any>> {
+            const response = await this.httpClient.request<any>({
+              url: Remote__USE_CASE_NAME_PASCAL_CASE__.API_ENDPOINT,
+              method: 'POST',
+              headers: Remote__USE_CASE_NAME_PASCAL_CASE__.REQUEST_HEADERS,
+              body: input
+            })
+
+            ResponseValidator.validate(response)
+            return response
+          }
+        }
+
+        /**
+         * Input validation utilities (Refactored)
+         */
+        class InputValidator {
+          static validate(input: __USE_CASE_NAME_PASCAL_CASE__Input): void {
+            const errors: string[] = []
+
+            if (!input.__INPUT_FIELD_1__?.trim()) {
+              errors.push('__INPUT_FIELD_1__ is required and cannot be empty')
+            }
+
+            if (!input.__INPUT_FIELD_2__?.trim()) {
+              errors.push('__INPUT_FIELD_2__ is required and cannot be empty')
+            }
+
+            if (input.__INPUT_FIELD_3__ && input.__INPUT_FIELD_3__.length > 100) {
+              errors.push('__INPUT_FIELD_3__ cannot exceed 100 characters')
+            }
+
+            if (errors.length > 0) {
+              throw new ValidationError(`Input validation failed: ${errors.join(', ')}`)
+            }
+          }
+        }
+
+        /**
+         * HTTP response validation utilities (Refactored)
+         */
+        class ResponseValidator {
+          static validate(response: HttpResponse<any>): void {
+            if (response.status === 404) {
+              throw new NotFoundError('Resource not found')
+            }
+
+            if (response.status === 400) {
+              const errorMessage = response.data?.error || 'Bad request'
+              throw new ValidationError(errorMessage)
+            }
+
+            if (response.status === 401) {
+              throw new UnauthorizedError('Authentication required')
+            }
+
+            if (response.status === 403) {
+              throw new ForbiddenError('Access denied')
+            }
+
+            if (response.status >= 500) {
+              throw new ServerError(`Server error: ${response.status} ${response.statusText}`)
+            }
+
+            if (response.status >= 400) {
+              throw new HttpError(`HTTP error: ${response.status} ${response.statusText}`)
+            }
+          }
+        }
+
+        /**
+         * Response transformation utilities (Refactored)
+         */
+        class ResponseTransformer {
+          static transform(response: HttpResponse<any>): __USE_CASE_NAME_PASCAL_CASE__Output {
+            const data = response.data
+
+            // Validate required response fields
+            if (!data) {
+              throw new Error('Empty response data received')
+            }
+
+            return {
+              __OUTPUT_FIELD_1__: String(data.__OUTPUT_FIELD_1__ || ''),
+              __OUTPUT_FIELD_2__: String(data.__OUTPUT_FIELD_2__ || ''),
+              __OUTPUT_FIELD_3__: Number(data.__OUTPUT_FIELD_3__ || 0),
+              __TIMESTAMP_FIELD__: data.__TIMESTAMP_FIELD__
+                ? new Date(data.__TIMESTAMP_FIELD__)
+                : new Date(),
+              success: Boolean(data.success ?? true)
+            }
+          }
+        }
+
+        /**
+         * Error handling utilities (Refactored)
+         */
+        class ErrorHandler {
+          static handle(error: any, input: __USE_CASE_NAME_PASCAL_CASE__Input): Error {
+            // Log error in development
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Remote__USE_CASE_NAME_PASCAL_CASE__ error:', {
+                error: error.message,
+                stack: error.stack,
+                input
+              })
+            }
+
+            // Return appropriate domain errors
+            if (error instanceof ValidationError) return error
+            if (error instanceof NotFoundError) return error
+            if (error instanceof UnauthorizedError) return error
+            if (error instanceof ForbiddenError) return error
+            if (error instanceof ServerError) return error
+            if (error instanceof HttpError) return error
+
+            // Handle network errors
+            if (error.message.includes('fetch') || error.message.includes('network')) {
+              return new NetworkError('Network connection failed. Please check your internet connection.')
+            }
+
+            // Default error
+            return new Error(`__USE_CASE_NAME_PASCAL_CASE__ execution failed: ${error.message}`)
+          }
+        }
+
+        /**
+         * Domain-specific error types for better error handling
+         */
+        export class ValidationError extends Error {
+          constructor(message: string) {
+            super(message)
+            this.name = 'ValidationError'
+          }
+        }
+
+        export class NotFoundError extends Error {
+          constructor(message: string) {
+            super(message)
+            this.name = 'NotFoundError'
+          }
+        }
+
+        export class UnauthorizedError extends Error {
+          constructor(message: string) {
+            super(message)
+            this.name = 'UnauthorizedError'
+          }
+        }
+
+        export class ForbiddenError extends Error {
+          constructor(message: string) {
+            super(message)
+            this.name = 'ForbiddenError'
+          }
+        }
+
+        export class ServerError extends Error {
+          constructor(message: string) {
+            super(message)
+            this.name = 'ServerError'
+          }
+        }
+
+        export class NetworkError extends Error {
+          constructor(message: string) {
+            super(message)
+            this.name = 'NetworkError'
+          }
+        }
+
+        export class HttpError extends Error {
+          constructor(message: string) {
+            super(message)
+            this.name = 'HttpError'
+          }
+        }
+
+    # === STEP 7: CREATE INTEGRATION TESTS (REFACTOR PHASE) ===
+    - id: 'create-integration-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create integration tests for complete data layer (REFACTOR)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'integration testing frontend data layer http mocking vitest'
+          url: 'https://github.com/...'
+          description: 'Integration testing patterns for frontend data layer.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.integration.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import { Remote__USE_CASE_NAME_PASCAL_CASE__ } from './remote-__USE_CASE_NAME_KEBAB_CASE__'
+        import type { __USE_CASE_NAME_PASCAL_CASE__HttpClient } from '../protocols/__USE_CASE_NAME_KEBAB_CASE__-http-client'
+
+        /**
+         * Integration tests for Remote__USE_CASE_NAME_PASCAL_CASE__
+         * Tests complete data layer functionality with realistic scenarios
+         *
+         * @testType Integration Test - Complete Data Layer Flow
+         * @coverage End-to-end data layer functionality
+         */
+        describe('Remote__USE_CASE_NAME_PASCAL_CASE__ Integration', () => {
+          let sut: Remote__USE_CASE_NAME_PASCAL_CASE__
+          let mockFetch: ReturnType<typeof vi.fn>
+          let httpClient: __USE_CASE_NAME_PASCAL_CASE__HttpClient
+
+          beforeEach(() => {
+            mockFetch = vi.fn()
+            global.fetch = mockFetch
+
+            // Create real HTTP client implementation for integration testing
+            httpClient = {
+              async request(req) {
+                const response = await fetch(req.url, {
+                  method: req.method,
+                  headers: req.headers,
+                  body: req.body ? JSON.stringify(req.body) : undefined
+                })
+
+                return {
+                  data: await response.json(),
+                  status: response.status,
+                  statusText: response.statusText,
+                  headers: Object.fromEntries(response.headers.entries())
+                }
+              }
+            }
+
+            sut = new Remote__USE_CASE_NAME_PASCAL_CASE__(httpClient)
+          })
+
+          afterEach(() => {
+            vi.restoreAllMocks()
+          })
+
+          describe('Success Scenarios', () => {
+            it('should handle successful API response', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'integration-test-1',
+                __INPUT_FIELD_2__: 'integration-test-2',
+                __INPUT_FIELD_3__: 'optional-field'
+              }
+
+              const apiResponse = {
+                __OUTPUT_FIELD_1__: 'api-result-1',
+                __OUTPUT_FIELD_2__: 'api-result-2',
+                __OUTPUT_FIELD_3__: 789,
+                __TIMESTAMP_FIELD__: '2024-01-15T10:30:00.000Z',
+                success: true
+              }
+
+              mockFetch.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                json: () => Promise.resolve(apiResponse),
+                headers: new Headers({
+                  'content-type': 'application/json'
+                })
+              })
+
+              const result = await sut.execute(input)
+
+              const expectedOutput: __USE_CASE_NAME_PASCAL_CASE__Output = {
+                __OUTPUT_FIELD_1__: 'api-result-1',
+                __OUTPUT_FIELD_2__: 'api-result-2',
+                __OUTPUT_FIELD_3__: 789,
+                __TIMESTAMP_FIELD__: new Date('2024-01-15T10:30:00.000Z'),
+                success: true
+              }
+
+              expect(result).toEqual(expectedOutput)
+              expect(mockFetch).toHaveBeenCalledWith(
+                '/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__',
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                  },
+                  body: JSON.stringify(input)
+                }
+              )
+            })
+
+            it('should handle minimal valid input', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'minimal',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              const apiResponse = {
+                __OUTPUT_FIELD_1__: 'minimal-result',
+                __OUTPUT_FIELD_2__: 'test-result',
+                __OUTPUT_FIELD_3__: 0,
+                __TIMESTAMP_FIELD__: '2024-01-15T10:30:00.000Z',
+                success: true
+              }
+
+              mockFetch.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                json: () => Promise.resolve(apiResponse),
+                headers: new Headers()
+              })
+
+              const result = await sut.execute(input)
+
+              expect(result.success).toBe(true)
+              expect(result.__OUTPUT_FIELD_1__).toBe('minimal-result')
+            })
+          })
+
+          describe('Error Scenarios', () => {
+            it('should handle 404 not found errors', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'not-found',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              mockFetch.mockResolvedValueOnce({
+                ok: false,
+                status: 404,
+                statusText: 'Not Found',
+                json: () => Promise.resolve({ error: 'Resource not found' }),
+                headers: new Headers()
+              })
+
+              await expect(sut.execute(input)).rejects.toThrow('Resource not found')
+            })
+
+            it('should handle 400 validation errors', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: '',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              mockFetch.mockResolvedValueOnce({
+                ok: false,
+                status: 400,
+                statusText: 'Bad Request',
+                json: () => Promise.resolve({
+                  error: 'Validation failed',
+                  details: ['__INPUT_FIELD_1__ is required']
+                }),
+                headers: new Headers()
+              })
+
+              await expect(sut.execute(input)).rejects.toThrow('Validation failed')
+            })
+
+            it('should handle 401 authentication errors', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'unauthorized',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              mockFetch.mockResolvedValueOnce({
+                ok: false,
+                status: 401,
+                statusText: 'Unauthorized',
+                json: () => Promise.resolve({ error: 'Authentication required' }),
+                headers: new Headers()
+              })
+
+              await expect(sut.execute(input)).rejects.toThrow('Authentication required')
+            })
+
+            it('should handle 500 server errors', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'server-error',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              mockFetch.mockResolvedValueOnce({
+                ok: false,
+                status: 500,
+                statusText: 'Internal Server Error',
+                json: () => Promise.resolve({ error: 'Internal server error' }),
+                headers: new Headers()
+              })
+
+              await expect(sut.execute(input)).rejects.toThrow('Server error: 500 Internal Server Error')
+            })
+
+            it('should handle network errors', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'network-error',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              mockFetch.mockRejectedValueOnce(new Error('fetch failed'))
+
+              await expect(sut.execute(input)).rejects.toThrow('Network connection failed')
+            })
+          })
+
+          describe('Data Transformation', () => {
+            it('should correctly transform API response to domain output', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'transform-test',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              const apiResponse = {
+                __OUTPUT_FIELD_1__: 'api-string',
+                __OUTPUT_FIELD_2__: 'another-string',
+                __OUTPUT_FIELD_3__: '123', // String in API
+                __TIMESTAMP_FIELD__: '2024-01-15T10:30:00.000Z',
+                success: 'true' // String in API
+              }
+
+              mockFetch.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                json: () => Promise.resolve(apiResponse),
+                headers: new Headers()
+              })
+
+              const result = await sut.execute(input)
+
+              // Verify type transformations
+              expect(typeof result.__OUTPUT_FIELD_1__).toBe('string')
+              expect(typeof result.__OUTPUT_FIELD_2__).toBe('string')
+              expect(typeof result.__OUTPUT_FIELD_3__).toBe('number')
+              expect(result.__OUTPUT_FIELD_3__).toBe(123)
+              expect(result.__TIMESTAMP_FIELD__).toBeInstanceOf(Date)
+              expect(typeof result.success).toBe('boolean')
+              expect(result.success).toBe(true)
+            })
+
+            it('should handle missing optional fields gracefully', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'missing-fields',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              const apiResponse = {
+                // Missing some optional fields
+                __OUTPUT_FIELD_1__: 'present',
+                success: true
+              }
+
+              mockFetch.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                json: () => Promise.resolve(apiResponse),
+                headers: new Headers()
+              })
+
+              const result = await sut.execute(input)
+
+              expect(result.__OUTPUT_FIELD_1__).toBe('present')
+              expect(result.__OUTPUT_FIELD_2__).toBe('') // Default empty string
+              expect(result.__OUTPUT_FIELD_3__).toBe(0) // Default number
+              expect(result.__TIMESTAMP_FIELD__).toBeInstanceOf(Date)
+              expect(result.success).toBe(true)
+            })
+          })
+        })
+
+    # === STEP 8: FINAL VALIDATION (REFACTOR PHASE) ===
+    - id: 'validate-refactored-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Run all tests and validations after refactoring (REFACTOR phase complete)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      run_scripts:
+        description: 'Complete TDD cycle validation and commit refactored code'
+        scripts:
+          - name: 'Run all data layer tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data --coverage --reporter=verbose'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'TypeScript compilation check'
+            command: 'npx tsc --noEmit --project tsconfig.json'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'ESLint validation'
+            command: 'npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit refactored implementation'
+            command: 'git add . && git commit -m "refactor(__FEATURE_NAME_KEBAB_CASE__): improve __USE_CASE_NAME_KEBAB_CASE__ data layer design (REFACTOR)"'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 9: CREATE INFRASTRUCTURE ADAPTER (OPTIONAL) ===
+    - id: 'create-http-adapter-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Create Fetch API adapter implementation for HTTP client protocol'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: 'check_if_http_adapter_needed'
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'fetch api adapter pattern typescript frontend http client'
+          url: 'https://github.com/...'
+          description: 'Fetch API adapter implementation patterns.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/http/fetch-__USE_CASE_NAME_KEBAB_CASE__-client.ts'
+      template: |
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__HttpClient,
+          HttpRequest,
+          HttpResponse
+        } from '../../data/protocols/__USE_CASE_NAME_KEBAB_CASE__-http-client'
+
+        /**
+         * Fetch API implementation of __USE_CASE_NAME_PASCAL_CASE__HttpClient
+         * Concrete adapter for HTTP operations using native Fetch API
+         *
+         * @implementation Infrastructure Layer - HTTP Adapter
+         * @pattern Adapter Pattern - Fetch API implementation
+         * @layer Infrastructure - External service communication
+         */
+        export class Fetch__USE_CASE_NAME_PASCAL_CASE__Client implements __USE_CASE_NAME_PASCAL_CASE__HttpClient {
+          private readonly baseUrl: string
+          private readonly defaultTimeout: number
+          private readonly defaultHeaders: Record<string, string>
+
+          constructor(
+            baseUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || '',
+            timeout: number = 30000
+          ) {
+            this.baseUrl = baseUrl.replace(/\/$/, '') // Remove trailing slash
+            this.defaultTimeout = timeout
+            this.defaultHeaders = {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          }
+
+          /**
+           * Execute HTTP request using Fetch API
+           *
+           * @param request - HTTP request configuration
+           * @returns Promise with HTTP response
+           * @throws Error if request fails or times out
+           */
+          async request<T = unknown>(request: HttpRequest): Promise<HttpResponse<T>> {
+            const url = this.buildUrl(request.url)
+            const config = this.buildRequestConfig(request)
+
+            try {
+              const response = await this.executeWithTimeout(fetch(url, config))
+
+              const data = await this.parseResponse<T>(response)
+
+              return {
+                data,
+                status: response.status,
+                statusText: response.statusText,
+                headers: this.extractHeaders(response)
+              }
+            } catch (error) {
+              throw this.handleRequestError(error, request)
+            }
+          }
+
+          /**
+           * Build complete URL from base URL and request path
+           *
+           * @private
+           * @param path - Request path
+           * @returns Complete URL
+           */
+          private buildUrl(path: string): string {
+            // Handle absolute URLs
+            if (path.startsWith('http://') || path.startsWith('https://')) {
+              return path
+            }
+
+            // Handle relative paths
+            const cleanPath = path.startsWith('/') ? path : `/${path}`
+            return `${this.baseUrl}${cleanPath}`
+          }
+
+          /**
+           * Build Fetch API request configuration
+           *
+           * @private
+           * @param request - HTTP request
+           * @returns Fetch request configuration
+           */
+          private buildRequestConfig(request: HttpRequest): RequestInit {
+            const headers = {
+              ...this.defaultHeaders,
+              ...request.headers
+            }
+
+            const config: RequestInit = {
+              method: request.method,
+              headers,
+              signal: request.signal
+            }
+
+            // Add body for non-GET requests
+            if (request.body && request.method !== 'GET') {
+              config.body = typeof request.body === 'string'
+                ? request.body
+                : JSON.stringify(request.body)
+            }
+
+            return config
+          }
+
+          /**
+           * Execute request with timeout
+           *
+           * @private
+           * @param fetchPromise - Fetch promise
+           * @returns Response with timeout handling
+           */
+          private async executeWithTimeout(fetchPromise: Promise<Response>): Promise<Response> {
+            const timeoutPromise = new Promise<never>((_, reject) => {
+              setTimeout(() => reject(new Error('Request timeout')), this.defaultTimeout)
+            })
+
+            return Promise.race([fetchPromise, timeoutPromise])
+          }
+
+          /**
+           * Parse HTTP response data
+           *
+           * @private
+           * @param response - Fetch response
+           * @returns Parsed response data
+           */
+          private async parseResponse<T>(response: Response): Promise<T> {
+            const contentType = response.headers.get('content-type') || ''
+
+            if (contentType.includes('application/json')) {
+              return await response.json()
+            }
+
+            if (contentType.includes('text/')) {
+              return await response.text() as unknown as T
+            }
+
+            // For other content types, return as blob
+            const blob = await response.blob()
+            return blob as unknown as T
+          }
+
+          /**
+           * Extract headers from Fetch response
+           *
+           * @private
+           * @param response - Fetch response
+           * @returns Headers object
+           */
+          private extractHeaders(response: Response): Record<string, string> {
+            const headers: Record<string, string> = {}
+
+            response.headers.forEach((value, key) => {
+              headers[key] = value
+            })
+
+            return headers
+          }
+
+          /**
+           * Handle and transform request errors
+           *
+           * @private
+           * @param error - Original error
+           * @param request - Original request for context
+           * @returns Transformed error
+           */
+          private handleRequestError(error: any, request: HttpRequest): Error {
+            if (error.name === 'AbortError') {
+              return new Error('Request was cancelled')
+            }
+
+            if (error.message.includes('timeout')) {
+              return new Error(`Request timeout after ${this.defaultTimeout}ms`)
+            }
+
+            if (error.message.includes('fetch')) {
+              return new Error(`Network error: ${error.message}`)
+            }
+
+            // Log error for debugging in development
+            if (process.env.NODE_ENV === 'development') {
+              console.error('HTTP Client Error:', {
+                error: error.message,
+                url: request.url,
+                method: request.method
+              })
+            }
+
+            return new Error(`HTTP request failed: ${error.message}`)
+          }
+        }
+
+    # === STEP 10: VALIDATE COMPLETE DATA LAYER ===
+    - id: 'validate-complete-data-layer-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Final validation of complete frontend data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      run_scripts:
+        description: 'Run comprehensive validation of frontend data layer'
+        scripts:
+          - name: 'Complete test suite'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data --coverage --run'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'TypeScript strict compilation'
+            command: 'npx tsc --noEmit --strict --project tsconfig.json'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'ESLint with strict rules'
+            command: 'npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data --max-warnings 0'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Clean Architecture validation'
+            command: 'npm run arch:check -- --layer=data --feature=__FEATURE_NAME_KEBAB_CASE__ --use-case=__USE_CASE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Bundle size analysis'
+            command: 'npm run analyze -- --feature=__FEATURE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Final commit'
+            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): complete __USE_CASE_NAME_KEBAB_CASE__ frontend data layer with TDD"'
+            workingDirectory: '__PROJECT_NAME__'
+
+# ============= END DATA STEPS FRONTEND SECTION =============
