@@ -1,0 +1,462 @@
+# ============= BEGIN DOMAIN STEPS BACKEND SECTION =============
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: DOMAIN LAYER IMPLEMENTATION STEPS FOR BACKEND
+  # These steps create domain interfaces and types following Clean Architecture
+  # and Vertical Slice Architecture patterns specific to Node.js backend development
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # DOMAIN LAYER STEPS SECTION
+  # Steps for generating domain layer artifacts in backend features
+  # Following "Feature Module with Use Case Slices" architecture
+  # ------------------------------------------------------------------------------
+
+  domain_steps:
+    # === STEP 1: CREATE DOMAIN STRUCTURE ===
+    - id: 'create-domain-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'Create domain layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ use case slice'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'BACKEND_ARCHITECTURE.md'
+          description: 'Following Clean Architecture domain layer structure for backend.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture domain layer backend node.js'
+          url: 'https://github.com/...'
+          description: 'Domain layer patterns for backend development.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain'
+          folders:
+            - 'usecases'      # Use case interface for this specific use case
+            - 'errors'        # Domain errors specific to this use case
+      validation_script: |
+        # AI-NOTE: Replace placeholders but keep shell variables intact
+        BASE_PATH="__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain"
+        FOLDERS="$BASE_PATH/usecases $BASE_PATH/errors"
+        echo "✅ Verifying domain folder structure..."
+        for folder in $FOLDERS; do
+          if [ ! -d "$folder" ]; then
+            echo "❌ ERROR: Folder $folder was not created."
+            exit 1
+          fi
+        done
+        echo "✅ All domain folders exist for __USE_CASE_NAME_PASCAL_CASE__ use case."
+
+    # === STEP 2: CREATE USE CASE INTERFACE ===
+    - id: 'create-domain-usecase-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create __USE_CASE_NAME_PASCAL_CASE__ use case interface in domain layer'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture use case interface backend'
+          url: 'https://github.com/...'
+          description: 'Following Clean Architecture use case pattern for backend.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*UseCase'
+          description: 'Consistent with existing backend use case interfaces.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        /**
+        * Input parameters for __USE_CASE_NAME_PASCAL_CASE__ use case
+        * Following Clean Architecture principles - pure domain types for backend
+        * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+        * @layer Domain Layer - Framework agnostic business interface
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Input = {
+          __INPUT_FIELD_1__: string
+          __INPUT_FIELD_2__: string
+          __INPUT_FIELD_3__: string
+        }
+
+        /**
+        * Output type for __USE_CASE_NAME_PASCAL_CASE__ use case
+        * Represents the business outcome of the backend operation
+        * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+        * @layer Domain Layer - Pure business data structure
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Output = {
+          __OUTPUT_FIELD_1__: string
+          __OUTPUT_FIELD_2__: string
+          __OUTPUT_FIELD_3__: string
+          __TIMESTAMP_FIELD__: Date
+        }
+
+        /**
+        * __USE_CASE_NAME_PASCAL_CASE__ use case interface for backend
+        * @description __USE_CASE_DESCRIPTION__
+        * @pattern Command Pattern - Single Responsibility Principle
+        * @layer Domain Layer - Framework agnostic business interface
+        * @architecture Vertical Slice - Self-contained use case slice
+        */
+        export interface __USE_CASE_NAME_PASCAL_CASE__ {
+          /**
+          * Execute the __USE_CASE_NAME_LOWER_CASE__ operation in backend
+          * @param input - The input parameters for backend processing
+          * @returns Promise with the operation output
+          * @throws Domain errors when business rules are violated
+          */
+          execute: (input: __USE_CASE_NAME_PASCAL_CASE__Input) => Promise<__USE_CASE_NAME_PASCAL_CASE__Output>
+        }
+      validation_script: |
+        # AI-NOTE: Shell functions - DO NOT replace $ variables
+        run_lint_check() {
+          echo "🔍 Running lint check for domain layer..."
+          npm run lint || { npm run lint --fix && npm run lint; } || exit 1
+          echo "✅ Lint passed for domain layer"
+        }
+
+        run_domain_test_check() {
+          echo "🧪 Running domain layer tests..."
+          npm run test -- --testPathPattern=domain || exit 1
+          echo "✅ Domain tests passed"
+        }
+
+        stage_and_commit() {
+          echo "📦 Staging domain layer changes..."
+          git add .
+          echo "💾 Creating domain layer commit..."
+          git commit -m "$1" || exit 1
+          echo "✅ Successfully committed domain layer"
+        }
+
+        # Execute validation sequence for domain layer
+        run_lint_check
+        run_domain_test_check
+        stage_and_commit "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ domain interface"
+
+    # === STEP 3: CREATE DOMAIN ERRORS ===
+    - id: 'create-domain-errors-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create domain errors specific to __USE_CASE_NAME_PASCAL_CASE__ use case'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'domain driven design error handling backend'
+          url: 'https://github.com/...'
+          description: 'Following DDD error handling patterns for backend.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*Error'
+          description: 'Consistent with existing backend domain errors.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/errors/__USE_CASE_NAME_KEBAB_CASE__-errors.ts'
+      template: |
+        /**
+        * Domain error for __USE_CASE_NAME_PASCAL_CASE__ use case
+        * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+        * @layer Domain Layer - Business rule violation for backend
+        */
+        export class __ERROR_NAME_PASCAL_CASE__Error extends Error {
+          constructor(message: string = '__DEFAULT_ERROR_MESSAGE__') {
+            super(message)
+            this.name = '__ERROR_NAME_PASCAL_CASE__Error'
+          }
+        }
+
+        /**
+        * Validation error specific to __USE_CASE_NAME_PASCAL_CASE__ input
+        * @domainConcept Input validation in backend domain layer
+        */
+        export class __USE_CASE_NAME_PASCAL_CASE__ValidationError extends Error {
+          constructor(field: string, value: unknown) {
+            super(`Invalid __USE_CASE_NAME_LOWER_CASE__ input: ${field} = ${value}`)
+            this.name = '__USE_CASE_NAME_PASCAL_CASE__ValidationError'
+          }
+        }
+
+        /**
+        * Business rule violation error for __USE_CASE_NAME_PASCAL_CASE__
+        * @domainConcept Business invariant protection in backend
+        */
+        export class __USE_CASE_NAME_PASCAL_CASE__BusinessRuleError extends Error {
+          constructor(rule: string) {
+            super(`Business rule violation in __USE_CASE_NAME_LOWER_CASE__: ${rule}`)
+            this.name = '__USE_CASE_NAME_PASCAL_CASE__BusinessRuleError'
+          }
+        }
+      validation_script: |
+        run_error_lint_check() {
+          echo "🔍 Running lint check for domain errors..."
+          npm run lint -- --fix || exit 1
+          echo "✅ Error lint passed"
+        }
+
+        run_error_test_check() {
+          echo "🧪 Running domain error tests..."
+          npm run test -- --testPathPattern=domain.*error || exit 1
+          echo "✅ Domain error tests passed"
+        }
+
+        stage_and_commit_errors() {
+          echo "📦 Staging domain error changes..."
+          git add .
+          echo "💾 Creating domain error commit..."
+          git commit -m "$1" || exit 1
+          echo "✅ Successfully committed domain errors"
+        }
+
+        # Execute validation for domain errors
+        run_error_lint_check
+        run_error_test_check
+        stage_and_commit_errors "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ domain errors"
+
+    # === STEP 4: CREATE DOMAIN TESTS ===
+    - id: 'create-domain-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create unit tests for __USE_CASE_NAME_PASCAL_CASE__ domain layer'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development domain layer backend'
+          url: 'https://github.com/...'
+          description: 'Following TDD patterns for backend domain layer.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*.spec.ts'
+          description: 'Consistent with existing backend test patterns.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach } from 'vitest'
+        import {
+          __USE_CASE_NAME_PASCAL_CASE__,
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from './__USE_CASE_NAME_KEBAB_CASE__'
+        import {
+          __ERROR_NAME_PASCAL_CASE__Error,
+          __USE_CASE_NAME_PASCAL_CASE__ValidationError,
+          __USE_CASE_NAME_PASCAL_CASE__BusinessRuleError
+        } from '../errors/__USE_CASE_NAME_KEBAB_CASE__-errors'
+
+        // Mock implementation for testing the interface contract
+        class Mock__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
+          async execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output> {
+            // Mock implementation - validates interface contract
+            if (!input.__INPUT_FIELD_1__) {
+              throw new __USE_CASE_NAME_PASCAL_CASE__ValidationError('__INPUT_FIELD_1__', input.__INPUT_FIELD_1__)
+            }
+
+            return {
+              __OUTPUT_FIELD_1__: `processed-${input.__INPUT_FIELD_1__}`,
+              __OUTPUT_FIELD_2__: `result-${input.__INPUT_FIELD_2__}`,
+              __OUTPUT_FIELD_3__: `output-${input.__INPUT_FIELD_3__}`,
+              __TIMESTAMP_FIELD__: new Date()
+            }
+          }
+        }
+
+        describe('__USE_CASE_NAME_PASCAL_CASE__ Domain Interface', () => {
+          let useCase: __USE_CASE_NAME_PASCAL_CASE__
+
+          beforeEach(() => {
+            useCase = new Mock__USE_CASE_NAME_PASCAL_CASE__()
+          })
+
+          describe('Input Validation', () => {
+            it('should accept valid input parameters', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: '__EXAMPLE_VALUE_1__',
+                __INPUT_FIELD_2__: '__EXAMPLE_VALUE_2__',
+                __INPUT_FIELD_3__: '__EXAMPLE_VALUE_3__'
+              }
+
+              const result = await useCase.execute(input)
+
+              expect(result).toBeDefined()
+              expect(result.__OUTPUT_FIELD_1__).toBe('processed-__EXAMPLE_VALUE_1__')
+              expect(result.__TIMESTAMP_FIELD__).toBeInstanceOf(Date)
+            })
+
+            it('should throw validation error for invalid input', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: '', // Invalid empty value
+                __INPUT_FIELD_2__: '__EXAMPLE_VALUE_2__',
+                __INPUT_FIELD_3__: '__EXAMPLE_VALUE_3__'
+              }
+
+              await expect(useCase.execute(input)).rejects.toThrow(__USE_CASE_NAME_PASCAL_CASE__ValidationError)
+            })
+          })
+
+          describe('Output Contract', () => {
+            it('should return output with all required fields', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: '__EXAMPLE_VALUE_1__',
+                __INPUT_FIELD_2__: '__EXAMPLE_VALUE_2__',
+                __INPUT_FIELD_3__: '__EXAMPLE_VALUE_3__'
+              }
+
+              const result = await useCase.execute(input)
+
+              expect(result).toHaveProperty('__OUTPUT_FIELD_1__')
+              expect(result).toHaveProperty('__OUTPUT_FIELD_2__')
+              expect(result).toHaveProperty('__OUTPUT_FIELD_3__')
+              expect(result).toHaveProperty('__TIMESTAMP_FIELD__')
+              expect(typeof result.__OUTPUT_FIELD_1__).toBe('string')
+              expect(typeof result.__OUTPUT_FIELD_2__).toBe('string')
+              expect(typeof result.__OUTPUT_FIELD_3__).toBe('string')
+              expect(result.__TIMESTAMP_FIELD__).toBeInstanceOf(Date)
+            })
+          })
+        })
+
+        describe('__USE_CASE_NAME_PASCAL_CASE__ Domain Errors', () => {
+          describe('__ERROR_NAME_PASCAL_CASE__Error', () => {
+            it('should create error with default message', () => {
+              const error = new __ERROR_NAME_PASCAL_CASE__Error()
+
+              expect(error).toBeInstanceOf(Error)
+              expect(error.name).toBe('__ERROR_NAME_PASCAL_CASE__Error')
+              expect(error.message).toBe('__DEFAULT_ERROR_MESSAGE__')
+            })
+
+            it('should create error with custom message', () => {
+              const customMessage = 'Custom error message'
+              const error = new __ERROR_NAME_PASCAL_CASE__Error(customMessage)
+
+              expect(error.message).toBe(customMessage)
+            })
+          })
+
+          describe('__USE_CASE_NAME_PASCAL_CASE__ValidationError', () => {
+            it('should create validation error with field and value', () => {
+              const error = new __USE_CASE_NAME_PASCAL_CASE__ValidationError('testField', 'invalidValue')
+
+              expect(error).toBeInstanceOf(Error)
+              expect(error.name).toBe('__USE_CASE_NAME_PASCAL_CASE__ValidationError')
+              expect(error.message).toContain('testField')
+              expect(error.message).toContain('invalidValue')
+            })
+          })
+
+          describe('__USE_CASE_NAME_PASCAL_CASE__BusinessRuleError', () => {
+            it('should create business rule error with rule description', () => {
+              const rule = 'User must be active to perform this operation'
+              const error = new __USE_CASE_NAME_PASCAL_CASE__BusinessRuleError(rule)
+
+              expect(error).toBeInstanceOf(Error)
+              expect(error.name).toBe('__USE_CASE_NAME_PASCAL_CASE__BusinessRuleError')
+              expect(error.message).toContain(rule)
+            })
+          })
+        })
+      validation_script: |
+        run_domain_unit_tests() {
+          echo "🧪 Running domain layer unit tests..."
+          npm run test -- --testPathPattern=domain.*spec.ts --coverage || exit 1
+          echo "✅ Domain unit tests passed with coverage"
+        }
+
+        check_test_coverage() {
+          echo "📊 Checking domain test coverage..."
+          npm run test -- --testPathPattern=domain --coverage --coverageThreshold='{"global":{"branches":80,"functions":80,"lines":80,"statements":80}}' || exit 1
+          echo "✅ Domain test coverage meets requirements"
+        }
+
+        stage_and_commit_tests() {
+          echo "📦 Staging domain test changes..."
+          git add .
+          echo "💾 Creating domain test commit..."
+          git commit -m "$1" || exit 1
+          echo "✅ Successfully committed domain tests"
+        }
+
+        # Execute test validation
+        run_domain_unit_tests
+        check_test_coverage
+        stage_and_commit_tests "test(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ domain tests"
+
+    # === STEP 5: UPDATE FEATURE SHARED DOMAIN (IF NEEDED) ===
+    - id: 'update-feature-shared-domain-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Update feature shared domain models if needed for __USE_CASE_NAME_PASCAL_CASE__'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: 'check_if_shared_model_needed'
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '__FEATURE_NAME_PASCAL_CASE__Model'
+          description: 'Check if feature shared model exists and needs updating.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/domain/models/__FEATURE_NAME_KEBAB_CASE__-model.ts'
+      template: |
+        /**
+        * __FEATURE_NAME_PASCAL_CASE__ domain model
+        * Shared across all __FEATURE_NAME_LOWER_CASE__ use cases within this feature
+        * @domainConcept Core entity for __FEATURE_NAME_LOWER_CASE__ feature
+        * @layer Domain Layer - Feature shared model
+        */
+        export interface __FEATURE_NAME_PASCAL_CASE__Model {
+          id: string
+          __MODEL_FIELD_1__: string
+          __MODEL_FIELD_2__: string
+          __MODEL_FIELD_3__: string
+          createdAt: Date
+          updatedAt: Date
+        }
+
+        /**
+        * __FEATURE_NAME_PASCAL_CASE__ repository interface
+        * Protocol for data persistence operations
+        * @domainConcept Repository pattern for __FEATURE_NAME_LOWER_CASE__ aggregate
+        */
+        export interface __FEATURE_NAME_PASCAL_CASE__Repository {
+          findById(id: string): Promise<__FEATURE_NAME_PASCAL_CASE__Model | null>
+          save(model: Omit<__FEATURE_NAME_PASCAL_CASE__Model, 'id' | 'createdAt' | 'updatedAt'>): Promise<__FEATURE_NAME_PASCAL_CASE__Model>
+          update(id: string, model: Partial<__FEATURE_NAME_PASCAL_CASE__Model>): Promise<__FEATURE_NAME_PASCAL_CASE__Model>
+          delete(id: string): Promise<void>
+        }
+      validation_script: |
+        check_if_shared_model_needed() {
+          # Check if this use case needs shared domain models
+          if grep -q "__FEATURE_NAME_PASCAL_CASE__Model" "__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__.ts"; then
+            echo "✅ Shared model needed for __USE_CASE_NAME_PASCAL_CASE__"
+            return 0
+          else
+            echo "ℹ️ No shared model needed for __USE_CASE_NAME_PASCAL_CASE__"
+            return 1
+          fi
+        }
+
+        validate_shared_model() {
+          echo "🔍 Validating feature shared domain model..."
+          npm run lint -- --fix || exit 1
+          npm run test -- --testPathPattern=shared.*domain || exit 1
+          echo "✅ Feature shared domain model validated"
+        }
+
+        stage_and_commit_shared() {
+          echo "📦 Staging shared domain changes..."
+          git add .
+          echo "💾 Creating shared domain commit..."
+          git commit -m "$1" || exit 1
+          echo "✅ Successfully committed shared domain"
+        }
+
+        # Execute conditional shared model update
+        if check_if_shared_model_needed; then
+          validate_shared_model
+          stage_and_commit_shared "feat(__FEATURE_NAME_KEBAB_CASE__): update shared domain for __USE_CASE_NAME_KEBAB_CASE__"
+        fi
+# ============= END DOMAIN STEPS BACKEND SECTION =============
