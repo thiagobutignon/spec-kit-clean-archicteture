@@ -538,7 +538,7 @@
           source: 'REFACTORING_GUIDE.md'
           description: 'Clean Architecture patterns for React components'
         - type: 'internal_code_analysis'
-          tool: 'serena'
+          source: 'serena'
           description: 'Analyze component structure and dependencies'
         - type: 'external_pattern'
           source: 'context7'
