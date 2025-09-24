@@ -50,6 +50,10 @@
     "./templates/parts/backend/steps/01-domain.part.schema.json": [
       "templates/parts/backend/steps/01-domain.part.regent"
     ],
+    // Schema for backend data steps part
+    "./templates/parts/backend/steps/02-data.part.schema.json": [
+      "templates/parts/backend/steps/02-data.part.regent"
+    ],
     // Schema for frontend domain steps part
     "./templates/parts/frontend/steps/01-domain.part.schema.json": [
       "templates/parts/frontend/steps/01-domain.part.regent"
