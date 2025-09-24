@@ -1,0 +1,1792 @@
+# ============= BEGIN DATA STEPS FULLSTACK SECTION =============
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: DATA LAYER IMPLEMENTATION STEPS FOR FULLSTACK (TDD)
+  # These steps implement data layer following RED-GREEN-REFACTOR cycle
+  # Combines backend (Db prefix) and frontend (Remote prefix) implementations
+  # Shared protocols and validation for Next.js 15 fullstack development
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # DATA LAYER STEPS SECTION
+  # Steps for generating data layer artifacts in fullstack features
+  # Following Test-Driven Development (RED-GREEN-REFACTOR) methodology
+  # Split implementation: Backend (database) + Frontend (API clients)
+  # Vertical slice approach: Backend first, then Frontend, then Integration
+  # ------------------------------------------------------------------------------
+
+  data_steps:
+    # === STEP 1: CREATE DATA STRUCTURE (FULLSTACK) ===
+    - id: 'create-data-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'Create fullstack data layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ (backend + frontend)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FULLSTACK_ARCHITECTURE.md'
+          description: 'Following Clean Architecture data layer for fullstack Next.js 15.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture data layer fullstack next.js typescript prisma'
+          url: 'https://github.com/...'
+          description: 'Data layer patterns for fullstack with backend and frontend implementations.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+          folders:
+            - 'usecases'         # Use case implementations (Db + Remote)
+            - 'protocols'        # Shared protocols for both backend and frontend
+            - 'dto'              # Data transfer objects for API communication
+            - 'mappers'          # Data mappers for transformations
+
+    # === STEP 2: CREATE SHARED PROTOCOLS (RED PHASE) ===
+    - id: 'create-shared-protocols-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create shared protocol interfaces for fullstack __USE_CASE_NAME_PASCAL_CASE__ data layer (RED)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'dependency inversion protocol interfaces fullstack database http'
+          url: 'https://github.com/...'
+          description: 'Protocol interfaces for both database and HTTP dependencies.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*Protocol'
+          description: 'Consistent with existing protocol naming patterns.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/protocols/__USE_CASE_NAME_KEBAB_CASE__-protocols.ts'
+      template: |
+        /**
+         * Shared protocol interfaces for __USE_CASE_NAME_PASCAL_CASE__ fullstack data layer
+         * Abstracts both database operations (backend) and HTTP communication (frontend)
+         *
+         * @protocol Fullstack Data Protocols
+         * @layer Data Layer - Protocol Interfaces
+         * @shared Backend + Frontend
+         * @pattern Dependency Inversion - Abstract all external operations
+         */
+
+        /**
+         * Repository protocol for __USE_CASE_NAME_PASCAL_CASE__ database operations (Backend)
+         * Used by Db__USE_CASE_NAME_PASCAL_CASE__ implementation
+         */
+        export interface __USE_CASE_NAME_PASCAL_CASE__Repository {
+          /**
+           * Perform database operation for __USE_CASE_NAME_PASCAL_CASE__
+           */
+          save(data: __USE_CASE_NAME_PASCAL_CASE__RepositoryData): Promise<__USE_CASE_NAME_PASCAL_CASE__RepositoryResult>
+          findById(id: string): Promise<__USE_CASE_NAME_PASCAL_CASE__RepositoryResult | null>
+          findByQuery(query: __USE_CASE_NAME_PASCAL_CASE__Query): Promise<__USE_CASE_NAME_PASCAL_CASE__RepositoryResult[]>
+          update(id: string, data: Partial<__USE_CASE_NAME_PASCAL_CASE__RepositoryData>): Promise<__USE_CASE_NAME_PASCAL_CASE__RepositoryResult>
+          delete(id: string): Promise<void>
+        }
+
+        /**
+         * HTTP client protocol for __USE_CASE_NAME_PASCAL_CASE__ API communication (Frontend)
+         * Used by Remote__USE_CASE_NAME_PASCAL_CASE__ implementation
+         */
+        export interface __USE_CASE_NAME_PASCAL_CASE__HttpClient {
+          /**
+           * Perform HTTP request for __USE_CASE_NAME_PASCAL_CASE__ operation
+           */
+          request<T = unknown>(request: HttpRequest): Promise<HttpResponse<T>>
+        }
+
+        /**
+         * Cache protocol for fullstack __USE_CASE_NAME_PASCAL_CASE__ (Optional)
+         * Used by both backend (Redis) and frontend (localStorage) implementations
+         */
+        export interface __USE_CASE_NAME_PASCAL_CASE__Cache {
+          get<T = unknown>(key: string): Promise<T | null>
+          set<T = unknown>(key: string, value: T, ttl?: number): Promise<void>
+          invalidate(key: string): Promise<void>
+          clear(): Promise<void>
+        }
+
+        /**
+         * Repository data structure for database operations
+         */
+        export interface __USE_CASE_NAME_PASCAL_CASE__RepositoryData {
+          __REPO_FIELD_1__: string
+          __REPO_FIELD_2__: string
+          __REPO_FIELD_3__: number
+          metadata?: Record<string, unknown>
+          createdAt?: Date
+          updatedAt?: Date
+        }
+
+        /**
+         * Repository result structure from database
+         */
+        export interface __USE_CASE_NAME_PASCAL_CASE__RepositoryResult {
+          id: string
+          __REPO_FIELD_1__: string
+          __REPO_FIELD_2__: string
+          __REPO_FIELD_3__: number
+          metadata: Record<string, unknown>
+          createdAt: Date
+          updatedAt: Date
+          version: number
+        }
+
+        /**
+         * Repository query structure for searches
+         */
+        export interface __USE_CASE_NAME_PASCAL_CASE__Query {
+          filters?: Record<string, unknown>
+          pagination?: {
+            limit: number
+            offset: number
+          }
+          sorting?: {
+            field: string
+            direction: 'asc' | 'desc'
+          }
+        }
+
+        /**
+         * HTTP request parameters for frontend API calls
+         */
+        export interface HttpRequest {
+          url: string
+          method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+          headers?: Record<string, string>
+          body?: unknown
+          signal?: AbortSignal
+        }
+
+        /**
+         * HTTP response structure for frontend API responses
+         */
+        export interface HttpResponse<T = unknown> {
+          data: T
+          status: number
+          statusText: string
+          headers: Record<string, string>
+        }
+
+    # === STEP 3: CREATE FAILING TESTS - BACKEND (RED PHASE) ===
+    - id: 'create-backend-failing-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create failing tests for Db__USE_CASE_NAME_PASCAL_CASE__ backend implementation (RED)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development red phase vitest backend database'
+          url: 'https://github.com/...'
+          description: 'TDD RED phase patterns for backend database operations.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db-__USE_CASE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach, vi, type MockedFunction } from 'vitest'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__,
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__Repository,
+          __USE_CASE_NAME_PASCAL_CASE__RepositoryData,
+          __USE_CASE_NAME_PASCAL_CASE__RepositoryResult
+        } from '../protocols/__USE_CASE_NAME_KEBAB_CASE__-protocols'
+        import { Db__USE_CASE_NAME_PASCAL_CASE__ } from './db-__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * TDD Tests for Db__USE_CASE_NAME_PASCAL_CASE__ backend data layer implementation
+         * Following RED-GREEN-REFACTOR cycle for database operations
+         *
+         * @testType Integration Test - Data Layer with Mocked Repository
+         * @phase RED - These tests should FAIL initially
+         */
+        describe('Db__USE_CASE_NAME_PASCAL_CASE__ Backend (TDD RED Phase)', () => {
+          let sut: Db__USE_CASE_NAME_PASCAL_CASE__
+          let repositoryMock: {
+            save: MockedFunction<__USE_CASE_NAME_PASCAL_CASE__Repository['save']>
+            findById: MockedFunction<__USE_CASE_NAME_PASCAL_CASE__Repository['findById']>
+            findByQuery: MockedFunction<__USE_CASE_NAME_PASCAL_CASE__Repository['findByQuery']>
+            update: MockedFunction<__USE_CASE_NAME_PASCAL_CASE__Repository['update']>
+            delete: MockedFunction<__USE_CASE_NAME_PASCAL_CASE__Repository['delete']>
+          }
+
+          beforeEach(() => {
+            repositoryMock = {
+              save: vi.fn(),
+              findById: vi.fn(),
+              findByQuery: vi.fn(),
+              update: vi.fn(),
+              delete: vi.fn()
+            }
+            sut = new Db__USE_CASE_NAME_PASCAL_CASE__(repositoryMock)
+          })
+
+          describe('RED Phase - These should FAIL', () => {
+            it('should implement __USE_CASE_NAME_PASCAL_CASE__ interface', () => {
+              // RED: This will fail because Db__USE_CASE_NAME_PASCAL_CASE__ doesn't exist yet
+              expect(sut).toBeInstanceOf(Db__USE_CASE_NAME_PASCAL_CASE__)
+              expect(typeof sut.execute).toBe('function')
+            })
+
+            it('should perform database operation with repository', async () => {
+              // RED: This will fail because implementation doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'test-value-1',
+                __INPUT_FIELD_2__: 'test-value-2',
+                __INPUT_FIELD_3__: 'optional-field'
+              }
+
+              const expectedRepositoryData: __USE_CASE_NAME_PASCAL_CASE__RepositoryData = {
+                __REPO_FIELD_1__: 'mapped-value-1',
+                __REPO_FIELD_2__: 'mapped-value-2',
+                __REPO_FIELD_3__: 123,
+                metadata: { source: 'backend' }
+              }
+
+              const repositoryResult: __USE_CASE_NAME_PASCAL_CASE__RepositoryResult = {
+                id: 'generated-id-123',
+                __REPO_FIELD_1__: 'mapped-value-1',
+                __REPO_FIELD_2__: 'mapped-value-2',
+                __REPO_FIELD_3__: 123,
+                metadata: { source: 'backend' },
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                version: 1
+              }
+
+              repositoryMock.save.mockResolvedValueOnce(repositoryResult)
+
+              await sut.execute(input)
+
+              expect(repositoryMock.save).toHaveBeenCalledWith(expectedRepositoryData)
+            })
+
+            it('should return domain output from repository result', async () => {
+              // RED: This will fail because transformation doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'backend-input-1',
+                __INPUT_FIELD_2__: 'backend-input-2'
+              }
+
+              const repositoryResult: __USE_CASE_NAME_PASCAL_CASE__RepositoryResult = {
+                id: 'db-result-456',
+                __REPO_FIELD_1__: 'db-output-1',
+                __REPO_FIELD_2__: 'db-output-2',
+                __REPO_FIELD_3__: 789,
+                metadata: { source: 'database' },
+                createdAt: new Date('2024-01-01T00:00:00.000Z'),
+                updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+                version: 1
+              }
+
+              repositoryMock.save.mockResolvedValueOnce(repositoryResult)
+
+              const result = await sut.execute(input)
+
+              const expectedOutput: __USE_CASE_NAME_PASCAL_CASE__Output = {
+                __OUTPUT_FIELD_1__: 'db-output-1',
+                __OUTPUT_FIELD_2__: 'db-output-2',
+                __OUTPUT_FIELD_3__: 789,
+                __TIMESTAMP_FIELD__: new Date('2024-01-01T00:00:00.000Z'),
+                success: true,
+                message: 'Operation completed successfully'
+              }
+
+              expect(result).toEqual(expectedOutput)
+            })
+
+            it('should handle repository errors appropriately', async () => {
+              // RED: This will fail because error handling doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'error-trigger',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              const repositoryError = new Error('Database connection failed')
+              repositoryMock.save.mockRejectedValueOnce(repositoryError)
+
+              await expect(sut.execute(input)).rejects.toThrow('Failed to execute __USE_CASE_NAME_PASCAL_CASE__ on database')
+            })
+
+            it('should handle duplicate key errors', async () => {
+              // RED: This will fail because constraint error handling doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'duplicate-key',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              const constraintError = new Error('Unique constraint violation')
+              repositoryMock.save.mockRejectedValueOnce(constraintError)
+
+              await expect(sut.execute(input)).rejects.toThrow('Resource already exists')
+            })
+
+            it('should validate input before database operation', async () => {
+              // RED: This will fail because input validation doesn't exist
+              const invalidInput: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: '',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              await expect(sut.execute(invalidInput)).rejects.toThrow('Validation failed')
+              expect(repositoryMock.save).not.toHaveBeenCalled()
+            })
+          })
+
+          describe('Type Safety Tests (RED Phase)', () => {
+            it('should ensure repository data type compatibility', () => {
+              // RED: Will fail if types are not properly defined
+              const repositoryData: __USE_CASE_NAME_PASCAL_CASE__RepositoryData = {
+                __REPO_FIELD_1__: 'string-value',
+                __REPO_FIELD_2__: 'another-string',
+                __REPO_FIELD_3__: 42,
+                metadata: { key: 'value' }
+              }
+
+              expect(repositoryData).toBeDefined()
+            })
+
+            it('should ensure domain output type compatibility', async () => {
+              // RED: Will fail if return type is not correct
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'test',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              repositoryMock.save.mockResolvedValueOnce({
+                id: 'test-id',
+                __REPO_FIELD_1__: 'result',
+                __REPO_FIELD_2__: 'result',
+                __REPO_FIELD_3__: 1,
+                metadata: {},
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                version: 1
+              })
+
+              const result = await sut.execute(input)
+
+              // TypeScript should enforce these types
+              expect(typeof result.__OUTPUT_FIELD_1__).toBe('string')
+              expect(typeof result.__OUTPUT_FIELD_3__).toBe('number')
+              expect(result.__TIMESTAMP_FIELD__).toBeInstanceOf(Date)
+              expect(typeof result.success).toBe('boolean')
+            })
+          })
+        })
+
+      validation_script: |
+        run_failing_backend_tests() {
+          echo "🔴 RED PHASE: Running failing backend tests..."
+          npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db-*.spec.ts --reporter=verbose || {
+            echo "✅ Backend tests are failing as expected (RED phase)"
+            return 0
+          }
+          echo "❌ ERROR: Backend tests should be failing in RED phase!"
+          exit 1
+        }
+
+        stage_backend_red_phase() {
+          git add .
+          git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add failing backend tests for __USE_CASE_NAME_KEBAB_CASE__ data layer (RED)"
+          echo "✅ Backend RED phase committed"
+        }
+
+        run_failing_backend_tests
+        stage_backend_red_phase
+
+    # === STEP 4: CREATE FAILING TESTS - FRONTEND (RED PHASE) ===
+    - id: 'create-frontend-failing-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create failing tests for Remote__USE_CASE_NAME_PASCAL_CASE__ frontend implementation (RED)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development red phase vitest frontend http api'
+          url: 'https://github.com/...'
+          description: 'TDD RED phase patterns for frontend API communication.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach, vi, type MockedFunction } from 'vitest'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__,
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__HttpClient,
+          HttpRequest,
+          HttpResponse
+        } from '../protocols/__USE_CASE_NAME_KEBAB_CASE__-protocols'
+        import { Remote__USE_CASE_NAME_PASCAL_CASE__ } from './remote-__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * TDD Tests for Remote__USE_CASE_NAME_PASCAL_CASE__ frontend data layer implementation
+         * Following RED-GREEN-REFACTOR cycle for HTTP API operations
+         *
+         * @testType Integration Test - Data Layer with Mocked HTTP Client
+         * @phase RED - These tests should FAIL initially
+         */
+        describe('Remote__USE_CASE_NAME_PASCAL_CASE__ Frontend (TDD RED Phase)', () => {
+          let sut: Remote__USE_CASE_NAME_PASCAL_CASE__
+          let httpClientMock: {
+            request: MockedFunction<__USE_CASE_NAME_PASCAL_CASE__HttpClient['request']>
+          }
+
+          beforeEach(() => {
+            httpClientMock = {
+              request: vi.fn()
+            }
+            sut = new Remote__USE_CASE_NAME_PASCAL_CASE__(httpClientMock)
+          })
+
+          describe('RED Phase - These should FAIL', () => {
+            it('should implement __USE_CASE_NAME_PASCAL_CASE__ interface', () => {
+              // RED: This will fail because Remote__USE_CASE_NAME_PASCAL_CASE__ doesn't exist yet
+              expect(sut).toBeInstanceOf(Remote__USE_CASE_NAME_PASCAL_CASE__)
+              expect(typeof sut.execute).toBe('function')
+            })
+
+            it('should make HTTP request to backend API', async () => {
+              // RED: This will fail because implementation doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'frontend-value-1',
+                __INPUT_FIELD_2__: 'frontend-value-2',
+                __INPUT_FIELD_3__: 'optional-field'
+              }
+
+              const expectedRequest: HttpRequest = {
+                url: '/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__',
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+                },
+                body: {
+                  __REQUEST_FIELD_1__: 'frontend-value-1',
+                  __REQUEST_FIELD_2__: 'frontend-value-2',
+                  __REQUEST_FIELD_3__: 'optional-field'
+                }
+              }
+
+              const apiResponse: HttpResponse<any> = {
+                data: {
+                  success: true,
+                  data: {
+                    id: 'api-result-789',
+                    __DATA_FIELD_1__: 'api-output-1',
+                    __DATA_FIELD_2__: 'api-output-2',
+                    __DATA_FIELD_3__: 456,
+                    createdAt: '2024-01-01T00:00:00.000Z',
+                    updatedAt: '2024-01-01T00:00:00.000Z'
+                  }
+                },
+                status: 200,
+                statusText: 'OK',
+                headers: {}
+              }
+
+              httpClientMock.request.mockResolvedValueOnce(apiResponse)
+
+              await sut.execute(input)
+
+              expect(httpClientMock.request).toHaveBeenCalledWith(expectedRequest)
+            })
+
+            it('should transform API response to domain output', async () => {
+              // RED: This will fail because transformation doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'api-test-1',
+                __INPUT_FIELD_2__: 'api-test-2'
+              }
+
+              const apiResponse: HttpResponse<any> = {
+                data: {
+                  success: true,
+                  data: {
+                    id: 'frontend-result-321',
+                    __DATA_FIELD_1__: 'frontend-output-1',
+                    __DATA_FIELD_2__: 'frontend-output-2',
+                    __DATA_FIELD_3__: 999,
+                    createdAt: '2024-01-15T10:30:00.000Z',
+                    updatedAt: '2024-01-15T10:30:00.000Z'
+                  }
+                },
+                status: 200,
+                statusText: 'OK',
+                headers: {}
+              }
+
+              httpClientMock.request.mockResolvedValueOnce(apiResponse)
+
+              const result = await sut.execute(input)
+
+              const expectedOutput: __USE_CASE_NAME_PASCAL_CASE__Output = {
+                __OUTPUT_FIELD_1__: 'frontend-output-1',
+                __OUTPUT_FIELD_2__: 'frontend-output-2',
+                __OUTPUT_FIELD_3__: 999,
+                __TIMESTAMP_FIELD__: new Date('2024-01-15T10:30:00.000Z'),
+                success: true,
+                message: 'Operation completed successfully'
+              }
+
+              expect(result).toEqual(expectedOutput)
+            })
+
+            it('should handle HTTP errors appropriately', async () => {
+              // RED: This will fail because HTTP error handling doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'error-trigger',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              const httpError = new Error('Network Error')
+              httpClientMock.request.mockRejectedValueOnce(httpError)
+
+              await expect(sut.execute(input)).rejects.toThrow('Failed to execute __USE_CASE_NAME_PASCAL_CASE__')
+            })
+
+            it('should handle 400 validation errors from API', async () => {
+              // RED: This will fail because status code handling doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'invalid-data',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              const validationResponse: HttpResponse<any> = {
+                data: {
+                  success: false,
+                  error: {
+                    code: '__USE_CASE_NAME_UPPER_CASE___VALIDATION_ERROR',
+                    message: 'Validation failed',
+                    field: '__INPUT_FIELD_1__'
+                  }
+                },
+                status: 400,
+                statusText: 'Bad Request',
+                headers: {}
+              }
+
+              httpClientMock.request.mockResolvedValueOnce(validationResponse)
+
+              await expect(sut.execute(input)).rejects.toThrow('Validation failed')
+            })
+
+            it('should handle 404 not found errors from API', async () => {
+              // RED: This will fail because 404 handling doesn't exist
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'not-found',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              const notFoundResponse: HttpResponse<any> = {
+                data: { success: false, error: { message: 'Resource not found' } },
+                status: 404,
+                statusText: 'Not Found',
+                headers: {}
+              }
+
+              httpClientMock.request.mockResolvedValueOnce(notFoundResponse)
+
+              await expect(sut.execute(input)).rejects.toThrow('Resource not found')
+            })
+          })
+
+          describe('Type Safety Tests (RED Phase)', () => {
+            it('should ensure HTTP request type compatibility', () => {
+              // RED: Will fail if types are not properly defined
+              const httpRequest: HttpRequest = {
+                url: '/api/test',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: { test: 'data' }
+              }
+
+              expect(httpRequest).toBeDefined()
+            })
+
+            it('should ensure API response type compatibility', async () => {
+              // RED: Will fail if return type is not correct
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'test',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              httpClientMock.request.mockResolvedValueOnce({
+                data: {
+                  success: true,
+                  data: {
+                    id: 'test-id',
+                    __DATA_FIELD_1__: 'result',
+                    __DATA_FIELD_2__: 'result',
+                    __DATA_FIELD_3__: 1,
+                    createdAt: '2024-01-01T00:00:00.000Z',
+                    updatedAt: '2024-01-01T00:00:00.000Z'
+                  }
+                },
+                status: 200,
+                statusText: 'OK',
+                headers: {}
+              })
+
+              const result = await sut.execute(input)
+
+              // TypeScript should enforce these types
+              expect(typeof result.__OUTPUT_FIELD_1__).toBe('string')
+              expect(typeof result.__OUTPUT_FIELD_3__).toBe('number')
+              expect(result.__TIMESTAMP_FIELD__).toBeInstanceOf(Date)
+              expect(typeof result.success).toBe('boolean')
+            })
+          })
+        })
+
+      validation_script: |
+        run_failing_frontend_tests() {
+          echo "🔴 RED PHASE: Running failing frontend tests..."
+          npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-*.spec.ts --reporter=verbose || {
+            echo "✅ Frontend tests are failing as expected (RED phase)"
+            return 0
+          }
+          echo "❌ ERROR: Frontend tests should be failing in RED phase!"
+          exit 1
+        }
+
+        stage_frontend_red_phase() {
+          git add .
+          git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add failing frontend tests for __USE_CASE_NAME_KEBAB_CASE__ data layer (RED)"
+          echo "✅ Frontend RED phase committed"
+        }
+
+        run_failing_frontend_tests
+        stage_frontend_red_phase
+
+    # === STEP 5: CREATE BACKEND IMPLEMENTATION (GREEN PHASE) ===
+    - id: 'create-backend-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create Db__USE_CASE_NAME_PASCAL_CASE__ backend implementation to make tests pass (GREEN)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture data layer backend database prisma typescript'
+          url: 'https://github.com/...'
+          description: 'Backend data layer implementation patterns with database.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: 'Db*'
+          description: 'Consistent with existing Db implementations.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__,
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__Repository,
+          __USE_CASE_NAME_PASCAL_CASE__RepositoryData,
+          __USE_CASE_NAME_PASCAL_CASE__RepositoryResult
+        } from '../protocols/__USE_CASE_NAME_KEBAB_CASE__-protocols'
+
+        /**
+         * Database implementation of __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Handles database operations for fullstack backend data layer
+         *
+         * @implementation Data Layer - Database Backend Implementation
+         * @pattern Repository Pattern - Database variant
+         * @layer Data Layer - Implements domain use case via database
+         */
+        export class Db__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
+          /**
+           * Creates Db__USE_CASE_NAME_PASCAL_CASE__ with repository dependency
+           *
+           * @param repository - Repository for database operations
+           */
+          constructor(
+            private readonly repository: __USE_CASE_NAME_PASCAL_CASE__Repository
+          ) {}
+
+          /**
+           * Execute __USE_CASE_NAME_PASCAL_CASE__ via database operations
+           *
+           * @param input - Use case input parameters
+           * @returns Promise with use case output
+           * @throws Error if database operation fails or validation fails
+           */
+          async execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output> {
+            try {
+              // Validate input before database operations
+              this.validateInput(input)
+
+              // Transform domain input to repository data
+              const repositoryData = this.transformToRepositoryData(input)
+
+              // Perform database operation
+              const repositoryResult = await this.repository.save(repositoryData)
+
+              // Transform repository result to domain output
+              return this.transformToDomainOutput(repositoryResult)
+
+            } catch (error) {
+              // Transform infrastructure errors to domain errors
+              throw this.handleError(error, input)
+            }
+          }
+
+          /**
+           * Validate input parameters
+           *
+           * @private
+           * @param input - Input to validate
+           * @throws Error if validation fails
+           */
+          private validateInput(input: __USE_CASE_NAME_PASCAL_CASE__Input): void {
+            if (!input.__INPUT_FIELD_1__?.trim()) {
+              throw new Error('Missing required field: __INPUT_FIELD_1__')
+            }
+
+            if (!input.__INPUT_FIELD_2__?.trim()) {
+              throw new Error('Missing required field: __INPUT_FIELD_2__')
+            }
+
+            // Additional validation rules can be added here
+          }
+
+          /**
+           * Transform domain input to repository data structure
+           *
+           * @private
+           * @param input - Domain input
+           * @returns Repository data structure
+           */
+          private transformToRepositoryData(input: __USE_CASE_NAME_PASCAL_CASE__Input): __USE_CASE_NAME_PASCAL_CASE__RepositoryData {
+            return {
+              __REPO_FIELD_1__: input.__INPUT_FIELD_1__,
+              __REPO_FIELD_2__: input.__INPUT_FIELD_2__,
+              __REPO_FIELD_3__: input.__INPUT_FIELD_3__?.length || 0,
+              metadata: {
+                source: 'backend',
+                inputMetadata: input.__METADATA_FIELD__,
+                processedAt: new Date().toISOString()
+              }
+            }
+          }
+
+          /**
+           * Transform repository result to domain output type
+           *
+           * @private
+           * @param result - Repository result from database
+           * @returns Domain output object
+           */
+          private transformToDomainOutput(result: __USE_CASE_NAME_PASCAL_CASE__RepositoryResult): __USE_CASE_NAME_PASCAL_CASE__Output {
+            return {
+              __OUTPUT_FIELD_1__: result.__REPO_FIELD_1__,
+              __OUTPUT_FIELD_2__: result.__REPO_FIELD_2__,
+              __OUTPUT_FIELD_3__: result.__REPO_FIELD_3__,
+              __TIMESTAMP_FIELD__: result.updatedAt,
+              success: true,
+              message: 'Operation completed successfully',
+              data: {
+                id: result.id,
+                version: result.version,
+                metadata: result.metadata
+              }
+            }
+          }
+
+          /**
+           * Handle and transform errors to domain-appropriate errors
+           *
+           * @private
+           * @param error - Original error from database operation
+           * @param input - Original input for context
+           * @returns Domain-appropriate error
+           */
+          private handleError(error: any, input: __USE_CASE_NAME_PASCAL_CASE__Input): Error {
+            // Log error for debugging (in development)
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Db__USE_CASE_NAME_PASCAL_CASE__ error:', error, 'Input:', input)
+            }
+
+            // Handle specific database errors
+            if (error.message.includes('Unique constraint')) {
+              return new Error('Resource already exists')
+            }
+
+            if (error.message.includes('Foreign key constraint')) {
+              return new Error('Related resource not found')
+            }
+
+            if (error.message.includes('Connection')) {
+              return new Error('Database connection failed. Please try again later.')
+            }
+
+            if (error.message.includes('Validation')) {
+              return new Error('Validation failed')
+            }
+
+            // Default error transformation
+            return new Error(`Failed to execute __USE_CASE_NAME_PASCAL_CASE__ on database: ${error.message}`)
+          }
+        }
+
+    # === STEP 6: CREATE FRONTEND IMPLEMENTATION (GREEN PHASE) ===
+    - id: 'create-frontend-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create Remote__USE_CASE_NAME_PASCAL_CASE__ frontend implementation to make tests pass (GREEN)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture data layer frontend http api next.js typescript'
+          url: 'https://github.com/...'
+          description: 'Frontend data layer implementation patterns with HTTP API.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: 'Remote*'
+          description: 'Consistent with existing Remote implementations.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__,
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__HttpClient,
+          HttpRequest,
+          HttpResponse
+        } from '../protocols/__USE_CASE_NAME_KEBAB_CASE__-protocols'
+        import { __USE_CASE_NAME_PASCAL_CASE__Mappers } from '../dto/__USE_CASE_NAME_KEBAB_CASE__-dto'
+
+        /**
+         * Remote HTTP implementation of __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Handles HTTP API communication for fullstack frontend data layer
+         *
+         * @implementation Data Layer - Remote HTTP Frontend Implementation
+         * @pattern Repository Pattern - HTTP API variant
+         * @layer Data Layer - Implements domain use case via HTTP API
+         */
+        export class Remote__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
+          private static readonly API_ENDPOINT = '/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+          private static readonly REQUEST_HEADERS = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          } as const
+
+          /**
+           * Creates Remote__USE_CASE_NAME_PASCAL_CASE__ with HTTP client dependency
+           *
+           * @param httpClient - HTTP client for API communication
+           */
+          constructor(
+            private readonly httpClient: __USE_CASE_NAME_PASCAL_CASE__HttpClient
+          ) {}
+
+          /**
+           * Execute __USE_CASE_NAME_PASCAL_CASE__ via HTTP API call to backend
+           *
+           * @param input - Use case input parameters
+           * @returns Promise with use case output
+           * @throws Error if HTTP request fails or API returns error
+           */
+          async execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output> {
+            try {
+              // Validate input before making HTTP request
+              this.validateInput(input)
+
+              // Transform domain input to API request DTO
+              const requestBody = __USE_CASE_NAME_PASCAL_CASE__Mappers.toRequestDTO(input)
+
+              // Make HTTP request to backend API
+              const response = await this.makeHttpRequest(requestBody)
+
+              // Validate and transform API response to domain output
+              return this.transformToDomainOutput(response)
+
+            } catch (error) {
+              // Transform infrastructure errors to domain errors
+              throw this.handleError(error, input)
+            }
+          }
+
+          /**
+           * Validate input parameters
+           *
+           * @private
+           * @param input - Input to validate
+           * @throws Error if validation fails
+           */
+          private validateInput(input: __USE_CASE_NAME_PASCAL_CASE__Input): void {
+            if (!input.__INPUT_FIELD_1__?.trim()) {
+              throw new Error('Missing required field: __INPUT_FIELD_1__')
+            }
+
+            if (!input.__INPUT_FIELD_2__?.trim()) {
+              throw new Error('Missing required field: __INPUT_FIELD_2__')
+            }
+
+            // Additional validation rules can be added here
+          }
+
+          /**
+           * Make HTTP request to backend API
+           *
+           * @private
+           * @param requestBody - Request body data
+           * @returns HTTP response
+           */
+          private async makeHttpRequest(requestBody: unknown): Promise<HttpResponse<any>> {
+            const request: HttpRequest = {
+              url: Remote__USE_CASE_NAME_PASCAL_CASE__.API_ENDPOINT,
+              method: 'POST',
+              headers: Remote__USE_CASE_NAME_PASCAL_CASE__.REQUEST_HEADERS,
+              body: requestBody
+            }
+
+            const response = await this.httpClient.request<any>(request)
+            this.validateHttpResponse(response)
+            return response
+          }
+
+          /**
+           * Validate HTTP response status and structure
+           *
+           * @private
+           * @param response - HTTP response to validate
+           * @throws Error if response indicates error
+           */
+          private validateHttpResponse(response: HttpResponse<any>): void {
+            // Handle different HTTP status codes
+            if (response.status === 400) {
+              const errorMessage = response.data?.error?.message || 'Validation failed'
+              throw new Error(errorMessage)
+            }
+
+            if (response.status === 404) {
+              throw new Error('Resource not found')
+            }
+
+            if (response.status === 409) {
+              throw new Error('Resource already exists')
+            }
+
+            if (response.status >= 500) {
+              throw new Error(`Server error: ${response.status} ${response.statusText}`)
+            }
+
+            if (response.status >= 400) {
+              throw new Error(`HTTP error: ${response.status} ${response.statusText}`)
+            }
+
+            // Validate response structure
+            if (!response.data || typeof response.data !== 'object') {
+              throw new Error('Invalid API response format')
+            }
+          }
+
+          /**
+           * Transform HTTP response to domain output type
+           *
+           * @private
+           * @param response - HTTP response from backend API
+           * @returns Domain output object
+           */
+          private transformToDomainOutput(response: HttpResponse<any>): __USE_CASE_NAME_PASCAL_CASE__Output {
+            // Use shared mappers to transform API response to domain output
+            return __USE_CASE_NAME_PASCAL_CASE__Mappers.fromResponseDTO(response.data)
+          }
+
+          /**
+           * Handle and transform errors to domain-appropriate errors
+           *
+           * @private
+           * @param error - Original error from HTTP operation
+           * @param input - Original input for context
+           * @returns Domain-appropriate error
+           */
+          private handleError(error: any, input: __USE_CASE_NAME_PASCAL_CASE__Input): Error {
+            // Log error for debugging (in development)
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Remote__USE_CASE_NAME_PASCAL_CASE__ error:', {
+                error: error.message,
+                stack: error.stack,
+                input
+              })
+            }
+
+            // Return domain-appropriate error based on error type
+            if (error.message.includes('Network') || error.message.includes('fetch')) {
+              return new Error('Network connection failed. Please check your internet connection.')
+            }
+
+            if (error.message.includes('Validation')) {
+              return new Error('Validation failed')
+            }
+
+            if (error.message.includes('Resource not found')) {
+              return new Error('Resource not found')
+            }
+
+            if (error.message.includes('already exists')) {
+              return new Error('Resource already exists')
+            }
+
+            // Default error transformation
+            return new Error(`Failed to execute __USE_CASE_NAME_PASCAL_CASE__: ${error.message}`)
+          }
+        }
+
+    # === STEP 7: CREATE DTO MAPPERS ===
+    - id: 'create-dto-mappers-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create DTO mappers for API communication between frontend and backend'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FULLSTACK_ARCHITECTURE.md'
+          description: 'DTO mappers for fullstack API communication.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/dto/__USE_CASE_NAME_KEBAB_CASE__-dto.ts'
+      template: |
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__RequestDTO,
+          __USE_CASE_NAME_PASCAL_CASE__ResponseDTO,
+          __USE_CASE_NAME_PASCAL_CASE__DataDTO
+        } from '../../domain/types/__USE_CASE_NAME_KEBAB_CASE__-types'
+
+        /**
+         * DTO Mappers for __USE_CASE_NAME_PASCAL_CASE__ fullstack communication
+         * Transforms between domain types and API DTOs for frontend-backend communication
+         *
+         * @layer Data Layer - DTO Transformation
+         * @shared Frontend + Backend
+         * @pattern Data Mapper - Transform between different data representations
+         */
+        export const __USE_CASE_NAME_PASCAL_CASE__Mappers = {
+          /**
+           * Transform domain input to API request DTO
+           * Used by frontend when sending data to backend API
+           *
+           * @param input - Domain use case input
+           * @returns API request DTO
+           */
+          toRequestDTO: (input: __USE_CASE_NAME_PASCAL_CASE__Input): __USE_CASE_NAME_PASCAL_CASE__RequestDTO => {
+            return {
+              __REQUEST_FIELD_1__: input.__INPUT_FIELD_1__,
+              __REQUEST_FIELD_2__: input.__INPUT_FIELD_2__,
+              __REQUEST_FIELD_3__: input.__INPUT_FIELD_3__
+            }
+          },
+
+          /**
+           * Transform API response DTO to domain output
+           * Used by frontend when receiving data from backend API
+           *
+           * @param responseDTO - API response DTO from backend
+           * @returns Domain use case output
+           */
+          fromResponseDTO: (responseDTO: __USE_CASE_NAME_PASCAL_CASE__ResponseDTO): __USE_CASE_NAME_PASCAL_CASE__Output => {
+            if (!responseDTO.success || !responseDTO.data) {
+              return {
+                __OUTPUT_FIELD_1__: '',
+                __OUTPUT_FIELD_2__: '',
+                __OUTPUT_FIELD_3__: 0,
+                __TIMESTAMP_FIELD__: new Date(),
+                success: false,
+                message: responseDTO.error?.message || 'Operation failed'
+              }
+            }
+
+            return {
+              __OUTPUT_FIELD_1__: responseDTO.data.__DATA_FIELD_1__,
+              __OUTPUT_FIELD_2__: responseDTO.data.__DATA_FIELD_2__,
+              __OUTPUT_FIELD_3__: responseDTO.data.__DATA_FIELD_3__,
+              __TIMESTAMP_FIELD__: new Date(responseDTO.data.updatedAt),
+              success: true,
+              message: 'Operation completed successfully',
+              data: {
+                id: responseDTO.data.id,
+                createdAt: new Date(responseDTO.data.createdAt),
+                updatedAt: new Date(responseDTO.data.updatedAt)
+              }
+            }
+          },
+
+          /**
+           * Transform domain input to API request DTO (Backend perspective)
+           * Used by backend when processing API requests
+           *
+           * @param requestDTO - API request DTO from frontend
+           * @returns Domain use case input
+           */
+          fromRequestDTO: (requestDTO: __USE_CASE_NAME_PASCAL_CASE__RequestDTO): __USE_CASE_NAME_PASCAL_CASE__Input => {
+            return {
+              __INPUT_FIELD_1__: requestDTO.__REQUEST_FIELD_1__,
+              __INPUT_FIELD_2__: requestDTO.__REQUEST_FIELD_2__,
+              __INPUT_FIELD_3__: requestDTO.__REQUEST_FIELD_3__,
+              __METADATA_FIELD__: {
+                timestamp: new Date(),
+                source: 'API'
+              }
+            }
+          },
+
+          /**
+           * Transform domain output to API response DTO (Backend perspective)
+           * Used by backend when returning data to frontend API
+           *
+           * @param output - Domain use case output
+           * @returns API response DTO
+           */
+          toResponseDTO: (output: __USE_CASE_NAME_PASCAL_CASE__Output): __USE_CASE_NAME_PASCAL_CASE__ResponseDTO => {
+            if (!output.success) {
+              return {
+                success: false,
+                error: {
+                  code: '__USE_CASE_NAME_UPPER_CASE___EXECUTION_ERROR',
+                  message: output.message || 'Operation failed'
+                }
+              }
+            }
+
+            const dataDTO: __USE_CASE_NAME_PASCAL_CASE__DataDTO = {
+              id: (output.data as any)?.id || 'generated-id',
+              __DATA_FIELD_1__: output.__OUTPUT_FIELD_1__,
+              __DATA_FIELD_2__: output.__OUTPUT_FIELD_2__,
+              __DATA_FIELD_3__: output.__OUTPUT_FIELD_3__,
+              createdAt: ((output.data as any)?.createdAt || output.__TIMESTAMP_FIELD__).toISOString(),
+              updatedAt: output.__TIMESTAMP_FIELD__.toISOString()
+            }
+
+            return {
+              success: true,
+              data: dataDTO,
+              meta: {
+                timestamp: new Date().toISOString(),
+                version: '1.0'
+              }
+            }
+          }
+        } as const
+
+    # === STEP 8: RUN PASSING TESTS (GREEN PHASE) ===
+    - id: 'run-passing-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Verify all tests pass with both backend and frontend implementations (GREEN phase)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to verify GREEN phase completion for fullstack'
+        scripts:
+          - name: 'Run backend passing tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db-*.spec.ts --coverage'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Run frontend passing tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-*.spec.ts --coverage'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit GREEN phase'
+            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ fullstack data layer (GREEN)"'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 9: REFACTOR IMPLEMENTATIONS (REFACTOR PHASE) ===
+    - id: 'refactor-fullstack-implementations-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Refactor both backend and frontend implementations for better design (REFACTOR)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'refactoring patterns clean code fullstack typescript next.js'
+          url: 'https://github.com/...'
+          description: 'Refactoring patterns for fullstack implementations.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__,
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__Repository,
+          __USE_CASE_NAME_PASCAL_CASE__RepositoryData,
+          __USE_CASE_NAME_PASCAL_CASE__RepositoryResult
+        } from '../protocols/__USE_CASE_NAME_KEBAB_CASE__-protocols'
+
+        /**
+         * Database implementation of __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Refactored for better maintainability and separation of concerns
+         *
+         * @implementation Data Layer - Database Backend Implementation (Refactored)
+         * @pattern Repository Pattern - Database variant with improved design
+         * @layer Data Layer - Clean, testable, maintainable implementation
+         */
+        export class Db__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
+          /**
+           * Creates Db__USE_CASE_NAME_PASCAL_CASE__ with repository dependency
+           *
+           * @param repository - Repository for database operations
+           */
+          constructor(
+            private readonly repository: __USE_CASE_NAME_PASCAL_CASE__Repository
+          ) {}
+
+          /**
+           * Execute __USE_CASE_NAME_PASCAL_CASE__ via database operations
+           *
+           * @param input - Use case input parameters
+           * @returns Promise with use case output
+           * @throws Error if database operation fails or validation fails
+           */
+          async execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output> {
+            // Input validation
+            InputValidator.validate(input)
+
+            try {
+              // Transform and persist data
+              const repositoryData = DataTransformer.toRepositoryData(input)
+              const repositoryResult = await this.repository.save(repositoryData)
+
+              // Transform and return result
+              return DataTransformer.toDomainOutput(repositoryResult)
+
+            } catch (error) {
+              throw DatabaseErrorHandler.handle(error, input)
+            }
+          }
+        }
+
+        /**
+         * Input validation utilities (Refactored)
+         */
+        class InputValidator {
+          static validate(input: __USE_CASE_NAME_PASCAL_CASE__Input): void {
+            const errors: string[] = []
+
+            if (!input.__INPUT_FIELD_1__?.trim()) {
+              errors.push('__INPUT_FIELD_1__ is required and cannot be empty')
+            }
+
+            if (!input.__INPUT_FIELD_2__?.trim()) {
+              errors.push('__INPUT_FIELD_2__ is required and cannot be empty')
+            }
+
+            if (input.__INPUT_FIELD_3__ && input.__INPUT_FIELD_3__.length > 100) {
+              errors.push('__INPUT_FIELD_3__ cannot exceed 100 characters')
+            }
+
+            if (errors.length > 0) {
+              throw new ValidationError(`Input validation failed: ${errors.join(', ')}`)
+            }
+          }
+        }
+
+        /**
+         * Data transformation utilities (Refactored)
+         */
+        class DataTransformer {
+          static toRepositoryData(input: __USE_CASE_NAME_PASCAL_CASE__Input): __USE_CASE_NAME_PASCAL_CASE__RepositoryData {
+            return {
+              __REPO_FIELD_1__: input.__INPUT_FIELD_1__.trim(),
+              __REPO_FIELD_2__: input.__INPUT_FIELD_2__.trim(),
+              __REPO_FIELD_3__: input.__INPUT_FIELD_3__?.length || 0,
+              metadata: {
+                source: 'backend',
+                processedAt: new Date().toISOString(),
+                inputMetadata: input.__METADATA_FIELD__,
+                validation: {
+                  validated: true,
+                  timestamp: new Date().toISOString()
+                }
+              }
+            }
+          }
+
+          static toDomainOutput(result: __USE_CASE_NAME_PASCAL_CASE__RepositoryResult): __USE_CASE_NAME_PASCAL_CASE__Output {
+            return {
+              __OUTPUT_FIELD_1__: result.__REPO_FIELD_1__,
+              __OUTPUT_FIELD_2__: result.__REPO_FIELD_2__,
+              __OUTPUT_FIELD_3__: result.__REPO_FIELD_3__,
+              __TIMESTAMP_FIELD__: result.updatedAt,
+              success: true,
+              message: 'Operation completed successfully',
+              data: {
+                id: result.id,
+                version: result.version,
+                metadata: result.metadata,
+                auditInfo: {
+                  createdAt: result.createdAt,
+                  updatedAt: result.updatedAt
+                }
+              }
+            }
+          }
+        }
+
+        /**
+         * Database error handling utilities (Refactored)
+         */
+        class DatabaseErrorHandler {
+          static handle(error: any, input: __USE_CASE_NAME_PASCAL_CASE__Input): Error {
+            // Log error in development
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Database operation failed:', {
+                error: error.message,
+                stack: error.stack,
+                input: this.sanitizeInputForLogging(input)
+              })
+            }
+
+            // Return appropriate domain errors
+            if (this.isUniqueConstraintError(error)) {
+              return new UniqueConstraintError('Resource already exists with this identifier')
+            }
+
+            if (this.isForeignKeyConstraintError(error)) {
+              return new ForeignKeyConstraintError('Referenced resource not found')
+            }
+
+            if (this.isConnectionError(error)) {
+              return new DatabaseConnectionError('Database connection failed. Please try again later.')
+            }
+
+            if (this.isValidationError(error)) {
+              return new ValidationError('Data validation failed')
+            }
+
+            // Default error
+            return new DatabaseOperationError(`Database operation failed: ${error.message}`)
+          }
+
+          private static isUniqueConstraintError(error: any): boolean {
+            return error.message.includes('Unique constraint') ||
+                   error.code === 'P2002' // Prisma unique constraint
+          }
+
+          private static isForeignKeyConstraintError(error: any): boolean {
+            return error.message.includes('Foreign key constraint') ||
+                   error.code === 'P2003' // Prisma foreign key constraint
+          }
+
+          private static isConnectionError(error: any): boolean {
+            return error.message.includes('Connection') ||
+                   error.code === 'ECONNREFUSED'
+          }
+
+          private static isValidationError(error: any): boolean {
+            return error.message.includes('Validation') ||
+                   error instanceof ValidationError
+          }
+
+          private static sanitizeInputForLogging(input: __USE_CASE_NAME_PASCAL_CASE__Input) {
+            // Remove sensitive data for logging
+            return {
+              field1Length: input.__INPUT_FIELD_1__?.length,
+              field2Length: input.__INPUT_FIELD_2__?.length,
+              hasOptionalField: !!input.__INPUT_FIELD_3__,
+              hasMetadata: !!input.__METADATA_FIELD__
+            }
+          }
+        }
+
+        /**
+         * Domain-specific error types for better error handling
+         */
+        export class ValidationError extends Error {
+          constructor(message: string) {
+            super(message)
+            this.name = 'ValidationError'
+          }
+        }
+
+        export class UniqueConstraintError extends Error {
+          constructor(message: string) {
+            super(message)
+            this.name = 'UniqueConstraintError'
+          }
+        }
+
+        export class ForeignKeyConstraintError extends Error {
+          constructor(message: string) {
+            super(message)
+            this.name = 'ForeignKeyConstraintError'
+          }
+        }
+
+        export class DatabaseConnectionError extends Error {
+          constructor(message: string) {
+            super(message)
+            this.name = 'DatabaseConnectionError'
+          }
+        }
+
+        export class DatabaseOperationError extends Error {
+          constructor(message: string) {
+            super(message)
+            this.name = 'DatabaseOperationError'
+          }
+        }
+
+    # === STEP 10: CREATE INTEGRATION TESTS (REFACTOR PHASE) ===
+    - id: 'create-fullstack-integration-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create fullstack integration tests covering complete frontend-to-backend flow (REFACTOR)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'integration testing fullstack next.js api routes vitest'
+          url: 'https://github.com/...'
+          description: 'Integration testing patterns for fullstack Next.js applications.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/__tests__/integration/__USE_CASE_NAME_KEBAB_CASE__.integration.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import { Db__USE_CASE_NAME_PASCAL_CASE__ } from '../../data/usecases/db-__USE_CASE_NAME_KEBAB_CASE__'
+        import { Remote__USE_CASE_NAME_PASCAL_CASE__ } from '../../data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * Fullstack Integration Tests for __USE_CASE_NAME_PASCAL_CASE__
+         * Tests complete flow from frontend through API to backend and database
+         *
+         * @testType Integration Test - Complete Fullstack Flow
+         * @coverage Frontend → API → Backend → Database → Response → Frontend
+         */
+        describe('__USE_CASE_NAME_PASCAL_CASE__ Fullstack Integration', () => {
+          let mockFetch: ReturnType<typeof vi.fn>
+          let mockRepository: any
+          let backendUseCase: Db__USE_CASE_NAME_PASCAL_CASE__
+          let frontendUseCase: Remote__USE_CASE_NAME_PASCAL_CASE__
+
+          beforeEach(() => {
+            // Setup mocked fetch for frontend HTTP requests
+            mockFetch = vi.fn()
+            global.fetch = mockFetch
+
+            // Setup mocked repository for backend database operations
+            mockRepository = {
+              save: vi.fn(),
+              findById: vi.fn(),
+              findByQuery: vi.fn(),
+              update: vi.fn(),
+              delete: vi.fn()
+            }
+
+            // Create real HTTP client implementation for frontend
+            const httpClient = {
+              async request(req) {
+                const response = await fetch(req.url, {
+                  method: req.method,
+                  headers: req.headers,
+                  body: req.body ? JSON.stringify(req.body) : undefined
+                })
+
+                return {
+                  data: await response.json(),
+                  status: response.status,
+                  statusText: response.statusText,
+                  headers: Object.fromEntries(response.headers.entries())
+                }
+              }
+            }
+
+            // Initialize both backend and frontend use cases
+            backendUseCase = new Db__USE_CASE_NAME_PASCAL_CASE__(mockRepository)
+            frontendUseCase = new Remote__USE_CASE_NAME_PASCAL_CASE__(httpClient)
+          })
+
+          afterEach(() => {
+            vi.restoreAllMocks()
+          })
+
+          describe('Complete Fullstack Flow', () => {
+            it('should handle successful end-to-end operation', async () => {
+              // Arrange: Setup test data
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'fullstack-test-1',
+                __INPUT_FIELD_2__: 'fullstack-test-2',
+                __INPUT_FIELD_3__: 'integration-test',
+                __METADATA_FIELD__: {
+                  userId: 'user-123',
+                  sessionId: 'session-456'
+                }
+              }
+
+              // Setup backend database response
+              const repositoryResult = {
+                id: 'integration-test-id',
+                __REPO_FIELD_1__: 'fullstack-test-1',
+                __REPO_FIELD_2__: 'fullstack-test-2',
+                __REPO_FIELD_3__: 17, // Length of 'integration-test'
+                metadata: {
+                  source: 'backend',
+                  processedAt: '2024-01-15T10:30:00.000Z',
+                  inputMetadata: input.__METADATA_FIELD__
+                },
+                createdAt: new Date('2024-01-15T10:30:00.000Z'),
+                updatedAt: new Date('2024-01-15T10:30:00.000Z'),
+                version: 1
+              }
+
+              mockRepository.save.mockResolvedValueOnce(repositoryResult)
+
+              // Simulate API response structure
+              const apiResponseData = {
+                success: true,
+                data: {
+                  id: 'integration-test-id',
+                  __DATA_FIELD_1__: 'fullstack-test-1',
+                  __DATA_FIELD_2__: 'fullstack-test-2',
+                  __DATA_FIELD_3__: 17,
+                  createdAt: '2024-01-15T10:30:00.000Z',
+                  updatedAt: '2024-01-15T10:30:00.000Z'
+                }
+              }
+
+              mockFetch.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                json: () => Promise.resolve(apiResponseData),
+                headers: new Headers({
+                  'content-type': 'application/json'
+                })
+              })
+
+              // Act: Execute frontend use case (which calls backend API)
+              const result = await frontendUseCase.execute(input)
+
+              // Assert: Verify complete flow worked correctly
+              expect(result).toEqual({
+                __OUTPUT_FIELD_1__: 'fullstack-test-1',
+                __OUTPUT_FIELD_2__: 'fullstack-test-2',
+                __OUTPUT_FIELD_3__: 17,
+                __TIMESTAMP_FIELD__: new Date('2024-01-15T10:30:00.000Z'),
+                success: true,
+                message: 'Operation completed successfully',
+                data: {
+                  id: 'integration-test-id',
+                  createdAt: new Date('2024-01-15T10:30:00.000Z'),
+                  updatedAt: new Date('2024-01-15T10:30:00.000Z')
+                }
+              })
+
+              // Verify frontend made correct API call
+              expect(mockFetch).toHaveBeenCalledWith(
+                '/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__',
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    __REQUEST_FIELD_1__: 'fullstack-test-1',
+                    __REQUEST_FIELD_2__: 'fullstack-test-2',
+                    __REQUEST_FIELD_3__: 'integration-test'
+                  })
+                }
+              )
+            })
+
+            it('should handle validation errors consistently across stack', async () => {
+              // Test that validation errors are handled consistently
+              // from frontend → backend → frontend
+
+              const invalidInput: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: '', // Invalid: empty
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              // Backend should reject invalid input
+              await expect(backendUseCase.execute(invalidInput))
+                .rejects.toThrow('Input validation failed')
+
+              // Frontend should also handle API validation error response
+              const validationErrorResponse = {
+                success: false,
+                error: {
+                  code: '__USE_CASE_NAME_UPPER_CASE___VALIDATION_ERROR',
+                  message: 'Input validation failed: __INPUT_FIELD_1__ is required and cannot be empty',
+                  field: '__INPUT_FIELD_1__'
+                }
+              }
+
+              mockFetch.mockResolvedValueOnce({
+                ok: false,
+                status: 400,
+                statusText: 'Bad Request',
+                json: () => Promise.resolve(validationErrorResponse),
+                headers: new Headers()
+              })
+
+              await expect(frontendUseCase.execute(invalidInput))
+                .rejects.toThrow('Input validation failed')
+            })
+
+            it('should handle database errors with proper error transformation', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'db-error-test',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              // Simulate database constraint violation
+              const dbError = new Error('Unique constraint violation')
+              mockRepository.save.mockRejectedValueOnce(dbError)
+
+              // Backend should transform database error to domain error
+              await expect(backendUseCase.execute(input))
+                .rejects.toThrow('Resource already exists')
+
+              // Frontend should handle API error response
+              const errorResponse = {
+                success: false,
+                error: {
+                  code: 'RESOURCE_ALREADY_EXISTS',
+                  message: 'Resource already exists with this identifier'
+                }
+              }
+
+              mockFetch.mockResolvedValueOnce({
+                ok: false,
+                status: 409,
+                statusText: 'Conflict',
+                json: () => Promise.resolve(errorResponse),
+                headers: new Headers()
+              })
+
+              await expect(frontendUseCase.execute(input))
+                .rejects.toThrow('Resource already exists')
+            })
+
+            it('should handle network failures gracefully', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'network-test',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              // Simulate network failure
+              mockFetch.mockRejectedValueOnce(new Error('fetch failed'))
+
+              await expect(frontendUseCase.execute(input))
+                .rejects.toThrow('Network connection failed')
+            })
+          })
+
+          describe('Data Transformation Integration', () => {
+            it('should correctly transform data through entire stack', async () => {
+              // Test data transformation from frontend → API → backend → database → backend → API → frontend
+
+              const originalInput: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'transform-test-original',
+                __INPUT_FIELD_2__: 'data-flow-test',
+                __INPUT_FIELD_3__: 'metadata-field'
+              }
+
+              // Setup repository to return transformed data
+              mockRepository.save.mockImplementation(async (repositoryData) => {
+                // Verify backend transformed input correctly
+                expect(repositoryData.__REPO_FIELD_1__).toBe('transform-test-original')
+                expect(repositoryData.__REPO_FIELD_2__).toBe('data-flow-test')
+                expect(repositoryData.__REPO_FIELD_3__).toBe(14) // Length of 'metadata-field'
+
+                return {
+                  id: 'transformed-id',
+                  __REPO_FIELD_1__: repositoryData.__REPO_FIELD_1__,
+                  __REPO_FIELD_2__: repositoryData.__REPO_FIELD_2__,
+                  __REPO_FIELD_3__: repositoryData.__REPO_FIELD_3__,
+                  metadata: repositoryData.metadata,
+                  createdAt: new Date('2024-01-15T10:30:00.000Z'),
+                  updatedAt: new Date('2024-01-15T10:30:00.000Z'),
+                  version: 1
+                }
+              })
+
+              // Mock API response with backend transformation
+              mockFetch.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                json: () => Promise.resolve({
+                  success: true,
+                  data: {
+                    id: 'transformed-id',
+                    __DATA_FIELD_1__: 'transform-test-original',
+                    __DATA_FIELD_2__: 'data-flow-test',
+                    __DATA_FIELD_3__: 14,
+                    createdAt: '2024-01-15T10:30:00.000Z',
+                    updatedAt: '2024-01-15T10:30:00.000Z'
+                  }
+                }),
+                headers: new Headers()
+              })
+
+              const result = await frontendUseCase.execute(originalInput)
+
+              // Verify final transformation is correct
+              expect(result.__OUTPUT_FIELD_1__).toBe('transform-test-original')
+              expect(result.__OUTPUT_FIELD_2__).toBe('data-flow-test')
+              expect(result.__OUTPUT_FIELD_3__).toBe(14)
+              expect(result.success).toBe(true)
+            })
+          })
+        })
+
+    # === STEP 11: FINAL VALIDATION (REFACTOR PHASE) ===
+    - id: 'validate-refactored-fullstack-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Run all tests and validations after refactoring fullstack implementation (REFACTOR phase complete)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      run_scripts:
+        description: 'Complete TDD cycle validation and commit refactored fullstack code'
+        scripts:
+          - name: 'Run all fullstack data layer tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data --coverage --reporter=verbose'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Run integration tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/__tests__/integration --coverage --reporter=verbose'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'TypeScript compilation check'
+            command: 'npx tsc --noEmit --project tsconfig.json'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'ESLint validation'
+            command: 'npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Next.js build check'
+            command: 'npm run build'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit refactored implementation'
+            command: 'git add . && git commit -m "refactor(__FEATURE_NAME_KEBAB_CASE__): improve __USE_CASE_NAME_KEBAB_CASE__ fullstack data layer design (REFACTOR)"'
+            workingDirectory: '__PROJECT_NAME__'
+
+# ============= END DATA STEPS FULLSTACK SECTION =============

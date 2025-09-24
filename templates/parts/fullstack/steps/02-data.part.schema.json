@@ -1,0 +1,217 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Fullstack Data Steps Configuration",
+  "description": "Schema for fullstack data layer implementation steps with TDD methodology, combining backend (Db) and frontend (Remote) patterns",
+  "type": "object",
+  "required": ["data_steps"],
+  "properties": {
+    "data_steps": {
+      "type": "array",
+      "description": "Array of fullstack data layer implementation steps following TDD (Red-Green-Refactor) with both backend and frontend implementations",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/dataStep"
+      }
+    }
+  },
+  "definitions": {
+    "dataStep": {
+      "type": "object",
+      "required": ["id", "type", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the fullstack data step with template placeholders",
+          "pattern": "^[a-z0-9-_]+(__[A-Z_]+__[a-z0-9-_]*)*$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["folder", "create_file", "validation", "conditional_file"],
+          "description": "Type of step: folder creation, file creation, validation, or conditional file"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of what this fullstack data step does"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PENDING", "SUCCESS", "FAILED", "SKIPPED"],
+          "description": "Current status of the step execution"
+        },
+        "rlhf_score": {
+          "type": ["integer", "null"],
+          "minimum": -2,
+          "maximum": 2,
+          "description": "Reinforcement Learning from Human Feedback score"
+        },
+        "execution_log": {
+          "type": "string",
+          "description": "Log of step execution for fullstack data layer"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/reference"
+          },
+          "description": "References to patterns, guidelines, or documentation for fullstack data layer"
+        },
+        "action": {
+          "$ref": "#/definitions/folderAction",
+          "description": "Action for folder creation steps in fullstack data layer"
+        },
+        "path": {
+          "type": "string",
+          "description": "File path for create_file steps with template placeholders for fullstack data layer"
+        },
+        "template": {
+          "type": "string",
+          "description": "File content template for create_file steps with TypeScript/Next.js fullstack code"
+        },
+        "validation_script": {
+          "type": "string",
+          "description": "Shell script for validation steps specific to fullstack data layer"
+        },
+        "run_scripts": {
+          "type": "object",
+          "required": ["description", "scripts"],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Description of what the fullstack data validation scripts do"
+            },
+            "scripts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/script"
+              },
+              "minItems": 1,
+              "description": "List of scripts to run for fullstack data validation (npm, vitest, etc.)"
+            }
+          },
+          "description": "Scripts to run for fullstack data validation steps"
+        },
+        "condition": {
+          "type": "string",
+          "description": "Condition function name for conditional_file steps in fullstack data layer"
+        }
+      }
+    },
+    "folderAction": {
+      "type": "object",
+      "required": ["create_folders"],
+      "properties": {
+        "create_folders": {
+          "type": "object",
+          "required": ["basePath", "folders"],
+          "properties": {
+            "basePath": {
+              "type": "string",
+              "description": "Base path where fullstack data layer folders will be created with template placeholders"
+            },
+            "folders": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "description": "List of fullstack data layer folder names to create (usecases, protocols, dto, mappers)"
+            }
+          }
+        }
+      }
+    },
+    "fileAction": {
+      "type": "object",
+      "required": ["create_file"],
+      "properties": {
+        "create_file": {
+          "type": "object",
+          "required": ["path", "content"],
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "File path for fullstack data layer with template placeholders"
+            },
+            "content": {
+              "type": "string",
+              "description": "File content with template placeholders and TypeScript/Next.js code for fullstack data layer"
+            }
+          }
+        }
+      }
+    },
+    "validationAction": {
+      "type": "object",
+      "required": ["run_scripts"],
+      "properties": {
+        "run_scripts": {
+          "type": "object",
+          "required": ["description", "scripts"],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Description of what the fullstack data validation scripts do"
+            },
+            "scripts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/script"
+              },
+              "minItems": 1,
+              "description": "List of scripts to run for fullstack data validation"
+            }
+          }
+        }
+      }
+    },
+    "script": {
+      "type": "object",
+      "required": ["name", "command"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name for the fullstack data script"
+        },
+        "command": {
+          "type": "string",
+          "description": "Shell command to execute for fullstack data layer (npm, npx, vitest, next build, etc.)"
+        },
+        "workingDirectory": {
+          "type": "string",
+          "description": "Working directory for the fullstack data command (optional)"
+        }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "required": ["type", "source", "description"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["internal_guideline", "external_pattern", "internal_code_analysis"],
+          "description": "Type of reference for fullstack data layer"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source of the reference (e.g., context7, serena, FULLSTACK_ARCHITECTURE.md)"
+        },
+        "query": {
+          "type": "string",
+          "description": "Search query or pattern for external references related to fullstack data layer"
+        },
+        "url": {
+          "type": "string",
+          "description": "URL reference for external patterns related to fullstack data layer"
+        },
+        "tool": {
+          "type": "string",
+          "description": "Tool name for internal code analysis of fullstack data layer"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of what this reference provides for fullstack data layer"
+        }
+      }
+    }
+  }
+}
