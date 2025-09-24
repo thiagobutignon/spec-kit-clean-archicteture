@@ -106,6 +106,7 @@
           description: 'Following TDD methodology - test first approach for infrastructure.'
       path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.spec.ts'
       template: |
+        import { describe, test, expect, beforeEach, vi } from 'vitest'
         import { PrismaClient } from '@prisma/client'
         import { Prisma__FEATURE_NAME_PASCAL_CASE__Repository } from './prisma-__FEATURE_NAME_KEBAB_CASE__-repository'
         // AI-NOTE: Import repository protocol interface if exists
@@ -125,13 +126,13 @@
             // AI-NOTE: Mock PrismaClient for unit tests
             prismaClient = {
               __MODEL_NAME__: {
-                create: jest.fn(),
-                findFirst: jest.fn(),
-                findMany: jest.fn(),
-                update: jest.fn(),
-                delete: jest.fn()
+                create: vi.fn(),
+                findFirst: vi.fn(),
+                findMany: vi.fn(),
+                update: vi.fn(),
+                delete: vi.fn()
               },
-              $transaction: jest.fn()
+              $transaction: vi.fn()
             } as any
 
             sut = new Prisma__FEATURE_NAME_PASCAL_CASE__Repository(prismaClient)
@@ -146,7 +147,7 @@
           describe('save', () => {
             test('Should call Prisma create with correct values', async () => {
               // This test will FAIL initially (RED phase)
-              const createSpy = prismaClient.__MODEL_NAME__.create as jest.Mock
+              const createSpy = prismaClient.__MODEL_NAME__.create as any
               createSpy.mockResolvedValueOnce({
                 id: 'any_id',
                 __INPUT_FIELD_1__: 'any_value_1',
@@ -178,7 +179,7 @@
                 createdAt: new Date('2024-01-01'),
                 updatedAt: new Date('2024-01-01')
               }
-              ;(prismaClient.__MODEL_NAME__.create as jest.Mock).mockResolvedValueOnce(mockResult)
+              ;(prismaClient.__MODEL_NAME__.create as any).mockResolvedValueOnce(mockResult)
 
               const input = makeFakeRepositoryInput()
               const result = await sut.save(input)
@@ -195,7 +196,7 @@
 
             test('Should throw if Prisma throws', async () => {
               // This test will FAIL initially (RED phase)
-              ;(prismaClient.__MODEL_NAME__.create as jest.Mock).mockRejectedValueOnce(new Error('Database error'))
+              ;(prismaClient.__MODEL_NAME__.create as any).mockRejectedValueOnce(new Error('Database error'))
 
               const input = makeFakeRepositoryInput()
               const promise = sut.save(input)
@@ -207,7 +208,7 @@
           describe('findById', () => {
             test('Should call Prisma findFirst with correct id', async () => {
               // This test will FAIL initially (RED phase)
-              const findFirstSpy = prismaClient.__MODEL_NAME__.findFirst as jest.Mock
+              const findFirstSpy = prismaClient.__MODEL_NAME__.findFirst as any
               findFirstSpy.mockResolvedValueOnce(null)
 
               await sut.findById('any_id')
@@ -219,7 +220,7 @@
 
             test('Should return null if entity not found', async () => {
               // This test will FAIL initially (RED phase)
-              ;(prismaClient.__MODEL_NAME__.findFirst as jest.Mock).mockResolvedValueOnce(null)
+              ;(prismaClient.__MODEL_NAME__.findFirst as any).mockResolvedValueOnce(null)
 
               const result = await sut.findById('any_id')
 
@@ -236,7 +237,7 @@
                 createdAt: new Date('2024-01-01'),
                 updatedAt: new Date('2024-01-01')
               }
-              ;(prismaClient.__MODEL_NAME__.findFirst as jest.Mock).mockResolvedValueOnce(mockEntity)
+              ;(prismaClient.__MODEL_NAME__.findFirst as any).mockResolvedValueOnce(mockEntity)
 
               const result = await sut.findById('any_id')
 
@@ -246,7 +247,7 @@
         })
       validation_script: |
         echo "🔴 Running TDD RED phase - repository tests should FAIL..."
-        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.spec.ts --no-coverage
+        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.spec.ts
 
         # AI-NOTE: We expect tests to fail at this point (RED phase)
         if [ $? -eq 0 ]; then
@@ -493,6 +494,7 @@
           description: 'TDD Red phase - writing failing HTTP client tests first.'
       path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.spec.ts'
       template: |
+        import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'
         import { FetchHttpClient } from './fetch-http-client'
         import { HttpRequest, HttpResponse, HttpClient } from './http-client-protocol'
 
@@ -509,11 +511,11 @@
             sut = new FetchHttpClient()
 
             // AI-NOTE: Mock global fetch for tests
-            global.fetch = jest.fn()
+            global.fetch = vi.fn()
           })
 
           afterEach(() => {
-            jest.resetAllMocks()
+            vi.resetAllMocks()
           })
 
           const makeFakeRequest = (): HttpRequest => ({
@@ -526,11 +528,11 @@
           describe('request', () => {
             test('Should call fetch with correct url and options', async () => {
               // This test will FAIL initially (RED phase)
-              const fetchSpy = global.fetch as jest.Mock
+              const fetchSpy = global.fetch as any
               fetchSpy.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: jest.fn().mockResolvedValueOnce({ data: 'any_data' })
+                json: vi.fn().mockResolvedValueOnce({ data: 'any_data' })
               })
 
               const httpRequest = makeFakeRequest()
@@ -546,12 +548,12 @@
 
             test('Should return correct response on success', async () => {
               // This test will FAIL initially (RED phase)
-              const fetchSpy = global.fetch as jest.Mock
+              const fetchSpy = global.fetch as any
               const mockResponse = { data: 'any_data' }
               fetchSpy.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: jest.fn().mockResolvedValueOnce(mockResponse)
+                json: vi.fn().mockResolvedValueOnce(mockResponse)
               })
 
               const httpRequest = makeFakeRequest()
@@ -565,7 +567,7 @@
 
             test('Should throw if fetch throws', async () => {
               // This test will FAIL initially (RED phase)
-              const fetchSpy = global.fetch as jest.Mock
+              const fetchSpy = global.fetch as any
               fetchSpy.mockRejectedValueOnce(new Error('Network error'))
 
               const httpRequest = makeFakeRequest()
@@ -576,7 +578,7 @@
 
             test('Should handle timeout correctly', async () => {
               // This test will FAIL initially (RED phase)
-              const fetchSpy = global.fetch as jest.Mock
+              const fetchSpy = global.fetch as any
               fetchSpy.mockRejectedValueOnce(new Error('AbortError'))
 
               const httpRequest = { ...makeFakeRequest(), timeout: 1000 }
@@ -588,7 +590,7 @@
         })
       validation_script: |
         echo "🔴 Running TDD RED phase - HTTP client tests should FAIL..."
-        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.spec.ts --no-coverage
+        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.spec.ts
 
         # AI-NOTE: We expect tests to fail at this point (RED phase)
         if [ $? -eq 0 ]; then
@@ -812,6 +814,7 @@
           description: 'TDD approach for cache implementation with Redis and fallback.'
       path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache.spec.ts'
       template: |
+        import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'
         import { RedisCache } from './redis-cache'
         import { CacheClient } from './cache-client-protocol'
 
@@ -828,18 +831,18 @@
           beforeEach(() => {
             // AI-NOTE: Mock Redis client
             mockRedisClient = {
-              get: jest.fn(),
-              set: jest.fn(),
-              del: jest.fn(),
-              exists: jest.fn(),
-              ping: jest.fn()
+              get: vi.fn(),
+              set: vi.fn(),
+              del: vi.fn(),
+              exists: vi.fn(),
+              ping: vi.fn()
             }
 
             sut = new RedisCache(mockRedisClient)
           })
 
           afterEach(() => {
-            jest.resetAllMocks()
+            vi.resetAllMocks()
           })
 
           describe('get', () => {
@@ -922,7 +925,7 @@
         })
       validation_script: |
         echo "🔴 Running TDD RED phase - cache tests should FAIL..."
-        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache.spec.ts --no-coverage
+        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache.spec.ts
 
         if [ $? -eq 0 ]; then
           echo "⚠️  WARNING: Tests passed but they should fail in RED phase"
@@ -1372,6 +1375,7 @@
           description: 'Integration testing for infrastructure layer with external dependencies.'
       path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__tests__/integration/infrastructure.test.ts'
       template: |
+        import { describe, test, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest'
         import { PrismaClient } from '@prisma/client'
         import { Prisma__FEATURE_NAME_PASCAL_CASE__Repository } from '../../shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository'
         import { FetchHttpClient } from '../../shared/infra/http/fetch-http-client'
@@ -1411,11 +1415,11 @@
 
             // Setup cache (mock Redis if not available)
             const mockRedis = {
-              get: jest.fn().mockResolvedValue(null),
-              set: jest.fn().mockResolvedValue('OK'),
-              del: jest.fn().mockResolvedValue(1),
-              exists: jest.fn().mockResolvedValue(0),
-              ping: jest.fn().mockResolvedValue('PONG')
+              get: vi.fn().mockResolvedValue(null),
+              set: vi.fn().mockResolvedValue('OK'),
+              del: vi.fn().mockResolvedValue(1),
+              exists: vi.fn().mockResolvedValue(0),
+              ping: vi.fn().mockResolvedValue('PONG')
             }
             cache = new RedisCache(mockRedis)
           })
