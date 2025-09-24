@@ -469,7 +469,10 @@
 
               # Create and checkout new feature branch
               BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
-              git checkout -b "$BRANCH_NAME"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
 
               echo "✅ Created and checked out branch: $BRANCH_NAME"
             workingDirectory: '__PROJECT_NAME__'
@@ -486,6 +489,14 @@
         - type: 'internal_guideline'
           source: 'REFACTORING_GUIDE.md'
           description: 'Best practices for refactoring existing code to Clean Architecture'
+      validation_script: |
+        # Create rollback point before refactoring
+        git tag "before-refactor-__USE_CASE_NAME_KEBAB_CASE__" || {
+          echo "⚠️  Failed to create rollback tag"
+          exit 1
+        }
+        echo "✅ Created rollback point: before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
+        echo "   To rollback: git reset --hard before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
       path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.tsx'
       template: |
         // TODO: Refactor this component to comply with Clean Architecture
@@ -514,9 +525,12 @@
         FILE_TO_DELETE="__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__"
 
         if [ -f "$FILE_TO_DELETE" ]; then
+          # Extract filename without extension consistently
+          FILE_NAME=$(basename "$FILE_TO_DELETE" | sed 's/\.[^.]*$//')
+
           # Check for references to this file
-          echo "🔍 Checking for references to $FILE_TO_DELETE..."
-          REFERENCES=$(grep -r "$(basename $FILE_TO_DELETE .tsx)" __PROJECT_NAME__/src --exclude-dir=node_modules | wc -l)
+          echo "🔍 Checking for references to $FILE_NAME..."
+          REFERENCES=$(grep -r "$FILE_NAME" __PROJECT_NAME__/src --exclude-dir=node_modules | wc -l)
 
           if [ "$REFERENCES" -gt 0 ]; then
             echo "⚠️  WARNING: Found $REFERENCES references to this file. Review before deletion."
@@ -548,7 +562,10 @@
               BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
 
               # Push the branch
-              git push -u origin "$BRANCH_NAME"
+              git push -u origin "$BRANCH_NAME" || {
+                echo "❌ Failed to push branch to remote"
+                exit 1
+              }
 
               # Create PR using GitHub CLI if available
               if command -v gh &> /dev/null; then
@@ -571,6 +588,12 @@
                 - [ ] Component tests pass
                 - [ ] E2E tests pass
                 - [ ] Manual testing completed
+
+                ## Metrics
+                - [ ] Code coverage: __COVERAGE__%
+                - [ ] Bundle size impact: __SIZE_IMPACT__
+                - [ ] Lighthouse score: __LIGHTHOUSE_SCORE__
+                - [ ] Performance benchmarks: __PERF_STATUS__
 
                 ## Checklist
                 - [ ] Code follows Clean Architecture principles

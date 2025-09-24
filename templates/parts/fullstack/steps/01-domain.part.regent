@@ -698,7 +698,10 @@
 
               # Create and checkout new feature branch
               BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
-              git checkout -b "$BRANCH_NAME"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
 
               echo "✅ Created and checked out branch: $BRANCH_NAME"
             workingDirectory: '__PROJECT_NAME__'
@@ -715,6 +718,14 @@
         - type: 'internal_guideline'
           source: 'REFACTORING_GUIDE.md'
           description: 'Best practices for refactoring existing fullstack code to Clean Architecture'
+      validation_script: |
+        # Create rollback point before refactoring
+        git tag "before-refactor-__USE_CASE_NAME_KEBAB_CASE__" || {
+          echo "⚠️  Failed to create rollback tag"
+          exit 1
+        }
+        echo "✅ Created rollback point: before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
+        echo "   To rollback: git reset --hard before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
       path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__'
       template: |
         // TODO: Refactor this file to comply with Clean Architecture (Fullstack)
@@ -797,7 +808,10 @@
               BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
 
               # Push the branch
-              git push -u origin "$BRANCH_NAME"
+              git push -u origin "$BRANCH_NAME" || {
+                echo "❌ Failed to push branch to remote"
+                exit 1
+              }
 
               # Create PR using GitHub CLI if available
               if command -v gh &> /dev/null; then
@@ -834,6 +848,13 @@
                 - [ ] Integration tests pass
                 - [ ] E2E tests pass
                 - [ ] Manual testing completed
+
+                ## Metrics
+                - [ ] Code coverage: __COVERAGE__%
+                - [ ] Bundle size impact: __SIZE_IMPACT__
+                - [ ] API latency: __API_LATENCY_MS__
+                - [ ] Lighthouse score: __LIGHTHOUSE_SCORE__
+                - [ ] Performance benchmarks: __PERF_STATUS__
 
                 ## Checklist
                 - [ ] Code follows Clean Architecture principles
