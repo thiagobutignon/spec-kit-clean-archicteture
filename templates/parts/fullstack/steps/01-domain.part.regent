@@ -14,7 +14,41 @@
   # ------------------------------------------------------------------------------
 
   domain_steps:
-    # === STEP 1: CREATE DOMAIN STRUCTURE ===
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create feature branch for __USE_CASE_NAME_PASCAL_CASE__ fullstack domain layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Following Git Flow pattern for feature development.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'git workflow feature branch naming conventions fullstack'
+          url: 'https://github.com/...'
+          description: 'Git Flow and feature branch best practices for fullstack development.'
+      run_scripts:
+        description: 'Create and checkout feature branch for fullstack domain layer development'
+        scripts:
+          - name: 'Create feature branch'
+            command: 'git checkout -b feat/__FEATURE_NAME_KEBAB_CASE__-domain-__USE_CASE_NAME_KEBAB_CASE__-fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Push feature branch'
+            command: 'git push -u origin feat/__FEATURE_NAME_KEBAB_CASE__-domain-__USE_CASE_NAME_KEBAB_CASE__-fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+      validation_script: |
+        current_branch=$(git branch --show-current)
+        expected_branch="feat/__FEATURE_NAME_KEBAB_CASE__-domain-__USE_CASE_NAME_KEBAB_CASE__-fullstack"
+        if [ "$current_branch" != "$expected_branch" ]; then
+          echo "❌ ERROR: Expected branch $expected_branch, but current branch is $current_branch"
+          exit 1
+        fi
+        echo "✅ Feature branch created successfully: $current_branch"
+
+    # === STEP 2: CREATE DOMAIN STRUCTURE ===
     - id: 'create-domain-structure-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'folder'
       description: 'Create shared domain layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ use case slice'
