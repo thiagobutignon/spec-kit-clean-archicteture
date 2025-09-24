@@ -46,6 +46,10 @@
     "./templates/parts/fullstack/03-rules.part.schema.json": [
       "templates/parts/fullstack/03-rules.part.regent"
     ],
+    // Schema específico para backend domain steps part
+    "./templates/parts/backend/steps/01-domain.part.schema.json": [
+      "templates/parts/backend/steps/01-domain.part.regent"
+    ],
     // Schema para arquivos completos .regent (excluindo .part.regent)
     "./regent.schema.json": [
       "templates/template.regent",
@@ -58,7 +62,10 @@
     "axios",
     "Vitest",
     "Shadcn",
-    "pgvector"
+    "pgvector",
+    "usecases",
+    "kebab",
+    "pascal"
 ],
 "files.watcherExclude": {
   "**/.git/objects/**": true,
