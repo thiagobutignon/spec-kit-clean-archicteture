@@ -777,5 +777,5 @@
                 echo "⚠️  GitHub CLI not available. Please clean up branches manually after merge."
               fi
             workingDirectory: '__PROJECT_NAME__'
-        fi
+
 # ============= END DOMAIN STEPS BACKEND SECTION =============
