@@ -1,56 +1,60 @@
 {
-  // 1. Associa a extensão .regent com a linguagem YAML
+  // 1. Associate .regent extension with YAML language
   "files.associations": {
     "*.regent": "yaml"
   },
 
-  // 2. Aplica seu schema de validação a todos os arquivos .regent
+  // 2. Apply validation schemas to all .regent files
   "yaml.schemas": {
-    // Schema específico para o header part compartilhado
+    // Schema for shared header part
     "./templates/parts/shared/00-header.part.schema.json": [
       "templates/parts/shared/00-header.part.regent"
     ],
-    // Schema específico para backend structure part
+    // Schema for backend structure part
     "./templates/parts/backend/01-structure.part.schema.json": [
       "templates/parts/backend/01-structure.part.regent"
     ],
-    // Schema específico para frontend structure part
+    // Schema for frontend structure part
     "./templates/parts/frontend/01-structure.part.schema.json": [
       "templates/parts/frontend/01-structure.part.regent"
     ],
-    // Schema específico para fullstack structure part
+    // Schema for fullstack structure part
     "./templates/parts/fullstack/01-structure.part.schema.json": [
       "templates/parts/fullstack/01-structure.part.regent"
     ],
-    // Schema específico para backend architecture part
+    // Schema for backend architecture part
     "./templates/parts/backend/02-architecture.part.schema.json": [
       "templates/parts/backend/02-architecture.part.regent"
     ],
-    // Schema específico para frontend architecture part
+    // Schema for frontend architecture part
     "./templates/parts/frontend/02-architecture.part.schema.json": [
       "templates/parts/frontend/02-architecture.part.regent"
     ],
-    // Schema específico para fullstack architecture part
+    // Schema for fullstack architecture part
     "./templates/parts/fullstack/02-architecture.part.schema.json": [
       "templates/parts/fullstack/02-architecture.part.regent"
     ],
-    // Schema específico para backend rules part
+    // Schema for backend rules part
     "./templates/parts/backend/03-rules.part.schema.json": [
       "templates/parts/backend/03-rules.part.regent"
     ],
-    // Schema específico para frontend rules part
+    // Schema for frontend rules part
     "./templates/parts/frontend/03-rules.part.schema.json": [
       "templates/parts/frontend/03-rules.part.regent"
     ],
-    // Schema específico para fullstack rules part
+    // Schema for fullstack rules part
     "./templates/parts/fullstack/03-rules.part.schema.json": [
       "templates/parts/fullstack/03-rules.part.regent"
     ],
-    // Schema específico para backend domain steps part
+    // Schema for backend domain steps part
     "./templates/parts/backend/steps/01-domain.part.schema.json": [
       "templates/parts/backend/steps/01-domain.part.regent"
     ],
-    // Schema para arquivos completos .regent (excluindo .part.regent)
+    // Schema for frontend domain steps part
+    "./templates/parts/frontend/steps/01-domain.part.schema.json": [
+      "templates/parts/frontend/steps/01-domain.part.regent"
+    ],
+    // Schema for complete .regent files (excluding .part.regent)
     "./regent.schema.json": [
       "templates/template.regent",
       "*.regent",
@@ -64,8 +68,10 @@
     "Shadcn",
     "pgvector",
     "usecases",
+    "usecase",
     "kebab",
-    "pascal"
+    "pascal",
+    "anemic"
 ],
 "files.watcherExclude": {
   "**/.git/objects/**": true,

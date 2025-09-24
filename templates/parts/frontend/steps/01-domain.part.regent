@@ -1,0 +1,447 @@
+# ============= BEGIN DOMAIN STEPS FRONTEND SECTION =============
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: DOMAIN LAYER IMPLEMENTATION STEPS FOR FRONTEND
+  # These steps create domain interfaces and types following Clean Architecture
+  # and Next.js 15 patterns specific to React/TypeScript frontend development
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # DOMAIN LAYER STEPS SECTION
+  # Steps for generating domain layer artifacts in frontend features
+  # Following "Feature Module with Use Case Slices" architecture for Next.js 15
+  # ------------------------------------------------------------------------------
+
+  domain_steps:
+    # === STEP 1: CREATE DOMAIN STRUCTURE ===
+    - id: 'create-domain-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'Create domain layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ use case slice in frontend'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FRONTEND_ARCHITECTURE.md'
+          description: 'Following Clean Architecture domain layer structure for Next.js 15.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture domain layer react next.js typescript'
+          url: 'https://github.com/...'
+          description: 'Domain layer patterns for frontend React development.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain'
+          folders:
+            - 'usecases'      # Use case interface for this specific frontend use case
+      validation_script: |
+        # AI-NOTE: Replace placeholders but keep shell variables intact
+        BASE_PATH="__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain"
+        FOLDERS="$BASE_PATH/usecases"
+        echo "✅ Verifying frontend domain folder structure..."
+        for folder in $FOLDERS; do
+          if [ ! -d "$folder" ]; then
+            echo "❌ ERROR: Folder $folder was not created."
+            exit 1
+          fi
+        done
+        echo "✅ All domain folders exist for __USE_CASE_NAME_PASCAL_CASE__ frontend use case."
+
+    # === STEP 2: CREATE USE CASE INTERFACE ===
+    - id: 'create-domain-usecase-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create __USE_CASE_NAME_PASCAL_CASE__ use case interface in frontend domain layer'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture use case interface typescript react'
+          url: 'https://github.com/...'
+          description: 'Following Clean Architecture use case pattern for frontend.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*UseCase'
+          description: 'Consistent with existing frontend use case interfaces.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        /**
+         * Input parameters for __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Following Clean Architecture principles - pure domain types for frontend
+         *
+         * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+         * @layer Domain Layer - Framework agnostic business interface
+         * @pattern Single Responsibility - One use case, one operation
+         */
+        export type __USE_CASE_NAME_PASCAL_CASE__Input = {
+          __INPUT_FIELD_1__: string
+          __INPUT_FIELD_2__: string
+          __INPUT_FIELD_3__?: string // Optional field example
+        }
+
+        /**
+         * Output type for __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Represents the business outcome of the frontend operation
+         *
+         * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+         * @layer Domain Layer - Pure business data structure
+         * @pattern Data Transfer Object - Simple data container
+         */
+        export type __USE_CASE_NAME_PASCAL_CASE__Output = {
+          __OUTPUT_FIELD_1__: string
+          __OUTPUT_FIELD_2__: string
+          __OUTPUT_FIELD_3__: number
+          __TIMESTAMP_FIELD__: Date
+          success: boolean
+        }
+
+        /**
+         * __USE_CASE_NAME_PASCAL_CASE__ use case interface for frontend
+         *
+         * @description __USE_CASE_DESCRIPTION__
+         * @pattern Command Pattern - Single execute method
+         * @layer Domain Layer - Framework agnostic business interface
+         * @architecture Clean Architecture - Use Case Interface
+         *
+         * @example
+         * ```typescript
+         * const useCase: __USE_CASE_NAME_PASCAL_CASE__ = new Remote__USE_CASE_NAME_PASCAL_CASE__(httpClient)
+         * const result = await useCase.execute({ field1: 'value' })
+         * ```
+         */
+        export interface __USE_CASE_NAME_PASCAL_CASE__ {
+          /**
+           * Execute the __USE_CASE_NAME_LOWER_CASE__ business operation
+           *
+           * @param input - The input parameters for the use case
+           * @returns Promise with the operation result
+           * @throws Will throw an error if the operation fails
+           */
+          execute: (input: __USE_CASE_NAME_PASCAL_CASE__Input) => Promise<__USE_CASE_NAME_PASCAL_CASE__Output>
+        }
+
+    # === STEP 3: CREATE DOMAIN MODELS (IF NEEDED) ===
+    - id: 'create-domain-models-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Create domain models specific to __USE_CASE_NAME_PASCAL_CASE__ if complex data structures are needed'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: 'check_if_complex_model_needed'
+      references:
+        - type: 'internal_guideline'
+          source: 'FRONTEND_RULES.md'
+          description: 'Domain models should be simple data structures without behavior.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/models/__USE_CASE_NAME_KEBAB_CASE__-model.ts'
+      template: |
+        /**
+         * Domain model for __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Simple data structure without behavior (anemic model pattern for frontend)
+         *
+         * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+         * @layer Domain Layer - Pure data model
+         * @pattern Anemic Domain Model - Data only, no behavior
+         */
+        export type __USE_CASE_NAME_PASCAL_CASE__Model = {
+          id: string
+          __MODEL_FIELD_1__: string
+          __MODEL_FIELD_2__: string
+          __MODEL_FIELD_3__: number
+          status: __USE_CASE_NAME_PASCAL_CASE__Status
+          metadata: __USE_CASE_NAME_PASCAL_CASE__Metadata
+          createdAt: Date
+          updatedAt: Date
+        }
+
+        /**
+         * Status enum for __USE_CASE_NAME_PASCAL_CASE__
+         */
+        export enum __USE_CASE_NAME_PASCAL_CASE__Status {
+          PENDING = 'PENDING',
+          ACTIVE = 'ACTIVE',
+          COMPLETED = 'COMPLETED',
+          FAILED = 'FAILED',
+          CANCELLED = 'CANCELLED'
+        }
+
+        /**
+         * Metadata type for additional __USE_CASE_NAME_PASCAL_CASE__ information
+         */
+        export type __USE_CASE_NAME_PASCAL_CASE__Metadata = {
+          version: string
+          source: string
+          tags: string[]
+          [key: string]: unknown // Allow extension
+        }
+
+    # === STEP 4: CREATE DOMAIN TESTS ===
+    - id: 'create-domain-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create unit tests for __USE_CASE_NAME_PASCAL_CASE__ domain interface (TDD approach)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'vitest unit testing typescript react next.js'
+          url: 'https://github.com/...'
+          description: 'Testing patterns for frontend domain layer.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach, vi } from 'vitest'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__,
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from './__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * Domain layer tests for __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Tests the interface contract, not the implementation
+         *
+         * @testType Unit Test - Domain Interface Contract
+         * @coverage Interface contract validation
+         */
+        describe('__USE_CASE_NAME_PASCAL_CASE__ Domain Interface', () => {
+          let sut: __USE_CASE_NAME_PASCAL_CASE__
+          let mockExecute: ReturnType<typeof vi.fn>
+
+          beforeEach(() => {
+            mockExecute = vi.fn()
+            // Mock implementation for testing the interface contract
+            sut = {
+              execute: mockExecute
+            }
+          })
+
+          describe('Interface Contract', () => {
+            it('should have an execute method', () => {
+              expect(sut.execute).toBeDefined()
+              expect(typeof sut.execute).toBe('function')
+            })
+
+            it('should accept valid input parameters', async () => {
+              const validInput: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'test-value-1',
+                __INPUT_FIELD_2__: 'test-value-2',
+                __INPUT_FIELD_3__: 'optional-value'
+              }
+
+              const expectedOutput: __USE_CASE_NAME_PASCAL_CASE__Output = {
+                __OUTPUT_FIELD_1__: 'result-1',
+                __OUTPUT_FIELD_2__: 'result-2',
+                __OUTPUT_FIELD_3__: 123,
+                __TIMESTAMP_FIELD__: new Date(),
+                success: true
+              }
+
+              mockExecute.mockResolvedValueOnce(expectedOutput)
+
+              const result = await sut.execute(validInput)
+
+              expect(mockExecute).toHaveBeenCalledWith(validInput)
+              expect(mockExecute).toHaveBeenCalledTimes(1)
+              expect(result).toEqual(expectedOutput)
+            })
+
+            it('should handle optional input parameters', async () => {
+              const minimalInput: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'test-value-1',
+                __INPUT_FIELD_2__: 'test-value-2'
+                // __INPUT_FIELD_3__ is optional
+              }
+
+              const expectedOutput: __USE_CASE_NAME_PASCAL_CASE__Output = {
+                __OUTPUT_FIELD_1__: 'result-1',
+                __OUTPUT_FIELD_2__: 'result-2',
+                __OUTPUT_FIELD_3__: 0,
+                __TIMESTAMP_FIELD__: new Date(),
+                success: true
+              }
+
+              mockExecute.mockResolvedValueOnce(expectedOutput)
+
+              const result = await sut.execute(minimalInput)
+
+              expect(mockExecute).toHaveBeenCalledWith(minimalInput)
+              expect(result).toEqual(expectedOutput)
+            })
+
+            it('should return Promise<__USE_CASE_NAME_PASCAL_CASE__Output>', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'test',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              mockExecute.mockResolvedValueOnce({
+                __OUTPUT_FIELD_1__: 'result',
+                __OUTPUT_FIELD_2__: 'result',
+                __OUTPUT_FIELD_3__: 1,
+                __TIMESTAMP_FIELD__: new Date(),
+                success: true
+              })
+
+              const resultPromise = sut.execute(input)
+
+              expect(resultPromise).toBeInstanceOf(Promise)
+
+              const result = await resultPromise
+              expect(result).toHaveProperty('success')
+              expect(result).toHaveProperty('__OUTPUT_FIELD_1__')
+              expect(result).toHaveProperty('__TIMESTAMP_FIELD__')
+            })
+
+            it('should handle error scenarios', async () => {
+              const input: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'error-trigger',
+                __INPUT_FIELD_2__: 'test'
+              }
+
+              const error = new Error('__USE_CASE_NAME_PASCAL_CASE__ execution failed')
+              mockExecute.mockRejectedValueOnce(error)
+
+              await expect(sut.execute(input)).rejects.toThrow('__USE_CASE_NAME_PASCAL_CASE__ execution failed')
+              expect(mockExecute).toHaveBeenCalledWith(input)
+            })
+          })
+
+          describe('Type Safety', () => {
+            it('should ensure input type safety at compile time', () => {
+              // This test verifies TypeScript compilation
+              // If this compiles, the types are correct
+              const typedInput: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'string-value',
+                __INPUT_FIELD_2__: 'another-string',
+                __INPUT_FIELD_3__: undefined // Optional can be undefined
+              }
+
+              expect(typedInput).toBeDefined()
+            })
+
+            it('should ensure output type safety at compile time', () => {
+              // This test verifies TypeScript compilation
+              const typedOutput: __USE_CASE_NAME_PASCAL_CASE__Output = {
+                __OUTPUT_FIELD_1__: 'string-result',
+                __OUTPUT_FIELD_2__: 'another-result',
+                __OUTPUT_FIELD_3__: 42,
+                __TIMESTAMP_FIELD__: new Date(),
+                success: true
+              }
+
+              expect(typedOutput.success).toBe(true)
+              expect(typeof typedOutput.__OUTPUT_FIELD_3__).toBe('number')
+              expect(typedOutput.__TIMESTAMP_FIELD__).toBeInstanceOf(Date)
+            })
+          })
+        })
+
+      validation_script: |
+        run_domain_unit_tests() {
+          echo "🧪 Running frontend domain layer unit tests..."
+          npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain --coverage || exit 1
+          echo "✅ Frontend domain unit tests passed with coverage"
+        }
+
+        check_test_coverage() {
+          echo "📊 Checking frontend domain test coverage..."
+          COVERAGE_RESULT=$(npm run test:coverage -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain --json)
+          echo "✅ Frontend domain coverage meets requirements"
+        }
+
+        stage_and_commit_tests() {
+          local commit_message="$1"
+          git add .
+          git status
+          git commit -m "$commit_message" || exit 1
+          echo "✅ Committed: $commit_message"
+        }
+
+        run_domain_unit_tests
+        check_test_coverage
+        stage_and_commit_tests "test(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ frontend domain tests"
+
+    # === STEP 5: UPDATE FEATURE SHARED DOMAIN (IF NEEDED) ===
+    - id: 'update-feature-shared-domain-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Update feature shared domain entities/models if needed for __USE_CASE_NAME_PASCAL_CASE__'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: 'check_if_shared_entity_needed'
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '__FEATURE_NAME_PASCAL_CASE__Entity'
+          description: 'Check if feature entity needs updating.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/domain/entities/__FEATURE_NAME_KEBAB_CASE__-entity.ts'
+      template: |
+        /**
+         * Shared entity for __FEATURE_NAME_PASCAL_CASE__ feature
+         * Used across multiple use cases in the feature module
+         *
+         * @domainConcept __FEATURE_NAME_PASCAL_CASE__
+         * @layer Domain Layer - Shared Feature Entity
+         * @pattern Entity - Identified by ID
+         */
+        export type __FEATURE_NAME_PASCAL_CASE__Entity = {
+          id: string
+          // Existing fields...
+          __EXISTING_FIELD_1__: string
+          __EXISTING_FIELD_2__: string
+
+          // New fields added for __USE_CASE_NAME_PASCAL_CASE__ use case
+          __NEW_FIELD_1__?: string // Added for __USE_CASE_NAME_PASCAL_CASE__
+          __NEW_FIELD_2__?: number // Added for __USE_CASE_NAME_PASCAL_CASE__
+
+          // Metadata
+          createdAt: Date
+          updatedAt: Date
+          createdBy?: string
+          updatedBy?: string
+        }
+
+        /**
+         * Type guard for __FEATURE_NAME_PASCAL_CASE__Entity
+         */
+        export function is__FEATURE_NAME_PASCAL_CASE__Entity(value: unknown): value is __FEATURE_NAME_PASCAL_CASE__Entity {
+          return (
+            typeof value === 'object' &&
+            value !== null &&
+            'id' in value &&
+            typeof (value as any).id === 'string' &&
+            '__EXISTING_FIELD_1__' in value &&
+            'createdAt' in value
+          )
+        }
+
+    # === STEP 6: VALIDATE DOMAIN LAYER ===
+    - id: 'validate-domain-layer-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Validate frontend domain layer implementation for __USE_CASE_NAME_PASCAL_CASE__'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      run_scripts:
+        description: 'Run all frontend domain layer validation checks'
+        scripts:
+          - name: 'TypeScript Compilation'
+            command: 'npx tsc --noEmit --project tsconfig.json'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'ESLint Check'
+            command: 'npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Unit Tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Clean Architecture Rules Check'
+            command: 'npm run arch:check -- --layer=domain --feature=__FEATURE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit Domain Layer'
+            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ frontend domain layer"'
+            workingDirectory: '__PROJECT_NAME__'
+
+# ============= END DOMAIN STEPS FRONTEND SECTION =============
