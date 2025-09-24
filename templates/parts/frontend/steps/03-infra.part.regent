@@ -78,7 +78,7 @@
     # === STEP 3: CREATE FAILING TESTS (RED PHASE) ===
     - id: 'create-infra-failing-tests-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
-      description: 'Create failing tests for Fetch__USE_CASE_NAME_PASCAL_CASE__Client infrastructure implementation (RED)'
+      description: 'Create failing tests for FetchHttpAdapter infrastructure implementation (RED)'
       status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
       rlhf_score: null # -2, -1, 0, 1, 2
       execution_log: ''
@@ -88,31 +88,27 @@
           query: 'test driven development red phase vitest frontend fetch api mocking'
           url: 'https://github.com/...'
           description: 'TDD RED phase patterns for frontend infrastructure with Vitest.'
-      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/http/fetch-__USE_CASE_NAME_KEBAB_CASE__-client.spec.ts'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/http/fetch-http-adapter.spec.ts'
       template: |
         import { describe, it, expect, beforeEach, vi, afterEach, type MockedFunction } from 'vitest'
-        import type {
-          __USE_CASE_NAME_PASCAL_CASE__HttpClient,
-          HttpRequest,
-          HttpResponse
-        } from '../../data/protocols/__USE_CASE_NAME_KEBAB_CASE__-http-client'
-        import { Fetch__USE_CASE_NAME_PASCAL_CASE__Client } from './fetch-__USE_CASE_NAME_KEBAB_CASE__-client'
+        import type { HttpClient, HttpRequest, HttpResponse } from '@/data/protocols/http'
+        import { FetchHttpAdapter } from './fetch-http-adapter'
 
         /**
-         * TDD Tests for Fetch__USE_CASE_NAME_PASCAL_CASE__Client infrastructure implementation
+         * TDD Tests for FetchHttpAdapter infrastructure implementation
          * Following RED-GREEN-REFACTOR cycle for frontend HTTP operations
          *
          * @testType Unit Test - Infrastructure Layer with Mocked Fetch
          * @phase RED - These tests should FAIL initially
          */
-        describe('Fetch__USE_CASE_NAME_PASCAL_CASE__Client (TDD RED Phase)', () => {
-          let sut: Fetch__USE_CASE_NAME_PASCAL_CASE__Client
+        describe('FetchHttpAdapter (TDD RED Phase)', () => {
+          let sut: FetchHttpAdapter
           let mockFetch: MockedFunction<typeof fetch>
 
           beforeEach(() => {
             mockFetch = vi.fn()
             global.fetch = mockFetch
-            sut = new Fetch__USE_CASE_NAME_PASCAL_CASE__Client('https://api.example.com')
+            sut = new FetchHttpAdapter()
           })
 
           afterEach(() => {
@@ -120,9 +116,9 @@
           })
 
           describe('RED Phase - These should FAIL', () => {
-            it('should implement __USE_CASE_NAME_PASCAL_CASE__HttpClient interface', () => {
-              // RED: This will fail because Fetch__USE_CASE_NAME_PASCAL_CASE__Client doesn't exist yet
-              expect(sut).toBeInstanceOf(Fetch__USE_CASE_NAME_PASCAL_CASE__Client)
+            it('should implement HttpClient interface', () => {
+              // RED: This will fail because FetchHttpAdapter doesn't exist yet
+              expect(sut).toBeInstanceOf(FetchHttpAdapter)
               expect(typeof sut.request).toBe('function')
             })
 
@@ -130,7 +126,7 @@
               // RED: This will fail because implementation doesn't exist
               const httpRequest: HttpRequest = {
                 url: '/api/test',
-                method: 'GET',
+                method: 'get',
                 headers: {
                   'Accept': 'application/json'
                 }
@@ -146,14 +142,19 @@
 
               mockFetch.mockResolvedValueOnce(mockResponse as any)
 
-              await sut.request(httpRequest)
+              const result = await sut.request(httpRequest)
 
-              expect(mockFetch).toHaveBeenCalledWith('https://api.example.com/api/test', {
-                method: 'GET',
+              expect(mockFetch).toHaveBeenCalledWith('/api/test', {
+                method: 'get',
                 headers: {
-                  'Content-Type': 'application/json',
                   'Accept': 'application/json'
-                }
+                },
+                body: undefined
+              })
+
+              expect(result).toEqual({
+                statusCode: 200,
+                body: { data: 'test' }
               })
             })
 
@@ -360,220 +361,69 @@
     # === STEP 4: CREATE HTTP CLIENT IMPLEMENTATION (GREEN PHASE) ===
     - id: 'create-http-client-implementation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
-      description: 'Create Fetch__USE_CASE_NAME_PASCAL_CASE__Client implementation to make tests pass (GREEN)'
+      description: 'Create FetchHttpAdapter implementation to make tests pass (GREEN)'
       status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
       rlhf_score: null # -2, -1, 0, 1, 2
       execution_log: ''
       references:
         - type: 'external_pattern'
           source: 'context7'
-          query: 'fetch api client implementation typescript frontend http'
+          query: 'fetch api adapter implementation typescript frontend http'
           url: 'https://github.com/...'
-          description: 'Fetch API client implementation patterns for frontend.'
+          description: 'Fetch API adapter implementation patterns for frontend.'
         - type: 'internal_code_analysis'
           source: 'serena'
           tool: 'find_symbol'
-          query: 'Fetch*Client'
-          description: 'Consistent with existing Fetch client implementations.'
-      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/http/fetch-__USE_CASE_NAME_KEBAB_CASE__-client.ts'
+          query: 'FetchHttpAdapter'
+          description: 'Consistent with existing HTTP adapter implementations.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/http/fetch-http-adapter.ts'
       template: |
-        import type {
-          __USE_CASE_NAME_PASCAL_CASE__HttpClient,
-          HttpRequest,
-          HttpResponse
-        } from '../../data/protocols/__USE_CASE_NAME_KEBAB_CASE__-http-client'
+        import type { HttpClient, HttpRequest, HttpResponse, HttpStatusCode } from '@/data/protocols/http'
 
         /**
-         * Fetch API implementation of __USE_CASE_NAME_PASCAL_CASE__HttpClient
+         * Fetch API implementation of HttpClient protocol
          * Concrete adapter for HTTP operations using native Fetch API
          *
          * @implementation Infrastructure Layer - HTTP Adapter
          * @pattern Adapter Pattern - Fetch API implementation
          * @layer Infrastructure - External service communication
          */
-        export class Fetch__USE_CASE_NAME_PASCAL_CASE__Client implements __USE_CASE_NAME_PASCAL_CASE__HttpClient {
-          private readonly baseUrl: string
-          private readonly defaultTimeout: number
-          private readonly defaultHeaders: Record<string, string>
-
-          /**
-           * Creates a new Fetch HTTP client for __USE_CASE_NAME_PASCAL_CASE__
-           *
-           * @param baseUrl - Base URL for API requests (defaults to env variable)
-           * @param timeout - Request timeout in milliseconds (default: 30000)
-           */
-          constructor(
-            baseUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || '',
-            timeout: number = 30000
-          ) {
-            this.baseUrl = baseUrl.replace(/\/$/, '') // Remove trailing slash
-            this.defaultTimeout = timeout
-            this.defaultHeaders = {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            }
-          }
-
+        export class FetchHttpAdapter implements HttpClient {
           /**
            * Execute HTTP request using Fetch API
            *
-           * @param request - HTTP request configuration
-           * @returns Promise with HTTP response
-           * @throws Error if request fails or times out
+           * @param data - HTTP request configuration
+           * @returns Promise with HTTP response following HttpClient protocol
            */
-          async request<T = unknown>(request: HttpRequest): Promise<HttpResponse<T>> {
-            const url = this.buildUrl(request.url)
-            const config = this.buildRequestConfig(request)
+          async request(data: HttpRequest): Promise<HttpResponse> {
+            let response: Response
 
             try {
-              const response = await this.executeWithTimeout(fetch(url, config))
-
-              const data = await this.parseResponse<T>(response)
-
-              return {
-                data,
-                status: response.status,
-                statusText: response.statusText,
-                headers: this.extractHeaders(response)
-              }
-            } catch (error) {
-              throw this.handleRequestError(error, request)
-            }
-          }
-
-          /**
-           * Build complete URL from base URL and request path
-           *
-           * @private
-           * @param path - Request path
-           * @returns Complete URL
-           */
-          private buildUrl(path: string): string {
-            // Handle absolute URLs
-            if (path.startsWith('http://') || path.startsWith('https://')) {
-              return path
-            }
-
-            // Handle relative paths
-            const cleanPath = path.startsWith('/') ? path : `/${path}`
-            return `${this.baseUrl}${cleanPath}`
-          }
-
-          /**
-           * Build Fetch API request configuration
-           *
-           * @private
-           * @param request - HTTP request
-           * @returns Fetch request configuration
-           */
-          private buildRequestConfig(request: HttpRequest): RequestInit {
-            const headers = {
-              ...this.defaultHeaders,
-              ...request.headers
-            }
-
-            const config: RequestInit = {
-              method: request.method,
-              headers,
-              signal: request.signal
-            }
-
-            // Add body for non-GET requests
-            if (request.body && request.method !== 'GET') {
-              config.body = typeof request.body === 'string'
-                ? request.body
-                : JSON.stringify(request.body)
-            }
-
-            return config
-          }
-
-          /**
-           * Execute request with timeout
-           *
-           * @private
-           * @param fetchPromise - Fetch promise
-           * @returns Response with timeout handling
-           */
-          private async executeWithTimeout(fetchPromise: Promise<Response>): Promise<Response> {
-            const timeoutPromise = new Promise<never>((_, reject) => {
-              setTimeout(() => reject(new Error('Request timeout')), this.defaultTimeout)
-            })
-
-            return Promise.race([fetchPromise, timeoutPromise])
-          }
-
-          /**
-           * Parse HTTP response data based on content type
-           *
-           * @private
-           * @param response - Fetch response
-           * @returns Parsed response data
-           */
-          private async parseResponse<T>(response: Response): Promise<T> {
-            const contentType = response.headers.get('content-type') || ''
-
-            if (contentType.includes('application/json')) {
-              return await response.json()
-            }
-
-            if (contentType.includes('text/')) {
-              return await response.text() as unknown as T
-            }
-
-            // For other content types, return as blob
-            const blob = await response.blob()
-            return blob as unknown as T
-          }
-
-          /**
-           * Extract headers from Fetch response
-           *
-           * @private
-           * @param response - Fetch response
-           * @returns Headers object
-           */
-          private extractHeaders(response: Response): Record<string, string> {
-            const headers: Record<string, string> = {}
-
-            response.headers.forEach((value, key) => {
-              headers[key] = value
-            })
-
-            return headers
-          }
-
-          /**
-           * Handle and transform request errors
-           *
-           * @private
-           * @param error - Original error
-           * @param request - Original request for context
-           * @returns Transformed error
-           */
-          private handleRequestError(error: any, request: HttpRequest): Error {
-            if (error.name === 'AbortError') {
-              return new Error('Request was cancelled')
-            }
-
-            if (error.message.includes('timeout')) {
-              return new Error(`Request timeout after ${this.defaultTimeout}ms`)
-            }
-
-            if (error.message.includes('fetch')) {
-              return new Error(`Network error: ${error.message}`)
-            }
-
-            // Log error for debugging in development
-            if (process.env.NODE_ENV === 'development') {
-              console.error('HTTP Client Error:', {
-                error: error.message,
-                url: request.url,
-                method: request.method
+              response = await fetch(data.url, {
+                method: data.method,
+                body: data.body ? JSON.stringify(data.body) : undefined,
+                headers: data.headers
               })
+            } catch (error) {
+              // Handle network errors - return as if it was a server error
+              return {
+                statusCode: 500,
+                body: undefined
+              }
             }
 
-            return new Error(`HTTP request failed: ${error.message}`)
+            let body: any
+            try {
+              body = await response.json()
+            } catch (error) {
+              // If JSON parsing fails, return undefined body
+              body = undefined
+            }
+
+            return {
+              statusCode: response.status,
+              body
+            }
           }
         }
 
@@ -607,169 +457,67 @@
           query: 'browser cache implementation localStorage sessionStorage typescript'
           url: 'https://github.com/...'
           description: 'Browser storage and cache implementation patterns.'
-      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/cache/browser-__USE_CASE_NAME_KEBAB_CASE__-cache.ts'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/cache/browser-cache-adapter.ts'
       template: |
-        import type {
-          __USE_CASE_NAME_PASCAL_CASE__CacheClient
-        } from '../../data/protocols/__USE_CASE_NAME_KEBAB_CASE__-http-client'
+        /**
+         * Generic cache interface for browser storage operations
+         */
+        export interface CacheClient {
+          get<T = unknown>(key: string): Promise<T | null>
+          set<T = unknown>(key: string, value: T, ttl?: number): Promise<void>
+          invalidate(key: string): Promise<void>
+        }
 
         /**
          * Browser cache implementation using localStorage/sessionStorage
-         * Provides caching capabilities for frontend __USE_CASE_NAME_PASCAL_CASE__ operations
+         * Provides caching capabilities for frontend operations
          *
          * @implementation Infrastructure Layer - Cache Adapter
          * @pattern Adapter Pattern - Browser storage implementation
          * @layer Infrastructure - Browser storage communication
          */
-        export class Browser__USE_CASE_NAME_PASCAL_CASE__Cache implements __USE_CASE_NAME_PASCAL_CASE__CacheClient {
-          private readonly storageType: 'local' | 'session'
-          private readonly keyPrefix: string
+        export class BrowserCacheAdapter implements CacheClient {
+          private readonly storage: Storage
 
-          /**
-           * Creates a new browser cache for __USE_CASE_NAME_PASCAL_CASE__
-           *
-           * @param storageType - Type of storage ('local' or 'session')
-           * @param keyPrefix - Prefix for cache keys (default: '__USE_CASE_NAME_KEBAB_CASE__')
-           */
-          constructor(
-            storageType: 'local' | 'session' = 'local',
-            keyPrefix: string = '__USE_CASE_NAME_KEBAB_CASE__'
-          ) {
-            this.storageType = storageType
-            this.keyPrefix = keyPrefix
+          constructor() {
+            this.storage = typeof window !== 'undefined' ? window.localStorage : {} as Storage
           }
 
-          /**
-           * Get cached data by key
-           *
-           * @param key - Cache key
-           * @returns Promise with cached data or null if not found/expired
-           */
           async get<T = unknown>(key: string): Promise<T | null> {
             try {
-              const storage = this.getStorage()
-              const fullKey = this.buildKey(key)
-              const cachedItem = storage.getItem(fullKey)
+              const item = this.storage.getItem(key)
+              if (!item) return null
 
-              if (!cachedItem) {
-                return null
-              }
-
-              const { data, expiresAt } = JSON.parse(cachedItem)
-
-              // Check if item has expired
+              const { data, expiresAt } = JSON.parse(item)
               if (expiresAt && Date.now() > expiresAt) {
                 await this.invalidate(key)
                 return null
               }
 
               return data as T
-            } catch (error) {
-              // Return null on any error (storage not available, JSON parse error, etc.)
+            } catch {
               return null
             }
           }
 
-          /**
-           * Set cached data with optional TTL
-           *
-           * @param key - Cache key
-           * @param value - Data to cache
-           * @param ttl - Time to live in milliseconds (optional)
-           */
           async set<T = unknown>(key: string, value: T, ttl?: number): Promise<void> {
             try {
-              const storage = this.getStorage()
-              const fullKey = this.buildKey(key)
-
-              const cacheItem = {
+              const item = {
                 data: value,
-                cachedAt: Date.now(),
                 expiresAt: ttl ? Date.now() + ttl : null
               }
-
-              storage.setItem(fullKey, JSON.stringify(cacheItem))
-            } catch (error) {
-              // Silently fail if storage is not available or quota exceeded
-              if (process.env.NODE_ENV === 'development') {
-                console.warn('Cache set failed:', error)
-              }
+              this.storage.setItem(key, JSON.stringify(item))
+            } catch {
+              // Silent failure
             }
           }
 
-          /**
-           * Invalidate cached data by key
-           *
-           * @param key - Cache key to invalidate
-           */
           async invalidate(key: string): Promise<void> {
             try {
-              const storage = this.getStorage()
-              const fullKey = this.buildKey(key)
-
-              storage.removeItem(fullKey)
-            } catch (error) {
-              // Silently fail if storage is not available
-              if (process.env.NODE_ENV === 'development') {
-                console.warn('Cache invalidation failed:', error)
-              }
+              this.storage.removeItem(key)
+            } catch {
+              // Silent failure
             }
-          }
-
-          /**
-           * Clear all cached data for this use case
-           *
-           * @returns Promise when cleanup is complete
-           */
-          async clear(): Promise<void> {
-            try {
-              const storage = this.getStorage()
-              const keysToRemove: string[] = []
-
-              // Find all keys with our prefix
-              for (let i = 0; i < storage.length; i++) {
-                const key = storage.key(i)
-                if (key && key.startsWith(this.keyPrefix)) {
-                  keysToRemove.push(key)
-                }
-              }
-
-              // Remove all matching keys
-              keysToRemove.forEach(key => storage.removeItem(key))
-            } catch (error) {
-              // Silently fail if storage is not available
-              if (process.env.NODE_ENV === 'development') {
-                console.warn('Cache clear failed:', error)
-              }
-            }
-          }
-
-          /**
-           * Get appropriate storage implementation
-           *
-           * @private
-           * @returns Storage object (localStorage or sessionStorage)
-           * @throws Error if storage is not available
-           */
-          private getStorage(): Storage {
-            if (typeof window === 'undefined') {
-              throw new Error('Browser storage not available in server environment')
-            }
-
-            return this.storageType === 'local'
-              ? window.localStorage
-              : window.sessionStorage
-          }
-
-          /**
-           * Build full cache key with prefix
-           *
-           * @private
-           * @param key - Original key
-           * @returns Full key with prefix
-           */
-          private buildKey(key: string): string {
-            return `${this.keyPrefix}:${key}`
           }
         }
 
@@ -786,534 +534,109 @@
           query: 'browser storage adapter patterns typescript frontend'
           url: 'https://github.com/...'
           description: 'Browser storage adapter patterns for persistence.'
-      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/storage/browser-__USE_CASE_NAME_KEBAB_CASE__-storage.ts'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/storage/browser-storage-adapter.ts'
       template: |
         /**
-         * Storage protocol for __USE_CASE_NAME_PASCAL_CASE__ data persistence
-         * Defines contract for browser storage operations
-         */
-        export interface __USE_CASE_NAME_PASCAL_CASE__Storage {
-          /**
-           * Store data persistently
-           */
-          store<T = unknown>(key: string, data: T): Promise<void>
-
-          /**
-           * Retrieve stored data
-           */
-          retrieve<T = unknown>(key: string): Promise<T | null>
-
-          /**
-           * Remove stored data
-           */
-          remove(key: string): Promise<void>
-
-          /**
-           * Check if key exists in storage
-           */
-          exists(key: string): Promise<boolean>
-        }
-
-        /**
-         * Browser storage adapter implementation for __USE_CASE_NAME_PASCAL_CASE__
-         * Provides persistent storage capabilities using localStorage/sessionStorage
+         * Browser storage adapter for persistent data
+         * Simple localStorage wrapper following the established patterns
          *
          * @implementation Infrastructure Layer - Storage Adapter
          * @pattern Adapter Pattern - Browser storage implementation
          * @layer Infrastructure - Persistent storage operations
          */
-        export class Browser__USE_CASE_NAME_PASCAL_CASE__Storage implements __USE_CASE_NAME_PASCAL_CASE__Storage {
-          private readonly storageType: 'local' | 'session'
-          private readonly keyPrefix: string
+        export class BrowserStorageAdapter {
+          private readonly storage: Storage
 
-          /**
-           * Creates a new browser storage adapter for __USE_CASE_NAME_PASCAL_CASE__
-           *
-           * @param storageType - Type of storage ('local' or 'session')
-           * @param keyPrefix - Prefix for storage keys (default: '__USE_CASE_NAME_KEBAB_CASE__-storage')
-           */
-          constructor(
-            storageType: 'local' | 'session' = 'local',
-            keyPrefix: string = '__USE_CASE_NAME_KEBAB_CASE__-storage'
-          ) {
-            this.storageType = storageType
-            this.keyPrefix = keyPrefix
+          constructor() {
+            this.storage = typeof window !== 'undefined' ? window.localStorage : {} as Storage
           }
 
-          /**
-           * Store data persistently in browser storage
-           *
-           * @param key - Storage key
-           * @param data - Data to store
-           */
-          async store<T = unknown>(key: string, data: T): Promise<void> {
+          set(key: string, value: any): void {
             try {
-              const storage = this.getStorage()
-              const fullKey = this.buildKey(key)
-
-              const storageItem = {
-                data,
-                storedAt: new Date().toISOString(),
-                version: '1.0'
-              }
-
-              storage.setItem(fullKey, JSON.stringify(storageItem))
-            } catch (error) {
-              throw new Error(`Failed to store data: ${error instanceof Error ? error.message : 'Unknown error'}`)
+              this.storage.setItem(key, JSON.stringify(value))
+            } catch {
+              // Silent failure
             }
           }
 
-          /**
-           * Retrieve stored data from browser storage
-           *
-           * @param key - Storage key
-           * @returns Stored data or null if not found
-           */
-          async retrieve<T = unknown>(key: string): Promise<T | null> {
+          get<T = unknown>(key: string): T | null {
             try {
-              const storage = this.getStorage()
-              const fullKey = this.buildKey(key)
-              const storedItem = storage.getItem(fullKey)
-
-              if (!storedItem) {
-                return null
-              }
-
-              const { data } = JSON.parse(storedItem)
-              return data as T
-            } catch (error) {
-              // Return null on any error (storage not available, JSON parse error, etc.)
+              const item = this.storage.getItem(key)
+              return item ? JSON.parse(item) : null
+            } catch {
               return null
             }
           }
 
-          /**
-           * Remove stored data from browser storage
-           *
-           * @param key - Storage key to remove
-           */
-          async remove(key: string): Promise<void> {
+          remove(key: string): void {
             try {
-              const storage = this.getStorage()
-              const fullKey = this.buildKey(key)
-
-              storage.removeItem(fullKey)
-            } catch (error) {
-              throw new Error(`Failed to remove data: ${error instanceof Error ? error.message : 'Unknown error'}`)
+              this.storage.removeItem(key)
+            } catch {
+              // Silent failure
             }
-          }
-
-          /**
-           * Check if key exists in browser storage
-           *
-           * @param key - Storage key to check
-           * @returns Promise with existence status
-           */
-          async exists(key: string): Promise<boolean> {
-            try {
-              const storage = this.getStorage()
-              const fullKey = this.buildKey(key)
-
-              return storage.getItem(fullKey) !== null
-            } catch (error) {
-              return false
-            }
-          }
-
-          /**
-           * Get all keys for this storage adapter
-           *
-           * @returns Array of keys (without prefix)
-           */
-          async getKeys(): Promise<string[]> {
-            try {
-              const storage = this.getStorage()
-              const keys: string[] = []
-
-              for (let i = 0; i < storage.length; i++) {
-                const key = storage.key(i)
-                if (key && key.startsWith(`${this.keyPrefix}:`)) {
-                  // Remove prefix to return original key
-                  keys.push(key.substring(`${this.keyPrefix}:`.length))
-                }
-              }
-
-              return keys
-            } catch (error) {
-              return []
-            }
-          }
-
-          /**
-           * Clear all data for this storage adapter
-           */
-          async clear(): Promise<void> {
-            try {
-              const keys = await this.getKeys()
-
-              for (const key of keys) {
-                await this.remove(key)
-              }
-            } catch (error) {
-              throw new Error(`Failed to clear storage: ${error instanceof Error ? error.message : 'Unknown error'}`)
-            }
-          }
-
-          /**
-           * Get appropriate storage implementation
-           *
-           * @private
-           * @returns Storage object (localStorage or sessionStorage)
-           * @throws Error if storage is not available
-           */
-          private getStorage(): Storage {
-            if (typeof window === 'undefined') {
-              throw new Error('Browser storage not available in server environment')
-            }
-
-            return this.storageType === 'local'
-              ? window.localStorage
-              : window.sessionStorage
-          }
-
-          /**
-           * Build full storage key with prefix
-           *
-           * @private
-           * @param key - Original key
-           * @returns Full key with prefix
-           */
-          private buildKey(key: string): string {
-            return `${this.keyPrefix}:${key}`
           }
         }
 
     # === STEP 8: REFACTOR IMPLEMENTATION (REFACTOR PHASE) ===
     - id: 'refactor-infra-implementation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
-      description: 'Refactor infrastructure implementations for better design (REFACTOR)'
+      description: 'Add error handling and validation to HTTP adapter (REFACTOR)'
       status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
       rlhf_score: null # -2, -1, 0, 1, 2
       execution_log: ''
       references:
         - type: 'external_pattern'
           source: 'context7'
-          query: 'refactoring patterns clean code infrastructure typescript'
+          query: 'http client error handling frontend typescript'
           url: 'https://github.com/...'
-          description: 'Refactoring patterns for cleaner infrastructure code.'
-      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/http/fetch-__USE_CASE_NAME_KEBAB_CASE__-client.ts'
+          description: 'Error handling patterns for HTTP clients.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/http/fetch-http-adapter.ts'
       template: |
-        import type {
-          __USE_CASE_NAME_PASCAL_CASE__HttpClient,
-          HttpRequest,
-          HttpResponse
-        } from '../../data/protocols/__USE_CASE_NAME_KEBAB_CASE__-http-client'
+        import type { HttpClient, HttpRequest, HttpResponse } from '@/data/protocols/http'
 
         /**
-         * Enhanced Fetch API implementation with improved error handling and configuration
-         * Refactored for better maintainability and testing
+         * Enhanced Fetch API implementation with better error handling
+         * Refactored for production use following established patterns
          *
          * @implementation Infrastructure Layer - HTTP Adapter (Refactored)
          * @pattern Adapter Pattern - Enhanced Fetch API implementation
          * @layer Infrastructure - Robust external service communication
          */
-        export class Fetch__USE_CASE_NAME_PASCAL_CASE__Client implements __USE_CASE_NAME_PASCAL_CASE__HttpClient {
-          private static readonly DEFAULT_TIMEOUT = 30000
-          private static readonly DEFAULT_HEADERS = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          } as const
+        export class FetchHttpAdapter implements HttpClient {
+          async request(data: HttpRequest): Promise<HttpResponse> {
+            let response: Response
 
-          private readonly config: HttpClientConfig
-
-          /**
-           * Creates an enhanced Fetch HTTP client
-           *
-           * @param config - Client configuration options
-           */
-          constructor(config: Partial<HttpClientConfig> = {}) {
-            this.config = {
-              baseUrl: config.baseUrl || process.env.NEXT_PUBLIC_API_BASE_URL || '',
-              timeout: config.timeout || Fetch__USE_CASE_NAME_PASCAL_CASE__Client.DEFAULT_TIMEOUT,
-              headers: {
-                ...Fetch__USE_CASE_NAME_PASCAL_CASE__Client.DEFAULT_HEADERS,
-                ...(config.headers || {})
-              },
-              retries: config.retries || 0,
-              retryDelay: config.retryDelay || 1000
-            }
-          }
-
-          /**
-           * Execute HTTP request with retry logic and enhanced error handling
-           *
-           * @param request - HTTP request configuration
-           * @returns Promise with HTTP response
-           */
-          async request<T = unknown>(request: HttpRequest): Promise<HttpResponse<T>> {
-            const requestConfig = RequestBuilder.build(request, this.config)
-
-            return await RetryHandler.withRetry(
-              () => this.executeRequest<T>(requestConfig),
-              this.config.retries,
-              this.config.retryDelay
-            )
-          }
-
-          /**
-           * Execute single HTTP request
-           *
-           * @private
-           * @param config - Request configuration
-           * @returns HTTP response
-           */
-          private async executeRequest<T>(config: RequestConfig): Promise<HttpResponse<T>> {
             try {
-              const response = await TimeoutHandler.withTimeout(
-                fetch(config.url, config.init),
-                config.timeout
-              )
-
-              const data = await ResponseParser.parse<T>(response)
-
-              return ResponseBuilder.build(response, data)
+              response = await fetch(data.url, {
+                method: data.method,
+                body: data.body ? JSON.stringify(data.body) : undefined,
+                headers: data.headers
+              })
             } catch (error) {
-              throw ErrorTransformer.transform(error, config)
-            }
-          }
-        }
-
-        /**
-         * HTTP client configuration interface
-         */
-        interface HttpClientConfig {
-          baseUrl: string
-          timeout: number
-          headers: Record<string, string>
-          retries: number
-          retryDelay: number
-        }
-
-        /**
-         * Internal request configuration
-         */
-        interface RequestConfig {
-          url: string
-          init: RequestInit
-          timeout: number
-        }
-
-        /**
-         * Request configuration builder (Refactored)
-         */
-        class RequestBuilder {
-          static build(request: HttpRequest, config: HttpClientConfig): RequestConfig {
-            return {
-              url: this.buildUrl(request.url, config.baseUrl),
-              init: this.buildRequestInit(request, config.headers),
-              timeout: config.timeout
-            }
-          }
-
-          private static buildUrl(path: string, baseUrl: string): string {
-            if (path.startsWith('http://') || path.startsWith('https://')) {
-              return path
-            }
-
-            const cleanBaseUrl = baseUrl.replace(/\/$/, '')
-            const cleanPath = path.startsWith('/') ? path : `/${path}`
-            return `${cleanBaseUrl}${cleanPath}`
-          }
-
-          private static buildRequestInit(request: HttpRequest, defaultHeaders: Record<string, string>): RequestInit {
-            const headers = { ...defaultHeaders, ...request.headers }
-
-            const init: RequestInit = {
-              method: request.method,
-              headers,
-              signal: request.signal
-            }
-
-            if (request.body && request.method !== 'GET') {
-              init.body = typeof request.body === 'string'
-                ? request.body
-                : JSON.stringify(request.body)
-            }
-
-            return init
-          }
-        }
-
-        /**
-         * Timeout handling utilities (Refactored)
-         */
-        class TimeoutHandler {
-          static async withTimeout<T>(promise: Promise<T>, timeout: number): Promise<T> {
-            const timeoutPromise = new Promise<never>((_, reject) => {
-              setTimeout(() => reject(new TimeoutError(timeout)), timeout)
-            })
-
-            return Promise.race([promise, timeoutPromise])
-          }
-        }
-
-        /**
-         * Retry logic handler (Refactored)
-         */
-        class RetryHandler {
-          static async withRetry<T>(
-            operation: () => Promise<T>,
-            retries: number,
-            delay: number
-          ): Promise<T> {
-            for (let attempt = 0; attempt <= retries; attempt++) {
-              try {
-                return await operation()
-              } catch (error) {
-                if (attempt === retries || !this.isRetryableError(error)) {
-                  throw error
-                }
-
-                await this.delay(delay * (attempt + 1)) // Exponential backoff
+              // Network errors, CORS, etc.
+              return {
+                statusCode: 500,
+                body: undefined
               }
             }
 
-            // TypeScript satisfaction - should never reach here
-            throw new Error('Retry logic failed unexpectedly')
-          }
-
-          private static isRetryableError(error: any): boolean {
-            return (
-              error instanceof NetworkError ||
-              error instanceof TimeoutError ||
-              (error instanceof HttpError && error.status >= 500)
-            )
-          }
-
-          private static delay(ms: number): Promise<void> {
-            return new Promise(resolve => setTimeout(resolve, ms))
-          }
-        }
-
-        /**
-         * Response parsing utilities (Refactored)
-         */
-        class ResponseParser {
-          static async parse<T>(response: Response): Promise<T> {
-            const contentType = response.headers.get('content-type') || ''
-
-            if (contentType.includes('application/json')) {
-              return await response.json()
+            // Handle different response types
+            let body: any
+            try {
+              const contentType = response.headers.get('content-type')
+              if (contentType?.includes('application/json')) {
+                body = await response.json()
+              } else {
+                body = await response.text()
+              }
+            } catch (error) {
+              body = undefined
             }
 
-            if (contentType.includes('text/')) {
-              return await response.text() as unknown as T
-            }
-
-            if (contentType.includes('multipart/') || contentType.includes('application/octet-stream')) {
-              return await response.blob() as unknown as T
-            }
-
-            // Default to JSON parsing
-            return await response.json()
-          }
-        }
-
-        /**
-         * Response building utilities (Refactored)
-         */
-        class ResponseBuilder {
-          static build<T>(response: Response, data: T): HttpResponse<T> {
             return {
-              data,
-              status: response.status,
-              statusText: response.statusText,
-              headers: this.extractHeaders(response)
+              statusCode: response.status,
+              body
             }
-          }
-
-          private static extractHeaders(response: Response): Record<string, string> {
-            const headers: Record<string, string> = {}
-
-            response.headers.forEach((value, key) => {
-              headers[key] = value
-            })
-
-            return headers
-          }
-        }
-
-        /**
-         * Error transformation utilities (Refactored)
-         */
-        class ErrorTransformer {
-          static transform(error: any, config: RequestConfig): Error {
-            if (error instanceof NetworkError ||
-                error instanceof TimeoutError ||
-                error instanceof HttpError) {
-              return error
-            }
-
-            if (error.name === 'AbortError') {
-              return new RequestCancelledError()
-            }
-
-            if (error.message.includes('fetch')) {
-              return new NetworkError(`Network request failed: ${error.message}`)
-            }
-
-            // Log error for debugging in development
-            if (process.env.NODE_ENV === 'development') {
-              console.error('HTTP Client Error:', {
-                error: error.message,
-                stack: error.stack,
-                url: config.url,
-                method: config.init.method
-              })
-            }
-
-            return new HttpClientError(`Request failed: ${error.message}`)
-          }
-        }
-
-        /**
-         * Custom error classes for better error handling
-         */
-        export class HttpClientError extends Error {
-          constructor(message: string) {
-            super(message)
-            this.name = 'HttpClientError'
-          }
-        }
-
-        export class NetworkError extends Error {
-          constructor(message: string) {
-            super(message)
-            this.name = 'NetworkError'
-          }
-        }
-
-        export class TimeoutError extends Error {
-          constructor(timeout: number) {
-            super(`Request timeout after ${timeout}ms`)
-            this.name = 'TimeoutError'
-          }
-        }
-
-        export class RequestCancelledError extends Error {
-          constructor() {
-            super('Request was cancelled')
-            this.name = 'RequestCancelledError'
-          }
-        }
-
-        export class HttpError extends Error {
-          public readonly status: number
-
-          constructor(status: number, message: string) {
-            super(message)
-            this.name = 'HttpError'
-            this.status = status
           }
         }
 
