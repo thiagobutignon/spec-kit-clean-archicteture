@@ -16,7 +16,44 @@
   # ------------------------------------------------------------------------------
 
   data_steps:
-    # === STEP 1: CREATE DATA STRUCTURE (FULLSTACK) ===
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create feature branch for __USE_CASE_NAME_PASCAL_CASE__ fullstack data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Following Git Flow pattern for feature development.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'git workflow feature branch naming conventions fullstack'
+          url: 'https://github.com/...'
+          description: 'Git Flow and feature branch best practices for fullstack development.'
+      run_scripts:
+        description: 'Create and checkout feature branch for fullstack data layer development'
+        scripts:
+          - name: 'Create feature branch'
+            command: 'git checkout -b feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Verify branch creation'
+            command: 'git branch --show-current'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Push feature branch'
+            command: 'git push -u origin feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+      validation_script: |
+        current_branch=$(git branch --show-current)
+        expected_branch="feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-fullstack"
+        if [ "$current_branch" != "$expected_branch" ]; then
+          echo "❌ ERROR: Expected branch $expected_branch, but current branch is $current_branch"
+          exit 1
+        fi
+        echo "✅ Feature branch created successfully: $current_branch"
+
+    # === STEP 2: CREATE DATA STRUCTURE (FULLSTACK) ===
     - id: 'create-data-structure-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'folder'
       description: 'Create fullstack data layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ (backend + frontend)'
@@ -41,7 +78,7 @@
             - 'dto'              # Data transfer objects for API communication
             - 'mappers'          # Data mappers for transformations
 
-    # === STEP 2: CREATE SHARED PROTOCOLS (RED PHASE) ===
+    # === STEP 3: CREATE SHARED PROTOCOLS (RED PHASE) ===
     - id: 'create-shared-protocols-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create shared protocol interfaces for fullstack __USE_CASE_NAME_PASCAL_CASE__ data layer (RED)'
@@ -170,7 +207,7 @@
           headers: Record<string, string>
         }
 
-    # === STEP 3: CREATE FAILING TESTS - BACKEND (RED PHASE) ===
+    # === STEP 4: CREATE FAILING TESTS - BACKEND (RED PHASE) ===
     - id: 'create-backend-failing-tests-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create failing tests for Db__USE_CASE_NAME_PASCAL_CASE__ backend implementation (RED)'
@@ -400,7 +437,7 @@
         run_failing_backend_tests
         stage_backend_red_phase
 
-    # === STEP 4: CREATE FAILING TESTS - FRONTEND (RED PHASE) ===
+    # === STEP 5: CREATE FAILING TESTS - FRONTEND (RED PHASE) ===
     - id: 'create-frontend-failing-tests-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create failing tests for Remote__USE_CASE_NAME_PASCAL_CASE__ frontend implementation (RED)'
@@ -668,7 +705,7 @@
         run_failing_frontend_tests
         stage_frontend_red_phase
 
-    # === STEP 5: CREATE BACKEND IMPLEMENTATION (GREEN PHASE) ===
+    # === STEP 6: CREATE BACKEND IMPLEMENTATION (GREEN PHASE) ===
     - id: 'create-backend-implementation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create Db__USE_CASE_NAME_PASCAL_CASE__ backend implementation to make tests pass (GREEN)'
@@ -842,7 +879,7 @@
           }
         }
 
-    # === STEP 6: CREATE FRONTEND IMPLEMENTATION (GREEN PHASE) ===
+    # === STEP 7: CREATE FRONTEND IMPLEMENTATION (GREEN PHASE) ===
     - id: 'create-frontend-implementation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create Remote__USE_CASE_NAME_PASCAL_CASE__ frontend implementation to make tests pass (GREEN)'
@@ -1052,7 +1089,7 @@
           }
         }
 
-    # === STEP 7: CREATE DTO MAPPERS ===
+    # === STEP 8: CREATE DTO MAPPERS ===
     - id: 'create-dto-mappers-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create DTO mappers for API communication between frontend and backend'
@@ -1190,7 +1227,7 @@
           }
         } as const
 
-    # === STEP 8: RUN PASSING TESTS (GREEN PHASE) ===
+    # === STEP 9: RUN PASSING TESTS (GREEN PHASE) ===
     - id: 'run-passing-tests-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Verify all tests pass with both backend and frontend implementations (GREEN phase)'
@@ -1210,7 +1247,7 @@
             command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ fullstack data layer (GREEN)"'
             workingDirectory: '__PROJECT_NAME__'
 
-    # === STEP 9: REFACTOR IMPLEMENTATIONS (REFACTOR PHASE) ===
+    # === STEP 10: REFACTOR IMPLEMENTATIONS (REFACTOR PHASE) ===
     - id: 'refactor-fullstack-implementations-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Refactor both backend and frontend implementations for better design (REFACTOR)'
@@ -1450,7 +1487,7 @@
           }
         }
 
-    # === STEP 10: CREATE INTEGRATION TESTS (REFACTOR PHASE) ===
+    # === STEP 11: CREATE INTEGRATION TESTS (REFACTOR PHASE) ===
     - id: 'create-fullstack-integration-tests-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create fullstack integration tests covering complete frontend-to-backend flow (REFACTOR)'
@@ -1760,7 +1797,7 @@
           })
         })
 
-    # === STEP 11: FINAL VALIDATION (REFACTOR PHASE) ===
+    # === STEP 12: FINAL VALIDATION (REFACTOR PHASE) ===
     - id: 'validate-refactored-fullstack-implementation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Run all tests and validations after refactoring fullstack implementation (REFACTOR phase complete)'
@@ -1788,5 +1825,393 @@
           - name: 'Commit refactored implementation'
             command: 'git add . && git commit -m "refactor(__FEATURE_NAME_KEBAB_CASE__): improve __USE_CASE_NAME_KEBAB_CASE__ fullstack data layer design (REFACTOR)"'
             workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 13: OPEN PULL REQUEST ===
+    - id: 'open-pull-request-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Open Pull Request for fullstack data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'PULL_REQUEST_TEMPLATE.md'
+          description: 'Following PR template and code review guidelines.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'pull request best practices fullstack code review'
+          url: 'https://github.com/...'
+          description: 'PR and code review best practices for fullstack development.'
+      run_scripts:
+        description: 'Create pull request with comprehensive description and checklist'
+        scripts:
+          - name: 'Push final changes'
+            command: 'git push origin feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Create Pull Request'
+            command: |
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ fullstack data layer with TDD" \
+                --body "## Summary
+
+              Implements complete fullstack data layer for __USE_CASE_NAME_PASCAL_CASE__ use case following Clean Architecture and TDD methodology.
+
+              ### 🚀 Features Implemented
+
+              #### Backend Data Layer
+              - ✅ Db__USE_CASE_NAME_PASCAL_CASE__ implementation with database operations
+              - ✅ Repository protocol interfaces for dependency inversion
+              - ✅ Database transaction support and error handling
+              - ✅ Type-safe implementation with TypeScript
+              - ✅ Prisma ORM integration for PostgreSQL
+
+              #### Frontend Data Layer
+              - ✅ Remote__USE_CASE_NAME_PASCAL_CASE__ implementation with HTTP/API communication
+              - ✅ HTTP client protocol interfaces for dependency inversion
+              - ✅ Network error handling and retry logic
+              - ✅ Fetch API adapter for HTTP operations
+
+              #### Shared Components
+              - ✅ DTO mappers for API communication
+              - ✅ Shared protocol interfaces for both backend and frontend
+              - ✅ Complete TDD cycle (RED-GREEN-REFACTOR) with comprehensive tests
+              - ✅ Integration tests covering fullstack flow
+
+              ### 🧪 Test Coverage
+              - Unit tests for both Db__USE_CASE_NAME_PASCAL_CASE__ and Remote__USE_CASE_NAME_PASCAL_CASE__ implementations
+              - Integration tests with mocked dependencies
+              - Fullstack integration tests (frontend → API → database)
+              - Error scenario testing for both backend and frontend
+              - Type safety and data transformation tests
+              - Complete TDD methodology validation
+
+              ### 🏗️ Architecture Compliance
+              - ✅ Clean Architecture layers respected (backend + frontend)
+              - ✅ Dependency inversion with protocol interfaces
+              - ✅ Fullstack-specific patterns (Db prefix, Remote prefix)
+              - ✅ Domain types shared between backend and frontend
+              - ✅ Error boundaries and graceful degradation
+              - ✅ API communication with proper DTOs
+
+              ### 📋 Code Review Checklist
+              - [ ] All tests passing (backend + frontend)
+              - [ ] TypeScript compilation clean (npx tsc --noEmit)
+              - [ ] ESLint validation passed (npm run lint)
+              - [ ] Next.js build successful (npm run build)
+              - [ ] Clean Architecture principles followed
+              - [ ] No dependency violations between layers
+              - [ ] Error handling comprehensive for both stacks
+              - [ ] Code follows project conventions and patterns
+              - [ ] Documentation and JSDoc comments present
+              - [ ] Performance considerations addressed
+              - [ ] Security best practices followed
+
+              ### 🔍 Review Focus Areas
+              1. **Backend Data Layer**: Review Db__USE_CASE_NAME_PASCAL_CASE__ class and database operations
+              2. **Frontend Data Layer**: Review Remote__USE_CASE_NAME_PASCAL_CASE__ class and HTTP communication
+              3. **Shared Protocols**: Validate protocol interfaces and dependency inversion
+              4. **DTO Mapping**: Ensure proper data transformation between layers
+              5. **Error Handling**: Validate error transformation for both stacks
+              6. **Integration**: Confirm fullstack flow works end-to-end
+              7. **Type Safety**: Verify TypeScript types across the stack
+
+              ### 📊 Metrics
+              - Test Coverage: Aiming for >95% coverage (backend + frontend)
+              - TypeScript: Strict compilation with no any types
+              - ESLint: Zero warnings/errors
+              - Bundle Size Impact: Minimal (data layer only)
+              - Database Performance: Efficient queries with Prisma
+              - API Performance: Optimized HTTP communication
+
+              ---
+              🤖 Generated with TDD methodology and Clean Architecture best practices for fullstack development" \
+                --draft
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Display PR URL'
+            command: 'gh pr view --web'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 14: AI CODE REVIEW ===
+    - id: 'ai-code-review-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'AI-powered code review and quality analysis for fullstack data layer'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'CODE_REVIEW_GUIDELINES.md'
+          description: 'Automated code review standards and quality gates.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'automated code review fullstack clean architecture typescript next.js'
+          url: 'https://github.com/...'
+          description: 'AI code review patterns and quality metrics for fullstack applications.'
+      ai_review_prompts:
+        architecture_review: |
+          Please review this fullstack data layer implementation for Clean Architecture compliance:
+
+          📁 Files to Review:
+          - src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db-__USE_CASE_NAME_KEBAB_CASE__.ts
+          - src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.ts
+          - src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/protocols/__USE_CASE_NAME_KEBAB_CASE__-protocols.ts
+          - src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/dto/__USE_CASE_NAME_KEBAB_CASE__-dto.ts
+
+          🎯 Review Criteria:
+          1. **Clean Architecture Compliance**: Verify dependency direction across fullstack (data → domain)
+          2. **Fullstack Patterns**: Confirm Db/Remote prefixes, protocol sharing, DTO usage
+          3. **Error Handling**: Evaluate error transformation for both backend and frontend
+          4. **Type Safety**: Check TypeScript usage across the entire stack
+          5. **Testing Strategy**: Review TDD implementation for both sides
+
+          🔍 Focus Areas:
+          - No imports from outer layers across the stack
+          - Protocol interfaces properly shared between backend and frontend
+          - Error handling transforms infrastructure errors to domain errors (both stacks)
+          - Data transformations preserve type safety across API boundaries
+          - Database operations follow repository pattern with proper abstractions
+          - HTTP client follows fullstack best practices
+
+          Please provide specific feedback on architecture violations and improvement suggestions.
+
+        fullstack_integration_review: |
+          Please perform a comprehensive fullstack integration review:
+
+          🎯 Integration Points:
+          1. **API Communication**: DTOs, serialization, error handling
+          2. **Database Operations**: Transactions, connections, migrations
+          3. **Type Consistency**: Shared types between frontend and backend
+          4. **Error Propagation**: Domain errors across the stack
+          5. **Performance**: Database queries, network requests, caching
+
+          🔍 Specific Checks:
+          - DTO mappers handle all data transformation correctly
+          - Database transactions are properly managed
+          - API contracts are consistent between frontend and backend
+          - Error responses maintain domain error semantics
+          - Performance bottlenecks in database queries or API calls
+          - Proper connection management and cleanup
+
+          Please provide actionable feedback for fullstack integration improvements.
+
+        code_quality_review: |
+          Please perform a comprehensive code quality review for this fullstack data layer:
+
+          🎯 Quality Metrics:
+          1. **Backend Code**: Database operations, error handling, performance
+          2. **Frontend Code**: API communication, error handling, network resilience
+          3. **Shared Code**: DTOs, protocols, type safety
+          4. **Security**: Input validation, SQL injection prevention, API security
+          5. **Maintainability**: Code organization, documentation, extensibility
+
+          🔍 Specific Checks:
+          - Database queries are optimized and prevent SQL injection
+          - API endpoints follow RESTful conventions and security best practices
+          - Input validation covers all scenarios (frontend + backend)
+          - Error messages don't expose sensitive information
+          - Connection pooling and resource cleanup implemented properly
+          - Network timeout and retry logic for production resilience
+
+          Please provide actionable feedback with specific code examples and improvement suggestions.
+
+        test_quality_review: |
+          Please review the test suite for this fullstack data layer implementation:
+
+          📋 Test Categories to Evaluate:
+          1. **Backend Tests**: Database operations, repository implementations
+          2. **Frontend Tests**: API communication, HTTP client interactions
+          3. **Integration Tests**: Fullstack flow from frontend to database
+          4. **Error Scenarios**: Network failures, database errors, validation errors
+          5. **Type Safety**: TypeScript compilation across the stack
+
+          🎯 Test Quality Criteria:
+          - TDD methodology properly followed for both backend and frontend
+          - Test coverage >95% for all fullstack components
+          - Realistic integration tests that mirror production usage
+          - Proper mocking of external dependencies (database, HTTP)
+          - Error scenarios comprehensively covered across the stack
+          - Integration tests validate complete fullstack data flow
+
+          Please provide feedback on test completeness, quality, and suggest additional test cases if needed.
+
+      run_scripts:
+        description: 'Execute AI code review process for fullstack implementation'
+        scripts:
+          - name: 'Run automated architecture validation'
+            command: 'npm run arch:validate -- --layer=data --feature=__FEATURE_NAME_KEBAB_CASE__ --use-case=__USE_CASE_NAME_KEBAB_CASE__ --fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Generate code coverage report (fullstack)'
+            command: 'npm run test:coverage -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Static code analysis (fullstack)'
+            command: 'npm run analyze:code -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Database performance analysis'
+            command: 'npm run analyze:db -- --feature=__FEATURE_NAME_KEBAB_CASE__ --use-case=__USE_CASE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'API performance analysis'
+            command: 'npm run analyze:api -- --feature=__FEATURE_NAME_KEBAB_CASE__ --use-case=__USE_CASE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Bundle size impact analysis'
+            command: 'npm run analyze:bundle -- --feature=__FEATURE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 15: CLEANUP AND MERGE ===
+    - id: 'cleanup-and-merge-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Final cleanup, review approval, and merge fullstack data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'MERGE_GUIDELINES.md'
+          description: 'Merge process and cleanup procedures for fullstack development.'
+      run_scripts:
+        description: 'Complete PR merge and cleanup process'
+        scripts:
+          - name: 'Final validation before merge'
+            command: 'npm run validate:all -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Fullstack integration test'
+            command: 'npm run test:integration -- --feature=__FEATURE_NAME_KEBAB_CASE__ --use-case=__USE_CASE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Merge Pull Request'
+            command: 'gh pr merge --squash --delete-branch'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Switch back to main branch'
+            command: 'git checkout main'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Pull latest changes'
+            command: 'git pull origin main'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Cleanup local branch'
+            command: 'git branch -d feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+      validation_script: |
+        echo "✅ Verifying fullstack merge completion..."
+        current_branch=$(git branch --show-current)
+        if [ "$current_branch" != "main" ]; then
+          echo "❌ ERROR: Not on main branch after merge"
+          exit 1
+        fi
+
+        if git show-branch feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-fullstack 2>/dev/null; then
+          echo "❌ ERROR: Feature branch still exists after cleanup"
+          exit 1
+        fi
+
+        echo "✅ Fullstack data layer implementation successfully merged and cleaned up"
+        echo "🎉 __USE_CASE_NAME_PASCAL_CASE__ fullstack data layer is ready for use!"
+
+    # === OPTIONAL: BROWNFIELD REFACTORING STEPS ===
+    # These steps can be used to refactor existing fullstack code to Clean Architecture
+    - id: 'refactor-existing-__USE_CASE_NAME_KEBAB_CASE__-fullstack-1'
+      type: 'conditional_refactor'
+      description: 'Refactor existing API routes to use fullstack data layer pattern'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: 'check_existing_api_routes'
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'refactoring legacy api routes to clean architecture next.js'
+          url: 'https://github.com/...'
+          description: 'Brownfield refactoring patterns for Next.js API routes.'
+      refactor_pattern:
+        find_pattern: |
+          <<<FIND>>>
+          // Legacy API route with direct database access
+          export async function POST(request: Request) {
+            const data = await request.json()
+
+            const result = await prisma.__TABLE_NAME__.create({
+              data: {
+                __FIELD_1__: data.__FIELD_1__,
+                __FIELD_2__: data.__FIELD_2__,
+              }
+            })
+
+            return Response.json(result)
+          }
+          <<</FIND>>>
+        replace_pattern: |
+          <<<REPLACE>>>
+          // Refactored to use Clean Architecture fullstack data layer
+          import { make__USE_CASE_NAME_PASCAL_CASE__Controller } from '../../../main/factories/controllers/__USE_CASE_NAME_KEBAB_CASE__-controller-factory'
+
+          export async function POST(request: Request) {
+            const controller = make__USE_CASE_NAME_PASCAL_CASE__Controller()
+            return controller.handle(request)
+          }
+          <<</REPLACE>>>
+
+    - id: 'refactor-existing-__USE_CASE_NAME_KEBAB_CASE__-fullstack-2'
+      type: 'conditional_refactor'
+      description: 'Refactor existing React components to use fullstack data hooks'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: 'check_direct_api_calls_in_components'
+      refactor_pattern:
+        find_pattern: |
+          <<<FIND>>>
+          // Legacy component with direct API calls
+          const [data, setData] = useState(null)
+          const [loading, setLoading] = useState(false)
+
+          useEffect(() => {
+            setLoading(true)
+            fetch('/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__', {
+              method: 'POST',
+              body: JSON.stringify(inputData)
+            })
+            .then(res => res.json())
+            .then(setData)
+            .finally(() => setLoading(false))
+          }, [])
+          <<</FIND>>>
+        replace_pattern: |
+          <<<REPLACE>>>
+          // Refactored to use Clean Architecture data layer
+          import { use__USE_CASE_NAME_PASCAL_CASE__ } from '../hooks/use-__USE_CASE_NAME_KEBAB_CASE__'
+
+          const { data, loading, error, execute } = use__USE_CASE_NAME_PASCAL_CASE__()
+
+          useEffect(() => {
+            execute(inputData)
+  }, [])
+          <<</REPLACE>>>
+
+    - id: 'refactor-existing-__USE_CASE_NAME_KEBAB_CASE__-fullstack-3'
+      type: 'conditional_refactor'
+      description: 'Refactor existing database queries to use repository pattern'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: 'check_direct_prisma_usage'
+      refactor_pattern:
+        find_pattern: |
+          <<<FIND>>>
+          // Legacy direct Prisma usage
+          const __USE_CASE_NAME_CAMEL_CASE__Data = await prisma.__TABLE_NAME__.findMany({
+            where: {
+              __FIELD_1__: input.__FIELD_1__,
+              __FIELD_2__: { contains: input.__FIELD_2__ }
+            },
+            include: {
+              __RELATED_TABLE__: true
+            }
+          })
+          <<</FIND>>>
+        replace_pattern: |
+          <<<REPLACE>>>
+          // Refactored to use Clean Architecture repository pattern
+          const __USE_CASE_NAME_CAMEL_CASE__ = new Db__USE_CASE_NAME_PASCAL_CASE__(
+            new Prisma__USE_CASE_NAME_PASCAL_CASE__Repository()
+          )
+          const __USE_CASE_NAME_CAMEL_CASE__Data = await __USE_CASE_NAME_CAMEL_CASE__.execute(input)
+          <<</REPLACE>>>
 
 # ============= END DATA STEPS FULLSTACK SECTION =============
