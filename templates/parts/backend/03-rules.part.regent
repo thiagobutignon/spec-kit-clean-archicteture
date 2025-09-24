@@ -46,18 +46,18 @@
         - 'Dependency injection'
         - 'Domain entities with methods/behavior (use simple data structures)'
 
-      must:
+      should:
         - 'Define business entities and value objects'
         - 'Contain only interfaces and types'
         - 'Be framework-agnostic'
         - 'Follow domain-driven design principles'
 
-      must_not:
+      should_not:
         - 'Import from other layers'
         - 'Contain implementation details'
         - 'Have framework dependencies'
       use_case:
-        must:
+        should:
           - 'Have only ONE execute() method per interface'
           - 'Define separate Input and Output types'
           - 'Have EXACTLY ONE responsibility (one business operation)'
@@ -66,7 +66,7 @@
           - 'Return Promise<Output> from execute method'
           - 'Be framework agnostic'
           - 'Follow naming convention: VerbNoun (e.g., __USE_CASE_EXAMPLE_1__, __USE_CASE_EXAMPLE_2__, __USE_CASE_EXAMPLE_3__)'
-        must_not:
+        should_not:
           - 'Have multiple methods (no __METHOD_1__() AND __METHOD_2__() in same interface)'
           - 'Combine multiple operations (__USE_CASE_NAME__And__OTHER_ACTION__ violates SRP)'
           - 'Contain implementation logic'
@@ -77,7 +77,7 @@
 
     # Data layer rules
     data:
-      must:
+      should:
         - 'Implement domain use case interfaces'
         - 'Use constructor injection for dependencies'
         - 'Define protocols for external dependencies'
@@ -86,7 +86,7 @@
         - 'Keep business logic minimal (only orchestration)'
         - 'Return domain types, not infrastructure types'
 
-      must_not:
+      should_not:
         - 'Import from infrastructure layer directly'
         - 'Contain complex business logic (belongs in domain)'
         - 'Expose infrastructure details to domain'
@@ -95,7 +95,7 @@
 
     # Infrastructure layer rules
     infra:
-      must:
+      should:
         - 'Implement data layer protocols'
         - 'Use native Fetch API instead of axios'
         - 'Use Prisma ORM for database operations'
@@ -105,7 +105,7 @@
         - 'Handle connection management and retries'
         - 'Use environment variables for configuration'
 
-      must_not:
+      should_not:
         - 'Import from domain or use case layers'
         - 'Contain business logic'
         - 'Use multiple HTTP client implementations'
@@ -115,7 +115,7 @@
 
     # Presentation layer rules
     presentation:
-      must:
+      should:
         - 'Use Express for HTTP server and routing'
         - 'Implement Controller interface with handle method'
         - 'Return standardized HTTP responses (ok, badRequest, etc.)'
@@ -125,7 +125,7 @@
         - 'Use RESTful API design principles'
         - 'Implement proper HTTP status codes'
 
-      must_not:
+      should_not:
         - 'Use GraphQL (use REST with Express)'
         - 'Import from data or infra layers directly'
         - 'Contain business logic (belongs in use cases)'
@@ -135,14 +135,14 @@
 
     # Error rules
     error:
-      must:
+      should:
         - 'Extend the native Error class'
         - 'Have descriptive names ending with Error'
         - 'Contain meaningful error messages'
         - 'Represent business rule violations'
         - 'Be thrown when domain invariants are violated'
 
-      must_not:
+      should_not:
         - 'Contain HTTP status codes'
         - 'Include technical/implementation details'
         - 'Expose sensitive information'
@@ -150,14 +150,14 @@
 
     # Test helper rules
     test_helper:
-      must:
+      should:
         - 'Create mock/stub implementations of use cases'
         - 'Generate fake test data'
         - 'Be pure functions that return consistent data'
         - 'Help reduce test boilerplate'
         - 'Use ONLY Vitest (Jest is prohibited)'
 
-      must_not:
+      should_not:
         - 'Make real API calls or database queries'
         - 'Depend on external services'
         - 'Contain test assertions (those belong in test files)'
@@ -166,7 +166,7 @@
 
     # Validation rules
     validation:
-      must:
+      should:
         - 'Implement FieldValidation interface for field validators'
         - 'Use ValidationComposite to combine multiple validators'
         - 'Use ValidationBuilder for fluent validation construction'
@@ -175,7 +175,7 @@
         - 'Return descriptive error messages'
         - 'Support chaining of validation rules'
         - 'Use static build() method for composite creation'
-      must_not:
+      should_not:
         - 'Import from domain layer'
         - 'Import from data or infra layers'
         - 'Contain business logic (only validation rules)'
@@ -185,7 +185,7 @@
 
     # Main layer rules
     main:
-      must:
+      should:
         - 'Create factory functions for controllers'
         - 'Wire up all dependencies using composition'
         - 'Apply decorators for cross-cutting concerns (logging, monitoring)'
@@ -198,7 +198,7 @@
         - 'Configure database connections and migrations'
         - 'Initialize monitoring and health checks'
 
-      must_not:
+      should_not:
         - 'Contain business logic (only wiring)'
         - 'Have direct database or API calls'
         - 'Include complex algorithms or calculations'

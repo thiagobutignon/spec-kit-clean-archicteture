@@ -92,8 +92,8 @@ const ArchitectureSchema = z.object({
 // ==================== Rule Schemas (Flexible) ====================
 
 const RuleSetSchema = z.object({
-  must: z.array(z.string()),
-  must_not: z.array(z.string())
+  should: z.array(z.string()),
+  should_not: z.array(z.string())
 })
 
 // ==================== Step Schemas ====================

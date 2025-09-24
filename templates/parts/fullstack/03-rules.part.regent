@@ -51,7 +51,7 @@
         - 'Domain entities with methods/behavior (use simple data structures)'
 
       use_case:
-        must:
+        should:
           - 'Have only ONE execute() method per interface'
           - 'Define separate Input and Output types'
           - 'Have EXACTLY ONE responsibility (one business operation)'
@@ -60,7 +60,7 @@
           - 'Return Promise<Output> from execute method'
           - 'Be framework agnostic (runnable in both browser and Node.js)'
           - 'Follow naming convention: VerbNoun (e.g., __USE_CASE_EXAMPLE_1__, __USE_CASE_EXAMPLE_2__, __USE_CASE_EXAMPLE_3__)'
-        must_not:
+        should_not:
           - 'Have multiple methods (no __METHOD_1__() AND __METHOD_2__() in same interface)'
           - 'Combine multiple operations (__USE_CASE_NAME__And__OTHER_ACTION__ violates SRP)'
           - 'Contain implementation logic'
@@ -74,7 +74,7 @@
       split_purpose: 'Data layer splits into backend (database operations) and frontend (API calls)'
 
       backend:
-        must:
+        should:
           - 'Implement domain use case interfaces for server-side logic'
           - 'Use constructor injection for dependencies'
           - 'Define protocols for database and external services'
@@ -83,7 +83,7 @@
           - 'Map database models to domain entities'
           - 'Return domain types, not database-specific types'
           - 'Handle server-side errors and status codes'
-        must_not:
+        should_not:
           - 'Import from infrastructure layer directly'
           - 'Contain complex business logic (belongs in domain)'
           - 'Expose database details to domain'
@@ -92,7 +92,7 @@
           - 'Know about HTTP requests or browser APIs'
 
       frontend:
-        must:
+        should:
           - 'Implement domain use case interfaces for client-side logic'
           - 'Use constructor injection for dependencies'
           - 'Define protocols for API communication'
@@ -101,7 +101,7 @@
           - 'Map API responses to domain entities'
           - 'Return domain types, not HTTP-specific types'
           - 'Handle client-side caching and optimistic updates'
-        must_not:
+        should_not:
           - 'Import from infrastructure layer directly'
           - 'Contain complex business logic (belongs in domain)'
           - 'Expose HTTP details to domain'
@@ -114,7 +114,7 @@
       split_purpose: 'Infrastructure splits into server-side (database, cache) and client-side (HTTP, storage)'
 
       backend:
-        must:
+        should:
           - 'Implement data layer protocols for server operations'
           - 'Use Prisma ORM for database operations'
           - 'Support PostgreSQL with pgvector extension'
@@ -123,7 +123,7 @@
           - 'Use environment variables for server configuration'
           - 'Implement background job processing'
           - 'Handle file storage (S3, local filesystem)'
-        must_not:
+        should_not:
           - 'Import from domain or use case layers'
           - 'Contain business logic'
           - 'Expose database-specific types to other layers'
@@ -131,7 +131,7 @@
           - 'Know about browser APIs or client-side concerns'
 
       frontend:
-        must:
+        should:
           - 'Implement data layer protocols for client operations'
           - 'Use native Fetch API for HTTP requests'
           - 'Handle browser localStorage/sessionStorage'
@@ -140,7 +140,7 @@
           - 'Use environment variables for client configuration (NEXT_PUBLIC_*)'
           - 'Handle CORS and authentication headers'
           - 'Implement WebSocket connections for real-time features'
-        must_not:
+        should_not:
           - 'Import from domain or use case layers'
           - 'Contain business logic'
           - 'Use multiple HTTP client implementations'
@@ -154,7 +154,7 @@
 
       backend:
         handlers:
-          must:
+          should:
             - 'Use Next.js 15 API Routes for RESTful endpoints'
             - 'Implement handler functions with standard HTTP methods (GET, POST, PUT, DELETE)'
             - 'Return standardized API responses (NextResponse.json)'
@@ -162,7 +162,7 @@
             - 'Handle errors gracefully with try/catch'
             - 'Validate requests with shared Zod schemas'
             - 'Use dependency injection from main layer factories'
-          must_not:
+          should_not:
             - 'Use Express or other HTTP frameworks (use Next.js API Routes)'
             - 'Import from infra layer directly'
             - 'Contain business logic (delegate to use cases)'
@@ -171,20 +171,20 @@
 
       frontend:
         actions:
-          must:
+          should:
             - 'Use Next.js 15 Server Actions for form submission'
             - 'Implement "use server" directive for server-side execution'
             - 'Return ActionResult<T> or FormState for form feedback'
             - 'Validate with shared Zod schemas'
             - 'Handle errors with redirect/revalidate patterns'
             - 'Use dependency injection from main layer composites'
-          must_not:
+          should_not:
             - 'Contain business logic (delegate to use cases)'
             - 'Make direct database calls'
             - 'Import from infra layer directly'
 
         components:
-          must:
+          should:
             - 'Use Shadcn/ui components with Tailwind CSS'
             - 'Prefer Server Components over Client Components'
             - 'Use "use client" directive only when necessary'
@@ -192,21 +192,21 @@
             - 'Implement proper error boundaries'
             - 'Use TypeScript for props and state'
             - 'Receive dependencies as props from main layer'
-          must_not:
+          should_not:
             - 'Use custom CSS/SASS (use Tailwind CSS)'
             - 'Contain business logic (use custom hooks)'
             - 'Make direct API calls (use Server Actions or hooks)'
             - 'Import from data or infra layers directly'
 
         hooks:
-          must:
+          should:
             - 'Use React hooks for state management and side effects'
             - 'Implement custom hooks for reusable logic'
             - 'Use Context API for feature-specific state'
             - 'Handle loading, error, and success states'
             - 'Follow hooks rules (no conditional calls)'
             - 'Integrate with client-side data layer when needed'
-          must_not:
+          should_not:
             - 'Use Redux or external state managers (use Context API)'
             - 'Contain business logic (delegate to use cases)'
             - 'Make direct API calls (use data layer)'
@@ -214,14 +214,14 @@
 
     # Error rules
     error:
-      must:
+      should:
         - 'Extend the native Error class'
         - 'Have descriptive names ending with Error'
         - 'Contain meaningful error messages'
         - 'Represent business rule violations'
         - 'Be thrown when domain invariants are violated'
 
-      must_not:
+      should_not:
         - 'Contain HTTP status codes'
         - 'Include technical/implementation details'
         - 'Expose sensitive information'
@@ -229,14 +229,14 @@
 
     # Test helper rules
     test_helper:
-      must:
+      should:
         - 'Create mock/stub implementations of use cases'
         - 'Generate fake test data'
         - 'Be pure functions that return consistent data'
         - 'Help reduce test boilerplate'
         - 'Use ONLY Vitest (Jest is prohibited)'
 
-      must_not:
+      should_not:
         - 'Make real API calls or database queries'
         - 'Depend on external services'
         - 'Contain test assertions (those belong in test files)'
@@ -248,7 +248,7 @@
       shared_purpose: 'Validation schemas must be 100% shared between frontend and backend using Zod'
 
       schemas:
-        must:
+        should:
           - 'Use Zod for schema definition and validation'
           - 'Define schemas that match domain Input/Output types'
           - 'Support both client and server-side validation'
@@ -257,7 +257,7 @@
           - 'Use consistent naming: __USE_CASE_NAME__InputSchema, __USE_CASE_NAME__OutputSchema'
           - 'Support nested object validation for complex domain types'
           - 'Provide transform functions for data sanitization'
-        must_not:
+        should_not:
           - 'Import from domain layer (validation is independent)'
           - 'Import from data, presentation, or infra layers'
           - 'Contain business logic (only validation rules)'
@@ -266,7 +266,7 @@
           - 'Use async validation (keep schemas synchronous)'
 
       validators:
-        must:
+        should:
           - 'Implement reusable field validators with Zod'
           - 'Support synchronous validation for forms and APIs'
           - 'Return user-friendly error messages'
@@ -274,7 +274,7 @@
           - 'Provide helper functions for common validation patterns'
           - 'Support type inference for TypeScript integration'
           - 'Use refinements for complex validation rules'
-        must_not:
+        should_not:
           - 'Import from data or infra layers'
           - 'Throw exceptions (return validation results)'
           - 'Access external services for validation'
@@ -287,7 +287,7 @@
 
       backend:
         factories:
-          must:
+          should:
             - 'Create factory functions for Next.js API route handlers'
             - 'Wire up all dependencies using composition root pattern'
             - 'Apply decorators for cross-cutting concerns (logging, monitoring)'
@@ -297,7 +297,7 @@
             - 'Return fully configured API handlers'
             - 'Setup database connections and migrations'
             - 'Initialize monitoring and health checks'
-          must_not:
+          should_not:
             - 'Contain business logic (only wiring and composition)'
             - 'Have direct database or API calls'
             - 'Include complex algorithms or calculations'
@@ -307,7 +307,7 @@
 
       frontend:
         composites:
-          must:
+          should:
             - 'Create composite components that wire all dependencies'
             - 'Compose Server Actions with validation schemas'
             - 'Wire use cases with data layer and validation'
@@ -316,7 +316,7 @@
             - 'Use Next.js 15 App Router patterns (layout, page, loading, error)'
             - 'Implement proper SEO metadata and structured data'
             - 'Handle authentication and route protection'
-          must_not:
+          should_not:
             - 'Contain business logic (only composition)'
             - 'Make direct API calls'
             - 'Define new interfaces or types'
@@ -324,14 +324,14 @@
             - 'Include complex algorithms or calculations'
 
         pages:
-          must:
+          should:
             - 'Create page composers that aggregate feature composites'
             - 'Use Next.js 15 App Router patterns (layout, page, loading, error)'
             - 'Implement proper SEO metadata and structured data'
             - 'Handle authentication and route protection'
             - 'Export React.FC components for App Router integration'
             - 'Use Server Components by default, Client Components when necessary'
-          must_not:
+          should_not:
             - 'Contain business logic (delegate to composites)'
             - 'Have direct state management (use providers)'
             - 'Include complex algorithms or calculations'

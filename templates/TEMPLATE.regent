@@ -598,7 +598,7 @@
         - 'Dependency injection'
         - 'Complex domain entities with behavior'
       use_case:
-        must:
+        should:
           - 'Have only ONE execute() method per interface'
           - 'Define separate Input and Output types'
           - 'Have EXACTLY ONE responsibility (one business operation)'
@@ -607,7 +607,7 @@
           - 'Return Promise<Output> from execute method'
           - 'Be framework agnostic'
           - 'Follow naming convention: VerbNoun (e.g., CreateUser, LoadSurvey, AuthenticateUser)'
-        must_not:
+        should_not:
           - 'Have multiple methods (no createUser() AND readUser() in same interface)'
           - 'Combine multiple operations (CreateUserAndSendEmail violates SRP)'
           - 'Contain implementation logic'
@@ -618,7 +618,7 @@
 
     # Data layer rules
     data:
-      must:
+      should:
         - 'Implement domain use case interfaces'
         - 'Use constructor injection for dependencies'
         - 'Define protocols for external dependencies'
@@ -627,7 +627,7 @@
         - 'Keep business logic minimal (only orchestration)'
         - 'Return domain types, not infrastructure types'
 
-      must_not:
+      should_not:
         - 'Import from infrastructure layer directly'
         - 'Contain complex business logic (belongs in domain)'
         - 'Expose infrastructure details to domain'
@@ -636,7 +636,7 @@
 
     # Infrastructure layer rules
     infra:
-      must:
+      should:
         - 'Implement data layer protocols'
         - 'Use native Fetch API instead of axios'
         - 'Use Prisma ORM for database operations'
@@ -646,7 +646,7 @@
         - 'Handle connection management and retries'
         - 'Use environment variables for configuration'
 
-      must_not:
+      should_not:
         - 'Import from domain or use case layers'
         - 'Contain business logic'
         - 'Use multiple HTTP client implementations'
@@ -656,7 +656,7 @@
 
     # Presentation layer rules
     presentation:
-      backend_must:
+      backend_should:
         - 'Use Express for HTTP server and routing'
         - 'Implement Controller interface with handle method'
         - 'Return standardized HTTP responses (ok, badRequest, etc.)'
@@ -664,7 +664,7 @@
         - 'Handle errors gracefully with try/catch'
         - 'Validate requests before processing'
 
-      frontend_must:
+      frontend_should:
         - 'Use Next.js 15+ with App Router'
         - 'Use Shadcn/ui components with Tailwind CSS'
         - 'Use Context API for state management'
@@ -672,7 +672,7 @@
         - 'Use Server Components where possible'
         - 'Implement error boundaries for error handling'
 
-      must_not:
+      should_not:
         - 'Use React with custom CSS/SASS (use Next.js + Tailwind)'
         - 'Use Recoil or Redux (use Context API)'
         - 'Use GraphQL (use REST with Express)'
@@ -682,14 +682,14 @@
 
     # Error rules
     error:
-      must:
+      should:
         - 'Extend the native Error class'
         - 'Have descriptive names ending with Error'
         - 'Contain meaningful error messages'
         - 'Represent business rule violations'
         - 'Be thrown when domain invariants are violated'
 
-      must_not:
+      should_not:
         - 'Contain HTTP status codes'
         - 'Include technical/implementation details'
         - 'Expose sensitive information'
@@ -697,14 +697,14 @@
 
     # Test helper rules
     test_helper:
-      must:
+      should:
         - 'Create mock/stub implementations of use cases'
         - 'Generate fake test data'
         - 'Be pure functions that return consistent data'
         - 'Help reduce test boilerplate'
         - 'Use ONLY Vitest (Jest is prohibited)'
 
-      must_not:
+      should_not:
         - 'Make real API calls or database queries'
         - 'Depend on external services'
         - 'Contain test assertions (those belong in test files)'
@@ -713,7 +713,7 @@
 
     # Validation rules
     validation:
-      must:
+      should:
         - 'Implement FieldValidation interface for field validators'
         - 'Use ValidationComposite to combine multiple validators'
         - 'Use ValidationBuilder for fluent validation construction'
@@ -722,7 +722,7 @@
         - 'Return descriptive error messages'
         - 'Support chaining of validation rules'
         - 'Use static build() method for composite creation'
-      must_not:
+      should_not:
         - 'Import from domain layer'
         - 'Import from data or infra layers'
         - 'Contain business logic (only validation rules)'
@@ -732,7 +732,7 @@
 
     # Main layer rules
     main:
-      backend_must:
+      backend_should:
         - 'Create factory functions for controllers'
         - 'Wire up all dependencies using composition'
         - 'Apply decorators for cross-cutting concerns (logging, monitoring)'
@@ -741,7 +741,7 @@
         - 'Handle environment configuration'
         - 'Use adapters for framework integration'
         - 'Return decorated controllers from factories'
-      frontend_must:
+      frontend_should:
         - 'Create factory functions for React pages/components'
         - 'Compose use cases with HTTP clients and validators'
         - 'Use React.FC for page factories (makeLogin, makeSignup)'
@@ -750,7 +750,7 @@
         - 'Manage global state adapters (CurrentAccountAdapter)'
         - 'Build validation composites for forms'
         - 'Initialize app in index.tsx with all providers'
-      must_not:
+      should_not:
         - 'Contain business logic (only wiring)'
         - 'Have direct database or API calls'
         - 'Include complex algorithms or calculations'

@@ -162,20 +162,20 @@ rules:
       - "HTTP operations"
       - "Database queries"
     use_case:
-      must:
+      should:
         - "Have single execute() method"
-      must_not:
+      should_not:
         - "Have multiple methods"
 
   data:  # ✅ Required fields present
-    must:
+    should:
       - "Implement domain interfaces"
-    must_not:
+    should_not:
       - "Import from infrastructure"
 
   # ❌ Missing required fields - will fail validation
   infra:
-    must: []  # ❌ Empty array (minItems: 1)
+    should: []  # ❌ Empty array (minItems: 1)
 ```
 
 ### 8. Pre-execution Validation Output Example
