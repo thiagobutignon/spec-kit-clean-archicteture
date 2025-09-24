@@ -673,4 +673,465 @@
             command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ fullstack shared domain layer"'
             workingDirectory: '__PROJECT_NAME__'
 
+    # === STEP 8: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create and checkout feature branch for __USE_CASE_NAME_PASCAL_CASE__ fullstack implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Git branching strategy and naming conventions for fullstack features'
+      run_scripts:
+        description: 'Create feature branch with proper naming convention'
+        scripts:
+          - name: 'Create feature branch'
+            command: |
+              # Stash any uncommitted changes
+              git stash save "WIP: Before creating __FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__ fullstack branch"
+
+              # Ensure we're on the main branch and up to date
+              git checkout main || git checkout master
+              git pull origin main || git pull origin master
+
+              # Create and checkout new feature branch
+              BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
+
+              echo "✅ Created and checked out branch: $BRANCH_NAME"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 9: REFACTOR FOR BROWNFIELD (CONDITIONAL MULTI-STEP) ===
+    # AI-NOTE: When brownfield refactoring is needed in fullstack, the AI should dynamically
+    # generate multiple steps based on the specific files that need refactoring across both
+    # frontend and backend. Each file should have its own step for better tracking.
+    #
+    # RULE: For each file requiring refactoring, create a separate step with:
+    # - Unique ID: refactor-{layer}-{index}-{filename}
+    # - Clear indication if it's frontend, backend, or shared
+    # - Specific validation for that file's refactoring
+    # - Cross-stack impact analysis
+    #
+    # EXAMPLE PATTERN:
+    # If 5 files need refactoring across stack, generate:
+    # Step 9a: refactor-backend-1-user-controller
+    # Step 9b: refactor-backend-2-user-service
+    # Step 9c: refactor-frontend-1-user-list-component
+    # Step 9d: refactor-frontend-2-user-form
+    # Step 9e: refactor-shared-1-user-types
+
+    - id: 'refactor-rollback-point-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create rollback point before starting fullstack brownfield refactoring'
+      condition: 'check_if_brownfield_refactor_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Best practices for safe fullstack refactoring'
+      run_scripts:
+        description: 'Create git tag for rollback before any refactoring'
+        scripts:
+          - name: 'Create rollback tag'
+            command: |
+              # Create rollback point before refactoring
+              git tag "before-refactor-__USE_CASE_NAME_KEBAB_CASE__" || {
+                echo "⚠️  Failed to create rollback tag"
+                exit 1
+              }
+              echo "✅ Created rollback point: before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
+              echo "   To rollback: git reset --hard before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Document files that need refactoring across the stack
+              echo "📋 Files identified for refactoring:"
+              echo ""
+              echo "Backend files:"
+              # AI should list backend files here
+              echo ""
+              echo "Frontend files:"
+              # AI should list frontend files here
+              echo ""
+              echo "Shared files:"
+              # AI should list shared files here
+            workingDirectory: '__PROJECT_NAME__'
+
+    # AI-NOTE: The following are templates that should be duplicated for each file
+    # that needs refactoring. Generate separate templates for backend, frontend, and shared.
+
+    # Backend refactoring template
+    - id: 'refactor-backend-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor backend __FILE_TO_MODIFY_KEBAB_CASE__ to Clean Architecture'
+      condition: 'check_if_backend_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture patterns for backend refactoring'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Analyze backend dependencies and structure'
+      path: '__PROJECT_NAME__/src/api/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+      template: |
+        <<<FIND>>>
+        // The AI should identify the exact backend code that needs refactoring
+        [ORIGINAL_BACKEND_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        // TODO: Refactor this backend file to comply with Clean Architecture
+        // File: __FILE_TO_MODIFY_KEBAB_CASE__.ts
+        // Layer: Backend
+        // Priority: __PRIORITY__ (high/medium/low)
+        // Estimated effort: __EFFORT__ (hours)
+
+        // BACKEND REFACTORING TASKS:
+        // 1. Extract business logic to shared domain layer
+        // 2. Move data access to infrastructure layer
+        // 3. Implement proper dependency injection
+        // 4. Add proper error handling with shared error types
+        // 5. Ensure types are shareable with frontend
+        // 6. Update route handlers to use new structure
+        // 7. Add integration tests
+
+        // FRONTEND IMPACT:
+        // - [AI should list frontend files affected]
+
+        // SHARED TYPES TO CREATE/UPDATE:
+        // - [AI should list shared types needed]
+
+        /* TEMPORARY: Original backend code preserved for reference
+        [ORIGINAL_BACKEND_CODE_TO_BE_REPLACED]
+        */
+
+        // NEW REFACTORED BACKEND CODE:
+        [REFACTORED_BACKEND_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # Frontend refactoring template
+    - id: 'refactor-frontend-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor frontend __FILE_TO_MODIFY_KEBAB_CASE__ to Clean Architecture'
+      condition: 'check_if_frontend_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture patterns for frontend refactoring'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Analyze component dependencies and structure'
+      path: '__PROJECT_NAME__/src/app/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.tsx'
+      template: |
+        <<<FIND>>>
+        // The AI should identify the exact frontend component that needs refactoring
+        [ORIGINAL_FRONTEND_COMPONENT_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        // TODO: Refactor this frontend component to comply with Clean Architecture
+        // Component: __FILE_TO_MODIFY_KEBAB_CASE__.tsx
+        // Layer: Frontend
+        // Type: __COMPONENT_TYPE__ (Page/Component/Hook/ServerAction)
+        // Priority: __PRIORITY__ (high/medium/low)
+        // Estimated effort: __EFFORT__ (hours)
+
+        // FRONTEND REFACTORING TASKS:
+        // 1. Extract business logic to custom hooks
+        // 2. Use shared domain models from backend
+        // 3. Implement server actions for data fetching
+        // 4. Add proper error boundaries with shared error types
+        // 5. Implement proper loading states
+        // 6. Add accessibility attributes
+        // 7. Extract reusable UI components
+        // 8. Add component tests
+
+        // BACKEND DEPENDENCIES:
+        // - [AI should list API endpoints used]
+
+        // SHARED TYPES CONSUMED:
+        // - [AI should list shared types used]
+
+        /* TEMPORARY: Original frontend component preserved for reference
+        [ORIGINAL_FRONTEND_COMPONENT_TO_BE_REPLACED]
+        */
+
+        // NEW REFACTORED FRONTEND COMPONENT:
+        [REFACTORED_FRONTEND_COMPONENT_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # Shared refactoring template
+    - id: 'refactor-shared-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor shared __FILE_TO_MODIFY_KEBAB_CASE__ for both frontend and backend'
+      condition: 'check_if_shared_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Patterns for shared code between frontend and backend'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+      template: |
+        <<<FIND>>>
+        // The AI should identify the exact shared code that needs refactoring
+        [ORIGINAL_SHARED_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        // TODO: Refactor this shared file to comply with Clean Architecture
+        // File: __FILE_TO_MODIFY_KEBAB_CASE__.ts
+        // Layer: Shared Domain
+        // Priority: __PRIORITY__ (high/medium/low)
+        // Estimated effort: __EFFORT__ (hours)
+
+        // SHARED REFACTORING TASKS:
+        // 1. Ensure types work in both Node.js and browser
+        // 2. Add proper serialization/deserialization
+        // 3. Implement shared validation schemas
+        // 4. Add shared error types
+        // 5. Ensure no platform-specific dependencies
+        // 6. Add comprehensive type guards
+        // 7. Document usage for both frontend and backend
+
+        // BACKEND FILES USING THIS:
+        // - [AI should list backend consumers]
+
+        // FRONTEND FILES USING THIS:
+        // - [AI should list frontend consumers]
+
+        /* TEMPORARY: Original shared code preserved for reference
+        [ORIGINAL_SHARED_CODE_TO_BE_REPLACED]
+        */
+
+        // NEW REFACTORED SHARED CODE:
+        [REFACTORED_SHARED_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # === STEP 10: DELETE OBSOLETE FILES (CONDITIONAL) ===
+    - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Delete obsolete files when refactoring fullstack to Clean Architecture'
+      condition: 'check_if_file_deletion_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'MIGRATION_GUIDE.md'
+          description: 'Guidelines for safely removing obsolete fullstack code'
+      validation_script: |
+        FILE_TO_DELETE="__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__"
+
+        if [ -f "$FILE_TO_DELETE" ]; then
+          # Check for references in both frontend and backend code
+          echo "🔍 Checking for references to $FILE_TO_DELETE..."
+          FILE_NAME=$(basename "$FILE_TO_DELETE" | sed 's/\.[^.]*$//')
+
+          # Check frontend references
+          FRONTEND_REFS=$(grep -r "$FILE_NAME" __PROJECT_NAME__/src/app __PROJECT_NAME__/src/components 2>/dev/null | wc -l)
+
+          # Check backend references
+          BACKEND_REFS=$(grep -r "$FILE_NAME" __PROJECT_NAME__/src/api __PROJECT_NAME__/src/features 2>/dev/null | wc -l)
+
+          TOTAL_REFS=$((FRONTEND_REFS + BACKEND_REFS))
+
+          if [ "$TOTAL_REFS" -gt 0 ]; then
+            echo "⚠️  WARNING: Found $TOTAL_REFS references to this file."
+            echo "   Frontend: $FRONTEND_REFS references"
+            echo "   Backend: $BACKEND_REFS references"
+            echo "Review before deletion."
+            exit 1
+          fi
+
+          # Backup before deletion
+          cp "$FILE_TO_DELETE" "$FILE_TO_DELETE.backup"
+          rm "$FILE_TO_DELETE"
+          echo "✅ File deleted and backed up: $FILE_TO_DELETE.backup"
+        fi
+
+    # === STEP 11: CREATE PULL REQUEST ===
+    - id: 'create-pull-request-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create pull request for __USE_CASE_NAME_PASCAL_CASE__ fullstack implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'PR_TEMPLATE.md'
+          description: 'Pull request template for fullstack features'
+      run_scripts:
+        description: 'Push branch and create pull request'
+        scripts:
+          - name: 'Push and create PR'
+            command: |
+              BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Push the branch
+              git push -u origin "$BRANCH_NAME" || {
+                echo "❌ Failed to push branch to remote"
+                exit 1
+              }
+
+              # Create PR using GitHub CLI if available
+              if command -v gh &> /dev/null; then
+                gh pr create \
+                  --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ use case (Fullstack)" \
+                  --body "## Summary
+
+                Implements __USE_CASE_NAME_PASCAL_CASE__ use case as a fullstack feature following Clean Architecture principles.
+
+                ## Changes
+
+                ### Shared Domain (100% shared)
+                - ✅ Shared entities and models
+                - ✅ Shared error types
+                - ✅ Shared DTOs and types
+
+                ### Backend
+                - ✅ Data layer with repositories
+                - ✅ Infrastructure layer implementation
+                - ✅ API route handlers
+
+                ### Frontend
+                - ✅ Data layer with API clients
+                - ✅ Presentation components and hooks
+                - ✅ Server actions integration
+
+                ### Testing & Quality
+                - ✅ Comprehensive test coverage (Vitest)
+                - ✅ Zod validation schemas
+                - ✅ Type safety across stack
+
+                ## Testing
+                - [ ] Unit tests pass (frontend & backend)
+                - [ ] Integration tests pass
+                - [ ] E2E tests pass
+                - [ ] Manual testing completed
+
+                ## Metrics
+                - [ ] Code coverage: __COVERAGE__%
+                - [ ] Bundle size impact: __SIZE_IMPACT__
+                - [ ] API latency: __API_LATENCY_MS__
+                - [ ] Lighthouse score: __LIGHTHOUSE_SCORE__
+                - [ ] Performance benchmarks: __PERF_STATUS__
+
+                ## Checklist
+                - [ ] Code follows Clean Architecture principles
+                - [ ] Shared domain is truly shared (no duplicates)
+                - [ ] Tests have adequate coverage
+                - [ ] Documentation is updated
+                - [ ] No breaking changes
+                - [ ] Type safety maintained across stack
+                - [ ] Performance impact assessed" \
+                  --assignee @me \
+                  --label "enhancement,fullstack,clean-architecture,nextjs"
+
+                echo "✅ Pull request created successfully"
+              else
+                echo "📝 Push successful. Please create PR manually at:"
+                echo "   https://github.com/__GITHUB_ORG__/__PROJECT_NAME__/compare/$BRANCH_NAME"
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 12: TRIGGER AI CODE REVIEW ===
+    - id: 'trigger-ai-review-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Trigger AI-powered code review with Claude for fullstack implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'claude-cli'
+          query: 'claude code review clean architecture fullstack nextjs'
+          url: 'https://claude.ai/docs/code-review'
+          description: 'AI-powered code review using Claude for fullstack'
+      run_scripts:
+        description: 'Run Claude AI code review on the fullstack implementation'
+        scripts:
+          - name: 'Trigger Claude review'
+            command: |
+              BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Check if Claude CLI is available
+              if command -v claude &> /dev/null; then
+                echo "🤖 Starting AI code review with Claude for fullstack..."
+
+                claude /review \
+                  --branch "$BRANCH_NAME" \
+                  --focus "clean-architecture,nextjs,fullstack,typescript" \
+                  --checklist ".github/fullstack_checklist.md" \
+                  --output "review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md"
+
+                echo "✅ AI review complete. Check review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md for details."
+
+                # Add review as PR comment if gh CLI is available
+                if command -v gh &> /dev/null && [ -f "review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md" ]; then
+                  gh pr comment --body-file "review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md"
+                  echo "✅ Review posted to PR"
+                fi
+              else
+                echo "⚠️  Claude CLI not installed. Skipping AI review."
+                echo "   Install with: npm install -g @anthropic/claude-cli"
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 13: POST-MERGE CLEANUP ===
+    - id: 'post-merge-cleanup-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Cleanup after PR merge for fullstack feature'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Post-merge cleanup procedures for fullstack features'
+      run_scripts:
+        description: 'Clean up local and remote branches after merge'
+        scripts:
+          - name: 'Post-merge cleanup'
+            command: |
+              BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Check if PR is merged
+              if command -v gh &> /dev/null; then
+                PR_STATE=$(gh pr view "$BRANCH_NAME" --json state -q .state)
+
+                if [ "$PR_STATE" = "MERGED" ]; then
+                  echo "🧹 Starting post-merge cleanup for fullstack feature..."
+
+                  # Switch to main branch
+                  git checkout main || git checkout master
+                  git pull origin main || git pull origin master
+
+                  # Delete local branch
+                  git branch -d "$BRANCH_NAME"
+
+                  # Delete remote branch
+                  git push origin --delete "$BRANCH_NAME"
+
+                  # Clean up any review artifacts
+                  rm -f review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md
+
+                  echo "✅ Cleanup complete. Branch and artifacts deleted."
+                else
+                  echo "⏳ PR not yet merged. Skipping cleanup."
+                fi
+              else
+                echo "⚠️  GitHub CLI not available. Please clean up branches manually after merge."
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
 # ============= END DOMAIN STEPS FULLSTACK SECTION =============

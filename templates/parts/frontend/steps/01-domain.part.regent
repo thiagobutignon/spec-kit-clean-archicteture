@@ -444,4 +444,338 @@
             command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ frontend domain layer"'
             workingDirectory: '__PROJECT_NAME__'
 
+    # === STEP 7: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create and checkout feature branch for __USE_CASE_NAME_PASCAL_CASE__ implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Git branching strategy and naming conventions'
+      run_scripts:
+        description: 'Create feature branch with proper naming convention'
+        scripts:
+          - name: 'Create feature branch'
+            command: |
+              # Stash any uncommitted changes
+              git stash save "WIP: Before creating __FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__ branch"
+
+              # Ensure we're on the main branch and up to date
+              git checkout main || git checkout master
+              git pull origin main || git pull origin master
+
+              # Create and checkout new feature branch
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
+
+              echo "✅ Created and checked out branch: $BRANCH_NAME"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 8: REFACTOR FOR BROWNFIELD (CONDITIONAL MULTI-STEP) ===
+    # AI-NOTE: When brownfield refactoring is needed, the AI should dynamically generate
+    # multiple steps based on the specific components/files that need refactoring.
+    # Each file should have its own step for better tracking and granular control.
+    #
+    # RULE: For each file requiring refactoring, create a separate step with:
+    # - Unique ID: refactor-{index}-{component/filename}
+    # - Clear description of what changes are needed
+    # - Specific validation for that file's refactoring
+    # - Component-specific refactoring patterns
+    #
+    # EXAMPLE PATTERN:
+    # If 4 components need refactoring, generate:
+    # Step 8a: refactor-1-user-list-component
+    # Step 8b: refactor-2-user-form-component
+    # Step 8c: refactor-3-user-profile-page
+    # Step 8d: refactor-4-user-context
+
+    - id: 'refactor-rollback-point-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create rollback point before starting brownfield refactoring'
+      condition: 'check_if_brownfield_refactor_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Best practices for safe React component refactoring'
+      run_scripts:
+        description: 'Create git tag for rollback before any refactoring'
+        scripts:
+          - name: 'Create rollback tag'
+            command: |
+              # Create rollback point before refactoring
+              git tag "before-refactor-__USE_CASE_NAME_KEBAB_CASE__" || {
+                echo "⚠️  Failed to create rollback tag"
+                exit 1
+              }
+              echo "✅ Created rollback point: before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
+              echo "   To rollback: git reset --hard before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Document components that need refactoring
+              echo "📋 Components identified for refactoring:"
+              # AI should list components here based on analysis
+            workingDirectory: '__PROJECT_NAME__'
+
+    # AI-NOTE: The following is a template that should be duplicated for each component
+    # that needs refactoring. The AI should generate one step per component/file.
+    - id: 'refactor-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor __FILE_TO_MODIFY_KEBAB_CASE__ to Clean Architecture'
+      condition: 'check_if_component_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture patterns for React components'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Analyze component structure and dependencies'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'react clean architecture refactoring patterns'
+          url: 'https://...'
+          description: 'React refactoring best practices'
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.tsx'
+      template: |
+        <<<FIND>>>
+        // The AI should identify the exact component code that needs refactoring
+        // This will be the original component that violates Clean Architecture
+        [ORIGINAL_COMPONENT_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        // TODO: Refactor this component to comply with Clean Architecture
+        // Component: __FILE_TO_MODIFY_KEBAB_CASE__.tsx
+        // Type: __COMPONENT_TYPE__ (Page/Component/Hook/Context)
+        // Priority: __PRIORITY__ (high/medium/low)
+        // Estimated effort: __EFFORT__ (hours)
+
+        // SPECIFIC REFACTORING TASKS FOR THIS COMPONENT:
+        // 1. Extract business logic to custom hooks
+        // 2. Separate data fetching to repository layer
+        // 3. Move UI logic to presentation components
+        // 4. Add proper error boundaries
+        // 5. Implement proper state management (Zustand/Context)
+        // 6. Extract reusable UI components
+        // 7. Add proper TypeScript types
+        // 8. Implement loading and error states
+        // 9. Add accessibility attributes
+        // 10. Add unit and component tests
+
+        // DEPENDENCIES TO UPDATE:
+        // - [AI should list specific dependencies]
+
+        // COMPONENTS THAT USE THIS:
+        // - [AI should list parent components]
+
+        // HOOKS/CONTEXT CONSUMED:
+        // - [AI should list hooks and context]
+
+        /* TEMPORARY: Original component preserved for reference
+        [ORIGINAL_COMPONENT_CODE_TO_BE_REPLACED]
+        */
+
+        // NEW REFACTORED COMPONENT:
+        [REFACTORED_COMPONENT_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # === STEP 9: DELETE OBSOLETE FILES (CONDITIONAL) ===
+    - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Delete obsolete files when refactoring to Clean Architecture'
+      condition: 'check_if_file_deletion_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'MIGRATION_GUIDE.md'
+          description: 'Guidelines for safely removing obsolete code'
+      validation_script: |
+        FILE_TO_DELETE="__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__"
+
+        if [ -f "$FILE_TO_DELETE" ]; then
+          # Extract filename without extension consistently
+          FILE_NAME=$(basename "$FILE_TO_DELETE" | sed 's/\.[^.]*$//')
+
+          # Check for references to this file
+          echo "🔍 Checking for references to $FILE_NAME..."
+          REFERENCES=$(grep -r "$FILE_NAME" __PROJECT_NAME__/src --exclude-dir=node_modules | wc -l)
+
+          if [ "$REFERENCES" -gt 0 ]; then
+            echo "⚠️  WARNING: Found $REFERENCES references to this file. Review before deletion."
+            exit 1
+          fi
+
+          # Backup before deletion
+          cp "$FILE_TO_DELETE" "$FILE_TO_DELETE.backup"
+          rm "$FILE_TO_DELETE"
+          echo "✅ File deleted and backed up: $FILE_TO_DELETE.backup"
+        fi
+
+    # === STEP 10: CREATE PULL REQUEST ===
+    - id: 'create-pull-request-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create pull request for __USE_CASE_NAME_PASCAL_CASE__ implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'PR_TEMPLATE.md'
+          description: 'Pull request template and review checklist'
+      run_scripts:
+        description: 'Push branch and create pull request'
+        scripts:
+          - name: 'Push and create PR'
+            command: |
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Push the branch
+              git push -u origin "$BRANCH_NAME" || {
+                echo "❌ Failed to push branch to remote"
+                exit 1
+              }
+
+              # Create PR using GitHub CLI if available
+              if command -v gh &> /dev/null; then
+                gh pr create \
+                  --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ use case (Frontend)" \
+                  --body "## Summary
+
+                Implements __USE_CASE_NAME_PASCAL_CASE__ use case frontend following Clean Architecture principles.
+
+                ## Changes
+                - ✅ Domain layer with models and interfaces
+                - ✅ Data layer with repositories
+                - ✅ Infrastructure layer with API clients
+                - ✅ Presentation layer with components and hooks
+                - ✅ Comprehensive test coverage with Vitest
+                - ✅ Zod validation schemas
+
+                ## Testing
+                - [ ] Unit tests pass
+                - [ ] Component tests pass
+                - [ ] E2E tests pass
+                - [ ] Manual testing completed
+
+                ## Metrics
+                - [ ] Code coverage: __COVERAGE__%
+                - [ ] Bundle size impact: __SIZE_IMPACT__
+                - [ ] Lighthouse score: __LIGHTHOUSE_SCORE__
+                - [ ] Performance benchmarks: __PERF_STATUS__
+
+                ## Checklist
+                - [ ] Code follows Clean Architecture principles
+                - [ ] Tests have adequate coverage
+                - [ ] Documentation is updated
+                - [ ] No breaking changes
+                - [ ] Accessibility standards met
+                - [ ] Performance impact assessed" \
+                  --assignee @me \
+                  --label "enhancement,frontend,clean-architecture"
+
+                echo "✅ Pull request created successfully"
+              else
+                echo "📝 Push successful. Please create PR manually at:"
+                echo "   https://github.com/__GITHUB_ORG__/__PROJECT_NAME__/compare/$BRANCH_NAME"
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 11: TRIGGER AI CODE REVIEW ===
+    - id: 'trigger-ai-review-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Trigger AI-powered code review with Claude'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'claude-cli'
+          query: 'claude code review clean architecture frontend react'
+          url: 'https://claude.ai/docs/code-review'
+          description: 'AI-powered code review using Claude'
+      run_scripts:
+        description: 'Run Claude AI code review on the frontend implementation'
+        scripts:
+          - name: 'Trigger Claude review'
+            command: |
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Check if Claude CLI is available
+              if command -v claude &> /dev/null; then
+                echo "🤖 Starting AI code review with Claude..."
+
+                claude /review \
+                  --branch "$BRANCH_NAME" \
+                  --focus "clean-architecture,react,typescript" \
+                  --checklist ".github/frontend_checklist.md" \
+                  --output "review-frontend-__USE_CASE_NAME_KEBAB_CASE__.md"
+
+                echo "✅ AI review complete. Check review-frontend-__USE_CASE_NAME_KEBAB_CASE__.md for details."
+
+                # Add review as PR comment if gh CLI is available
+                if command -v gh &> /dev/null && [ -f "review-frontend-__USE_CASE_NAME_KEBAB_CASE__.md" ]; then
+                  gh pr comment --body-file "review-frontend-__USE_CASE_NAME_KEBAB_CASE__.md"
+                  echo "✅ Review posted to PR"
+                fi
+              else
+                echo "⚠️  Claude CLI not installed. Skipping AI review."
+                echo "   Install with: npm install -g @anthropic/claude-cli"
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 12: POST-MERGE CLEANUP ===
+    - id: 'post-merge-cleanup-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Cleanup after PR merge'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Post-merge cleanup procedures'
+      run_scripts:
+        description: 'Clean up local and remote branches after merge'
+        scripts:
+          - name: 'Post-merge cleanup'
+            command: |
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Check if PR is merged
+              if command -v gh &> /dev/null; then
+                PR_STATE=$(gh pr view "$BRANCH_NAME" --json state -q .state)
+
+                if [ "$PR_STATE" = "MERGED" ]; then
+                  echo "🧹 Starting post-merge cleanup..."
+
+                  # Switch to main branch
+                  git checkout main || git checkout master
+                  git pull origin main || git pull origin master
+
+                  # Delete local branch
+                  git branch -d "$BRANCH_NAME"
+
+                  # Delete remote branch
+                  git push origin --delete "$BRANCH_NAME"
+
+                  echo "✅ Cleanup complete. Branch deleted locally and remotely."
+                else
+                  echo "⏳ PR not yet merged. Skipping cleanup."
+                fi
+              else
+                echo "⚠️  GitHub CLI not available. Please clean up branches manually after merge."
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
 # ============= END DOMAIN STEPS FRONTEND SECTION =============
