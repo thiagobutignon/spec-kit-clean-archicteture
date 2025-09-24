@@ -673,4 +673,274 @@
             command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ fullstack shared domain layer"'
             workingDirectory: '__PROJECT_NAME__'
 
+    # === STEP 8: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create and checkout feature branch for __USE_CASE_NAME_PASCAL_CASE__ fullstack implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Git branching strategy and naming conventions for fullstack features'
+      run_scripts:
+        description: 'Create feature branch with proper naming convention'
+        scripts:
+          - name: 'Create feature branch'
+            command: |
+              # Stash any uncommitted changes
+              git stash save "WIP: Before creating __FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__ fullstack branch"
+
+              # Ensure we're on the main branch and up to date
+              git checkout main || git checkout master
+              git pull origin main || git pull origin master
+
+              # Create and checkout new feature branch
+              BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+              git checkout -b "$BRANCH_NAME"
+
+              echo "✅ Created and checked out branch: $BRANCH_NAME"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 9: REFACTOR FOR BROWNFIELD (CONDITIONAL) ===
+    - id: 'refactor-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor existing code for brownfield project integration in fullstack'
+      condition: 'check_if_brownfield_refactor_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Best practices for refactoring existing fullstack code to Clean Architecture'
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__'
+      template: |
+        // TODO: Refactor this file to comply with Clean Architecture (Fullstack)
+        // Backend considerations:
+        // 1. Extract business logic to shared domain layer
+        // 2. Move data access to infrastructure layer
+        // 3. Implement proper dependency injection
+
+        // Frontend considerations:
+        // 1. Extract UI logic to presentation components
+        // 2. Use shared domain models
+        // 3. Implement proper state management
+
+        // Shared considerations:
+        // 1. Ensure type safety across frontend/backend
+        // 2. Share validation schemas
+        // 3. Maintain consistent error handling
+
+        // Original code preserved below for reference:
+        // [ORIGINAL_CODE_PLACEHOLDER]
+
+    # === STEP 10: DELETE OBSOLETE FILES (CONDITIONAL) ===
+    - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Delete obsolete files when refactoring fullstack to Clean Architecture'
+      condition: 'check_if_file_deletion_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'MIGRATION_GUIDE.md'
+          description: 'Guidelines for safely removing obsolete fullstack code'
+      validation_script: |
+        FILE_TO_DELETE="__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__"
+
+        if [ -f "$FILE_TO_DELETE" ]; then
+          # Check for references in both frontend and backend code
+          echo "🔍 Checking for references to $FILE_TO_DELETE..."
+          FILE_NAME=$(basename "$FILE_TO_DELETE" | sed 's/\.[^.]*$//')
+
+          # Check frontend references
+          FRONTEND_REFS=$(grep -r "$FILE_NAME" __PROJECT_NAME__/src/app __PROJECT_NAME__/src/components 2>/dev/null | wc -l)
+
+          # Check backend references
+          BACKEND_REFS=$(grep -r "$FILE_NAME" __PROJECT_NAME__/src/api __PROJECT_NAME__/src/features 2>/dev/null | wc -l)
+
+          TOTAL_REFS=$((FRONTEND_REFS + BACKEND_REFS))
+
+          if [ "$TOTAL_REFS" -gt 0 ]; then
+            echo "⚠️  WARNING: Found $TOTAL_REFS references to this file."
+            echo "   Frontend: $FRONTEND_REFS references"
+            echo "   Backend: $BACKEND_REFS references"
+            echo "Review before deletion."
+            exit 1
+          fi
+
+          # Backup before deletion
+          cp "$FILE_TO_DELETE" "$FILE_TO_DELETE.backup"
+          rm "$FILE_TO_DELETE"
+          echo "✅ File deleted and backed up: $FILE_TO_DELETE.backup"
+        fi
+
+    # === STEP 11: CREATE PULL REQUEST ===
+    - id: 'create-pull-request-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create pull request for __USE_CASE_NAME_PASCAL_CASE__ fullstack implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'PR_TEMPLATE.md'
+          description: 'Pull request template for fullstack features'
+      run_scripts:
+        description: 'Push branch and create pull request'
+        scripts:
+          - name: 'Push and create PR'
+            command: |
+              BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Push the branch
+              git push -u origin "$BRANCH_NAME"
+
+              # Create PR using GitHub CLI if available
+              if command -v gh &> /dev/null; then
+                gh pr create \
+                  --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ use case (Fullstack)" \
+                  --body "## Summary
+
+                Implements __USE_CASE_NAME_PASCAL_CASE__ use case as a fullstack feature following Clean Architecture principles.
+
+                ## Changes
+
+                ### Shared Domain (100% shared)
+                - ✅ Shared entities and models
+                - ✅ Shared error types
+                - ✅ Shared DTOs and types
+
+                ### Backend
+                - ✅ Data layer with repositories
+                - ✅ Infrastructure layer implementation
+                - ✅ API route handlers
+
+                ### Frontend
+                - ✅ Data layer with API clients
+                - ✅ Presentation components and hooks
+                - ✅ Server actions integration
+
+                ### Testing & Quality
+                - ✅ Comprehensive test coverage (Vitest)
+                - ✅ Zod validation schemas
+                - ✅ Type safety across stack
+
+                ## Testing
+                - [ ] Unit tests pass (frontend & backend)
+                - [ ] Integration tests pass
+                - [ ] E2E tests pass
+                - [ ] Manual testing completed
+
+                ## Checklist
+                - [ ] Code follows Clean Architecture principles
+                - [ ] Shared domain is truly shared (no duplicates)
+                - [ ] Tests have adequate coverage
+                - [ ] Documentation is updated
+                - [ ] No breaking changes
+                - [ ] Type safety maintained across stack
+                - [ ] Performance impact assessed" \
+                  --assignee @me \
+                  --label "enhancement,fullstack,clean-architecture,nextjs"
+
+                echo "✅ Pull request created successfully"
+              else
+                echo "📝 Push successful. Please create PR manually at:"
+                echo "   https://github.com/__GITHUB_ORG__/__PROJECT_NAME__/compare/$BRANCH_NAME"
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 12: TRIGGER AI CODE REVIEW ===
+    - id: 'trigger-ai-review-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Trigger AI-powered code review with Claude for fullstack implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'claude-cli'
+          query: 'claude code review clean architecture fullstack nextjs'
+          url: 'https://claude.ai/docs/code-review'
+          description: 'AI-powered code review using Claude for fullstack'
+      run_scripts:
+        description: 'Run Claude AI code review on the fullstack implementation'
+        scripts:
+          - name: 'Trigger Claude review'
+            command: |
+              BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Check if Claude CLI is available
+              if command -v claude &> /dev/null; then
+                echo "🤖 Starting AI code review with Claude for fullstack..."
+
+                claude /review \
+                  --branch "$BRANCH_NAME" \
+                  --focus "clean-architecture,nextjs,fullstack,typescript" \
+                  --checklist ".github/fullstack_checklist.md" \
+                  --output "review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md"
+
+                echo "✅ AI review complete. Check review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md for details."
+
+                # Add review as PR comment if gh CLI is available
+                if command -v gh &> /dev/null && [ -f "review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md" ]; then
+                  gh pr comment --body-file "review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md"
+                  echo "✅ Review posted to PR"
+                fi
+              else
+                echo "⚠️  Claude CLI not installed. Skipping AI review."
+                echo "   Install with: npm install -g @anthropic/claude-cli"
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 13: POST-MERGE CLEANUP ===
+    - id: 'post-merge-cleanup-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Cleanup after PR merge for fullstack feature'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Post-merge cleanup procedures for fullstack features'
+      run_scripts:
+        description: 'Clean up local and remote branches after merge'
+        scripts:
+          - name: 'Post-merge cleanup'
+            command: |
+              BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Check if PR is merged
+              if command -v gh &> /dev/null; then
+                PR_STATE=$(gh pr view "$BRANCH_NAME" --json state -q .state)
+
+                if [ "$PR_STATE" = "MERGED" ]; then
+                  echo "🧹 Starting post-merge cleanup for fullstack feature..."
+
+                  # Switch to main branch
+                  git checkout main || git checkout master
+                  git pull origin main || git pull origin master
+
+                  # Delete local branch
+                  git branch -d "$BRANCH_NAME"
+
+                  # Delete remote branch
+                  git push origin --delete "$BRANCH_NAME"
+
+                  # Clean up any review artifacts
+                  rm -f review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md
+
+                  echo "✅ Cleanup complete. Branch and artifacts deleted."
+                else
+                  echo "⏳ PR not yet merged. Skipping cleanup."
+                fi
+              else
+                echo "⚠️  GitHub CLI not available. Please clean up branches manually after merge."
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
 # ============= END DOMAIN STEPS FULLSTACK SECTION =============
