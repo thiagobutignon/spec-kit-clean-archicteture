@@ -246,16 +246,18 @@
           })
         })
       validation_script: |
-        echo "🔴 Running TDD RED phase - repository tests should FAIL..."
+        echo "🔴 TDD RED phase: Running repository tests (expecting failures)..."
         npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.spec.ts
 
-        # AI-NOTE: We expect tests to fail at this point (RED phase)
+        # AI-NOTE: In RED phase, tests MUST fail because implementation doesn't exist yet
         if [ $? -eq 0 ]; then
-          echo "⚠️  WARNING: Tests passed but they should fail in RED phase"
-          echo "   Please verify test implementation"
+          echo "❌ UNEXPECTED: Tests passed in RED phase"
+          echo "   This indicates the test implementation may be incorrect"
+          echo "   RED phase requires failing tests before implementation"
+          exit 1
         else
-          echo "✅ RED phase complete - tests are failing as expected"
-          echo "   Ready to implement the repository (GREEN phase)"
+          echo "✅ RED phase successful: Repository tests failing as expected"
+          echo "   Next: Implement repository to make tests pass (GREEN phase)"
         fi
 
         git add .
@@ -460,16 +462,18 @@
           }
         }
       validation_script: |
-        echo "🟢 Running TDD GREEN phase - making repository tests pass..."
+        echo "🟢 TDD GREEN phase: Running repository tests (expecting all to pass)..."
 
-        # Run the tests - they should pass now
+        # Run tests with implementation - must pass to complete GREEN phase
         npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.spec.ts
 
         if [ $? -eq 0 ]; then
-          echo "✅ GREEN phase complete - all repository tests passing!"
+          echo "✅ GREEN phase successful: All repository tests passing!"
+          echo "   Implementation correctly satisfies test requirements"
         else
-          echo "❌ Tests still failing - implementation needs adjustment"
-          echo "   Review the test failures and adjust implementation"
+          echo "❌ GREEN phase failed: Repository tests still failing"
+          echo "   Implementation does not satisfy test requirements"
+          echo "   Review test failures and adjust repository implementation"
           exit 1
         fi
 
@@ -589,14 +593,18 @@
           })
         })
       validation_script: |
-        echo "🔴 Running TDD RED phase - HTTP client tests should FAIL..."
+        echo "🔴 TDD RED phase: Running HTTP client tests (expecting failures)..."
         npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.spec.ts
 
-        # AI-NOTE: We expect tests to fail at this point (RED phase)
+        # AI-NOTE: In RED phase, tests MUST fail because implementation doesn't exist yet
         if [ $? -eq 0 ]; then
-          echo "⚠️  WARNING: Tests passed but they should fail in RED phase"
+          echo "❌ UNEXPECTED: Tests passed in RED phase"
+          echo "   This indicates the test implementation may be incorrect"
+          echo "   RED phase requires failing tests before implementation"
+          exit 1
         else
-          echo "✅ RED phase complete - HTTP client tests are failing as expected"
+          echo "✅ RED phase successful: HTTP client tests failing as expected"
+          echo "   Next: Implement HTTP client to make tests pass (GREEN phase)"
         fi
 
         git add .
@@ -784,15 +792,18 @@
           }
         }
       validation_script: |
-        echo "🟢 Running TDD GREEN phase - making HTTP client tests pass..."
+        echo "🟢 TDD GREEN phase: Running HTTP client tests (expecting all to pass)..."
 
-        # Run the tests - they should pass now
+        # Run tests with implementation - must pass to complete GREEN phase
         npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.spec.ts
 
         if [ $? -eq 0 ]; then
-          echo "✅ GREEN phase complete - all HTTP client tests passing!"
+          echo "✅ GREEN phase successful: All HTTP client tests passing!"
+          echo "   Implementation correctly satisfies test requirements"
         else
-          echo "❌ Tests still failing - implementation needs adjustment"
+          echo "❌ GREEN phase failed: HTTP client tests still failing"
+          echo "   Implementation does not satisfy test requirements"
+          echo "   Review test failures and adjust HTTP client implementation"
           exit 1
         fi
 
@@ -924,13 +935,18 @@
           })
         })
       validation_script: |
-        echo "🔴 Running TDD RED phase - cache tests should FAIL..."
+        echo "🔴 TDD RED phase: Running cache tests (expecting failures)..."
         npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache.spec.ts
 
+        # AI-NOTE: In RED phase, tests MUST fail because implementation doesn't exist yet
         if [ $? -eq 0 ]; then
-          echo "⚠️  WARNING: Tests passed but they should fail in RED phase"
+          echo "❌ UNEXPECTED: Tests passed in RED phase"
+          echo "   This indicates the test implementation may be incorrect"
+          echo "   RED phase requires failing tests before implementation"
+          exit 1
         else
-          echo "✅ RED phase complete - cache tests are failing as expected"
+          echo "✅ RED phase successful: Cache tests failing as expected"
+          echo "   Next: Implement cache to make tests pass (GREEN phase)"
         fi
 
         git add .
@@ -1173,14 +1189,18 @@
           }
         }
       validation_script: |
-        echo "🟢 Running TDD GREEN phase - making cache tests pass..."
+        echo "🟢 TDD GREEN phase: Running cache tests (expecting all to pass)..."
 
+        # Run tests with implementation - must pass to complete GREEN phase
         npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache.spec.ts
 
         if [ $? -eq 0 ]; then
-          echo "✅ GREEN phase complete - all cache tests passing!"
+          echo "✅ GREEN phase successful: All cache tests passing!"
+          echo "   Implementation correctly satisfies test requirements"
         else
-          echo "❌ Tests still failing - implementation needs adjustment"
+          echo "❌ GREEN phase failed: Cache tests still failing"
+          echo "   Implementation does not satisfy test requirements"
+          echo "   Review test failures and adjust cache implementation"
           exit 1
         fi
 

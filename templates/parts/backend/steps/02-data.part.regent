@@ -203,16 +203,18 @@
           })
         })
       validation_script: |
-        echo "🔴 Running TDD RED phase - tests should FAIL..."
+        echo "🔴 TDD RED phase: Running tests (expecting failures)..."
         npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db-__USE_CASE_NAME_KEBAB_CASE__.spec.ts --no-coverage
 
-        # AI-NOTE: We expect tests to fail at this point (RED phase)
+        # AI-NOTE: In RED phase, tests MUST fail because implementation doesn't exist yet
         if [ $? -eq 0 ]; then
-          echo "⚠️  WARNING: Tests passed but they should fail in RED phase"
-          echo "   Please verify test implementation"
+          echo "❌ UNEXPECTED: Tests passed in RED phase"
+          echo "   This indicates the test implementation may be incorrect"
+          echo "   RED phase requires failing tests before implementation"
+          exit 1
         else
-          echo "✅ RED phase complete - tests are failing as expected"
-          echo "   Ready to implement the data layer (GREEN phase)"
+          echo "✅ RED phase successful: Tests failing as expected"
+          echo "   Next: Implement data layer to make tests pass (GREEN phase)"
         fi
 
         git add .
@@ -359,16 +361,18 @@
           }
         }
       validation_script: |
-        echo "🟢 Running TDD GREEN phase - making tests pass..."
+        echo "🟢 TDD GREEN phase: Running tests (expecting all to pass)..."
 
-        # Run the tests - they should pass now
+        # Run tests with implementation - must pass to complete GREEN phase
         npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db-__USE_CASE_NAME_KEBAB_CASE__.spec.ts
 
         if [ $? -eq 0 ]; then
-          echo "✅ GREEN phase complete - all tests passing!"
+          echo "✅ GREEN phase successful: All tests passing!"
+          echo "   Implementation correctly satisfies test requirements"
         else
-          echo "❌ Tests still failing - implementation needs adjustment"
-          echo "   Review the test failures and adjust implementation"
+          echo "❌ GREEN phase failed: Tests still failing"
+          echo "   Implementation does not satisfy test requirements"
+          echo "   Review test failures and adjust data layer implementation"
           exit 1
         fi
 
