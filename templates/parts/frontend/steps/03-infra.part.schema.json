@@ -1,0 +1,319 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Frontend Infrastructure Steps Configuration",
+  "description": "Schema for frontend infrastructure layer implementation steps with TDD methodology, focusing on Fetch API, browser storage, cache management, and Clean Architecture patterns for React/Next.js",
+  "type": "object",
+  "required": ["infra_steps"],
+  "properties": {
+    "infra_steps": {
+      "type": "array",
+      "description": "Array of frontend infrastructure layer implementation steps following TDD (Red-Green-Refactor) with HTTP, storage, cache, and browser API implementations",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/infraStep"
+      }
+    },
+    "brownfield_infra_steps": {
+      "type": "array",
+      "description": "Optional brownfield refactoring steps for migrating legacy frontend code to Clean Architecture",
+      "items": {
+        "$ref": "#/definitions/brownfieldStep"
+      }
+    }
+  },
+  "definitions": {
+    "infraStep": {
+      "type": "object",
+      "required": ["id", "type", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the frontend infrastructure step with template placeholders",
+          "pattern": "^[a-z0-9-_]+(__[A-Z_]+__[a-z0-9-_]*)*$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["folder", "create_file", "validation", "conditional_file", "analysis"],
+          "description": "Type of step: folder creation, file creation, validation, conditional file, or analysis"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of what this frontend infrastructure step does"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PENDING", "SUCCESS", "FAILED", "SKIPPED"],
+          "default": "PENDING",
+          "description": "Current status of the step execution"
+        },
+        "rlhf_score": {
+          "type": ["integer", "null"],
+          "minimum": -2,
+          "maximum": 2,
+          "default": null,
+          "description": "Reinforcement Learning from Human Feedback score"
+        },
+        "execution_log": {
+          "type": "string",
+          "default": "",
+          "description": "Log of step execution for frontend infrastructure layer"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/reference"
+          },
+          "description": "References to patterns, guidelines, or documentation for frontend infrastructure layer"
+        },
+        "action": {
+          "$ref": "#/definitions/folderAction",
+          "description": "Action for folder creation steps in frontend infrastructure layer"
+        },
+        "path": {
+          "type": "string",
+          "description": "File path for create_file steps with template placeholders for frontend infrastructure layer"
+        },
+        "template": {
+          "type": "string",
+          "description": "File content template for create_file steps with TypeScript/React code"
+        },
+        "validation_script": {
+          "type": "string",
+          "description": "Shell script for validation steps specific to frontend infrastructure layer"
+        },
+        "run_scripts": {
+          "type": "object",
+          "required": ["description", "scripts"],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Description of what the frontend infrastructure validation scripts do"
+            },
+            "scripts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/script"
+              },
+              "minItems": 1,
+              "description": "List of scripts to run for frontend infrastructure validation (npm, vitest, etc.)"
+            }
+          },
+          "description": "Scripts to run for frontend infrastructure validation steps"
+        },
+        "ai_review_prompts": {
+          "$ref": "#/definitions/aiReviewPrompts",
+          "description": "AI review prompts for code quality and pattern consistency"
+        },
+        "analysis_script": {
+          "type": "string",
+          "description": "Script for analyzing existing code in brownfield refactoring"
+        },
+        "migration_strategy": {
+          "type": "string",
+          "description": "Strategy description for gradual migration in brownfield scenarios"
+        },
+        "condition": {
+          "type": "string",
+          "description": "Condition function name for conditional_file steps in frontend infrastructure layer"
+        }
+      }
+    },
+    "brownfieldStep": {
+      "type": "object",
+      "required": ["id", "type", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the brownfield refactoring step",
+          "pattern": "^[a-z0-9-_]+(__[A-Z_]+__[a-z0-9-_]*)*$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["analysis", "create_file", "validation"],
+          "description": "Type of brownfield step"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the brownfield refactoring step"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PENDING", "SUCCESS", "FAILED", "SKIPPED"],
+          "default": "PENDING",
+          "description": "Current status of the step execution"
+        },
+        "rlhf_score": {
+          "type": ["integer", "null"],
+          "minimum": -2,
+          "maximum": 2,
+          "default": null,
+          "description": "Reinforcement Learning from Human Feedback score"
+        },
+        "execution_log": {
+          "type": "string",
+          "default": "",
+          "description": "Log of brownfield step execution"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/reference"
+          },
+          "description": "References to migration patterns and strategies"
+        },
+        "analysis_script": {
+          "type": "string",
+          "description": "Script for analyzing legacy code"
+        },
+        "template": {
+          "type": "string",
+          "description": "Adapter template for bridging legacy and new code"
+        },
+        "migration_strategy": {
+          "type": "string",
+          "description": "Detailed migration strategy for gradual replacement"
+        }
+      }
+    },
+    "folderAction": {
+      "type": "object",
+      "required": ["create_folders"],
+      "properties": {
+        "create_folders": {
+          "type": "object",
+          "required": ["basePath", "folders"],
+          "properties": {
+            "basePath": {
+              "type": "string",
+              "description": "Base path where frontend infrastructure layer folders will be created with template placeholders"
+            },
+            "folders": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "description": "List of frontend infrastructure layer folder names to create (http, cache, storage)"
+            }
+          }
+        }
+      }
+    },
+    "fileAction": {
+      "type": "object",
+      "required": ["create_file"],
+      "properties": {
+        "create_file": {
+          "type": "object",
+          "required": ["path", "content"],
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "File path for frontend infrastructure layer with template placeholders"
+            },
+            "content": {
+              "type": "string",
+              "description": "File content with template placeholders and TypeScript/React code for frontend infrastructure layer"
+            }
+          }
+        }
+      }
+    },
+    "validationAction": {
+      "type": "object",
+      "required": ["run_scripts"],
+      "properties": {
+        "run_scripts": {
+          "type": "object",
+          "required": ["description", "scripts"],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Description of what the frontend infrastructure validation scripts do"
+            },
+            "scripts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/script"
+              },
+              "minItems": 1,
+              "description": "List of scripts to run for frontend infrastructure validation"
+            }
+          }
+        }
+      }
+    },
+    "script": {
+      "type": "object",
+      "required": ["name", "command"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name for the frontend infrastructure script"
+        },
+        "command": {
+          "type": "string",
+          "description": "Shell command to execute for frontend infrastructure layer (npm, npx, vitest, etc.)"
+        },
+        "workingDirectory": {
+          "type": "string",
+          "description": "Working directory for the frontend infrastructure command (optional)"
+        }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "required": ["type", "source", "description"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["internal_guideline", "external_pattern", "internal_code_analysis"],
+          "description": "Type of reference for frontend infrastructure layer"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source of the reference (e.g., context7, serena, FRONTEND_ARCHITECTURE.md)"
+        },
+        "query": {
+          "type": "string",
+          "description": "Search query or pattern for external references related to frontend infrastructure layer"
+        },
+        "url": {
+          "type": "string",
+          "description": "URL reference for external patterns related to frontend infrastructure layer"
+        },
+        "tool": {
+          "type": "string",
+          "description": "Tool name for internal code analysis of frontend infrastructure layer"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of what this reference provides for frontend infrastructure layer"
+        }
+      }
+    },
+    "aiReviewPrompts": {
+      "type": "object",
+      "description": "AI review prompts for different aspects of code quality",
+      "properties": {
+        "architecture_review": {
+          "type": "string",
+          "description": "Prompt for reviewing Clean Architecture compliance"
+        },
+        "browser_compatibility": {
+          "type": "string",
+          "description": "Prompt for reviewing browser API compatibility"
+        },
+        "performance_review": {
+          "type": "string",
+          "description": "Prompt for reviewing performance and optimization"
+        },
+        "security_review": {
+          "type": "string",
+          "description": "Prompt for reviewing security and data handling"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
