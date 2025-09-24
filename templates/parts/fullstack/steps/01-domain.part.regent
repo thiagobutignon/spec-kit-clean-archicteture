@@ -706,10 +706,28 @@
               echo "✅ Created and checked out branch: $BRANCH_NAME"
             workingDirectory: '__PROJECT_NAME__'
 
-    # === STEP 9: REFACTOR FOR BROWNFIELD (CONDITIONAL) ===
-    - id: 'refactor-__FILE_TO_MODIFY_KEBAB_CASE__'
-      type: 'conditional_file'
-      description: 'Refactor existing code for brownfield project integration in fullstack'
+    # === STEP 9: REFACTOR FOR BROWNFIELD (CONDITIONAL MULTI-STEP) ===
+    # AI-NOTE: When brownfield refactoring is needed in fullstack, the AI should dynamically
+    # generate multiple steps based on the specific files that need refactoring across both
+    # frontend and backend. Each file should have its own step for better tracking.
+    #
+    # RULE: For each file requiring refactoring, create a separate step with:
+    # - Unique ID: refactor-{layer}-{index}-{filename}
+    # - Clear indication if it's frontend, backend, or shared
+    # - Specific validation for that file's refactoring
+    # - Cross-stack impact analysis
+    #
+    # EXAMPLE PATTERN:
+    # If 5 files need refactoring across stack, generate:
+    # Step 9a: refactor-backend-1-user-controller
+    # Step 9b: refactor-backend-2-user-service
+    # Step 9c: refactor-frontend-1-user-list-component
+    # Step 9d: refactor-frontend-2-user-form
+    # Step 9e: refactor-shared-1-user-types
+
+    - id: 'refactor-rollback-point-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create rollback point before starting fullstack brownfield refactoring'
       condition: 'check_if_brownfield_refactor_needed'
       status: 'PENDING'
       rlhf_score: null
@@ -717,32 +735,154 @@
       references:
         - type: 'internal_guideline'
           source: 'REFACTORING_GUIDE.md'
-          description: 'Best practices for refactoring existing fullstack code to Clean Architecture'
-      validation_script: |
-        # Create rollback point before refactoring
-        git tag "before-refactor-__USE_CASE_NAME_KEBAB_CASE__" || {
-          echo "⚠️  Failed to create rollback tag"
-          exit 1
-        }
-        echo "✅ Created rollback point: before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
-        echo "   To rollback: git reset --hard before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
-      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__'
+          description: 'Best practices for safe fullstack refactoring'
+      run_scripts:
+        description: 'Create git tag for rollback before any refactoring'
+        scripts:
+          - name: 'Create rollback tag'
+            command: |
+              # Create rollback point before refactoring
+              git tag "before-refactor-__USE_CASE_NAME_KEBAB_CASE__" || {
+                echo "⚠️  Failed to create rollback tag"
+                exit 1
+              }
+              echo "✅ Created rollback point: before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
+              echo "   To rollback: git reset --hard before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Document files that need refactoring across the stack
+              echo "📋 Files identified for refactoring:"
+              echo ""
+              echo "Backend files:"
+              # AI should list backend files here
+              echo ""
+              echo "Frontend files:"
+              # AI should list frontend files here
+              echo ""
+              echo "Shared files:"
+              # AI should list shared files here
+            workingDirectory: '__PROJECT_NAME__'
+
+    # AI-NOTE: The following are templates that should be duplicated for each file
+    # that needs refactoring. Generate separate templates for backend, frontend, and shared.
+
+    # Backend refactoring template
+    - id: 'refactor-backend-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor backend __FILE_TO_MODIFY_KEBAB_CASE__ to Clean Architecture'
+      condition: 'check_if_backend_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture patterns for backend refactoring'
+        - type: 'internal_code_analysis'
+          tool: 'serena'
+          description: 'Analyze backend dependencies and structure'
+      path: '__PROJECT_NAME__/src/api/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
       template: |
-        // TODO: Refactor this file to comply with Clean Architecture (Fullstack)
-        // Backend considerations:
+        // TODO: Refactor this backend file to comply with Clean Architecture
+        // File: __FILE_TO_MODIFY_KEBAB_CASE__.ts
+        // Layer: Backend
+        // Priority: __PRIORITY__ (high/medium/low)
+        // Estimated effort: __EFFORT__ (hours)
+
+        // BACKEND REFACTORING TASKS:
         // 1. Extract business logic to shared domain layer
         // 2. Move data access to infrastructure layer
         // 3. Implement proper dependency injection
+        // 4. Add proper error handling with shared error types
+        // 5. Ensure types are shareable with frontend
+        // 6. Update route handlers to use new structure
+        // 7. Add integration tests
 
-        // Frontend considerations:
-        // 1. Extract UI logic to presentation components
-        // 2. Use shared domain models
-        // 3. Implement proper state management
+        // FRONTEND IMPACT:
+        // - [AI should list frontend files affected]
 
-        // Shared considerations:
-        // 1. Ensure type safety across frontend/backend
-        // 2. Share validation schemas
-        // 3. Maintain consistent error handling
+        // SHARED TYPES TO CREATE/UPDATE:
+        // - [AI should list shared types needed]
+
+        // Original code preserved below for reference:
+        // [ORIGINAL_CODE_PLACEHOLDER]
+
+    # Frontend refactoring template
+    - id: 'refactor-frontend-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor frontend __FILE_TO_MODIFY_KEBAB_CASE__ to Clean Architecture'
+      condition: 'check_if_frontend_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture patterns for frontend refactoring'
+        - type: 'internal_code_analysis'
+          tool: 'serena'
+          description: 'Analyze component dependencies and structure'
+      path: '__PROJECT_NAME__/src/app/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.tsx'
+      template: |
+        // TODO: Refactor this frontend component to comply with Clean Architecture
+        // Component: __FILE_TO_MODIFY_KEBAB_CASE__.tsx
+        // Layer: Frontend
+        // Type: __COMPONENT_TYPE__ (Page/Component/Hook/ServerAction)
+        // Priority: __PRIORITY__ (high/medium/low)
+        // Estimated effort: __EFFORT__ (hours)
+
+        // FRONTEND REFACTORING TASKS:
+        // 1. Extract business logic to custom hooks
+        // 2. Use shared domain models from backend
+        // 3. Implement server actions for data fetching
+        // 4. Add proper error boundaries with shared error types
+        // 5. Implement proper loading states
+        // 6. Add accessibility attributes
+        // 7. Extract reusable UI components
+        // 8. Add component tests
+
+        // BACKEND DEPENDENCIES:
+        // - [AI should list API endpoints used]
+
+        // SHARED TYPES CONSUMED:
+        // - [AI should list shared types used]
+
+        // Original code preserved below for reference:
+        // [ORIGINAL_CODE_PLACEHOLDER]
+
+    # Shared refactoring template
+    - id: 'refactor-shared-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor shared __FILE_TO_MODIFY_KEBAB_CASE__ for both frontend and backend'
+      condition: 'check_if_shared_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Patterns for shared code between frontend and backend'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+      template: |
+        // TODO: Refactor this shared file to comply with Clean Architecture
+        // File: __FILE_TO_MODIFY_KEBAB_CASE__.ts
+        // Layer: Shared Domain
+        // Priority: __PRIORITY__ (high/medium/low)
+        // Estimated effort: __EFFORT__ (hours)
+
+        // SHARED REFACTORING TASKS:
+        // 1. Ensure types work in both Node.js and browser
+        // 2. Add proper serialization/deserialization
+        // 3. Implement shared validation schemas
+        // 4. Add shared error types
+        // 5. Ensure no platform-specific dependencies
+        // 6. Add comprehensive type guards
+        // 7. Document usage for both frontend and backend
+
+        // BACKEND FILES USING THIS:
+        // - [AI should list backend consumers]
+
+        // FRONTEND FILES USING THIS:
+        // - [AI should list frontend consumers]
 
         // Original code preserved below for reference:
         // [ORIGINAL_CODE_PLACEHOLDER]

@@ -493,10 +493,26 @@
               echo "✅ Created and checked out branch: $BRANCH_NAME"
             workingDirectory: '__PROJECT_NAME__'
 
-    # === STEP 8: REFACTOR FOR BROWNFIELD (CONDITIONAL) ===
-    - id: 'refactor-__FILE_TO_MODIFY_KEBAB_CASE__'
-      type: 'conditional_file'
-      description: 'Refactor existing code for brownfield project integration'
+    # === STEP 8: REFACTOR FOR BROWNFIELD (CONDITIONAL MULTI-STEP) ===
+    # AI-NOTE: When brownfield refactoring is needed, the AI should dynamically generate
+    # multiple steps based on the specific files that need refactoring. Each file should
+    # have its own step for better tracking and granular control.
+    #
+    # RULE: For each file requiring refactoring, create a separate step with:
+    # - Unique ID: refactor-{index}-{filename}
+    # - Clear description of what changes are needed
+    # - Specific validation for that file's refactoring
+    # - Rollback point for each major refactoring
+    #
+    # EXAMPLE PATTERN:
+    # If 3 files need refactoring, generate:
+    # Step 8a: refactor-1-user-controller
+    # Step 8b: refactor-2-user-service
+    # Step 8c: refactor-3-user-repository
+
+    - id: 'refactor-rollback-point-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create rollback point before starting brownfield refactoring'
       condition: 'check_if_brownfield_refactor_needed'
       status: 'PENDING'
       rlhf_score: null
@@ -504,23 +520,62 @@
       references:
         - type: 'internal_guideline'
           source: 'REFACTORING_GUIDE.md'
-          description: 'Best practices for refactoring existing code to Clean Architecture'
-      validation_script: |
-        # Create rollback point before refactoring
-        git tag "before-refactor-__USE_CASE_NAME_KEBAB_CASE__" || {
-          echo "⚠️  Failed to create rollback tag"
-          exit 1
-        }
-        echo "✅ Created rollback point: before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
-        echo "   To rollback: git reset --hard before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
+          description: 'Best practices for safe refactoring with rollback points'
+      run_scripts:
+        description: 'Create git tag for rollback before any refactoring'
+        scripts:
+          - name: 'Create rollback tag'
+            command: |
+              # Create rollback point before refactoring
+              git tag "before-refactor-__USE_CASE_NAME_KEBAB_CASE__" || {
+                echo "⚠️  Failed to create rollback tag"
+                exit 1
+              }
+              echo "✅ Created rollback point: before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
+              echo "   To rollback: git reset --hard before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Document files that need refactoring
+              echo "📋 Files identified for refactoring:"
+              # AI should list files here based on analysis
+            workingDirectory: '__PROJECT_NAME__'
+
+    # AI-NOTE: The following is a template that should be duplicated for each file
+    # that needs refactoring. The AI should generate one step per file.
+    - id: 'refactor-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor __FILE_TO_MODIFY_KEBAB_CASE__ to Clean Architecture'
+      condition: 'check_if_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture refactoring patterns for backend'
+        - type: 'internal_code_analysis'
+          tool: 'serena'
+          description: 'Analyze current file structure and dependencies'
       path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
       template: |
         // TODO: Refactor this file to comply with Clean Architecture
+        // File: __FILE_TO_MODIFY_KEBAB_CASE__.ts
+        // Priority: __PRIORITY__ (high/medium/low)
+        // Estimated effort: __EFFORT__ (hours)
+
+        // SPECIFIC REFACTORING TASKS FOR THIS FILE:
         // 1. Extract business logic to domain layer
         // 2. Move data access to infrastructure layer
         // 3. Separate presentation concerns
         // 4. Add proper error handling
         // 5. Implement dependency injection
+        // 6. Update imports to follow Clean Architecture boundaries
+        // 7. Add unit tests for refactored code
+
+        // DEPENDENCIES TO UPDATE:
+        // - [AI should list specific dependencies]
+
+        // FILES THAT IMPORT THIS:
+        // - [AI should list files that will need updates]
 
         // Original code preserved below for reference:
         // [ORIGINAL_CODE_PLACEHOLDER]
