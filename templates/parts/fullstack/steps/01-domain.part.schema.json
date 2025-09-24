@@ -1,0 +1,217 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Fullstack Domain Steps Configuration",
+  "description": "Schema for fullstack-specific domain layer implementation steps for unified Next.js 15 development",
+  "type": "object",
+  "required": ["domain_steps"],
+  "properties": {
+    "domain_steps": {
+      "type": "array",
+      "description": "Array of shared domain layer implementation steps for fullstack use case slices",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/domainStep"
+      }
+    }
+  },
+  "definitions": {
+    "domainStep": {
+      "type": "object",
+      "required": ["id", "type", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the domain step with template placeholders",
+          "pattern": "^[a-z0-9-_]+(__[A-Z_]+__[a-z0-9-_]*)*$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["folder", "create_file", "validation", "conditional_file"],
+          "description": "Type of step: folder creation, file creation, validation, or conditional file"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of what this step does"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PENDING", "SUCCESS", "FAILED", "SKIPPED"],
+          "description": "Current status of the step execution"
+        },
+        "rlhf_score": {
+          "type": ["integer", "null"],
+          "minimum": -2,
+          "maximum": 2,
+          "description": "Reinforcement Learning from Human Feedback score"
+        },
+        "execution_log": {
+          "type": "string",
+          "description": "Log of step execution"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/reference"
+          },
+          "description": "References to patterns, guidelines, or documentation"
+        },
+        "action": {
+          "$ref": "#/definitions/folderAction",
+          "description": "Action for folder creation steps"
+        },
+        "path": {
+          "type": "string",
+          "description": "File path for create_file steps with template placeholders"
+        },
+        "template": {
+          "type": "string",
+          "description": "File content template for create_file steps"
+        },
+        "validation_script": {
+          "type": "string",
+          "description": "Shell script for validation steps"
+        },
+        "run_scripts": {
+          "type": "object",
+          "required": ["description", "scripts"],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Description of what the validation scripts do"
+            },
+            "scripts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/script"
+              },
+              "minItems": 1,
+              "description": "List of scripts to run for validation"
+            }
+          },
+          "description": "Scripts to run for validation steps"
+        },
+        "condition": {
+          "type": "string",
+          "description": "Condition function name for conditional_file steps"
+        }
+      }
+    },
+    "folderAction": {
+      "type": "object",
+      "required": ["create_folders"],
+      "properties": {
+        "create_folders": {
+          "type": "object",
+          "required": ["basePath", "folders"],
+          "properties": {
+            "basePath": {
+              "type": "string",
+              "description": "Base path where folders will be created with template placeholders"
+            },
+            "folders": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "description": "List of folder names to create"
+            }
+          }
+        }
+      }
+    },
+    "fileAction": {
+      "type": "object",
+      "required": ["create_file"],
+      "properties": {
+        "create_file": {
+          "type": "object",
+          "required": ["path", "content"],
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "File path with template placeholders"
+            },
+            "content": {
+              "type": "string",
+              "description": "File content with template placeholders and TypeScript code"
+            }
+          }
+        }
+      }
+    },
+    "validationAction": {
+      "type": "object",
+      "required": ["run_scripts"],
+      "properties": {
+        "run_scripts": {
+          "type": "object",
+          "required": ["description", "scripts"],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Description of what the validation scripts do"
+            },
+            "scripts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/script"
+              },
+              "minItems": 1,
+              "description": "List of scripts to run for validation"
+            }
+          }
+        }
+      }
+    },
+    "script": {
+      "type": "object",
+      "required": ["name", "command"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name for the script"
+        },
+        "command": {
+          "type": "string",
+          "description": "Shell command to execute (npm, npx, etc.)"
+        },
+        "workingDirectory": {
+          "type": "string",
+          "description": "Working directory for the command (optional)"
+        }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "required": ["type", "source", "description"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["internal_guideline", "external_pattern", "internal_code_analysis"],
+          "description": "Type of reference"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source of the reference (e.g., context7, serena, FULLSTACK_ARCHITECTURE.md)"
+        },
+        "query": {
+          "type": "string",
+          "description": "Search query or pattern for external references"
+        },
+        "url": {
+          "type": "string",
+          "description": "URL reference for external patterns"
+        },
+        "tool": {
+          "type": "string",
+          "description": "Tool name for internal code analysis"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of what this reference provides"
+        }
+      }
+    }
+  }
+}
