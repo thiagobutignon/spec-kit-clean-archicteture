@@ -72,6 +72,8 @@
           __USE_CASE_NAME_PASCAL_CASE__Input,
           __USE_CASE_NAME_PASCAL_CASE__Output
         } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        // AI-NOTE: Import domain errors if they exist
+        // import { __USE_CASE_NAME_PASCAL_CASE__Error } from '../../domain/errors/__USE_CASE_NAME_KEBAB_CASE__-error'
 
         /**
          * Test suite for Db__USE_CASE_NAME_PASCAL_CASE__ implementation
@@ -256,6 +258,8 @@
           __USE_CASE_NAME_PASCAL_CASE__Input,
           __USE_CASE_NAME_PASCAL_CASE__Output
         } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        // AI-NOTE: Import repository protocol if it exists
+        import type { __REPOSITORY_PROTOCOL_NAME__ } from '../protocols/__REPOSITORY_PROTOCOL_NAME__'
 
         /**
          * Data implementation of __USE_CASE_NAME_PASCAL_CASE__ use case
@@ -270,8 +274,21 @@
            * @param __FEATURE_NAME_CAMEL_CASE__Repository - Repository for database operations
            */
           constructor(
-            private readonly __FEATURE_NAME_CAMEL_CASE__Repository: any // AI-NOTE: Replace 'any' with proper protocol
+            private readonly __FEATURE_NAME_CAMEL_CASE__Repository: __REPOSITORY_PROTOCOL_NAME__
           ) {}
+
+          /**
+           * Validate input data before processing
+           * @param input - Input to validate
+           * @throws Error if input is invalid
+           * @private
+           */
+          private validateInput(input: __USE_CASE_NAME_PASCAL_CASE__Input): void {
+            if (!input.__INPUT_FIELD_1__) {
+              throw new Error('Missing required field: __INPUT_FIELD_1__')
+            }
+            // AI-NOTE: Add specific validation rules based on business requirements
+          }
 
           /**
            * Execute the __USE_CASE_NAME_LOWER_CASE__ operation
@@ -284,17 +301,20 @@
             // AI-NOTE: Minimal orchestration logic only
             // Business rules should be in domain layer
 
-            // Step 1: Prepare data for repository
+            // Step 1: Validate input
+            this.validateInput(input)
+
+            // Step 2: Prepare data for repository
             const repositoryData = {
               __INPUT_FIELD_1__: input.__INPUT_FIELD_1__,
               __INPUT_FIELD_2__: input.__INPUT_FIELD_2__,
               __INPUT_FIELD_3__: input.__INPUT_FIELD_3__
             }
 
-            // Step 2: Call repository (infrastructure abstraction)
+            // Step 3: Call repository (infrastructure abstraction)
             const result = await this.__FEATURE_NAME_CAMEL_CASE__Repository.__REPOSITORY_METHOD_NAME__(repositoryData)
 
-            // Step 3: Map to domain output
+            // Step 4: Map to domain output
             const output: __USE_CASE_NAME_PASCAL_CASE__Output = {
               __OUTPUT_FIELD_1__: result.__OUTPUT_FIELD_1__ || result.id,
               __OUTPUT_FIELD_2__: result.__OUTPUT_FIELD_2__ || result.__INPUT_FIELD_2__,
@@ -391,7 +411,7 @@
 
         /**
          * Prisma implementation of __FEATURE_NAME_PASCAL_CASE__ repository
-         * Handles database operations using Prisma ORM
+         * Handles database operations using Prisma ORM with transaction support
          * @layer Infrastructure Layer
          * @pattern Repository Pattern
          * @implements __REPOSITORY_PROTOCOL_NAME__
@@ -404,11 +424,17 @@
           /**
            * __REPOSITORY_METHOD_DESCRIPTION__
            * @param data - Data to persist
+           * @param tx - Optional Prisma transaction client for atomic operations
            * @returns Promise with persisted entity
            */
-          async __REPOSITORY_METHOD_NAME__(data: any): Promise<any> {
-            // AI-NOTE: Implement actual Prisma operation
-            const result = await this.prisma.__MODEL_NAME__.create({
+          async __REPOSITORY_METHOD_NAME__(
+            data: any,
+            tx?: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>
+          ): Promise<any> {
+            // AI-NOTE: Use transaction client if provided, otherwise use main client
+            const client = tx || this.prisma
+
+            const result = await client.__MODEL_NAME__.create({
               data: {
                 __INPUT_FIELD_1__: data.__INPUT_FIELD_1__,
                 __INPUT_FIELD_2__: data.__INPUT_FIELD_2__,
@@ -424,6 +450,17 @@
               createdAt: result.createdAt,
               updatedAt: result.updatedAt
             }
+          }
+
+          /**
+           * Execute operations within a transaction for data consistency
+           * @param fn - Function to execute within transaction
+           * @returns Promise with transaction result
+           */
+          async executeInTransaction<T>(
+            fn: (tx: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>) => Promise<T>
+          ): Promise<T> {
+            return await this.prisma.$transaction(fn)
           }
         }
 
@@ -523,9 +560,5 @@
 
         git add .
         git commit -m "test(data): add integration tests for __USE_CASE_NAME_KEBAB_CASE__"
-
-    # === MULTI-STEP REFACTORING SUPPORT (SAME AS DOMAIN) ===
-    # AI-NOTE: Include the same refactoring, delete, and workflow steps as domain layer
-    # These steps are identical to domain layer for consistency
 
 # ============= END DATA STEPS BACKEND SECTION =============
