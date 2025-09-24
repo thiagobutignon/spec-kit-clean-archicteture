@@ -11,7 +11,18 @@
     - id: 'create-feature-branch-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Create feature branch for __USE_CASE_NAME_PASCAL_CASE__ frontend data layer implementation'
-      status: 'PENDING'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Following Git Flow pattern for feature development.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'git workflow feature branch naming conventions'
+          url: 'https://github.com/...'
+          description: 'Git Flow and feature branch best practices.'
       run_scripts:
         description: 'Create and checkout feature branch for data layer development'
         scripts:
@@ -21,12 +32,31 @@
           - name: 'Push feature branch'
             command: 'git push -u origin feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-frontend'
             workingDirectory: '__PROJECT_NAME__'
+      validation_script: |
+        current_branch=$(git branch --show-current)
+        expected_branch="feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-frontend"
+        if [ "$current_branch" != "$expected_branch" ]; then
+          echo "❌ ERROR: Expected branch $expected_branch, but current branch is $current_branch"
+          exit 1
+        fi
+        echo "✅ Feature branch created successfully: $current_branch"
 
     # === STEP 2: CREATE DATA STRUCTURE ===
     - id: 'create-data-structure-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'folder'
       description: 'Create data layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ frontend use case'
-      status: 'PENDING'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FRONTEND_ARCHITECTURE.md'
+          description: 'Following Clean Architecture data layer structure for frontend.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture data layer frontend typescript'
+          url: 'https://github.com/...'
+          description: 'Data layer patterns for frontend with simple Remote implementations.'
       action:
         create_folders:
           basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
@@ -37,7 +67,18 @@
     - id: 'create-data-failing-tests-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create failing tests for Remote__USE_CASE_NAME_PASCAL_CASE__ data implementation (RED)'
-      status: 'PENDING'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Following existing test patterns from RemoteAuthentication and RemoteLoadSurveyList.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development vitest typescript'
+          url: 'https://github.com/...'
+          description: 'TDD patterns with Vitest for TypeScript.'
       path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.spec.ts'
       template: |
         import { describe, it, expect, beforeEach, vi } from 'vitest'
@@ -148,7 +189,18 @@
     - id: 'create-data-implementation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create Remote__USE_CASE_NAME_PASCAL_CASE__ implementation following real codebase patterns (GREEN)'
-      status: 'PENDING'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Following RemoteAuthentication and RemoteLoadSurveyList patterns.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture use case implementation'
+          url: 'https://github.com/...'
+          description: 'Simple use case implementation patterns without over-engineering.'
       path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.ts'
       template: |
         import { HttpClient, HttpStatusCode } from '@/data/protocols/http'
@@ -189,7 +241,15 @@
     - id: 'run-passing-tests-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Verify all tests pass with implementation (GREEN phase)'
-      status: 'PENDING'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development green phase'
+          url: 'https://github.com/...'
+          description: 'TDD Green phase - making tests pass.'
       run_scripts:
         description: 'Run tests to verify GREEN phase completion'
         scripts:
@@ -204,7 +264,15 @@
     - id: 'refactor-data-implementation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Refactor Remote__USE_CASE_NAME_PASCAL_CASE__ for specific domain needs (REFACTOR)'
-      status: 'PENDING'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development refactor phase'
+          url: 'https://github.com/...'
+          description: 'TDD Refactor phase - improving code without breaking tests.'
       path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.ts'
       template: |
         import { HttpClient, HttpStatusCode } from '@/data/protocols/http'
@@ -268,7 +336,13 @@
     - id: 'validate-refactored-implementation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Run all tests and validations after refactoring (REFACTOR phase complete)'
-      status: 'PENDING'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'TESTING_STRATEGY.md'
+          description: 'Complete test coverage and validation requirements.'
       run_scripts:
         description: 'Complete TDD cycle validation and commit refactored code'
         scripts:
@@ -289,7 +363,13 @@
     - id: 'validate-complete-data-layer-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Final validation of complete frontend data layer implementation'
-      status: 'PENDING'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'CI_CD.md'
+          description: 'Following CI/CD validation requirements.'
       run_scripts:
         description: 'Run comprehensive validation of frontend data layer'
         scripts:
@@ -310,7 +390,18 @@
     - id: 'open-pull-request-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Open Pull Request for frontend data layer implementation'
-      status: 'PENDING'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Pull Request process and review guidelines.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'github pull request best practices'
+          url: 'https://github.com/...'
+          description: 'Pull request creation and documentation standards.'
       run_scripts:
         description: 'Create pull request with simple, focused description'
         scripts:
@@ -349,7 +440,18 @@
     - id: 'ai-code-review-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'AI-powered code review focusing on pattern consistency'
-      status: 'PENDING'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'AI_CODE_REVIEW.md'
+          description: 'AI review patterns and quality gates.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'automated code review ai patterns'
+          url: 'https://github.com/...'
+          description: 'AI-powered code review best practices.'
       ai_review_prompts:
         pattern_consistency: |
           Please review this Remote__USE_CASE_NAME_PASCAL_CASE__ implementation for consistency with existing codebase patterns:
@@ -372,7 +474,18 @@
     - id: 'cleanup-and-merge-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Final cleanup and merge frontend data layer implementation'
-      status: 'PENDING'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Merge process and branch cleanup.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'git merge squash cleanup'
+          url: 'https://github.com/...'
+          description: 'Git merge strategies and branch cleanup.'
       run_scripts:
         description: 'Complete PR merge and cleanup process'
         scripts:
@@ -385,5 +498,77 @@
           - name: 'Cleanup'
             command: 'git checkout main && git pull origin main && git branch -d feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-frontend'
             workingDirectory: '__PROJECT_NAME__'
+
+  # ------------------------------------------------------------------------------
+  # BROWNFIELD REFACTORING STEPS (OPTIONAL)
+  # For existing projects that need to adapt to Clean Architecture patterns
+  # ------------------------------------------------------------------------------
+
+  brownfield_data_steps:
+    # === STEP 12: IDENTIFY EXISTING IMPLEMENTATIONS ===
+    - id: 'identify-existing-implementations-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'analysis'
+      description: 'Identify existing __USE_CASE_NAME_PASCAL_CASE__ implementations to refactor'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Brownfield refactoring strategies for legacy code.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'refactoring legacy code to clean architecture'
+          url: 'https://github.com/...'
+          description: 'Strategies for refactoring existing code to Clean Architecture.'
+      analysis_script: |
+        echo "🔍 Searching for existing implementations..."
+        grep -r "__USE_CASE_NAME__\|__USE_CASE_KEYWORD__" --include="*.ts" --include="*.tsx" src/ || true
+        echo "📋 Analyzing current architecture patterns..."
+        find src/ -name "*__USE_CASE_NAME_KEBAB_CASE__*" -o -name "*__USE_CASE_KEYWORD__*" || true
+
+    # === STEP 13: CREATE ADAPTER LAYER ===
+    - id: 'create-adapter-layer-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create adapter to bridge legacy code with new Clean Architecture implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'adapter pattern legacy migration'
+          url: 'https://github.com/...'
+          description: 'Adapter pattern for legacy system integration.'
+      template: |
+        /**
+         * Legacy adapter for __USE_CASE_NAME_PASCAL_CASE__
+         * Bridges existing implementation with new Clean Architecture
+         * @deprecated Will be removed once migration is complete
+         */
+        export class Legacy__USE_CASE_NAME_PASCAL_CASE__Adapter {
+          // Bridge between old and new implementations
+        }
+
+    # === STEP 14: GRADUAL MIGRATION ===
+    - id: 'gradual-migration-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Implement gradual migration strategy from legacy to Clean Architecture'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'strangler fig pattern refactoring'
+          url: 'https://github.com/...'
+          description: 'Strangler Fig pattern for gradual system replacement.'
+      migration_strategy: |
+        1. Identify all consumers of legacy implementation
+        2. Create feature flag for gradual rollout
+        3. Run both implementations in parallel (shadow mode)
+        4. Compare outputs for consistency
+        5. Gradually increase traffic to new implementation
+        6. Remove legacy code once fully migrated
 
 # ============= END DATA STEPS FRONTEND SECTION =============
