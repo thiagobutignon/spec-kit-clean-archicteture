@@ -782,6 +782,11 @@
           description: 'Analyze backend dependencies and structure'
       path: '__PROJECT_NAME__/src/api/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
       template: |
+        <<<FIND>>>
+        // The AI should identify the exact backend code that needs refactoring
+        [ORIGINAL_BACKEND_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
         // TODO: Refactor this backend file to comply with Clean Architecture
         // File: __FILE_TO_MODIFY_KEBAB_CASE__.ts
         // Layer: Backend
@@ -803,8 +808,13 @@
         // SHARED TYPES TO CREATE/UPDATE:
         // - [AI should list shared types needed]
 
-        // Original code preserved below for reference:
-        // [ORIGINAL_CODE_PLACEHOLDER]
+        /* TEMPORARY: Original backend code preserved for reference
+        [ORIGINAL_BACKEND_CODE_TO_BE_REPLACED]
+        */
+
+        // NEW REFACTORED BACKEND CODE:
+        [REFACTORED_BACKEND_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
 
     # Frontend refactoring template
     - id: 'refactor-frontend-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
@@ -823,6 +833,11 @@
           description: 'Analyze component dependencies and structure'
       path: '__PROJECT_NAME__/src/app/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.tsx'
       template: |
+        <<<FIND>>>
+        // The AI should identify the exact frontend component that needs refactoring
+        [ORIGINAL_FRONTEND_COMPONENT_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
         // TODO: Refactor this frontend component to comply with Clean Architecture
         // Component: __FILE_TO_MODIFY_KEBAB_CASE__.tsx
         // Layer: Frontend
@@ -846,8 +861,13 @@
         // SHARED TYPES CONSUMED:
         // - [AI should list shared types used]
 
-        // Original code preserved below for reference:
-        // [ORIGINAL_CODE_PLACEHOLDER]
+        /* TEMPORARY: Original frontend component preserved for reference
+        [ORIGINAL_FRONTEND_COMPONENT_TO_BE_REPLACED]
+        */
+
+        // NEW REFACTORED FRONTEND COMPONENT:
+        [REFACTORED_FRONTEND_COMPONENT_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
 
     # Shared refactoring template
     - id: 'refactor-shared-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
@@ -863,6 +883,11 @@
           description: 'Patterns for shared code between frontend and backend'
       path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
       template: |
+        <<<FIND>>>
+        // The AI should identify the exact shared code that needs refactoring
+        [ORIGINAL_SHARED_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
         // TODO: Refactor this shared file to comply with Clean Architecture
         // File: __FILE_TO_MODIFY_KEBAB_CASE__.ts
         // Layer: Shared Domain
@@ -884,8 +909,13 @@
         // FRONTEND FILES USING THIS:
         // - [AI should list frontend consumers]
 
-        // Original code preserved below for reference:
-        // [ORIGINAL_CODE_PLACEHOLDER]
+        /* TEMPORARY: Original shared code preserved for reference
+        [ORIGINAL_SHARED_CODE_TO_BE_REPLACED]
+        */
+
+        // NEW REFACTORED SHARED CODE:
+        [REFACTORED_SHARED_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
 
     # === STEP 10: DELETE OBSOLETE FILES (CONDITIONAL) ===
     - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'

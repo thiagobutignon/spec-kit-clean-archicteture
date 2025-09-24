@@ -547,6 +547,12 @@
           description: 'React refactoring best practices'
       path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.tsx'
       template: |
+        <<<FIND>>>
+        // The AI should identify the exact component code that needs refactoring
+        // This will be the original component that violates Clean Architecture
+        [ORIGINAL_COMPONENT_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
         // TODO: Refactor this component to comply with Clean Architecture
         // Component: __FILE_TO_MODIFY_KEBAB_CASE__.tsx
         // Type: __COMPONENT_TYPE__ (Page/Component/Hook/Context)
@@ -574,8 +580,13 @@
         // HOOKS/CONTEXT CONSUMED:
         // - [AI should list hooks and context]
 
-        // Original code preserved below for reference:
-        // [ORIGINAL_CODE_PLACEHOLDER]
+        /* TEMPORARY: Original component preserved for reference
+        [ORIGINAL_COMPONENT_CODE_TO_BE_REPLACED]
+        */
+
+        // NEW REFACTORED COMPONENT:
+        [REFACTORED_COMPONENT_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
 
     # === STEP 9: DELETE OBSOLETE FILES (CONDITIONAL) ===
     - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'
