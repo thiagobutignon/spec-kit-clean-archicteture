@@ -14,7 +14,44 @@
   # ------------------------------------------------------------------------------
 
   data_steps:
-    # === STEP 1: CREATE DATA STRUCTURE (RED PHASE) ===
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create feature branch for __USE_CASE_NAME_PASCAL_CASE__ frontend data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Following Git Flow pattern for feature development.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'git workflow feature branch naming conventions'
+          url: 'https://github.com/...'
+          description: 'Git Flow and feature branch best practices.'
+      run_scripts:
+        description: 'Create and checkout feature branch for data layer development'
+        scripts:
+          - name: 'Create feature branch'
+            command: 'git checkout -b feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-frontend'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Verify branch creation'
+            command: 'git branch --show-current'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Push feature branch'
+            command: 'git push -u origin feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-frontend'
+            workingDirectory: '__PROJECT_NAME__'
+      validation_script: |
+        current_branch=$(git branch --show-current)
+        expected_branch="feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-frontend"
+        if [ "$current_branch" != "$expected_branch" ]; then
+          echo "❌ ERROR: Expected branch $expected_branch, but current branch is $current_branch"
+          exit 1
+        fi
+        echo "✅ Feature branch created successfully: $current_branch"
+
+    # === STEP 2: CREATE DATA STRUCTURE (RED PHASE) ===
     - id: 'create-data-structure-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'folder'
       description: 'Create data layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ frontend use case'
@@ -37,7 +74,7 @@
             - 'usecases'     # Use case implementations (Remote prefix)
             - 'protocols'    # HTTP/API protocol interfaces
 
-    # === STEP 2: CREATE PROTOCOL INTERFACES (RED PHASE) ===
+    # === STEP 3: CREATE PROTOCOL INTERFACES (RED PHASE) ===
     - id: 'create-data-protocols-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create HTTP/API protocol interfaces for __USE_CASE_NAME_PASCAL_CASE__ data layer (RED)'
@@ -117,7 +154,7 @@
           invalidate(key: string): Promise<void>
         }
 
-    # === STEP 3: CREATE FAILING TESTS (RED PHASE) ===
+    # === STEP 4: CREATE FAILING TESTS (RED PHASE) ===
     - id: 'create-data-failing-tests-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create failing tests for Remote__USE_CASE_NAME_PASCAL_CASE__ data implementation (RED)'
@@ -360,7 +397,7 @@
         run_failing_tests
         stage_red_phase
 
-    # === STEP 4: CREATE DATA IMPLEMENTATION (GREEN PHASE) ===
+    # === STEP 5: CREATE DATA IMPLEMENTATION (GREEN PHASE) ===
     - id: 'create-data-implementation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create Remote__USE_CASE_NAME_PASCAL_CASE__ implementation to make tests pass (GREEN)'
@@ -535,7 +572,7 @@
           }
         }
 
-    # === STEP 5: RUN PASSING TESTS (GREEN PHASE) ===
+    # === STEP 6: RUN PASSING TESTS (GREEN PHASE) ===
     - id: 'run-passing-tests-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Verify all tests pass with implementation (GREEN phase)'
@@ -552,7 +589,7 @@
             command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ data layer (GREEN)"'
             workingDirectory: '__PROJECT_NAME__'
 
-    # === STEP 6: REFACTOR IMPLEMENTATION (REFACTOR PHASE) ===
+    # === STEP 7: REFACTOR IMPLEMENTATION (REFACTOR PHASE) ===
     - id: 'refactor-data-implementation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Refactor Remote__USE_CASE_NAME_PASCAL_CASE__ for better design (REFACTOR)'
@@ -809,7 +846,7 @@
           }
         }
 
-    # === STEP 7: CREATE INTEGRATION TESTS (REFACTOR PHASE) ===
+    # === STEP 8: CREATE INTEGRATION TESTS (REFACTOR PHASE) ===
     - id: 'create-integration-tests-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create integration tests for complete data layer (REFACTOR)'
@@ -1102,7 +1139,7 @@
           })
         })
 
-    # === STEP 8: FINAL VALIDATION (REFACTOR PHASE) ===
+    # === STEP 9: FINAL VALIDATION (REFACTOR PHASE) ===
     - id: 'validate-refactored-implementation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Run all tests and validations after refactoring (REFACTOR phase complete)'
@@ -1125,7 +1162,7 @@
             command: 'git add . && git commit -m "refactor(__FEATURE_NAME_KEBAB_CASE__): improve __USE_CASE_NAME_KEBAB_CASE__ data layer design (REFACTOR)"'
             workingDirectory: '__PROJECT_NAME__'
 
-    # === STEP 9: CREATE INFRASTRUCTURE ADAPTER (OPTIONAL) ===
+    # === STEP 10: CREATE INFRASTRUCTURE ADAPTER (OPTIONAL) ===
     - id: 'create-http-adapter-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'conditional_file'
       description: 'Create Fetch API adapter implementation for HTTP client protocol'
@@ -1335,7 +1372,7 @@
           }
         }
 
-    # === STEP 10: VALIDATE COMPLETE DATA LAYER ===
+    # === STEP 11: VALIDATE COMPLETE DATA LAYER ===
     - id: 'validate-complete-data-layer-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Final validation of complete frontend data layer implementation'
@@ -1363,5 +1400,345 @@
           - name: 'Final commit'
             command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): complete __USE_CASE_NAME_KEBAB_CASE__ frontend data layer with TDD"'
             workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 12: OPEN PULL REQUEST ===
+    - id: 'open-pull-request-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Open Pull Request for frontend data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'PULL_REQUEST_TEMPLATE.md'
+          description: 'Following PR template and code review guidelines.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'pull request best practices code review checklist'
+          url: 'https://github.com/...'
+          description: 'PR and code review best practices.'
+      run_scripts:
+        description: 'Create pull request with comprehensive description and checklist'
+        scripts:
+          - name: 'Push final changes'
+            command: 'git push origin feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-frontend'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Create Pull Request'
+            command: |
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ frontend data layer with TDD" \
+                --body "## Summary
+
+              Implements complete frontend data layer for __USE_CASE_NAME_PASCAL_CASE__ use case following Clean Architecture and TDD methodology.
+
+              ### 🚀 Features Implemented
+              - ✅ Remote__USE_CASE_NAME_PASCAL_CASE__ implementation with HTTP/API communication
+              - ✅ Protocol interfaces for dependency inversion (__USE_CASE_NAME_PASCAL_CASE__HttpClient)
+              - ✅ Complete TDD cycle (RED-GREEN-REFACTOR) with comprehensive tests
+              - ✅ Error handling with domain-appropriate error types
+              - ✅ Type-safe implementation with TypeScript
+              - ✅ Fetch API adapter for HTTP operations
+              - ✅ Integration tests with realistic scenarios
+              - ✅ Input validation and data transformation
+              - ✅ Network error handling and retry logic
+
+              ### 🧪 Test Coverage
+              - Unit tests for Remote__USE_CASE_NAME_PASCAL_CASE__ implementation
+              - Integration tests with mocked HTTP client
+              - Error scenario testing (404, 400, 401, 500, network errors)
+              - Type safety and data transformation tests
+              - Complete TDD methodology validation
+
+              ### 🏗️ Architecture Compliance
+              - ✅ Clean Architecture layers respected
+              - ✅ Dependency inversion with protocol interfaces
+              - ✅ Frontend-specific patterns (Remote prefix, Fetch API)
+              - ✅ Domain types returned (not infrastructure types)
+              - ✅ Error boundaries and graceful degradation
+
+              ### 📋 Code Review Checklist
+              - [ ] All tests passing (npm run test)
+              - [ ] TypeScript compilation clean (npx tsc --noEmit)
+              - [ ] ESLint validation passed (npm run lint)
+              - [ ] Clean Architecture principles followed
+              - [ ] No dependency violations between layers
+              - [ ] Error handling comprehensive and appropriate
+              - [ ] Code follows project conventions and patterns
+              - [ ] Documentation and JSDoc comments present
+              - [ ] Performance considerations addressed
+              - [ ] Security best practices followed
+
+              ### 🔍 Review Focus Areas
+              1. **Data Layer Implementation**: Review Remote__USE_CASE_NAME_PASCAL_CASE__ class structure and HTTP communication logic
+              2. **Error Handling**: Validate error transformation and domain-appropriate error types
+              3. **Test Quality**: Ensure comprehensive test coverage and realistic scenarios
+              4. **Type Safety**: Verify TypeScript types and data transformations
+              5. **Architecture**: Confirm Clean Architecture compliance and dependency directions
+
+              ### 📊 Metrics
+              - Test Coverage: Aiming for >95% coverage
+              - TypeScript: Strict compilation with no any types
+              - ESLint: Zero warnings/errors
+              - Bundle Size Impact: Minimal (data layer only)
+
+              ---
+              🤖 Generated with TDD methodology and Clean Architecture best practices" \
+                --draft
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Display PR URL'
+            command: 'gh pr view --web'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 13: AI CODE REVIEW ===
+    - id: 'ai-code-review-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'AI-powered code review and quality analysis for frontend data layer'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'CODE_REVIEW_GUIDELINES.md'
+          description: 'Automated code review standards and quality gates.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'automated code review frontend clean architecture typescript'
+          url: 'https://github.com/...'
+          description: 'AI code review patterns and quality metrics.'
+      ai_review_prompts:
+        architecture_review: |
+          Please review this frontend data layer implementation for Clean Architecture compliance:
+
+          📁 Files to Review:
+          - src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.ts
+          - src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/protocols/__USE_CASE_NAME_KEBAB_CASE__-http-client.ts
+          - src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/http/fetch-__USE_CASE_NAME_KEBAB_CASE__-client.ts
+
+          🎯 Review Criteria:
+          1. **Clean Architecture Compliance**: Verify dependency direction (data → domain, infra → data)
+          2. **Frontend Patterns**: Confirm Remote prefix, Fetch API usage, Next.js compatibility
+          3. **Error Handling**: Evaluate error transformation and domain-appropriate errors
+          4. **Type Safety**: Check TypeScript usage and data transformations
+          5. **Testing Strategy**: Review TDD implementation and test coverage
+
+          🔍 Focus Areas:
+          - No imports from outer layers (domain should not import data/infra)
+          - Protocol interfaces properly abstract HTTP dependencies
+          - Error handling transforms infrastructure errors to domain errors
+          - Data transformations preserve type safety
+          - HTTP client follows frontend best practices (timeout, retry, cancellation)
+
+          Please provide specific feedback on architecture violations and improvement suggestions.
+
+        code_quality_review: |
+          Please perform a comprehensive code quality review for this frontend data layer:
+
+          🎯 Quality Metrics:
+          1. **Code Structure**: Classes, methods, separation of concerns
+          2. **Error Handling**: Comprehensive error scenarios and user-friendly messages
+          3. **Performance**: Network requests, caching, memory usage
+          4. **Security**: Input validation, data sanitization, error exposure
+          5. **Maintainability**: Code readability, documentation, extensibility
+
+          🔍 Specific Checks:
+          - Input validation covers all required fields and edge cases
+          - HTTP timeout and retry logic implemented properly
+          - Error messages don't expose sensitive information
+          - Data transformation handles missing/malformed responses
+          - Memory leaks prevented (event listeners, timeouts, promises)
+          - Network cancellation supported for component unmounting
+
+          Please provide actionable feedback with specific code examples and improvement suggestions.
+
+        test_quality_review: |
+          Please review the test suite for this frontend data layer implementation:
+
+          📋 Test Categories to Evaluate:
+          1. **Unit Tests**: Remote__USE_CASE_NAME_PASCAL_CASE__ implementation testing
+          2. **Integration Tests**: HTTP client interaction testing
+          3. **Error Scenarios**: Network failures, HTTP errors, validation errors
+          4. **Edge Cases**: Empty responses, malformed data, timeout scenarios
+          5. **Type Safety**: TypeScript compilation and type checking
+
+          🎯 Test Quality Criteria:
+          - TDD methodology properly followed (RED-GREEN-REFACTOR)
+          - Test coverage >95% for data layer components
+          - Realistic test scenarios that mirror production usage
+          - Proper mocking of HTTP dependencies
+          - Error scenarios comprehensively covered
+          - Integration tests validate complete data flow
+
+          Please provide feedback on test completeness, quality, and suggest additional test cases if needed.
+
+      run_scripts:
+        description: 'Execute AI code review process'
+        scripts:
+          - name: 'Run automated architecture validation'
+            command: 'npm run arch:validate -- --layer=data --feature=__FEATURE_NAME_KEBAB_CASE__ --use-case=__USE_CASE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Generate code coverage report'
+            command: 'npm run test:coverage -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Static code analysis'
+            command: 'npm run analyze:code -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Bundle size impact analysis'
+            command: 'npm run analyze:bundle -- --feature=__FEATURE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 14: CLEANUP AND MERGE ===
+    - id: 'cleanup-and-merge-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Final cleanup, review approval, and merge frontend data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'MERGE_GUIDELINES.md'
+          description: 'Merge process and cleanup procedures.'
+      run_scripts:
+        description: 'Complete PR merge and cleanup process'
+        scripts:
+          - name: 'Final validation before merge'
+            command: 'npm run validate:all -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Merge Pull Request'
+            command: 'gh pr merge --squash --delete-branch'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Switch back to main branch'
+            command: 'git checkout main'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Pull latest changes'
+            command: 'git pull origin main'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Cleanup local branch'
+            command: 'git branch -d feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-frontend'
+            workingDirectory: '__PROJECT_NAME__'
+      validation_script: |
+        echo "✅ Verifying merge completion..."
+        current_branch=$(git branch --show-current)
+        if [ "$current_branch" != "main" ]; then
+          echo "❌ ERROR: Not on main branch after merge"
+          exit 1
+        fi
+
+        if git show-branch feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-frontend 2>/dev/null; then
+          echo "❌ ERROR: Feature branch still exists after cleanup"
+          exit 1
+        fi
+
+        echo "✅ Frontend data layer implementation successfully merged and cleaned up"
+        echo "🎉 __USE_CASE_NAME_PASCAL_CASE__ data layer is ready for use!"
+
+    # === OPTIONAL: BROWNFIELD REFACTORING STEPS ===
+    # These steps can be used to refactor existing frontend code to Clean Architecture
+    - id: 'refactor-existing-__USE_CASE_NAME_KEBAB_CASE__-data-1'
+      type: 'conditional_refactor'
+      description: 'Refactor existing HTTP calls to use data layer pattern'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: 'check_existing_http_calls'
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'refactoring legacy code to clean architecture frontend'
+          url: 'https://github.com/...'
+          description: 'Brownfield refactoring patterns for frontend.'
+      refactor_pattern:
+        find_pattern: |
+          <<<FIND>>>
+          // Legacy direct HTTP call pattern
+          const response = await fetch('/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(__INPUT_DATA__)
+          })
+          const data = await response.json()
+          <<</FIND>>>
+        replace_pattern: |
+          <<<REPLACE>>>
+          // Refactored to use Clean Architecture data layer
+          const __USE_CASE_NAME_CAMEL_CASE__ = new Remote__USE_CASE_NAME_PASCAL_CASE__(
+            new Fetch__USE_CASE_NAME_PASCAL_CASE__Client()
+          )
+          const data = await __USE_CASE_NAME_CAMEL_CASE__.execute(__INPUT_DATA__)
+          <<</REPLACE>>>
+
+    - id: 'refactor-existing-__USE_CASE_NAME_KEBAB_CASE__-data-2'
+      type: 'conditional_refactor'
+      description: 'Refactor inline error handling to use domain errors'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: 'check_inline_error_handling'
+      refactor_pattern:
+        find_pattern: |
+          <<<FIND>>>
+          // Legacy inline error handling
+          if (!response.ok) {
+            if (response.status === 404) {
+              throw new Error('Not found')
+            } else if (response.status === 400) {
+              throw new Error('Bad request')
+            } else {
+              throw new Error('Something went wrong')
+            }
+          }
+          <<</FIND>>>
+        replace_pattern: |
+          <<<REPLACE>>>
+          // Refactored to use domain-appropriate error handling
+          // Error handling now managed by Remote__USE_CASE_NAME_PASCAL_CASE__
+          // Domain errors: ValidationError, NotFoundError, etc.
+          try {
+            const result = await __USE_CASE_NAME_CAMEL_CASE__.execute(input)
+            return result
+          } catch (error) {
+            // Handle domain-specific errors
+            if (error instanceof ValidationError) {
+              // Handle validation errors appropriately for UI
+            } else if (error instanceof NotFoundError) {
+              // Handle not found errors appropriately for UI
+            } else {
+              // Handle general errors
+            }
+            throw error
+          }
+          <<</REPLACE>>>
+
+    - id: 'refactor-existing-__USE_CASE_NAME_KEBAB_CASE__-data-3'
+      type: 'conditional_refactor'
+      description: 'Refactor component props to use domain types'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: 'check_api_types_in_components'
+      refactor_pattern:
+        find_pattern: |
+          <<<FIND>>>
+          // Legacy API response types used in components
+          interface ComponentProps {
+            data: {
+              id: string
+              name: string
+              status: string
+              created_at: string // API snake_case
+              updated_at: string // API snake_case
+            }
+          }
+          <<</FIND>>>
+        replace_pattern: |
+          <<<REPLACE>>>
+          // Refactored to use domain types
+          import type { __USE_CASE_NAME_PASCAL_CASE__Output } from '../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+
+          interface ComponentProps {
+            data: __USE_CASE_NAME_PASCAL_CASE__Output // Clean domain type
+          }
+          <<</REPLACE>>>
 
 # ============= END DATA STEPS FRONTEND SECTION =============
