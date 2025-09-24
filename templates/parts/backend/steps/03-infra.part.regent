@@ -1,0 +1,1665 @@
+# ============= BEGIN INFRA STEPS BACKEND SECTION =============
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: INFRASTRUCTURE LAYER IMPLEMENTATION STEPS FOR BACKEND
+  # These steps implement infrastructure layer following Clean Architecture principles
+  # Infrastructure layer provides concrete implementations of data layer protocols
+  # Including database repositories, HTTP clients, cache implementations, etc.
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # INFRASTRUCTURE LAYER STEPS SECTION
+  # Steps for generating infrastructure layer artifacts in backend features
+  # Following "Feature Module with Use Case Slices" architecture
+  # Infrastructure implementations are shared within feature (not per use case)
+  # ------------------------------------------------------------------------------
+
+  infra_steps:
+    # === STEP 1: ANALYZE INFRASTRUCTURE NEEDS ===
+    - id: 'analyze-infra-needs-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Analyze infrastructure needs for __FEATURE_NAME_PASCAL_CASE__ feature before creating adapters'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'BACKEND_ARCHITECTURE.md'
+          description: 'Infrastructure layer provides concrete implementations for data layer protocols.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*Protocol*'
+          description: 'Identify existing protocols that need infrastructure implementations.'
+      run_scripts:
+        description: 'Analyze existing protocols and identify infrastructure needs'
+        scripts:
+          - name: 'Find existing protocols in data layer'
+            command: 'find src/features/__FEATURE_NAME_KEBAB_CASE__ -name "*protocol*" -o -name "*Protocol*" | grep -v node_modules'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Check existing infrastructure implementations'
+            command: 'find src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra -name "*.ts" 2>/dev/null | head -10'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'List use cases needing infrastructure'
+            command: 'find src/features/__FEATURE_NAME_KEBAB_CASE__ -name "db-*" | wc -l'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: CREATE INFRASTRUCTURE STRUCTURE ===
+    - id: 'create-infra-structure-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'Create infrastructure layer folder structure for __FEATURE_NAME_PASCAL_CASE__ feature'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'BACKEND_ARCHITECTURE.md'
+          description: 'Following Clean Architecture infrastructure layer structure.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture infrastructure layer repository adapter pattern'
+          url: 'https://github.com/...'
+          description: 'Infrastructure layer patterns for backend development.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra'
+          folders:
+            - 'db'              # Database implementations (Prisma repositories)
+            - 'http'            # HTTP client implementations (Fetch API)
+            - 'cache'           # Cache implementations (Redis, in-memory)
+            - 'crypto'          # Cryptography implementations (bcrypt, jwt)
+            - 'validators'      # External validation implementations
+            - 'messaging'       # Message queue implementations
+            - 'storage'         # File storage implementations
+      validation_script: |
+        BASE_PATH="__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra"
+        FOLDERS="$BASE_PATH/db $BASE_PATH/http $BASE_PATH/cache $BASE_PATH/crypto $BASE_PATH/validators $BASE_PATH/messaging $BASE_PATH/storage"
+        echo "✅ Verifying infrastructure folder structure..."
+        for folder in $FOLDERS; do
+          if [ ! -d "$folder" ]; then
+            echo "❌ ERROR: Folder $folder was not created."
+            exit 1
+          fi
+        done
+        echo "✅ All infrastructure folders exist for __FEATURE_NAME_PASCAL_CASE__ feature."
+
+    # === STEP 3: CREATE DATABASE REPOSITORY IMPLEMENTATION ===
+    - id: 'create-database-repository-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create Prisma database repository implementation for __FEATURE_NAME_PASCAL_CASE__ feature'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'prisma repository pattern typescript postgresql clean architecture'
+          url: 'https://github.com/...'
+          description: 'Prisma repository implementation patterns for Clean Architecture.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '__FEATURE_NAME_PASCAL_CASE__Repository'
+          description: 'Find repository protocol interface for implementation.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.ts'
+      template: |
+        import { PrismaClient } from '@prisma/client'
+        import type { __FEATURE_NAME_PASCAL_CASE__Repository } from '../../domain/repositories/__FEATURE_NAME_KEBAB_CASE__-repository'
+        import type { __FEATURE_NAME_PASCAL_CASE__Model } from '../../domain/models/__FEATURE_NAME_KEBAB_CASE__-model'
+
+        /**
+         * Prisma implementation of __FEATURE_NAME_PASCAL_CASE__Repository
+         * Provides database operations for __FEATURE_NAME_PASCAL_CASE__ entities using PostgreSQL
+         *
+         * @implementation Infrastructure Layer - Database Repository
+         * @pattern Repository Pattern - Concrete implementation with Prisma ORM
+         * @layer Infrastructure - Database access implementation
+         */
+        export class Prisma__FEATURE_NAME_PASCAL_CASE__Repository implements __FEATURE_NAME_PASCAL_CASE__Repository {
+          /**
+           * Creates Prisma__FEATURE_NAME_PASCAL_CASE__Repository with database client
+           *
+           * @param prisma - Prisma client for database operations
+           */
+          constructor(private readonly prisma: PrismaClient) {}
+
+          /**
+           * Save __FEATURE_NAME_PASCAL_CASE__ entity to database
+           *
+           * @param data - __FEATURE_NAME_PASCAL_CASE__ data to save
+           * @returns Promise with saved entity
+           * @throws Database error if operation fails
+           */
+          async save(data: Omit<__FEATURE_NAME_PASCAL_CASE__Model, 'id' | 'createdAt' | 'updatedAt'>): Promise<__FEATURE_NAME_PASCAL_CASE__Model> {
+            try {
+              const saved__FEATURE_NAME_PASCAL_CASE__ = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.create({
+                data: {
+                  __ENTITY_FIELD_1__: data.__ENTITY_FIELD_1__,
+                  __ENTITY_FIELD_2__: data.__ENTITY_FIELD_2__,
+                  __ENTITY_FIELD_3__: data.__ENTITY_FIELD_3__,
+                  status: data.status || 'active',
+                  metadata: data.metadata || {}
+                }
+              })
+
+              return this.toDomainModel(saved__FEATURE_NAME_PASCAL_CASE__)
+            } catch (error) {
+              throw this.handleDatabaseError(error, 'save')
+            }
+          }
+
+          /**
+           * Find __FEATURE_NAME_PASCAL_CASE__ entity by ID
+           *
+           * @param id - Entity ID to search
+           * @returns Promise with found entity or null
+           * @throws Database error if operation fails
+           */
+          async findById(id: string): Promise<__FEATURE_NAME_PASCAL_CASE__Model | null> {
+            try {
+              const __FEATURE_NAME_CAMEL_CASE__ = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.findUnique({
+                where: { id }
+              })
+
+              return __FEATURE_NAME_CAMEL_CASE__ ? this.toDomainModel(__FEATURE_NAME_CAMEL_CASE__) : null
+            } catch (error) {
+              throw this.handleDatabaseError(error, 'findById')
+            }
+          }
+
+          /**
+           * Find __FEATURE_NAME_PASCAL_CASE__ entities by field
+           *
+           * @param field - Field name to search by
+           * @param value - Value to search for
+           * @returns Promise with array of matching entities
+           * @throws Database error if operation fails
+           */
+          async findByField(field: keyof Pick<__FEATURE_NAME_PASCAL_CASE__Model, '__ENTITY_FIELD_1__' | '__ENTITY_FIELD_2__'>, value: string): Promise<__FEATURE_NAME_PASCAL_CASE__Model[]> {
+            try {
+              const entities = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.findMany({
+                where: { [field]: value }
+              })
+
+              return entities.map(entity => this.toDomainModel(entity))
+            } catch (error) {
+              throw this.handleDatabaseError(error, 'findByField')
+            }
+          }
+
+          /**
+           * Find all __FEATURE_NAME_PASCAL_CASE__ entities with pagination
+           *
+           * @param options - Query options (limit, offset, filters)
+           * @returns Promise with paginated entities
+           * @throws Database error if operation fails
+           */
+          async findAll(options?: {
+            limit?: number
+            offset?: number
+            status?: string
+          }): Promise<__FEATURE_NAME_PASCAL_CASE__Model[]> {
+            try {
+              const { limit = 50, offset = 0, status } = options || {}
+
+              const entities = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.findMany({
+                where: status ? { status } : undefined,
+                skip: offset,
+                take: limit,
+                orderBy: { createdAt: 'desc' }
+              })
+
+              return entities.map(entity => this.toDomainModel(entity))
+            } catch (error) {
+              throw this.handleDatabaseError(error, 'findAll')
+            }
+          }
+
+          /**
+           * Update __FEATURE_NAME_PASCAL_CASE__ entity
+           *
+           * @param id - Entity ID to update
+           * @param data - Partial data to update
+           * @returns Promise with updated entity
+           * @throws Database error if operation fails
+           */
+          async update(id: string, data: Partial<Omit<__FEATURE_NAME_PASCAL_CASE__Model, 'id' | 'createdAt' | 'updatedAt'>>): Promise<__FEATURE_NAME_PASCAL_CASE__Model> {
+            try {
+              const updated__FEATURE_NAME_PASCAL_CASE__ = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.update({
+                where: { id },
+                data: {
+                  ...data,
+                  updatedAt: new Date()
+                }
+              })
+
+              return this.toDomainModel(updated__FEATURE_NAME_PASCAL_CASE__)
+            } catch (error) {
+              throw this.handleDatabaseError(error, 'update')
+            }
+          }
+
+          /**
+           * Delete __FEATURE_NAME_PASCAL_CASE__ entity
+           *
+           * @param id - Entity ID to delete
+           * @returns Promise<void>
+           * @throws Database error if operation fails
+           */
+          async delete(id: string): Promise<void> {
+            try {
+              await this.prisma.__FEATURE_NAME_CAMEL_CASE__.delete({
+                where: { id }
+              })
+            } catch (error) {
+              throw this.handleDatabaseError(error, 'delete')
+            }
+          }
+
+          /**
+           * Check if __FEATURE_NAME_PASCAL_CASE__ exists by field
+           *
+           * @param field - Field name to check
+           * @param value - Value to check for
+           * @returns Promise with boolean indicating existence
+           * @throws Database error if operation fails
+           */
+          async exists(field: keyof Pick<__FEATURE_NAME_PASCAL_CASE__Model, '__ENTITY_FIELD_1__' | '__ENTITY_FIELD_2__'>, value: string): Promise<boolean> {
+            try {
+              const count = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.count({
+                where: { [field]: value }
+              })
+
+              return count > 0
+            } catch (error) {
+              throw this.handleDatabaseError(error, 'exists')
+            }
+          }
+
+          /**
+           * Execute transaction with multiple operations
+           *
+           * @param operations - Array of database operations
+           * @returns Promise with transaction results
+           * @throws Database error if transaction fails
+           */
+          async executeTransaction<T>(
+            operations: ((tx: PrismaClient) => Promise<T>)[]
+          ): Promise<T[]> {
+            try {
+              return await this.prisma.$transaction(
+                operations.map(operation => operation(this.prisma))
+              )
+            } catch (error) {
+              throw this.handleDatabaseError(error, 'transaction')
+            }
+          }
+
+          /**
+           * Transform Prisma entity to domain model
+           *
+           * @private
+           * @param entity - Prisma entity from database
+           * @returns Domain model object
+           */
+          private toDomainModel(entity: any): __FEATURE_NAME_PASCAL_CASE__Model {
+            return {
+              id: entity.id,
+              __ENTITY_FIELD_1__: entity.__ENTITY_FIELD_1__,
+              __ENTITY_FIELD_2__: entity.__ENTITY_FIELD_2__,
+              __ENTITY_FIELD_3__: entity.__ENTITY_FIELD_3__,
+              status: entity.status,
+              metadata: entity.metadata || {},
+              createdAt: entity.createdAt,
+              updatedAt: entity.updatedAt
+            }
+          }
+
+          /**
+           * Handle database errors and transform to domain errors
+           *
+           * @private
+           * @param error - Original database error
+           * @param operation - Operation that failed
+           * @returns Transformed error with context
+           */
+          private handleDatabaseError(error: any, operation: string): Error {
+            // Log error for debugging in development
+            if (process.env.NODE_ENV === 'development') {
+              console.error(`Database error in ${operation}:`, error)
+            }
+
+            // Handle specific Prisma error codes
+            if (error.code === 'P2002') {
+              return new Error(`Duplicate entry: ${error.meta?.target?.join(', ')}`)
+            }
+
+            if (error.code === 'P2025') {
+              return new Error(`Record not found for ${operation}`)
+            }
+
+            if (error.code === 'P2003') {
+              return new Error(`Foreign key constraint violation in ${operation}`)
+            }
+
+            if (error.code === 'P2014') {
+              return new Error(`Invalid ID provided for ${operation}`)
+            }
+
+            // Connection and timeout errors
+            if (error.message.includes('connection') || error.message.includes('timeout')) {
+              return new Error(`Database connection error during ${operation}`)
+            }
+
+            // Generic database error
+            return new Error(`Database operation failed: ${operation}`)
+          }
+        }
+
+    # === STEP 4: CREATE HTTP CLIENT IMPLEMENTATION ===
+    - id: 'create-http-client-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create Fetch API HTTP client implementation for __FEATURE_NAME_PASCAL_CASE__ feature'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'fetch api http client typescript clean architecture adapter pattern'
+          url: 'https://github.com/...'
+          description: 'Fetch API implementation patterns for HTTP clients.'
+        - type: 'internal_guideline'
+          source: 'BACKEND_RULES.md'
+          description: 'Use native Fetch API instead of axios for HTTP clients.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.ts'
+      template: |
+        import type { HttpClient, HttpRequest, HttpResponse } from '../../../shared/infra/protocols/http-client'
+
+        /**
+         * Fetch API implementation of HttpClient protocol
+         * Provides HTTP operations using native Fetch API for backend services
+         *
+         * @implementation Infrastructure Layer - HTTP Client
+         * @pattern Adapter Pattern - Fetch API implementation
+         * @layer Infrastructure - External HTTP communication
+         */
+        export class FetchHttpClient implements HttpClient {
+          private readonly baseURL: string
+          private readonly timeout: number
+          private readonly defaultHeaders: Record<string, string>
+
+          /**
+           * Creates FetchHttpClient with configuration
+           *
+           * @param config - HTTP client configuration
+           */
+          constructor(config: {
+            baseURL?: string
+            timeout?: number
+            defaultHeaders?: Record<string, string>
+          } = {}) {
+            this.baseURL = config.baseURL || process.env.API_BASE_URL || ''
+            this.timeout = config.timeout || 30000 // 30 seconds
+            this.defaultHeaders = {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'User-Agent': 'Backend-Service/1.0',
+              ...config.defaultHeaders
+            }
+          }
+
+          /**
+           * Execute HTTP request using Fetch API
+           *
+           * @param request - HTTP request configuration
+           * @returns Promise with HTTP response
+           * @throws Error if request fails or times out
+           */
+          async request<T = unknown>(request: HttpRequest): Promise<HttpResponse<T>> {
+            try {
+              const url = this.buildUrl(request.url)
+              const config = this.buildRequestConfig(request)
+
+              const response = await this.executeWithTimeout(fetch(url, config))
+              const data = await this.parseResponseData<T>(response)
+
+              return {
+                statusCode: response.status,
+                headers: this.extractHeaders(response),
+                body: data
+              }
+            } catch (error) {
+              throw this.handleRequestError(error, request)
+            }
+          }
+
+          /**
+           * Build complete URL from base URL and request path
+           *
+           * @private
+           * @param path - Request path or full URL
+           * @returns Complete URL
+           */
+          private buildUrl(path: string): string {
+            if (path.startsWith('http://') || path.startsWith('https://')) {
+              return path
+            }
+
+            const cleanBaseUrl = this.baseURL.replace(/\/$/, '')
+            const cleanPath = path.startsWith('/') ? path : `/${path}`
+            return `${cleanBaseUrl}${cleanPath}`
+          }
+
+          /**
+           * Build Fetch API request configuration
+           *
+           * @private
+           * @param request - HTTP request object
+           * @returns Fetch request configuration
+           */
+          private buildRequestConfig(request: HttpRequest): RequestInit {
+            const headers = {
+              ...this.defaultHeaders,
+              ...request.headers
+            }
+
+            // Add authorization header from environment if available
+            if (process.env.API_TOKEN && !headers.Authorization) {
+              headers.Authorization = `Bearer ${process.env.API_TOKEN}`
+            }
+
+            const config: RequestInit = {
+              method: request.method,
+              headers
+            }
+
+            // Add body for non-GET requests
+            if (request.body && request.method !== 'GET') {
+              config.body = typeof request.body === 'string'
+                ? request.body
+                : JSON.stringify(request.body)
+            }
+
+            return config
+          }
+
+          /**
+           * Execute request with timeout
+           *
+           * @private
+           * @param fetchPromise - Fetch promise to execute
+           * @returns Response with timeout handling
+           */
+          private async executeWithTimeout(fetchPromise: Promise<Response>): Promise<Response> {
+            const timeoutPromise = new Promise<never>((_, reject) => {
+              setTimeout(
+                () => reject(new Error(`Request timeout after ${this.timeout}ms`)),
+                this.timeout
+              )
+            })
+
+            return Promise.race([fetchPromise, timeoutPromise])
+          }
+
+          /**
+           * Parse response data based on content type
+           *
+           * @private
+           * @param response - Fetch response object
+           * @returns Parsed response data
+           */
+          private async parseResponseData<T>(response: Response): Promise<T> {
+            const contentType = response.headers.get('content-type') || ''
+
+            if (contentType.includes('application/json')) {
+              const text = await response.text()
+              return text ? JSON.parse(text) : null
+            }
+
+            if (contentType.includes('text/')) {
+              return await response.text() as unknown as T
+            }
+
+            // For binary content, return as ArrayBuffer
+            return await response.arrayBuffer() as unknown as T
+          }
+
+          /**
+           * Extract headers from Fetch response
+           *
+           * @private
+           * @param response - Fetch response object
+           * @returns Headers object
+           */
+          private extractHeaders(response: Response): Record<string, string> {
+            const headers: Record<string, string> = {}
+
+            response.headers.forEach((value, key) => {
+              headers[key.toLowerCase()] = value
+            })
+
+            return headers
+          }
+
+          /**
+           * Handle and transform request errors
+           *
+           * @private
+           * @param error - Original error from request
+           * @param request - Original request for context
+           * @returns Transformed error with context
+           */
+          private handleRequestError(error: any, request: HttpRequest): Error {
+            // Log error for debugging in development
+            if (process.env.NODE_ENV === 'development') {
+              console.error('HTTP request error:', {
+                error: error.message,
+                url: request.url,
+                method: request.method
+              })
+            }
+
+            // Handle specific error types
+            if (error.name === 'AbortError') {
+              return new Error('Request was cancelled')
+            }
+
+            if (error.message.includes('timeout')) {
+              return new Error(`Request timeout: ${request.method} ${request.url}`)
+            }
+
+            if (error.message.includes('fetch')) {
+              return new Error(`Network error: ${request.method} ${request.url}`)
+            }
+
+            // Generic HTTP error
+            return new Error(`HTTP request failed: ${error.message}`)
+          }
+        }
+
+    # === STEP 5: CREATE CACHE IMPLEMENTATION ===
+    - id: 'create-cache-implementation-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create Redis cache implementation for __FEATURE_NAME_PASCAL_CASE__ feature'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'redis cache implementation typescript backend clean architecture'
+          url: 'https://github.com/...'
+          description: 'Redis cache implementation patterns for backend services.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache-adapter.ts'
+      template: |
+        import { createClient, RedisClientType } from 'redis'
+        import type { CacheProtocol } from '../../../shared/infra/protocols/cache-protocol'
+
+        /**
+         * Redis implementation of CacheProtocol
+         * Provides caching operations using Redis for backend services
+         *
+         * @implementation Infrastructure Layer - Cache
+         * @pattern Adapter Pattern - Redis implementation
+         * @layer Infrastructure - Cache storage implementation
+         */
+        export class RedisCacheAdapter implements CacheProtocol {
+          private client: RedisClientType
+          private readonly keyPrefix: string
+          private readonly defaultTTL: number
+
+          /**
+           * Creates RedisCacheAdapter with Redis client
+           *
+           * @param config - Cache configuration
+           */
+          constructor(config: {
+            keyPrefix?: string
+            defaultTTL?: number
+            redisUrl?: string
+          } = {}) {
+            this.keyPrefix = config.keyPrefix || '__FEATURE_NAME_KEBAB_CASE__:'
+            this.defaultTTL = config.defaultTTL || 3600 // 1 hour
+
+            this.client = createClient({
+              url: config.redisUrl || process.env.REDIS_URL || 'redis://localhost:6379'
+            })
+
+            this.setupErrorHandling()
+          }
+
+          /**
+           * Connect to Redis server
+           *
+           * @returns Promise<void>
+           * @throws Error if connection fails
+           */
+          async connect(): Promise<void> {
+            try {
+              if (!this.client.isOpen) {
+                await this.client.connect()
+              }
+            } catch (error) {
+              throw new Error(`Redis connection failed: ${error}`)
+            }
+          }
+
+          /**
+           * Disconnect from Redis server
+           *
+           * @returns Promise<void>
+           */
+          async disconnect(): Promise<void> {
+            try {
+              if (this.client.isOpen) {
+                await this.client.disconnect()
+              }
+            } catch (error) {
+              console.error('Redis disconnect error:', error)
+            }
+          }
+
+          /**
+           * Get value from cache
+           *
+           * @param key - Cache key
+           * @returns Promise with cached value or null
+           * @throws Error if cache operation fails
+           */
+          async get<T = unknown>(key: string): Promise<T | null> {
+            try {
+              await this.ensureConnected()
+
+              const fullKey = this.buildKey(key)
+              const value = await this.client.get(fullKey)
+
+              return value ? JSON.parse(value) : null
+            } catch (error) {
+              throw this.handleCacheError(error, 'get', key)
+            }
+          }
+
+          /**
+           * Set value in cache with TTL
+           *
+           * @param key - Cache key
+           * @param value - Value to cache
+           * @param ttl - Time to live in seconds (optional)
+           * @returns Promise<void>
+           * @throws Error if cache operation fails
+           */
+          async set<T = unknown>(key: string, value: T, ttl?: number): Promise<void> {
+            try {
+              await this.ensureConnected()
+
+              const fullKey = this.buildKey(key)
+              const serializedValue = JSON.stringify(value)
+              const expiration = ttl || this.defaultTTL
+
+              await this.client.setEx(fullKey, expiration, serializedValue)
+            } catch (error) {
+              throw this.handleCacheError(error, 'set', key)
+            }
+          }
+
+          /**
+           * Delete value from cache
+           *
+           * @param key - Cache key to delete
+           * @returns Promise<void>
+           * @throws Error if cache operation fails
+           */
+          async delete(key: string): Promise<void> {
+            try {
+              await this.ensureConnected()
+
+              const fullKey = this.buildKey(key)
+              await this.client.del(fullKey)
+            } catch (error) {
+              throw this.handleCacheError(error, 'delete', key)
+            }
+          }
+
+          /**
+           * Check if key exists in cache
+           *
+           * @param key - Cache key to check
+           * @returns Promise with boolean indicating existence
+           * @throws Error if cache operation fails
+           */
+          async exists(key: string): Promise<boolean> {
+            try {
+              await this.ensureConnected()
+
+              const fullKey = this.buildKey(key)
+              const result = await this.client.exists(fullKey)
+
+              return result === 1
+            } catch (error) {
+              throw this.handleCacheError(error, 'exists', key)
+            }
+          }
+
+          /**
+           * Get TTL for cache key
+           *
+           * @param key - Cache key
+           * @returns Promise with TTL in seconds (-1 if no expiry, -2 if key doesn't exist)
+           * @throws Error if cache operation fails
+           */
+          async getTTL(key: string): Promise<number> {
+            try {
+              await this.ensureConnected()
+
+              const fullKey = this.buildKey(key)
+              return await this.client.ttl(fullKey)
+            } catch (error) {
+              throw this.handleCacheError(error, 'getTTL', key)
+            }
+          }
+
+          /**
+           * Clear all keys with feature prefix
+           *
+           * @returns Promise<void>
+           * @throws Error if cache operation fails
+           */
+          async clear(): Promise<void> {
+            try {
+              await this.ensureConnected()
+
+              const pattern = `${this.keyPrefix}*`
+              const keys = await this.client.keys(pattern)
+
+              if (keys.length > 0) {
+                await this.client.del(keys)
+              }
+            } catch (error) {
+              throw this.handleCacheError(error, 'clear')
+            }
+          }
+
+          /**
+           * Get cache statistics
+           *
+           * @returns Promise with cache statistics
+           * @throws Error if cache operation fails
+           */
+          async getStats(): Promise<{
+            totalKeys: number
+            featureKeys: number
+            memoryUsage: string
+          }> {
+            try {
+              await this.ensureConnected()
+
+              const pattern = `${this.keyPrefix}*`
+              const featureKeys = await this.client.keys(pattern)
+              const totalKeys = await this.client.dbSize()
+              const info = await this.client.info('memory')
+
+              // Extract memory usage from info string
+              const memoryMatch = info.match(/used_memory_human:([^\\r\\n]+)/)
+              const memoryUsage = memoryMatch ? memoryMatch[1] : 'unknown'
+
+              return {
+                totalKeys,
+                featureKeys: featureKeys.length,
+                memoryUsage
+              }
+            } catch (error) {
+              throw this.handleCacheError(error, 'getStats')
+            }
+          }
+
+          /**
+           * Build full cache key with prefix
+           *
+           * @private
+           * @param key - Original key
+           * @returns Full key with prefix
+           */
+          private buildKey(key: string): string {
+            return `${this.keyPrefix}${key}`
+          }
+
+          /**
+           * Ensure Redis client is connected
+           *
+           * @private
+           * @returns Promise<void>
+           */
+          private async ensureConnected(): Promise<void> {
+            if (!this.client.isOpen) {
+              await this.connect()
+            }
+          }
+
+          /**
+           * Setup error handling for Redis client
+           *
+           * @private
+           */
+          private setupErrorHandling(): void {
+            this.client.on('error', (error) => {
+              console.error('Redis client error:', error)
+            })
+
+            this.client.on('connect', () => {
+              console.log('Redis client connected')
+            })
+
+            this.client.on('disconnect', () => {
+              console.log('Redis client disconnected')
+            })
+          }
+
+          /**
+           * Handle cache errors and provide context
+           *
+           * @private
+           * @param error - Original error
+           * @param operation - Operation that failed
+           * @param key - Cache key (optional)
+           * @returns Transformed error with context
+           */
+          private handleCacheError(error: any, operation: string, key?: string): Error {
+            // Log error for debugging in development
+            if (process.env.NODE_ENV === 'development') {
+              console.error(`Cache error in ${operation}:`, {
+                error: error.message,
+                key
+              })
+            }
+
+            const keyContext = key ? ` for key: ${key}` : ''
+            return new Error(`Cache operation failed: ${operation}${keyContext}`)
+          }
+        }
+
+        /**
+         * In-memory cache implementation for development/testing
+         * Fallback when Redis is not available
+         */
+        export class InMemoryCacheAdapter implements CacheProtocol {
+          private cache = new Map<string, { value: any; expiry: number }>()
+          private readonly keyPrefix: string
+          private readonly defaultTTL: number
+
+          constructor(config: { keyPrefix?: string; defaultTTL?: number } = {}) {
+            this.keyPrefix = config.keyPrefix || '__FEATURE_NAME_KEBAB_CASE__:'
+            this.defaultTTL = config.defaultTTL || 3600 // 1 hour
+          }
+
+          async get<T = unknown>(key: string): Promise<T | null> {
+            const fullKey = this.buildKey(key)
+            const item = this.cache.get(fullKey)
+
+            if (!item) return null
+
+            if (Date.now() > item.expiry) {
+              this.cache.delete(fullKey)
+              return null
+            }
+
+            return item.value
+          }
+
+          async set<T = unknown>(key: string, value: T, ttl?: number): Promise<void> {
+            const fullKey = this.buildKey(key)
+            const expiration = Date.now() + (ttl || this.defaultTTL) * 1000
+
+            this.cache.set(fullKey, { value, expiry: expiration })
+          }
+
+          async delete(key: string): Promise<void> {
+            const fullKey = this.buildKey(key)
+            this.cache.delete(fullKey)
+          }
+
+          async exists(key: string): Promise<boolean> {
+            const fullKey = this.buildKey(key)
+            const item = this.cache.get(fullKey)
+
+            if (!item) return false
+
+            if (Date.now() > item.expiry) {
+              this.cache.delete(fullKey)
+              return false
+            }
+
+            return true
+          }
+
+          async clear(): Promise<void> {
+            const keysToDelete: string[] = []
+
+            for (const key of this.cache.keys()) {
+              if (key.startsWith(this.keyPrefix)) {
+                keysToDelete.push(key)
+              }
+            }
+
+            keysToDelete.forEach(key => this.cache.delete(key))
+          }
+
+          private buildKey(key: string): string {
+            return `${this.keyPrefix}${key}`
+          }
+        }
+
+    # === STEP 6: CREATE CRYPTOGRAPHY IMPLEMENTATION ===
+    - id: 'create-crypto-implementation-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create cryptography implementation for __FEATURE_NAME_PASCAL_CASE__ feature (bcrypt, jwt)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'bcrypt jwt typescript backend security clean architecture'
+          url: 'https://github.com/...'
+          description: 'Cryptography implementation patterns for backend security.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/crypto/bcrypt-adapter.ts'
+      template: |
+        import bcrypt from 'bcrypt'
+        import jwt from 'jsonwebtoken'
+        import type { Hasher, HashComparer } from '../../../shared/infra/protocols/cryptography'
+        import type { Encrypter, Decrypter } from '../../../shared/infra/protocols/cryptography'
+
+        /**
+         * Bcrypt implementation for password hashing and comparison
+         * Provides secure password operations using bcrypt algorithm
+         *
+         * @implementation Infrastructure Layer - Cryptography
+         * @pattern Adapter Pattern - Bcrypt implementation
+         * @layer Infrastructure - Password security implementation
+         */
+        export class BcryptAdapter implements Hasher, HashComparer {
+          private readonly saltRounds: number
+
+          /**
+           * Creates BcryptAdapter with salt rounds configuration
+           *
+           * @param saltRounds - Number of bcrypt salt rounds (default: 12)
+           */
+          constructor(saltRounds: number = 12) {
+            this.saltRounds = saltRounds
+          }
+
+          /**
+           * Hash plaintext password using bcrypt
+           *
+           * @param plaintext - Password to hash
+           * @returns Promise with hashed password
+           * @throws Error if hashing fails
+           */
+          async hash(plaintext: string): Promise<string> {
+            try {
+              return await bcrypt.hash(plaintext, this.saltRounds)
+            } catch (error) {
+              throw new Error(`Password hashing failed: ${error}`)
+            }
+          }
+
+          /**
+           * Compare plaintext password with hash
+           *
+           * @param plaintext - Password to compare
+           * @param hashedText - Hashed password to compare against
+           * @returns Promise with boolean indicating match
+           * @throws Error if comparison fails
+           */
+          async compare(plaintext: string, hashedText: string): Promise<boolean> {
+            try {
+              return await bcrypt.compare(plaintext, hashedText)
+            } catch (error) {
+              throw new Error(`Password comparison failed: ${error}`)
+            }
+          }
+        }
+
+        /**
+         * JWT implementation for token encryption and decryption
+         * Provides secure token operations using JSON Web Tokens
+         *
+         * @implementation Infrastructure Layer - Cryptography
+         * @pattern Adapter Pattern - JWT implementation
+         * @layer Infrastructure - Token security implementation
+         */
+        export class JwtAdapter implements Encrypter, Decrypter {
+          private readonly secret: string
+          private readonly expiresIn: string
+
+          /**
+           * Creates JwtAdapter with secret and expiration configuration
+           *
+           * @param secret - JWT secret key
+           * @param expiresIn - Token expiration time (default: '1d')
+           */
+          constructor(secret?: string, expiresIn: string = '1d') {
+            this.secret = secret || process.env.JWT_SECRET || 'default-secret-key'
+            this.expiresIn = expiresIn
+          }
+
+          /**
+           * Encrypt payload into JWT token
+           *
+           * @param payload - Data to encrypt into token
+           * @returns Promise with JWT token
+           * @throws Error if encryption fails
+           */
+          async encrypt(payload: object): Promise<string> {
+            try {
+              return jwt.sign(payload, this.secret, {
+                expiresIn: this.expiresIn
+              })
+            } catch (error) {
+              throw new Error(`Token encryption failed: ${error}`)
+            }
+          }
+
+          /**
+           * Decrypt JWT token to payload
+           *
+           * @param ciphertext - JWT token to decrypt
+           * @returns Promise with decrypted payload
+           * @throws Error if decryption fails
+           */
+          async decrypt(ciphertext: string): Promise<object> {
+            try {
+              return jwt.verify(ciphertext, this.secret) as object
+            } catch (error) {
+              if (error instanceof jwt.TokenExpiredError) {
+                throw new Error('Token has expired')
+              }
+
+              if (error instanceof jwt.JsonWebTokenError) {
+                throw new Error('Invalid token provided')
+              }
+
+              throw new Error(`Token decryption failed: ${error}`)
+            }
+          }
+
+          /**
+           * Verify token without decrypting (check if valid)
+           *
+           * @param token - JWT token to verify
+           * @returns Promise with boolean indicating validity
+           */
+          async verify(token: string): Promise<boolean> {
+            try {
+              jwt.verify(token, this.secret)
+              return true
+            } catch (error) {
+              return false
+            }
+          }
+
+          /**
+           * Get token expiration time
+           *
+           * @param token - JWT token
+           * @returns Promise with expiration timestamp or null
+           */
+          async getTokenExpiration(token: string): Promise<number | null> {
+            try {
+              const decoded = jwt.decode(token) as any
+              return decoded?.exp || null
+            } catch (error) {
+              return null
+            }
+          }
+
+          /**
+           * Check if token is expired
+           *
+           * @param token - JWT token to check
+           * @returns Promise with boolean indicating if expired
+           */
+          async isTokenExpired(token: string): Promise<boolean> {
+            const expiration = await this.getTokenExpiration(token)
+
+            if (!expiration) return true
+
+            return Date.now() >= expiration * 1000
+          }
+        }
+
+    # === STEP 7: CREATE INFRASTRUCTURE PROTOCOLS ===
+    - id: 'create-infra-protocols-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create infrastructure protocols for external dependencies'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'BACKEND_ARCHITECTURE.md'
+          description: 'Infrastructure protocols define contracts for external services.'
+      path: '__PROJECT_NAME__/src/shared/infra/protocols/index.ts'
+      template: |
+        /**
+         * Infrastructure layer protocols
+         * Define contracts for external dependencies used by data layer
+         *
+         * @layer Infrastructure - Protocol definitions
+         * @pattern Dependency Inversion - Abstract external dependencies
+         */
+
+        /**
+         * HTTP Client protocol for external API communication
+         */
+        export interface HttpClient {
+          request<T = unknown>(request: HttpRequest): Promise<HttpResponse<T>>
+        }
+
+        export interface HttpRequest {
+          url: string
+          method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+          headers?: Record<string, string>
+          body?: unknown
+        }
+
+        export interface HttpResponse<T = unknown> {
+          statusCode: number
+          headers: Record<string, string>
+          body: T
+        }
+
+        /**
+         * Cache protocol for data persistence
+         */
+        export interface CacheProtocol {
+          get<T = unknown>(key: string): Promise<T | null>
+          set<T = unknown>(key: string, value: T, ttl?: number): Promise<void>
+          delete(key: string): Promise<void>
+          exists(key: string): Promise<boolean>
+          clear(): Promise<void>
+        }
+
+        /**
+         * Cryptography protocols for security operations
+         */
+        export interface Hasher {
+          hash(plaintext: string): Promise<string>
+        }
+
+        export interface HashComparer {
+          compare(plaintext: string, hashedText: string): Promise<boolean>
+        }
+
+        export interface Encrypter {
+          encrypt(payload: object): Promise<string>
+        }
+
+        export interface Decrypter {
+          decrypt(ciphertext: string): Promise<object>
+        }
+
+        /**
+         * File Storage protocol for file operations
+         */
+        export interface FileStorage {
+          save(file: FileData): Promise<string>
+          load(key: string): Promise<FileData>
+          delete(key: string): Promise<void>
+          exists(key: string): Promise<boolean>
+        }
+
+        export interface FileData {
+          key: string
+          content: Buffer
+          contentType: string
+          metadata?: Record<string, unknown>
+        }
+
+        /**
+         * Message Queue protocol for async communication
+         */
+        export interface MessageQueue {
+          publish(queue: string, message: unknown): Promise<void>
+          subscribe(queue: string, handler: MessageHandler): Promise<void>
+          unsubscribe(queue: string): Promise<void>
+        }
+
+        export type MessageHandler = (message: unknown) => Promise<void>
+
+        /**
+         * Logger protocol for application logging
+         */
+        export interface Logger {
+          info(message: string, meta?: Record<string, unknown>): void
+          error(message: string, error?: Error, meta?: Record<string, unknown>): void
+          warn(message: string, meta?: Record<string, unknown>): void
+          debug(message: string, meta?: Record<string, unknown>): void
+        }
+
+    # === STEP 8: CREATE INFRASTRUCTURE TESTS ===
+    - id: 'create-infra-tests-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create integration tests for infrastructure implementations'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'infrastructure testing integration tests vitest prisma redis'
+          url: 'https://github.com/...'
+          description: 'Infrastructure testing patterns with external dependencies.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/__tests__/infra-integration.spec.ts'
+      template: |
+        import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest'
+        import { PrismaClient } from '@prisma/client'
+        import { Prisma__FEATURE_NAME_PASCAL_CASE__Repository } from '../db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository'
+        import { FetchHttpClient } from '../http/fetch-http-client'
+        import { RedisCacheAdapter, InMemoryCacheAdapter } from '../cache/redis-cache-adapter'
+        import { BcryptAdapter, JwtAdapter } from '../crypto/bcrypt-adapter'
+
+        /**
+         * Infrastructure Layer Integration Tests
+         * Tests actual implementations with external dependencies
+         *
+         * @testType Integration Test - Infrastructure Layer
+         * @coverage Database, HTTP, Cache, Crypto implementations
+         */
+        describe('Infrastructure Integration Tests', () => {
+          let prisma: PrismaClient
+          let repository: Prisma__FEATURE_NAME_PASCAL_CASE__Repository
+          let httpClient: FetchHttpClient
+          let cacheAdapter: InMemoryCacheAdapter
+          let bcryptAdapter: BcryptAdapter
+          let jwtAdapter: JwtAdapter
+
+          beforeAll(async () => {
+            // Setup test database
+            prisma = new PrismaClient({
+              datasources: {
+                db: {
+                  url: process.env.TEST_DATABASE_URL || 'postgresql://test:test@localhost:5432/test_db'
+                }
+              }
+            })
+
+            await prisma.$connect()
+
+            // Initialize infrastructure implementations
+            repository = new Prisma__FEATURE_NAME_PASCAL_CASE__Repository(prisma)
+            httpClient = new FetchHttpClient({
+              baseURL: 'https://jsonplaceholder.typicode.com',
+              timeout: 5000
+            })
+            cacheAdapter = new InMemoryCacheAdapter({
+              keyPrefix: 'test:',
+              defaultTTL: 300
+            })
+            bcryptAdapter = new BcryptAdapter(8) // Lower rounds for faster tests
+            jwtAdapter = new JwtAdapter('test-secret', '1h')
+          })
+
+          afterAll(async () => {
+            await prisma.$disconnect()
+          })
+
+          beforeEach(async () => {
+            // Clean up test data before each test
+            await prisma.__FEATURE_NAME_CAMEL_CASE__.deleteMany()
+            await cacheAdapter.clear()
+          })
+
+          describe('Database Repository', () => {
+            it('should save and retrieve __FEATURE_NAME_KEBAB_CASE__ entity', async () => {
+              const testData = {
+                __ENTITY_FIELD_1__: 'test-value-1',
+                __ENTITY_FIELD_2__: 'test-value-2',
+                __ENTITY_FIELD_3__: 'test-value-3',
+                status: 'active' as const,
+                metadata: { test: true }
+              }
+
+              const saved = await repository.save(testData)
+
+              expect(saved).toMatchObject({
+                __ENTITY_FIELD_1__: 'test-value-1',
+                __ENTITY_FIELD_2__: 'test-value-2',
+                __ENTITY_FIELD_3__: 'test-value-3',
+                status: 'active'
+              })
+              expect(saved.id).toBeDefined()
+              expect(saved.createdAt).toBeInstanceOf(Date)
+              expect(saved.updatedAt).toBeInstanceOf(Date)
+            })
+
+            it('should find __FEATURE_NAME_KEBAB_CASE__ by id', async () => {
+              const testData = {
+                __ENTITY_FIELD_1__: 'findable-value',
+                __ENTITY_FIELD_2__: 'test-value',
+                __ENTITY_FIELD_3__: 'test-value',
+                status: 'active' as const,
+                metadata: {}
+              }
+
+              const saved = await repository.save(testData)
+              const found = await repository.findById(saved.id)
+
+              expect(found).toMatchObject(saved)
+            })
+
+            it('should return null for non-existent id', async () => {
+              const found = await repository.findById('non-existent-id')
+              expect(found).toBeNull()
+            })
+
+            it('should handle database constraint violations', async () => {
+              // This test assumes there's a unique constraint
+              const testData = {
+                __ENTITY_FIELD_1__: 'unique-value',
+                __ENTITY_FIELD_2__: 'test-value',
+                __ENTITY_FIELD_3__: 'test-value',
+                status: 'active' as const,
+                metadata: {}
+              }
+
+              await repository.save(testData)
+
+              // Try to save duplicate (if unique constraint exists)
+              await expect(repository.save(testData))
+                .rejects
+                .toThrow(/duplicate/i)
+            })
+          })
+
+          describe('HTTP Client', () => {
+            it('should make successful GET request', async () => {
+              const response = await httpClient.request({
+                url: '/posts/1',
+                method: 'GET'
+              })
+
+              expect(response.statusCode).toBe(200)
+              expect(response.body).toMatchObject({
+                id: 1,
+                title: expect.any(String),
+                body: expect.any(String)
+              })
+            })
+
+            it('should handle HTTP errors', async () => {
+              await expect(
+                httpClient.request({
+                  url: '/posts/9999999',
+                  method: 'GET'
+                })
+              ).rejects.toThrow()
+            })
+
+            it('should include custom headers', async () => {
+              const mockFetch = vi.fn().mockResolvedValue({
+                status: 200,
+                headers: new Map([['content-type', 'application/json']]),
+                json: async () => ({ success: true })
+              })
+
+              vi.stubGlobal('fetch', mockFetch)
+
+              await httpClient.request({
+                url: '/test',
+                method: 'POST',
+                headers: {
+                  'X-Custom-Header': 'test-value'
+                },
+                body: { test: true }
+              })
+
+              expect(mockFetch).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                  headers: expect.objectContaining({
+                    'X-Custom-Header': 'test-value'
+                  })
+                })
+              )
+
+              vi.unstubAllGlobals()
+            })
+          })
+
+          describe('Cache Adapter', () => {
+            it('should store and retrieve values', async () => {
+              const testKey = 'test-key'
+              const testValue = { data: 'test-value', number: 123 }
+
+              await cacheAdapter.set(testKey, testValue, 300)
+              const retrieved = await cacheAdapter.get(testKey)
+
+              expect(retrieved).toEqual(testValue)
+            })
+
+            it('should return null for non-existent keys', async () => {
+              const retrieved = await cacheAdapter.get('non-existent-key')
+              expect(retrieved).toBeNull()
+            })
+
+            it('should handle key expiration', async () => {
+              const testKey = 'expiring-key'
+              const testValue = 'expiring-value'
+
+              // Set with very short TTL
+              await cacheAdapter.set(testKey, testValue, 1)
+
+              // Should exist immediately
+              expect(await cacheAdapter.exists(testKey)).toBe(true)
+
+              // Wait for expiration
+              await new Promise(resolve => setTimeout(resolve, 1100))
+
+              // Should be expired
+              expect(await cacheAdapter.exists(testKey)).toBe(false)
+              expect(await cacheAdapter.get(testKey)).toBeNull()
+            })
+
+            it('should clear cache entries', async () => {
+              await cacheAdapter.set('key1', 'value1')
+              await cacheAdapter.set('key2', 'value2')
+
+              await cacheAdapter.clear()
+
+              expect(await cacheAdapter.get('key1')).toBeNull()
+              expect(await cacheAdapter.get('key2')).toBeNull()
+            })
+          })
+
+          describe('Bcrypt Adapter', () => {
+            it('should hash and verify passwords', async () => {
+              const password = 'test-password-123'
+
+              const hashedPassword = await bcryptAdapter.hash(password)
+
+              expect(hashedPassword).toBeDefined()
+              expect(hashedPassword).not.toBe(password)
+              expect(hashedPassword.length).toBeGreaterThan(50)
+
+              const isValid = await bcryptAdapter.compare(password, hashedPassword)
+              expect(isValid).toBe(true)
+            })
+
+            it('should reject invalid passwords', async () => {
+              const password = 'correct-password'
+              const wrongPassword = 'wrong-password'
+
+              const hashedPassword = await bcryptAdapter.hash(password)
+              const isValid = await bcryptAdapter.compare(wrongPassword, hashedPassword)
+
+              expect(isValid).toBe(false)
+            })
+          })
+
+          describe('JWT Adapter', () => {
+            it('should encrypt and decrypt tokens', async () => {
+              const payload = {
+                userId: '123',
+                email: 'test@example.com',
+                role: 'user'
+              }
+
+              const token = await jwtAdapter.encrypt(payload)
+
+              expect(token).toBeDefined()
+              expect(typeof token).toBe('string')
+
+              const decrypted = await jwtAdapter.decrypt(token) as any
+
+              expect(decrypted.userId).toBe(payload.userId)
+              expect(decrypted.email).toBe(payload.email)
+              expect(decrypted.role).toBe(payload.role)
+            })
+
+            it('should verify valid tokens', async () => {
+              const payload = { userId: '123' }
+              const token = await jwtAdapter.encrypt(payload)
+
+              const isValid = await jwtAdapter.verify(token)
+              expect(isValid).toBe(true)
+            })
+
+            it('should reject invalid tokens', async () => {
+              const invalidToken = 'invalid.token.here'
+
+              const isValid = await jwtAdapter.verify(invalidToken)
+              expect(isValid).toBe(false)
+
+              await expect(jwtAdapter.decrypt(invalidToken))
+                .rejects
+                .toThrow(/invalid token/i)
+            })
+
+            it('should handle token expiration', async () => {
+              const shortLivedAdapter = new JwtAdapter('test-secret', '1ms')
+              const payload = { userId: '123' }
+
+              const token = await shortLivedAdapter.encrypt(payload)
+
+              // Wait for token to expire
+              await new Promise(resolve => setTimeout(resolve, 10))
+
+              await expect(shortLivedAdapter.decrypt(token))
+                .rejects
+                .toThrow(/expired/i)
+            })
+          })
+
+          describe('Infrastructure Error Handling', () => {
+            it('should handle database connection errors gracefully', async () => {
+              const badPrisma = new PrismaClient({
+                datasources: {
+                  db: {
+                    url: 'postgresql://invalid:invalid@localhost:9999/invalid'
+                  }
+                }
+              })
+
+              const badRepository = new Prisma__FEATURE_NAME_PASCAL_CASE__Repository(badPrisma)
+
+              await expect(badRepository.findById('any-id'))
+                .rejects
+                .toThrow(/database/i)
+
+              await badPrisma.$disconnect()
+            })
+
+            it('should handle HTTP network errors gracefully', async () => {
+              const httpClientWithBadUrl = new FetchHttpClient({
+                baseURL: 'https://non-existent-domain-12345.com',
+                timeout: 1000
+              })
+
+              await expect(
+                httpClientWithBadUrl.request({
+                  url: '/test',
+                  method: 'GET'
+                })
+              ).rejects.toThrow(/network|timeout/i)
+            })
+          })
+        })
+
+      validation_script: |
+        run_infra_integration_tests() {
+          echo "🧪 Running infrastructure integration tests..."
+          npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/__tests__ --coverage || exit 1
+          echo "✅ Infrastructure integration tests passed with coverage"
+        }
+
+        check_infra_dependencies() {
+          echo "📦 Checking infrastructure dependencies..."
+
+          # Check if required dependencies are installed
+          if ! npm list @prisma/client >/dev/null 2>&1; then
+            echo "⚠️  Installing @prisma/client..."
+            npm install @prisma/client
+          fi
+
+          if ! npm list bcrypt >/dev/null 2>&1; then
+            echo "⚠️  Installing bcrypt..."
+            npm install bcrypt && npm install --save-dev @types/bcrypt
+          fi
+
+          if ! npm list jsonwebtoken >/dev/null 2>&1; then
+            echo "⚠️  Installing jsonwebtoken..."
+            npm install jsonwebtoken && npm install --save-dev @types/jsonwebtoken
+          fi
+
+          if ! npm list redis >/dev/null 2>&1; then
+            echo "⚠️  Installing redis..."
+            npm install redis
+          fi
+
+          echo "✅ All infrastructure dependencies are available"
+        }
+
+        stage_and_commit_infra() {
+          local commit_message="$1"
+          git add .
+          git status
+          git commit -m "$commit_message" || exit 1
+          echo "✅ Committed: $commit_message"
+        }
+
+        check_infra_dependencies
+        run_infra_integration_tests
+        stage_and_commit_infra "feat(__FEATURE_NAME_KEBAB_CASE__): add infrastructure layer implementations"
+
+    # === STEP 9: VALIDATE INFRASTRUCTURE LAYER ===
+    - id: 'validate-infrastructure-layer-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Validate complete infrastructure layer implementation for __FEATURE_NAME_PASCAL_CASE__'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      run_scripts:
+        description: 'Run all infrastructure layer validation checks'
+        scripts:
+          - name: 'TypeScript Compilation'
+            command: 'npx tsc --noEmit --project tsconfig.json'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'ESLint Check'
+            command: 'npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Infrastructure Tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Clean Architecture Rules Check'
+            command: 'npm run arch:check -- --layer=infra --feature=__FEATURE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Build Check'
+            command: 'npm run build'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit Infrastructure Layer'
+            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): complete infrastructure layer implementation"'
+            workingDirectory: '__PROJECT_NAME__'
+
+# ============= END INFRA STEPS BACKEND SECTION =============
