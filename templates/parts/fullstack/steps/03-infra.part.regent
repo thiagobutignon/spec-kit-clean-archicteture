@@ -1388,155 +1388,43 @@
           }
         }
 
-    # === STEP 11: REFACTOR EXISTING AXIOS TO FETCH (BROWNFIELD) ===
-    - id: 'refactor-axios-to-fetch-__USE_CASE_NAME_KEBAB_CASE__'
+    # === STEP 11: REFACTOR EXISTING CODE TO CLEAN ARCHITECTURE (BROWNFIELD) ===
+    - id: 'refactor-to-clean-architecture-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'conditional_file'
-      description: 'Refactor existing axios usage to Fetch API in fullstack'
-      condition: 'check_if_axios_exists'
+      description: 'Refactor existing code to follow Clean Architecture patterns'
+      condition: 'check_if_refactoring_needed'
       status: 'PENDING'
       rlhf_score: null
       execution_log: ''
       references:
         - type: 'internal_guideline'
-          source: 'FULLSTACK_RULES.md'
-          description: 'Use Fetch API instead of axios.'
-      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.ts'
+          source: 'FULLSTACK_ARCHITECTURE.md'
+          description: 'Clean Architecture refactoring patterns.'
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__'
       template: |
+        # AI-NOTE: This is a generic refactoring template
+        # The AI should identify the specific pattern that needs refactoring
+        # and apply the appropriate transformation
+
         <<<FIND>>>
-        import axios from 'axios'
-        import type { __USE_CASE_NAME_PASCAL_CASE__ } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
-
-        export class Remote__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
-          constructor(
-            private readonly url: string
-          ) {}
-
-          async execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output> {
-            const response = await axios.post(this.url, input)
-            return response.data
-          }
-        }
+        # AI should identify the code that violates Clean Architecture principles
+        # Examples:
+        # - Direct HTTP calls instead of using adapters
+        # - Business logic mixed with infrastructure
+        # - Direct database access in presentation layer
+        # - Hard-coded dependencies instead of dependency injection
+        # - Framework-specific code in domain layer
+        [ORIGINAL_CODE_TO_BE_REFACTORED]
         <<<REPLACE>>>
-        import type { HttpClient } from '@/shared/infra/http/protocols/http-client'
-        import type { __USE_CASE_NAME_PASCAL_CASE__ } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        # AI should replace with Clean Architecture compliant code
+        # Following the principles:
+        # - Dependency injection
+        # - Separation of concerns
+        # - Interface segregation
+        # - Single responsibility
+        [REFACTORED_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
 
-        export class Remote__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
-          constructor(
-            private readonly httpClient: HttpClient,
-            private readonly url: string
-          ) {}
-
-          async execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output> {
-            const response = await this.httpClient.request({
-              url: this.url,
-              method: 'POST',
-              body: input
-            })
-
-            if (!response.ok) {
-              throw new Error(`Request failed with status ${response.statusCode}`)
-            }
-
-            return response.data
-          }
-        }
-
-    # === STEP 12: REFACTOR DIRECT LOCALSTORAGE TO CACHE ADAPTER ===
-    - id: 'refactor-localstorage-to-cache-__USE_CASE_NAME_KEBAB_CASE__'
-      type: 'conditional_file'
-      description: 'Refactor direct localStorage usage to cache adapter'
-      condition: 'check_if_direct_localstorage_usage'
-      status: 'PENDING'
-      rlhf_score: null
-      execution_log: ''
-      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/hooks/use-__USE_CASE_NAME_KEBAB_CASE__.ts'
-      template: |
-        <<<FIND>>>
-        const getCached__USE_CASE_NAME_PASCAL_CASE__ = () => {
-          const cached = localStorage.getItem('__USE_CASE_NAME_KEBAB_CASE__-data')
-          if (cached) {
-            const data = JSON.parse(cached)
-            if (Date.now() - data.timestamp < 5 * 60 * 1000) {
-              return data.value
-            }
-          }
-          return null
-        }
-
-        const setCached__USE_CASE_NAME_PASCAL_CASE__ = (value: any) => {
-          localStorage.setItem('__USE_CASE_NAME_KEBAB_CASE__-data', JSON.stringify({
-            value,
-            timestamp: Date.now()
-          }))
-        }
-        <<<REPLACE>>>
-        import { __USE_CASE_NAME_PASCAL_CASE__CacheStrategy } from '../../infra/cache/__USE_CASE_NAME_KEBAB_CASE__-cache-strategy'
-
-        const cacheStrategy = new __USE_CASE_NAME_PASCAL_CASE__CacheStrategy(
-          cacheClient,
-          300 // 5 minutes TTL
-        )
-
-        const getCached__USE_CASE_NAME_PASCAL_CASE__ = async () => {
-          return await cacheStrategy.get({ key: '__USE_CASE_NAME_KEBAB_CASE__-data' })
-        }
-
-        const setCached__USE_CASE_NAME_PASCAL_CASE__ = async (value: any) => {
-          await cacheStrategy.set(
-            { key: '__USE_CASE_NAME_KEBAB_CASE__-data' },
-            value
-          )
-        }
-
-    # === STEP 13: REFACTOR WEBSOCKET TO ADAPTER PATTERN ===
-    - id: 'refactor-websocket-to-adapter-__USE_CASE_NAME_KEBAB_CASE__'
-      type: 'conditional_file'
-      description: 'Refactor raw WebSocket usage to adapter pattern'
-      condition: 'check_if_raw_websocket_usage'
-      status: 'PENDING'
-      rlhf_score: null
-      execution_log: ''
-      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/hooks/use-realtime-__USE_CASE_NAME_KEBAB_CASE__.ts'
-      template: |
-        <<<FIND>>>
-        useEffect(() => {
-          const ws = new WebSocket('wss://api.example.com/__FEATURE_NAME_KEBAB_CASE__')
-
-          ws.onmessage = (event) => {
-            const data = JSON.parse(event.data)
-            set__USE_CASE_NAME_PASCAL_CASE__Data(data)
-          }
-
-          ws.onerror = (error) => {
-            console.error('WebSocket error:', error)
-          }
-
-          return () => {
-            ws.close()
-          }
-        }, [])
-        <<<REPLACE>>>
-        import { WebSocketClient } from '@/shared/infra/websocket/websocket-client'
-
-        useEffect(() => {
-          const wsClient = new WebSocketClient('wss://api.example.com/__FEATURE_NAME_KEBAB_CASE__', {
-            reconnectDelay: 3000,
-            maxReconnectAttempts: 5
-          })
-
-          wsClient.connect()
-
-          const unsubscribe = wsClient.on('__USE_CASE_NAME_KEBAB_CASE__-update', (data) => {
-            set__USE_CASE_NAME_PASCAL_CASE__Data(data)
-          })
-
-          return () => {
-            unsubscribe()
-            wsClient.disconnect()
-          }
-        }, [])
-
-    # === STEP 14: VALIDATE INFRA LAYER ===
+    # === STEP 12: VALIDATE INFRA LAYER ===
     - id: 'validate-infra-layer-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Validate fullstack infrastructure layer implementation'
