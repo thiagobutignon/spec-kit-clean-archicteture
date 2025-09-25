@@ -847,10 +847,10 @@
           })
         })
 
-    # === STEP 8: CREATE SHARED HTTP CLIENT ===
+    # === STEP 8: CREATE SHARED HTTP CLIENT WITH RETRY LOGIC ===
     - id: 'create-shared-http-client-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
-      description: 'Create shared HTTP client implementation using Fetch API'
+      description: 'Create shared HTTP client implementation using Fetch API with retry logic'
       status: 'PENDING'
       rlhf_score: null
       execution_log: ''
@@ -863,22 +863,65 @@
         import type { HttpClient, HttpRequest, HttpResponse } from './protocols/http-client'
 
         /**
-         * Fetch API implementation of HttpClient
+         * Fetch API implementation of HttpClient with retry logic and exponential backoff
          * Shared infrastructure for frontend HTTP requests
          *
          * @implements HttpClient
          * @layer Infrastructure Layer - Shared HTTP
          */
         export class FetchHttpClient implements HttpClient {
+          private readonly maxRetries: number
+          private readonly retryDelay: number
+          private readonly retryableStatuses = [408, 429, 500, 502, 503, 504]
+
           constructor(
-            private readonly defaultHeaders?: Record<string, string>
-          ) {}
+            private readonly defaultHeaders?: Record<string, string>,
+            options?: {
+              maxRetries?: number
+              retryDelay?: number
+            }
+          ) {
+            this.maxRetries = options?.maxRetries || 3
+            this.retryDelay = options?.retryDelay || 1000
+          }
 
           async request<T = any>(params: HttpRequest): Promise<HttpResponse<T>> {
+            let lastError: Error | null = null
+
+            for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+              try {
+                const response = await this.executeRequest<T>(params)
+
+                // If successful or non-retryable status, return response
+                if (response.ok || !this.shouldRetry(response.statusCode, attempt)) {
+                  return response
+                }
+
+                // Wait before retry with exponential backoff
+                if (attempt < this.maxRetries) {
+                  await this.wait(this.calculateBackoff(attempt))
+                }
+              } catch (error) {
+                lastError = error as Error
+
+                // If it's a network error and we have retries left, continue
+                if (attempt < this.maxRetries && this.isNetworkError(error)) {
+                  await this.wait(this.calculateBackoff(attempt))
+                  continue
+                }
+
+                throw error
+              }
+            }
+
+            throw lastError || new Error('Max retries exceeded')
+          }
+
+          private async executeRequest<T>(params: HttpRequest): Promise<HttpResponse<T>> {
             const controller = new AbortController()
             const timeoutId = params.timeout
               ? setTimeout(() => controller.abort(), params.timeout)
-              : null
+              : setTimeout(() => controller.abort(), 30000) // Default 30s timeout
 
             try {
               const response = await fetch(params.url, {
@@ -894,7 +937,7 @@
                 mode: params.mode || 'cors'
               })
 
-              if (timeoutId) clearTimeout(timeoutId)
+              clearTimeout(timeoutId)
 
               const contentType = response.headers.get('content-type')
               let data: T
@@ -914,11 +957,11 @@
                 ok: response.ok
               }
             } catch (error) {
-              if (timeoutId) clearTimeout(timeoutId)
+              clearTimeout(timeoutId)
 
               if (error instanceof Error) {
                 if (error.name === 'AbortError') {
-                  throw new Error(`Request timeout after ${params.timeout}ms`)
+                  throw new Error(`Request timeout after ${params.timeout || 30000}ms`)
                 }
                 throw error
               }
@@ -927,14 +970,36 @@
             }
           }
 
+          private shouldRetry(statusCode: number, attempt: number): boolean {
+            return attempt < this.maxRetries && this.retryableStatuses.includes(statusCode)
+          }
+
+          private isNetworkError(error: unknown): boolean {
+            return error instanceof Error && (
+              error.message.includes('Network') ||
+              error.message.includes('fetch')
+            )
+          }
+
+          private calculateBackoff(attempt: number): number {
+            // Exponential backoff with jitter
+            const exponential = Math.pow(2, attempt) * this.retryDelay
+            const jitter = Math.random() * 100
+            return Math.min(exponential + jitter, 10000) // Max 10 seconds
+          }
+
+          private wait(ms: number): Promise<void> {
+            return new Promise(resolve => setTimeout(resolve, ms))
+          }
+
           /**
            * Create a new instance with additional headers
            */
           withHeaders(headers: Record<string, string>): HttpClient {
-            return new FetchHttpClient({
-              ...this.defaultHeaders,
-              ...headers
-            })
+            return new FetchHttpClient(
+              { ...this.defaultHeaders, ...headers },
+              { maxRetries: this.maxRetries, retryDelay: this.retryDelay }
+            )
           }
 
           /**
@@ -947,7 +1012,383 @@
           }
         }
 
-    # === STEP 9: VALIDATE INFRA LAYER ===
+    # === STEP 9: CREATE WEBSOCKET ADAPTER ===
+    - id: 'create-websocket-adapter-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create WebSocket adapter for real-time communication'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'websocket adapter typescript next.js real-time'
+          url: 'https://github.com/...'
+          description: 'WebSocket patterns for real-time features.'
+      path: '__PROJECT_NAME__/src/shared/infra/websocket/websocket-client.ts'
+      template: |
+        /**
+         * WebSocket client for real-time communication
+         * Supports reconnection, heartbeat, and message queuing
+         *
+         * @layer Infrastructure Layer - Real-time Communication
+         */
+        export class WebSocketClient {
+          private ws: WebSocket | null = null
+          private readonly url: string
+          private readonly reconnectDelay: number
+          private readonly maxReconnectAttempts: number
+          private reconnectAttempts = 0
+          private messageQueue: any[] = []
+          private heartbeatInterval: NodeJS.Timeout | null = null
+          private listeners = new Map<string, Set<(data: any) => void>>()
+
+          constructor(
+            url: string,
+            options?: {
+              reconnectDelay?: number
+              maxReconnectAttempts?: number
+              heartbeatInterval?: number
+            }
+          ) {
+            this.url = url.replace('http://', 'ws://').replace('https://', 'wss://')
+            this.reconnectDelay = options?.reconnectDelay || 3000
+            this.maxReconnectAttempts = options?.maxReconnectAttempts || 5
+          }
+
+          connect(): Promise<void> {
+            return new Promise((resolve, reject) => {
+              if (this.ws?.readyState === WebSocket.OPEN) {
+                resolve()
+                return
+              }
+
+              this.ws = new WebSocket(this.url)
+
+              this.ws.onopen = () => {
+                console.log('[WebSocket] Connected')
+                this.reconnectAttempts = 0
+                this.flushMessageQueue()
+                this.startHeartbeat()
+                resolve()
+              }
+
+              this.ws.onmessage = (event) => {
+                this.handleMessage(event.data)
+              }
+
+              this.ws.onerror = (error) => {
+                console.error('[WebSocket] Error:', error)
+                reject(error)
+              }
+
+              this.ws.onclose = () => {
+                console.log('[WebSocket] Disconnected')
+                this.stopHeartbeat()
+                this.attemptReconnect()
+              }
+            })
+          }
+
+          disconnect(): void {
+            this.stopHeartbeat()
+            if (this.ws) {
+              this.ws.close()
+              this.ws = null
+            }
+          }
+
+          send(event: string, data: any): void {
+            const message = JSON.stringify({ event, data })
+
+            if (this.ws?.readyState === WebSocket.OPEN) {
+              this.ws.send(message)
+            } else {
+              // Queue message for later
+              this.messageQueue.push(message)
+            }
+          }
+
+          on(event: string, callback: (data: any) => void): () => void {
+            if (!this.listeners.has(event)) {
+              this.listeners.set(event, new Set())
+            }
+
+            this.listeners.get(event)?.add(callback)
+
+            // Return unsubscribe function
+            return () => {
+              this.listeners.get(event)?.delete(callback)
+            }
+          }
+
+          private handleMessage(rawData: string): void {
+            try {
+              const { event, data } = JSON.parse(rawData)
+              const callbacks = this.listeners.get(event)
+
+              if (callbacks) {
+                callbacks.forEach(callback => {
+                  try {
+                    callback(data)
+                  } catch (error) {
+                    console.error(`[WebSocket] Error in callback for ${event}:`, error)
+                  }
+                })
+              }
+            } catch (error) {
+              console.error('[WebSocket] Failed to parse message:', error)
+            }
+          }
+
+          private attemptReconnect(): void {
+            if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+              console.error('[WebSocket] Max reconnection attempts reached')
+              return
+            }
+
+            this.reconnectAttempts++
+            console.log(`[WebSocket] Reconnecting... (attempt ${this.reconnectAttempts})`)
+
+            setTimeout(() => {
+              this.connect().catch(console.error)
+            }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1))
+          }
+
+          private flushMessageQueue(): void {
+            while (this.messageQueue.length > 0) {
+              const message = this.messageQueue.shift()
+              if (this.ws?.readyState === WebSocket.OPEN) {
+                this.ws.send(message)
+              }
+            }
+          }
+
+          private startHeartbeat(): void {
+            this.heartbeatInterval = setInterval(() => {
+              if (this.ws?.readyState === WebSocket.OPEN) {
+                this.send('ping', { timestamp: Date.now() })
+              }
+            }, 30000) // 30 seconds
+          }
+
+          private stopHeartbeat(): void {
+            if (this.heartbeatInterval) {
+              clearInterval(this.heartbeatInterval)
+              this.heartbeatInterval = null
+            }
+          }
+        }
+
+    # === STEP 10: CREATE INDEXEDDB ADAPTER ===
+    - id: 'create-indexeddb-adapter-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create IndexedDB adapter for large data storage'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'indexeddb adapter typescript browser storage'
+          url: 'https://github.com/...'
+          description: 'IndexedDB patterns for large data storage.'
+      path: '__PROJECT_NAME__/src/shared/infra/storage/indexeddb-adapter.ts'
+      template: |
+        /**
+         * IndexedDB adapter for large data storage in browser
+         * Supports structured data, binary storage, and offline capabilities
+         *
+         * @layer Infrastructure Layer - Browser Storage
+         */
+        export class IndexedDBAdapter {
+          private readonly dbName: string
+          private readonly storeName: string
+          private readonly version: number
+          private db: IDBDatabase | null = null
+
+          constructor(
+            dbName: string = '__FEATURE_NAME_KEBAB_CASE__-db',
+            storeName: string = '__USE_CASE_NAME_KEBAB_CASE__-store',
+            version: number = 1
+          ) {
+            this.dbName = dbName
+            this.storeName = storeName
+            this.version = version
+          }
+
+          async connect(): Promise<void> {
+            if (this.db) return
+
+            return new Promise((resolve, reject) => {
+              const request = indexedDB.open(this.dbName, this.version)
+
+              request.onerror = () => {
+                reject(new Error(`Failed to open IndexedDB: ${request.error}`))
+              }
+
+              request.onsuccess = () => {
+                this.db = request.result
+                resolve()
+              }
+
+              request.onupgradeneeded = (event) => {
+                const db = (event.target as IDBOpenDBRequest).result
+
+                if (!db.objectStoreNames.contains(this.storeName)) {
+                  const store = db.createObjectStore(this.storeName, { keyPath: 'id', autoIncrement: true })
+
+                  // Create indexes for common queries
+                  store.createIndex('createdAt', 'createdAt', { unique: false })
+                  store.createIndex('updatedAt', 'updatedAt', { unique: false })
+                  store.createIndex('type', 'type', { unique: false })
+                  store.createIndex('status', 'status', { unique: false })
+                }
+              }
+            })
+          }
+
+          async put<T = any>(key: string, value: T): Promise<void> {
+            await this.connect()
+
+            return new Promise((resolve, reject) => {
+              if (!this.db) {
+                reject(new Error('Database not connected'))
+                return
+              }
+
+              const transaction = this.db.transaction([this.storeName], 'readwrite')
+              const store = transaction.objectStore(this.storeName)
+
+              const data = {
+                id: key,
+                data: value,
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+              }
+
+              const request = store.put(data)
+
+              request.onsuccess = () => resolve()
+              request.onerror = () => reject(request.error)
+            })
+          }
+
+          async get<T = any>(key: string): Promise<T | null> {
+            await this.connect()
+
+            return new Promise((resolve, reject) => {
+              if (!this.db) {
+                reject(new Error('Database not connected'))
+                return
+              }
+
+              const transaction = this.db.transaction([this.storeName], 'readonly')
+              const store = transaction.objectStore(this.storeName)
+              const request = store.get(key)
+
+              request.onsuccess = () => {
+                const result = request.result
+                resolve(result ? result.data : null)
+              }
+
+              request.onerror = () => reject(request.error)
+            })
+          }
+
+          async delete(key: string): Promise<void> {
+            await this.connect()
+
+            return new Promise((resolve, reject) => {
+              if (!this.db) {
+                reject(new Error('Database not connected'))
+                return
+              }
+
+              const transaction = this.db.transaction([this.storeName], 'readwrite')
+              const store = transaction.objectStore(this.storeName)
+              const request = store.delete(key)
+
+              request.onsuccess = () => resolve()
+              request.onerror = () => reject(request.error)
+            })
+          }
+
+          async clear(): Promise<void> {
+            await this.connect()
+
+            return new Promise((resolve, reject) => {
+              if (!this.db) {
+                reject(new Error('Database not connected'))
+                return
+              }
+
+              const transaction = this.db.transaction([this.storeName], 'readwrite')
+              const store = transaction.objectStore(this.storeName)
+              const request = store.clear()
+
+              request.onsuccess = () => resolve()
+              request.onerror = () => reject(request.error)
+            })
+          }
+
+          async getAll<T = any>(): Promise<T[]> {
+            await this.connect()
+
+            return new Promise((resolve, reject) => {
+              if (!this.db) {
+                reject(new Error('Database not connected'))
+                return
+              }
+
+              const transaction = this.db.transaction([this.storeName], 'readonly')
+              const store = transaction.objectStore(this.storeName)
+              const request = store.getAll()
+
+              request.onsuccess = () => {
+                const results = request.result || []
+                resolve(results.map(item => item.data))
+              }
+
+              request.onerror = () => reject(request.error)
+            })
+          }
+
+          async query<T = any>(
+            indexName: string,
+            query?: IDBKeyRange | IDBValidKey
+          ): Promise<T[]> {
+            await this.connect()
+
+            return new Promise((resolve, reject) => {
+              if (!this.db) {
+                reject(new Error('Database not connected'))
+                return
+              }
+
+              const transaction = this.db.transaction([this.storeName], 'readonly')
+              const store = transaction.objectStore(this.storeName)
+              const index = store.index(indexName)
+              const request = query ? index.getAll(query) : index.getAll()
+
+              request.onsuccess = () => {
+                const results = request.result || []
+                resolve(results.map(item => item.data))
+              }
+
+              request.onerror = () => reject(request.error)
+            })
+          }
+
+          disconnect(): void {
+            if (this.db) {
+              this.db.close()
+              this.db = null
+            }
+          }
+        }
+
+    # === STEP 11: VALIDATE INFRA LAYER ===
     - id: 'validate-infra-layer-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Validate fullstack infrastructure layer implementation'
