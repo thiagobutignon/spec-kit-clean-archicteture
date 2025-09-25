@@ -16,7 +16,7 @@
           "id": {
             "description": "Unique identifier for the presentation step",
             "type": "string",
-            "pattern": "^create-.*|^test-.*|^refactor-.*|^code-review-.*"
+            "pattern": "^create-.*|^test-.*|^refactor-.*|^code-review-.*|^verify-.*"
           },
           "type": {
             "description": "Type of presentation layer action",
