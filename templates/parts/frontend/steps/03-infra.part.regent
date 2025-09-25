@@ -1342,6 +1342,9 @@
           description: 'Brownfield refactoring patterns for HTTP clients.'
       refactor_pattern:
         find_pattern: |
+          # AI-NOTE: Identify axios imports and usage
+          # Look for: import axios from 'axios'
+          # Replace ALL axios calls with FetchHttpClient
           <<<FIND>>>
           // Legacy axios usage pattern
           import axios from 'axios'
@@ -1359,6 +1362,11 @@
           return response.data
           <<</FIND>>>
         replace_pattern: |
+          # AI-NOTE: Ensure replacement:
+          # - Uses FetchHttpClient from infra layer
+          # - Implements proper error handling
+          # - Uses dependency injection
+          # - Is testable with mocks
           <<<REPLACE>>>
           // Refactored to use Clean Architecture infrastructure layer
           import { Fetch__USE_CASE_NAME_PASCAL_CASE__Client } from '../infra/http/fetch-__USE_CASE_NAME_KEBAB_CASE__-client'
@@ -1405,6 +1413,11 @@
           }
           <<</FIND>>>
         replace_pattern: |
+          # AI-NOTE: Ensure replacement:
+          # - Uses FetchHttpClient from infra layer
+          # - Implements proper error handling
+          # - Uses dependency injection
+          # - Is testable with mocks
           <<<REPLACE>>>
           // Refactored to use Clean Architecture storage adapter
           import { Browser__USE_CASE_NAME_PASCAL_CASE__Storage } from '../infra/storage/browser-__USE_CASE_NAME_KEBAB_CASE__-storage'
@@ -1460,6 +1473,11 @@
           }
           <<</FIND>>>
         replace_pattern: |
+          # AI-NOTE: Ensure replacement:
+          # - Uses FetchHttpClient from infra layer
+          # - Implements proper error handling
+          # - Uses dependency injection
+          # - Is testable with mocks
           <<<REPLACE>>>
           // Refactored to use Clean Architecture cache adapter
           import { Browser__USE_CASE_NAME_PASCAL_CASE__Cache } from '../infra/cache/browser-__USE_CASE_NAME_KEBAB_CASE__-cache'

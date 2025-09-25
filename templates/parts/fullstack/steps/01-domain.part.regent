@@ -816,11 +816,25 @@
           description: 'Analyze backend dependencies and structure'
       path: '__PROJECT_NAME__/src/api/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
       template: |
+        # AI-NOTE: FIND/REPLACE for Fullstack Backend Refactoring
+        # Look for backend-specific violations:
+        # - Business logic in API routes
+        # - Direct database access in controllers
+        # - Missing dependency injection
+        # - Framework coupling in domain
+
         <<<FIND>>>
-        // The AI should identify the exact backend code that needs refactoring
+        # AI-NOTE: Match EXACT backend code
+        # Include imports, class/function definitions
+        # The AI should identify the exact backend code that needs refactoring
         [ORIGINAL_BACKEND_CODE_TO_BE_REPLACED]
         <<</FIND>>>
         <<<REPLACE>>>
+        # AI-NOTE: Apply backend Clean Architecture:
+        # - Extract to use cases
+        # - Use repository pattern
+        # - Inject dependencies
+        # - Remove framework dependencies
         // TODO: Refactor this backend file to comply with Clean Architecture
         // File: __FILE_TO_MODIFY_KEBAB_CASE__.ts
         // Layer: Backend
@@ -867,11 +881,25 @@
           description: 'Analyze component dependencies and structure'
       path: '__PROJECT_NAME__/src/app/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.tsx'
       template: |
+        # AI-NOTE: FIND/REPLACE for Fullstack Frontend Refactoring
+        # Look for frontend-specific violations:
+        # - Business logic in components
+        # - Direct API calls in components
+        # - Complex state management
+        # - Missing custom hooks
+
         <<<FIND>>>
-        // The AI should identify the exact frontend component that needs refactoring
+        # AI-NOTE: Match EXACT frontend component code
+        # Include JSX, hooks, event handlers
+        # The AI should identify the exact frontend component that needs refactoring
         [ORIGINAL_FRONTEND_COMPONENT_TO_BE_REPLACED]
         <<</FIND>>>
         <<<REPLACE>>>
+        # AI-NOTE: Apply frontend Clean Architecture:
+        # - Extract to custom hooks
+        # - Use data layer for API
+        # - Separate presentation/container
+        # - Make components pure
         // TODO: Refactor this frontend component to comply with Clean Architecture
         // Component: __FILE_TO_MODIFY_KEBAB_CASE__.tsx
         // Layer: Frontend
@@ -917,11 +945,25 @@
           description: 'Patterns for shared code between frontend and backend'
       path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
       template: |
+        # AI-NOTE: FIND/REPLACE for Fullstack Shared Domain Refactoring
+        # Look for shared domain violations:
+        # - Framework dependencies in domain
+        # - Missing interfaces/protocols
+        # - Anemic domain models
+        # - Business logic leakage
+
         <<<FIND>>>
-        // The AI should identify the exact shared code that needs refactoring
+        # AI-NOTE: Match EXACT shared domain code
+        # Include type definitions, interfaces
+        # The AI should identify the exact shared code that needs refactoring
         [ORIGINAL_SHARED_CODE_TO_BE_REPLACED]
         <<</FIND>>>
         <<<REPLACE>>>
+        # AI-NOTE: Apply shared domain patterns:
+        # - Pure domain models
+        # - Framework-agnostic
+        # - Rich domain logic
+        # - Clear boundaries
         // TODO: Refactor this shared file to comply with Clean Architecture
         // File: __FILE_TO_MODIFY_KEBAB_CASE__.ts
         // Layer: Shared Domain

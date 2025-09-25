@@ -1668,12 +1668,30 @@
           description: 'Analyze current infrastructure layer file structure and dependencies'
       path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
       template: |
+        # AI-NOTE: FIND/REPLACE for Infrastructure Refactoring
+        # Common backend infra violations:
+        # - Missing adapter pattern for external services
+        # - Direct database access without repository
+        # - Hard-coded configurations
+        # - Missing error handling and fallbacks
+        # - Tight coupling to specific implementations
+
         <<<FIND>>>
-        // The AI should identify the exact code block that needs refactoring
-        // This will be the original infrastructure code that violates Clean Architecture
+        # AI-NOTE: Identify EXACT infra code with violations
+        # Include imports that show tight coupling
+        # Match constructor and method implementations
+        # The AI should identify the exact code block that needs refactoring
+        # This will be the original infrastructure code that violates Clean Architecture
         [ORIGINAL_INFRA_CODE_TO_BE_REPLACED]
         <<</FIND>>>
         <<<REPLACE>>>
+        # AI-NOTE: Apply infrastructure patterns:
+        # - Implement adapter/protocol pattern
+        # - Use dependency injection
+        # - Add proper error handling
+        # - Include fallback mechanisms
+        # - Make it testable with mocks
+
         // TODO: Refactor this infrastructure layer file to comply with Clean Architecture
         // Estimated effort: __EFFORT__ (hours)
         // SPECIFIC INFRASTRUCTURE LAYER REFACTORING TASKS FOR THIS FILE:

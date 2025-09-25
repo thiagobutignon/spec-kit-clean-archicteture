@@ -581,12 +581,32 @@
           description: 'React refactoring best practices'
       path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.tsx'
       template: |
+        # AI-NOTE: FIND/REPLACE for Frontend Component Refactoring
+        # Common React/Next.js violations to identify:
+        # - Business logic mixed with UI components
+        # - Direct API calls (fetch/axios) in components
+        # - Complex state logic in components (move to hooks)
+        # - Missing separation of concerns
+        # - Direct browser API usage (localStorage, etc)
+
         <<<FIND>>>
-        // The AI should identify the exact component code that needs refactoring
-        // This will be the original component that violates Clean Architecture
+        # AI-NOTE: Match EXACT component code including:
+        # - Import statements if they show violations
+        # - useState/useEffect with business logic
+        # - Event handlers with complex logic
+        # - Direct API calls or data mutations
+        # The AI should identify the exact component code that needs refactoring
+        # This will be the original component that violates Clean Architecture
         [ORIGINAL_COMPONENT_CODE_TO_BE_REPLACED]
         <<</FIND>>>
         <<<REPLACE>>>
+        # AI-NOTE: Apply these transformations:
+        # - Extract business logic to custom hooks
+        # - Move API calls to data layer
+        # - Create presentation/container separation
+        # - Use dependency injection for services
+        # - Ensure components are pure and testable
+
         // TODO: Refactor this component to comply with Clean Architecture
         // Component: __FILE_TO_MODIFY_KEBAB_CASE__.tsx
         // Type: __COMPONENT_TYPE__ (Page/Component/Hook/Context)
