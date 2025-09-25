@@ -1,0 +1,693 @@
+# ============= BEGIN PRESENTATION STEPS BACKEND SECTION =============
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: PRESENTATION LAYER IMPLEMENTATION STEPS FOR BACKEND
+  # These steps create controllers, middlewares, and HTTP protocols
+  # following Clean Architecture and Vertical Slice patterns for Node.js/Express
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION LAYER STEPS SECTION
+  # Steps for generating presentation layer artifacts in backend features
+  # Following "Feature Module with Use Case Slices" architecture
+  # ------------------------------------------------------------------------------
+
+  presentation_steps:
+    # === STEP 1: CREATE PRESENTATION STRUCTURE ===
+    - id: 'create-presentation-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'Create presentation layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ use case slice'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'BACKEND_ARCHITECTURE.md'
+          description: 'Following Clean Architecture presentation layer structure for backend.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture presentation layer express node.js controller'
+          url: 'https://github.com/...'
+          description: 'Presentation layer patterns for Express/Node.js development.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation'
+          folders:
+            - 'controllers'   # Controller for this specific use case
+            - 'errors'        # HTTP errors specific to this use case
+            - 'protocols'     # HTTP protocols for this use case
+            - 'helpers'       # HTTP helper functions
+      validation_script: |
+        # AI-NOTE: Replace placeholders but keep shell variables intact
+        BASE_PATH="__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation"
+        FOLDERS="$BASE_PATH/controllers $BASE_PATH/errors $BASE_PATH/protocols $BASE_PATH/helpers"
+        echo "✅ Verifying presentation folder structure..."
+        for folder in $FOLDERS; do
+          if [ ! -d "$folder" ]; then
+            echo "❌ ERROR: Folder $folder was not created."
+            exit 1
+          fi
+        done
+        echo "✅ All presentation folders exist for __USE_CASE_NAME_PASCAL_CASE__ use case."
+
+    # === STEP 2: CREATE CONTROLLER ===
+    - id: 'create-presentation-controller-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create __USE_CASE_NAME_PASCAL_CASE__ controller in presentation layer'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'express controller clean architecture dependency injection'
+          url: 'https://github.com/...'
+          description: 'Following Clean Architecture controller pattern for Express.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*Controller'
+          description: 'Consistent with existing backend controllers.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/controllers/__USE_CASE_NAME_KEBAB_CASE__-controller.ts'
+      template: |
+        import { Controller, HttpResponse, Validation } from '@/presentation/protocols'
+        import { badRequest, serverError, ok, noContent } from '@/presentation/helpers'
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * HTTP Controller for __USE_CASE_NAME_PASCAL_CASE__ use case
+         * @pattern Clean Architecture - Framework agnostic controller
+         * @layer Presentation Layer - HTTP adapter for business logic
+         * @architecture Vertical Slice - Self-contained controller
+         *
+         * AI-NOTE: Controllers should only:
+         * 1. Validate request format (NOT business rules)
+         * 2. Call the use case
+         * 3. Transform result to HTTP response
+         * 4. Handle errors appropriately
+         */
+        export class __USE_CASE_NAME_PASCAL_CASE__Controller implements Controller {
+          constructor(
+            private readonly __USE_CASE_NAME_CAMEL_CASE__: __USE_CASE_NAME_PASCAL_CASE__,
+            private readonly validation: Validation
+          ) {}
+
+          /**
+           * Handle HTTP request for __USE_CASE_NAME_LOWER_CASE__
+           * @param request - HTTP request data
+           * @returns Promise with HTTP response
+           */
+          async handle(request: __USE_CASE_NAME_PASCAL_CASE__Controller.Request): Promise<HttpResponse> {
+            try {
+              // AI-NOTE: Validation is structural only - business rules belong in domain
+              const error = this.validation.validate(request)
+              if (error) {
+                return badRequest(error)
+              }
+
+              // AI-NOTE: Controller delegates to use case - no business logic here
+              const result = await this.__USE_CASE_NAME_CAMEL_CASE__.execute(request)
+
+              // AI-NOTE: Choose appropriate response based on use case type
+              if (!result) {
+                return noContent()
+              }
+
+              return ok(result)
+            } catch (error) {
+              // AI-NOTE: All unhandled errors become 500 - domain errors should be caught
+              return serverError(error)
+            }
+          }
+        }
+
+        /**
+         * Namespace for __USE_CASE_NAME_PASCAL_CASE__Controller types
+         * AI-NOTE: Request type should match domain input but may have HTTP-specific fields
+         */
+        export namespace __USE_CASE_NAME_PASCAL_CASE__Controller {
+          export type Request = {
+            __INPUT_FIELD_1__: string
+            __INPUT_FIELD_2__: string
+            __INPUT_FIELD_3__: string
+            // AI-NOTE: Add authentication/authorization fields if needed
+            accountId?: string
+            role?: string
+          }
+        }
+      validation_script: |
+        # AI-NOTE: Shell functions - DO NOT replace $ variables
+        run_lint_check() {
+          echo "🔍 Running lint check for presentation layer..."
+          npm run lint || { npm run lint --fix && npm run lint; } || exit 1
+          echo "✅ Lint passed for presentation layer"
+        }
+
+        run_presentation_test_check() {
+          echo "🧪 Running presentation layer tests..."
+          npm run test -- --testPathPattern=presentation || exit 1
+          echo "✅ Presentation tests passed"
+        }
+
+        stage_and_commit() {
+          echo "📦 Staging presentation layer changes..."
+          git add .
+          echo "💾 Creating presentation layer commit..."
+          git commit -m "$1" || exit 1
+          echo "✅ Successfully committed presentation layer"
+        }
+
+        # Execute validation sequence for presentation layer
+        run_lint_check
+        run_presentation_test_check
+        stage_and_commit "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ controller"
+
+    # === STEP 3: CREATE HTTP HELPERS ===
+    - id: 'create-presentation-helpers-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create HTTP helper functions for __USE_CASE_NAME_PASCAL_CASE__'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: 'http-helper'
+          description: 'Following existing HTTP helper patterns.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/helpers/http-helper.ts'
+      template: |
+        import { HttpResponse } from '@/presentation/protocols'
+        import { ServerError, UnauthorizedError } from '@/presentation/errors'
+
+        /**
+         * HTTP Helper functions for consistent responses
+         * AI-NOTE: Use these helpers to maintain consistent HTTP status codes
+         * and error handling across all controllers
+         */
+
+        export const badRequest = (error: Error): HttpResponse => ({
+          statusCode: 400,
+          body: error
+        })
+
+        export const forbidden = (error: Error): HttpResponse => ({
+          statusCode: 403,
+          body: error
+        })
+
+        export const unauthorized = (): HttpResponse => ({
+          statusCode: 401,
+          body: new UnauthorizedError()
+        })
+
+        export const serverError = (error: Error): HttpResponse => ({
+          statusCode: 500,
+          body: new ServerError(error.stack)
+        })
+
+        export const ok = (data: any): HttpResponse => ({
+          statusCode: 200,
+          body: data
+        })
+
+        export const noContent = (): HttpResponse => ({
+          statusCode: 204,
+          body: null
+        })
+
+        export const created = (data: any): HttpResponse => ({
+          statusCode: 201,
+          body: data
+        })
+
+    # === STEP 4: CREATE PRESENTATION ERRORS ===
+    - id: 'create-presentation-errors-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create presentation errors for __USE_CASE_NAME_PASCAL_CASE__'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*Error'
+          description: 'Consistent with existing presentation errors.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/errors/__USE_CASE_NAME_KEBAB_CASE__-errors.ts'
+      template: |
+        /**
+         * Presentation layer errors for __USE_CASE_NAME_PASCAL_CASE__
+         * AI-NOTE: These are HTTP-specific errors, not domain errors
+         */
+
+        export class ServerError extends Error {
+          constructor(stack?: string) {
+            super('Internal server error')
+            this.name = 'ServerError'
+            this.stack = stack
+          }
+        }
+
+        export class UnauthorizedError extends Error {
+          constructor() {
+            super('Unauthorized')
+            this.name = 'UnauthorizedError'
+          }
+        }
+
+        export class AccessDeniedError extends Error {
+          constructor() {
+            super('Access denied')
+            this.name = 'AccessDeniedError'
+          }
+        }
+
+        export class MissingParamError extends Error {
+          constructor(paramName: string) {
+            super(`Missing param: ${paramName}`)
+            this.name = 'MissingParamError'
+          }
+        }
+
+        export class InvalidParamError extends Error {
+          constructor(paramName: string) {
+            super(`Invalid param: ${paramName}`)
+            this.name = 'InvalidParamError'
+          }
+        }
+
+    # === STEP 5: CREATE MIDDLEWARE (IF NEEDED) ===
+    - id: 'create-presentation-middleware-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create authentication middleware for __USE_CASE_NAME_PASCAL_CASE__ if needed'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: '__REQUIRES_AUTH__' # Skip if authentication not needed
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'express middleware clean architecture authentication'
+          url: 'https://github.com/...'
+          description: 'Authentication middleware pattern.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/presentation/middlewares/auth-middleware.ts'
+      template: |
+        import { Middleware, HttpResponse } from '@/presentation/protocols'
+        import { forbidden, ok, serverError } from '@/presentation/helpers'
+        import { AccessDeniedError } from '@/presentation/errors'
+        import { LoadAccountByToken } from '@/domain/usecases'
+
+        /**
+         * Authentication Middleware for __FEATURE_NAME_PASCAL_CASE__ feature
+         * AI-NOTE: Middleware should only handle cross-cutting concerns
+         * Business logic belongs in use cases
+         */
+        export class AuthMiddleware implements Middleware {
+          constructor(
+            private readonly loadAccountByToken: LoadAccountByToken,
+            private readonly role?: string
+          ) {}
+
+          async handle(request: AuthMiddleware.Request): Promise<HttpResponse> {
+            try {
+              const { accessToken } = request
+              if (accessToken) {
+                const account = await this.loadAccountByToken.load(accessToken, this.role)
+                if (account) {
+                  return ok({ accountId: account.id })
+                }
+              }
+              return forbidden(new AccessDeniedError())
+            } catch (error) {
+              return serverError(error)
+            }
+          }
+        }
+
+        export namespace AuthMiddleware {
+          export type Request = {
+            accessToken?: string
+          }
+        }
+
+    # === STEP 6: CREATE CONTROLLER TEST ===
+    - id: 'create-presentation-controller-test-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create unit test for __USE_CASE_NAME_PASCAL_CASE__Controller'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'vitest controller test clean architecture mocking'
+          url: 'https://github.com/...'
+          description: 'Controller testing patterns with Vitest.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/controllers/__USE_CASE_NAME_KEBAB_CASE__-controller.spec.ts'
+      template: |
+        import { describe, it, expect, vi, beforeEach } from 'vitest'
+        import { __USE_CASE_NAME_PASCAL_CASE__Controller } from './__USE_CASE_NAME_KEBAB_CASE__-controller'
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import { Validation } from '@/presentation/protocols'
+        import { badRequest, serverError, ok } from '@/presentation/helpers'
+
+        describe('__USE_CASE_NAME_PASCAL_CASE__Controller', () => {
+          let sut: __USE_CASE_NAME_PASCAL_CASE__Controller
+          let __USE_CASE_NAME_CAMEL_CASE__Spy: __USE_CASE_NAME_PASCAL_CASE__
+          let validationSpy: Validation
+
+          beforeEach(() => {
+            // AI-NOTE: Always use fixed test data, never random/faker data
+            __USE_CASE_NAME_CAMEL_CASE__Spy = {
+              execute: vi.fn().mockResolvedValue({
+                __OUTPUT_FIELD_1__: 'test-output-1',
+                __OUTPUT_FIELD_2__: 'test-output-2',
+                __OUTPUT_FIELD_3__: 'test-output-3',
+                __TIMESTAMP_FIELD__: new Date('2024-01-01')
+              })
+            }
+
+            validationSpy = {
+              validate: vi.fn().mockReturnValue(null)
+            }
+
+            sut = new __USE_CASE_NAME_PASCAL_CASE__Controller(
+              __USE_CASE_NAME_CAMEL_CASE__Spy,
+              validationSpy
+            )
+          })
+
+          it('should return 400 if validation fails', async () => {
+            const error = new Error('Validation error')
+            validationSpy.validate = vi.fn().mockReturnValue(error)
+
+            const request = {
+              __INPUT_FIELD_1__: 'test-value-1',
+              __INPUT_FIELD_2__: 'test-value-2',
+              __INPUT_FIELD_3__: 'test-value-3'
+            }
+
+            const httpResponse = await sut.handle(request)
+
+            expect(httpResponse).toEqual(badRequest(error))
+            expect(__USE_CASE_NAME_CAMEL_CASE__Spy.execute).not.toHaveBeenCalled()
+          })
+
+          it('should return 500 if use case throws', async () => {
+            const error = new Error('Use case error')
+            __USE_CASE_NAME_CAMEL_CASE__Spy.execute = vi.fn().mockRejectedValue(error)
+
+            const request = {
+              __INPUT_FIELD_1__: 'test-value-1',
+              __INPUT_FIELD_2__: 'test-value-2',
+              __INPUT_FIELD_3__: 'test-value-3'
+            }
+
+            const httpResponse = await sut.handle(request)
+
+            expect(httpResponse).toEqual(serverError(error))
+          })
+
+          it('should return 200 on success', async () => {
+            const request = {
+              __INPUT_FIELD_1__: 'test-value-1',
+              __INPUT_FIELD_2__: 'test-value-2',
+              __INPUT_FIELD_3__: 'test-value-3'
+            }
+
+            const httpResponse = await sut.handle(request)
+
+            expect(httpResponse.statusCode).toBe(200)
+            expect(httpResponse.body).toEqual({
+              __OUTPUT_FIELD_1__: 'test-output-1',
+              __OUTPUT_FIELD_2__: 'test-output-2',
+              __OUTPUT_FIELD_3__: 'test-output-3',
+              __TIMESTAMP_FIELD__: new Date('2024-01-01')
+            })
+          })
+
+          it('should call use case with correct values', async () => {
+            const request = {
+              __INPUT_FIELD_1__: 'test-value-1',
+              __INPUT_FIELD_2__: 'test-value-2',
+              __INPUT_FIELD_3__: 'test-value-3'
+            }
+
+            await sut.handle(request)
+
+            expect(__USE_CASE_NAME_CAMEL_CASE__Spy.execute).toHaveBeenCalledWith(request)
+            expect(__USE_CASE_NAME_CAMEL_CASE__Spy.execute).toHaveBeenCalledTimes(1)
+          })
+        })
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION REFACTORING PATTERNS
+  # Patterns for refactoring existing code to Clean Architecture presentation layer
+  # ------------------------------------------------------------------------------
+
+  presentation_refactoring_patterns:
+    # === PATTERN 1: EXTRACT CONTROLLER FROM ROUTE ===
+    - id: 'extract-controller-from-route'
+      description: 'Extract business logic from Express route to controller'
+      detection:
+        - 'Direct database access in route handlers'
+        - 'Business logic mixed with HTTP handling'
+        - 'req.body validation in routes'
+      examples:
+        - original: |
+            <<<FIND>>>
+            # AI-NOTE: Identify Express routes with inline business logic
+            # Look for: app.post('/api/...', async (req, res) => { ... database calls ... })
+            # This violates Clean Architecture - business logic in route handler
+            app.post('/api/__ENDPOINT__', async (req, res) => {
+              try {
+                const { __FIELD_1__, __FIELD_2__ } = req.body
+
+                if (!__FIELD_1__ || !__FIELD_2__) {
+                  return res.status(400).json({ error: 'Missing fields' })
+                }
+
+                const result = await db.__TABLE__.create({
+                  data: { __FIELD_1__, __FIELD_2__ }
+                })
+
+                res.json(result)
+              } catch (error) {
+                res.status(500).json({ error: 'Internal error' })
+              }
+            })
+            <<<REPLACE>>>
+            # AI-NOTE: Refactor to Clean Architecture pattern:
+            # 1. Extract to controller class with dependency injection
+            # 2. Move business logic to use case (domain layer)
+            # 3. Add proper validation layer
+            # 4. Use adapter pattern for Express integration
+            app.post('/api/__ENDPOINT__', adapt(__USE_CASE_NAME_CAMEL_CASE__Controller))
+          category: 'route-to-controller'
+          severity: 'HIGH'
+          rlhf_impact: -2 # Major architecture violation
+
+    # === PATTERN 2: REMOVE FRAMEWORK DEPENDENCIES ===
+    - id: 'remove-express-from-controller'
+      description: 'Remove Express-specific types from controller'
+      detection:
+        - 'import { Request, Response } from "express"'
+        - 'Controllers using req and res directly'
+      examples:
+        - original: |
+            <<<FIND>>>
+            # AI-NOTE: Identify controllers with Express dependencies
+            # Look for: import ... from 'express' and (req: Request, res: Response)
+            # This couples presentation to Express framework
+            import { Request, Response } from 'express'
+
+            export class __CONTROLLER_NAME__ {
+              async handle(req: Request, res: Response) {
+                // controller logic using req and res
+              }
+            }
+            <<<REPLACE>>>
+            # AI-NOTE: Refactor to framework-agnostic controller:
+            # 1. Remove Express imports
+            # 2. Use custom HttpRequest and HttpResponse types
+            # 3. Return response instead of calling res.json()
+            # 4. Let adapter handle Express integration
+            import { Controller, HttpResponse } from '@/presentation/protocols'
+
+            export class __CONTROLLER_NAME__ implements Controller {
+              async handle(request: __CONTROLLER_NAME__.Request): Promise<HttpResponse> {
+                // controller logic returning HttpResponse
+              }
+            }
+
+            export namespace __CONTROLLER_NAME__ {
+              export type Request = {
+                // typed request fields
+              }
+            }
+          category: 'framework-decoupling'
+          severity: 'HIGH'
+          rlhf_impact: -1 # Framework coupling
+
+    # === PATTERN 3: EXTRACT VALIDATION ===
+    - id: 'extract-validation-from-controller'
+      description: 'Extract validation logic from controller to validation layer'
+      detection:
+        - 'Manual validation in controller handle method'
+        - 'if (!field) return badRequest'
+      examples:
+        - original: |
+            <<<FIND>>>
+            # AI-NOTE: Identify manual validation in controllers
+            # Look for: if (!field) or manual validation checks
+            # Validation should be injected, not hardcoded
+            async handle(request: any): Promise<HttpResponse> {
+              if (!request.email || !request.password) {
+                return badRequest(new MissingParamError('email or password'))
+              }
+
+              if (!request.email.includes('@')) {
+                return badRequest(new InvalidParamError('email'))
+              }
+
+              // rest of controller logic
+            }
+            <<<REPLACE>>>
+            # AI-NOTE: Refactor to use injected validation:
+            # 1. Inject Validation interface via constructor
+            # 2. Call validation.validate() method
+            # 3. Let validation composite handle all rules
+            # 4. Keep controller focused on orchestration
+            constructor(
+              private readonly validation: Validation
+            ) {}
+
+            async handle(request: any): Promise<HttpResponse> {
+              const error = this.validation.validate(request)
+              if (error) {
+                return badRequest(error)
+              }
+
+              // rest of controller logic
+            }
+          category: 'validation-extraction'
+          severity: 'MEDIUM'
+          rlhf_impact: 0 # Improves but not critical
+
+    # === PATTERN 4: EXTRACT MIDDLEWARE ===
+    - id: 'extract-auth-from-controller'
+      description: 'Extract authentication logic from controller to middleware'
+      detection:
+        - 'JWT verification in controller'
+        - 'Token validation in handle method'
+      examples:
+        - original: |
+            <<<FIND>>>
+            # AI-NOTE: Identify authentication logic in controllers
+            # Look for: JWT verification, token checks, role validation
+            # Auth is cross-cutting concern - belongs in middleware
+            async handle(request: any): Promise<HttpResponse> {
+              const token = request.headers?.authorization?.replace('Bearer ', '')
+
+              if (!token) {
+                return unauthorized()
+              }
+
+              try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET)
+                request.userId = decoded.id
+              } catch {
+                return unauthorized()
+              }
+
+              // rest of controller logic
+            }
+            <<<REPLACE>>>
+            # AI-NOTE: Refactor to use auth middleware:
+            # 1. Remove all auth logic from controller
+            # 2. Create separate AuthMiddleware class
+            # 3. Apply middleware in route composition
+            # 4. Controller receives validated accountId
+            async handle(request: any): Promise<HttpResponse> {
+              // request.accountId is set by middleware
+              // rest of controller logic using request.accountId
+            }
+
+            // In route factory:
+            // return [authMiddleware, controller]
+          category: 'middleware-extraction'
+          severity: 'MEDIUM'
+          rlhf_impact: 1 # Good separation
+
+    # === PATTERN 5: PROPER ERROR HANDLING ===
+    - id: 'implement-proper-error-handling'
+      description: 'Implement proper error handling in controllers'
+      detection:
+        - 'Missing try-catch in handle method'
+        - 'console.log in catch blocks'
+      examples:
+        - original: |
+            <<<FIND>>>
+            # AI-NOTE: Identify poor error handling
+            # Look for: missing try-catch, console.log, generic errors
+            # All controllers must handle errors consistently
+            async handle(request: any): Promise<HttpResponse> {
+              const result = await this.useCase.execute(request)
+              return ok(result)
+            }
+            <<<REPLACE>>>
+            # AI-NOTE: Add proper error handling:
+            # 1. Wrap in try-catch
+            # 2. Use serverError helper for unhandled errors
+            # 3. Let domain errors bubble up for proper handling
+            # 4. Never expose stack traces in production
+            async handle(request: any): Promise<HttpResponse> {
+              try {
+                const result = await this.useCase.execute(request)
+                return ok(result)
+              } catch (error) {
+                return serverError(error)
+              }
+            }
+          category: 'error-handling'
+          severity: 'HIGH'
+          rlhf_impact: -1 # Missing error handling
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION ANTI-PATTERNS TO AVOID
+  # Common mistakes that violate Clean Architecture in presentation layer
+  # ------------------------------------------------------------------------------
+
+  presentation_anti_patterns:
+    - name: 'Business Logic in Controller'
+      description: 'Controller contains business rules instead of delegating to use case'
+      example: 'if (user.age < 18) return forbidden() // Business rule!'
+      correct: 'Let use case throw domain error, controller just transforms it'
+      rlhf_impact: -2
+
+    - name: 'Direct Database Access'
+      description: 'Controller or middleware accessing database directly'
+      example: 'const user = await prisma.user.findUnique(...)'
+      correct: 'Controller calls use case, use case calls repository'
+      rlhf_impact: -2
+
+    - name: 'Framework Coupling'
+      description: 'Controllers depend on Express/Fastify specific types'
+      example: 'import { Request, Response } from "express"'
+      correct: 'Use framework-agnostic interfaces'
+      rlhf_impact: -1
+
+    - name: 'Missing Validation'
+      description: 'No validation layer, manual checks in controller'
+      example: 'if (!email) return badRequest(...)'
+      correct: 'Inject Validation interface'
+      rlhf_impact: -1
+
+    - name: 'Poor Error Handling'
+      description: 'No try-catch or exposing internal errors'
+      example: 'res.status(500).json({ error: error.message })'
+      correct: 'Use serverError helper with proper logging'
+      rlhf_impact: -1
+
+# ============= END PRESENTATION STEPS BACKEND SECTION =============
