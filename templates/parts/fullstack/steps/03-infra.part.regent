@@ -1402,26 +1402,29 @@
           description: 'Clean Architecture refactoring patterns.'
       path: '__PROJECT_NAME__/src/__PATH_TO_FILE__'
       template: |
-        # AI-NOTE: This is a generic refactoring template
-        # The AI should identify the specific pattern that needs refactoring
-        # and apply the appropriate transformation
+        # AI-NOTE: Generic refactoring template for brownfield projects
+        # The AI should:
+        # 1. Identify the specific violation pattern
+        # 2. Determine the appropriate Clean Architecture solution
+        # 3. Apply transformation preserving functionality
+        # 4. Ensure backward compatibility if needed
 
         <<<FIND>>>
-        # AI should identify the code that violates Clean Architecture principles
-        # Examples:
-        # - Direct HTTP calls instead of using adapters
-        # - Business logic mixed with infrastructure
-        # - Direct database access in presentation layer
-        # - Hard-coded dependencies instead of dependency injection
-        # - Framework-specific code in domain layer
+        # AI-NOTE: Common violations to look for:
+        # - axios usage → Replace with FetchHttpClient
+        # - Direct localStorage → Replace with cache/storage adapters
+        # - Raw WebSocket → Replace with WebSocketClient
+        # - Business logic in components → Extract to use cases
+        # - Database queries in controllers → Move to repositories
+        # - Hard-coded configs → Use dependency injection
         [ORIGINAL_CODE_TO_BE_REFACTORED]
         <<<REPLACE>>>
-        # AI should replace with Clean Architecture compliant code
-        # Following the principles:
-        # - Dependency injection
-        # - Separation of concerns
-        # - Interface segregation
-        # - Single responsibility
+        # AI-NOTE: Apply these transformation patterns:
+        # - Extract interfaces for dependencies
+        # - Move logic to appropriate layer
+        # - Inject dependencies via constructor
+        # - Use protocols/adapters for external services
+        # - Ensure testability with mocks/spies
         [REFACTORED_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
 
     # === STEP 12: VALIDATE INFRA LAYER ===

@@ -3,6 +3,8 @@
   # ------------------------------------------------------------------------------
   # FRONTEND ARCHITECTURAL RULES SECTION - NEXT.JS 15 + CLEAN ARCHITECTURE
   # These rules define the Clean Architecture boundaries for React/Next.js frontend
+  # AI-NOTE: Frontend follows same Clean Architecture principles adapted for React/Next.js
+  # AI-NOTE: Server components and client components have different dependency rules
   # ------------------------------------------------------------------------------
 
   architecture:
@@ -14,6 +16,9 @@
       app_router: '__PROJECT_NAME__/src/app'
 
     execution_order:
+      # AI-NOTE: Frontend vertical slicing includes UI components
+      # Server Actions should be created before client hooks
+      # Components should be tested in isolation before integration
       description: 'Frontend use cases are implemented vertically, from domain to UI components'
       approach: 'Vertical Slice Architecture - One feature at a time, through all frontend layers'
       sequence_per_use_case:
@@ -55,6 +60,8 @@
           V5[Git Commit: 'feat(validation): add __USE_CASE__ schema']
 
           %% Presentation Slice - Actions
+          %% AI-NOTE: Server Actions use 'use server' directive
+          %% Must handle form validation and error states
           PA1[Create Server Actions]
           PA2[Write Action Tests]
           PA3[Run: npm test - Green]

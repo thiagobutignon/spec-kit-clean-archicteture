@@ -392,6 +392,9 @@
       status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
       rlhf_score: null # -2, -1, 0, 1, 2
       execution_log: ''
+      # AI-NOTE: Evaluate if this model will be used across multiple use cases
+      # If YES: Place in feature/shared/domain/models
+      # If NO: Keep in use-case specific domain folder
       condition: 'check_if_shared_model_needed'
       references:
         - type: 'internal_code_analysis'
