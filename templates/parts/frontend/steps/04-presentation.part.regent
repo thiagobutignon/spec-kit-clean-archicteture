@@ -711,7 +711,7 @@
     # === STEP 14: REFACTOR FOR BROWNFIELD (CONDITIONAL) ===
     - id: 'refactor-presentation-__FILE_TO_MODIFY_KEBAB_CASE__'
       type: 'conditional_file'
-      description: 'Refactor __FILE_TO_MODIFY_KEBAB_CASE__ to Next.js 15 patterns'
+      description: 'Refactor __FILE_TO_MODIFY_KEBAB_CASE__ to Clean Architecture patterns'
       condition: 'check_if_presentation_needs_refactoring'
       status: 'PENDING'
       rlhf_score: null
@@ -719,31 +719,27 @@
       path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.tsx'
       template: |
         # AI-NOTE: FIND/REPLACE Pattern for Brownfield Refactoring
-        # Common React to Next.js 15 migrations:
-        # - React Router → Next.js App Router
-        # - Redux/Recoil → React Context API
-        # - SCSS → Tailwind CSS
-        # - Class components → Function components
-        # - Material UI → Shadcn UI
+        # The AI must identify SPECIFIC code blocks that violate Clean Architecture
+        # Common presentation layer violations in frontend:
+        # - Business logic in components
+        # - Direct API calls instead of use cases
+        # - Missing separation of concerns
 
         <<<FIND>>>
-        # AI-NOTE: Identify old patterns
-        # Look for:
-        # - import { useHistory } from 'react-router-dom'
-        # - import styles from './component.scss'
-        # - Redux/Recoil state management
-        # - Class components
-        # - Old UI libraries
+        # AI-NOTE: Match the EXACT code including imports if needed
+        # Be specific to avoid matching wrong code blocks
+        # Include enough context for unique identification
         [ORIGINAL_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
         <<<REPLACE>>>
-        # AI-NOTE: Apply Next.js 15 + Shadcn patterns
-        # Replace with:
-        # - useRouter from 'next/navigation'
-        # - Tailwind classes
-        # - React Context API
-        # - Function components with hooks
-        # - Shadcn UI components
-        [REFACTORED_CODE_WITH_NEXTJS_PATTERNS]
+        # AI-NOTE: Apply Clean Architecture transformation
+        # Ensure the refactored code:
+        # - Delegates business logic to use cases
+        # - Uses hooks for state management
+        # - Follows separation of concerns
+        # - Has proper error handling
+        [REFACTORED_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
 
     # === STEP 15: CREATE PULL REQUEST ===
     - id: 'create-pr-presentation-__USE_CASE_NAME_KEBAB_CASE__'
@@ -827,41 +823,43 @@
 
   # ------------------------------------------------------------------------------
   # PRESENTATION REFACTORING PATTERN
-  # Pattern for refactoring existing React code to Next.js 15 + Shadcn
+  # Single pattern for refactoring existing code to Clean Architecture
   # ------------------------------------------------------------------------------
 
   presentation_refactoring_patterns:
-    - id: 'refactor-to-nextjs-patterns'
-      description: 'Refactor existing React code to Next.js 15 with Shadcn UI'
+    - id: 'refactor-to-clean-presentation'
+      description: 'Refactor existing frontend code to follow Clean Architecture'
       detection:
-        - 'React Router usage'
-        - 'Redux or Recoil state management'
-        - 'SCSS or CSS modules'
-        - 'Material UI or other component libraries'
-        - 'Class components'
+        - 'Business logic in components'
+        - 'Direct API calls in components'
+        - 'Data manipulation in presentation layer'
+        - 'Missing use cases'
+        - 'Tight coupling between layers'
       example:
         original: |
           <<<FIND>>>
-          # AI-NOTE: Identify React patterns to migrate
-          # Common patterns:
-          # 1. React Router navigation
-          # 2. Redux/Recoil state
-          # 3. SCSS styling
-          # 4. Old component libraries
-          # 5. useEffect for data fetching
-          [ORIGINAL_REACT_CODE]
+          # AI-NOTE: Identify presentation layer violations
+          # Common patterns to look for:
+          # 1. Components with business logic
+          # 2. Direct fetch/axios calls
+          # 3. Data calculations in components
+          # 4. State management mixed with UI
+          # 5. Missing separation of concerns
+          [ORIGINAL_VIOLATING_CODE]
+          <<</FIND>>>
           <<<REPLACE>>>
-          # AI-NOTE: Apply Next.js 15 + Shadcn patterns
-          # Migrations:
-          # 1. App Router navigation
-          # 2. Context API or Server State
-          # 3. Tailwind CSS classes
-          # 4. Shadcn UI components
-          # 5. Server Components/Actions for data
-          [REFACTORED_NEXTJS_CODE]
-        category: 'frontend-modernization'
+          # AI-NOTE: Apply Clean Architecture transformation
+          # The refactored code should:
+          # 1. Extract business logic to use cases
+          # 2. Use hooks for state management
+          # 3. Delegate API calls to data layer
+          # 4. Keep components focused on UI
+          # 5. Use proper dependency injection
+          [REFACTORED_CLEAN_CODE]
+          <<</REPLACE>>>
+        category: 'presentation-refactoring'
         severity: 'HIGH'
-        rlhf_impact: 1
+        rlhf_impact: -2
 
   # ------------------------------------------------------------------------------
   # PRESENTATION ANTI-PATTERNS TO AVOID
