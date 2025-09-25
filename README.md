@@ -1,38 +1,239 @@
 # 🏗️ Spec-Kit Clean Architecture
 
-> **Deterministic Software Development with AI-Powered RLHF and Clean Architecture**
+> **AI-Powered Clean Architecture Template System with Intelligent Code Generation**
 
 [![RLHF Score](https://img.shields.io/badge/RLHF%20Score-+2%20PERFECT-brightgreen)](https://github.com/thiagobutignon/spec-kit-clean-archicteture)
 [![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-✓-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-[![DDD](https://img.shields.io/badge/Domain%20Driven%20Design-✓-purple)](https://martinfowler.com/tags/domain%20driven%20design.html)
+[![Templates](https://img.shields.io/badge/Templates-Backend%20|%20Frontend%20|%20Fullstack-purple)](./templates)
+[![AI-NOTEs](https://img.shields.io/badge/AI--NOTEs-100%25%20Coverage-orange)](./templates)
 
 ## 📋 Overview
 
-Spec-Kit Clean Architecture is an evolution of [GitHub's Spec-Kit](https://github.com/github/spec-kit), enhanced with intelligent RLHF (Reinforcement Learning from Human Feedback) scoring system for deterministic software development. This framework ensures your code follows Clean Architecture, DDD, TDD, and SOLID principles through automated validation and continuous improvement.
+Spec-Kit Clean Architecture is a comprehensive template system that generates production-ready code following Clean Architecture, DDD, TDD, and SOLID principles. With intelligent AI-NOTEs guidance and RLHF scoring, it ensures consistent, high-quality code generation for backend, frontend, and fullstack applications.
 
-## 🎯 The Core Problem: Beyond the Black Box
+## 🚀 What's New - v3.0
 
-Current AI coding assistants operate as a "black box": a prompt goes in, a large volume of code comes out. This process lacks the predictability, auditability, and quality control required for professional software engineering. Key failures include:
+### 🎯 Complete Template System
+- **✅ Backend Templates**: Node.js/Express with Prisma, Redis, and PostgreSQL
+- **✅ Frontend Templates**: Next.js 15 with React Server Components
+- **✅ Fullstack Templates**: Unified architecture for full-stack applications
+- **✅ All 3 Layers**: Domain, Data, and Infrastructure fully implemented
 
-- **Lack of Predictability:** The same prompt can yield different results, making automation unreliable.
-- **No Atomic Changes:** Large, monolithic code dumps make reviews difficult and rollbacks impossible.
-- **Absence of Quality Gates:** Code is generated without guarantees that it adheres to architectural principles or coding standards.
-- **Ignoring Existing Context:** Solutions often fail in brownfield projects because they don't deeply understand the existing codebase.
+### 🤖 AI-NOTEs Intelligence System
+- **Strategic Guidance**: AI-NOTEs at critical decision points
+- **FIND/REPLACE Patterns**: 100% coverage with specific guidance
+- **Architecture Validation**: Automatic detection of violations
+- **RLHF Scoring**: -2 to +2 quality assessment
 
-**Spec-Kit Clean Architecture was built to solve this.** We replace the black box with a transparent, step-by-step, and fully validated engineering workflow.
+### 🔄 Brownfield & Greenfield Support
+- **Greenfield**: Generate complete features from scratch
+- **Brownfield**: Intelligent refactoring with `<<<FIND>>>/<<<REPLACE>>>` patterns
+- **Migration Paths**: Gradual adoption in existing codebases
 
-### 🎯 Key Features
+## 🏛️ Architecture Overview
 
-- **🤖 Intelligent RLHF Scoring System** (-2 to +2) for automated quality assessment
-- **🏛️ Clean Architecture Enforcement** with domain layer purity validation
-- **🔄 Self-Healing Capabilities** with auto-fix for common issues
-- **📊 Performance Optimization** with pattern caching and progress reporting
-- **🛡️ Rollback Mechanism** for safe recovery from failures
-- **🔍 Deep Code Search** using [Serena](https://github.com/sapientinc/HRM) and Context7 for external libraries
-- **📚 Ubiquitous Language Support** for Domain-Driven Design
-- **✅ Works for both Green Field and Brown Field projects**
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     PRESENTATION LAYER                       │
+│  Controllers │ Middlewares │ Routes │ Server Actions │ UI   │
+├─────────────────────────────────────────────────────────────┤
+│                        DOMAIN LAYER                          │
+│    Use Cases │ Entities │ Value Objects │ Errors │ DTOs    │
+├─────────────────────────────────────────────────────────────┤
+│                         DATA LAYER                           │
+│    Use Case Implementations │ Protocols │ Repositories      │
+├─────────────────────────────────────────────────────────────┤
+│                    INFRASTRUCTURE LAYER                      │
+│   Database │ Cache │ HTTP │ WebSocket │ Storage │ Crypto   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 🎯 Feature-Based Architecture with Use Case Slices
+
+### Hybrid Approach: Feature Modules + Use Case Slices
+
+Our architecture combines the best of both worlds:
+
+```
+src/
+├── features/                         # Feature-based modules
+│   ├── user-management/              # Feature module
+│   │   ├── create-user/              # Use case slice
+│   │   │   ├── domain/               # Domain layer
+│   │   │   ├── data/                 # Data layer
+│   │   │   ├── infra/                # Infrastructure (if needed)
+│   │   │   └── presentation/         # Presentation layer
+│   │   ├── update-user/              # Another use case slice
+│   │   ├── delete-user/              # Another use case slice
+│   │   ├── shared/                   # Shared within feature
+│   │   │   ├── domain/               # Shared entities, VOs
+│   │   │   ├── infra/                # Feature-specific repositories
+│   │   │   └── utils/                # Feature utilities
+│   │   └── main/                     # Feature composition
+│   │       ├── factories/            # Use case factories
+│   │       └── routes/               # Feature routes
+│   ├── authentication/               # Another feature
+│   └── billing/                      # Another feature
+└── shared/                           # Global shared resources
+    ├── domain/                       # Global domain types
+    ├── infra/                        # Global infrastructure
+    └── utils/                        # Global utilities
+```
+
+### Why Feature Modules with Use Case Slices?
+
+**Feature Modules** provide:
+- 🎯 **Domain Cohesion**: Related use cases stay together
+- 📦 **Encapsulation**: Features are self-contained
+- 🔄 **Reusability**: Shared resources within feature boundary
+- 🚀 **Team Scalability**: Teams own entire features
+
+**Use Case Slices** provide:
+- ⚡ **Atomic Delivery**: Each use case is independently deployable
+- 🧪 **Isolated Testing**: Test one use case without affecting others
+- 🔒 **Reduced Coupling**: Use cases don't depend on each other
+- 📝 **Clear Commits**: Each slice = one atomic git commit
+
+### Vertical Slice Architecture
+
+Each use case is implemented vertically through all layers:
+
+```mermaid
+graph TD
+    subgraph "Feature: User Management"
+        subgraph "Use Case: Create User"
+            A1[Domain Interface] --> A2[Data Implementation]
+            A2 --> A3[Infrastructure Adapters]
+            A3 --> A4[Presentation Controller]
+            A4 --> A5[Route/Handler]
+        end
+
+        subgraph "Use Case: Update User"
+            B1[Domain Interface] --> B2[Data Implementation]
+            B2 --> B3[Shared Repository]
+            B3 --> B4[Presentation Controller]
+            B4 --> B5[Route/Handler]
+        end
+    end
+
+    A3 -.-> SR[Shared Repository in Feature]
+    B3 -.-> SR
+```
+
+### Implementation Flow
+
+```yaml
+# 1. Create feature module
+feat/user-management/
+
+# 2. Add first use case slice
+feat/user-management/create-user/
+  ├── domain/usecases/create-user.ts
+  ├── data/usecases/db-create-user.ts
+  └── presentation/controllers/create-user-controller.ts
+
+# 3. Add shared resources when needed
+feat/user-management/shared/
+  ├── domain/entities/user.ts
+  └── infra/db/user-repository.ts
+
+# 4. Add more use cases
+feat/user-management/update-user/
+feat/user-management/delete-user/
+
+# 5. Compose in main
+feat/user-management/main/
+  ├── factories/create-user-factory.ts
+  └── routes/user-routes.ts
+```
+
+## 📁 Template Structure
+
+```
+templates/
+├── parts/
+│   ├── backend/
+│   │   ├── 01-structure.part.regent      # Project structure
+│   │   ├── 02-architecture.part.regent   # Architecture rules
+│   │   ├── 03-rules.part.regent         # Clean Architecture rules
+│   │   └── steps/
+│   │       ├── 01-domain.part.regent    # Domain layer generation
+│   │       ├── 02-data.part.regent      # Data layer generation
+│   │       └── 03-infra.part.regent     # Infrastructure generation
+│   ├── frontend/
+│   │   └── [similar structure]
+│   ├── fullstack/
+│   │   └── [similar structure]
+│   └── shared/
+│       └── 00-header.part.regent         # Shared metadata
+├── backend-template.regent              # Complete backend template
+├── frontend-template.regent             # Complete frontend template
+└── fullstack-template.regent           # Complete fullstack template
+```
+
+## 🤖 AI-NOTEs System
+
+### Strategic Placement
+AI-NOTEs are placed at critical decision points to guide AI code generation:
+
+```yaml
+# AI-NOTE: Vertical slicing ensures atomic feature delivery
+# Complete one use case through ALL layers before starting another
+execution_order:
+  approach: 'Vertical Slice Architecture'
+
+# AI-NOTE: Dependency direction is INWARD toward domain
+# Any outward dependency is a CRITICAL violation
+dependency_rules:
+  domain:
+    can_import_from: []  # Domain imports nothing
+```
+
+### FIND/REPLACE Patterns
+Every refactoring pattern includes comprehensive AI guidance:
+
+```yaml
+<<<FIND>>>
+# AI-NOTE: Identify axios imports and usage
+# Look for: import axios from 'axios'
+# Replace ALL axios calls with FetchHttpClient
+[ORIGINAL_CODE]
+<<<REPLACE>>>
+# AI-NOTE: Ensure replacement:
+# - Uses FetchHttpClient from infra layer
+# - Implements proper error handling
+# - Uses dependency injection
+[REFACTORED_CODE]
+```
+
+## 🎯 Key Features
+
+### Backend Features
+- **Prisma ORM**: Type-safe database access with PostgreSQL
+- **Redis Cache**: Performance optimization with fallback strategies
+- **Repository Pattern**: Clean data access abstraction
+- **Dependency Injection**: IoC container for testability
+- **TDD Approach**: Test-first development with Vitest
+- **Express Controllers**: RESTful API with middleware pipeline
+
+### Frontend Features
+- **Next.js 15**: App Router with React Server Components
+- **Server Actions**: Type-safe server mutations
+- **Custom Hooks**: Business logic extraction
+- **Zod Validation**: Runtime type validation
+- **Fetch API**: No axios, using native Fetch with adapters
+- **IndexedDB**: Offline-first capabilities
+
+### Fullstack Features
+- **Shared Domain Models**: Unified business logic
+- **Dual Infrastructure**: Backend (Prisma/Redis) + Frontend (Fetch/IndexedDB)
+- **WebSocket Support**: Real-time communication with reconnection
+- **Optimistic Updates**: Enhanced UX patterns
+- **Cache Strategies**: Unified caching across stack
 
 ## 🚀 Quick Start
+
+### Installation
 
 ```bash
 # Clone the repository
@@ -40,551 +241,270 @@ git clone https://github.com/thiagobutignon/spec-kit-clean-archicteture.git
 cd spec-kit-clean-archicteture
 
 # Install dependencies
-yarn install
-
-# Run domain generation
-npx tsx execute-steps.ts spec/001-user-registration/domain/implementation.yaml
-
-# View RLHF dashboard
-npx tsx rlhf-dashboard.ts
+npm install
 ```
 
-## 🔄 The ReAct Lifecycle: From Concept to Commit
+### Generate a Feature
 
-Our system models the workflow of a senior engineering team using the Reason-Act (ReAct) framework. Each feature is built through a series of auditable, single-responsibility commands:
-
-```mermaid
-graph TD
-    A[Start: User Concept] --> B{/01-plan-domain-features}
-    B -- "Generates Plan" --> C{/02-validate-domain-plan}
-    C -- "Validates Plan" --> D{/03-generate-domain-code}
-    D -- "Generates YAML" --> E{/05-reflect-domain-lessons}
-    E -- "Refines YAML" --> F{/04-evaluate-domain-results}
-    F -- "Approves YAML" --> G[User Review & Approval]
-    G -- "Triggers Execution" --> H{/06-execute-domain-steps}
-    H -- "Executes Step by Step" --> I[Success: Commits in Git]
-    H -- "On Failure" --> J{/07-fix-domain-errors}
-    J -- "Generates Fix Plan" --> D
-
-    style A fill:#f9f,stroke:#333,stroke-width:4px
-    style I fill:#9f9,stroke:#333,stroke-width:4px
-    style G fill:#ff9,stroke:#333,stroke-width:2px
+#### Backend Feature
+```bash
+# Generate user authentication backend feature
+npx tsx execute-steps.ts templates/backend-template.regent \
+  --feature "user-authentication" \
+  --use-case "login"
 ```
 
-### Three Critical Phases:
+#### Frontend Feature
+```bash
+# Generate dashboard frontend feature
+npx tsx execute-steps.ts templates/frontend-template.regent \
+  --feature "dashboard" \
+  --use-case "display-metrics"
+```
 
-1. **Reasoning Loop (Phases A-F):** The AI researches, plans, validates, and refines a detailed implementation plan (the YAML). This entire loop operates on configuration data, not code.
+#### Fullstack Feature
+```bash
+# Generate complete e-commerce feature
+npx tsx execute-steps.ts templates/fullstack-template.regent \
+  --feature "e-commerce" \
+  --use-case "checkout"
+```
 
-2. **User Approval (Phase G):** A human engineer reviews the final, approved plan. This is the critical "go/no-go" decision point.
+### Benefits of This Approach
 
-3. **Action Loop (Phases H-J):** Only after approval does the system act on the codebase, executing the plan step-by-step, with a built-in loop for fixing failures.
+#### For Development
+- **Parallel Development**: Multiple devs can work on different use cases
+- **No Merge Conflicts**: Each use case is isolated
+- **Progressive Enhancement**: Add use cases incrementally
+- **Easy Refactoring**: Change one use case without affecting others
 
-## 💾 Stateless and Resumable by Design
+#### For Testing
+- **Unit Testing**: Test each layer independently
+- **Integration Testing**: Test vertical slices
+- **Feature Testing**: Test entire features
+- **E2E Testing**: Test user journeys across features
 
-Unlike chat-based workflows that lose context, our system is fundamentally stateless. The `spec/[FEATURE]/domain/implementation.yaml` file **is the state**.
+#### For Architecture
+- **Clean Boundaries**: Clear separation of concerns
+- **No Circular Dependencies**: Unidirectional flow
+- **Scalable Structure**: Grows naturally with features
+- **Domain Focus**: Business logic stays pure
 
-### Key Benefits:
+## 📊 RLHF Scoring System
 
-- **Resumable Execution:** If the `execute-steps.ts` script fails or is interrupted on step 7, the YAML file is saved with step 7 marked as `FAILED`. You can simply re-run the script, and it will automatically skip the first 6 successful steps and retry from step 7.
-
-- **No Context Overload:** The AI doesn't need to hold the entire project history in its context window. Each command (`/pre-tasks`, `/evaluate`, etc.) is a discrete task that operates on a well-defined input (JSON or YAML), making the process scalable and predictable.
-
-- **Audit Trail:** Every step, success, or failure is recorded in the YAML with timestamps, RLHF scores, and execution logs. This creates a complete audit trail of the development process.
-
-- **Parallel Development:** Multiple developers can work on different features simultaneously, each with their own YAML state file, without interference.
-
-## 📖 Architecture Principles
-
-This framework enforces best practices through automated validation:
-
-- **Clean Architecture** - Separation of concerns with pure domain layer
-- **DDD (Domain-Driven Design)** - Ubiquitous language and bounded contexts
-- **TDD (Test-Driven Development)** - Test helpers for every use case
-- **SOLID Principles** - Single responsibility, open/closed, etc.
-- **KISS (Keep It Simple, Stupid)** - Simplicity over complexity
-- **YAGNI (You Aren't Gonna Need It)** - No premature optimization
-- **DRY (Don't Repeat Yourself)** - Code reusability
-
-## 🤖 RLHF Scoring System
-
-The intelligent scoring system evaluates code quality in real-time:
+The intelligent scoring system evaluates code quality:
 
 | Score  | Level             | Description                                    |
 | ------ | ----------------- | ---------------------------------------------- |
-| **+2** | 🏆 PERFECT        | Clean Architecture + DDD + Ubiquitous Language |
+| **+2** | 🏆 PERFECT        | Clean Architecture + DDD + All Best Practices |
 | **+1** | ✅ GOOD           | Valid implementation following patterns        |
-| **0**  | ⚠️ LOW CONFIDENCE | Missing references or documentation            |
-| **-1** | ❌ RUNTIME ERROR  | Lint failures, test failures                   |
-| **-2** | 💥 CATASTROPHIC   | Architecture violations                        |
+| **0**  | ⚠️ LOW CONFIDENCE | Missing references or unclear implementation  |
+| **-1** | ❌ RUNTIME ERROR  | Lint failures, test failures, build errors    |
+| **-2** | 💥 CATASTROPHIC   | Architecture violations, dependency issues    |
 
-## 📁 Project Structure
+## 🔄 Brownfield Refactoring
 
-```
-spec-kit-clean-archicteture/
-├── .claude/
-│   └── commands/        # AI command documentation
-├── templates/           # Domain generation templates
-├── .rlhf/              # RLHF learning data and metrics
-├── *.ts                # Core system files
-└── README.md
-```
+The system includes intelligent refactoring capabilities for existing codebases:
 
-**Note**: The `backend/`, `frontend/`, and `src/` directories are example implementations and should be ignored for framework usage.
-
-## 📚 Commands Documentation
-
-### Core Commands
-
-All commands are documented in `.claude/commands/` for AI-assisted development:
-
-#### Domain Generation Commands
-
-- **`01-plan-domain-features.md`** - Transforms a concept into a structured JSON plan
-
-  - **Greenfield/Ideation Input:**
-    ```bash
-    /01-plan-domain-features create a multi-tenant user authentication system
-    ```
-  - **Brownfield/Modification Input:**
-    ```bash
-    /01-plan-domain-features add email verification to existing user registration
-    ```
-
-- **`02-validate-domain-plan.md`** - JSON validation with score impact assessment (-2 to +2)
-
-  ```bash
-  /02-validate-domain-plan from json: {...}
-  ```
-
-- **`03-generate-domain-code.md`** - Main domain generation with quality guidelines
-
-  ```bash
-  /03-generate-domain-code create feature from json: {...}
-  # or
-  /03-generate-domain-code update yaml: {...} with json: {...}
-  ```
-
-- **`05-reflect-domain-lessons.md`** - Architectural reflection with score optimization
-
-  ```bash
-  /05-reflect-domain-lessons from yaml: {...}
-  ```
-
-- **`04-evaluate-domain-results.md`** - Pre-execution evaluation with score prediction
-
-  ```bash
-  /04-evaluate-domain-results from yaml: {...}
-  ```
-
-- **`06-execute-domain-steps.md`** - Execution with real-time RLHF scoring
-
-  ```bash
-  /06-execute-domain-steps from yaml: {...}
-  ```
-
-- **`07-fix-domain-errors.md`** - Intelligent fix suggestions for failed steps
-
-  ```bash
-  /07-fix-domain-errors from yaml: {...}
-  ```
-
-- **`08-apply-domain-improvements.md`** - Apply learned patterns for continuous improvement
-  ```bash
-  /08-apply-domain-improvements
-  ```
-
-### System Tools
-
-#### Core Executors
-
-- **`execute-steps.ts`** - Main step executor with RLHF scoring
-- **`validate-implementation.ts`** - Template validation with quality indicators
-- **`rlhf-system.ts`** - RLHF scoring engine with pattern learning
-- **`rlhf-dashboard.ts`** - Visual dashboard for metrics and scores
-- **`rlhf-autofix.ts`** - Automatic fix system for common issues
-- **`rollback-manager.ts`** - Safe rollback and recovery system
-- **`logger.ts`** - Centralized logging with audit trails
-
-## 🔧 Configuration
-
-### Templates
-
-The main template `templates/DOMAIN_TEMPLATE.yaml` includes:
-
-- Ubiquitous language definitions
-- Git workflow automation (branch → implementation → PR)
-- Domain layer structure
-- Use case interfaces
-- Error classes
-- Test helpers with mock data
-
-### RLHF Learning
-
-The system continuously learns from executions:
-
-- Pattern analysis and caching
-- Success/failure tracking
-- Automatic improvements
-- Performance optimization
-
-## 🌟 Features
-
-### For Green Field Projects
-
-- Generate complete domain layer from scratch
-- Enforce Clean Architecture from day one
-- Automated test helper generation
-- Git workflow automation
-
-### For Brown Field Projects
-
-- Gradual refactoring with safety checks
-- Architecture violation detection
-- Rollback capabilities for failed changes
-- Incremental improvements with RLHF scoring
-
-## 🛠️ Advanced Usage
-
-### Auto-Fix System
-
-```bash
-# Automatically fix common issues
-npx tsx rlhf-autofix.ts spec/001-user-registration/domain/implementation.yaml --validate
+### Automatic Detection
+```yaml
+# The AI identifies violations:
+- Business logic in controllers → Extract to use cases
+- Direct database access → Implement repository pattern
+- axios usage → Replace with FetchHttpClient
+- localStorage in components → Use storage adapters
 ```
 
-### Rollback Management
-
-```bash
-# Create backup before risky operations
-npx tsx rollback-manager.ts backup
-
-# Rollback failed step
-npx tsx rollback-manager.ts rollback <step-id>
-
-# Rollback all failed steps
-npx tsx rollback-manager.ts rollback-all spec/001-user-registration/domain/implementation.yaml
+### Safe Refactoring
+```yaml
+steps:
+  - Create rollback point
+  - Identify violations
+  - Apply transformations
+  - Validate changes
+  - Run tests
+  - Commit if successful
 ```
 
-### RLHF Analytics
+## 🛠️ Template Customization
 
-```bash
-# View dashboard
-npx tsx rlhf-dashboard.ts
+### Configure for Your Project
 
-# Export HTML report
-npx tsx rlhf-dashboard.ts export
-
-# Apply learned improvements
-npx tsx rlhf-system.ts apply
+1. **Update Placeholders**:
+```yaml
+__PROJECT_NAME__: "my-awesome-app"
+__FEATURE_NAME_PASCAL_CASE__: "UserAuthentication"
+__USE_CASE_NAME_KEBAB_CASE__: "login-user"
 ```
 
-## 🔍 Deep Search Integration with HRM (Hierarchical Reasoning Model)
-
-### Understanding HRM in Software Engineering
-
-The [Hierarchical Reasoning Model (HRM)](https://github.com/sapientinc/HRM) from Sapient Inc. introduces a revolutionary approach to code analysis through hierarchical reasoning. Unlike traditional RLHF which focuses on model training, our implementation leverages HRM concepts for:
-
-#### 🧠 Hierarchical Code Analysis
-
-```
-High-Level Planning → Domain Understanding → Use Case Mapping
-         ↓                    ↓                    ↓
-Low-Level Execution → Code Generation → Pattern Recognition
+2. **Customize Infrastructure**:
+```yaml
+infrastructure:
+  backend:
+    database: "prisma-postgresql"  # or "drizzle"
+    cache: "redis"                  # or "in-memory"
+  frontend:
+    http: "fetch"                   # enforced, no axios
+    storage: "indexedDB"            # or "localStorage"
 ```
 
-- **Level 1 (Strategic)**: Architectural patterns and domain boundaries
-- **Level 2 (Tactical)**: Use cases, entities, and value objects
-- **Level 3 (Implementation)**: Specific code patterns and syntax
-
-#### 🎯 HRM Application in Clean Architecture
-
-1. **Pattern Recognition Hierarchy**
-
-   - **Domain Layer**: Pure business logic patterns (RLHF +2)
-   - **Application Layer**: Use case orchestration patterns (RLHF +1)
-   - **Infrastructure Layer**: Integration patterns (RLHF 0)
-
-2. **Recursive Reasoning**
-
-   - Analyze code at multiple abstraction levels simultaneously
-   - Detect architectural violations through hierarchical pattern matching
-   - Self-correct based on learned patterns from successful implementations
-
-3. **Adaptive Learning Cycles**
-
-   ```typescript
-   // HRM-inspired learning cycle
-   for (let cycle = 0; cycle < MAX_CYCLES; cycle++) {
-     const analysis = analyzeCodeHierarchy(implementation);
-     const score = calculateRLHFScore(analysis);
-
-     if (score >= TARGET_SCORE) break;
-
-     const improvements = generateImprovements(analysis);
-     implementation = applyImprovements(implementation, improvements);
-   }
-   ```
-
-### Serena Integration
-
-The framework integrates with Serena for semantic code search:
-
-- **Hierarchical Symbol Analysis**: Navigate code at different abstraction levels
-- **Pattern Matching**: Find similar patterns across the codebase
-- **Context-Aware Refactoring**: Understand impact across architectural layers
-- **Memory System**: Retain project knowledge for future reasoning
-
-### Context7 Integration
-
-External library documentation through Context7:
-
-- **Real-time Library Analysis**: Understand external dependencies
-- **Pattern Extraction**: Learn from library best practices
-- **API Mapping**: Connect domain concepts to library implementations
-- **Cross-Reference Learning**: Apply patterns from successful libraries
-
-### 🔬 Deep Learning Without Training
-
-Our HRM implementation differs from traditional ML approaches:
-
-| Traditional RLHF        | Our HRM Implementation    |
-| ----------------------- | ------------------------- |
-| Model training required | No training needed        |
-| Large datasets needed   | Works with single project |
-| GPU intensive           | Runs on CPU               |
-| Static after training   | Continuously adapts       |
-| General purpose         | Domain-specific           |
-
-#### Key Innovations:
-
-1. **Hierarchical Pattern Database**
-
-   ```yaml
-   patterns:
-     architectural:
-       - clean_architecture: weight: 1.0
-       - ddd_boundaries: weight: 0.9
-     tactical:
-       - use_case_interface: weight: 0.8
-       - value_object_pattern: weight: 0.7
-     implementation:
-       - typescript_types: weight: 0.6
-       - test_coverage: weight: 0.5
-   ```
-
-2. **Multi-Level Scoring**
-
-   - Each hierarchical level contributes to final RLHF score
-   - Weighted average based on architectural importance
-   - Self-balancing based on project characteristics
-
-3. **Reasoning Chains**
-   - Traces decision paths through code
-   - Explains why certain patterns are preferred
-   - Provides actionable improvement suggestions
-
-## 🧠 HRM Adapted for Deterministic Development
-
-### 🗺️ The Traveling Salesman Problem in Software Development
-
-#### Why is software development a TSP (Traveling Salesman Problem)?
-
-Software development, especially following Clean Architecture and DDD, is fundamentally a **combinatorial optimization problem** similar to TSP:
-
-1. **Multiple Destinations (Features)**: Each functionality is a "city" to visit
-2. **Order Matters**: The implementation sequence affects the final result
-3. **Complex Dependencies**: Some routes (implementations) block others
-4. **Variable Cost**: Each decision has different costs (time, complexity, technical debt)
-5. **No Easy Return**: Refactoring is expensive, like backtracking in the salesman's path
-
-### 🎯 How HRM Solves the Software TSP
-
-```mermaid
-graph TB
-    subgraph "🧠 STRATEGIC LEVEL (High-Level Planning)"
-        A[User Concept] --> B[Domain Analysis]
-        B --> C[Bounded Contexts Identification]
-        C --> D[Dependency Map]
-
-        style A fill:#e1f5fe
-        style B fill:#b3e5fc
-        style C fill:#81d4fa
-        style D fill:#4fc3f7
-    end
-
-    subgraph "🎯 TACTICAL LEVEL (Reasoning Loop)"
-        D --> E[01-plan-domain-features]
-        E -->|JSON Plan| F[02-validate-domain-plan]
-        F -->|RLHF: -2 to +2| G[03-generate-domain-code]
-        G -->|YAML| H[05-reflect-domain-lessons]
-        H -->|Refined YAML| I[04-evaluate-domain-results]
-
-        I -->|Score < 1| E
-
-        style E fill:#fff3e0
-        style F fill:#ffe0b2
-        style G fill:#ffcc80
-        style H fill:#ffb74d
-        style I fill:#ffa726
-    end
-
-    subgraph "🚦 HUMAN GATE"
-        I -->|Score ≥ 1| J{Human Approval}
-        J -->|❌ Reject| E
-        J -->|✅ Approve| K
-
-        style J fill:#ffeb3b,stroke:#f57c00,stroke-width:4px
-    end
-
-    subgraph "⚡ EXECUTION LEVEL (Action Loop)"
-        K[06-execute-domain-steps] --> L{Step Status?}
-        L -->|SUCCESS| M[Next Step]
-        L -->|FAILED| N[07-fix-domain-errors]
-        N --> O[Rollback Manager]
-        O --> K
-        M --> P[Git Commit]
-
-        P --> Q{More Steps?}
-        Q -->|Yes| K
-        Q -->|No| R[PR Created]
-
-        style K fill:#e8f5e9
-        style L fill:#c8e6c9
-        style M fill:#a5d6a7
-        style N fill:#ffcdd2
-        style O fill:#ef9a9a
-        style P fill:#81c784
-        style R fill:#4caf50
-    end
-
-    subgraph "📊 RLHF SYSTEM (Feedback Loop)"
-        S[Pattern Database] --> T[Score Calculator]
-        T --> U[Learning System]
-        U --> V[Template Improvements]
-        V --> S
-
-        K -.->|Execution Metrics| T
-        N -.->|Error Patterns| U
-        R -.->|Success Patterns| U
-
-        style S fill:#f3e5f5
-        style T fill:#e1bee7
-        style U fill:#ce93d8
-        style V fill:#ba68c8
-    end
+3. **Add Custom Rules**:
+```yaml
+architecture_rules:
+  custom:
+    - "No console.log in production"
+    - "All async functions must have error handling"
+    - "Components must be under 200 lines"
 ```
 
-### 🔄 Detailed Hierarchical Flow
+## 📈 Architecture Compliance
 
-#### 1️⃣ **Strategic Layer (Pathfinding)**
-```
-🧭 Finds the "optimal path" through solution space
-├── Requirements analysis → Identify "cities" (features)
-├── Dependency mapping → Connection graph
-└── Cost estimation → Edge weights
-```
+### Dependency Rules Enforcement
 
-#### 2️⃣ **Tactical Layer (Route Planning)**
-```
-🗺️ Plans specific route before traveling
-├── 01-plan-domain-features → Initial proposed route
-├── validate → Verifies route validity
-├── reflection → Optimizes route (improvement algorithm)
-└── evaluate → Confirms optimal route found
-```
+```typescript
+// ✅ VALID: Domain imports nothing
+// domain/usecases/login.ts
+export interface Login {
+  execute(input: LoginInput): Promise<LoginOutput>
+}
 
-#### 3️⃣ **Execution Layer (Traveling)**
-```
-🚗 Executes journey step by step
-├── 06-execute-domain-steps → Start journey
-├── Each step → One "city" visited
-├── Validation → Confirms correct arrival
-└── Commit → Checkpoint saved (no need to redo)
+// ✅ VALID: Data imports from domain
+// data/usecases/remote-login.ts
+import { Login } from '@/domain/usecases/login'
+
+// ❌ INVALID: Domain importing from data (RLHF: -2)
+// domain/usecases/login.ts
+import { HttpClient } from '@/data/protocols/http' // VIOLATION!
 ```
 
-### 📈 TSP Optimization Metrics
+### Vertical Slicing
 
-#### RLHF Score as Cost Function
+Each feature is implemented completely through all layers:
 
-| Score | TSP Meaning | Route Impact |
-|-------|-------------|--------------|
-| **+2** | Global Optimal Path | Lowest possible cost, all cities visited perfectly |
-| **+1** | Acceptable Sub-optimal Path | Works but could be more efficient |
-| **0** | Uncertain Path | We don't know if we'll reach the destination |
-| **-1** | Blocked Path | Found obstacle, needs detour |
-| **-2** | Impossible Path | Violates fundamental constraints (e.g., city doesn't exist) |
+```
+feature/user-authentication/
+├── domain/
+│   ├── usecases/
+│   ├── entities/
+│   └── errors/
+├── data/
+│   ├── usecases/
+│   └── protocols/
+├── infra/
+│   ├── cache/
+│   └── external/
+└── presentation/
+    ├── controllers/
+    └── middlewares/
+```
 
-### 🎯 HRM+TSP Approach Advantages
+## 🧪 Testing Strategy
 
-#### Comparison with Traditional Approaches
+### Layer-Specific Testing
 
-| Aspect | Traditional LLM | HRM + TSP (Our Approach) |
-|--------|-----------------|--------------------------|
-| **Predictability** | Low (black box) | High (deterministic) |
-| **Optimization** | Not guaranteed | Active search for optimum |
-| **Recovery** | Redo everything | Rollback to last checkpoint |
-| **Learning** | Not local | Project-specific patterns |
-| **Complexity** | O(2^n) without optimization | O(n²) with heuristics |
+| Layer | Strategy | Coverage Target | Tools |
+|-------|----------|----------------|--------|
+| **Domain** | Unit Tests | 100% | Vitest |
+| **Data** | Unit + Mocks | 95% | Vitest + Spies |
+| **Infrastructure** | Integration | 80% | Vitest + Test DB |
+| **Presentation** | Unit + E2E | 90% | Vitest + Playwright |
 
-### 💡 Key Insights
+### Test Patterns
 
-1. **Determinism vs Probabilism**: By treating it as TSP, we transform a probabilistic problem (LLM generating code) into a deterministic one (following planned route)
+```typescript
+// AI-NOTE: NEVER use faker or random data in tests
+// Always use deterministic, fixed test data
 
-2. **Checkpoints as Visited Cities**: Each commit is a permanently visited city - we don't need to revisit
+// ✅ GOOD: Fixed test data
+const mockUser = {
+  id: 'test-id-123',
+  name: 'Test User',
+  email: 'test@example.com'
+}
 
-3. **RLHF as Heuristic**: The RLHF score works like the A* heuristic in TSP, guiding toward better solutions
+// ❌ BAD: Random data (RLHF: -1)
+const mockUser = {
+  id: faker.datatype.uuid(),  // VIOLATION!
+  name: faker.name.findName(), // VIOLATION!
+}
+```
 
-4. **Rollback as Backtracking**: When we find a blocked path, we return to the last valid checkpoint
+## 📚 Template Files
 
-### 🚀 Conclusion
+### Backend Template Components
+- **Domain Layer**: Use cases, entities, errors, value objects
+- **Data Layer**: Use case implementations, protocols, DTOs
+- **Infrastructure**: Prisma repositories, Redis cache, crypto adapters
+- **Presentation**: Express controllers, middlewares, routes
+- **Main**: Factories, composition root, server setup
 
-HRM applied to software development solves the fundamental TSP: **"What is the optimal sequence of implementations that minimizes total cost (time, complexity, technical debt) while visiting all required features?"**
+### Frontend Template Components
+- **Domain Layer**: Business interfaces, entities, types
+- **Data Layer**: HTTP clients, storage protocols
+- **Infrastructure**: Fetch adapters, IndexedDB, WebSocket
+- **Presentation**: React components, hooks, server actions
+- **Validation**: Zod schemas, form validation
 
-The genius lies in:
-- **Separating planning from execution** (doesn't travel while planning the route)
-- **Saving checkpoints** (doesn't redo already visited cities)
-- **Learning from each journey** (RLHF improves future routes)
-- **Allowing human intervention** (GPS recalculating route)
+### Fullstack Template Components
+- **Shared Domain**: Common entities and interfaces
+- **Backend API**: Server-side implementations
+- **Frontend App**: Client-side implementations
+- **Infrastructure**: Dual-stack adapters
+- **Integration**: End-to-end type safety
 
-## 📊 Performance
+## 🔍 VS Code Integration
 
-- **Pattern Caching**: 5-minute cache with LRU eviction
-- **Progress Reporting**: Visual progress bars with persistence
-- **Memory Management**: Bounded cache size (100 entries max)
-- **Resumable Operations**: Progress saved for recovery
+The project includes VS Code settings for optimal development:
 
-## 🤝 Credits
+```json
+{
+  "files.associations": {
+    "*.regent": "yaml"
+  },
+  "yaml.schemas": {
+    "./templates/parts/backend/steps/01-domain.part.schema.json": [
+      "templates/parts/backend/steps/01-domain.part.regent"
+    ]
+    // ... all schemas mapped
+  }
+}
+```
 
-This project builds upon excellent work from the community:
-
-### Core Inspiration
-
-- **[GitHub Spec-Kit](https://github.com/github/spec-kit)** - The original specification framework that inspired this project
-- **[Rodrigo Manguinho](https://github.com/rmanguinho)** - Clean Architecture patterns and TDD best practices
-- **[Sapient HRM](https://github.com/sapientinc/HRM)** - Deep search capabilities and semantic understanding
-
-### Technologies
-
-- **TypeScript** - Type-safe development
-- **YAML** - Configuration and templates
-- **Claude AI** - Intelligent code generation
-- **MCP Servers** - Serena and Context7 integration
-
-## 📈 Roadmap
-
-- [ ] Visual Studio Code extension
-- [ ] GitHub Actions integration
-- [ ] Multi-language support (Python, Go, Rust)
-- [ ] Cloud deployment templates
-- [ ] Advanced RLHF training modes
-
-## 📝 License
-
-MIT License - See [LICENSE](LICENSE) file for details
+Benefits:
+- **IntelliSense**: Auto-completion for template fields
+- **Validation**: Real-time schema validation
+- **Documentation**: Inline documentation
+- **Error Detection**: Immediate feedback on template errors
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Areas for Contribution
+- Additional language support (Python, Go, Rust)
+- More infrastructure adapters (AWS, GCP, Azure)
+- Enhanced testing patterns
+- Performance optimizations
+- Documentation improvements
+
+## 📝 License
+
+MIT License - See [LICENSE](LICENSE) file for details.
+
+## 🙏 Credits
+
+### Core Inspiration
+- **[GitHub Spec-Kit](https://github.com/github/spec-kit)** - Original specification framework
+- **[Rodrigo Manguinho](https://github.com/rmanguinho)** - Clean Architecture patterns
+- **[Uncle Bob Martin](https://blog.cleancoder.com)** - Clean Architecture principles
+
+### Technologies
+- **TypeScript** - Type-safe development
+- **YAML/JSON** - Configuration and schemas
+- **Claude AI** - Intelligent code generation
+- **Vitest** - Testing framework
+- **Prisma** - Database ORM
+- **Next.js** - React framework
 
 ## 💬 Support
 
@@ -592,55 +512,10 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 - **Discussions**: [GitHub Discussions](https://github.com/thiagobutignon/spec-kit-clean-archicteture/discussions)
 - **Documentation**: [Wiki](https://github.com/thiagobutignon/spec-kit-clean-archicteture/wiki)
 
-## ❓ Why Not Just Use Chat-Based AI?
-
-### The Fundamental Difference:
-
-| Chat-Based AI (GPT, Claude, etc.)                              | Spec-Kit Clean Architecture                                  |
-| -------------------------------------------------------------- | ------------------------------------------------------------ |
-| **Monolithic Output**: Generates entire files/features at once | **Atomic Steps**: Each change is a single, reviewable commit |
-| **Context Decay**: Loses context over long conversations       | **Stateless**: YAML file maintains complete state            |
-| **No Quality Gates**: Output quality varies                    | **RLHF Scoring**: Every step validated (-2 to +2)            |
-| **Manual Rollback**: Developer must undo changes manually      | **Automatic Rollback**: Failed steps can be rolled back      |
-| **Opaque Process**: "Black box" generation                     | **Transparent Pipeline**: Every decision is auditable        |
-| **Generic Solutions**: Not aware of your architecture          | **Architecture-Aware**: Enforces your specific patterns      |
-
-### Real-World Example:
-
-**Chat-Based Approach:**
-
-```
-You: "Create a user registration feature"
-AI: [Generates 500+ lines across 10 files]
-Result: All-or-nothing - if one part is wrong, manual fixes needed
-```
-
-**Spec-Kit Approach:**
-
-```yaml
-steps:
-  - id: create-branch # ✅ Step 1: Git branch created
-  - id: create-use-case # ✅ Step 2: Use case interface created
-  - id: create-errors # ✅ Step 3: Error classes created
-  - id: create-test-helper # ❌ Step 4: Failed - auto-rollback
-  - id: fix-test-helper # ✅ Step 5: Fixed and continued
-```
-
-## 🏆 Why Use Spec-Kit Clean Architecture?
-
-1. **Deterministic Development**: Predictable, repeatable results
-2. **Quality Assurance**: Automated RLHF scoring ensures high quality
-3. **Architecture Compliance**: Enforces Clean Architecture principles
-4. **Self-Improving**: Learns from mistakes and successes
-5. **Safe Refactoring**: Rollback capabilities protect your code
-6. **Developer Experience**: Visual feedback and progress tracking
-7. **Best Practices**: Enforces TDD, DDD, SOLID automatically
-8. **Enterprise Ready**: Audit trails, approval workflows, resumable execution
-
 ---
 
 <div align="center">
-  <strong>Built with ❤️ for developers who care about code quality</strong>
+  <strong>🏗️ Building the future of AI-assisted Clean Architecture</strong>
   <br>
-  <sub>Powered by Claude AI and the open-source community</sub>
+  <sub>With intelligent templates, comprehensive AI-NOTEs, and RLHF validation</sub>
 </div>
