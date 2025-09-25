@@ -102,6 +102,10 @@
     "./templates/parts/fullstack/steps/04-presentation.part.schema.json": [
       "templates/parts/fullstack/steps/04-presentation.part.regent"
     ],
+    // Schema for fullstack main steps part
+    "./templates/parts/fullstack/steps/05-main.part.schema.json": [
+      "templates/parts/fullstack/steps/05-main.part.regent"
+    ],
     // Schema for shared validation layer
     "./templates/parts/shared/steps/validation.part.schema.json": [
       "templates/parts/shared/steps/validation.part.regent"
