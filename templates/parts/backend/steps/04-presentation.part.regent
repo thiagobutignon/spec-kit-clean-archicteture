@@ -13,47 +13,234 @@
   # ------------------------------------------------------------------------------
 
   presentation_steps:
-    # === STEP 1: CREATE PRESENTATION STRUCTURE ===
-    - id: 'create-presentation-structure-__USE_CASE_NAME_KEBAB_CASE__'
+    # === STEP 1: CREATE TEST STRUCTURE (TDD - RED PHASE) ===
+    - id: 'create-test-structure-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'folder'
-      description: 'Create presentation layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ use case slice'
+      description: 'TDD RED: Create test structure for __USE_CASE_NAME_PASCAL_CASE__ presentation layer'
       status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
       rlhf_score: null # -2, -1, 0, 1, 2
       execution_log: ''
       references:
         - type: 'internal_guideline'
-          source: 'BACKEND_ARCHITECTURE.md'
-          description: 'Following Clean Architecture presentation layer structure for backend.'
+          source: 'TDD_GUIDE.md'
+          description: 'Following Test-Driven Development: RED-GREEN-REFACTOR cycle.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/tests/presentation'
+          folders:
+            - 'controllers'   # Controller tests
+            - 'mocks'         # Test mocks and spies
+            - 'middlewares'   # Middleware tests
+      validation_script: |
+        # AI-NOTE: TDD starts with test structure
+        BASE_PATH="__PROJECT_NAME__/tests/presentation"
+        FOLDERS="$BASE_PATH/controllers $BASE_PATH/mocks $BASE_PATH/middlewares"
+        echo "🔴 TDD RED: Creating test structure..."
+        for folder in $FOLDERS; do
+          mkdir -p "$folder"
+        done
+        echo "✅ Test structure created for TDD cycle"
+
+    # === STEP 2: CREATE TEST MOCKS (TDD - RED PHASE) ===
+    - id: 'create-test-mocks-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Create test mocks and spies for __USE_CASE_NAME_PASCAL_CASE__'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'TDD_GUIDE.md'
+          description: 'Test doubles and mocking patterns'
+      path: '__PROJECT_NAME__/tests/presentation/mocks/mock-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import { Validation } from '@/presentation/protocols'
+
+        /**
+         * Test doubles for __USE_CASE_NAME_PASCAL_CASE__ controller testing
+         * AI-NOTE: TDD - Create mocks BEFORE implementation
+         * These mocks define the expected behavior
+         */
+
+        export class __USE_CASE_NAME_PASCAL_CASE__Spy implements __USE_CASE_NAME_PASCAL_CASE__ {
+          params: any
+          result = {
+            __OUTPUT_FIELD_1__: 'test-output-1',
+            __OUTPUT_FIELD_2__: 'test-output-2',
+            __OUTPUT_FIELD_3__: 'test-output-3',
+            __TIMESTAMP_FIELD__: new Date('2024-01-01')
+          }
+          callsCount = 0
+
+          async execute(input: any): Promise<any> {
+            this.params = input
+            this.callsCount++
+            return this.result
+          }
+        }
+
+        export class ValidationSpy implements Validation {
+          error: Error | null = null
+          input: any
+
+          validate(input: any): Error | null {
+            this.input = input
+            return this.error
+          }
+        }
+
+    # === STEP 3: CREATE CONTROLLER TEST (TDD - RED PHASE) ===
+    - id: 'create-controller-test-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Write failing tests for __USE_CASE_NAME_PASCAL_CASE__Controller'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
         - type: 'external_pattern'
           source: 'context7'
-          query: 'clean architecture presentation layer express node.js controller'
-          url: 'https://github.com/...'
-          description: 'Presentation layer patterns for Express/Node.js development.'
+          query: 'test driven development vitest red green refactor'
+          description: 'TDD cycle with Vitest'
+      path: '__PROJECT_NAME__/tests/presentation/controllers/__USE_CASE_NAME_KEBAB_CASE__-controller.spec.ts'
+      template: |
+        import { describe, it, expect, vi, beforeEach } from 'vitest'
+        import { __USE_CASE_NAME_PASCAL_CASE__Controller } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/controllers/__USE_CASE_NAME_KEBAB_CASE__-controller'
+        import { badRequest, serverError, ok, noContent } from '@/presentation/helpers'
+        import { __USE_CASE_NAME_PASCAL_CASE__Spy, ValidationSpy } from '@/tests/presentation/mocks/mock-__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * TDD RED Phase: Write tests BEFORE implementation
+         * AI-NOTE: These tests will FAIL initially - that's expected!
+         * The implementation will be created to make these tests pass
+         */
+
+        type SutTypes = {
+          sut: __USE_CASE_NAME_PASCAL_CASE__Controller
+          __USE_CASE_NAME_CAMEL_CASE__Spy: __USE_CASE_NAME_PASCAL_CASE__Spy
+          validationSpy: ValidationSpy
+        }
+
+        const makeSut = (): SutTypes => {
+          const __USE_CASE_NAME_CAMEL_CASE__Spy = new __USE_CASE_NAME_PASCAL_CASE__Spy()
+          const validationSpy = new ValidationSpy()
+          const sut = new __USE_CASE_NAME_PASCAL_CASE__Controller(
+            __USE_CASE_NAME_CAMEL_CASE__Spy,
+            validationSpy
+          )
+          return {
+            sut,
+            __USE_CASE_NAME_CAMEL_CASE__Spy,
+            validationSpy
+          }
+        }
+
+        // AI-NOTE: NEVER use faker or random data - use fixed test data
+        const makeRequest = (): __USE_CASE_NAME_PASCAL_CASE__Controller.Request => ({
+          __INPUT_FIELD_1__: 'test-value-1',
+          __INPUT_FIELD_2__: 'test-value-2',
+          __INPUT_FIELD_3__: 'test-value-3'
+        })
+
+        describe('__USE_CASE_NAME_PASCAL_CASE__Controller', () => {
+          describe('TDD RED - These tests will fail initially', () => {
+            it('should call Validation with correct values', async () => {
+              const { sut, validationSpy } = makeSut()
+              const request = makeRequest()
+
+              await sut.handle(request)
+
+              expect(validationSpy.input).toEqual(request)
+            })
+
+            it('should return 400 if Validation fails', async () => {
+              const { sut, validationSpy } = makeSut()
+              validationSpy.error = new Error('Validation error')
+
+              const httpResponse = await sut.handle(makeRequest())
+
+              expect(httpResponse).toEqual(badRequest(validationSpy.error))
+            })
+
+            it('should call __USE_CASE_NAME_PASCAL_CASE__ with correct values', async () => {
+              const { sut, __USE_CASE_NAME_CAMEL_CASE__Spy } = makeSut()
+              const request = makeRequest()
+
+              await sut.handle(request)
+
+              expect(__USE_CASE_NAME_CAMEL_CASE__Spy.params).toEqual(request)
+            })
+
+            it('should return 500 if __USE_CASE_NAME_PASCAL_CASE__ throws', async () => {
+              const { sut, __USE_CASE_NAME_CAMEL_CASE__Spy } = makeSut()
+              vi.spyOn(__USE_CASE_NAME_CAMEL_CASE__Spy, 'execute').mockRejectedValueOnce(new Error())
+
+              const httpResponse = await sut.handle(makeRequest())
+
+              expect(httpResponse).toEqual(serverError(new Error()))
+            })
+
+            it('should return 200 on success', async () => {
+              const { sut, __USE_CASE_NAME_CAMEL_CASE__Spy } = makeSut()
+
+              const httpResponse = await sut.handle(makeRequest())
+
+              expect(httpResponse).toEqual(ok(__USE_CASE_NAME_CAMEL_CASE__Spy.result))
+            })
+
+            it('should return 204 if no content', async () => {
+              const { sut, __USE_CASE_NAME_CAMEL_CASE__Spy } = makeSut()
+              __USE_CASE_NAME_CAMEL_CASE__Spy.result = null
+
+              const httpResponse = await sut.handle(makeRequest())
+
+              expect(httpResponse).toEqual(noContent())
+            })
+          })
+        })
+
+    # === STEP 4: RUN TESTS - VERIFY RED (TDD - RED PHASE) ===
+    - id: 'verify-tests-fail-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD RED: Verify tests fail (controller does not exist yet)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to ensure they fail (RED phase)'
+        scripts:
+          - name: 'Run failing tests'
+            command: |
+              echo "🔴 TDD RED: Running tests - they should FAIL..."
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__-controller.spec.ts || {
+                echo "✅ Good! Tests are failing as expected (RED phase)"
+                echo "   Now we'll implement the code to make them pass..."
+                exit 0
+              }
+              echo "❌ ERROR: Tests are passing but code doesn't exist yet!"
+              exit 1
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 5: CREATE PRESENTATION STRUCTURE (TDD - GREEN PHASE) ===
+    - id: 'create-presentation-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'TDD GREEN: Create presentation layer structure to make tests pass'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
       action:
         create_folders:
           basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation'
           folders:
-            - 'controllers'   # Controller for this specific use case
-            - 'errors'        # HTTP errors specific to this use case
-            - 'protocols'     # HTTP protocols for this use case
-            - 'helpers'       # HTTP helper functions
-      validation_script: |
-        # AI-NOTE: Replace placeholders but keep shell variables intact
-        BASE_PATH="__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation"
-        FOLDERS="$BASE_PATH/controllers $BASE_PATH/errors $BASE_PATH/protocols $BASE_PATH/helpers"
-        echo "✅ Verifying presentation folder structure..."
-        for folder in $FOLDERS; do
-          if [ ! -d "$folder" ]; then
-            echo "❌ ERROR: Folder $folder was not created."
-            exit 1
-          fi
-        done
-        echo "✅ All presentation folders exist for __USE_CASE_NAME_PASCAL_CASE__ use case."
+            - 'controllers'
+            - 'errors'
+            - 'protocols'
+            - 'helpers'
 
-    # === STEP 2: CREATE CONTROLLER ===
+    # === STEP 6: CREATE CONTROLLER (TDD - GREEN PHASE) ===
     - id: 'create-presentation-controller-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
-      description: 'Create __USE_CASE_NAME_PASCAL_CASE__ controller in presentation layer'
+      description: 'TDD GREEN: Implement controller to make tests pass'
       status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
       rlhf_score: null # -2, -1, 0, 1, 2
       execution_log: ''
@@ -162,7 +349,29 @@
         run_presentation_test_check
         stage_and_commit "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ controller"
 
-    # === STEP 3: CREATE HTTP HELPERS ===
+    # === STEP 7: RUN TESTS - VERIFY GREEN (TDD - GREEN PHASE) ===
+    - id: 'verify-tests-pass-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD GREEN: Verify all tests pass with implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to ensure they pass (GREEN phase)'
+        scripts:
+          - name: 'Run passing tests'
+            command: |
+              echo "🟢 TDD GREEN: Running tests - they should PASS now..."
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__-controller.spec.ts || {
+                echo "❌ ERROR: Tests are still failing after implementation!"
+                echo "   Review the controller implementation and fix issues."
+                exit 1
+              }
+              echo "✅ Excellent! All tests are passing (GREEN phase)"
+              echo "   Consider refactoring if needed (REFACTOR phase)..."
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 8: CREATE HTTP HELPERS ===
     - id: 'create-presentation-helpers-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create HTTP helper functions for __USE_CASE_NAME_PASCAL_CASE__'
@@ -221,7 +430,7 @@
           body: data
         })
 
-    # === STEP 4: CREATE PRESENTATION ERRORS ===
+    # === STEP 9: CREATE PRESENTATION ERRORS ===
     - id: 'create-presentation-errors-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create presentation errors for __USE_CASE_NAME_PASCAL_CASE__'
@@ -277,7 +486,7 @@
           }
         }
 
-    # === STEP 5: CREATE MIDDLEWARE (IF NEEDED) ===
+    # === STEP 10: CREATE MIDDLEWARE (IF NEEDED) ===
     - id: 'create-presentation-middleware-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create authentication middleware for __USE_CASE_NAME_PASCAL_CASE__ if needed'
@@ -331,7 +540,52 @@
           }
         }
 
-    # === STEP 6: CREATE FEATURE SHARED PRESENTATION (IF NEEDED) ===
+    # === STEP 11: REFACTOR (TDD - REFACTOR PHASE - OPTIONAL) ===
+    - id: 'refactor-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD REFACTOR: Improve code quality while keeping tests green'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      condition: '__NEEDS_REFACTORING__' # Optional step
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTOR_GUIDE.md'
+          description: 'Refactoring patterns and best practices'
+      run_scripts:
+        description: 'Refactor code while ensuring tests remain green'
+        scripts:
+          - name: 'Refactor with safety'
+            command: |
+              echo "♻️ TDD REFACTOR: Improving code quality..."
+              echo "   Common refactorings:"
+              echo "   - Extract methods for better readability"
+              echo "   - Remove duplication"
+              echo "   - Improve naming"
+              echo "   - Simplify complex conditionals"
+
+              # Run tests before refactoring
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__-controller.spec.ts || {
+                echo "❌ Tests must be green before refactoring!"
+                exit 1
+              }
+
+              # AI-NOTE: Apply refactorings here
+              # Examples:
+              # - Extract validation to separate method
+              # - Simplify error handling
+              # - Improve response helpers
+
+              # Run tests after refactoring
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__-controller.spec.ts || {
+                echo "❌ Refactoring broke tests! Revert changes."
+                exit 1
+              }
+
+              echo "✅ Refactoring complete - tests still green!"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 12: CREATE FEATURE SHARED PRESENTATION (IF NEEDED) ===
     - id: 'create-shared-presentation-__FEATURE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create shared presentation protocols for __FEATURE_NAME_PASCAL_CASE__ feature'
@@ -369,7 +623,7 @@
           validate(input: any): Error | null
         }
 
-    # === STEP 7: CREATE FEATURE BRANCH ===
+    # === STEP 13: CREATE FEATURE BRANCH ===
     - id: 'create-feature-branch-presentation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Create and checkout feature branch for __USE_CASE_NAME_PASCAL_CASE__ presentation implementation'
@@ -402,117 +656,7 @@
               echo "✅ Created and checked out branch: $BRANCH_NAME"
             workingDirectory: '__PROJECT_NAME__'
 
-    # === STEP 8: CREATE CONTROLLER TEST ===
-    - id: 'create-presentation-controller-test-__USE_CASE_NAME_KEBAB_CASE__'
-      type: 'create_file'
-      description: 'Create unit test for __USE_CASE_NAME_PASCAL_CASE__Controller'
-      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
-      rlhf_score: null # -2, -1, 0, 1, 2
-      execution_log: ''
-      references:
-        - type: 'external_pattern'
-          source: 'context7'
-          query: 'vitest controller test clean architecture mocking'
-          url: 'https://github.com/...'
-          description: 'Controller testing patterns with Vitest.'
-      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/controllers/__USE_CASE_NAME_KEBAB_CASE__-controller.spec.ts'
-      template: |
-        import { describe, it, expect, vi, beforeEach } from 'vitest'
-        import { __USE_CASE_NAME_PASCAL_CASE__Controller } from './__USE_CASE_NAME_KEBAB_CASE__-controller'
-        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
-        import { Validation } from '@/presentation/protocols'
-        import { badRequest, serverError, ok } from '@/presentation/helpers'
-
-        describe('__USE_CASE_NAME_PASCAL_CASE__Controller', () => {
-          let sut: __USE_CASE_NAME_PASCAL_CASE__Controller
-          let __USE_CASE_NAME_CAMEL_CASE__Spy: __USE_CASE_NAME_PASCAL_CASE__
-          let validationSpy: Validation
-
-          beforeEach(() => {
-            // AI-NOTE: Always use fixed test data, never random/faker data
-            __USE_CASE_NAME_CAMEL_CASE__Spy = {
-              execute: vi.fn().mockResolvedValue({
-                __OUTPUT_FIELD_1__: 'test-output-1',
-                __OUTPUT_FIELD_2__: 'test-output-2',
-                __OUTPUT_FIELD_3__: 'test-output-3',
-                __TIMESTAMP_FIELD__: new Date('2024-01-01')
-              })
-            }
-
-            validationSpy = {
-              validate: vi.fn().mockReturnValue(null)
-            }
-
-            sut = new __USE_CASE_NAME_PASCAL_CASE__Controller(
-              __USE_CASE_NAME_CAMEL_CASE__Spy,
-              validationSpy
-            )
-          })
-
-          it('should return 400 if validation fails', async () => {
-            const error = new Error('Validation error')
-            validationSpy.validate = vi.fn().mockReturnValue(error)
-
-            const request = {
-              __INPUT_FIELD_1__: 'test-value-1',
-              __INPUT_FIELD_2__: 'test-value-2',
-              __INPUT_FIELD_3__: 'test-value-3'
-            }
-
-            const httpResponse = await sut.handle(request)
-
-            expect(httpResponse).toEqual(badRequest(error))
-            expect(__USE_CASE_NAME_CAMEL_CASE__Spy.execute).not.toHaveBeenCalled()
-          })
-
-          it('should return 500 if use case throws', async () => {
-            const error = new Error('Use case error')
-            __USE_CASE_NAME_CAMEL_CASE__Spy.execute = vi.fn().mockRejectedValue(error)
-
-            const request = {
-              __INPUT_FIELD_1__: 'test-value-1',
-              __INPUT_FIELD_2__: 'test-value-2',
-              __INPUT_FIELD_3__: 'test-value-3'
-            }
-
-            const httpResponse = await sut.handle(request)
-
-            expect(httpResponse).toEqual(serverError(error))
-          })
-
-          it('should return 200 on success', async () => {
-            const request = {
-              __INPUT_FIELD_1__: 'test-value-1',
-              __INPUT_FIELD_2__: 'test-value-2',
-              __INPUT_FIELD_3__: 'test-value-3'
-            }
-
-            const httpResponse = await sut.handle(request)
-
-            expect(httpResponse.statusCode).toBe(200)
-            expect(httpResponse.body).toEqual({
-              __OUTPUT_FIELD_1__: 'test-output-1',
-              __OUTPUT_FIELD_2__: 'test-output-2',
-              __OUTPUT_FIELD_3__: 'test-output-3',
-              __TIMESTAMP_FIELD__: new Date('2024-01-01')
-            })
-          })
-
-          it('should call use case with correct values', async () => {
-            const request = {
-              __INPUT_FIELD_1__: 'test-value-1',
-              __INPUT_FIELD_2__: 'test-value-2',
-              __INPUT_FIELD_3__: 'test-value-3'
-            }
-
-            await sut.handle(request)
-
-            expect(__USE_CASE_NAME_CAMEL_CASE__Spy.execute).toHaveBeenCalledWith(request)
-            expect(__USE_CASE_NAME_CAMEL_CASE__Spy.execute).toHaveBeenCalledTimes(1)
-          })
-        })
-
-    # === STEP 9: REFACTOR FOR BROWNFIELD (CONDITIONAL) ===
+    # === STEP 14: REFACTOR FOR BROWNFIELD (CONDITIONAL) ===
     # AI-NOTE: When brownfield refactoring is needed, the AI should dynamically generate
     # steps based on the specific files that need refactoring. Each file should
     # have its own step for better tracking and granular control.
@@ -564,7 +708,7 @@
         # - Uses middleware for cross-cutting concerns
         [REFACTORED_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
 
-    # === STEP 10: CREATE PULL REQUEST ===
+    # === STEP 15: CREATE PULL REQUEST ===
     - id: 'create-pr-presentation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Create Pull Request for __USE_CASE_NAME_PASCAL_CASE__ presentation layer'
@@ -613,7 +757,7 @@
                 --label "feature,presentation,clean-architecture"
             workingDirectory: '__PROJECT_NAME__'
 
-    # === STEP 11: CODE REVIEW ===
+    # === STEP 16: CODE REVIEW ===
     - id: 'code-review-presentation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'Automated code review for presentation layer implementation'
