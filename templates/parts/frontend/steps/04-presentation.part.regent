@@ -837,25 +837,48 @@
         - 'Tight coupling between layers'
       example:
         original: |
+          # AI-NOTE: Extract business logic from React components to hooks or server actions
           <<<FIND>>>
-          # AI-NOTE: Identify presentation layer violations
-          # Common patterns to look for:
-          # 1. Components with business logic
-          # 2. Direct fetch/axios calls
-          # 3. Data calculations in components
-          # 4. State management mixed with UI
-          # 5. Missing separation of concerns
-          [ORIGINAL_VIOLATING_CODE]
+          'use client'
+
+          export function ProductList() {
+            const [products, setProducts] = useState([])
+            const [total, setTotal] = useState(0)
+
+            useEffect(() => {
+              // Business logic in component
+              const calculateTotal = () => {
+                const sum = products.reduce((acc, p) => {
+                  if (p.discount > 0) {
+                    return acc + (p.price * (1 - p.discount))
+                  }
+                  return acc + p.price
+                }, 0)
+                const tax = sum * 0.1
+                return sum + tax
+              }
+
+              setTotal(calculateTotal())
+            }, [products])
+
+            return (
+              <div>{/* UI */}</div>
+            )
+          }
           <<</FIND>>>
           <<<REPLACE>>>
-          # AI-NOTE: Apply Clean Architecture transformation
-          # The refactored code should:
-          # 1. Extract business logic to use cases
-          # 2. Use hooks for state management
-          # 3. Delegate API calls to data layer
-          # 4. Keep components focused on UI
-          # 5. Use proper dependency injection
-          [REFACTORED_CLEAN_CODE]
+          'use client'
+
+          import { useProductCalculations } from '@/presentation/hooks/useProductCalculations'
+
+          export function ProductList() {
+            const [products, setProducts] = useState([])
+            const { total } = useProductCalculations(products)
+
+            return (
+              <div>{/* UI */}</div>
+            )
+          }
           <<</REPLACE>>>
         category: 'presentation-refactoring'
         severity: 'HIGH'
