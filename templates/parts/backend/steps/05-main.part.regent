@@ -1,0 +1,852 @@
+# ------------------------------------------------------------------------------
+# BACKEND MAIN LAYER TEMPLATE
+# Clean Architecture - Application Bootstrap and Composition Root
+# Supports: Express/Fastify with Dependency Injection
+# Pattern: TDD with Factory Pattern and Adapters
+# ------------------------------------------------------------------------------
+
+metadata:
+  layer: 'main'
+  project_type: 'backend'
+  architecture_style: 'clean'
+  test_approach: 'tdd'
+  framework: 'express' # express | fastify - AI-NOTE: Replace with actual framework
+  patterns:
+    - 'composition-root'
+    - 'factory-pattern'
+    - 'adapter-pattern'
+    - 'dependency-injection'
+  references:
+    - 'Clean Architecture principles'
+    - 'SOLID principles'
+    - 'Dependency Injection pattern'
+    - 'Factory Method pattern'
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER STRUCTURE
+# ------------------------------------------------------------------------------
+
+structure:
+  main_structure:
+    description: 'Setup main layer structure for application bootstrap'
+    folders:
+      - 'src/main'
+      - 'src/main/config'
+      - 'src/main/adapters'
+      - 'src/main/factories'
+      - 'src/main/middlewares'
+      - 'src/main/docs'
+      - 'src/main/routes'
+      - 'tests/main'
+      - 'tests/main/routes'
+      - 'tests/main/middlewares'
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER IMPLEMENTATION STEPS
+# Following TDD and Factory Pattern
+# ------------------------------------------------------------------------------
+
+steps:
+  main_steps:
+    # === STEP 1: CREATE MAIN BRANCH ===
+    - id: 'create-main-branch'
+      type: 'validation'
+      description: 'Create feature branch for main layer implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Create and checkout main layer branch'
+        scripts:
+          - name: 'Create main branch'
+            command: |
+              git checkout -b "feat/__FEATURE_NAME_KEBAB_CASE__-main-layer"
+              echo "✅ Created branch: feat/__FEATURE_NAME_KEBAB_CASE__-main-layer"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: CREATE ENVIRONMENT CONFIGURATION ===
+    - id: 'create-env-config'
+      type: 'create_file'
+      description: 'Create environment configuration'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/main/config/env.ts'
+      template: |
+        /**
+         * Environment configuration
+         * @layer Main Layer
+         * @pattern Configuration Pattern
+         */
+        export default {
+          port: process.env.PORT || 3000,
+          nodeEnv: process.env.NODE_ENV || 'development',
+          mongoUrl: process.env.MONGO_URL || 'mongodb://localhost:27017/__PROJECT_NAME__',
+          postgresUrl: process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/__PROJECT_NAME__',
+          redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
+          jwtSecret: process.env.JWT_SECRET || 'secret',
+          apiPrefix: process.env.API_PREFIX || '/api',
+          corsOrigin: process.env.CORS_ORIGIN || '*',
+          rateLimitWindow: parseInt(process.env.RATE_LIMIT_WINDOW || '900000'), // 15 minutes
+          rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX || '100')
+        }
+
+    # === STEP 3: CREATE EXPRESS/FASTIFY ADAPTER ===
+    - id: 'create-route-adapter'
+      type: 'create_file'
+      description: 'Create route adapter for framework'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/main/adapters/__FRAMEWORK__-route-adapter.ts'
+      template: |
+        import { Controller, HttpRequest } from '@/presentation/protocols'
+        // AI-NOTE: Import based on framework
+        // Express: import { Request, Response } from 'express'
+        // Fastify: import { FastifyRequest, FastifyReply } from 'fastify'
+
+        /**
+         * Adapts Controller to __FRAMEWORK__ route handler
+         * @layer Main Layer - Adapter
+         * @pattern Adapter Pattern
+         */
+        export const adaptRoute = (controller: Controller) => {
+          // AI-NOTE: Express implementation
+          // return async (req: Request, res: Response) => {
+          //   const httpRequest: HttpRequest = {
+          //     body: req.body,
+          //     params: req.params,
+          //     query: req.query,
+          //     headers: req.headers,
+          //     accountId: req.accountId
+          //   }
+          //
+          //   const httpResponse = await controller.handle(httpRequest)
+          //
+          //   if (httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299) {
+          //     res.status(httpResponse.statusCode).json(httpResponse.body)
+          //   } else {
+          //     res.status(httpResponse.statusCode).json({
+          //       error: httpResponse.body.message
+          //     })
+          //   }
+          // }
+
+          // AI-NOTE: Fastify implementation
+          // return async (request: FastifyRequest, reply: FastifyReply) => {
+          //   const httpRequest: HttpRequest = {
+          //     body: request.body,
+          //     params: request.params,
+          //     query: request.query,
+          //     headers: request.headers,
+          //     accountId: request.accountId
+          //   }
+          //
+          //   const httpResponse = await controller.handle(httpRequest)
+          //
+          //   return reply
+          //     .status(httpResponse.statusCode)
+          //     .send(httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299
+          //       ? httpResponse.body
+          //       : { error: httpResponse.body.message })
+          // }
+        }
+
+    # === STEP 4: CREATE MIDDLEWARE ADAPTER ===
+    - id: 'create-middleware-adapter'
+      type: 'create_file'
+      description: 'Create middleware adapter for framework'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/main/adapters/__FRAMEWORK__-middleware-adapter.ts'
+      template: |
+        import { Middleware, HttpRequest } from '@/presentation/protocols'
+        // AI-NOTE: Import based on framework
+        // Express: import { Request, Response, NextFunction } from 'express'
+        // Fastify: import { FastifyRequest, FastifyReply } from 'fastify'
+
+        /**
+         * Adapts Middleware to __FRAMEWORK__ middleware handler
+         * @layer Main Layer - Adapter
+         * @pattern Adapter Pattern
+         */
+        export const adaptMiddleware = (middleware: Middleware) => {
+          // AI-NOTE: Express implementation
+          // return async (req: Request, res: Response, next: NextFunction) => {
+          //   const httpRequest: HttpRequest = {
+          //     headers: req.headers,
+          //     body: req.body,
+          //     params: req.params,
+          //     query: req.query
+          //   }
+          //
+          //   const httpResponse = await middleware.handle(httpRequest)
+          //
+          //   if (httpResponse.statusCode === 200) {
+          //     Object.assign(req, httpResponse.body)
+          //     next()
+          //   } else {
+          //     res.status(httpResponse.statusCode).json({
+          //       error: httpResponse.body.message
+          //     })
+          //   }
+          // }
+
+          // AI-NOTE: Fastify implementation
+          // return async (request: FastifyRequest, reply: FastifyReply) => {
+          //   const httpRequest: HttpRequest = {
+          //     headers: request.headers,
+          //     body: request.body,
+          //     params: request.params,
+          //     query: request.query
+          //   }
+          //
+          //   const httpResponse = await middleware.handle(httpRequest)
+          //
+          //   if (httpResponse.statusCode === 200) {
+          //     Object.assign(request, httpResponse.body)
+          //   } else {
+          //     reply.status(httpResponse.statusCode).send({
+          //       error: httpResponse.body.message
+          //     })
+          //   }
+          // }
+        }
+
+    # === STEP 5: CREATE CONTROLLER FACTORY ===
+    - id: 'create-controller-factory'
+      type: 'create_file'
+      description: 'Create controller factory with dependency injection'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/main/factories/__USE_CASE_NAME_KEBAB_CASE__-controller-factory.ts'
+      template: |
+        import { Controller } from '@/presentation/protocols'
+        import { __USE_CASE_NAME_PASCAL_CASE__Controller } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/controllers'
+        import { makeDb__USE_CASE_NAME_PASCAL_CASE__ } from './usecases/__USE_CASE_NAME_KEBAB_CASE__-factory'
+        import { make__USE_CASE_NAME_PASCAL_CASE__Validation } from './validation/__USE_CASE_NAME_KEBAB_CASE__-validation-factory'
+        import { makeLogControllerDecorator } from '@/main/factories/decorators'
+
+        /**
+         * Factory for __USE_CASE_NAME_PASCAL_CASE__ Controller
+         * @layer Main Layer - Factory
+         * @pattern Factory Pattern, Dependency Injection
+         */
+        export const make__USE_CASE_NAME_PASCAL_CASE__Controller = (): Controller => {
+          const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+          const validation = make__USE_CASE_NAME_PASCAL_CASE__Validation()
+          const controller = new __USE_CASE_NAME_PASCAL_CASE__Controller(useCase, validation)
+
+          // Apply decorators
+          return makeLogControllerDecorator(controller)
+        }
+
+    # === STEP 6: CREATE USE CASE FACTORY ===
+    - id: 'create-usecase-factory'
+      type: 'create_file'
+      description: 'Create use case factory with repository injection'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/main/factories/usecases/__USE_CASE_NAME_KEBAB_CASE__-factory.ts'
+      template: |
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases'
+        import { Db__USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases'
+        import { __FEATURE_NAME_PASCAL_CASE__MongoRepository } from '@/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db'
+        // AI-NOTE: Import other dependencies as needed
+
+        /**
+         * Factory for __USE_CASE_NAME_PASCAL_CASE__ Use Case
+         * @layer Main Layer - Factory
+         * @pattern Factory Pattern, Dependency Injection
+         */
+        export const makeDb__USE_CASE_NAME_PASCAL_CASE__ = (): __USE_CASE_NAME_PASCAL_CASE__ => {
+          const repository = new __FEATURE_NAME_PASCAL_CASE__MongoRepository()
+          // AI-NOTE: Add other dependencies
+          // const cacheRepository = new RedisCacheRepository()
+          // const httpClient = new FetchHttpClient()
+
+          return new Db__USE_CASE_NAME_PASCAL_CASE__(repository)
+        }
+
+    # === STEP 7: CREATE VALIDATION FACTORY ===
+    - id: 'create-validation-factory'
+      type: 'create_file'
+      description: 'Create validation factory for use case'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/main/factories/validation/__USE_CASE_NAME_KEBAB_CASE__-validation-factory.ts'
+      template: |
+        import { Validation } from '@/presentation/protocols'
+        import {
+          ValidationComposite,
+          RequiredFieldValidation,
+          EmailValidation,
+          MinLengthValidation
+        } from '@/validation/validators'
+        import { EmailValidatorAdapter } from '@/infra/validators'
+
+        /**
+         * Factory for __USE_CASE_NAME_PASCAL_CASE__ Validation
+         * @layer Main Layer - Factory
+         * @pattern Factory Pattern, Composite Pattern
+         */
+        export const make__USE_CASE_NAME_PASCAL_CASE__Validation = (): Validation => {
+          const validations: Validation[] = []
+
+          // AI-NOTE: Configure validations based on use case requirements
+          // Required fields
+          const requiredFields = ['name', 'email']
+          for (const field of requiredFields) {
+            validations.push(new RequiredFieldValidation(field))
+          }
+
+          // Email validation
+          validations.push(new EmailValidation('email', new EmailValidatorAdapter()))
+
+          // Other validations
+          validations.push(new MinLengthValidation('password', 8))
+
+          return new ValidationComposite(validations)
+        }
+
+    # === STEP 8: CREATE FEATURE ROUTES ===
+    - id: 'create-feature-routes'
+      type: 'create_file'
+      description: 'Create routes for feature use cases'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main/routes/__FEATURE_NAME_KEBAB_CASE__-routes.ts'
+      template: |
+        import { adaptRoute } from '@/main/adapters'
+        import { make__USE_CASE_NAME_PASCAL_CASE__Controller } from '../__USE_CASE_NAME_KEBAB_CASE__/main/factories'
+        // AI-NOTE: Import other use case controllers
+
+        // Express: import { Router } from 'express'
+        // Fastify: import { FastifyInstance } from 'fastify'
+
+        /**
+         * Routes for __FEATURE_NAME_PASCAL_CASE__ feature
+         * @layer Main Layer - Routes
+         * @pattern Route Aggregation
+         */
+        // Express implementation
+        // export default (router: Router): void => {
+        //   router.post('/__FEATURE_NAME_KEBAB_CASE__', adaptRoute(make__USE_CASE_NAME_PASCAL_CASE__Controller()))
+        //   // AI-NOTE: Add other routes
+        // }
+
+        // Fastify implementation
+        // export default async (app: FastifyInstance): Promise<void> => {
+        //   app.post('/__FEATURE_NAME_KEBAB_CASE__', adaptRoute(make__USE_CASE_NAME_PASCAL_CASE__Controller()))
+        //   // AI-NOTE: Add other routes
+        // }
+
+    # === STEP 9: CREATE MIDDLEWARE SETUP ===
+    - id: 'create-middleware-setup'
+      type: 'create_file'
+      description: 'Create middleware configuration'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/main/config/middlewares.ts'
+      template: |
+        // Express: import { Express } from 'express'
+        // Fastify: import { FastifyInstance } from 'fastify'
+        import { bodyParser, cors, contentType, noCache } from '@/main/middlewares'
+
+        /**
+         * Setup global middlewares
+         * @layer Main Layer - Configuration
+         * @pattern Middleware Chain
+         */
+        // Express implementation
+        // export default (app: Express): void => {
+        //   app.use(bodyParser)
+        //   app.use(cors)
+        //   app.use(contentType)
+        //   app.use(noCache)
+        // }
+
+        // Fastify implementation
+        // export default async (app: FastifyInstance): Promise<void> => {
+        //   await app.register(require('@fastify/cors'), { origin: true })
+        //   await app.register(require('@fastify/helmet'))
+        //   await app.register(require('@fastify/rate-limit'), {
+        //     max: 100,
+        //     timeWindow: '15 minutes'
+        //   })
+        // }
+
+    # === STEP 10: CREATE ROUTE AGGREGATOR ===
+    - id: 'create-route-aggregator'
+      type: 'create_file'
+      description: 'Create route aggregator to load all feature routes'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/main/config/routes.ts'
+      template: |
+        // Express: import { Express, Router } from 'express'
+        // Fastify: import { FastifyInstance } from 'fastify'
+        import { readdirSync } from 'fs'
+        import { join } from 'path'
+        import env from './env'
+
+        /**
+         * Dynamic route loader
+         * @layer Main Layer - Configuration
+         * @pattern Route Aggregation
+         */
+        // Express implementation
+        // export default (app: Express): void => {
+        //   const router = Router()
+        //   app.use(env.apiPrefix, router)
+        //
+        //   // Load all feature routes dynamically
+        //   const featuresDir = join(__dirname, '../../features')
+        //   readdirSync(featuresDir).forEach(feature => {
+        //     const routesPath = join(featuresDir, feature, 'main/routes')
+        //     if (existsSync(routesPath)) {
+        //       readdirSync(routesPath).forEach(async file => {
+        //         if (!file.endsWith('.map')) {
+        //           (await import(join(routesPath, file))).default(router)
+        //         }
+        //       })
+        //     }
+        //   })
+        // }
+
+        // Fastify implementation
+        // export default async (app: FastifyInstance): Promise<void> => {
+        //   // Load all feature routes dynamically
+        //   const featuresDir = join(__dirname, '../../features')
+        //   const features = readdirSync(featuresDir)
+        //
+        //   for (const feature of features) {
+        //     const routesPath = join(featuresDir, feature, 'main/routes')
+        //     if (existsSync(routesPath)) {
+        //       const files = readdirSync(routesPath)
+        //       for (const file of files) {
+        //         if (!file.endsWith('.map')) {
+        //           await app.register(
+        //             (await import(join(routesPath, file))).default,
+        //             { prefix: env.apiPrefix }
+        //           )
+        //         }
+        //       }
+        //     }
+        //   }
+        // }
+
+    # === STEP 11: CREATE APPLICATION SETUP ===
+    - id: 'create-app-setup'
+      type: 'create_file'
+      description: 'Create application setup and configuration'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/main/config/app.ts'
+      template: |
+        import setupMiddlewares from './middlewares'
+        import setupRoutes from './routes'
+        import setupSwagger from './swagger'
+        // Express: import express, { Express } from 'express'
+        // Fastify: import fastify, { FastifyInstance } from 'fastify'
+
+        /**
+         * Application setup
+         * @layer Main Layer - Configuration
+         * @pattern Application Bootstrap
+         */
+        // Express implementation
+        // export const setupApp = async (): Promise<Express> => {
+        //   const app = express()
+        //
+        //   setupSwagger(app)
+        //   setupMiddlewares(app)
+        //   setupRoutes(app)
+        //
+        //   return app
+        // }
+
+        // Fastify implementation
+        // export const setupApp = async (): Promise<FastifyInstance> => {
+        //   const app = fastify({
+        //     logger: true,
+        //     trustProxy: true
+        //   })
+        //
+        //   await setupSwagger(app)
+        //   await setupMiddlewares(app)
+        //   await setupRoutes(app)
+        //
+        //   return app
+        // }
+
+    # === STEP 12: CREATE SERVER ENTRY POINT ===
+    - id: 'create-server'
+      type: 'create_file'
+      description: 'Create server entry point'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/main/server.ts'
+      template: |
+        import 'module-alias/register'
+        import env from './config/env'
+        // AI-NOTE: Import database helper
+        // import { MongoHelper } from '@/infra/db/mongodb'
+        // import { PrismaHelper } from '@/infra/db/prisma'
+
+        /**
+         * Server entry point
+         * @layer Main Layer - Bootstrap
+         * @pattern Application Entry Point
+         */
+        async function bootstrap() {
+          try {
+            // Connect to database
+            // await MongoHelper.connect(env.mongoUrl)
+            // await PrismaHelper.connect()
+
+            console.log('✅ Database connected')
+
+            // Setup and start application
+            const { setupApp } = await import('./config/app')
+            const app = await setupApp()
+
+            // Express
+            // app.listen(env.port, () => {
+            //   console.log(`🚀 Server running at http://localhost:${env.port}`)
+            // })
+
+            // Fastify
+            // await app.listen({ port: env.port, host: '0.0.0.0' })
+            // console.log(`🚀 Server running at http://localhost:${env.port}`)
+
+          } catch (error) {
+            console.error('❌ Server failed to start:', error)
+            process.exit(1)
+          }
+        }
+
+        bootstrap()
+
+    # === STEP 13: CREATE LOG DECORATOR FACTORY ===
+    - id: 'create-log-decorator-factory'
+      type: 'create_file'
+      description: 'Create log decorator factory for controllers'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/main/factories/decorators/log-controller-decorator-factory.ts'
+      template: |
+        import { Controller } from '@/presentation/protocols'
+        import { LogControllerDecorator } from '@/main/decorators'
+        // AI-NOTE: Import log repository
+        // import { LogMongoRepository } from '@/infra/db/mongodb'
+
+        /**
+         * Factory for LogControllerDecorator
+         * @layer Main Layer - Factory
+         * @pattern Decorator Pattern, Factory Pattern
+         */
+        export const makeLogControllerDecorator = (controller: Controller): Controller => {
+          // const logRepository = new LogMongoRepository()
+          // return new LogControllerDecorator(controller, logRepository)
+
+          // For now, return controller without logging
+          return controller
+        }
+
+    # === STEP 14: CREATE AUTH MIDDLEWARE FACTORY ===
+    - id: 'create-auth-middleware-factory'
+      type: 'create_file'
+      description: 'Create authentication middleware factory'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/main/factories/middlewares/auth-middleware-factory.ts'
+      template: |
+        import { Middleware } from '@/presentation/protocols'
+        import { AuthMiddleware } from '@/presentation/middlewares'
+        import { makeDbLoadAccountByToken } from '../usecases'
+
+        /**
+         * Factory for AuthMiddleware
+         * @layer Main Layer - Factory
+         * @pattern Factory Pattern, Dependency Injection
+         */
+        export const makeAuthMiddleware = (role?: string): Middleware => {
+          const loadAccountByToken = makeDbLoadAccountByToken()
+          return new AuthMiddleware(loadAccountByToken, role)
+        }
+
+    # === STEP 15: CREATE E2E TEST ===
+    - id: 'create-e2e-test'
+      type: 'create_file'
+      description: 'Create E2E test for feature'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/tests/main/routes/__FEATURE_NAME_KEBAB_CASE__-routes.test.ts'
+      template: |
+        import { describe, test, expect, beforeAll, afterAll, beforeEach } from 'vitest'
+        import request from 'supertest'
+        // Express: import { Express } from 'express'
+        // Fastify: import { FastifyInstance } from 'fastify'
+        import { setupApp } from '@/main/config/app'
+        // AI-NOTE: Import database helper for test setup
+        // import { MongoHelper } from '@/infra/db/mongodb'
+
+        /**
+         * E2E tests for __FEATURE_NAME_PASCAL_CASE__ routes
+         * @layer Main Layer - Tests
+         * @pattern E2E Testing
+         */
+        describe('__FEATURE_NAME_PASCAL_CASE__ Routes', () => {
+          let app: any // Express or FastifyInstance
+
+          beforeAll(async () => {
+            // await MongoHelper.connect(process.env.MONGO_URL)
+            app = await setupApp()
+          })
+
+          afterAll(async () => {
+            // await MongoHelper.disconnect()
+          })
+
+          beforeEach(async () => {
+            // Clean database before each test
+            // const collection = await MongoHelper.getCollection('__FEATURE_NAME_KEBAB_CASE__')
+            // await collection.deleteMany({})
+          })
+
+          describe('POST /__FEATURE_NAME_KEBAB_CASE__', () => {
+            test('Should return 201 on success', async () => {
+              const response = await request(app)
+                .post('/api/__FEATURE_NAME_KEBAB_CASE__')
+                .send({
+                  name: 'Test Name',
+                  email: 'test@example.com'
+                })
+
+              expect(response.status).toBe(201)
+              expect(response.body).toHaveProperty('id')
+            })
+
+            test('Should return 400 on validation error', async () => {
+              const response = await request(app)
+                .post('/api/__FEATURE_NAME_KEBAB_CASE__')
+                .send({
+                  // Missing required fields
+                })
+
+              expect(response.status).toBe(400)
+              expect(response.body).toHaveProperty('error')
+            })
+
+            test('Should return 401 on authentication error', async () => {
+              // Test protected route without token
+              const response = await request(app)
+                .post('/api/__FEATURE_NAME_KEBAB_CASE__/protected')
+                .send({
+                  name: 'Test Name'
+                })
+
+              expect(response.status).toBe(401)
+            })
+          })
+        })
+
+    # === STEP 16: CREATE SWAGGER DOCUMENTATION ===
+    - id: 'create-swagger-config'
+      type: 'create_file'
+      description: 'Create Swagger/OpenAPI documentation configuration'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/main/config/swagger.ts'
+      template: |
+        // Express: import { Express } from 'express'
+        // import swaggerUi from 'swagger-ui-express'
+        // Fastify: import { FastifyInstance } from 'fastify'
+        // import swagger from '@fastify/swagger'
+        // import swaggerUi from '@fastify/swagger-ui'
+
+        /**
+         * Swagger/OpenAPI documentation setup
+         * @layer Main Layer - Configuration
+         * @pattern API Documentation
+         */
+        const swaggerConfig = {
+          openapi: '3.0.0',
+          info: {
+            title: '__PROJECT_NAME__ API',
+            version: '1.0.0',
+            description: 'Clean Architecture API with __FRAMEWORK__'
+          },
+          servers: [
+            {
+              url: '/api',
+              description: 'API Server'
+            }
+          ],
+          components: {
+            securitySchemes: {
+              bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT'
+              }
+            }
+          }
+        }
+
+        // Express implementation
+        // export default (app: Express): void => {
+        //   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerConfig))
+        // }
+
+        // Fastify implementation
+        // export default async (app: FastifyInstance): Promise<void> => {
+        //   await app.register(swagger, {
+        //     swagger: swaggerConfig,
+        //     hideUntagged: true,
+        //     exposeRoute: true
+        //   })
+        //
+        //   await app.register(swaggerUi, {
+        //     routePrefix: '/api-docs',
+        //     staticCSP: true,
+        //     transformStaticCSP: (header) => header,
+        //     transformSpecification: (swaggerObject) => swaggerObject,
+        //     transformSpecificationClone: true
+        //   })
+        // }
+
+    # === STEP 17: CREATE PR ===
+    - id: 'create-pr-main'
+      type: 'validation'
+      description: 'Create Pull Request for main layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Create PR using GitHub CLI'
+        scripts:
+          - name: 'Push and create PR'
+            command: |
+              git add .
+              git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement main layer with dependency injection"
+              git push -u origin "feat/__FEATURE_NAME_KEBAB_CASE__-main-layer"
+
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): add main layer implementation" \
+                --body "## Summary
+
+              Implemented main layer for __FEATURE_NAME_PASCAL_CASE__ feature.
+
+              ## Changes
+              - ✅ Created controller factories with dependency injection
+              - ✅ Created use case factories
+              - ✅ Created validation factories
+              - ✅ Implemented route adapters for __FRAMEWORK__
+              - ✅ Setup middleware configuration
+              - ✅ Created application bootstrap
+              - ✅ Added E2E tests
+              - ✅ Configured Swagger documentation
+
+              ## Architecture
+              - Composition Root pattern
+              - Factory Method pattern
+              - Adapter pattern for framework integration
+              - Dependency Injection
+
+              ## Testing
+              - [ ] Unit tests pass
+              - [ ] E2E tests pass
+              - [ ] Manual API testing completed
+              " \
+                --assignee @me \
+                --label "feature,backend,main-layer"
+            workingDirectory: '__PROJECT_NAME__'
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER REFACTORING PATTERNS
+# ------------------------------------------------------------------------------
+
+main_refactoring_patterns:
+  - id: 'extract-factory-logic'
+    description: 'Extract inline object creation to factories'
+    detection:
+      - 'Direct instantiation in routes'
+      - 'Dependencies created inline'
+      - 'Missing dependency injection'
+    example:
+      original: |
+        # AI-NOTE: Extract direct instantiation to factory
+        <<<FIND>>>
+        // In route file
+        router.post('/users', async (req, res) => {
+          const repository = new UserMongoRepository()
+          const useCase = new CreateUser(repository)
+          const validation = new ValidationComposite([
+            new RequiredFieldValidation('email')
+          ])
+          const controller = new CreateUserController(useCase, validation)
+
+          const response = await controller.handle(req)
+          res.status(response.statusCode).json(response.body)
+        })
+        <<</FIND>>>
+        <<<REPLACE>>>
+        // In route file
+        import { adaptRoute } from '@/main/adapters'
+        import { makeCreateUserController } from '@/main/factories'
+
+        router.post('/users', adaptRoute(makeCreateUserController()))
+        <<</REPLACE>>>
+      category: 'architecture'
+      severity: 'HIGH'
+      rlhf_impact: 2
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER ANTI-PATTERNS
+# ------------------------------------------------------------------------------
+
+main_anti_patterns:
+  - name: 'Business Logic in Main Layer'
+    description: 'Main layer should only compose, not implement business logic'
+    example: 'Validation rules or business logic in factories'
+    correct: 'Factories should only instantiate and wire dependencies'
+    rlhf_impact: -2
+
+  - name: 'Hard-coded Dependencies'
+    description: 'Dependencies hard-coded instead of injected'
+    example: 'new MongoRepository() inside controller'
+    correct: 'Use factories to inject dependencies'
+    rlhf_impact: -2
+
+  - name: 'Framework Coupling'
+    description: 'Business logic coupled to framework'
+    example: 'Express Request/Response in use cases'
+    correct: 'Use adapters to isolate framework'
+    rlhf_impact: -2
+
+  - name: 'Missing Error Handling'
+    description: 'No global error handling in main layer'
+    example: 'Unhandled promise rejections'
+    correct: 'Setup global error handlers in app configuration'
+    rlhf_impact: -1
+
+  - name: 'Static Route Registration'
+    description: 'Routes registered manually instead of dynamically'
+    example: 'import userRoutes; import productRoutes'
+    correct: 'Use dynamic route loading from features'
+    rlhf_impact: -1

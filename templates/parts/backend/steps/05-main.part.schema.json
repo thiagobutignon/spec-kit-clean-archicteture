@@ -1,0 +1,274 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Backend Main Layer Template Schema",
+  "description": "Schema for validating backend main layer implementation with dependency injection and composition root",
+  "type": "object",
+  "required": ["metadata", "structure", "steps", "main_refactoring_patterns", "main_anti_patterns"],
+  "properties": {
+    "metadata": {
+      "description": "Metadata about the main layer template",
+      "type": "object",
+      "required": ["layer", "project_type", "architecture_style", "test_approach", "framework"],
+      "properties": {
+        "layer": {
+          "type": "string",
+          "const": "main"
+        },
+        "project_type": {
+          "type": "string",
+          "const": "backend"
+        },
+        "architecture_style": {
+          "type": "string",
+          "const": "clean"
+        },
+        "test_approach": {
+          "type": "string",
+          "const": "tdd"
+        },
+        "framework": {
+          "type": "string",
+          "enum": ["express", "fastify"]
+        },
+        "patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "structure": {
+      "description": "Main layer structure definition",
+      "type": "object",
+      "required": ["main_structure"],
+      "properties": {
+        "main_structure": {
+          "type": "object",
+          "required": ["description", "folders"],
+          "properties": {
+            "description": {
+              "type": "string"
+            },
+            "folders": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "steps": {
+      "description": "Implementation steps for main layer",
+      "type": "object",
+      "required": ["main_steps"],
+      "properties": {
+        "main_steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "type", "description", "status"],
+            "properties": {
+              "id": {
+                "description": "Unique identifier for the main step",
+                "type": "string",
+                "pattern": "^create-.*|^test-.*|^refactor-.*|^verify-.*"
+              },
+              "type": {
+                "description": "Type of main layer action",
+                "type": "string",
+                "enum": ["validation", "create_file", "test", "conditional_file"]
+              },
+              "description": {
+                "description": "Human-readable description of what this step does",
+                "type": "string",
+                "minLength": 10
+              },
+              "status": {
+                "description": "Current execution status",
+                "type": "string",
+                "enum": ["PENDING", "SUCCESS", "FAILED", "SKIPPED"]
+              },
+              "rlhf_score": {
+                "description": "RLHF quality score",
+                "type": ["integer", "null"],
+                "minimum": -2,
+                "maximum": 2
+              },
+              "execution_log": {
+                "description": "Execution output or error messages",
+                "type": "string"
+              },
+              "condition": {
+                "description": "Optional condition for step execution",
+                "type": "string"
+              },
+              "path": {
+                "description": "File path for file creation steps",
+                "type": "string"
+              },
+              "template": {
+                "description": "Code template for file creation",
+                "type": "string",
+                "minLength": 10
+              },
+              "run_scripts": {
+                "description": "Scripts to run for validation steps",
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "scripts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "command": {
+                          "type": "string"
+                        },
+                        "workingDirectory": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "references": {
+                "description": "External and internal references for patterns",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["type", "source", "description"],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": ["internal_guideline", "external_pattern", "internal_code_analysis"]
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "main_refactoring_patterns": {
+      "description": "Patterns for refactoring existing code to use main layer patterns",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "detection", "example"],
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the refactoring pattern",
+            "type": "string",
+            "pattern": "^[a-z-]+$"
+          },
+          "description": {
+            "description": "What this refactoring pattern addresses",
+            "type": "string",
+            "minLength": 10
+          },
+          "detection": {
+            "description": "How to detect code that needs this refactoring",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "example": {
+            "description": "Before/after example with AI-NOTEs",
+            "type": "object",
+            "required": ["original", "category", "severity", "rlhf_impact"],
+            "properties": {
+              "original": {
+                "description": "FIND/REPLACE pattern with AI-NOTEs",
+                "type": "string"
+              },
+              "category": {
+                "description": "Category of refactoring",
+                "type": "string"
+              },
+              "severity": {
+                "description": "Severity of the issue",
+                "type": "string",
+                "enum": ["LOW", "MEDIUM", "HIGH"]
+              },
+              "rlhf_impact": {
+                "description": "Impact on RLHF score",
+                "type": "integer",
+                "minimum": -2,
+                "maximum": 2
+              }
+            }
+          }
+        }
+      }
+    },
+    "main_anti_patterns": {
+      "description": "Common anti-patterns to avoid in main layer",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "description", "example", "correct", "rlhf_impact"],
+        "properties": {
+          "name": {
+            "description": "Name of the anti-pattern",
+            "type": "string",
+            "minLength": 3
+          },
+          "description": {
+            "description": "Why this is problematic",
+            "type": "string",
+            "minLength": 10
+          },
+          "example": {
+            "description": "Code example of the anti-pattern",
+            "type": "string"
+          },
+          "correct": {
+            "description": "Correct approach",
+            "type": "string"
+          },
+          "rlhf_impact": {
+            "description": "Impact on RLHF score if detected",
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 0
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

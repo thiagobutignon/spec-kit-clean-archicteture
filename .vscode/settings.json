@@ -62,6 +62,10 @@
     "./templates/parts/backend/steps/04-presentation.part.schema.json": [
       "templates/parts/backend/steps/04-presentation.part.regent"
     ],
+    // Schema for backend main steps part
+    "./templates/parts/backend/steps/05-main.part.schema.json": [
+      "templates/parts/backend/steps/05-main.part.regent"
+    ],
     // Schema for frontend domain steps part
     "./templates/parts/frontend/steps/01-domain.part.schema.json": [
       "templates/parts/frontend/steps/01-domain.part.regent"
