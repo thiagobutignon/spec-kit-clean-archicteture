@@ -1,0 +1,979 @@
+# ============= BEGIN INFRA STEPS FULLSTACK SECTION =============
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: INFRASTRUCTURE LAYER IMPLEMENTATION STEPS FOR FULLSTACK
+  # These steps create concrete implementations of data layer protocols
+  # Split into backend (database, cache) and frontend (HTTP, storage) infrastructure
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # INFRASTRUCTURE LAYER STEPS SECTION
+  # Steps for generating infrastructure layer artifacts in fullstack features
+  # Following "Feature Module with Use Case Slices" architecture for Next.js 15
+  # Infrastructure layer is split between backend and frontend implementations
+  # ------------------------------------------------------------------------------
+
+  infra_steps:
+    # === STEP 1: CREATE INFRA STRUCTURE ===
+    - id: 'create-infra-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'Create infrastructure layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ use case slice'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FULLSTACK_ARCHITECTURE.md'
+          description: 'Following Clean Architecture infrastructure layer structure for fullstack.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture infrastructure adapters next.js fullstack typescript'
+          url: 'https://github.com/...'
+          description: 'Infrastructure patterns for fullstack development.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra'
+          folders:
+            - 'cache'         # Use case specific cache strategies
+            - 'external'      # External API calls specific to this use case
+
+    # === STEP 2: CREATE SHARED INFRA STRUCTURE ===
+    - id: 'create-shared-infra-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'Create shared infrastructure folder structure for __FEATURE_NAME_PASCAL_CASE__ feature'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FULLSTACK_ARCHITECTURE.md'
+          description: 'Shared infrastructure within feature module.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra'
+          folders:
+            - 'db'            # Database repository implementations
+            - 'api-client'    # Internal API client for frontend
+            - 'services'      # Feature services
+
+    # === STEP 3: CREATE BACKEND REPOSITORY IMPLEMENTATION ===
+    - id: 'create-backend-repository-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create Prisma repository implementation for __USE_CASE_NAME_PASCAL_CASE__ backend'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'prisma repository pattern typescript postgresql'
+          url: 'https://github.com/...'
+          description: 'Repository pattern with Prisma ORM.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*Repository'
+          description: 'Consistent with existing repository implementations.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.ts'
+      template: |
+        import { PrismaClient, Prisma } from '@prisma/client'
+        import type { __FEATURE_NAME_PASCAL_CASE__Repository } from '../../domain/repositories/__FEATURE_NAME_KEBAB_CASE__-repository'
+        import type { __FEATURE_NAME_PASCAL_CASE__Entity } from '../../../__USE_CASE_NAME_KEBAB_CASE__/domain/entities/__USE_CASE_NAME_KEBAB_CASE__-entity'
+        import { __FEATURE_NAME_PASCAL_CASE__NotFoundError } from '../../../__USE_CASE_NAME_KEBAB_CASE__/domain/errors/__USE_CASE_NAME_KEBAB_CASE__-errors'
+
+        /**
+         * Prisma implementation of __FEATURE_NAME_PASCAL_CASE__Repository
+         * Backend infrastructure layer - Database operations with PostgreSQL
+         *
+         * @implements __FEATURE_NAME_PASCAL_CASE__Repository
+         * @layer Infrastructure Layer - Backend
+         * @dependency Prisma ORM with PostgreSQL + pgvector
+         */
+        export class Prisma__FEATURE_NAME_PASCAL_CASE__Repository implements __FEATURE_NAME_PASCAL_CASE__Repository {
+          constructor(
+            private readonly prisma: PrismaClient
+          ) {}
+
+          /**
+           * Create a new __FEATURE_NAME_LOWER_CASE__ in the database
+           */
+          async create(data: Omit<__FEATURE_NAME_PASCAL_CASE__Entity, 'id' | 'createdAt' | 'updatedAt' | 'version'>): Promise<__FEATURE_NAME_PASCAL_CASE__Entity> {
+            try {
+              const result = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.create({
+                data: {
+                  __ENTITY_FIELD_1__: data.__ENTITY_FIELD_1__,
+                  __ENTITY_FIELD_2__: data.__ENTITY_FIELD_2__,
+                  __ENTITY_FIELD_3__: data.__ENTITY_FIELD_3__,
+                  status: data.status,
+                  metadata: data.metadata as Prisma.JsonObject,
+                }
+              })
+
+              return this.toDomainEntity(result)
+            } catch (error) {
+              if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === 'P2002') {
+                  throw new __FEATURE_NAME_PASCAL_CASE__AlreadyExistsError('__FEATURE_NAME_LOWER_CASE__ already exists')
+                }
+              }
+              throw error
+            }
+          }
+
+          /**
+           * Find a __FEATURE_NAME_LOWER_CASE__ by ID
+           */
+          async findById(id: string): Promise<__FEATURE_NAME_PASCAL_CASE__Entity | null> {
+            const result = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.findUnique({
+              where: { id }
+            })
+
+            if (!result) {
+              return null
+            }
+
+            return this.toDomainEntity(result)
+          }
+
+          /**
+           * Find multiple __FEATURE_NAME_LOWER_CASE__ with pagination
+           */
+          async findMany(params: {
+            skip?: number
+            take?: number
+            where?: Partial<__FEATURE_NAME_PASCAL_CASE__Entity>
+            orderBy?: { [key: string]: 'asc' | 'desc' }
+          }): Promise<{
+            data: __FEATURE_NAME_PASCAL_CASE__Entity[]
+            total: number
+            hasMore: boolean
+          }> {
+            const [data, total] = await this.prisma.$transaction([
+              this.prisma.__FEATURE_NAME_CAMEL_CASE__.findMany({
+                skip: params.skip || 0,
+                take: params.take || 10,
+                where: this.buildWhereClause(params.where),
+                orderBy: params.orderBy || { createdAt: 'desc' }
+              }),
+              this.prisma.__FEATURE_NAME_CAMEL_CASE__.count({
+                where: this.buildWhereClause(params.where)
+              })
+            ])
+
+            const entities = data.map(item => this.toDomainEntity(item))
+            const hasMore = (params.skip || 0) + entities.length < total
+
+            return { data: entities, total, hasMore }
+          }
+
+          /**
+           * Update a __FEATURE_NAME_LOWER_CASE__ with optimistic locking
+           */
+          async update(id: string, data: Partial<__FEATURE_NAME_PASCAL_CASE__Entity>): Promise<__FEATURE_NAME_PASCAL_CASE__Entity> {
+            try {
+              const current = await this.findById(id)
+              if (!current) {
+                throw new __FEATURE_NAME_PASCAL_CASE__NotFoundError(id)
+              }
+
+              const result = await this.prisma.__FEATURE_NAME_CAMEL_CASE__.update({
+                where: {
+                  id,
+                  version: current.version // Optimistic locking
+                },
+                data: {
+                  ...this.buildUpdateData(data),
+                  version: { increment: 1 }
+                }
+              })
+
+              return this.toDomainEntity(result)
+            } catch (error) {
+              if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === 'P2025') {
+                  throw new __FEATURE_NAME_PASCAL_CASE__NotFoundError(id)
+                }
+              }
+              throw error
+            }
+          }
+
+          /**
+           * Delete a __FEATURE_NAME_LOWER_CASE__ by ID
+           */
+          async delete(id: string): Promise<void> {
+            try {
+              await this.prisma.__FEATURE_NAME_CAMEL_CASE__.delete({
+                where: { id }
+              })
+            } catch (error) {
+              if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === 'P2025') {
+                  throw new __FEATURE_NAME_PASCAL_CASE__NotFoundError(id)
+                }
+              }
+              throw error
+            }
+          }
+
+          /**
+           * Execute within a transaction
+           */
+          async transaction<T>(
+            fn: (tx: Prisma.TransactionClient) => Promise<T>
+          ): Promise<T> {
+            return this.prisma.$transaction(fn)
+          }
+
+          /**
+           * Map Prisma model to domain entity
+           */
+          private toDomainEntity(model: any): __FEATURE_NAME_PASCAL_CASE__Entity {
+            return {
+              id: model.id,
+              __ENTITY_FIELD_1__: model.__ENTITY_FIELD_1__,
+              __ENTITY_FIELD_2__: model.__ENTITY_FIELD_2__,
+              __ENTITY_FIELD_3__: model.__ENTITY_FIELD_3__,
+              status: model.status,
+              metadata: model.metadata as __FEATURE_NAME_PASCAL_CASE__Metadata,
+              createdAt: model.createdAt,
+              updatedAt: model.updatedAt,
+              version: model.version
+            }
+          }
+
+          /**
+           * Build Prisma where clause from domain filters
+           */
+          private buildWhereClause(where?: Partial<__FEATURE_NAME_PASCAL_CASE__Entity>): any {
+            if (!where) return undefined
+
+            const clause: any = {}
+
+            if (where.status) clause.status = where.status
+            if (where.__ENTITY_FIELD_1__) clause.__ENTITY_FIELD_1__ = { contains: where.__ENTITY_FIELD_1__ }
+
+            return clause
+          }
+
+          /**
+           * Build update data from partial entity
+           */
+          private buildUpdateData(data: Partial<__FEATURE_NAME_PASCAL_CASE__Entity>): any {
+            const updateData: any = {}
+
+            if (data.__ENTITY_FIELD_1__ !== undefined) updateData.__ENTITY_FIELD_1__ = data.__ENTITY_FIELD_1__
+            if (data.__ENTITY_FIELD_2__ !== undefined) updateData.__ENTITY_FIELD_2__ = data.__ENTITY_FIELD_2__
+            if (data.__ENTITY_FIELD_3__ !== undefined) updateData.__ENTITY_FIELD_3__ = data.__ENTITY_FIELD_3__
+            if (data.status !== undefined) updateData.status = data.status
+            if (data.metadata !== undefined) updateData.metadata = data.metadata as Prisma.JsonObject
+
+            return updateData
+          }
+        }
+
+    # === STEP 4: CREATE FRONTEND API CLIENT ===
+    - id: 'create-frontend-api-client-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create API client implementation for __FEATURE_NAME_PASCAL_CASE__ frontend'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'fetch api client typescript next.js'
+          url: 'https://github.com/...'
+          description: 'Fetch API client pattern for Next.js.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/api-client/__FEATURE_NAME_KEBAB_CASE__-api.ts'
+      template: |
+        import type { HttpClient } from '@/shared/infra/http/protocols/http-client'
+        import type { __FEATURE_NAME_PASCAL_CASE__RequestDTO, __FEATURE_NAME_PASCAL_CASE__ResponseDTO } from '../../../__USE_CASE_NAME_KEBAB_CASE__/domain/types/__USE_CASE_NAME_KEBAB_CASE__-types'
+
+        /**
+         * API client for __FEATURE_NAME_PASCAL_CASE__ feature
+         * Frontend infrastructure layer - HTTP communication with backend
+         *
+         * @layer Infrastructure Layer - Frontend
+         * @dependency Fetch API wrapper
+         */
+        export class __FEATURE_NAME_PASCAL_CASE__ApiClient {
+          private readonly baseUrl: string
+
+          constructor(
+            private readonly httpClient: HttpClient,
+            baseUrl?: string
+          ) {
+            this.baseUrl = baseUrl || process.env.NEXT_PUBLIC_API_URL || '/api'
+          }
+
+          /**
+           * Create a new __FEATURE_NAME_LOWER_CASE__ via API
+           */
+          async create(data: __FEATURE_NAME_PASCAL_CASE__RequestDTO): Promise<__FEATURE_NAME_PASCAL_CASE__ResponseDTO> {
+            const response = await this.httpClient.request<__FEATURE_NAME_PASCAL_CASE__ResponseDTO>({
+              url: `${this.baseUrl}/__FEATURE_NAME_KEBAB_CASE__`,
+              method: 'POST',
+              body: data,
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+
+            if (!response.success && response.error) {
+              throw new Error(response.error.message || 'Failed to create __FEATURE_NAME_LOWER_CASE__')
+            }
+
+            return response
+          }
+
+          /**
+           * Get __FEATURE_NAME_LOWER_CASE__ by ID
+           */
+          async getById(id: string): Promise<__FEATURE_NAME_PASCAL_CASE__ResponseDTO> {
+            const response = await this.httpClient.request<__FEATURE_NAME_PASCAL_CASE__ResponseDTO>({
+              url: `${this.baseUrl}/__FEATURE_NAME_KEBAB_CASE__/${id}`,
+              method: 'GET'
+            })
+
+            if (!response.success && response.error) {
+              throw new Error(response.error.message || 'Failed to get __FEATURE_NAME_LOWER_CASE__')
+            }
+
+            return response
+          }
+
+          /**
+           * List __FEATURE_NAME_LOWER_CASE__ with pagination
+           */
+          async list(params?: {
+            page?: number
+            limit?: number
+            filter?: string
+            sort?: string
+          }): Promise<__FEATURE_NAME_PASCAL_CASE__ResponseDTO> {
+            const searchParams = new URLSearchParams()
+
+            if (params?.page) searchParams.append('page', params.page.toString())
+            if (params?.limit) searchParams.append('limit', params.limit.toString())
+            if (params?.filter) searchParams.append('filter', params.filter)
+            if (params?.sort) searchParams.append('sort', params.sort)
+
+            const queryString = searchParams.toString()
+            const url = `${this.baseUrl}/__FEATURE_NAME_KEBAB_CASE__${queryString ? `?${queryString}` : ''}`
+
+            const response = await this.httpClient.request<__FEATURE_NAME_PASCAL_CASE__ResponseDTO>({
+              url,
+              method: 'GET'
+            })
+
+            if (!response.success && response.error) {
+              throw new Error(response.error.message || 'Failed to list __FEATURE_NAME_LOWER_CASE__')
+            }
+
+            return response
+          }
+
+          /**
+           * Update __FEATURE_NAME_LOWER_CASE__
+           */
+          async update(id: string, data: Partial<__FEATURE_NAME_PASCAL_CASE__RequestDTO>): Promise<__FEATURE_NAME_PASCAL_CASE__ResponseDTO> {
+            const response = await this.httpClient.request<__FEATURE_NAME_PASCAL_CASE__ResponseDTO>({
+              url: `${this.baseUrl}/__FEATURE_NAME_KEBAB_CASE__/${id}`,
+              method: 'PUT',
+              body: data,
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+
+            if (!response.success && response.error) {
+              throw new Error(response.error.message || 'Failed to update __FEATURE_NAME_LOWER_CASE__')
+            }
+
+            return response
+          }
+
+          /**
+           * Delete __FEATURE_NAME_LOWER_CASE__
+           */
+          async delete(id: string): Promise<void> {
+            const response = await this.httpClient.request<__FEATURE_NAME_PASCAL_CASE__ResponseDTO>({
+              url: `${this.baseUrl}/__FEATURE_NAME_KEBAB_CASE__/${id}`,
+              method: 'DELETE'
+            })
+
+            if (!response.success && response.error) {
+              throw new Error(response.error.message || 'Failed to delete __FEATURE_NAME_LOWER_CASE__')
+            }
+          }
+
+          /**
+           * Handle optimistic updates for better UX
+           */
+          async createOptimistic(
+            data: __FEATURE_NAME_PASCAL_CASE__RequestDTO,
+            options?: {
+              onOptimisticUpdate?: (tempData: __FEATURE_NAME_PASCAL_CASE__ResponseDTO) => void
+              onRollback?: (error: Error) => void
+            }
+          ): Promise<__FEATURE_NAME_PASCAL_CASE__ResponseDTO> {
+            // Create temporary optimistic response
+            const optimisticResponse: __FEATURE_NAME_PASCAL_CASE__ResponseDTO = {
+              success: true,
+              data: {
+                id: `temp-${Date.now()}`,
+                __DATA_FIELD_1__: data.__REQUEST_FIELD_1__,
+                __DATA_FIELD_2__: data.__REQUEST_FIELD_2__,
+                __DATA_FIELD_3__: 0,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              }
+            }
+
+            // Call optimistic update callback
+            options?.onOptimisticUpdate?.(optimisticResponse)
+
+            try {
+              // Make actual API call
+              const response = await this.create(data)
+              return response
+            } catch (error) {
+              // Rollback on error
+              options?.onRollback?.(error as Error)
+              throw error
+            }
+          }
+        }
+
+    # === STEP 5: CREATE CACHE STRATEGY ===
+    - id: 'create-cache-strategy-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create cache strategy for __USE_CASE_NAME_PASCAL_CASE__ use case'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'redis cache strategy typescript next.js'
+          url: 'https://github.com/...'
+          description: 'Cache patterns for fullstack applications.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/cache/__USE_CASE_NAME_KEBAB_CASE__-cache-strategy.ts'
+      template: |
+        import type { CacheClient } from '@/shared/infra/cache/protocols/cache-client'
+        import type { __USE_CASE_NAME_PASCAL_CASE__Output } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * Cache strategy for __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Can be used by both frontend (browser cache) and backend (Redis)
+         *
+         * @layer Infrastructure Layer - Cache
+         * @pattern Strategy Pattern
+         */
+        export class __USE_CASE_NAME_PASCAL_CASE__CacheStrategy {
+          private readonly TTL_SECONDS = 300 // 5 minutes default
+          private readonly KEY_PREFIX = '__FEATURE_NAME_UPPER_CASE___CACHE'
+
+          constructor(
+            private readonly cacheClient: CacheClient,
+            private readonly ttl: number = 300
+          ) {}
+
+          /**
+           * Generate cache key for the use case
+           */
+          private generateKey(input: Record<string, any>): string {
+            const sortedInput = Object.keys(input)
+              .sort()
+              .reduce((acc, key) => {
+                acc[key] = input[key]
+                return acc
+              }, {} as Record<string, any>)
+
+            const hash = JSON.stringify(sortedInput)
+            return `${this.KEY_PREFIX}:__USE_CASE_NAME_UPPER_CASE__:${Buffer.from(hash).toString('base64')}`
+          }
+
+          /**
+           * Get cached result if available
+           */
+          async get(input: Record<string, any>): Promise<__USE_CASE_NAME_PASCAL_CASE__Output | null> {
+            try {
+              const key = this.generateKey(input)
+              const cached = await this.cacheClient.get<__USE_CASE_NAME_PASCAL_CASE__Output>(key)
+
+              if (cached) {
+                console.log(`[Cache Hit] ${key}`)
+                return cached
+              }
+
+              console.log(`[Cache Miss] ${key}`)
+              return null
+            } catch (error) {
+              console.error('[Cache Error] Failed to get from cache:', error)
+              return null // Fail gracefully
+            }
+          }
+
+          /**
+           * Set cache with result
+           */
+          async set(input: Record<string, any>, output: __USE_CASE_NAME_PASCAL_CASE__Output): Promise<void> {
+            try {
+              const key = this.generateKey(input)
+              await this.cacheClient.set(key, output, this.ttl)
+              console.log(`[Cache Set] ${key} (TTL: ${this.ttl}s)`)
+            } catch (error) {
+              console.error('[Cache Error] Failed to set cache:', error)
+              // Fail gracefully - don't break the flow
+            }
+          }
+
+          /**
+           * Invalidate cache for specific input
+           */
+          async invalidate(input: Record<string, any>): Promise<void> {
+            try {
+              const key = this.generateKey(input)
+              await this.cacheClient.delete(key)
+              console.log(`[Cache Invalidated] ${key}`)
+            } catch (error) {
+              console.error('[Cache Error] Failed to invalidate cache:', error)
+            }
+          }
+
+          /**
+           * Invalidate all cache entries for this use case
+           */
+          async invalidateAll(): Promise<void> {
+            try {
+              const pattern = `${this.KEY_PREFIX}:__USE_CASE_NAME_UPPER_CASE__:*`
+              await this.cacheClient.deletePattern(pattern)
+              console.log(`[Cache Invalidated] All entries for __USE_CASE_NAME_PASCAL_CASE__`)
+            } catch (error) {
+              console.error('[Cache Error] Failed to invalidate all cache:', error)
+            }
+          }
+
+          /**
+           * Wrap use case execution with cache
+           */
+          async execute<T extends { execute: (input: any) => Promise<__USE_CASE_NAME_PASCAL_CASE__Output> }>(
+            useCase: T,
+            input: Parameters<T['execute']>[0]
+          ): Promise<__USE_CASE_NAME_PASCAL_CASE__Output> {
+            // Try to get from cache first
+            const cached = await this.get(input)
+            if (cached) {
+              return cached
+            }
+
+            // Execute use case
+            const result = await useCase.execute(input)
+
+            // Cache the result if successful
+            if (result.success) {
+              await this.set(input, result)
+            }
+
+            return result
+          }
+        }
+
+    # === STEP 6: CREATE EXTERNAL API ADAPTER ===
+    - id: 'create-external-api-adapter-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Create external API adapter if use case requires third-party integration'
+      condition: 'check_if_external_api_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'adapter pattern external api typescript'
+          url: 'https://github.com/...'
+          description: 'Adapter pattern for external API integration.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra/external/__EXTERNAL_SERVICE_KEBAB_CASE__-adapter.ts'
+      template: |
+        import type { ExternalServiceProtocol } from '../../data/protocols/__EXTERNAL_SERVICE_KEBAB_CASE__-protocol'
+
+        /**
+         * Adapter for __EXTERNAL_SERVICE_PASCAL_CASE__ external API
+         * Infrastructure layer implementation for third-party service integration
+         *
+         * @implements ExternalServiceProtocol
+         * @layer Infrastructure Layer - External Services
+         * @pattern Adapter Pattern
+         */
+        export class __EXTERNAL_SERVICE_PASCAL_CASE__Adapter implements ExternalServiceProtocol {
+          private readonly apiKey: string
+          private readonly baseUrl: string
+          private readonly timeout: number
+
+          constructor(config?: {
+            apiKey?: string
+            baseUrl?: string
+            timeout?: number
+          }) {
+            this.apiKey = config?.apiKey || process.env.__EXTERNAL_SERVICE_UPPER_CASE___API_KEY || ''
+            this.baseUrl = config?.baseUrl || process.env.__EXTERNAL_SERVICE_UPPER_CASE___BASE_URL || 'https://api.__EXTERNAL_SERVICE_LOWER_CASE__.com'
+            this.timeout = config?.timeout || 30000 // 30 seconds default
+          }
+
+          /**
+           * Call external service API
+           */
+          async call(params: {
+            endpoint: string
+            method: 'GET' | 'POST' | 'PUT' | 'DELETE'
+            data?: any
+            headers?: Record<string, string>
+          }): Promise<any> {
+            const controller = new AbortController()
+            const timeoutId = setTimeout(() => controller.abort(), this.timeout)
+
+            try {
+              const response = await fetch(`${this.baseUrl}${params.endpoint}`, {
+                method: params.method,
+                headers: {
+                  'Authorization': `Bearer ${this.apiKey}`,
+                  'Content-Type': 'application/json',
+                  ...params.headers
+                },
+                body: params.data ? JSON.stringify(params.data) : undefined,
+                signal: controller.signal
+              })
+
+              clearTimeout(timeoutId)
+
+              if (!response.ok) {
+                throw new Error(`External API error: ${response.status} ${response.statusText}`)
+              }
+
+              return await response.json()
+            } catch (error) {
+              clearTimeout(timeoutId)
+
+              if (error instanceof Error) {
+                if (error.name === 'AbortError') {
+                  throw new Error(`External API timeout after ${this.timeout}ms`)
+                }
+                throw error
+              }
+
+              throw new Error('Unknown external API error')
+            }
+          }
+
+          /**
+           * Health check for external service
+           */
+          async healthCheck(): Promise<boolean> {
+            try {
+              await this.call({
+                endpoint: '/health',
+                method: 'GET'
+              })
+              return true
+            } catch {
+              return false
+            }
+          }
+        }
+
+    # === STEP 7: CREATE INFRA TESTS ===
+    - id: 'create-infra-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create unit tests for infrastructure layer implementations'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'vitest mock testing infrastructure layer'
+          url: 'https://github.com/...'
+          description: 'Testing infrastructure implementations.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
+        import { PrismaClient } from '@prisma/client'
+        import { Prisma__FEATURE_NAME_PASCAL_CASE__Repository } from './prisma-__FEATURE_NAME_KEBAB_CASE__-repository'
+        import { __FEATURE_NAME_PASCAL_CASE__NotFoundError } from '../../../__USE_CASE_NAME_KEBAB_CASE__/domain/errors/__USE_CASE_NAME_KEBAB_CASE__-errors'
+
+        // Mock Prisma Client
+        vi.mock('@prisma/client', () => ({
+          PrismaClient: vi.fn(() => ({
+            __FEATURE_NAME_CAMEL_CASE__: {
+              create: vi.fn(),
+              findUnique: vi.fn(),
+              findMany: vi.fn(),
+              count: vi.fn(),
+              update: vi.fn(),
+              delete: vi.fn()
+            },
+            $transaction: vi.fn()
+          })),
+          Prisma: {
+            PrismaClientKnownRequestError: class PrismaClientKnownRequestError extends Error {
+              constructor(public code: string) {
+                super()
+              }
+            }
+          }
+        }))
+
+        describe('Prisma__FEATURE_NAME_PASCAL_CASE__Repository', () => {
+          let sut: Prisma__FEATURE_NAME_PASCAL_CASE__Repository
+          let prismaClient: any
+
+          beforeEach(() => {
+            prismaClient = new PrismaClient()
+            sut = new Prisma__FEATURE_NAME_PASCAL_CASE__Repository(prismaClient)
+          })
+
+          afterEach(() => {
+            vi.clearAllMocks()
+          })
+
+          describe('create', () => {
+            it('should create a new entity in database', async () => {
+              const input = {
+                __ENTITY_FIELD_1__: 'value1',
+                __ENTITY_FIELD_2__: 'value2',
+                __ENTITY_FIELD_3__: 42,
+                status: 'ACTIVE',
+                metadata: { source: 'WEB' }
+              }
+
+              const dbResult = {
+                id: 'generated-id',
+                ...input,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                version: 1
+              }
+
+              prismaClient.__FEATURE_NAME_CAMEL_CASE__.create.mockResolvedValueOnce(dbResult)
+
+              const result = await sut.create(input)
+
+              expect(prismaClient.__FEATURE_NAME_CAMEL_CASE__.create).toHaveBeenCalledWith({
+                data: expect.objectContaining({
+                  __ENTITY_FIELD_1__: input.__ENTITY_FIELD_1__,
+                  status: input.status
+                })
+              })
+
+              expect(result).toMatchObject({
+                id: 'generated-id',
+                __ENTITY_FIELD_1__: input.__ENTITY_FIELD_1__,
+                version: 1
+              })
+            })
+          })
+
+          describe('findById', () => {
+            it('should return entity when found', async () => {
+              const dbEntity = {
+                id: 'test-id',
+                __ENTITY_FIELD_1__: 'value',
+                __ENTITY_FIELD_2__: 'value2',
+                __ENTITY_FIELD_3__: 10,
+                status: 'ACTIVE',
+                metadata: {},
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                version: 1
+              }
+
+              prismaClient.__FEATURE_NAME_CAMEL_CASE__.findUnique.mockResolvedValueOnce(dbEntity)
+
+              const result = await sut.findById('test-id')
+
+              expect(prismaClient.__FEATURE_NAME_CAMEL_CASE__.findUnique).toHaveBeenCalledWith({
+                where: { id: 'test-id' }
+              })
+
+              expect(result).toMatchObject({
+                id: 'test-id',
+                __ENTITY_FIELD_1__: 'value'
+              })
+            })
+
+            it('should return null when not found', async () => {
+              prismaClient.__FEATURE_NAME_CAMEL_CASE__.findUnique.mockResolvedValueOnce(null)
+
+              const result = await sut.findById('non-existent')
+
+              expect(result).toBeNull()
+            })
+          })
+
+          describe('update', () => {
+            it('should update entity with optimistic locking', async () => {
+              const currentEntity = {
+                id: 'test-id',
+                __ENTITY_FIELD_1__: 'old-value',
+                version: 1
+              }
+
+              const updatedEntity = {
+                ...currentEntity,
+                __ENTITY_FIELD_1__: 'new-value',
+                version: 2
+              }
+
+              prismaClient.__FEATURE_NAME_CAMEL_CASE__.findUnique.mockResolvedValueOnce(currentEntity)
+              prismaClient.__FEATURE_NAME_CAMEL_CASE__.update.mockResolvedValueOnce(updatedEntity)
+
+              const result = await sut.update('test-id', { __ENTITY_FIELD_1__: 'new-value' })
+
+              expect(prismaClient.__FEATURE_NAME_CAMEL_CASE__.update).toHaveBeenCalledWith({
+                where: {
+                  id: 'test-id',
+                  version: 1 // Optimistic locking check
+                },
+                data: expect.objectContaining({
+                  version: { increment: 1 }
+                })
+              })
+
+              expect(result.__ENTITY_FIELD_1__).toBe('new-value')
+              expect(result.version).toBe(2)
+            })
+          })
+        })
+
+    # === STEP 8: CREATE SHARED HTTP CLIENT ===
+    - id: 'create-shared-http-client-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create shared HTTP client implementation using Fetch API'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FULLSTACK_RULES.md'
+          description: 'Use Fetch API, not axios for HTTP requests.'
+      path: '__PROJECT_NAME__/src/shared/infra/http/fetch-http-client.ts'
+      template: |
+        import type { HttpClient, HttpRequest, HttpResponse } from './protocols/http-client'
+
+        /**
+         * Fetch API implementation of HttpClient
+         * Shared infrastructure for frontend HTTP requests
+         *
+         * @implements HttpClient
+         * @layer Infrastructure Layer - Shared HTTP
+         */
+        export class FetchHttpClient implements HttpClient {
+          constructor(
+            private readonly defaultHeaders?: Record<string, string>
+          ) {}
+
+          async request<T = any>(params: HttpRequest): Promise<HttpResponse<T>> {
+            const controller = new AbortController()
+            const timeoutId = params.timeout
+              ? setTimeout(() => controller.abort(), params.timeout)
+              : null
+
+            try {
+              const response = await fetch(params.url, {
+                method: params.method || 'GET',
+                headers: {
+                  ...this.defaultHeaders,
+                  ...params.headers
+                },
+                body: params.body ? JSON.stringify(params.body) : undefined,
+                signal: controller.signal,
+                credentials: params.credentials || 'same-origin',
+                cache: params.cache || 'default',
+                mode: params.mode || 'cors'
+              })
+
+              if (timeoutId) clearTimeout(timeoutId)
+
+              const contentType = response.headers.get('content-type')
+              let data: T
+
+              if (contentType?.includes('application/json')) {
+                data = await response.json()
+              } else if (contentType?.includes('text/')) {
+                data = await response.text() as any
+              } else {
+                data = await response.blob() as any
+              }
+
+              return {
+                statusCode: response.status,
+                data,
+                headers: Object.fromEntries(response.headers.entries()),
+                ok: response.ok
+              }
+            } catch (error) {
+              if (timeoutId) clearTimeout(timeoutId)
+
+              if (error instanceof Error) {
+                if (error.name === 'AbortError') {
+                  throw new Error(`Request timeout after ${params.timeout}ms`)
+                }
+                throw error
+              }
+
+              throw new Error('Network request failed')
+            }
+          }
+
+          /**
+           * Create a new instance with additional headers
+           */
+          withHeaders(headers: Record<string, string>): HttpClient {
+            return new FetchHttpClient({
+              ...this.defaultHeaders,
+              ...headers
+            })
+          }
+
+          /**
+           * Create instance with authentication
+           */
+          withAuth(token: string): HttpClient {
+            return this.withHeaders({
+              'Authorization': `Bearer ${token}`
+            })
+          }
+        }
+
+    # === STEP 9: VALIDATE INFRA LAYER ===
+    - id: 'validate-infra-layer-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Validate fullstack infrastructure layer implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run all infrastructure layer validation checks'
+        scripts:
+          - name: 'TypeScript Compilation'
+            command: 'npx tsc --noEmit --project tsconfig.json'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'ESLint Check'
+            command: 'npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/infra src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Unit Tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Integration Tests with Test Database'
+            command: 'npm run test:integration -- --grep="repository"'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Clean Architecture Rules Check'
+            command: 'npm run arch:check -- --layer=infra --feature=__FEATURE_NAME_KEBAB_CASE__ --type=fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit Infrastructure Layer'
+            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ fullstack infrastructure layer"'
+            workingDirectory: '__PROJECT_NAME__'
+
+# ============= END INFRA STEPS FULLSTACK SECTION =============
