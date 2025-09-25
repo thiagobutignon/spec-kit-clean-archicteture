@@ -82,6 +82,10 @@
     "./templates/parts/frontend/steps/04-presentation.part.schema.json": [
       "templates/parts/frontend/steps/04-presentation.part.regent"
     ],
+    // Schema for frontend main steps part
+    "./templates/parts/frontend/steps/05-main.part.schema.json": [
+      "templates/parts/frontend/steps/05-main.part.regent"
+    ],
     // Schema for fullstack domain steps part
     "./templates/parts/fullstack/steps/01-domain.part.schema.json": [
       "templates/parts/fullstack/steps/01-domain.part.regent"
