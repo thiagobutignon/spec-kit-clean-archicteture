@@ -1,0 +1,872 @@
+# ============= BEGIN PRESENTATION STEPS BACKEND SECTION =============
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: PRESENTATION LAYER IMPLEMENTATION STEPS FOR BACKEND
+  # These steps create controllers, middlewares, and HTTP protocols
+  # following Clean Architecture and Vertical Slice patterns for Node.js/Express
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION LAYER STEPS SECTION
+  # Steps for generating presentation layer artifacts in backend features
+  # Following "Feature Module with Use Case Slices" architecture
+  # ------------------------------------------------------------------------------
+
+  presentation_steps:
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create and checkout feature branch for __USE_CASE_NAME_PASCAL_CASE__ presentation implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Git branching strategy and naming conventions'
+      run_scripts:
+        description: 'Create feature branch with proper naming convention'
+        scripts:
+          - name: 'Create feature branch'
+            command: |
+              # Stash any uncommitted changes
+              git stash save "WIP: Before creating __FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__ presentation branch"
+
+              # Ensure we're on the main branch and up to date
+              git checkout main || git checkout master
+              git pull origin main || git pull origin master
+
+              # Create and checkout new feature branch
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__-presentation"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
+
+              echo "✅ Created and checked out branch: $BRANCH_NAME"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: CREATE TEST STRUCTURE (TDD - RED PHASE) ===
+    - id: 'create-test-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'TDD RED: Create test structure for __USE_CASE_NAME_PASCAL_CASE__ presentation layer'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'TDD_GUIDE.md'
+          description: 'Following Test-Driven Development: RED-GREEN-REFACTOR cycle.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/tests/presentation'
+          folders:
+            - 'controllers'   # Controller tests
+            - 'mocks'         # Test mocks and spies
+            - 'middlewares'   # Middleware tests
+      validation_script: |
+        # AI-NOTE: TDD starts with test structure
+        BASE_PATH="__PROJECT_NAME__/tests/presentation"
+        FOLDERS="$BASE_PATH/controllers $BASE_PATH/mocks $BASE_PATH/middlewares"
+        echo "🔴 TDD RED: Creating test structure..."
+        for folder in $FOLDERS; do
+          mkdir -p "$folder"
+        done
+        echo "✅ Test structure created for TDD cycle"
+
+    # === STEP 3: CREATE TEST MOCKS (TDD - RED PHASE) ===
+    - id: 'create-test-mocks-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Create test mocks and spies for __USE_CASE_NAME_PASCAL_CASE__'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'TDD_GUIDE.md'
+          description: 'Test doubles and mocking patterns'
+      path: '__PROJECT_NAME__/tests/presentation/mocks/mock-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import { Validation } from '@/presentation/protocols'
+
+        /**
+         * Test doubles for __USE_CASE_NAME_PASCAL_CASE__ controller testing
+         * AI-NOTE: TDD - Create mocks BEFORE implementation
+         * These mocks define the expected behavior
+         */
+
+        export class __USE_CASE_NAME_PASCAL_CASE__Spy implements __USE_CASE_NAME_PASCAL_CASE__ {
+          params: any
+          result = {
+            __OUTPUT_FIELD_1__: 'test-output-1',
+            __OUTPUT_FIELD_2__: 'test-output-2',
+            __OUTPUT_FIELD_3__: 'test-output-3',
+            __TIMESTAMP_FIELD__: new Date('2024-01-01')
+          }
+          callsCount = 0
+
+          async execute(input: any): Promise<any> {
+            this.params = input
+            this.callsCount++
+            return this.result
+          }
+        }
+
+        export class ValidationSpy implements Validation {
+          error: Error | null = null
+          input: any
+
+          validate(input: any): Error | null {
+            this.input = input
+            return this.error
+          }
+        }
+
+    # === STEP 4: CREATE CONTROLLER TEST (TDD - RED PHASE) ===
+    - id: 'create-controller-test-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Write failing tests for __USE_CASE_NAME_PASCAL_CASE__Controller'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development vitest red green refactor'
+          description: 'TDD cycle with Vitest'
+      path: '__PROJECT_NAME__/tests/presentation/controllers/__USE_CASE_NAME_KEBAB_CASE__-controller.spec.ts'
+      template: |
+        import { describe, it, expect, vi, beforeEach } from 'vitest'
+        import { __USE_CASE_NAME_PASCAL_CASE__Controller } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/controllers/__USE_CASE_NAME_KEBAB_CASE__-controller'
+        import { badRequest, serverError, ok, noContent } from '@/presentation/helpers'
+        import { __USE_CASE_NAME_PASCAL_CASE__Spy, ValidationSpy } from '@/tests/presentation/mocks/mock-__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * TDD RED Phase: Write tests BEFORE implementation
+         * AI-NOTE: These tests will FAIL initially - that's expected!
+         * The implementation will be created to make these tests pass
+         */
+
+        type SutTypes = {
+          sut: __USE_CASE_NAME_PASCAL_CASE__Controller
+          __USE_CASE_NAME_CAMEL_CASE__Spy: __USE_CASE_NAME_PASCAL_CASE__Spy
+          validationSpy: ValidationSpy
+        }
+
+        const makeSut = (): SutTypes => {
+          const __USE_CASE_NAME_CAMEL_CASE__Spy = new __USE_CASE_NAME_PASCAL_CASE__Spy()
+          const validationSpy = new ValidationSpy()
+          const sut = new __USE_CASE_NAME_PASCAL_CASE__Controller(
+            __USE_CASE_NAME_CAMEL_CASE__Spy,
+            validationSpy
+          )
+          return {
+            sut,
+            __USE_CASE_NAME_CAMEL_CASE__Spy,
+            validationSpy
+          }
+        }
+
+        // AI-NOTE: NEVER use faker or random data - use fixed test data
+        const makeRequest = (): __USE_CASE_NAME_PASCAL_CASE__Controller.Request => ({
+          __INPUT_FIELD_1__: 'test-value-1',
+          __INPUT_FIELD_2__: 'test-value-2',
+          __INPUT_FIELD_3__: 'test-value-3'
+        })
+
+        describe('__USE_CASE_NAME_PASCAL_CASE__Controller', () => {
+          describe('TDD RED - These tests will fail initially', () => {
+            it('should call Validation with correct values', async () => {
+              const { sut, validationSpy } = makeSut()
+              const request = makeRequest()
+
+              await sut.handle(request)
+
+              expect(validationSpy.input).toEqual(request)
+            })
+
+            it('should return 400 if Validation fails', async () => {
+              const { sut, validationSpy } = makeSut()
+              validationSpy.error = new Error('Validation error')
+
+              const httpResponse = await sut.handle(makeRequest())
+
+              expect(httpResponse).toEqual(badRequest(validationSpy.error))
+            })
+
+            it('should call __USE_CASE_NAME_PASCAL_CASE__ with correct values', async () => {
+              const { sut, __USE_CASE_NAME_CAMEL_CASE__Spy } = makeSut()
+              const request = makeRequest()
+
+              await sut.handle(request)
+
+              expect(__USE_CASE_NAME_CAMEL_CASE__Spy.params).toEqual(request)
+            })
+
+            it('should return 500 if __USE_CASE_NAME_PASCAL_CASE__ throws', async () => {
+              const { sut, __USE_CASE_NAME_CAMEL_CASE__Spy } = makeSut()
+              vi.spyOn(__USE_CASE_NAME_CAMEL_CASE__Spy, 'execute').mockRejectedValueOnce(new Error())
+
+              const httpResponse = await sut.handle(makeRequest())
+
+              expect(httpResponse).toEqual(serverError(new Error()))
+            })
+
+            it('should return 200 on success', async () => {
+              const { sut, __USE_CASE_NAME_CAMEL_CASE__Spy } = makeSut()
+
+              const httpResponse = await sut.handle(makeRequest())
+
+              expect(httpResponse).toEqual(ok(__USE_CASE_NAME_CAMEL_CASE__Spy.result))
+            })
+
+            it('should return 204 if no content', async () => {
+              const { sut, __USE_CASE_NAME_CAMEL_CASE__Spy } = makeSut()
+              __USE_CASE_NAME_CAMEL_CASE__Spy.result = null
+
+              const httpResponse = await sut.handle(makeRequest())
+
+              expect(httpResponse).toEqual(noContent())
+            })
+          })
+        })
+
+    # === STEP 5: RUN TESTS - VERIFY RED (TDD - RED PHASE) ===
+    - id: 'verify-tests-fail-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD RED: Verify tests fail (controller does not exist yet)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to ensure they fail (RED phase)'
+        scripts:
+          - name: 'Run failing tests'
+            command: |
+              echo "🔴 TDD RED: Running tests - they should FAIL..."
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__-controller.spec.ts || {
+                echo "✅ Good! Tests are failing as expected (RED phase)"
+                echo "   Now we'll implement the code to make them pass..."
+                exit 0
+              }
+              echo "❌ ERROR: Tests are passing but code doesn't exist yet!"
+              exit 1
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 6: CREATE PRESENTATION STRUCTURE (TDD - GREEN PHASE) ===
+    - id: 'create-presentation-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'TDD GREEN: Create presentation layer structure to make tests pass'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation'
+          folders:
+            - 'controllers'
+            - 'errors'
+            - 'protocols'
+            - 'helpers'
+
+    # === STEP 7: CREATE CONTROLLER (TDD - GREEN PHASE) ===
+    - id: 'create-presentation-controller-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement controller to make tests pass'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'express controller clean architecture dependency injection'
+          url: 'https://github.com/...'
+          description: 'Following Clean Architecture controller pattern for Express.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*Controller'
+          description: 'Consistent with existing backend controllers.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/controllers/__USE_CASE_NAME_KEBAB_CASE__-controller.ts'
+      template: |
+        import { Controller, HttpResponse, Validation } from '@/presentation/protocols'
+        import { badRequest, serverError, ok, noContent } from '@/presentation/helpers'
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * HTTP Controller for __USE_CASE_NAME_PASCAL_CASE__ use case
+         * @pattern Clean Architecture - Framework agnostic controller
+         * @layer Presentation Layer - HTTP adapter for business logic
+         * @architecture Vertical Slice - Self-contained controller
+         *
+         * AI-NOTE: Controllers should only:
+         * 1. Validate request format (NOT business rules)
+         * 2. Call the use case
+         * 3. Transform result to HTTP response
+         * 4. Handle errors appropriately
+         */
+        export class __USE_CASE_NAME_PASCAL_CASE__Controller implements Controller {
+          constructor(
+            private readonly __USE_CASE_NAME_CAMEL_CASE__: __USE_CASE_NAME_PASCAL_CASE__,
+            private readonly validation: Validation
+          ) {}
+
+          /**
+           * Handle HTTP request for __USE_CASE_NAME_LOWER_CASE__
+           * @param request - HTTP request data
+           * @returns Promise with HTTP response
+           */
+          async handle(request: __USE_CASE_NAME_PASCAL_CASE__Controller.Request): Promise<HttpResponse> {
+            try {
+              // AI-NOTE: Validation is structural only - business rules belong in domain
+              const error = this.validation.validate(request)
+              if (error) {
+                return badRequest(error)
+              }
+
+              // AI-NOTE: Controller delegates to use case - no business logic here
+              const result = await this.__USE_CASE_NAME_CAMEL_CASE__.execute(request)
+
+              // AI-NOTE: Choose appropriate response based on use case type
+              if (!result) {
+                return noContent()
+              }
+
+              return ok(result)
+            } catch (error) {
+              // AI-NOTE: All unhandled errors become 500 - domain errors should be caught
+              return serverError(error)
+            }
+          }
+        }
+
+        /**
+         * Namespace for __USE_CASE_NAME_PASCAL_CASE__Controller types
+         * AI-NOTE: Request type should match domain input but may have HTTP-specific fields
+         */
+        export namespace __USE_CASE_NAME_PASCAL_CASE__Controller {
+          export type Request = {
+            __INPUT_FIELD_1__: string
+            __INPUT_FIELD_2__: string
+            __INPUT_FIELD_3__: string
+            // AI-NOTE: Add authentication/authorization fields if needed
+            accountId?: string
+            role?: string
+          }
+        }
+      validation_script: |
+        # AI-NOTE: Shell functions - DO NOT replace $ variables
+        run_lint_check() {
+          echo "🔍 Running lint check for presentation layer..."
+          npm run lint || { npm run lint --fix && npm run lint; } || exit 1
+          echo "✅ Lint passed for presentation layer"
+        }
+
+        run_presentation_test_check() {
+          echo "🧪 Running presentation layer tests..."
+          npm run test -- --testPathPattern=presentation || exit 1
+          echo "✅ Presentation tests passed"
+        }
+
+        stage_and_commit() {
+          echo "📦 Staging presentation layer changes..."
+          git add .
+          echo "💾 Creating presentation layer commit..."
+          git commit -m "$1" || exit 1
+          echo "✅ Successfully committed presentation layer"
+        }
+
+        # Execute validation sequence for presentation layer
+        run_lint_check
+        run_presentation_test_check
+        stage_and_commit "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ controller"
+
+    # === STEP 8: RUN TESTS - VERIFY GREEN (TDD - GREEN PHASE) ===
+    - id: 'verify-tests-pass-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD GREEN: Verify all tests pass with implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to ensure they pass (GREEN phase)'
+        scripts:
+          - name: 'Run passing tests'
+            command: |
+              echo "🟢 TDD GREEN: Running tests - they should PASS now..."
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__-controller.spec.ts || {
+                echo "❌ ERROR: Tests are still failing after implementation!"
+                echo "   Review the controller implementation and fix issues."
+                exit 1
+              }
+              echo "✅ Excellent! All tests are passing (GREEN phase)"
+              echo "   Consider refactoring if needed (REFACTOR phase)..."
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 9: CREATE HTTP HELPERS ===
+    - id: 'create-presentation-helpers-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create HTTP helper functions for __USE_CASE_NAME_PASCAL_CASE__'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: 'http-helper'
+          description: 'Following existing HTTP helper patterns.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/helpers/http-helper.ts'
+      template: |
+        import { HttpResponse } from '@/presentation/protocols'
+        import { ServerError, UnauthorizedError } from '@/presentation/errors'
+
+        /**
+         * HTTP Helper functions for consistent responses
+         * AI-NOTE: Use these helpers to maintain consistent HTTP status codes
+         * and error handling across all controllers
+         */
+
+        export const badRequest = (error: Error): HttpResponse => ({
+          statusCode: 400,
+          body: error
+        })
+
+        export const forbidden = (error: Error): HttpResponse => ({
+          statusCode: 403,
+          body: error
+        })
+
+        export const unauthorized = (): HttpResponse => ({
+          statusCode: 401,
+          body: new UnauthorizedError()
+        })
+
+        export const serverError = (error: Error): HttpResponse => ({
+          statusCode: 500,
+          body: new ServerError(error.stack)
+        })
+
+        export const ok = (data: any): HttpResponse => ({
+          statusCode: 200,
+          body: data
+        })
+
+        export const noContent = (): HttpResponse => ({
+          statusCode: 204,
+          body: null
+        })
+
+        export const created = (data: any): HttpResponse => ({
+          statusCode: 201,
+          body: data
+        })
+
+    # === STEP 10: CREATE PRESENTATION ERRORS ===
+    - id: 'create-presentation-errors-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create presentation errors for __USE_CASE_NAME_PASCAL_CASE__'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*Error'
+          description: 'Consistent with existing presentation errors.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/errors/__USE_CASE_NAME_KEBAB_CASE__-errors.ts'
+      template: |
+        /**
+         * Presentation layer errors for __USE_CASE_NAME_PASCAL_CASE__
+         * AI-NOTE: These are HTTP-specific errors, not domain errors
+         */
+
+        export class ServerError extends Error {
+          constructor(stack?: string) {
+            super('Internal server error')
+            this.name = 'ServerError'
+            this.stack = stack
+          }
+        }
+
+        export class UnauthorizedError extends Error {
+          constructor() {
+            super('Unauthorized')
+            this.name = 'UnauthorizedError'
+          }
+        }
+
+        export class AccessDeniedError extends Error {
+          constructor() {
+            super('Access denied')
+            this.name = 'AccessDeniedError'
+          }
+        }
+
+        export class MissingParamError extends Error {
+          constructor(paramName: string) {
+            super(`Missing param: ${paramName}`)
+            this.name = 'MissingParamError'
+          }
+        }
+
+        export class InvalidParamError extends Error {
+          constructor(paramName: string) {
+            super(`Invalid param: ${paramName}`)
+            this.name = 'InvalidParamError'
+          }
+        }
+
+    # === STEP 11: CREATE MIDDLEWARE (IF NEEDED) ===
+    - id: 'create-presentation-middleware-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create authentication middleware for __USE_CASE_NAME_PASCAL_CASE__ if needed'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: '__REQUIRES_AUTH__' # Skip if authentication not needed
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'express middleware clean architecture authentication'
+          url: 'https://github.com/...'
+          description: 'Authentication middleware pattern.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/presentation/middlewares/auth-middleware.ts'
+      template: |
+        import { Middleware, HttpResponse } from '@/presentation/protocols'
+        import { forbidden, ok, serverError } from '@/presentation/helpers'
+        import { AccessDeniedError } from '@/presentation/errors'
+        import { LoadAccountByToken } from '@/domain/usecases'
+
+        /**
+         * Authentication Middleware for __FEATURE_NAME_PASCAL_CASE__ feature
+         * AI-NOTE: Middleware should only handle cross-cutting concerns
+         * Business logic belongs in use cases
+         */
+        export class AuthMiddleware implements Middleware {
+          constructor(
+            private readonly loadAccountByToken: LoadAccountByToken,
+            private readonly role?: string
+          ) {}
+
+          async handle(request: AuthMiddleware.Request): Promise<HttpResponse> {
+            try {
+              const { accessToken } = request
+              if (accessToken) {
+                const account = await this.loadAccountByToken.load(accessToken, this.role)
+                if (account) {
+                  return ok({ accountId: account.id })
+                }
+              }
+              return forbidden(new AccessDeniedError())
+            } catch (error) {
+              return serverError(error)
+            }
+          }
+        }
+
+        export namespace AuthMiddleware {
+          export type Request = {
+            accessToken?: string
+          }
+        }
+
+    # === STEP 12: REFACTOR (TDD - REFACTOR PHASE - OPTIONAL) ===
+    - id: 'refactor-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD REFACTOR: Improve code quality while keeping tests green'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      condition: '__NEEDS_REFACTORING__' # Optional step
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTOR_GUIDE.md'
+          description: 'Refactoring patterns and best practices'
+      run_scripts:
+        description: 'Refactor code while ensuring tests remain green'
+        scripts:
+          - name: 'Refactor with safety'
+            command: |
+              echo "♻️ TDD REFACTOR: Improving code quality..."
+              echo "   Common refactorings:"
+              echo "   - Extract methods for better readability"
+              echo "   - Remove duplication"
+              echo "   - Improve naming"
+              echo "   - Simplify complex conditionals"
+
+              # Run tests before refactoring
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__-controller.spec.ts || {
+                echo "❌ Tests must be green before refactoring!"
+                exit 1
+              }
+
+              # AI-NOTE: Apply refactorings here
+              # Examples:
+              # - Extract validation to separate method
+              # - Simplify error handling
+              # - Improve response helpers
+
+              # Run tests after refactoring
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__-controller.spec.ts || {
+                echo "❌ Refactoring broke tests! Revert changes."
+                exit 1
+              }
+
+              echo "✅ Refactoring complete - tests still green!"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 13: CREATE FEATURE SHARED PRESENTATION (IF NEEDED) ===
+    - id: 'create-shared-presentation-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create shared presentation protocols for __FEATURE_NAME_PASCAL_CASE__ feature'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: '__MULTIPLE_USE_CASES_IN_FEATURE__' # Skip if single use case
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*Protocol'
+          description: 'Check if feature shared protocols exist.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/presentation/protocols/index.ts'
+      template: |
+        /**
+         * Shared presentation protocols for __FEATURE_NAME_PASCAL_CASE__ feature
+         * AI-NOTE: These are shared across multiple use cases in this feature
+         */
+
+        export type HttpResponse = {
+          statusCode: number
+          body: any
+        }
+
+        export interface Controller {
+          handle(request: any): Promise<HttpResponse>
+        }
+
+        export interface Middleware {
+          handle(request: any): Promise<HttpResponse>
+        }
+
+        export interface Validation {
+          validate(input: any): Error | null
+        }
+
+    # === STEP 14: REFACTOR FOR BROWNFIELD (CONDITIONAL) ===
+    # AI-NOTE: When brownfield refactoring is needed, the AI should dynamically generate
+    # steps based on the specific files that need refactoring. Each file should
+    # have its own step for better tracking and granular control.
+
+    - id: 'refactor-presentation-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor __FILE_TO_MODIFY_KEBAB_CASE__ presentation layer to Clean Architecture'
+      condition: 'check_if_presentation_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture refactoring patterns for presentation layer'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Analyze current presentation structure and dependencies'
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+      template: |
+        # AI-NOTE: FIND/REPLACE Pattern for Brownfield Refactoring
+        # The AI must identify SPECIFIC code blocks that violate Clean Architecture
+        # Common presentation layer violations:
+        # - Business logic in controllers/routes
+        # - Direct database access
+        # - Framework dependencies (Express types)
+        # - Missing dependency injection
+        # - Poor error handling
+
+        <<<FIND>>>
+        # AI-NOTE: Match the EXACT code including imports if needed
+        # Be specific to avoid matching wrong code blocks
+        # Include enough context for unique identification
+        # Look for violations like:
+        # - app.post('/api/...', async (req, res) => { ... database calls ... })
+        # - import { Request, Response } from 'express'
+        # - Manual validation in controllers
+        # - JWT verification in controller
+        # - Missing try-catch blocks
+        [ORIGINAL_CODE_TO_BE_REPLACED]
+        <<<REPLACE>>>
+        # AI-NOTE: Apply Clean Architecture transformation
+        # Ensure the refactored code:
+        # - Separates controllers from routes
+        # - Uses framework-agnostic interfaces
+        # - Implements proper dependency injection
+        # - Has consistent error handling
+        # - Delegates business logic to use cases
+        # - Uses middleware for cross-cutting concerns
+        [REFACTORED_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+
+    # === STEP 15: CREATE PULL REQUEST ===
+    - id: 'create-pr-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create Pull Request for __USE_CASE_NAME_PASCAL_CASE__ presentation layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'PR_TEMPLATE.md'
+          description: 'Pull request template and guidelines'
+      run_scripts:
+        description: 'Create PR using GitHub CLI'
+        scripts:
+          - name: 'Push branch and create PR'
+            command: |
+              # Push branch to remote
+              git push -u origin "feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__-presentation"
+
+              # Create PR using GitHub CLI
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ presentation layer" \
+                --body "## Summary
+
+              Added presentation layer for __USE_CASE_NAME_PASCAL_CASE__ use case following Clean Architecture patterns.
+
+              ## Changes
+              - ✅ Created controller with dependency injection
+              - ✅ Added HTTP helper functions
+              - ✅ Implemented middleware for cross-cutting concerns
+              - ✅ Added comprehensive unit tests
+              - ✅ Follows vertical slice architecture
+
+              ## Testing
+              - [ ] Unit tests pass
+              - [ ] Integration tests pass
+              - [ ] Manual testing completed
+
+              ## Checklist
+              - [ ] Code follows Clean Architecture principles
+              - [ ] No business logic in controllers
+              - [ ] Framework-agnostic interfaces
+              - [ ] Proper error handling
+              - [ ] Tests coverage > 80%
+              " \
+                --assignee @me \
+                --label "feature,presentation,clean-architecture"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 16: CODE REVIEW ===
+    - id: 'code-review-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Automated code review for presentation layer implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'CODE_REVIEW_CHECKLIST.md'
+          description: 'Code review standards for presentation layer'
+      run_scripts:
+        description: 'Run automated code review checks'
+        scripts:
+          - name: 'Architecture compliance check'
+            command: |
+              echo "🔍 Running presentation layer architecture compliance checks..."
+
+              # Check for business logic in controllers
+              if grep -r "prisma\." src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/controllers/; then
+                echo "❌ CRITICAL: Direct database access found in controllers"
+                exit 1
+              fi
+
+              # Check for Express dependencies
+              if grep -r "import.*Request.*from.*express" src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/controllers/; then
+                echo "❌ ERROR: Express dependencies found in controllers"
+                exit 1
+              fi
+
+              # Check for proper error handling
+              if ! grep -r "try.*catch" src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/controllers/; then
+                echo "⚠️ WARNING: Missing try-catch blocks in controllers"
+              fi
+
+              echo "✅ Presentation layer architecture compliance passed"
+            workingDirectory: '__PROJECT_NAME__'
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION REFACTORING PATTERN
+  # Single pattern for refactoring existing code to Clean Architecture presentation layer
+  # ------------------------------------------------------------------------------
+
+  presentation_refactoring_patterns:
+    - id: 'refactor-to-clean-presentation'
+      description: 'Refactor existing presentation layer to follow Clean Architecture'
+      detection:
+        - 'Direct database access in controllers/routes'
+        - 'Business logic mixed with HTTP handling'
+        - 'Framework-specific types in controllers'
+        - 'Missing dependency injection'
+        - 'Poor error handling'
+      example:
+        original: |
+          <<<FIND>>>
+          # AI-NOTE: Identify presentation layer violations
+          # Common patterns to look for:
+          # 1. Express routes with inline business logic
+          # 2. Controllers with database queries
+          # 3. Framework dependencies (req, res)
+          # 4. Missing validation layer
+          # 5. Authentication logic in controllers
+          [ORIGINAL_VIOLATING_CODE]
+          <<<REPLACE>>>
+          # AI-NOTE: Apply Clean Architecture transformation
+          # The refactored code should:
+          # 1. Separate controllers from routes
+          # 2. Use framework-agnostic interfaces
+          # 3. Implement dependency injection
+          # 4. Delegate to use cases
+          # 5. Use middleware for cross-cutting concerns
+          [REFACTORED_CLEAN_CODE]
+        category: 'presentation-refactoring'
+        severity: 'HIGH'
+        rlhf_impact: -2 # Major architecture violation
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION ANTI-PATTERNS TO AVOID
+  # Common mistakes that violate Clean Architecture in presentation layer
+  # ------------------------------------------------------------------------------
+
+  presentation_anti_patterns:
+    - name: 'Business Logic in Controller'
+      description: 'Controller contains business rules instead of delegating to use case'
+      example: 'if (user.age < 18) return forbidden() // Business rule!'
+      correct: 'Let use case throw domain error, controller just transforms it'
+      rlhf_impact: -2
+
+    - name: 'Direct Database Access'
+      description: 'Controller or middleware accessing database directly'
+      example: 'const user = await prisma.user.findUnique(...)'
+      correct: 'Controller calls use case, use case calls repository'
+      rlhf_impact: -2
+
+    - name: 'Framework Coupling'
+      description: 'Controllers depend on Express/Fastify specific types'
+      example: 'import { Request, Response } from "express"'
+      correct: 'Use framework-agnostic interfaces'
+      rlhf_impact: -1
+
+    - name: 'Missing Validation'
+      description: 'No validation layer, manual checks in controller'
+      example: 'if (!email) return badRequest(...)'
+      correct: 'Inject Validation interface'
+      rlhf_impact: -1
+
+    - name: 'Poor Error Handling'
+      description: 'No try-catch or exposing internal errors'
+      example: 'res.status(500).json({ error: error.message })'
+      correct: 'Use serverError helper with proper logging'
+      rlhf_impact: -1
+
+# ============= END PRESENTATION STEPS BACKEND SECTION =============

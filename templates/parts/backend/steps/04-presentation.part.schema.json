@@ -1,0 +1,232 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Backend Presentation Layer Template Schema",
+  "description": "Schema for validating backend presentation layer implementation steps following Clean Architecture",
+  "type": "object",
+  "required": ["presentation_steps", "presentation_refactoring_patterns", "presentation_anti_patterns"],
+  "properties": {
+    "presentation_steps": {
+      "description": "Steps for implementing presentation layer (controllers, middlewares, HTTP protocols)",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "description", "status"],
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the presentation step",
+            "type": "string",
+            "pattern": "^create-.*|^test-.*|^refactor-.*|^code-review-.*|^verify-.*"
+          },
+          "type": {
+            "description": "Type of presentation layer action",
+            "type": "string",
+            "enum": ["folder", "create_file", "test", "validation", "conditional_file"]
+          },
+          "description": {
+            "description": "Human-readable description of what this step does",
+            "type": "string",
+            "minLength": 10
+          },
+          "status": {
+            "description": "Current execution status",
+            "type": "string",
+            "enum": ["PENDING", "SUCCESS", "FAILED", "SKIPPED"]
+          },
+          "rlhf_score": {
+            "description": "RLHF quality score",
+            "type": ["integer", "null"],
+            "minimum": -2,
+            "maximum": 2
+          },
+          "execution_log": {
+            "description": "Execution output or error messages",
+            "type": "string"
+          },
+          "condition": {
+            "description": "Optional condition for step execution",
+            "type": "string"
+          },
+          "references": {
+            "description": "External and internal references for patterns",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "source", "description"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["internal_guideline", "external_pattern", "internal_code_analysis"]
+                },
+                "source": {
+                  "type": "string"
+                },
+                "query": {
+                  "type": "string"
+                },
+                "tool": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "action": {
+            "description": "Action to perform for folder creation",
+            "type": "object",
+            "properties": {
+              "create_folders": {
+                "type": "object",
+                "required": ["basePath", "folders"],
+                "properties": {
+                  "basePath": {
+                    "type": "string"
+                  },
+                  "folders": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "path": {
+            "description": "File path for file creation steps",
+            "type": "string"
+          },
+          "template": {
+            "description": "Code template for file creation",
+            "type": "string",
+            "minLength": 10
+          },
+          "validation_script": {
+            "description": "Shell script for validation",
+            "type": "string"
+          },
+          "run_scripts": {
+            "description": "Scripts to run for validation steps",
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "scripts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "command": {
+                      "type": "string"
+                    },
+                    "workingDirectory": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "presentation_refactoring_patterns": {
+      "description": "Patterns for refactoring existing code to Clean Architecture presentation layer",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "detection", "example"],
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the refactoring pattern",
+            "type": "string",
+            "pattern": "^[a-z-]+$"
+          },
+          "description": {
+            "description": "What this refactoring pattern addresses",
+            "type": "string",
+            "minLength": 10
+          },
+          "detection": {
+            "description": "How to detect code that needs this refactoring",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "example": {
+            "description": "Before/after example with AI-NOTEs",
+            "type": "object",
+            "required": ["original", "category", "severity", "rlhf_impact"],
+            "properties": {
+              "original": {
+                "description": "FIND/REPLACE pattern with AI-NOTEs",
+                "type": "string"
+              },
+              "category": {
+                "description": "Category of refactoring",
+                "type": "string"
+              },
+              "severity": {
+                "description": "Severity of the issue",
+                "type": "string",
+                "enum": ["LOW", "MEDIUM", "HIGH"]
+              },
+              "rlhf_impact": {
+                "description": "Impact on RLHF score",
+                "type": "integer",
+                "minimum": -2,
+                "maximum": 2
+              }
+            }
+          }
+        }
+      }
+    },
+    "presentation_anti_patterns": {
+      "description": "Common anti-patterns to avoid in presentation layer",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "description", "example", "correct", "rlhf_impact"],
+        "properties": {
+          "name": {
+            "description": "Name of the anti-pattern",
+            "type": "string",
+            "minLength": 3
+          },
+          "description": {
+            "description": "Why this is problematic",
+            "type": "string",
+            "minLength": 10
+          },
+          "example": {
+            "description": "Code example of the anti-pattern",
+            "type": "string"
+          },
+          "correct": {
+            "description": "Correct approach",
+            "type": "string"
+          },
+          "rlhf_impact": {
+            "description": "Impact on RLHF score if detected",
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 0
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
