@@ -392,6 +392,9 @@
       status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
       rlhf_score: null # -2, -1, 0, 1, 2
       execution_log: ''
+      # AI-NOTE: Evaluate if this model will be used across multiple use cases
+      # If YES: Place in feature/shared/domain/models
+      # If NO: Keep in use-case specific domain folder
       condition: 'check_if_shared_model_needed'
       references:
         - type: 'internal_code_analysis'
@@ -557,12 +560,31 @@
           description: 'Analyze current file structure and dependencies'
       path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
       template: |
+        # AI-NOTE: FIND/REPLACE Pattern for Brownfield Refactoring
+        # The AI must identify SPECIFIC code blocks that violate Clean Architecture
+        # Look for these common violations:
+        # - Business logic in controllers/routes
+        # - Database queries outside repositories
+        # - Framework types in domain layer
+        # - Missing dependency injection
+
         <<<FIND>>>
-        // The AI should identify the exact code block that needs refactoring
-        // This will be the original code that violates Clean Architecture
+        # AI-NOTE: Match the EXACT code including imports if needed
+        # Be specific to avoid matching wrong code blocks
+        # Include enough context for unique identification
+        # The AI should identify the exact code block that needs refactoring
+        # This will be the original code that violates Clean Architecture
         [ORIGINAL_CODE_TO_BE_REPLACED]
         <<</FIND>>>
         <<<REPLACE>>>
+        # AI-NOTE: Apply Clean Architecture transformation
+        # Ensure the refactored code:
+        # - Follows dependency rules (domain imports nothing)
+        # - Uses dependency injection via constructor
+        # - Has NO framework dependencies in domain/data
+        # - Uses protocols/interfaces for external services
+        # - Is fully testable with mocks/spies
+
         // TODO: Refactor this file to comply with Clean Architecture
         // File: __FILE_TO_MODIFY_KEBAB_CASE__.ts
         // Priority: __PRIORITY__ (high/medium/low)

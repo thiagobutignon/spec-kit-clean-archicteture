@@ -3,6 +3,8 @@
   # ------------------------------------------------------------------------------
   # ARCHITECTURAL RULES SECTION
   # These rules define the Clean Architecture boundaries and dependencies
+  # AI-NOTE: These rules are CRITICAL - any violation should trigger RLHF score: -2
+  # AI-NOTE: Use these rules to validate generated code and refactoring decisions
   # ------------------------------------------------------------------------------
 
   architecture:
@@ -14,6 +16,9 @@
       main_server: '__PROJECT_NAME__/src/main'
 
     execution_order:
+      # AI-NOTE: Vertical slicing ensures atomic feature delivery
+      # Each use case should be independently deployable and testable
+      # Complete one use case through ALL layers before starting another
       description: 'Use cases are implemented vertically, crossing all layers atomically'
       approach: 'Vertical Slice Architecture - One use case at a time, through all layers'
       sequence_per_use_case:
@@ -49,6 +54,8 @@
           DT4[Git Commit: 'feat(data): implement __USE_CASE__']
 
           %% Infra Slice (if needed)
+          %% AI-NOTE: Repository creation is CONDITIONAL
+          %% Only create if no existing repository handles this entity
           I1[Check if Repository Exists]
           I2{Need New Repository?}
           I3[Implement Repository in Feature Shared]
@@ -226,6 +233,9 @@
           - 'Cleaner git history: Each commit represents a logical unit of work'  
 
     dependency_rules:
+      # AI-NOTE: Dependency direction is INWARD toward domain
+      # Any outward dependency is a CRITICAL violation
+      # Use these rules to validate imports in generated code
       domain:
         can_import_from: []  # Domain layer is the core - imports nothing
         cannot_import_from: ['data', 'infra', 'presentation', 'validation', 'main']
@@ -311,11 +321,17 @@
           - "Route Aggregation: Collect routes from all features"
 
       testing_strategy:
+        # AI-NOTE: Testing strategy varies by layer
+        # Domain: Pure unit tests with no external dependencies
+        # Data: Unit tests with mocked protocols
+        # Infra: Integration tests with real databases
         domain:
           approach: "Unit Tests - Pure functions and business logic"
           coverage_target: "100%"
           tools: ["Vitest", "Testing Library"]
           practices:
+            # AI-NOTE: NEVER use faker or random data in tests
+            # Always use deterministic, fixed test data
             - "Use fixed test data helpers instead of faker"
             - "Create mock factories with deterministic data"
             - "Test domain models and use case interfaces"
