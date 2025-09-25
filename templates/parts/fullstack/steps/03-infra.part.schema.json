@@ -1,0 +1,299 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Fullstack Infrastructure Steps Configuration",
+  "description": "Schema for fullstack infrastructure layer implementation steps, split between backend (database, cache) and frontend (HTTP, storage) implementations",
+  "type": "object",
+  "required": ["infra_steps"],
+  "properties": {
+    "infra_steps": {
+      "type": "array",
+      "description": "Array of fullstack infrastructure layer implementation steps for concrete adapters and external service integrations",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/infraStep"
+      }
+    }
+  },
+  "definitions": {
+    "infraStep": {
+      "type": "object",
+      "required": ["id", "type", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the fullstack infrastructure step with template placeholders",
+          "pattern": "^[a-z0-9-_]+(__[A-Z_]+__[a-z0-9-_]*)*$",
+          "examples": [
+            "create-backend-repository-__USE_CASE_NAME_KEBAB_CASE__",
+            "create-frontend-api-client-__USE_CASE_NAME_KEBAB_CASE__",
+            "create-cache-strategy-__USE_CASE_NAME_KEBAB_CASE__"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": ["folder", "create_file", "validation", "conditional_file"],
+          "description": "Type of infrastructure step: folder creation, file creation, validation, or conditional file"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of what this fullstack infrastructure step does",
+          "examples": [
+            "Create Prisma repository implementation for backend",
+            "Create API client implementation for frontend",
+            "Create cache strategy for use case"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PENDING", "SUCCESS", "FAILED", "SKIPPED"],
+          "default": "PENDING",
+          "description": "Current status of the infrastructure step execution"
+        },
+        "rlhf_score": {
+          "type": ["integer", "null"],
+          "minimum": -2,
+          "maximum": 2,
+          "description": "Reinforcement Learning from Human Feedback score for infrastructure implementation quality"
+        },
+        "execution_log": {
+          "type": "string",
+          "description": "Log of infrastructure step execution details"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/reference"
+          },
+          "description": "References to patterns, guidelines, or documentation for fullstack infrastructure"
+        },
+        "action": {
+          "$ref": "#/definitions/folderAction",
+          "description": "Action for folder creation steps in fullstack infrastructure layer"
+        },
+        "path": {
+          "type": "string",
+          "description": "File path for create_file steps with template placeholders for infrastructure files",
+          "examples": [
+            "__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.ts",
+            "__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/api-client/__FEATURE_NAME_KEBAB_CASE__-api.ts"
+          ]
+        },
+        "template": {
+          "type": "string",
+          "description": "File content template for create_file steps with TypeScript/Next.js infrastructure code"
+        },
+        "validation_script": {
+          "type": "string",
+          "description": "Shell script for infrastructure validation steps"
+        },
+        "run_scripts": {
+          "type": "object",
+          "required": ["description", "scripts"],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Description of what the infrastructure validation scripts do"
+            },
+            "scripts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/script"
+              },
+              "minItems": 1,
+              "description": "List of scripts to run for infrastructure validation"
+            }
+          }
+        },
+        "condition": {
+          "type": "string",
+          "description": "Condition function name for conditional infrastructure files",
+          "examples": [
+            "check_if_external_api_needed",
+            "check_if_cache_needed",
+            "check_if_websocket_needed"
+          ]
+        }
+      }
+    },
+    "folderAction": {
+      "type": "object",
+      "required": ["create_folders"],
+      "properties": {
+        "create_folders": {
+          "type": "object",
+          "required": ["basePath", "folders"],
+          "properties": {
+            "basePath": {
+              "type": "string",
+              "description": "Base path where fullstack infrastructure folders will be created"
+            },
+            "folders": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "description": "List of infrastructure folder names to create",
+              "examples": [
+                ["db", "api-client", "services"],
+                ["cache", "external"],
+                ["http", "websocket", "storage"]
+              ]
+            }
+          }
+        }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "required": ["type", "source", "description"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["internal_guideline", "external_pattern", "internal_code_analysis"],
+          "description": "Type of reference for infrastructure implementation"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source of the reference",
+          "examples": [
+            "context7",
+            "serena",
+            "FULLSTACK_ARCHITECTURE.md",
+            "FULLSTACK_RULES.md"
+          ]
+        },
+        "query": {
+          "type": "string",
+          "description": "Search query for external references related to infrastructure",
+          "examples": [
+            "prisma repository pattern typescript postgresql",
+            "fetch api client typescript next.js",
+            "redis cache strategy typescript"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL reference for external infrastructure patterns"
+        },
+        "tool": {
+          "type": "string",
+          "enum": ["find_symbol", "search_for_pattern", "get_symbols_overview"],
+          "description": "Tool name for internal code analysis of infrastructure"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of what this reference provides for infrastructure"
+        }
+      }
+    },
+    "script": {
+      "type": "object",
+      "required": ["name", "command"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name for the infrastructure script",
+          "examples": [
+            "TypeScript Compilation",
+            "Integration Tests with Test Database",
+            "Clean Architecture Rules Check"
+          ]
+        },
+        "command": {
+          "type": "string",
+          "description": "Shell command to execute for infrastructure validation",
+          "examples": [
+            "npm run test:integration -- --grep=\"repository\"",
+            "docker-compose up -d test-db && npm run test:db",
+            "npm run arch:check -- --layer=infra"
+          ]
+        },
+        "workingDirectory": {
+          "type": "string",
+          "description": "Working directory for the infrastructure command"
+        }
+      }
+    },
+    "infraImplementation": {
+      "type": "object",
+      "description": "Infrastructure implementation details",
+      "properties": {
+        "backend": {
+          "type": "object",
+          "description": "Backend infrastructure implementations",
+          "properties": {
+            "database": {
+              "type": "string",
+              "enum": ["prisma-postgresql", "prisma-mysql", "drizzle"],
+              "description": "Database ORM and provider"
+            },
+            "cache": {
+              "type": "string",
+              "enum": ["redis", "memcached", "in-memory"],
+              "description": "Cache provider"
+            },
+            "queue": {
+              "type": "string",
+              "enum": ["bullmq", "bee-queue", "none"],
+              "description": "Queue system provider"
+            },
+            "storage": {
+              "type": "string",
+              "enum": ["s3", "local", "cloudinary"],
+              "description": "File storage provider"
+            }
+          }
+        },
+        "frontend": {
+          "type": "object",
+          "description": "Frontend infrastructure implementations",
+          "properties": {
+            "http": {
+              "type": "string",
+              "enum": ["fetch", "native-fetch"],
+              "description": "HTTP client (not axios)"
+            },
+            "cache": {
+              "type": "string",
+              "enum": ["react-query", "swr", "custom"],
+              "description": "Client-side cache strategy"
+            },
+            "storage": {
+              "type": "string",
+              "enum": ["localStorage", "sessionStorage", "indexedDB"],
+              "description": "Browser storage provider"
+            },
+            "realtime": {
+              "type": "string",
+              "enum": ["websocket", "server-sent-events", "polling"],
+              "description": "Real-time communication method"
+            }
+          }
+        },
+        "shared": {
+          "type": "object",
+          "description": "Shared infrastructure between frontend and backend",
+          "properties": {
+            "auth": {
+              "type": "string",
+              "enum": ["nextauth", "clerk", "supabase", "custom"],
+              "description": "Authentication provider"
+            },
+            "telemetry": {
+              "type": "string",
+              "enum": ["sentry", "datadog", "newrelic", "none"],
+              "description": "Monitoring and telemetry provider"
+            },
+            "logger": {
+              "type": "string",
+              "enum": ["winston", "pino", "console"],
+              "description": "Logging system"
+            }
+          }
+        }
+      }
+    }
+  }
+}
