@@ -16,12 +16,12 @@
           "id": {
             "description": "Unique identifier for the presentation step",
             "type": "string",
-            "pattern": "^create-presentation-.*|^test-presentation-.*"
+            "pattern": "^create-.*|^test-.*|^refactor-.*|^code-review-.*"
           },
           "type": {
             "description": "Type of presentation layer action",
             "type": "string",
-            "enum": ["folder", "create_file", "test", "validation"]
+            "enum": ["folder", "create_file", "test", "validation", "conditional_file"]
           },
           "description": {
             "description": "Human-readable description of what this step does",
@@ -110,6 +110,32 @@
           "validation_script": {
             "description": "Shell script for validation",
             "type": "string"
+          },
+          "run_scripts": {
+            "description": "Scripts to run for validation steps",
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "scripts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "command": {
+                      "type": "string"
+                    },
+                    "workingDirectory": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -119,7 +145,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "description", "detection", "examples"],
+        "required": ["id", "description", "detection", "example"],
         "properties": {
           "id": {
             "description": "Unique identifier for the refactoring pattern",
@@ -138,40 +164,29 @@
               "type": "string"
             }
           },
-          "examples": {
-            "description": "Before/after examples with AI-NOTEs",
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": ["original", "category", "severity", "rlhf_impact"],
-              "properties": {
-                "original": {
-                  "description": "FIND/REPLACE pattern with AI-NOTEs",
-                  "type": "string",
-                  "pattern": "<<<FIND>>>.*<<<REPLACE>>>"
-                },
-                "category": {
-                  "description": "Category of refactoring",
-                  "type": "string",
-                  "enum": [
-                    "route-to-controller",
-                    "framework-decoupling",
-                    "validation-extraction",
-                    "middleware-extraction",
-                    "error-handling"
-                  ]
-                },
-                "severity": {
-                  "description": "Severity of the issue",
-                  "type": "string",
-                  "enum": ["LOW", "MEDIUM", "HIGH"]
-                },
-                "rlhf_impact": {
-                  "description": "Impact on RLHF score",
-                  "type": "integer",
-                  "minimum": -2,
-                  "maximum": 2
-                }
+          "example": {
+            "description": "Before/after example with AI-NOTEs",
+            "type": "object",
+            "required": ["original", "category", "severity", "rlhf_impact"],
+            "properties": {
+              "original": {
+                "description": "FIND/REPLACE pattern with AI-NOTEs",
+                "type": "string"
+              },
+              "category": {
+                "description": "Category of refactoring",
+                "type": "string"
+              },
+              "severity": {
+                "description": "Severity of the issue",
+                "type": "string",
+                "enum": ["LOW", "MEDIUM", "HIGH"]
+              },
+              "rlhf_impact": {
+                "description": "Impact on RLHF score",
+                "type": "integer",
+                "minimum": -2,
+                "maximum": 2
               }
             }
           }

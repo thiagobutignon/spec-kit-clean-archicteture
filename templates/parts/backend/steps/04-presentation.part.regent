@@ -331,7 +331,78 @@
           }
         }
 
-    # === STEP 6: CREATE CONTROLLER TEST ===
+    # === STEP 6: CREATE FEATURE SHARED PRESENTATION (IF NEEDED) ===
+    - id: 'create-shared-presentation-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create shared presentation protocols for __FEATURE_NAME_PASCAL_CASE__ feature'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      condition: '__MULTIPLE_USE_CASES_IN_FEATURE__' # Skip if single use case
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*Protocol'
+          description: 'Check if feature shared protocols exist.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/presentation/protocols/index.ts'
+      template: |
+        /**
+         * Shared presentation protocols for __FEATURE_NAME_PASCAL_CASE__ feature
+         * AI-NOTE: These are shared across multiple use cases in this feature
+         */
+
+        export type HttpResponse = {
+          statusCode: number
+          body: any
+        }
+
+        export interface Controller {
+          handle(request: any): Promise<HttpResponse>
+        }
+
+        export interface Middleware {
+          handle(request: any): Promise<HttpResponse>
+        }
+
+        export interface Validation {
+          validate(input: any): Error | null
+        }
+
+    # === STEP 7: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create and checkout feature branch for __USE_CASE_NAME_PASCAL_CASE__ presentation implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Git branching strategy and naming conventions'
+      run_scripts:
+        description: 'Create feature branch with proper naming convention'
+        scripts:
+          - name: 'Create feature branch'
+            command: |
+              # Stash any uncommitted changes
+              git stash save "WIP: Before creating __FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__ presentation branch"
+
+              # Ensure we're on the main branch and up to date
+              git checkout main || git checkout master
+              git pull origin main || git pull origin master
+
+              # Create and checkout new feature branch
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__-presentation"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
+
+              echo "✅ Created and checked out branch: $BRANCH_NAME"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 8: CREATE CONTROLLER TEST ===
     - id: 'create-presentation-controller-test-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create unit test for __USE_CASE_NAME_PASCAL_CASE__Controller'
@@ -441,218 +512,182 @@
           })
         })
 
+    # === STEP 9: REFACTOR FOR BROWNFIELD (CONDITIONAL) ===
+    # AI-NOTE: When brownfield refactoring is needed, the AI should dynamically generate
+    # steps based on the specific files that need refactoring. Each file should
+    # have its own step for better tracking and granular control.
+
+    - id: 'refactor-presentation-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor __FILE_TO_MODIFY_KEBAB_CASE__ presentation layer to Clean Architecture'
+      condition: 'check_if_presentation_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture refactoring patterns for presentation layer'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Analyze current presentation structure and dependencies'
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+      template: |
+        # AI-NOTE: FIND/REPLACE Pattern for Brownfield Refactoring
+        # The AI must identify SPECIFIC code blocks that violate Clean Architecture
+        # Common presentation layer violations:
+        # - Business logic in controllers/routes
+        # - Direct database access
+        # - Framework dependencies (Express types)
+        # - Missing dependency injection
+        # - Poor error handling
+
+        <<<FIND>>>
+        # AI-NOTE: Match the EXACT code including imports if needed
+        # Be specific to avoid matching wrong code blocks
+        # Include enough context for unique identification
+        # Look for violations like:
+        # - app.post('/api/...', async (req, res) => { ... database calls ... })
+        # - import { Request, Response } from 'express'
+        # - Manual validation in controllers
+        # - JWT verification in controller
+        # - Missing try-catch blocks
+        [ORIGINAL_CODE_TO_BE_REPLACED]
+        <<<REPLACE>>>
+        # AI-NOTE: Apply Clean Architecture transformation
+        # Ensure the refactored code:
+        # - Separates controllers from routes
+        # - Uses framework-agnostic interfaces
+        # - Implements proper dependency injection
+        # - Has consistent error handling
+        # - Delegates business logic to use cases
+        # - Uses middleware for cross-cutting concerns
+        [REFACTORED_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+
+    # === STEP 10: CREATE PULL REQUEST ===
+    - id: 'create-pr-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create Pull Request for __USE_CASE_NAME_PASCAL_CASE__ presentation layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'PR_TEMPLATE.md'
+          description: 'Pull request template and guidelines'
+      run_scripts:
+        description: 'Create PR using GitHub CLI'
+        scripts:
+          - name: 'Push branch and create PR'
+            command: |
+              # Push branch to remote
+              git push -u origin "feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__-presentation"
+
+              # Create PR using GitHub CLI
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ presentation layer" \
+                --body "## Summary
+
+              Added presentation layer for __USE_CASE_NAME_PASCAL_CASE__ use case following Clean Architecture patterns.
+
+              ## Changes
+              - ✅ Created controller with dependency injection
+              - ✅ Added HTTP helper functions
+              - ✅ Implemented middleware for cross-cutting concerns
+              - ✅ Added comprehensive unit tests
+              - ✅ Follows vertical slice architecture
+
+              ## Testing
+              - [ ] Unit tests pass
+              - [ ] Integration tests pass
+              - [ ] Manual testing completed
+
+              ## Checklist
+              - [ ] Code follows Clean Architecture principles
+              - [ ] No business logic in controllers
+              - [ ] Framework-agnostic interfaces
+              - [ ] Proper error handling
+              - [ ] Tests coverage > 80%
+              " \
+                --assignee @me \
+                --label "feature,presentation,clean-architecture"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 11: CODE REVIEW ===
+    - id: 'code-review-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Automated code review for presentation layer implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'CODE_REVIEW_CHECKLIST.md'
+          description: 'Code review standards for presentation layer'
+      run_scripts:
+        description: 'Run automated code review checks'
+        scripts:
+          - name: 'Architecture compliance check'
+            command: |
+              echo "🔍 Running presentation layer architecture compliance checks..."
+
+              # Check for business logic in controllers
+              if grep -r "prisma\." src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/controllers/; then
+                echo "❌ CRITICAL: Direct database access found in controllers"
+                exit 1
+              fi
+
+              # Check for Express dependencies
+              if grep -r "import.*Request.*from.*express" src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/controllers/; then
+                echo "❌ ERROR: Express dependencies found in controllers"
+                exit 1
+              fi
+
+              # Check for proper error handling
+              if ! grep -r "try.*catch" src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/controllers/; then
+                echo "⚠️ WARNING: Missing try-catch blocks in controllers"
+              fi
+
+              echo "✅ Presentation layer architecture compliance passed"
+            workingDirectory: '__PROJECT_NAME__'
+
   # ------------------------------------------------------------------------------
-  # PRESENTATION REFACTORING PATTERNS
-  # Patterns for refactoring existing code to Clean Architecture presentation layer
+  # PRESENTATION REFACTORING PATTERN
+  # Single pattern for refactoring existing code to Clean Architecture presentation layer
   # ------------------------------------------------------------------------------
 
   presentation_refactoring_patterns:
-    # === PATTERN 1: EXTRACT CONTROLLER FROM ROUTE ===
-    - id: 'extract-controller-from-route'
-      description: 'Extract business logic from Express route to controller'
+    - id: 'refactor-to-clean-presentation'
+      description: 'Refactor existing presentation layer to follow Clean Architecture'
       detection:
-        - 'Direct database access in route handlers'
+        - 'Direct database access in controllers/routes'
         - 'Business logic mixed with HTTP handling'
-        - 'req.body validation in routes'
-      examples:
-        - original: |
-            <<<FIND>>>
-            # AI-NOTE: Identify Express routes with inline business logic
-            # Look for: app.post('/api/...', async (req, res) => { ... database calls ... })
-            # This violates Clean Architecture - business logic in route handler
-            app.post('/api/__ENDPOINT__', async (req, res) => {
-              try {
-                const { __FIELD_1__, __FIELD_2__ } = req.body
-
-                if (!__FIELD_1__ || !__FIELD_2__) {
-                  return res.status(400).json({ error: 'Missing fields' })
-                }
-
-                const result = await db.__TABLE__.create({
-                  data: { __FIELD_1__, __FIELD_2__ }
-                })
-
-                res.json(result)
-              } catch (error) {
-                res.status(500).json({ error: 'Internal error' })
-              }
-            })
-            <<<REPLACE>>>
-            # AI-NOTE: Refactor to Clean Architecture pattern:
-            # 1. Extract to controller class with dependency injection
-            # 2. Move business logic to use case (domain layer)
-            # 3. Add proper validation layer
-            # 4. Use adapter pattern for Express integration
-            app.post('/api/__ENDPOINT__', adapt(__USE_CASE_NAME_CAMEL_CASE__Controller))
-          category: 'route-to-controller'
-          severity: 'HIGH'
-          rlhf_impact: -2 # Major architecture violation
-
-    # === PATTERN 2: REMOVE FRAMEWORK DEPENDENCIES ===
-    - id: 'remove-express-from-controller'
-      description: 'Remove Express-specific types from controller'
-      detection:
-        - 'import { Request, Response } from "express"'
-        - 'Controllers using req and res directly'
-      examples:
-        - original: |
-            <<<FIND>>>
-            # AI-NOTE: Identify controllers with Express dependencies
-            # Look for: import ... from 'express' and (req: Request, res: Response)
-            # This couples presentation to Express framework
-            import { Request, Response } from 'express'
-
-            export class __CONTROLLER_NAME__ {
-              async handle(req: Request, res: Response) {
-                // controller logic using req and res
-              }
-            }
-            <<<REPLACE>>>
-            # AI-NOTE: Refactor to framework-agnostic controller:
-            # 1. Remove Express imports
-            # 2. Use custom HttpRequest and HttpResponse types
-            # 3. Return response instead of calling res.json()
-            # 4. Let adapter handle Express integration
-            import { Controller, HttpResponse } from '@/presentation/protocols'
-
-            export class __CONTROLLER_NAME__ implements Controller {
-              async handle(request: __CONTROLLER_NAME__.Request): Promise<HttpResponse> {
-                // controller logic returning HttpResponse
-              }
-            }
-
-            export namespace __CONTROLLER_NAME__ {
-              export type Request = {
-                // typed request fields
-              }
-            }
-          category: 'framework-decoupling'
-          severity: 'HIGH'
-          rlhf_impact: -1 # Framework coupling
-
-    # === PATTERN 3: EXTRACT VALIDATION ===
-    - id: 'extract-validation-from-controller'
-      description: 'Extract validation logic from controller to validation layer'
-      detection:
-        - 'Manual validation in controller handle method'
-        - 'if (!field) return badRequest'
-      examples:
-        - original: |
-            <<<FIND>>>
-            # AI-NOTE: Identify manual validation in controllers
-            # Look for: if (!field) or manual validation checks
-            # Validation should be injected, not hardcoded
-            async handle(request: any): Promise<HttpResponse> {
-              if (!request.email || !request.password) {
-                return badRequest(new MissingParamError('email or password'))
-              }
-
-              if (!request.email.includes('@')) {
-                return badRequest(new InvalidParamError('email'))
-              }
-
-              // rest of controller logic
-            }
-            <<<REPLACE>>>
-            # AI-NOTE: Refactor to use injected validation:
-            # 1. Inject Validation interface via constructor
-            # 2. Call validation.validate() method
-            # 3. Let validation composite handle all rules
-            # 4. Keep controller focused on orchestration
-            constructor(
-              private readonly validation: Validation
-            ) {}
-
-            async handle(request: any): Promise<HttpResponse> {
-              const error = this.validation.validate(request)
-              if (error) {
-                return badRequest(error)
-              }
-
-              // rest of controller logic
-            }
-          category: 'validation-extraction'
-          severity: 'MEDIUM'
-          rlhf_impact: 0 # Improves but not critical
-
-    # === PATTERN 4: EXTRACT MIDDLEWARE ===
-    - id: 'extract-auth-from-controller'
-      description: 'Extract authentication logic from controller to middleware'
-      detection:
-        - 'JWT verification in controller'
-        - 'Token validation in handle method'
-      examples:
-        - original: |
-            <<<FIND>>>
-            # AI-NOTE: Identify authentication logic in controllers
-            # Look for: JWT verification, token checks, role validation
-            # Auth is cross-cutting concern - belongs in middleware
-            async handle(request: any): Promise<HttpResponse> {
-              const token = request.headers?.authorization?.replace('Bearer ', '')
-
-              if (!token) {
-                return unauthorized()
-              }
-
-              try {
-                const decoded = jwt.verify(token, process.env.JWT_SECRET)
-                request.userId = decoded.id
-              } catch {
-                return unauthorized()
-              }
-
-              // rest of controller logic
-            }
-            <<<REPLACE>>>
-            # AI-NOTE: Refactor to use auth middleware:
-            # 1. Remove all auth logic from controller
-            # 2. Create separate AuthMiddleware class
-            # 3. Apply middleware in route composition
-            # 4. Controller receives validated accountId
-            async handle(request: any): Promise<HttpResponse> {
-              // request.accountId is set by middleware
-              // rest of controller logic using request.accountId
-            }
-
-            // In route factory:
-            // return [authMiddleware, controller]
-          category: 'middleware-extraction'
-          severity: 'MEDIUM'
-          rlhf_impact: 1 # Good separation
-
-    # === PATTERN 5: PROPER ERROR HANDLING ===
-    - id: 'implement-proper-error-handling'
-      description: 'Implement proper error handling in controllers'
-      detection:
-        - 'Missing try-catch in handle method'
-        - 'console.log in catch blocks'
-      examples:
-        - original: |
-            <<<FIND>>>
-            # AI-NOTE: Identify poor error handling
-            # Look for: missing try-catch, console.log, generic errors
-            # All controllers must handle errors consistently
-            async handle(request: any): Promise<HttpResponse> {
-              const result = await this.useCase.execute(request)
-              return ok(result)
-            }
-            <<<REPLACE>>>
-            # AI-NOTE: Add proper error handling:
-            # 1. Wrap in try-catch
-            # 2. Use serverError helper for unhandled errors
-            # 3. Let domain errors bubble up for proper handling
-            # 4. Never expose stack traces in production
-            async handle(request: any): Promise<HttpResponse> {
-              try {
-                const result = await this.useCase.execute(request)
-                return ok(result)
-              } catch (error) {
-                return serverError(error)
-              }
-            }
-          category: 'error-handling'
-          severity: 'HIGH'
-          rlhf_impact: -1 # Missing error handling
+        - 'Framework-specific types in controllers'
+        - 'Missing dependency injection'
+        - 'Poor error handling'
+      example:
+        original: |
+          <<<FIND>>>
+          # AI-NOTE: Identify presentation layer violations
+          # Common patterns to look for:
+          # 1. Express routes with inline business logic
+          # 2. Controllers with database queries
+          # 3. Framework dependencies (req, res)
+          # 4. Missing validation layer
+          # 5. Authentication logic in controllers
+          [ORIGINAL_VIOLATING_CODE]
+          <<<REPLACE>>>
+          # AI-NOTE: Apply Clean Architecture transformation
+          # The refactored code should:
+          # 1. Separate controllers from routes
+          # 2. Use framework-agnostic interfaces
+          # 3. Implement dependency injection
+          # 4. Delegate to use cases
+          # 5. Use middleware for cross-cutting concerns
+          [REFACTORED_CLEAN_CODE]
+        category: 'presentation-refactoring'
+        severity: 'HIGH'
+        rlhf_impact: -2 # Major architecture violation
 
   # ------------------------------------------------------------------------------
   # PRESENTATION ANTI-PATTERNS TO AVOID

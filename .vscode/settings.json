@@ -103,7 +103,8 @@
     "usecase",
     "kebab",
     "pascal",
-    "anemic"
+    "anemic",
+    "Fastify"
 ],
 "files.watcherExclude": {
   "**/.git/objects/**": true,
