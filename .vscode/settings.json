@@ -123,7 +123,8 @@
     "Fastify",
     "nextjs",
     "NEXTJS",
-    "lucide"
+    "lucide",
+    "supertest"
 ],
 "files.watcherExclude": {
   "**/.git/objects/**": true,
