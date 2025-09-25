@@ -13,7 +13,40 @@
   # ------------------------------------------------------------------------------
 
   presentation_steps:
-    # === STEP 1: CREATE TEST STRUCTURE (TDD - RED PHASE) ===
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create and checkout feature branch for __USE_CASE_NAME_PASCAL_CASE__ presentation implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Git branching strategy and naming conventions'
+      run_scripts:
+        description: 'Create feature branch with proper naming convention'
+        scripts:
+          - name: 'Create feature branch'
+            command: |
+              # Stash any uncommitted changes
+              git stash save "WIP: Before creating __FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__ presentation branch"
+
+              # Ensure we're on the main branch and up to date
+              git checkout main || git checkout master
+              git pull origin main || git pull origin master
+
+              # Create and checkout new feature branch
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__-presentation"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
+
+              echo "✅ Created and checked out branch: $BRANCH_NAME"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: CREATE TEST STRUCTURE (TDD - RED PHASE) ===
     - id: 'create-test-structure-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'folder'
       description: 'TDD RED: Create test structure for __USE_CASE_NAME_PASCAL_CASE__ presentation layer'
@@ -41,7 +74,7 @@
         done
         echo "✅ Test structure created for TDD cycle"
 
-    # === STEP 2: CREATE TEST MOCKS (TDD - RED PHASE) ===
+    # === STEP 3: CREATE TEST MOCKS (TDD - RED PHASE) ===
     - id: 'create-test-mocks-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'TDD RED: Create test mocks and spies for __USE_CASE_NAME_PASCAL_CASE__'
@@ -90,7 +123,7 @@
           }
         }
 
-    # === STEP 3: CREATE CONTROLLER TEST (TDD - RED PHASE) ===
+    # === STEP 4: CREATE CONTROLLER TEST (TDD - RED PHASE) ===
     - id: 'create-controller-test-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'TDD RED: Write failing tests for __USE_CASE_NAME_PASCAL_CASE__Controller'
@@ -199,7 +232,7 @@
           })
         })
 
-    # === STEP 4: RUN TESTS - VERIFY RED (TDD - RED PHASE) ===
+    # === STEP 5: RUN TESTS - VERIFY RED (TDD - RED PHASE) ===
     - id: 'verify-tests-fail-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'TDD RED: Verify tests fail (controller does not exist yet)'
@@ -221,7 +254,7 @@
               exit 1
             workingDirectory: '__PROJECT_NAME__'
 
-    # === STEP 5: CREATE PRESENTATION STRUCTURE (TDD - GREEN PHASE) ===
+    # === STEP 6: CREATE PRESENTATION STRUCTURE (TDD - GREEN PHASE) ===
     - id: 'create-presentation-structure-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'folder'
       description: 'TDD GREEN: Create presentation layer structure to make tests pass'
@@ -237,7 +270,7 @@
             - 'protocols'
             - 'helpers'
 
-    # === STEP 6: CREATE CONTROLLER (TDD - GREEN PHASE) ===
+    # === STEP 7: CREATE CONTROLLER (TDD - GREEN PHASE) ===
     - id: 'create-presentation-controller-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'TDD GREEN: Implement controller to make tests pass'
@@ -349,7 +382,7 @@
         run_presentation_test_check
         stage_and_commit "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ controller"
 
-    # === STEP 7: RUN TESTS - VERIFY GREEN (TDD - GREEN PHASE) ===
+    # === STEP 8: RUN TESTS - VERIFY GREEN (TDD - GREEN PHASE) ===
     - id: 'verify-tests-pass-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'TDD GREEN: Verify all tests pass with implementation'
@@ -371,7 +404,7 @@
               echo "   Consider refactoring if needed (REFACTOR phase)..."
             workingDirectory: '__PROJECT_NAME__'
 
-    # === STEP 8: CREATE HTTP HELPERS ===
+    # === STEP 9: CREATE HTTP HELPERS ===
     - id: 'create-presentation-helpers-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create HTTP helper functions for __USE_CASE_NAME_PASCAL_CASE__'
@@ -430,7 +463,7 @@
           body: data
         })
 
-    # === STEP 9: CREATE PRESENTATION ERRORS ===
+    # === STEP 10: CREATE PRESENTATION ERRORS ===
     - id: 'create-presentation-errors-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create presentation errors for __USE_CASE_NAME_PASCAL_CASE__'
@@ -486,7 +519,7 @@
           }
         }
 
-    # === STEP 10: CREATE MIDDLEWARE (IF NEEDED) ===
+    # === STEP 11: CREATE MIDDLEWARE (IF NEEDED) ===
     - id: 'create-presentation-middleware-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create authentication middleware for __USE_CASE_NAME_PASCAL_CASE__ if needed'
@@ -540,7 +573,7 @@
           }
         }
 
-    # === STEP 11: REFACTOR (TDD - REFACTOR PHASE - OPTIONAL) ===
+    # === STEP 12: REFACTOR (TDD - REFACTOR PHASE - OPTIONAL) ===
     - id: 'refactor-presentation-__USE_CASE_NAME_KEBAB_CASE__'
       type: 'validation'
       description: 'TDD REFACTOR: Improve code quality while keeping tests green'
@@ -585,7 +618,7 @@
               echo "✅ Refactoring complete - tests still green!"
             workingDirectory: '__PROJECT_NAME__'
 
-    # === STEP 12: CREATE FEATURE SHARED PRESENTATION (IF NEEDED) ===
+    # === STEP 13: CREATE FEATURE SHARED PRESENTATION (IF NEEDED) ===
     - id: 'create-shared-presentation-__FEATURE_NAME_KEBAB_CASE__'
       type: 'create_file'
       description: 'Create shared presentation protocols for __FEATURE_NAME_PASCAL_CASE__ feature'
@@ -622,39 +655,6 @@
         export interface Validation {
           validate(input: any): Error | null
         }
-
-    # === STEP 13: CREATE FEATURE BRANCH ===
-    - id: 'create-feature-branch-presentation-__USE_CASE_NAME_KEBAB_CASE__'
-      type: 'validation'
-      description: 'Create and checkout feature branch for __USE_CASE_NAME_PASCAL_CASE__ presentation implementation'
-      status: 'PENDING'
-      rlhf_score: null
-      execution_log: ''
-      references:
-        - type: 'internal_guideline'
-          source: 'GIT_WORKFLOW.md'
-          description: 'Git branching strategy and naming conventions'
-      run_scripts:
-        description: 'Create feature branch with proper naming convention'
-        scripts:
-          - name: 'Create feature branch'
-            command: |
-              # Stash any uncommitted changes
-              git stash save "WIP: Before creating __FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__ presentation branch"
-
-              # Ensure we're on the main branch and up to date
-              git checkout main || git checkout master
-              git pull origin main || git pull origin master
-
-              # Create and checkout new feature branch
-              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__-presentation"
-              git checkout -b "$BRANCH_NAME" || {
-                echo "❌ Failed to create branch: $BRANCH_NAME"
-                exit 1
-              }
-
-              echo "✅ Created and checked out branch: $BRANCH_NAME"
-            workingDirectory: '__PROJECT_NAME__'
 
     # === STEP 14: REFACTOR FOR BROWNFIELD (CONDITIONAL) ===
     # AI-NOTE: When brownfield refactoring is needed, the AI should dynamically generate
