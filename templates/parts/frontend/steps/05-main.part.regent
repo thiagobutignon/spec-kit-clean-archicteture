@@ -1,0 +1,756 @@
+# ------------------------------------------------------------------------------
+# FRONTEND MAIN LAYER TEMPLATE
+# Next.js 15 App Router - Composition Root and Page Assembly
+# Supports: Next.js 15 with App Router, Server Components, and Server Actions
+# Pattern: Factory Pattern, Composite Pattern, Dependency Injection
+# ------------------------------------------------------------------------------
+
+metadata:
+  layer: 'main'
+  project_type: 'frontend'
+  architecture_style: 'clean'
+  framework: 'nextjs15'
+  rendering: 'rsc' # React Server Components
+  patterns:
+    - 'factory-pattern'
+    - 'composite-pattern'
+    - 'provider-pattern'
+    - 'server-components'
+    - 'server-actions'
+  references:
+    - 'Next.js 15 App Router documentation'
+    - 'React Server Components'
+    - 'Clean Architecture principles'
+    - 'Factory Pattern'
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER STRUCTURE
+# ------------------------------------------------------------------------------
+
+structure:
+  main_structure:
+    description: 'Setup main layer for Next.js 15 App Router'
+    folders:
+      - 'src/app'
+      - 'src/app/(features)'
+      - 'src/app/api'
+      - 'src/shared/main/factories'
+      - 'src/shared/main/composites'
+      - 'src/shared/main/providers'
+      - 'src/shared/main/adapters'
+      - 'src/shared/main/lib'
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER IMPLEMENTATION STEPS
+# Following Factory and Composite Patterns for Next.js 15
+# ------------------------------------------------------------------------------
+
+steps:
+  main_steps:
+    # === STEP 1: CREATE MAIN BRANCH ===
+    - id: 'create-main-branch-frontend'
+      type: 'validation'
+      description: 'Create feature branch for frontend main layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Create and checkout main layer branch'
+        scripts:
+          - name: 'Create main branch'
+            command: |
+              git checkout -b "feat/__FEATURE_NAME_KEBAB_CASE__-frontend-main"
+              echo "✅ Created branch: feat/__FEATURE_NAME_KEBAB_CASE__-frontend-main"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: CREATE ROOT LAYOUT ===
+    - id: 'create-root-layout'
+      type: 'create_file'
+      description: 'Create root layout with providers'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/app/layout.tsx'
+      template: |
+        import type { Metadata } from 'next'
+        import { Inter } from 'next/font/google'
+        import './globals.css'
+        import { RootProviders } from '@/shared/main/providers/root-providers'
+        import { ThemeProvider } from '@/shared/main/providers/theme-provider'
+
+        const inter = Inter({ subsets: ['latin'] })
+
+        /**
+         * Root metadata for the application
+         * @layer Main Layer - App Router
+         */
+        export const metadata: Metadata = {
+          title: '__PROJECT_NAME__',
+          description: 'Clean Architecture Next.js 15 Application',
+          metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+        }
+
+        /**
+         * Root layout component
+         * @layer Main Layer - App Router
+         * @pattern Provider Pattern, Server Component
+         */
+        export default function RootLayout({
+          children,
+        }: {
+          children: React.ReactNode
+        }) {
+          return (
+            <html lang="en" suppressHydrationWarning>
+              <body className={inter.className}>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="system"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  <RootProviders>
+                    {children}
+                  </RootProviders>
+                </ThemeProvider>
+              </body>
+            </html>
+          )
+        }
+
+    # === STEP 3: CREATE ROOT PROVIDERS ===
+    - id: 'create-root-providers'
+      type: 'create_file'
+      description: 'Create root providers for dependency injection'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/shared/main/providers/root-providers.tsx'
+      template: |
+        'use client'
+
+        import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+        import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+        import { useState } from 'react'
+        import { Toaster } from '@/shared/presentation/ui/toaster'
+
+        /**
+         * Root providers for the application
+         * @layer Main Layer - Providers
+         * @pattern Provider Pattern, Client Component
+         */
+        export function RootProviders({ children }: { children: React.ReactNode }) {
+          const [queryClient] = useState(
+            () =>
+              new QueryClient({
+                defaultOptions: {
+                  queries: {
+                    staleTime: 60 * 1000, // 1 minute
+                    gcTime: 5 * 60 * 1000, // 5 minutes
+                  },
+                },
+              })
+          )
+
+          return (
+            <QueryClientProvider client={queryClient}>
+              {children}
+              <Toaster />
+              <ReactQueryDevtools initialIsOpen={false} />
+            </QueryClientProvider>
+          )
+        }
+
+    # === STEP 4: CREATE FEATURE COMPOSITE ===
+    - id: 'create-feature-composite'
+      type: 'create_file'
+      description: 'Create composite component for feature'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main/composites/__USE_CASE_NAME_KEBAB_CASE__-composite.tsx'
+      template: |
+        import { Suspense } from 'react'
+        import { __USE_CASE_NAME_PASCAL_CASE__Form } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components'
+        import { __USE_CASE_NAME_PASCAL_CASE__Loading } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components/loading'
+        import { make__USE_CASE_NAME_PASCAL_CASE__Props } from '../factories/__USE_CASE_NAME_KEBAB_CASE__-factory'
+
+        /**
+         * Composite component for __USE_CASE_NAME_PASCAL_CASE__
+         * @layer Main Layer - Composite
+         * @pattern Composite Pattern, Server Component
+         */
+        export async function __USE_CASE_NAME_PASCAL_CASE__Composite() {
+          // Server-side data fetching and dependency injection
+          const props = await make__USE_CASE_NAME_PASCAL_CASE__Props()
+
+          return (
+            <Suspense fallback={<__USE_CASE_NAME_PASCAL_CASE__Loading />}>
+              <__USE_CASE_NAME_PASCAL_CASE__Form {...props} />
+            </Suspense>
+          )
+        }
+
+    # === STEP 5: CREATE COMPONENT FACTORY ===
+    - id: 'create-component-factory'
+      type: 'create_file'
+      description: 'Create factory for component props and dependencies'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/__USE_CASE_NAME_KEBAB_CASE__-factory.ts'
+      template: |
+        import { makeRemote__USE_CASE_NAME_PASCAL_CASE__ } from './usecases/__USE_CASE_NAME_KEBAB_CASE__-factory'
+        import { make__USE_CASE_NAME_PASCAL_CASE__Validation } from './validation/__USE_CASE_NAME_KEBAB_CASE__-validation-factory'
+
+        /**
+         * Factory for __USE_CASE_NAME_PASCAL_CASE__ component props
+         * @layer Main Layer - Factory
+         * @pattern Factory Pattern, Dependency Injection
+         */
+        export async function make__USE_CASE_NAME_PASCAL_CASE__Props() {
+          // AI-NOTE: Server-side data fetching can happen here
+          // const initialData = await fetchInitialData()
+
+          return {
+            useCase: makeRemote__USE_CASE_NAME_PASCAL_CASE__(),
+            validation: make__USE_CASE_NAME_PASCAL_CASE__Validation(),
+            // initialData,
+          }
+        }
+
+    # === STEP 6: CREATE USE CASE FACTORY ===
+    - id: 'create-usecase-factory-frontend'
+      type: 'create_file'
+      description: 'Create factory for use case with HTTP client'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/usecases/__USE_CASE_NAME_KEBAB_CASE__-factory.ts'
+      template: |
+        import { Remote__USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases'
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases'
+        import { makeAuthorizedHttpClient } from '@/shared/main/factories/http'
+        import { makeApiUrl } from '@/shared/main/factories/http/api-url-factory'
+
+        /**
+         * Factory for Remote __USE_CASE_NAME_PASCAL_CASE__ use case
+         * @layer Main Layer - Factory
+         * @pattern Factory Pattern
+         */
+        export const makeRemote__USE_CASE_NAME_PASCAL_CASE__ = (): __USE_CASE_NAME_PASCAL_CASE__ => {
+          const url = makeApiUrl('/__FEATURE_NAME_KEBAB_CASE__')
+          const httpClient = makeAuthorizedHttpClient()
+
+          return new Remote__USE_CASE_NAME_PASCAL_CASE__(url, httpClient)
+        }
+
+    # === STEP 7: CREATE HTTP CLIENT FACTORY ===
+    - id: 'create-http-client-factory'
+      type: 'create_file'
+      description: 'Create factory for authorized HTTP client'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/shared/main/factories/http/authorized-http-client-factory.ts'
+      template: |
+        import { FetchHttpClient } from '@/shared/infra/http'
+        import { AuthorizeHttpClientDecorator } from '@/shared/main/decorators'
+        import { makeLocalStorageAdapter } from '../cache'
+        import { HttpClient } from '@/shared/data/protocols'
+
+        /**
+         * Factory for authorized HTTP client
+         * @layer Main Layer - Factory
+         * @pattern Decorator Pattern, Factory Pattern
+         */
+        export const makeAuthorizedHttpClient = (): HttpClient => {
+          const httpClient = new FetchHttpClient()
+          const storage = makeLocalStorageAdapter()
+
+          return new AuthorizeHttpClientDecorator(httpClient, storage)
+        }
+
+    # === STEP 8: CREATE SERVER ACTION ===
+    - id: 'create-server-action'
+      type: 'create_file'
+      description: 'Create Server Action for form submission'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/actions/__USE_CASE_NAME_KEBAB_CASE__-action.ts'
+      template: |
+        'use server'
+
+        import { revalidatePath } from 'next/cache'
+        import { makeDb__USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/usecases'
+        import { make__USE_CASE_NAME_PASCAL_CASE__Validation } from '@/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/validation'
+        import { ActionResult } from '@/shared/presentation/protocols'
+
+        /**
+         * Server Action for __USE_CASE_NAME_PASCAL_CASE__
+         * @layer Presentation Layer - Server Action
+         * @pattern Server Action, Form Handling
+         */
+        export async function __USE_CASE_NAME_CAMEL_CASE__Action(
+          prevState: ActionResult | null,
+          formData: FormData
+        ): Promise<ActionResult> {
+          try {
+            // Convert FormData to object
+            const data = Object.fromEntries(formData)
+
+            // Validate input
+            const validation = make__USE_CASE_NAME_PASCAL_CASE__Validation()
+            const error = validation.validate(data)
+            if (error) {
+              return { success: false, error: error.message }
+            }
+
+            // Execute use case
+            const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+            const result = await useCase.execute(data)
+
+            // Revalidate cache
+            revalidatePath('/__FEATURE_NAME_KEBAB_CASE__')
+
+            return { success: true, data: result }
+          } catch (error) {
+            return {
+              success: false,
+              error: error instanceof Error ? error.message : 'An error occurred'
+            }
+          }
+        }
+
+    # === STEP 9: CREATE FEATURE PAGE ===
+    - id: 'create-feature-page'
+      type: 'create_file'
+      description: 'Create feature page in App Router'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/app/(features)/__FEATURE_NAME_KEBAB_CASE__/page.tsx'
+      template: |
+        import { Metadata } from 'next'
+        import { __FEATURE_NAME_PASCAL_CASE__PageComposer } from '@/features/__FEATURE_NAME_KEBAB_CASE__/main/pages'
+
+        /**
+         * Metadata for __FEATURE_NAME_PASCAL_CASE__ page
+         * @layer App Router - Page
+         */
+        export const metadata: Metadata = {
+          title: '__FEATURE_NAME_PASCAL_CASE__',
+          description: '__FEATURE_NAME_PASCAL_CASE__ page'
+        }
+
+        /**
+         * __FEATURE_NAME_PASCAL_CASE__ page component
+         * @layer App Router - Page
+         * @pattern Server Component
+         */
+        export default function __FEATURE_NAME_PASCAL_CASE__Page() {
+          return <__FEATURE_NAME_PASCAL_CASE__PageComposer />
+        }
+
+    # === STEP 10: CREATE PAGE COMPOSER ===
+    - id: 'create-page-composer'
+      type: 'create_file'
+      description: 'Create page composer that aggregates use case composites'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main/pages/__FEATURE_NAME_KEBAB_CASE__-page-composer.tsx'
+      template: |
+        import { __USE_CASE_NAME_PASCAL_CASE__Composite } from '../composites/__USE_CASE_NAME_KEBAB_CASE__-composite'
+        // AI-NOTE: Import other use case composites
+
+        /**
+         * Page composer for __FEATURE_NAME_PASCAL_CASE__ feature
+         * @layer Main Layer - Page Composer
+         * @pattern Composite Pattern, Server Component
+         */
+        export function __FEATURE_NAME_PASCAL_CASE__PageComposer() {
+          return (
+            <div className="container mx-auto py-8">
+              <h1 className="text-3xl font-bold mb-8">__FEATURE_NAME_PASCAL_CASE__</h1>
+
+              {/* Compose use case components */}
+              <__USE_CASE_NAME_PASCAL_CASE__Composite />
+
+              {/* AI-NOTE: Add other use case composites */}
+            </div>
+          )
+        }
+
+    # === STEP 11: CREATE API ROUTE HANDLER ===
+    - id: 'create-api-route'
+      type: 'create_file'
+      description: 'Create API route handler for feature'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/app/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/route.ts'
+      template: |
+        import { NextRequest, NextResponse } from 'next/server'
+        import { makeDb__USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/usecases'
+        import { make__USE_CASE_NAME_PASCAL_CASE__Validation } from '@/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/validation'
+
+        /**
+         * API Route handler for __USE_CASE_NAME_PASCAL_CASE__
+         * @layer App Router - API Route
+         * @pattern Route Handler
+         */
+        export async function POST(request: NextRequest) {
+          try {
+            const body = await request.json()
+
+            // Validate request
+            const validation = make__USE_CASE_NAME_PASCAL_CASE__Validation()
+            const error = validation.validate(body)
+            if (error) {
+              return NextResponse.json(
+                { error: error.message },
+                { status: 400 }
+              )
+            }
+
+            // Execute use case
+            const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+            const result = await useCase.execute(body)
+
+            return NextResponse.json(result, { status: 201 })
+          } catch (error) {
+            return NextResponse.json(
+              { error: 'Internal server error' },
+              { status: 500 }
+            )
+          }
+        }
+
+        export async function GET(request: NextRequest) {
+          // AI-NOTE: Implement GET handler if needed
+          return NextResponse.json({ message: 'Method not implemented' }, { status: 501 })
+        }
+
+    # === STEP 12: CREATE LOADING COMPONENT ===
+    - id: 'create-loading-component'
+      type: 'create_file'
+      description: 'Create loading component for Suspense'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/app/(features)/__FEATURE_NAME_KEBAB_CASE__/loading.tsx'
+      template: |
+        import { Skeleton } from '@/shared/presentation/ui/skeleton'
+
+        /**
+         * Loading component for __FEATURE_NAME_PASCAL_CASE__ page
+         * @layer App Router - Loading
+         * @pattern Suspense Boundary
+         */
+        export default function Loading() {
+          return (
+            <div className="container mx-auto py-8">
+              <Skeleton className="h-10 w-48 mb-8" />
+              <div className="space-y-4">
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-20 w-full" />
+              </div>
+            </div>
+          )
+        }
+
+    # === STEP 13: CREATE ERROR BOUNDARY ===
+    - id: 'create-error-boundary'
+      type: 'create_file'
+      description: 'Create error boundary for feature'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/app/(features)/__FEATURE_NAME_KEBAB_CASE__/error.tsx'
+      template: |
+        'use client'
+
+        import { useEffect } from 'react'
+        import { Button } from '@/shared/presentation/ui/button'
+
+        /**
+         * Error boundary for __FEATURE_NAME_PASCAL_CASE__ page
+         * @layer App Router - Error Boundary
+         * @pattern Error Handling, Client Component
+         */
+        export default function Error({
+          error,
+          reset,
+        }: {
+          error: Error & { digest?: string }
+          reset: () => void
+        }) {
+          useEffect(() => {
+            // Log error to monitoring service
+            console.error(error)
+          }, [error])
+
+          return (
+            <div className="flex min-h-[400px] flex-col items-center justify-center">
+              <h2 className="text-2xl font-semibold mb-4">Something went wrong!</h2>
+              <p className="text-muted-foreground mb-8">{error.message}</p>
+              <Button onClick={reset}>Try again</Button>
+            </div>
+          )
+        }
+
+    # === STEP 14: CREATE MIDDLEWARE ===
+    - id: 'create-middleware'
+      type: 'create_file'
+      description: 'Create Next.js middleware for authentication and routing'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/middleware.ts'
+      template: |
+        import { NextResponse } from 'next/server'
+        import type { NextRequest } from 'next/server'
+
+        /**
+         * Next.js Middleware
+         * @layer Main Layer - Middleware
+         * @pattern Edge Runtime, Request Interceptor
+         */
+        export function middleware(request: NextRequest) {
+          // Get token from cookies
+          const token = request.cookies.get('auth-token')
+
+          // Protected routes
+          const protectedPaths = ['/dashboard', '/profile', '/admin']
+          const isProtectedPath = protectedPaths.some(path =>
+            request.nextUrl.pathname.startsWith(path)
+          )
+
+          // Redirect to login if accessing protected route without token
+          if (isProtectedPath && !token) {
+            const url = new URL('/login', request.url)
+            url.searchParams.set('from', request.nextUrl.pathname)
+            return NextResponse.redirect(url)
+          }
+
+          // Add security headers
+          const response = NextResponse.next()
+          response.headers.set('X-Frame-Options', 'DENY')
+          response.headers.set('X-Content-Type-Options', 'nosniff')
+          response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+
+          return response
+        }
+
+        export const config = {
+          matcher: [
+            /*
+             * Match all request paths except:
+             * - api routes
+             * - _next/static (static files)
+             * - _next/image (image optimization files)
+             * - favicon.ico, robots.txt
+             */
+            '/((?!api|_next/static|_next/image|favicon.ico|robots.txt).*)',
+          ],
+        }
+
+    # === STEP 15: CREATE E2E TEST ===
+    - id: 'create-e2e-test-frontend'
+      type: 'create_file'
+      description: 'Create E2E test for feature using Playwright'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/e2e/__FEATURE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { test, expect } from '@playwright/test'
+
+        /**
+         * E2E tests for __FEATURE_NAME_PASCAL_CASE__ feature
+         * @layer Main Layer - E2E Tests
+         * @pattern E2E Testing with Playwright
+         */
+        test.describe('__FEATURE_NAME_PASCAL_CASE__ Feature', () => {
+          test.beforeEach(async ({ page }) => {
+            await page.goto('/__FEATURE_NAME_KEBAB_CASE__')
+          })
+
+          test('should display the feature page', async ({ page }) => {
+            await expect(page).toHaveTitle(/__FEATURE_NAME_PASCAL_CASE__/)
+            await expect(page.locator('h1')).toContainText('__FEATURE_NAME_PASCAL_CASE__')
+          })
+
+          test('should submit form successfully', async ({ page }) => {
+            // Fill form fields
+            await page.fill('input[name="name"]', 'Test Name')
+            await page.fill('input[name="email"]', 'test@example.com')
+
+            // Submit form
+            await page.click('button[type="submit"]')
+
+            // Check success message
+            await expect(page.locator('[role="alert"]')).toContainText('Success')
+          })
+
+          test('should show validation errors', async ({ page }) => {
+            // Submit empty form
+            await page.click('button[type="submit"]')
+
+            // Check validation errors
+            await expect(page.locator('[role="alert"]')).toContainText('Required')
+          })
+
+          test('should handle API errors gracefully', async ({ page }) => {
+            // Intercept API call to simulate error
+            await page.route('/api/__FEATURE_NAME_KEBAB_CASE__/**', route => {
+              route.fulfill({
+                status: 500,
+                body: JSON.stringify({ error: 'Server error' })
+              })
+            })
+
+            // Submit form
+            await page.fill('input[name="name"]', 'Test')
+            await page.click('button[type="submit"]')
+
+            // Check error message
+            await expect(page.locator('[role="alert"]')).toContainText('error')
+          })
+        })
+
+    # === STEP 16: CREATE PR ===
+    - id: 'create-pr-frontend-main'
+      type: 'validation'
+      description: 'Create Pull Request for frontend main layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Create PR using GitHub CLI'
+        scripts:
+          - name: 'Push and create PR'
+            command: |
+              git add .
+              git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement frontend main layer for Next.js 15"
+              git push -u origin "feat/__FEATURE_NAME_KEBAB_CASE__-frontend-main"
+
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): add frontend main layer for Next.js 15" \
+                --body "## Summary
+
+              Implemented main layer for __FEATURE_NAME_PASCAL_CASE__ feature in Next.js 15.
+
+              ## Changes
+              - ✅ Created root layout with providers
+              - ✅ Implemented composite components
+              - ✅ Created factories for dependency injection
+              - ✅ Added Server Actions for form handling
+              - ✅ Setup API route handlers
+              - ✅ Configured middleware for auth and security
+              - ✅ Added loading and error boundaries
+              - ✅ Created E2E tests with Playwright
+
+              ## Architecture
+              - App Router with Server Components
+              - Factory Pattern for dependency injection
+              - Composite Pattern for page assembly
+              - Server Actions for mutations
+              - Edge Runtime middleware
+
+              ## Testing
+              - [ ] Unit tests pass
+              - [ ] E2E tests pass
+              - [ ] Manual testing completed
+              " \
+                --assignee @me \
+                --label "feature,frontend,nextjs15,main-layer"
+            workingDirectory: '__PROJECT_NAME__'
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER REFACTORING PATTERNS
+# ------------------------------------------------------------------------------
+
+main_refactoring_patterns:
+  - id: 'extract-to-server-action'
+    description: 'Extract API calls to Server Actions'
+    detection:
+      - 'Client-side API calls for mutations'
+      - 'Form submissions with fetch'
+      - 'Direct database access in components'
+    example:
+      original: |
+        # AI-NOTE: Extract client-side API call to Server Action
+        <<<FIND>>>
+        'use client'
+
+        export function CreateForm() {
+          const handleSubmit = async (e) => {
+            e.preventDefault()
+            const formData = new FormData(e.target)
+
+            const response = await fetch('/api/users', {
+              method: 'POST',
+              body: JSON.stringify(Object.fromEntries(formData)),
+            })
+
+            if (response.ok) {
+              router.push('/success')
+            }
+          }
+
+          return <form onSubmit={handleSubmit}>...</form>
+        }
+        <<</FIND>>>
+        <<<REPLACE>>>
+        import { createUserAction } from './actions'
+
+        export function CreateForm() {
+          return (
+            <form action={createUserAction}>
+              ...
+            </form>
+          )
+        }
+        <<</REPLACE>>>
+      category: 'architecture'
+      severity: 'HIGH'
+      rlhf_impact: 2
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER ANTI-PATTERNS
+# ------------------------------------------------------------------------------
+
+main_anti_patterns:
+  - name: 'Business Logic in Components'
+    description: 'Components should not contain business logic'
+    example: 'Complex calculations or business rules in React components'
+    correct: 'Move business logic to use cases and use factories'
+    rlhf_impact: -2
+
+  - name: 'Direct Database Access'
+    description: 'Components accessing database directly'
+    example: 'prisma.user.findMany() in Server Component'
+    correct: 'Use repositories and factories for data access'
+    rlhf_impact: -2
+
+  - name: 'Missing Error Boundaries'
+    description: 'No error handling for async components'
+    example: 'Async Server Component without error.tsx'
+    correct: 'Add error.tsx for each route segment'
+    rlhf_impact: -1
+
+  - name: 'Client Components Everywhere'
+    description: 'Overuse of "use client" directive'
+    example: 'Every component marked as client component'
+    correct: 'Use Server Components by default, client only when needed'
+    rlhf_impact: -1
+
+  - name: 'No Loading States'
+    description: 'Missing loading UI for async operations'
+    example: 'No loading.tsx or Suspense boundaries'
+    correct: 'Add loading.tsx and Suspense for better UX'
+    rlhf_impact: -1
