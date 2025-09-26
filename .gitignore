@@ -2,5 +2,11 @@ node_modules
 
 # macOS
 .DS_Store
-# Generated combined template - do not edit directly
+
+# Generated templates (built from parts) - do not edit directly
 templates/template.regent
+templates/*-domain-template.regent
+templates/*-data-template.regent
+templates/*-infra-template.regent
+templates/*-presentation-template.regent
+templates/*-main-template.regent

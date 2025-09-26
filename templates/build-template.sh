@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Build Template Script
-# Combines all .part.regent files from subdirectories into complete template files
+# Generates layer-specific templates by combining parts in the correct order
+# Output format: [backend|frontend|fullstack]-[layer]-template.regent
 
 set -e  # Exit on any error
 
@@ -10,17 +11,22 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
 NC='\033[0m' # No Color
 
 # Paths
 PARTS_DIR="templates/parts"
 OUTPUT_DIR="templates"
-TEMP_FILE="templates/.template.tmp"
 
-# Target types
+# Target types and layers
 TARGETS=("backend" "frontend" "fullstack")
+LAYERS=("domain" "data" "infra" "presentation" "main")
 
-echo -e "${YELLOW}Building templates from modular parts...${NC}"
+echo -e "${CYAN}╔═══════════════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║     Building Layer-Specific Templates                 ║${NC}"
+echo -e "${CYAN}╚═══════════════════════════════════════════════════════╝${NC}"
+echo ""
 
 # Check if parts directory exists
 if [ ! -d "$PARTS_DIR" ]; then
@@ -28,149 +34,207 @@ if [ ! -d "$PARTS_DIR" ]; then
     exit 1
 fi
 
-# Function to build a template for a specific target
-build_template() {
-    local TARGET=$1
-    local OUTPUT_FILE="${OUTPUT_DIR}/${TARGET}-template.regent"
-    local TEMP_FILE="${OUTPUT_DIR}/.${TARGET}-template.tmp"
-    local PART_COUNT=0
+# Function to check if file exists and add to template
+add_part_if_exists() {
+    local part_path=$1
+    local temp_file=$2
+    local description=$3
 
-    echo -e "${BLUE}Building ${TARGET} template...${NC}"
+    if [ -f "$part_path" ]; then
+        echo -e "${GREEN}  ✓ Adding ${description}${NC}"
 
-    # Create temporary file
-    > "$TEMP_FILE"
+        echo "" >> "$temp_file"
+        echo "# --- From: ${part_path#$PARTS_DIR/} ---" >> "$temp_file"
 
-    # Add build header
-    echo "# =============================================" >> "$TEMP_FILE"
-    echo "# GENERATED FILE - DO NOT EDIT DIRECTLY" >> "$TEMP_FILE"
-    echo "# Target: ${TARGET}" >> "$TEMP_FILE"
-    echo "# Built from parts in $PARTS_DIR" >> "$TEMP_FILE"
-    echo "# Generated at: $(date '+%Y-%m-%d %H:%M:%S')" >> "$TEMP_FILE"
-    echo "# To modify, edit the part files and rebuild" >> "$TEMP_FILE"
-    echo "# =============================================" >> "$TEMP_FILE"
-    echo "" >> "$TEMP_FILE"
+        # Remove section markers if they exist
+        sed '/^# ============= BEGIN .* SECTION =============/d; /^# ============= END .* SECTION =============/d' "$part_path" >> "$temp_file"
 
-    # First add shared parts (like header)
-    if [ -d "$PARTS_DIR/shared" ]; then
-        for part in $PARTS_DIR/shared/*.part.regent; do
-            if [ -f "$part" ]; then
-                filename=$(basename "$part")
-                echo -e "${GREEN}  ✓ Adding shared: $filename${NC}"
-
-                echo "" >> "$TEMP_FILE"
-                echo "# --- From: shared/$filename ---" >> "$TEMP_FILE"
-
-                # Remove section markers if they exist
-                sed '/^# ============= BEGIN .* SECTION =============/d; /^# ============= END .* SECTION =============/d' "$part" >> "$TEMP_FILE"
-
-                echo "" >> "$TEMP_FILE"
-                PART_COUNT=$((PART_COUNT + 1))
-            fi
-        done
-    fi
-
-    # Then add target-specific parts
-    if [ -d "$PARTS_DIR/$TARGET" ]; then
-        for part in $PARTS_DIR/$TARGET/*.part.regent; do
-            if [ -f "$part" ]; then
-                filename=$(basename "$part")
-                echo -e "${GREEN}  ✓ Adding ${TARGET}: $filename${NC}"
-
-                echo "" >> "$TEMP_FILE"
-                echo "# --- From: ${TARGET}/$filename ---" >> "$TEMP_FILE"
-
-                # Remove section markers if they exist
-                sed '/^# ============= BEGIN .* =============/d; /^# ============= END .* =============/d' "$part" >> "$TEMP_FILE"
-
-                echo "" >> "$TEMP_FILE"
-                PART_COUNT=$((PART_COUNT + 1))
-            fi
-        done
+        echo "" >> "$temp_file"
+        return 0
     else
-        echo -e "${YELLOW}  ⚠ No parts found for ${TARGET}${NC}"
-    fi
-
-    # Move temp file to final location if we have parts
-    if [ $PART_COUNT -gt 0 ]; then
-        mv "$TEMP_FILE" "$OUTPUT_FILE"
-        echo -e "${GREEN}  ✓ Built ${TARGET} template from $PART_COUNT parts${NC}"
-        echo -e "${GREEN}    Output: $OUTPUT_FILE${NC}"
-    else
-        rm -f "$TEMP_FILE"
-        echo -e "${RED}  ✗ No parts found for ${TARGET} template${NC}"
+        echo -e "${YELLOW}  ⚠ Skipping ${description} (not found)${NC}"
+        return 1
     fi
 }
 
-# Build templates for each target
-for TARGET in "${TARGETS[@]}"; do
-    build_template "$TARGET"
-    echo ""
-done
+# Function to build a layer-specific template
+build_layer_template() {
+    local target=$1
+    local layer=$2
+    local output_file="${OUTPUT_DIR}/${target}-${layer}-template.regent"
+    local temp_file="${OUTPUT_DIR}/.${target}-${layer}-template.tmp"
+    local part_count=0
 
-# Also build a combined template if needed
-echo -e "${BLUE}Building combined template...${NC}"
-COMBINED_OUTPUT="${OUTPUT_DIR}/template.regent"
-COMBINED_TEMP="${OUTPUT_DIR}/.template.tmp"
-TOTAL_PARTS=0
+    echo -e "${MAGENTA}Building ${target}/${layer} template...${NC}"
 
-> "$COMBINED_TEMP"
+    # Create temporary file
+    > "$temp_file"
 
-# Add header for combined
-echo "# =============================================" >> "$COMBINED_TEMP"
-echo "# GENERATED FILE - DO NOT EDIT DIRECTLY" >> "$COMBINED_TEMP"
-echo "# Combined template (backend + frontend)" >> "$COMBINED_TEMP"
-echo "# Built from parts in $PARTS_DIR" >> "$COMBINED_TEMP"
-echo "# Generated at: $(date '+%Y-%m-%d %H:%M:%S')" >> "$COMBINED_TEMP"
-echo "# =============================================" >> "$COMBINED_TEMP"
-echo "" >> "$COMBINED_TEMP"
+    # Add build header
+    echo "# =============================================" >> "$temp_file"
+    echo "# GENERATED FILE - DO NOT EDIT DIRECTLY" >> "$temp_file"
+    echo "# Target: ${target}" >> "$temp_file"
+    echo "# Layer: ${layer}" >> "$temp_file"
+    echo "# Built from parts in $PARTS_DIR" >> "$temp_file"
+    echo "# Generated at: $(date '+%Y-%m-%d %H:%M:%S')" >> "$temp_file"
+    echo "# To modify, edit the part files and rebuild" >> "$temp_file"
+    echo "# =============================================" >> "$temp_file"
+    echo "" >> "$temp_file"
 
-# Add all parts from all directories (excluding fullstack from combined)
-# Combined template only includes backend and frontend, not fullstack
-for dir in shared backend frontend; do
-    if [ -d "$PARTS_DIR/$dir" ]; then
-        for part in $PARTS_DIR/$dir/*.part.regent; do
-            if [ -f "$part" ]; then
-                filename=$(basename "$part")
-                echo -e "${GREEN}  ✓ Adding $dir/$filename${NC}"
-
-                echo "" >> "$COMBINED_TEMP"
-                echo "# --- From: $dir/$filename ---" >> "$COMBINED_TEMP"
-
-                sed '/^# ============= BEGIN .* =============/d; /^# ============= END .* =============/d' "$part" >> "$COMBINED_TEMP"
-
-                echo "" >> "$COMBINED_TEMP"
-                TOTAL_PARTS=$((TOTAL_PARTS + 1))
-            fi
-        done
+    # Step 1: Add shared header (00-header.part.regent)
+    if add_part_if_exists "$PARTS_DIR/shared/00-header.part.regent" "$temp_file" "shared header"; then
+        part_count=$((part_count + 1))
     fi
+
+    # Step 2: Add target-specific structure, architecture, and rules
+    if add_part_if_exists "$PARTS_DIR/$target/01-structure.part.regent" "$temp_file" "$target structure"; then
+        part_count=$((part_count + 1))
+    fi
+
+    if add_part_if_exists "$PARTS_DIR/$target/02-architecture.part.regent" "$temp_file" "$target architecture"; then
+        part_count=$((part_count + 1))
+    fi
+
+    if add_part_if_exists "$PARTS_DIR/$target/03-rules.part.regent" "$temp_file" "$target rules"; then
+        part_count=$((part_count + 1))
+    fi
+
+    # Step 3: Add layer-specific implementation
+    local layer_file=""
+    case $layer in
+        "domain")
+            layer_file="01-domain.part.regent"
+            ;;
+        "data")
+            layer_file="02-data.part.regent"
+            ;;
+        "infra")
+            layer_file="03-infra.part.regent"
+            ;;
+        "presentation")
+            layer_file="04-presentation.part.regent"
+            ;;
+        "main")
+            layer_file="05-main.part.regent"
+            ;;
+    esac
+
+    if add_part_if_exists "$PARTS_DIR/$target/steps/$layer_file" "$temp_file" "$target $layer layer"; then
+        part_count=$((part_count + 1))
+    fi
+
+    # Step 4: Add shared validation if it's not the main layer (validation is part of presentation)
+    if [ "$layer" = "presentation" ] && [ -f "$PARTS_DIR/shared/steps/validation.part.regent" ]; then
+        if add_part_if_exists "$PARTS_DIR/shared/steps/validation.part.regent" "$temp_file" "shared validation"; then
+            part_count=$((part_count + 1))
+        fi
+    fi
+
+    # Step 5: Add shared footer (01-footer.part.regent)
+    if add_part_if_exists "$PARTS_DIR/shared/01-footer.part.regent" "$temp_file" "shared footer"; then
+        part_count=$((part_count + 1))
+    fi
+
+    # Move temp file to final location if we have parts
+    if [ $part_count -gt 0 ]; then
+        mv "$temp_file" "$output_file"
+        echo -e "${GREEN}  ✅ Built ${target}-${layer} template from $part_count parts${NC}"
+        echo -e "${BLUE}     Output: $output_file${NC}"
+        return 0
+    else
+        rm -f "$temp_file"
+        echo -e "${RED}  ❌ No parts found for ${target}-${layer} template${NC}"
+        return 1
+    fi
+}
+
+# Statistics
+total_templates=0
+failed_templates=0
+
+# Build templates for each target and layer combination
+for target in "${TARGETS[@]}"; do
+    echo ""
+    echo -e "${CYAN}═══════════════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}  Processing ${target} templates${NC}"
+    echo -e "${CYAN}═══════════════════════════════════════════════════════${NC}"
+    echo ""
+
+    for layer in "${LAYERS[@]}"; do
+        if build_layer_template "$target" "$layer"; then
+            total_templates=$((total_templates + 1))
+        else
+            failed_templates=$((failed_templates + 1))
+        fi
+        echo ""
+    done
 done
 
-if [ $TOTAL_PARTS -gt 0 ]; then
-    mv "$COMBINED_TEMP" "$COMBINED_OUTPUT"
-    echo -e "${GREEN}✓ Built combined template from $TOTAL_PARTS parts${NC}"
-    echo -e "${GREEN}  Output: $COMBINED_OUTPUT${NC}"
+# Summary
+echo ""
+echo -e "${CYAN}╔═══════════════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║                    Build Summary                      ║${NC}"
+echo -e "${CYAN}╚═══════════════════════════════════════════════════════╝${NC}"
+echo ""
+
+if [ $failed_templates -eq 0 ]; then
+    echo -e "${GREEN}✅ Successfully built all $total_templates templates!${NC}"
 else
-    rm -f "$COMBINED_TEMP"
+    echo -e "${YELLOW}⚠️  Built $total_templates templates with $failed_templates failures${NC}"
 fi
 
 echo ""
-
-# Validate the generated template if schema exists
-if [ -f "regent.schema.json" ]; then
-    echo -e "${YELLOW}Validating generated template...${NC}"
-
-    # Check if the YAML is valid (basic check)
-    if command -v yq &> /dev/null; then
-        if yq eval '.' "$OUTPUT_FILE" > /dev/null 2>&1; then
-            echo -e "${GREEN}  ✓ YAML syntax is valid${NC}"
-        else
-            echo -e "${RED}  ✗ YAML syntax validation failed${NC}"
-            echo -e "${YELLOW}  Run 'yq eval . $OUTPUT_FILE' to see errors${NC}"
+echo -e "${BLUE}Templates generated:${NC}"
+for target in "${TARGETS[@]}"; do
+    for layer in "${LAYERS[@]}"; do
+        template_file="${OUTPUT_DIR}/${target}-${layer}-template.regent"
+        if [ -f "$template_file" ]; then
+            size=$(wc -l < "$template_file" | tr -d ' ')
+            echo -e "  ${GREEN}✓${NC} ${target}-${layer}-template.regent (${size} lines)"
         fi
+    done
+done
+
+echo ""
+
+# Optional: Validate YAML syntax if yq is installed
+if command -v yq &> /dev/null; then
+    echo -e "${YELLOW}Validating YAML syntax...${NC}"
+    validation_failed=0
+
+    for target in "${TARGETS[@]}"; do
+        for layer in "${LAYERS[@]}"; do
+            template_file="${OUTPUT_DIR}/${target}-${layer}-template.regent"
+            if [ -f "$template_file" ]; then
+                if yq eval '.' "$template_file" > /dev/null 2>&1; then
+                    echo -e "  ${GREEN}✓${NC} ${target}-${layer}: Valid YAML"
+                else
+                    echo -e "  ${RED}✗${NC} ${target}-${layer}: Invalid YAML"
+                    validation_failed=$((validation_failed + 1))
+                fi
+            fi
+        done
+    done
+
+    if [ $validation_failed -gt 0 ]; then
+        echo -e "${RED}⚠️  $validation_failed templates have YAML syntax errors${NC}"
     else
-        echo -e "${YELLOW}  ⚠ yq not installed - skipping YAML validation${NC}"
-        echo -e "${YELLOW}  Install with: brew install yq (macOS) or apt-get install yq (Linux)${NC}"
+        echo -e "${GREEN}✅ All templates have valid YAML syntax${NC}"
     fi
+else
+    echo -e "${YELLOW}ℹ️  yq not installed - skipping YAML validation${NC}"
+    echo -e "${YELLOW}   Install with: brew install yq (macOS) or apt-get install yq (Linux)${NC}"
 fi
 
+echo ""
 echo -e "${GREEN}Build complete!${NC}"
+echo ""
+
+# Show usage hint
+echo -e "${CYAN}Usage hint:${NC}"
+echo -e "  To use a specific template, run:"
+echo -e "  ${BLUE}npx tsx execute-template.ts templates/[target]-[layer]-template.regent${NC}"
+echo -e ""
+echo -e "  Example:"
+echo -e "  ${BLUE}npx tsx execute-template.ts templates/backend-domain-template.regent${NC}"
+echo ""
