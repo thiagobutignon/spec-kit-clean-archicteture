@@ -300,35 +300,35 @@ npx tsx validate-template.ts --all
 # - Checks for architectural violations
 ```
 
-### Execute Templates with Enhanced System
+### Execute Templates with Layer-Aware System
 
 ```bash
 # Execute with layer-aware RLHF scoring
-npx tsx execute-steps-enhanced.ts templates/backend-domain-template.regent
+npx tsx execute-steps.ts templates/backend-domain-template.regent
 
-# The enhanced executor provides:
+# The executor provides:
 # - Pre-execution validation
 # - Layer-specific architectural checks
 # - Centralized RLHF scoring
 # - Contextual error messages
 
 # Batch execution options:
-npx tsx execute-steps-enhanced.ts --all              # All templates
-npx tsx execute-steps-enhanced.ts --layer=domain     # All domain templates
-npx tsx execute-steps-enhanced.ts --target=backend   # All backend templates
+npx tsx execute-steps.ts --all              # All templates
+npx tsx execute-steps.ts --layer=domain     # All domain templates
+npx tsx execute-steps.ts --target=backend   # All backend templates
 ```
 
 ### RLHF Analysis with Layer Context
 
 ```bash
 # Analyze execution with layer awareness
-npx tsx rlhf-system-enhanced.ts analyze implementation.yaml domain backend
+npx tsx rlhf-system.ts analyze implementation.yaml domain backend
 
 # Generate layer-specific report
-npx tsx rlhf-system-enhanced.ts report domain backend
+npx tsx rlhf-system.ts report domain backend
 
 # View loaded patterns for a layer
-npx tsx rlhf-system-enhanced.ts patterns domain
+npx tsx rlhf-system.ts patterns domain
 ```
 
 ### Benefits of This Approach
@@ -608,22 +608,22 @@ Benefits:
 ## 🛠️ Key Tools & Scripts
 
 ### Core Executors
-- **`execute-steps-enhanced.ts`**: Layer-aware template executor with pre-validation
+- **`execute-steps.ts`**: Layer-aware template executor with pre-validation
 - **`validate-template.ts`**: Unified validator using JSON schemas
-- **`rlhf-system-enhanced.ts`**: Centralized RLHF scoring with layer context
+- **`rlhf-system.ts`**: Centralized RLHF scoring with layer context
 - **`build-template.sh`**: Generates 15 layer-specific templates
 
 ### System Architecture
 ```
 ┌─────────────────────────────┐
-│   Execute Steps Enhanced    │
+│      Execute Steps          │
 │  - Detects layer from file  │
 │  - Pre-validates template   │
 └────────────┬────────────────┘
              │
              ▼
 ┌─────────────────────────────┐
-│  Enhanced RLHF System       │
+│       RLHF System           │
 │  - Centralized scoring      │
 │  - Pattern loading          │
 │  - Layer-aware validation   │

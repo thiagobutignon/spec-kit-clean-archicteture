@@ -9,20 +9,20 @@ import Logger from './logger';
 import { resolveRLHFDirectory, resolveLogDirectory } from './utils/log-path-resolver';
 
 /**
- * Automated RLHF System for Domain Generation
+ * Enhanced RLHF System with Layer-Aware Scoring
  *
- * This system learns from execution results and automatically:
- * 1. Tracks success/failure patterns
- * 2. Identifies common error types
- * 3. Adjusts templates and processes
- * 4. Improves generation quality over time
+ * This enhanced version integrates with templates by:
+ * 1. Accepting layer context in scoring decisions
+ * 2. Loading score impacts from template patterns
+ * 3. Centralizing all scoring logic
+ * 4. Caching layer-specific patterns
  *
  * INTELLIGENT SCORING SYSTEM:
- * -2: Catastrophic errors (architecture violations, incorrect REPLACE/WITH format)
- * -1: Runtime errors during execution (lint, tests, git operations)
- *  0: Low confidence situations - PREVENTS HALLUCINATIONS
- * +1: Task complete but missing elements (ubiquitous language, best practices)
- * +2: Perfect execution with domain knowledge and clean architecture
+ * -2: Catastrophic errors (architecture violations)
+ * -1: Runtime errors or missing implementations
+ *  0: Low confidence - prevents hallucinations
+ * +1: Task complete with good practices
+ * +2: Perfect execution with domain patterns
  */
 
 interface ExecutionMetrics {
@@ -34,6 +34,8 @@ interface ExecutionMetrics {
   errorMessage?: string;
   codePattern?: string;
   timestamp: Date;
+  layer?: string;
+  target?: string;
 }
 
 interface LearningPattern {
@@ -43,6 +45,20 @@ interface LearningPattern {
   lastSeen: Date;
   suggestedFix?: string;
   autoFixApplied?: boolean;
+  scoreImpact?: number;
+  layer?: string;
+}
+
+interface LayerInfo {
+  layer: 'domain' | 'data' | 'infra' | 'presentation' | 'main';
+  target: 'backend' | 'frontend' | 'fullstack';
+}
+
+interface TemplatePattern {
+  pattern: string;
+  fix: string;
+  layer: string;
+  score_impact: number;
 }
 
 interface TemplateImprovement {
@@ -51,23 +67,24 @@ interface TemplateImprovement {
   solution: string;
   confidence: number;
   appliedAt?: Date;
+  layer?: string;
 }
 
-class RLHFSystem {
+class EnhancedRLHFSystem {
   private dataDir: string;
   private metricsFile: string;
   private patternsFile: string;
   private improvementsFile: string;
   private logger: Logger;
   private patternCache = new Map<string, { result: any; timestamp: number }>();
+  private layerPatterns = new Map<string, TemplatePattern[]>();
   private cacheExpiry: number;
-  private maxCacheSize = 100; // Maximum cache entries
+  private maxCacheSize = 100;
   private cacheStats = { hits: 0, misses: 0, evictions: 0 };
   private progressCallback?: (message: string, percentage: number) => void;
   private progressFile: string;
 
   constructor(contextPath?: string, cacheExpiry?: number) {
-    // Resolve data directory based on context
     this.dataDir = resolveRLHFDirectory(contextPath);
     this.metricsFile = path.join(this.dataDir, 'metrics.json');
     this.patternsFile = path.join(this.dataDir, 'patterns.json');
@@ -76,7 +93,6 @@ class RLHFSystem {
 
     fs.ensureDirSync(this.dataDir);
 
-    // Resolve log directory based on context
     const logDir = contextPath
       ? resolveLogDirectory(contextPath, 'rlhf')
       : path.join(this.dataDir, 'logs');
@@ -84,13 +100,48 @@ class RLHFSystem {
     this.logger = new Logger(logDir);
     this.cacheExpiry = cacheExpiry || 5 * 60 * 1000; // Default 5 minutes
     this.setupCleanupHandlers();
+    this.loadLayerPatterns();
   }
 
   /**
-   * Analyze execution results and extract metrics
+   * Load layer-specific patterns from templates
    */
-  async analyzeExecution(yamlPath: string): Promise<void> {
-    this.logger.log(`🤖 Starting RLHF analysis for: ${yamlPath}`);
+  private async loadLayerPatterns(): Promise<void> {
+    // Load patterns from footer template which contains all layer patterns
+    const footerPath = 'templates/parts/shared/01-footer.part.regent';
+
+    try {
+      if (await fs.pathExists(footerPath)) {
+        const content = await fs.readFile(footerPath, 'utf-8');
+        const footer = yaml.parse(content);
+
+        // Extract patterns from learning_patterns section
+        if (footer.learning_patterns?.common_errors) {
+          for (const error of footer.learning_patterns.common_errors) {
+            const layer = error.layer || 'all';
+            if (!this.layerPatterns.has(layer)) {
+              this.layerPatterns.set(layer, []);
+            }
+            this.layerPatterns.get(layer)!.push(error);
+          }
+        }
+
+        this.logger.log(`📚 Loaded ${this.layerPatterns.size} layer pattern groups`);
+      }
+    } catch (error) {
+      this.logger.log(`⚠️ Could not load layer patterns from templates: ${error}`);
+    }
+  }
+
+  /**
+   * Analyze execution with layer context
+   */
+  async analyzeExecution(yamlPath: string, layerInfo?: LayerInfo): Promise<void> {
+    this.logger.log(`🤖 Starting layer-aware RLHF analysis for: ${yamlPath}`);
+    if (layerInfo) {
+      this.logger.log(`📊 Layer context: ${layerInfo.target}/${layerInfo.layer}`);
+    }
+
     this.reportProgress('Starting RLHF analysis', 0);
 
     const content = await fs.readFile(yamlPath, 'utf-8');
@@ -98,19 +149,24 @@ class RLHFSystem {
     this.reportProgress('Parsing YAML file', 10);
 
     const metrics: ExecutionMetrics[] = [];
-    const totalSteps = plan.steps.length;
+    const totalSteps = plan.steps?.length || 0;
     let processedSteps = 0;
 
-    for (const step of plan.steps) {
-      // Check cache first for pattern analysis
+    // Extract steps based on layer
+    const steps = this.extractSteps(plan, layerInfo);
+
+    for (const step of steps) {
       const cacheKey = this.getCacheKey(step);
       const cached = this.getCachedResult(cacheKey);
+
       const metric: ExecutionMetrics = {
         stepId: step.id,
         stepType: step.type,
         success: step.status === 'SUCCESS',
         duration: this.extractDuration(step.execution_log),
-        timestamp: new Date()
+        timestamp: new Date(),
+        layer: layerInfo?.layer,
+        target: layerInfo?.target
       };
 
       if (step.status === 'FAILED') {
@@ -122,7 +178,6 @@ class RLHFSystem {
 
       metrics.push(metric);
 
-      // Cache pattern analysis if not cached
       if (!cached && step.template) {
         this.setCachedResult(cacheKey, metric);
       }
@@ -138,17 +193,149 @@ class RLHFSystem {
     await this.saveMetrics(metrics);
 
     this.reportProgress('Updating patterns', 85);
-    await this.updatePatterns(metrics);
+    await this.updatePatterns(metrics, layerInfo);
 
     this.reportProgress('Generating improvements', 95);
-    await this.generateImprovements(metrics);
+    await this.generateImprovements(metrics, layerInfo);
 
     this.reportProgress('Analysis complete', 100);
     this.logger.log(`✅ RLHF analysis complete. Processed ${metrics.length} steps.`);
   }
 
   /**
-   * Extract error information from execution log
+   * Extract steps based on layer
+   */
+  private extractSteps(plan: any, layerInfo?: LayerInfo): any[] {
+    if (!layerInfo) {
+      return plan.steps || [];
+    }
+
+    // Try layer-specific steps first
+    const layerStepsKey = `${layerInfo.layer}_steps`;
+    if (plan[layerStepsKey]) {
+      return plan[layerStepsKey];
+    }
+
+    // Fallback to general steps
+    return plan.steps || [];
+  }
+
+  /**
+   * Calculate layer-aware RLHF score
+   * This is the centralized scoring logic
+   */
+  async calculateLayerScore(
+    stepType: string,
+    success: boolean,
+    layerInfo?: LayerInfo,
+    errorMessage?: string,
+    stepData?: any
+  ): Promise<number> {
+    this.logger.log(`🧮 Calculating layer-aware RLHF score`);
+    if (layerInfo) {
+      this.logger.log(`   Layer: ${layerInfo.layer}, Target: ${layerInfo.target}`);
+    }
+
+    // Base score calculation
+    let score = await this.calculateScore(stepType, success, errorMessage, stepData);
+
+    // Apply layer-specific patterns if available
+    if (layerInfo && stepData?.template) {
+      score = this.applyLayerPatterns(score, stepData.template, layerInfo);
+    }
+
+    // Apply template-defined score impacts
+    if (layerInfo) {
+      score = this.applyTemplateScoreImpacts(score, stepData, layerInfo);
+    }
+
+    this.logger.log(`📊 Final layer-aware score: ${score}`);
+    return score;
+  }
+
+  /**
+   * Apply layer-specific patterns to score
+   */
+  private applyLayerPatterns(score: number, template: string, layerInfo: LayerInfo): number {
+    const patterns = this.layerPatterns.get(layerInfo.layer) || [];
+    const allPatterns = this.layerPatterns.get('all') || [];
+
+    // Check both layer-specific and general patterns
+    for (const pattern of [...patterns, ...allPatterns]) {
+      const regex = new RegExp(pattern.pattern, 'i');
+      if (regex.test(template)) {
+        this.logger.log(`   Pattern match: ${pattern.pattern} (impact: ${pattern.score_impact})`);
+        score = Math.min(score + pattern.score_impact, 2);
+        score = Math.max(score, -2);
+      }
+    }
+
+    return score;
+  }
+
+  /**
+   * Apply template-defined score impacts
+   */
+  private applyTemplateScoreImpacts(score: number, stepData: any, layerInfo: LayerInfo): number {
+    if (!stepData?.template) return score;
+
+    const template = stepData.template.toLowerCase();
+
+    // Layer-specific architectural rules
+    switch (layerInfo.layer) {
+      case 'domain':
+        // Domain layer should have NO external dependencies
+        if (template.match(/import\s+(?:axios|fetch|prisma|redis|mysql|postgres)/i)) {
+          this.logger.log(`   Domain violation: External dependency detected`);
+          return Math.min(score, -2);
+        }
+        // Bonus for good domain patterns
+        if (template.includes('value object') || template.includes('aggregate root')) {
+          return Math.min(score + 1, 2);
+        }
+        break;
+
+      case 'data':
+        // Data layer should implement domain interfaces
+        if (!template.includes('implements')) {
+          this.logger.log(`   Data layer warning: No interface implementation`);
+          return Math.max(score - 1, -2);
+        }
+        // Penalty for direct DB access without repository pattern
+        if (template.includes('select * from') && !template.includes('repository')) {
+          return Math.min(score, -2);
+        }
+        break;
+
+      case 'infra':
+        // Infrastructure should handle errors
+        if (!template.includes('try') || !template.includes('catch')) {
+          this.logger.log(`   Infra warning: Missing error handling`);
+          return Math.max(score - 1, -2);
+        }
+        break;
+
+      case 'presentation':
+        // Presentation should not contain business logic
+        if (template.match(/calculate|compute|business|domain logic/i)) {
+          this.logger.log(`   Presentation violation: Business logic detected`);
+          return Math.min(score, -2);
+        }
+        break;
+
+      case 'main':
+        // Main layer should use factory pattern
+        if (template.includes('factory') || template.includes('createFactory')) {
+          return Math.min(score + 1, 2);
+        }
+        break;
+    }
+
+    return score;
+  }
+
+  /**
+   * Extract error information
    */
   private extractErrorInfo(log: string): { type: string; message: string } {
     const errorPatterns = [
@@ -159,14 +346,16 @@ class RLHFSystem {
       { regex: /PR.*failed/i, type: 'pr_creation' },
       { regex: /permission denied/i, type: 'permission' },
       { regex: /cannot find module/i, type: 'missing_dependency' },
-      { regex: /git.*failed/i, type: 'git_operation' }
+      { regex: /git.*failed/i, type: 'git_operation' },
+      { regex: /architecture.*violation/i, type: 'architecture_violation' },
+      { regex: /clean.*architecture/i, type: 'clean_architecture' }
     ];
 
     for (const pattern of errorPatterns) {
       if (pattern.regex.test(log)) {
         return {
           type: pattern.type,
-          message: log.substring(0, 500) // First 500 chars
+          message: log.substring(0, 500)
         };
       }
     }
@@ -175,11 +364,10 @@ class RLHFSystem {
   }
 
   /**
-   * Extract code pattern that caused the error
+   * Extract code pattern
    */
   private extractCodePattern(step: any): string {
     if (step.template) {
-      // Hash the template to identify similar patterns
       return createHash('md5')
         .update(step.template.substring(0, 200))
         .digest('hex');
@@ -188,7 +376,7 @@ class RLHFSystem {
   }
 
   /**
-   * Extract execution duration from log
+   * Extract execution duration
    */
   private extractDuration(log: string): number {
     const match = log.match(/completed.*in (\d+)ms/i);
@@ -196,7 +384,7 @@ class RLHFSystem {
   }
 
   /**
-   * Save metrics to persistent storage
+   * Save metrics with layer information
    */
   private async saveMetrics(metrics: ExecutionMetrics[]): Promise<void> {
     let existingMetrics: ExecutionMetrics[] = [];
@@ -216,9 +404,9 @@ class RLHFSystem {
   }
 
   /**
-   * Update learning patterns based on new metrics
+   * Update patterns with layer context
    */
-  private async updatePatterns(metrics: ExecutionMetrics[]): Promise<void> {
+  private async updatePatterns(metrics: ExecutionMetrics[], layerInfo?: LayerInfo): Promise<void> {
     let patterns: Map<string, LearningPattern> = new Map();
 
     if (await fs.pathExists(this.patternsFile)) {
@@ -227,12 +415,15 @@ class RLHFSystem {
     }
 
     for (const metric of metrics) {
-      const key = `${metric.stepType}_${metric.errorType || 'success'}`;
+      const layerPrefix = layerInfo ? `${layerInfo.layer}_` : '';
+      const key = `${layerPrefix}${metric.stepType}_${metric.errorType || 'success'}`;
+
       const existing = patterns.get(key) || {
         pattern: key,
         successRate: 0,
         occurrences: 0,
         lastSeen: new Date(),
+        layer: layerInfo?.layer,
         suggestedFix: undefined
       };
 
@@ -246,9 +437,8 @@ class RLHFSystem {
         existing.successRate =
           (existing.successRate * (existing.occurrences - 1)) / existing.occurrences;
 
-        // Generate fix suggestion for common failures
         if (existing.occurrences > 3 && existing.successRate < 0.5) {
-          existing.suggestedFix = this.generateFixSuggestion(metric.errorType!);
+          existing.suggestedFix = this.generateLayerAwareFix(metric.errorType!, layerInfo);
         }
       }
 
@@ -263,10 +453,10 @@ class RLHFSystem {
   }
 
   /**
-   * Generate fix suggestions based on error type
+   * Generate layer-aware fix suggestions
    */
-  private generateFixSuggestion(errorType: string): string {
-    const suggestions: Record<string, string> = {
+  private generateLayerAwareFix(errorType: string, layerInfo?: LayerInfo): string {
+    const baseSuggestions: Record<string, string> = {
       'lint': 'Add automatic lint fix step before validation',
       'test': 'Review test expectations and mock data',
       'typescript': 'Add type definitions or fix type mismatches',
@@ -274,30 +464,51 @@ class RLHFSystem {
       'pr_creation': 'Ensure all changes are committed and pushed',
       'permission': 'Add git credential configuration step',
       'missing_dependency': 'Add dependency installation step',
-      'git_operation': 'Add git status check and recovery steps'
+      'git_operation': 'Add git status check and recovery steps',
+      'architecture_violation': 'Review layer responsibilities and dependencies',
+      'clean_architecture': 'Follow clean architecture principles'
     };
 
-    return suggestions[errorType] || 'Review and debug the failing step';
+    let suggestion = baseSuggestions[errorType] || 'Review and debug the failing step';
+
+    // Add layer-specific context
+    if (layerInfo) {
+      const layerContext: Record<string, string> = {
+        'domain': ' Ensure no external dependencies in domain layer.',
+        'data': ' Implement domain interfaces and use repository pattern.',
+        'infra': ' Add proper error handling and external service integration.',
+        'presentation': ' Keep presentation logic separate from business logic.',
+        'main': ' Use dependency injection and factory patterns.'
+      };
+
+      suggestion += layerContext[layerInfo.layer] || '';
+    }
+
+    return suggestion;
   }
 
   /**
-   * Generate template improvements based on patterns
+   * Generate improvements with layer awareness
    */
-  private async generateImprovements(_metrics: ExecutionMetrics[]): Promise<void> {
+  private async generateImprovements(metrics: ExecutionMetrics[], layerInfo?: LayerInfo): Promise<void> {
     const patterns = await this.loadPatterns();
     const improvements: TemplateImprovement[] = [];
 
-    // Find patterns with low success rates
     for (const [key, pattern] of Array.from(patterns.entries())) {
+      // Filter by layer if provided
+      if (layerInfo && pattern.layer && pattern.layer !== layerInfo.layer) {
+        continue;
+      }
+
       if (pattern.successRate < 0.3 && pattern.occurrences > 5) {
         const improvement: TemplateImprovement = {
-          templatePath: this.inferTemplatePath(key),
+          templatePath: this.inferTemplatePath(key, layerInfo),
           problemPattern: key,
           solution: pattern.suggestedFix || 'Needs investigation',
-          confidence: Math.min(pattern.occurrences / 10, 1)
+          confidence: Math.min(pattern.occurrences / 10, 1),
+          layer: pattern.layer
         };
 
-        // Auto-apply high-confidence improvements
         if (improvement.confidence > 0.8 && !pattern.autoFixApplied) {
           await this.applyImprovement(improvement);
           pattern.autoFixApplied = true;
@@ -322,33 +533,36 @@ class RLHFSystem {
   }
 
   /**
-   * Infer template path from pattern key
+   * Infer template path with layer context
    */
-  private inferTemplatePath(patternKey: string): string {
-    const [stepType] = patternKey.split('_');
+  private inferTemplatePath(patternKey: string, layerInfo?: LayerInfo): string {
+    const parts = patternKey.split('_');
+    const layer = layerInfo?.layer || parts[0];
+    const target = layerInfo?.target || 'backend';
+    const stepType = parts[parts.length - 2];
 
     const templateMap: Record<string, string> = {
-      'create_file': 'templates/DOMAIN_TEMPLATE.yaml#create_file',
-      'refactor_file': 'templates/DOMAIN_TEMPLATE.yaml#refactor_file',
-      'branch': 'templates/DOMAIN_TEMPLATE.yaml#branch',
-      'pull_request': 'templates/DOMAIN_TEMPLATE.yaml#pull_request'
+      'create_file': `templates/${target}-${layer}-template.regent#create_file`,
+      'refactor_file': `templates/${target}-${layer}-template.regent#refactor_file`,
+      'branch': `templates/${target}-${layer}-template.regent#branch`,
+      'pull_request': `templates/${target}-${layer}-template.regent#pull_request`
     };
 
-    return templateMap[stepType] || 'templates/DOMAIN_TEMPLATE.yaml';
+    return templateMap[stepType] || `templates/${target}-${layer}-template.regent`;
   }
 
   /**
-   * Apply improvement to template automatically
+   * Apply improvement
    */
   private async applyImprovement(improvement: TemplateImprovement): Promise<void> {
     this.logger.log(`🤖 Auto-applying improvement for ${improvement.problemPattern}`);
+    if (improvement.layer) {
+      this.logger.log(`   Layer: ${improvement.layer}`);
+    }
     this.logger.log(`📝 Solution: ${improvement.solution} (confidence: ${(improvement.confidence * 100).toFixed(1)}%)`);
 
-    // This would modify the actual template files
-    // For now, we'll just log and mark as applied
     improvement.appliedAt = new Date();
 
-    // Create improvement record
     const record = {
       improvement,
       applied: true,
@@ -364,48 +578,172 @@ class RLHFSystem {
     records.push(record);
     await fs.writeJson(recordsFile, records, { spaces: 2 });
 
-    this.logger.log(`✅ Improvement applied and recorded for ${improvement.problemPattern}`);
+    this.logger.log(`✅ Improvement applied and recorded`);
   }
 
   /**
-   * Generate learning report
+   * Generate layer-aware report
    */
-  async generateReport(): Promise<void> {
-    this.logger.log('📊 Generating RLHF learning report...');
+  async generateLayerReport(layerInfo?: LayerInfo): Promise<void> {
+    this.logger.log('📊 Generating layer-aware RLHF report...');
+
     const metrics = await fs.readJson(this.metricsFile);
     const patterns = await fs.readJson(this.patternsFile);
     const improvements = await fs.readJson(this.improvementsFile);
 
+    // Filter by layer if provided
+    const filteredMetrics = layerInfo
+      ? metrics.filter((m: any) => m.layer === layerInfo.layer)
+      : metrics;
+
     const report = {
+      layer: layerInfo?.layer || 'all',
+      target: layerInfo?.target || 'all',
       summary: {
-        totalExecutions: metrics.length,
-        successRate: metrics.filter((m: any) => m.success).length / metrics.length,
-        commonErrors: this.getTopErrors(metrics),
-        avgDuration: metrics.reduce((acc: number, m: any) => acc + m.duration, 0) / metrics.length
+        totalExecutions: filteredMetrics.length,
+        successRate: filteredMetrics.filter((m: any) => m.success).length / filteredMetrics.length,
+        commonErrors: this.getTopErrors(filteredMetrics),
+        avgDuration: filteredMetrics.reduce((acc: number, m: any) => acc + m.duration, 0) / filteredMetrics.length
       },
+      layerPatterns: Array.from(this.layerPatterns.entries()).map(([layer, patterns]) => ({
+        layer,
+        patternCount: patterns.length,
+        patterns: patterns.slice(0, 5)
+      })),
       patterns: Object.values(patterns)
+        .filter((p: any) => !layerInfo || p.layer === layerInfo.layer)
         .sort((a: any, b: any) => b.occurrences - a.occurrences)
         .slice(0, 10),
-      suggestedImprovements: improvements.filter((i: any) => !i.appliedAt),
-      appliedImprovements: improvements.filter((i: any) => i.appliedAt)
+      suggestedImprovements: improvements.filter((i: any) => !i.appliedAt && (!layerInfo || i.layer === layerInfo.layer)),
+      appliedImprovements: improvements.filter((i: any) => i.appliedAt && (!layerInfo || i.layer === layerInfo.layer))
     };
 
-    console.log('📊 RLHF Learning Report');
-    console.log('========================');
-    console.log(JSON.stringify(report, null, 2));
+    console.log('\n📊 Layer-Aware RLHF Report');
+    console.log('=' .repeat(50));
+    console.log(chalk.cyan(`Layer: ${report.layer}`));
+    console.log(chalk.cyan(`Target: ${report.target}`));
+    console.log(chalk.green(`Success Rate: ${(report.summary.successRate * 100).toFixed(1)}%`));
+    console.log(chalk.blue(`Total Executions: ${report.summary.totalExecutions}`));
+    console.log('\n📚 Layer Patterns Loaded:');
+    report.layerPatterns.forEach(lp => {
+      console.log(`   ${lp.layer}: ${lp.patternCount} patterns`);
+    });
+
+    const reportFile = layerInfo
+      ? `learning-report-${layerInfo.layer}-${layerInfo.target}.json`
+      : 'learning-report.json';
 
     await fs.writeJson(
-      path.join(this.dataDir, 'learning-report.json'),
+      path.join(this.dataDir, reportFile),
       report,
       { spaces: 2 }
     );
 
-    this.logger.log(`✅ Learning report generated. Success rate: ${(report.summary.successRate * 100).toFixed(1)}%`);
-    this.logger.log(`📈 Patterns discovered: ${Object.keys(patterns).length}, Improvements suggested: ${report.suggestedImprovements.length}`);
+    this.logger.log(`✅ Layer-aware report saved to ${reportFile}`);
   }
 
   /**
-   * Get most common errors
+   * Original calculateScore method (kept for compatibility)
+   */
+  async calculateScore(stepType: string, success: boolean, errorMessage?: string, stepData?: any): Promise<number> {
+    this.logger.log(`🧮 Calculating base RLHF score for ${stepType} (${success ? 'success' : 'failure'})`);
+
+    if (!success && errorMessage) {
+      const score = this.analyzeFailureSeverity(errorMessage, stepType, stepData);
+      this.logger.log(`❌ Failure analysis: Score ${score}`);
+      return score;
+    }
+
+    if (success) {
+      const score = this.analyzeSuccessQuality(stepType, stepData);
+      this.logger.log(`✅ Success analysis: Score ${score}`);
+      return score;
+    }
+
+    this.logger.log(`⚠️ Low confidence: Score 0`);
+    return 0;
+  }
+
+  /**
+   * Analyze failure severity
+   */
+  private analyzeFailureSeverity(errorMessage: string, stepType: string, stepData?: any): number {
+    // -2: Catastrophic errors
+    const catastrophicPatterns = [
+      /replace.*with.*format/i,
+      /<<<replace>>>.*<<</i,
+      /architecture.*violation/i,
+      /clean.*architecture/i,
+      /domain.*layer.*violation/i,
+      /invalid.*template.*format/i
+    ];
+
+    for (const pattern of catastrophicPatterns) {
+      if (pattern.test(errorMessage)) {
+        return -2;
+      }
+    }
+
+    if (stepData?.template && stepType === 'refactor_file') {
+      if (!stepData.template.includes('<<<REPLACE>>>') || !stepData.template.includes('<<<WITH>>>')) {
+        return -2;
+      }
+    }
+
+    // -1: Runtime errors
+    const runtimePatterns = [
+      /lint.*failed/i,
+      /test.*failed/i,
+      /typescript.*error/i,
+      /compilation.*error/i
+    ];
+
+    for (const pattern of runtimePatterns) {
+      if (pattern.test(errorMessage)) {
+        return -1;
+      }
+    }
+
+    return 0;
+  }
+
+  /**
+   * Analyze success quality
+   */
+  private analyzeSuccessQuality(stepType: string, stepData?: any): number {
+    let score = 1;
+    let qualityIndicators = 0;
+
+    if (stepData?.template) {
+      const template = stepData.template.toLowerCase();
+
+      const perfectIndicators = [
+        /ubiquitous.*language/i,
+        /domain.*driven.*design/i,
+        /clean.*architecture/i,
+        /aggregate.*root/i,
+        /value.*object/i,
+        /repository.*pattern/i
+      ];
+
+      for (const indicator of perfectIndicators) {
+        if (indicator.test(template)) {
+          qualityIndicators++;
+        }
+      }
+    }
+
+    if (qualityIndicators >= 2) {
+      score = 2;
+    } else if (qualityIndicators >= 1) {
+      score = 2;
+    }
+
+    return score;
+  }
+
+  /**
+   * Get top errors
    */
   private getTopErrors(metrics: any[]): Record<string, number> {
     const errors: Record<string, number> = {};
@@ -418,213 +756,6 @@ class RLHFSystem {
   }
 
   /**
-   * Calculate RLHF score based on intelligent scoring system
-   * -2: Catastrophic errors (architecture violations, incorrect REPLACE/WITH format)
-   * -1: Runtime errors during execution
-   *  0: Low confidence - AVOIDS HALLUCINATIONS
-   * +1: Task complete but missing something (e.g., ubiquitous language)
-   * +2: Perfect execution
-   */
-  async calculateScore(stepType: string, success: boolean, errorMessage?: string, stepData?: any): Promise<number> {
-    this.logger.log(`🧮 Calculating intelligent RLHF score for ${stepType} (${success ? 'success' : 'failure'})`);
-
-    // For failures, analyze error severity
-    if (!success && errorMessage) {
-      const score = this.analyzeFailureSeverity(errorMessage, stepType, stepData);
-      this.logger.log(`❌ Failure analysis: Score ${score} for error type`);
-      return score;
-    }
-
-    // For successes, analyze completion quality
-    if (success) {
-      const score = this.analyzeSuccessQuality(stepType, stepData);
-      this.logger.log(`✅ Success analysis: Score ${score} for quality level`);
-      return score;
-    }
-
-    // Default low confidence score
-    this.logger.log(`⚠️ Low confidence case: Score 0`);
-    return 0;
-  }
-
-  /**
-   * Analyze failure severity to determine score
-   */
-  private analyzeFailureSeverity(errorMessage: string, stepType: string, stepData?: any): number {
-
-    // -2: Catastrophic errors (architecture violations, format errors)
-    const catastrophicPatterns = [
-      /replace.*with.*format/i,
-      /<<<replace>>>.*<<</i,
-      /architecture.*violation/i,
-      /clean.*architecture/i,
-      /domain.*layer.*violation/i,
-      /invalid.*template.*format/i,
-      /missing.*replace.*block/i,
-      /missing.*with.*block/i,
-      /template.*syntax.*error/i
-    ];
-
-    for (const pattern of catastrophicPatterns) {
-      if (pattern.test(errorMessage)) {
-        return -2;
-      }
-    }
-
-    // Additional catastrophic checks for step data
-    if (stepData?.template && stepType === 'refactor_file') {
-      if (!stepData.template.includes('<<<REPLACE>>>') || !stepData.template.includes('<<<WITH>>>')) {
-        return -2;
-      }
-    }
-
-    // -1: Runtime errors during execution
-    const runtimePatterns = [
-      /lint.*failed/i,
-      /test.*failed/i,
-      /typescript.*error/i,
-      /compilation.*error/i,
-      /branch.*conflict/i,
-      /pr.*creation.*failed/i,
-      /permission.*denied/i,
-      /git.*operation.*failed/i,
-      /file.*not.*found/i,
-      /command.*not.*found/i,
-      /network.*error/i,
-      /timeout/i
-    ];
-
-    for (const pattern of runtimePatterns) {
-      if (pattern.test(errorMessage)) {
-        return -1;
-      }
-    }
-
-    // Unknown error type - low confidence
-    return 0;
-  }
-
-  /**
-   * Analyze success quality to determine score
-   */
-  private analyzeSuccessQuality(stepType: string, stepData?: any): number {
-    let score = 1; // Base success score
-    let qualityIndicators = 0;
-    let missingElements = 0;
-
-    // Check for quality indicators
-    if (stepData?.template) {
-      const template = stepData.template.toLowerCase();
-
-      // Perfect execution indicators (+2)
-      const perfectIndicators = [
-        /ubiquitous.*language/i,
-        /domain.*driven.*design/i,
-        /clean.*architecture/i,
-        /interface.*segregation/i,
-        /dependency.*inversion/i,
-        /single.*responsibility/i,
-        /aggregate.*root/i,
-        /value.*object/i,
-        /domain.*event/i,
-        /repository.*pattern/i
-      ];
-
-      for (const indicator of perfectIndicators) {
-        if (indicator.test(template)) {
-          qualityIndicators++;
-        }
-      }
-
-      // Missing elements that should be there
-      const expectedElements = [
-        { pattern: /export.*interface/i, name: 'interface_export' },
-        { pattern: /export.*type/i, name: 'type_export' },
-        { pattern: /export.*class/i, name: 'class_export' },
-        { pattern: /async.*function/i, name: 'async_function' },
-        { pattern: /promise<.*>/i, name: 'promise_typing' }
-      ];
-
-      if (stepType === 'create_file') {
-        for (const element of expectedElements) {
-          if (!element.pattern.test(template)) {
-            missingElements++;
-          }
-        }
-      }
-    }
-
-    // Scoring logic
-    if (qualityIndicators >= 2) {
-      score = 2; // Perfect execution
-    } else if (qualityIndicators >= 1) {
-      score = 2; // Good execution with domain knowledge
-    } else if (missingElements > 2) {
-      score = 1; // Complete but missing important elements
-    } else {
-      score = 1; // Standard successful completion
-    }
-
-    // Branch and PR steps quality analysis
-    if (stepType === 'branch') {
-      if (stepData?.action?.branch_name?.includes('feat/') && stepData.action.branch_name.includes('-domain')) {
-        score = 2; // Perfect branch naming
-      }
-    }
-
-    if (stepType === 'pull_request') {
-      if (stepData?.action?.title?.includes('feat(') || stepData.action?.title?.includes('domain')) {
-        score = 2; // Perfect PR title
-      }
-    }
-
-    return score;
-  }
-
-  /**
-   * Clean up resources
-   */
-  public close(): void {
-    this.logger.close();
-  }
-
-  /**
-   * Caching utilities for pattern analysis
-   */
-  private getCacheKey(step: any): string {
-    return createHash('md5')
-      .update(JSON.stringify({ id: step.id, type: step.type, template: step.template || '' }))
-      .digest('hex');
-  }
-
-  private getCachedResult(key: string): any | null {
-    const cached = this.patternCache.get(key);
-    if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
-      this.cacheStats.hits++;
-      return cached.result;
-    }
-    this.cacheStats.misses++;
-    if (cached) {
-      this.patternCache.delete(key); // Remove expired cache
-    }
-    return null;
-  }
-
-  private setCachedResult(key: string, result: any): void {
-    // Implement LRU eviction if cache is too large
-    if (this.patternCache.size >= this.maxCacheSize) {
-      const firstKey = this.patternCache.keys().next().value;
-      this.patternCache.delete(firstKey);
-      this.cacheStats.evictions++;
-    }
-
-    this.patternCache.set(key, {
-      result,
-      timestamp: Date.now()
-    });
-  }
-
-  /**
    * Progress reporting
    */
   private reportProgress(message: string, percentage: number): void {
@@ -632,17 +763,15 @@ class RLHFSystem {
       this.progressCallback(message, percentage);
     }
 
-    // Save progress for resumability
     this.saveProgress(message, percentage);
 
-    // Visual progress bar in console
     const barLength = 30;
     const filled = Math.round((percentage / 100) * barLength);
     const bar = '█'.repeat(filled) + '░'.repeat(barLength - filled);
     process.stdout.write(`\r[${bar}] ${percentage}% - ${message}`);
+
     if (percentage === 100) {
-      console.log(); // New line when complete
-      // Clean up progress file on completion
+      console.log();
       if (fs.existsSync(this.progressFile)) {
         fs.removeSync(this.progressFile);
       }
@@ -658,12 +787,49 @@ class RLHFSystem {
         cacheStats: this.cacheStats
       });
     } catch (error) {
-      // Silently fail if can't save progress
+      // Silently fail
     }
   }
 
+  /**
+   * Cache utilities
+   */
+  private getCacheKey(step: any): string {
+    return createHash('md5')
+      .update(JSON.stringify({ id: step.id, type: step.type, template: step.template || '' }))
+      .digest('hex');
+  }
+
+  private getCachedResult(key: string): any | null {
+    const cached = this.patternCache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
+      this.cacheStats.hits++;
+      return cached.result;
+    }
+    this.cacheStats.misses++;
+    if (cached) {
+      this.patternCache.delete(key);
+    }
+    return null;
+  }
+
+  private setCachedResult(key: string, result: any): void {
+    if (this.patternCache.size >= this.maxCacheSize) {
+      const firstKey = this.patternCache.keys().next().value;
+      this.patternCache.delete(firstKey);
+      this.cacheStats.evictions++;
+    }
+
+    this.patternCache.set(key, {
+      result,
+      timestamp: Date.now()
+    });
+  }
+
+  /**
+   * Cleanup handlers
+   */
   private setupCleanupHandlers(): void {
-    // Clean up on exit
     process.on('SIGINT', () => {
       console.log('\n\nCleaning up...');
       this.logCacheStats();
@@ -687,6 +853,10 @@ class RLHFSystem {
     console.log(chalk.gray(`   Hit Rate: ${hitRate.toFixed(1)}%`));
   }
 
+  public close(): void {
+    this.logger.close();
+  }
+
   public setProgressCallback(callback: (message: string, percentage: number) => void): void {
     this.progressCallback = callback;
   }
@@ -694,46 +864,87 @@ class RLHFSystem {
   public getCacheStatistics(): typeof this.cacheStats {
     return { ...this.cacheStats };
   }
+
+  /**
+   * Get layer patterns for inspection
+   */
+  public getLayerPatterns(layer?: string): TemplatePattern[] {
+    if (layer) {
+      return this.layerPatterns.get(layer) || [];
+    }
+
+    const allPatterns: TemplatePattern[] = [];
+    this.layerPatterns.forEach(patterns => {
+      allPatterns.push(...patterns);
+    });
+    return allPatterns;
+  }
 }
 
 // CLI Interface
 async function main() {
   const [command, ...args] = process.argv.slice(2);
-  // Pass the first argument as context if it's a file path
   const contextPath = args[0] && args[0].endsWith('.yaml') ? args[0] : undefined;
-  const rlhf = new RLHFSystem(contextPath);
+  const rlhf = new EnhancedRLHFSystem(contextPath);
 
   switch (command) {
     case 'analyze':
       if (args[0]) {
-        await rlhf.analyzeExecution(args[0]);
-        console.log('✅ Analysis complete');
+        // Parse layer info from arguments
+        const layerInfo = args[1] && args[2] ? {
+          layer: args[1] as any,
+          target: args[2] as any
+        } : undefined;
+
+        await rlhf.analyzeExecution(args[0], layerInfo);
+        console.log('✅ Layer-aware analysis complete');
       } else {
-        console.error('Usage: rlhf-system analyze <yaml-file>');
+        console.error('Usage: rlhf-system-enhanced analyze <yaml-file> [layer] [target]');
       }
       break;
 
     case 'report':
-      await rlhf.generateReport();
+      const layerInfo = args[0] && args[1] ? {
+        layer: args[0] as any,
+        target: args[1] as any
+      } : undefined;
+
+      await rlhf.generateLayerReport(layerInfo);
       break;
 
     case 'score':
       if (args[0] && args[1]) {
-        const score = await rlhf.calculateScore(args[0], args[1] === 'true');
-        console.log(`RLHF Score: ${score}`);
+        const layerInfo = args[3] && args[4] ? {
+          layer: args[3] as any,
+          target: args[4] as any
+        } : undefined;
+
+        const score = await rlhf.calculateLayerScore(
+          args[0],
+          args[1] === 'true',
+          layerInfo,
+          args[2]
+        );
+        console.log(`Layer-aware RLHF Score: ${score}`);
       } else {
-        console.error('Usage: rlhf-system score <step-type> <success> [error-message]');
+        console.error('Usage: rlhf-system-enhanced score <step-type> <success> [error-message] [layer] [target]');
       }
       break;
 
+    case 'patterns':
+      const patterns = rlhf.getLayerPatterns(args[0]);
+      console.log(`\n📚 Layer Patterns${args[0] ? ` for ${args[0]}` : ''}:`);
+      console.log(JSON.stringify(patterns, null, 2));
+      break;
+
     default:
-      console.log('Available commands:');
-      console.log('  analyze <yaml-file> - Analyze execution results');
-      console.log('  report              - Generate learning report');
-      console.log('  score <type> <bool> - Calculate RLHF score');
+      console.log('Enhanced RLHF System Commands:');
+      console.log('  analyze <yaml> [layer] [target] - Layer-aware analysis');
+      console.log('  report [layer] [target]        - Generate layer report');
+      console.log('  score <type> <bool> [err] [layer] [target] - Calculate layer score');
+      console.log('  patterns [layer]               - Show loaded patterns');
   }
 
-  // Clean up logger
   rlhf.close();
 }
 
@@ -742,4 +953,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(console.error);
 }
 
-export { RLHFSystem };
+// Export the enhanced system as RLHFSystem for backward compatibility
+export { EnhancedRLHFSystem, EnhancedRLHFSystem as RLHFSystem, LayerInfo, TemplatePattern };

@@ -23,9 +23,9 @@ This document describes the enhancements made to integrate RLHF scoring with lay
 
 ## Solution Implemented
 
-### 1. Enhanced RLHF System (`rlhf-system-enhanced.ts`)
+### 1. Enhanced RLHF System (`rlhf-system.ts`)
 
-Created an enhanced version with:
+The system now includes:
 - **Layer Context Support**: Accepts `LayerInfo` parameter
 - **Pattern Loading**: Loads patterns from template files
 - **Centralized Scoring**: All scoring logic in one place
@@ -49,7 +49,7 @@ analyzeExecution(
 ): Promise<void>
 ```
 
-### 2. Updated Execute Steps (`execute-steps-enhanced.ts`)
+### 2. Updated Execute Steps (`execute-steps.ts`)
 
 Modified to:
 - Use `EnhancedRLHFSystem` instead of `RLHFSystem`
@@ -73,14 +73,14 @@ learning_patterns:
 
 ```
 ┌─────────────────────────────┐
-│   Execute Steps Enhanced    │
+│      Execute Steps          │
 │  - Detects layer from file  │
 │  - Passes context to RLHF   │
 └────────────┬────────────────┘
              │
              ▼
 ┌─────────────────────────────┐
-│  Enhanced RLHF System       │
+│       RLHF System           │
 │  - Centralized scoring      │
 │  - Layer-aware patterns     │
 │  - Template integration     │
@@ -126,7 +126,7 @@ learning_patterns:
 ### Run with Layer Context
 ```bash
 # Execute with automatic layer detection
-npx tsx execute-steps-enhanced.ts backend-domain-implementation.yaml
+npx tsx execute-steps.ts backend-domain-implementation.yaml
 
 # The system will:
 # 1. Detect layer from filename
@@ -138,10 +138,10 @@ npx tsx execute-steps-enhanced.ts backend-domain-implementation.yaml
 ### Generate Layer Reports
 ```bash
 # Generate report for specific layer
-npx tsx rlhf-system-enhanced.ts report domain backend
+npx tsx rlhf-system.ts report domain backend
 
 # View loaded patterns
-npx tsx rlhf-system-enhanced.ts patterns domain
+npx tsx rlhf-system.ts patterns domain
 ```
 
 ## Benefits
@@ -166,10 +166,10 @@ npx tsx rlhf-system-enhanced.ts patterns domain
 3. Auto-generate fix suggestions
 4. Implement pattern evolution based on scores
 
-## Files Modified
+## Files in Production
 
-- `rlhf-system-enhanced.ts` - New enhanced RLHF system
-- `execute-steps-enhanced.ts` - Updated to use centralized scoring
+- `rlhf-system.ts` - Enhanced RLHF system with layer awareness
+- `execute-steps.ts` - Updated executor with centralized scoring
 - `templates/parts/shared/01-footer.part.regent` - Pattern definitions
 
 ## Testing
