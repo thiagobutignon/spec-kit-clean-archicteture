@@ -1,7 +1,7 @@
 ---
 title: "Reflect on Domain YAML Plan"
 description: "Senior architect review to optimize domain YAML plans for maximum RLHF score through reflection and refinement"
-category: "domain"
+category: "layer"
 stage: "reflection"
 priority: 4
 tags:
@@ -9,12 +9,12 @@ tags:
   - yaml-optimization
   - rlhf-scoring
   - clean-architecture
-  - domain-driven-design
+  - layer-specific-patterns
 parameters:
   input:
     type: "yaml"
-    description: "Complete validated YAML from /03-generate-domain-code"
-    location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml"
+    description: "Complete validated YAML from /03-generate-layer-code"
+    location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
     required: true
   output_success:
     type: "json"
@@ -34,15 +34,15 @@ reflection_areas:
 scoring_optimization:
   increase_to_2:
     - "Add ubiquitous language"
-    - "Include @domainConcept tags"
+    - "Include @layerConcept tags"
     - "Document with @pattern tags"
     - "Ensure Clean Architecture"
   prevent_negative:
     - "Remove external dependencies"
     - "Fix REPLACE/WITH format"
     - "Use interfaces not classes"
-previous_command: "/03-generate-domain-code"
-next_command: "/05-evaluate-domain-results from yaml: <refined-yaml>"
+previous_command: "/03-generate-layer-code"
+next_command: "/05-evaluate-layer-results from yaml: <refined-yaml>"
 ---
 
 # Task: Reflect on Domain YAML Plan
@@ -94,7 +94,7 @@ Act as a **senior software architect** reviewing a detailed implementation plan.
 
 | Parameter | Type | Location | Purpose |
 |-----------|------|----------|---------|
-| **YAML Plan** | YAML | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml` | Complete validated plan from /03-generate-domain-code |
+| **YAML Plan** | YAML | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml` | Complete validated plan from /03-generate-layer-code |
 
 ## 4. Reflection Checklist (Guiding Questions)
 
@@ -156,13 +156,13 @@ Act as a **senior software architect** reviewing a detailed implementation plan.
 | **External Deps** | axios, fetch, prisma in domain? | -2 CATASTROPHIC |
 | **REPLACE/WITH** | Incorrect format in refactors? | -2 CATASTROPHIC |
 | **Use Case Pattern** | Classes instead of interfaces? | -2 CATASTROPHIC |
-| **Domain Purity** | Implementation in domain? | -2 CATASTROPHIC |
+| **Layer Purity** | Implementation in domain? | -2 CATASTROPHIC |
 
 ### 📖 Domain Documentation Quality (+1 to +2)
 
 | Documentation | Requirement | Score Boost |
 |---------------|-------------|-------------|
-| **@domainConcept** | Present in templates? | +0.5 to +1 |
+| **@layerConcept** | Present in templates? | +0.5 to +1 |
 | **@pattern tags** | Design patterns identified? | +0.5 |
 | **Business Context** | Clear domain explanation? | +0.5 |
 | **Error Messages** | Use business language? | Quality indicator |
@@ -219,7 +219,7 @@ steps:
 ```json
 {
   "status": "REVISED",
-  "reflection": "Optimized by combining create and immediate refactor into single step. Added @domainConcept tags for +2 score. Workflow integrity maintained.",
+  "reflection": "Optimized by combining create and immediate refactor into single step. Added @layerConcept tags for +2 score. Workflow integrity maintained.",
   "revised_yaml": "Combined create-user-service-with-logging step...",
   "estimated_rlhf_score": 2
 }
@@ -270,7 +270,7 @@ steps:
 {
   "status": "REVISED",
   "reflection": "CRITICAL: Removed axios import (would cause -2 CATASTROPHIC). Added proper domain documentation for +2 score.",
-  "revised_yaml": "Clean template with @domainConcept tags...",
+  "revised_yaml": "Clean template with @layerConcept tags...",
   "estimated_rlhf_score": 2
 }
 ```
@@ -281,7 +281,7 @@ steps:
 
 | Pattern | Before | After | Impact |
 |---------|--------|-------|--------|
-| **Add JSDoc** | Plain interface | `/** @domainConcept */` | +0.5 to +1 |
+| **Add JSDoc** | Plain interface | `/** @layerConcept */` | +0.5 to +1 |
 | **Combine Steps** | Create + Refactor | Single create | Efficiency |
 | **Fix Violations** | External imports | Pure domain | Prevents -2 |
 | **Add UL** | No vocabulary | Define terms | Enables +2 |
@@ -313,7 +313,7 @@ steps:
 After reflection and optimization:
 
 ```bash
-/05-evaluate-domain-results from yaml: <your-refined-yaml>
+/05-evaluate-layer-results from yaml: <your-refined-yaml>
 ```
 
 This will evaluate your refined YAML plan and determine if it's ready for execution or needs further refinement.

@@ -1,7 +1,7 @@
 ---
 title: "Fix Failed Domain Steps"
 description: "Analyze and generate corrective steps for failed YAML implementation plan steps with RLHF score recovery"
-category: "domain"
+category: "layer"
 stage: "error-recovery"
 priority: 7
 tags:
@@ -13,16 +13,16 @@ tags:
 parameters:
   input:
     type: "yaml"
-    description: "YAML plan with failed step(s) from /06-execute-domain-steps"
+    description: "YAML plan with failed step(s) from /06-execute-layer-steps"
     required: true
   working_directory:
     type: "path"
-    pattern: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/"
+    pattern: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/"
     description: "Base path for all file operations"
   output:
     type: "yaml"
     description: "Updated YAML with fix step appended"
-    location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml"
+    location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
 rlhf_score_recovery:
   from_catastrophic:
     current: -2
@@ -51,8 +51,8 @@ failure_categories:
     - "test failures"
     - "import violation"
     - "REPLACE/WITH syntax"
-previous_command: "/06-execute-domain-steps from yaml: <yaml>"
-next_command: "/06-execute-domain-steps from yaml: <yaml-with-fix>"
+previous_command: "/06-execute-layer-steps from yaml: <yaml>"
+next_command: "/06-execute-layer-steps from yaml: <yaml-with-fix>"
 ---
 
 # Task: Fix Failed Domain Steps
@@ -76,7 +76,7 @@ Analyze a failed step in a YAML implementation plan and generate a **new correct
 | Input | Description |
 |-------|-------------|
 | **YAML with Failures** | Contains steps with `status: 'FAILED'` |
-| **Working Directory** | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/` |
+| **Working Directory** | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/` |
 | **Fix Strategy** | Append new fix step, preserve failed step |
 
 ## 3. Step-by-Step Execution Plan
@@ -115,7 +115,7 @@ graph TD
    - Create descriptive `id`: `fix-for-[failed-step-id]`
    - Choose appropriate `type` for fix
    - **Add `references` for +1 score**
-   - **Add JSDoc with `@domainConcept` for +2 score**
+   - **Add JSDoc with `@layerConcept` for +2 score**
 6. **Append New Step**: Add to end of `steps` array
 7. **Preserve History**: Keep failed step untouched
 
@@ -194,7 +194,7 @@ graph TD
   action:
     target_branch: 'staging'
     source_branch: 'feat/user-profile-domain'
-    title: 'feat(user-profile): implement domain layer'
+    title: 'feat(user-profile): implement selected layer'
   validation_script: |
     echo "📤 Pushing branch to remote..."
     git push --set-upstream origin feat/user-profile-domain
@@ -221,7 +221,7 @@ graph TD
   status: 'PENDING'
   rlhf_score: null
   execution_log: ''
-  path: 'src/features/user/domain/use-cases/get-user.ts'
+  path: 'src/features/user/[LAYER]/use-cases/get-user.ts'
   template: |
     <<<REPLACE>>>
     export interface GetUser {
@@ -230,7 +230,7 @@ graph TD
     <<</REPLACE>>>
     <<<WITH>>>
     /**
-     * @domainConcept User Retrieval
+     * @layerConcept User Retrieval
      * @pattern Use Case Interface
      * @description Retrieves user information from the domain
      */
@@ -249,7 +249,7 @@ graph TD
       description: 'Added missing semicolon to fix lint error'
     - type: 'quality_improvement'
       source: 'ddd_best_practices'
-      description: 'Added JSDoc with @domainConcept for RLHF +2 score'
+      description: 'Added JSDoc with @layerConcept for RLHF +2 score'
 ```
 </details>
 
@@ -261,11 +261,11 @@ graph TD
 ```yaml
 - id: 'fix-for-create-use-case-with-axios'
   type: 'refactor_file'
-  description: 'Remove external dependency from domain layer'
+  description: 'Remove external dependency from selected layer'
   status: 'PENDING'
   rlhf_score: null
   execution_log: ''
-  path: 'src/features/user/domain/use-cases/fetch-user.ts'
+  path: 'src/features/user/[LAYER]/use-cases/fetch-user.ts'
   template: |
     <<<REPLACE>>>
     import axios from 'axios';
@@ -276,8 +276,8 @@ graph TD
     <<</REPLACE>>>
     <<<WITH>>>
     /**
-     * @domainConcept User Fetching
-     * @pattern Clean Architecture - Domain Layer
+     * @layerConcept User Fetching
+     * @pattern Clean Architecture - Selected Layer
      * @principle No external dependencies in domain
      */
     export interface FetchUser {
@@ -286,13 +286,13 @@ graph TD
     <<</WITH>>>
   validation_script: |
     echo "🏗️ Verifying Clean Architecture compliance..."
-    grep -r "import.*from.*axios" src/features/*/domain/ && echo "❌ Found axios in domain" && exit 1
+    grep -r "import.*from.*axios" src/features/*/[LAYER]/ && echo "❌ Found axios in domain" && exit 1
     echo "✅ Domain layer is clean - no external dependencies"
     echo "🏆 Architecture violation fixed for RLHF +2 score"
   references:
     - type: 'architecture_fix'
       source: 'clean_architecture'
-      description: 'Removed axios import - external deps not allowed in domain layer (was RLHF -2)'
+      description: 'Removed axios import - external deps not allowed in selected layer (was RLHF -2)'
 ```
 </details>
 
@@ -322,7 +322,7 @@ graph TD
 | Addition | Score Impact | Example |
 |----------|--------------|---------|
 | **References** | 0 → +1 | Explain why fix is correct |
-| **JSDoc Comments** | +1 → +2 | Add `@domainConcept` tags |
+| **JSDoc Comments** | +1 → +2 | Add `@layerConcept` tags |
 | **Validation Script** | +0.5 | Include verification steps |
 | **Clean Architecture** | -2 → +2 | Remove all violations |
 
@@ -340,7 +340,7 @@ Your **only** output is the complete **updated YAML file** with:
 After generating the fix, return to execution:
 
 ```bash
-/06-execute-domain-steps from yaml: <your-yaml-with-fix>
+/06-execute-layer-steps from yaml: <your-yaml-with-fix>
 ```
 
 This will re-execute your plan with the fix applied. The execution will:

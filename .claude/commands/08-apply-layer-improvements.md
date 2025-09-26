@@ -1,7 +1,7 @@
 ---
 title: "Apply RLHF Learnings to Improve Templates"
 description: "Automated learning system that analyzes RLHF scores to continuously improve domain templates and processes"
-category: "domain"
+category: "layer"
 stage: "improvement"
 priority: 8
 tags:
@@ -52,7 +52,7 @@ learning_metrics:
   - "Catastrophic Prevention Count"
   - "Perfect Achievement Rate"
   - "Learning Effectiveness"
-previous_command: "/06-execute-domain-steps (successful execution)"
+previous_command: "/06-execute-layer-steps (successful execution)"
 next_command: "/01-plan-domain-features (new feature) OR review improvements"
 ---
 
@@ -136,8 +136,8 @@ graph TD
 ```yaml
 template: |
   /**
-   * @domainConcept ${CONCEPT_NAME}
-   * @pattern Clean Architecture - Domain Layer
+   * @layerConcept ${CONCEPT_NAME}
+   * @pattern Clean Architecture - Selected Layer
    * @principle No external dependencies
    */
   // NEVER import from: axios, fetch, prisma, express
@@ -210,7 +210,7 @@ validation_script: |
 ```yaml
 template: |
   /**
-   * @domainConcept ${DOMAIN_CONCEPT}
+   * @layerConcept ${DOMAIN_CONCEPT}
    * @pattern ${PATTERN_NAME}
    * @description ${BUSINESS_DESCRIPTION}
    * @boundedContext ${CONTEXT}
@@ -233,11 +233,11 @@ ubiquitousLanguage:
 
 template: |
   /**
-   * @domainConcept ${CONCEPT}
+   * @layerConcept ${CONCEPT}
    * @pattern Use Case Interface
    * @aggregate ${AGGREGATE_ROOT}
    * @boundedContext ${CONTEXT}
-   * @layer Domain Layer - Pure Business Logic
+   * @layer Selected Layer - Pure Business Logic
    * @principle Clean Architecture
    */
   export interface ${USE_CASE} {
@@ -251,7 +251,7 @@ template: |
 references:
   - type: "ddd_pattern"
     source: "context7"
-    description: "Domain-Driven Design tactical patterns"
+    description: "Layer-Specific Design tactical patterns"
   - type: "clean_architecture"
     source: "uncle_bob"
     description: "Clean Architecture principles"
@@ -315,7 +315,7 @@ validation_script: |
     {
       "template": "DOMAIN_TEMPLATE.yaml",
       "issue": "Missing domain documentation",
-      "fix": "Added @domainConcept JSDoc template",
+      "fix": "Added @layerConcept JSDoc template",
       "confidence": 0.95,
       "expected_improvement": "Score increase from 0 to +1",
       "rlhf_score_impact": "Enables +1 and +2 scores"

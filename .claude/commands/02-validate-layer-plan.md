@@ -1,7 +1,7 @@
 ---
 title: "Validate Domain JSON Plan"
-description: "Automated quality assurance validation for domain layer JSON plans with RLHF scoring impact assessment"
-category: "domain"
+description: "Automated quality assurance validation for selected layer JSON plans with RLHF scoring impact assessment"
+category: "layer"
 stage: "validation"
 priority: 2
 tags:
@@ -33,18 +33,18 @@ scoring_impact:
     causes: ["Missing references", "Unclear concepts", "Empty arrays"]
   good:
     score: 1
-    causes: ["Valid but missing ubiquitous language", "No @domainConcept tags"]
+    causes: ["Valid but missing ubiquitous language", "No @layerConcept tags"]
   perfect:
     score: 2
-    requirements: ["Complete ubiquitous language", "DDD concepts", "@domainConcept tags", "Clean architecture"]
+    requirements: ["Complete ubiquitous language", "DDD concepts", "@layerConcept tags", "Clean architecture"]
 validation_categories:
   - "Schema and Structure"
   - "Logical Consistency"
   - "Content and Naming"
-  - "Domain Layer Purity"
+  - "Selected Layer Purity"
   - "RLHF Quality Indicators"
 previous_command: "/01-plan-domain-features"
-next_command: "/03-generate-domain-code create feature from json: <validated-json>"
+next_command: "/03-generate-layer-code create feature from json: <validated-json>"
 ---
 
 # Task: Validate Domain JSON Plan
@@ -85,7 +85,7 @@ Your **only** output for this task is a validation report in JSON format.
 
 ## 2. Objective
 
-Act as an **automated quality assurance engineer**. Validate the JSON plan against a strict set of logical and structural rules to ensure it will generate a valid domain layer following Clean Architecture principles.
+Act as an **automated quality assurance engineer**. Validate the JSON plan against a strict set of logical and structural rules to ensure it will generate a valid selected layer following Clean Architecture principles.
 
 ## 3. Input Parameters
 
@@ -119,7 +119,7 @@ You **MUST** validate the input JSON against every rule in this checklist. The v
 | **Test Helper** | `__MOCK_INPUT_DATA__`<br>`__MOCK_OUTPUT_DATA__` | `mockInput{}`, `mockOutput{}` | -1 if missing |
 | **Error Class** | None (complete template) | None | N/A |
 
-> 🏆 **For +2 Score:** Templates should include JSDoc comments with `@domainConcept` and `@pattern` tags
+> 🏆 **For +2 Score:** Templates should include JSDoc comments with `@layerConcept` and `@pattern` tags
 
 #### Template Correctness for `refactor_file`:
 - [ ] Must contain exactly one `<<<REPLACE>>>...<<</REPLACE>>>` block
@@ -139,7 +139,7 @@ You **MUST** validate the input JSON against every rule in this checklist. The v
 | **Use Cases** | Must be verbs | `CreateUser` ✅<br>`UserCreator` ❌ | -1 |
 | **Mock Data** | Must exist for use cases | Non-empty `mockInput` & `mockOutput` | 0 |
 
-### D. Domain Layer Purity Validation 🛡️ (RLHF Critical)
+### D. Selected Layer Purity Validation 🛡️ (RLHF Critical)
 
 #### ❌ **FORBIDDEN - Causes CATASTROPHIC (-2)**:
 ```typescript
@@ -166,7 +166,7 @@ Quality scoring criteria for achieving higher RLHF scores:
 | Indicator | Requirement | Impact | Score |
 |-----------|------------|--------|-------|
 | **Ubiquitous Language** | Present with meaningful business terms | Missing prevents +2 | +2 |
-| **Domain Documentation** | `@domainConcept` tags in templates | Quality indicator | +1 to +2 |
+| **Domain Documentation** | `@layerConcept` tags in templates | Quality indicator | +1 to +2 |
 | **Reference Quality** | Meaningful references to patterns | Empty = low confidence | 0 to +1 |
 | **Test Coverage** | Test helper for every use case | Missing = incomplete | +1 |
 | **DDD Alignment** | Proper Value Objects, Entities, Aggregates | Excellence indicator | +2 |
@@ -177,7 +177,7 @@ Quality scoring criteria for achieving higher RLHF scores:
 graph TD
     A[Parse Input JSON] --> B[Validate Schema]
     B --> C[Check Logical Consistency]
-    C --> D[Verify Domain Purity]
+    C --> D[Verify Layer Purity]
     D --> E[Assess RLHF Quality]
     E --> F{Any Violations?}
     F -->|No| G[Generate SUCCESS Report]
@@ -213,7 +213,7 @@ graph TD
       "id": "create-use-case-create-user-account",
       "type": "create_file",
       "description": "Create user account use case",
-      "path": "src/features/user-account/domain/use-cases/create-user-account.ts",
+      "path": "src/features/user-account/[LAYER]/use-cases/create-user-account.ts",
       "references": [
         {
           "type": "external_pattern",
@@ -221,7 +221,7 @@ graph TD
           "description": "DDD patterns for user registration"
         }
       ],
-      "template": "/**\n * @domainConcept User Account Creation\n */\nexport interface CreateUserAccount {\n  execute(input: CreateUserAccountInput): Promise<CreateUserAccountOutput>;\n}\n\nexport type CreateUserAccountInput = {\n  __USE_CASE_INPUT_FIELDS__\n};\n\nexport type CreateUserAccountOutput = {\n  __USE_CASE_OUTPUT_FIELDS__\n};",
+      "template": "/**\n * @layerConcept User Account Creation\n */\nexport interface CreateUserAccount {\n  execute(input: CreateUserAccountInput): Promise<CreateUserAccountOutput>;\n}\n\nexport type CreateUserAccountInput = {\n  __USE_CASE_INPUT_FIELDS__\n};\n\nexport type CreateUserAccountOutput = {\n  __USE_CASE_OUTPUT_FIELDS__\n};",
       "input": [
         { "name": "email", "type": "string" },
         { "name": "password", "type": "string" }
@@ -298,13 +298,13 @@ Based on your validation results:
 ### ✅ If validation PASSED (SUCCESS):
 Proceed to generate the YAML plan:
 ```bash
-/03-generate-domain-code create feature from json: <your-validated-json>
+/03-generate-layer-code create feature from json: <your-validated-json>
 ```
 
 ### ❌ If validation FAILED:
 Fix the identified issues and re-run validation:
 ```bash
-/02-validate-domain-plan from json: <your-corrected-json>
+/02-validate-layer-plan from json: <your-corrected-json>
 ```
 
 > 💡 **Pro Tip**: Address CATASTROPHIC errors first, then RUNTIME errors, and finally optimize for PERFECT score by adding quality indicators.
