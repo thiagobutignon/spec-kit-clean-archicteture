@@ -52,8 +52,8 @@ learning_metrics:
   - "Catastrophic Prevention Count"
   - "Perfect Achievement Rate"
   - "Learning Effectiveness"
-previous_command: "/06-execute-domain-steps (successful execution)"
-next_command: "/01-plan-domain-features (new feature) OR review improvements"
+previous_command: "/06-execute-layer-steps (successful execution)"
+next_command: "/01-plan-layer-features (new feature) OR review improvements"
 ---
 
 # Task: Apply RLHF Learnings to Improve Templates
@@ -384,7 +384,7 @@ After applying improvements:
 ### 1. Start New Feature
 Return to the beginning of the pipeline:
 ```bash
-/01-plan-domain-features create <new-feature-description>
+/01-plan-layer-features create <new-feature-description>
 ```
 
 ### 2. Review Improvements

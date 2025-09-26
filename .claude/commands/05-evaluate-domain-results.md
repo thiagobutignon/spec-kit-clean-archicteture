@@ -1,5 +1,5 @@
 ---
-title: "Evaluate Domain YAML Plan"
+title: "Evaluate Layer YAML Plan"
 description: "Principal engineer architectural review to validate YAML plans against engineering principles before execution"
 category: "domain"
 stage: "evaluation"
@@ -13,7 +13,7 @@ tags:
 parameters:
   input:
     type: "yaml"
-    description: "Complete YAML plan from /04-reflect-domain-lessons"
+    description: "Complete YAML plan from /04-reflect-layer-lessons"
     location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml"
     required: true
   output_approved:
@@ -52,9 +52,9 @@ evaluation_principles:
   - "Atomic Commits"
   - "Ubiquitous Language"
   - "REPLACE/WITH Syntax"
-previous_command: "/04-reflect-domain-lessons from yaml: <refined-yaml>"
-next_command_approved: "/06-execute-domain-steps from yaml: <approved-yaml>"
-next_command_rejected: "/04-reflect-domain-lessons from yaml: <yaml> OR /01-plan-domain-features"
+previous_command: "/04-reflect-layer-lessons from yaml: <refined-yaml>"
+next_command_approved: "/06-execute-layer-steps from yaml: <approved-yaml>"
+next_command_rejected: "/04-reflect-layer-lessons from yaml: <yaml> OR /01-plan-layer-features"
 ---
 
 # Task: Evaluate Domain YAML Plan
@@ -105,7 +105,7 @@ Act as a **Principal Engineer** performing a final architectural review on an im
 
 | Parameter | Type | Location | Description |
 |-----------|------|----------|-------------|
-| **YAML Plan** | YAML | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml` | Complete, potentially revised YAML from /04-reflect-domain-lessons |
+| **YAML Plan** | YAML | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml` | Complete, potentially revised YAML from /04-reflect-layer-lessons |
 
 ## 4. Evaluation Principles (The Constitution)
 
@@ -331,7 +331,7 @@ Based on your evaluation results:
 ### ✅ If APPROVED (Score = 5):
 Proceed to execution:
 ```bash
-/06-execute-domain-steps from yaml: <your-approved-yaml>
+/06-execute-layer-steps from yaml: <your-approved-yaml>
 ```
 
 ### ❌ If REJECTED (Score < 5):
@@ -339,13 +339,13 @@ Proceed to execution:
 #### For architectural issues:
 Return to reflection to fix issues:
 ```bash
-/04-reflect-domain-lessons from yaml: <your-yaml>
+/04-reflect-layer-lessons from yaml: <your-yaml>
 ```
 
 #### For structural issues:
 Go back to planning:
 ```bash
-/01-plan-domain-features <modify-your-request>
+/01-plan-layer-features <modify-your-request>
 ```
 
 > 💡 **Pro Tip**: Address violations in order of severity. Fix CRITICAL issues first, then MAJOR, MODERATE, and finally MINOR. A perfect score of 5 ensures smooth execution with RLHF +2!

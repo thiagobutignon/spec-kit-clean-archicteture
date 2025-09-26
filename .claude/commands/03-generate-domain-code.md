@@ -13,7 +13,7 @@ tags:
 parameters:
   input:
     type: "json"
-    description: "Validated JSON plan from /02-validate-domain-plan"
+    description: "Validated JSON plan from /02-validate-layer-plan"
     required: true
   existing_yaml:
     type: "yaml"
@@ -53,8 +53,8 @@ scoring:
     causes: ["Architecture violations", "Wrong REPLACE/WITH format"]
 source_template: "templates/DOMAIN_TEMPLATE.yaml"
 validation_script: "npx tsx validate-implementation.ts"
-previous_command: "/02-validate-domain-plan from json: <json>"
-next_command: "/04-reflect-domain-lessons from yaml: <generated-yaml>"
+previous_command: "/02-validate-layer-plan from json: <json>"
+next_command: "/04-reflect-layer-lessons from yaml: <generated-yaml>"
 ---
 
 # Task: Generate Domain Layer Code
@@ -272,7 +272,7 @@ graph TD
 
 **Command:**
 ```bash
-/03-generate-domain-code create feature from json:
+/03-generate-layer-code create feature from json:
 ```
 
 **Input JSON:**
@@ -309,7 +309,7 @@ graph TD
 
 **Command:**
 ```bash
-/03-generate-domain-code update yaml:
+/03-generate-layer-code update yaml:
 ```
 
 **With existing YAML containing placeholders and new JSON data to populate them**
@@ -335,7 +335,7 @@ graph LR
 After generating your YAML plan, proceed to architectural reflection:
 
 ```bash
-/04-reflect-domain-lessons from yaml: <your-generated-yaml>
+/04-reflect-layer-lessons from yaml: <your-generated-yaml>
 ```
 
 This will refine your YAML plan using Clean Architecture principles and DDD patterns to optimize for RLHF score.

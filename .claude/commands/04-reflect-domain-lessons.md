@@ -1,5 +1,5 @@
 ---
-title: "Reflect on Domain YAML Plan"
+title: "Reflect on Layer YAML Plan"
 description: "Senior architect review to optimize domain YAML plans for maximum RLHF score through reflection and refinement"
 category: "domain"
 stage: "reflection"
@@ -13,7 +13,7 @@ tags:
 parameters:
   input:
     type: "yaml"
-    description: "Complete validated YAML from /03-generate-domain-code"
+    description: "Complete validated YAML from /03-generate-layer-code"
     location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml"
     required: true
   output_success:
@@ -41,8 +41,8 @@ scoring_optimization:
     - "Remove external dependencies"
     - "Fix REPLACE/WITH format"
     - "Use interfaces not classes"
-previous_command: "/03-generate-domain-code"
-next_command: "/05-evaluate-domain-results from yaml: <refined-yaml>"
+previous_command: "/03-generate-layer-code"
+next_command: "/05-evaluate-layer-results from yaml: <refined-yaml>"
 ---
 
 # Task: Reflect on Domain YAML Plan
@@ -94,7 +94,7 @@ Act as a **senior software architect** reviewing a detailed implementation plan.
 
 | Parameter | Type | Location | Purpose |
 |-----------|------|----------|---------|
-| **YAML Plan** | YAML | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml` | Complete validated plan from /03-generate-domain-code |
+| **YAML Plan** | YAML | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml` | Complete validated plan from /03-generate-layer-code |
 
 ## 4. Reflection Checklist (Guiding Questions)
 
@@ -313,7 +313,7 @@ steps:
 After reflection and optimization:
 
 ```bash
-/05-evaluate-domain-results from yaml: <your-refined-yaml>
+/05-evaluate-layer-results from yaml: <your-refined-yaml>
 ```
 
 This will evaluate your refined YAML plan and determine if it's ready for execution or needs further refinement.

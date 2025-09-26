@@ -1,5 +1,5 @@
 ---
-title: "Pre-Task Domain Planning"
+title: "Pre-Task Layer Planning"
 description: "Transform high-level feature requests into detailed JSON plans for domain layer generation following Clean Architecture and DDD principles"
 category: "domain"
 stage: "planning"
@@ -44,7 +44,7 @@ tools:
   internal:
     - name: "serena"
       purpose: "Analyze existing code structure and conventions"
-next_command: "/02-validate-domain-plan from json: <your-generated-json>"
+next_command: "/02-validate-layer-plan from json: <your-generated-json>"
 ---
 
 # Task: Pre-Task Domain Planning
@@ -82,7 +82,7 @@ The system uses automated scoring to ensure quality:
 
 ## 1. Your Deliverable
 
-Your **only** output for this task is a single, complete, and well-formed **JSON object**. This JSON will serve as the input for the `/03-generate-domain-code` command, which will then generate the final YAML plan.
+Your **only** output for this task is a single, complete, and well-formed **JSON object**. This JSON will serve as the input for the `/03-generate-layer-code` command, which will then generate the final YAML plan.
 
 **OUTPUT LOCATION**:
 - Save at: `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/plan.json`
@@ -466,7 +466,7 @@ Your final JSON must follow this structure with COMPLETE examples:
 After generating your JSON plan, your next command should be:
 
 ```bash
-/02-validate-domain-plan from json: <your-generated-json>
+/02-validate-layer-plan from json: <your-generated-json>
 ```
 
 This will validate your JSON plan for completeness and architectural compliance, providing an RLHF score prediction.

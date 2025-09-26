@@ -1,5 +1,5 @@
 ---
-title: "Execute Domain YAML Plan"
+title: "Execute Layer YAML Plan"
 description: "Automated build engineer execution of approved YAML plans with real-time RLHF scoring"
 category: "domain"
 stage: "execution"
@@ -13,7 +13,7 @@ tags:
 parameters:
   input:
     type: "yaml"
-    description: "Complete approved YAML plan from /05-evaluate-domain-results"
+    description: "Complete approved YAML plan from /05-evaluate-layer-results"
     required: true
   working_directory:
     type: "path"
@@ -47,9 +47,9 @@ rlhf_scoring:
     emoji: "🏆"
     causes: ["Clean Architecture + DDD + ubiquitous language"]
 execution_script: "npx tsx execute-steps.ts"
-previous_command: "/05-evaluate-domain-results from yaml: <yaml>"
-next_command_success: "/08-apply-domain-improvements"
-next_command_failure: "/07-fix-domain-errors from yaml: <yaml-with-failed-step>"
+previous_command: "/05-evaluate-layer-results from yaml: <yaml>"
+next_command_success: "/08-apply-layer-improvements"
+next_command_failure: "/07-fix-layer-errors from yaml: <yaml-with-failed-step>"
 ---
 
 # Task: Execute Domain YAML Plan
@@ -99,7 +99,7 @@ Act as an **automated build engineer**. Execute the approved YAML implementation
 
 | Parameter | Description | Example |
 |-----------|-------------|---------|
-| **YAML Plan** | Complete approved YAML from /05-evaluate-domain-results | Full YAML content |
+| **YAML Plan** | Complete approved YAML from /05-evaluate-layer-results | Full YAML content |
 | **Working Directory** | Base path for all file operations | `spec/001-user-registration/domain/` |
 
 ### ⚠️ Important Path Resolution:
@@ -272,7 +272,7 @@ Based on execution results:
 ### ✅ If SUCCESS:
 Your domain layer is complete! Consider running RLHF improvements:
 ```bash
-/08-apply-domain-improvements
+/08-apply-layer-improvements
 ```
 
 Or generate a learning report:
@@ -284,12 +284,12 @@ npx tsx rlhf-system.ts report
 
 #### For error fixes:
 ```bash
-/07-fix-domain-errors from yaml: <your-yaml-with-failed-step>
+/07-fix-layer-errors from yaml: <your-yaml-with-failed-step>
 ```
 
 #### After fixing, re-run:
 ```bash
-/06-execute-domain-steps from yaml: <your-fixed-yaml>
+/06-execute-layer-steps from yaml: <your-fixed-yaml>
 ```
 
 > 💡 **Pro Tip**: The execution script maintains state in the YAML. Failed steps are marked, allowing you to fix and resume from the failure point without re-executing successful steps!

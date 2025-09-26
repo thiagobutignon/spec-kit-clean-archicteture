@@ -1,5 +1,5 @@
 ---
-title: "Fix Failed Domain Steps"
+title: "Fix Failed Layer Steps"
 description: "Analyze and generate corrective steps for failed YAML implementation plan steps with RLHF score recovery"
 category: "domain"
 stage: "error-recovery"
@@ -13,7 +13,7 @@ tags:
 parameters:
   input:
     type: "yaml"
-    description: "YAML plan with failed step(s) from /06-execute-domain-steps"
+    description: "YAML plan with failed step(s) from /06-execute-layer-steps"
     required: true
   working_directory:
     type: "path"
@@ -51,8 +51,8 @@ failure_categories:
     - "test failures"
     - "import violation"
     - "REPLACE/WITH syntax"
-previous_command: "/06-execute-domain-steps from yaml: <yaml>"
-next_command: "/06-execute-domain-steps from yaml: <yaml-with-fix>"
+previous_command: "/06-execute-layer-steps from yaml: <yaml>"
+next_command: "/06-execute-layer-steps from yaml: <yaml-with-fix>"
 ---
 
 # Task: Fix Failed Domain Steps
@@ -340,7 +340,7 @@ Your **only** output is the complete **updated YAML file** with:
 After generating the fix, return to execution:
 
 ```bash
-/06-execute-domain-steps from yaml: <your-yaml-with-fix>
+/06-execute-layer-steps from yaml: <your-yaml-with-fix>
 ```
 
 This will re-execute your plan with the fix applied. The execution will:
