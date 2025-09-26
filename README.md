@@ -269,30 +269,36 @@ cd spec-kit-clean-archicteture
 npm install
 ```
 
-### Generate a Feature
+### Generate Templates
 
-#### Backend Feature
 ```bash
-# Generate user authentication backend feature
-npx tsx execute-steps.ts templates/backend-template.regent \
-  --feature "user-authentication" \
-  --use-case "login"
+# Build all layer-specific templates (15 templates total)
+./templates/build-template.sh
 ```
 
-#### Frontend Feature
+This generates templates in the format: `[target]-[layer]-template.regent`
+- Targets: backend, frontend, fullstack
+- Layers: domain, data, infra, presentation, main
+
+### Validate Templates
+
 ```bash
-# Generate dashboard frontend feature
-npx tsx execute-steps.ts templates/frontend-template.regent \
-  --feature "dashboard" \
-  --use-case "display-metrics"
+# Validate a specific template
+npx tsx validate-template.ts templates/backend-domain-template.regent
+
+# Validate all generated templates
+npx tsx validate-template.ts --all
 ```
 
-#### Fullstack Feature
+### Execute a Template
+
 ```bash
-# Generate complete e-commerce feature
-npx tsx execute-steps.ts templates/fullstack-template.regent \
-  --feature "e-commerce" \
-  --use-case "checkout"
+# Execute a specific layer template
+npx tsx execute-steps.ts templates/backend-domain-template.regent
+
+# Examples for different layers:
+npx tsx execute-steps.ts templates/frontend-presentation-template.regent
+npx tsx execute-steps.ts templates/fullstack-main-template.regent
 ```
 
 ### Benefits of This Approach
@@ -457,11 +463,12 @@ const mockUser = {
 ## 📚 Complete Template Coverage
 
 ### Template System Statistics
-- **Total Templates**: 16 production-ready templates
-- **Total Lines**: 15,000+ lines of template code
+- **Total Templates**: 15 layer-specific templates (generated on-demand)
+- **Template Parts**: 46 modular components
+- **JSON Schemas**: 16 schemas for validation
 - **AI-NOTEs**: 500+ strategic guidance notes
 - **RLHF Scoring**: Complete -2 to +2 coverage
-- **JSON Schemas**: Full VS Code IntelliSense support
+- **Lines of Code**: 15,000+ across all parts
 
 ### Backend Templates (5 Complete Layers)
 - **01-domain.part.regent**: Use cases, entities, errors, value objects
@@ -489,7 +496,7 @@ const mockUser = {
 
 ## 🔍 VS Code Integration
 
-The project includes VS Code settings for optimal development:
+The project includes comprehensive VS Code settings for optimal development:
 
 ```json
 {
@@ -497,9 +504,10 @@ The project includes VS Code settings for optimal development:
     "*.regent": "yaml"
   },
   "yaml.schemas": {
-    "./templates/parts/backend/steps/01-domain.part.schema.json": [
-      "templates/parts/backend/steps/01-domain.part.regent"
-    ]
+    // 16 JSON schemas for all layer/target combinations
+    "./templates/parts/backend/steps/01-domain.part.schema.json": ["..."],
+    "./templates/parts/frontend/steps/02-data.part.schema.json": ["..."],
+    "./templates/parts/fullstack/steps/03-infra.part.schema.json": ["..."],
     // ... all schemas mapped
   }
 }
@@ -507,9 +515,10 @@ The project includes VS Code settings for optimal development:
 
 Benefits:
 - **IntelliSense**: Auto-completion for template fields
-- **Validation**: Real-time schema validation
-- **Documentation**: Inline documentation
+- **Real-time Validation**: Schema validation as you type
+- **Layer-Specific**: Each layer has its own schema
 - **Error Detection**: Immediate feedback on template errors
+- **Documentation**: Inline documentation from schemas
 
 ## 🤝 Contributing
 

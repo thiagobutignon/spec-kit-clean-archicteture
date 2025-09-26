@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
 /**
- * Enhanced Template Validator with Schema Support
+ * Template Validator
  * Validates layer-specific templates against their corresponding JSON schemas
- * Provides better maintainability by using the schemas we've created
+ * Uses the 16 JSON schemas created for each layer/target combination
  */
 
 import Ajv from 'ajv'
@@ -426,13 +426,13 @@ async function main() {
   const validator = new EnhancedTemplateValidator()
 
   if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
-    console.log(chalk.cyan.bold('\n📖 Enhanced Template Validator with Schema Support'))
+    console.log(chalk.cyan.bold('\n📖 Template Validator'))
     console.log(chalk.gray('\nUsage:'))
-    console.log('  npx tsx validate-template-with-schema.ts <template-file>')
-    console.log('  npx tsx validate-template-with-schema.ts --all')
+    console.log('  npx tsx validate-template.ts <template-file>')
+    console.log('  npx tsx validate-template.ts --all')
     console.log('\nExamples:')
-    console.log('  npx tsx validate-template-with-schema.ts templates/backend-domain-template.regent')
-    console.log('  npx tsx validate-template-with-schema.ts --all')
+    console.log('  npx tsx validate-template.ts templates/backend-domain-template.regent')
+    console.log('  npx tsx validate-template.ts --all')
     process.exit(0)
   }
 
