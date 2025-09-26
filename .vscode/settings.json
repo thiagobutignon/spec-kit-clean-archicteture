@@ -110,6 +110,10 @@
     "./templates/parts/shared/steps/validation.part.schema.json": [
       "templates/parts/shared/steps/validation.part.regent"
     ],
+    // Schema for shared footer part
+    "./templates/parts/shared/01-footer.part.schema.json": [
+      "templates/parts/shared/01-footer.part.regent"
+    ],
     // Schema for complete .regent files (excluding .part.regent)
     "./regent.schema.json": [
       "templates/template.regent",
