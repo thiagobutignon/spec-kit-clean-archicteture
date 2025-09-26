@@ -6,7 +6,7 @@ import * as yaml from 'yaml';
 import { createHash } from 'crypto';
 import chalk from 'chalk';
 import Logger from './logger';
-import { resolveRLHFDirectory, resolveLogDirectory } from './utils/log-path-resolver';
+import { resolveRLHFDirectory, resolveLogDirectory } from '../utils/log-path-resolver';
 
 /**
  * Enhanced RLHF System with Layer-Aware Scoring

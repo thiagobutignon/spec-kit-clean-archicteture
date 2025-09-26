@@ -13,8 +13,10 @@
     "templates:validate-all": "tsx validate-template.ts --all",
     "templates:build": "./templates/build-template.sh",
     "execute": "tsx execute-steps.ts",
-    "rlhf:analyze": "tsx rlhf-system.ts analyze",
-    "rlhf:report": "tsx rlhf-system.ts report"
+    "rlhf:analyze": "tsx core/rlhf-system.ts analyze",
+    "rlhf:report": "tsx core/rlhf-system.ts report",
+    "rlhf:dashboard": "tsx scripts/rlhf-dashboard.ts",
+    "rollback": "tsx scripts/rollback-manager.ts"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
