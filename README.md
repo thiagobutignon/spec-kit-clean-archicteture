@@ -11,20 +11,28 @@
 
 Spec-Kit Clean Architecture is a comprehensive template system that generates production-ready code following Clean Architecture, DDD, TDD, and SOLID principles. With intelligent AI-NOTEs guidance and RLHF scoring, it ensures consistent, high-quality code generation for backend, frontend, and fullstack applications.
 
-## 🚀 What's New - v4.0 - COMPLETE SYSTEM
+## 🚀 What's New - v5.0 - ENHANCED ARCHITECTURE
 
-### 🎯 100% Complete Template System
-- **✅ Backend Templates**: All 5 layers (Domain, Data, Infrastructure, Presentation, Main)
-- **✅ Frontend Templates**: Next.js 15 with all 5 layers fully implemented
-- **✅ Fullstack Templates**: Unified architecture combining backend and frontend
-- **✅ Shared Templates**: Validation layer working across all project types
-- **✅ 16 Total Templates**: Complete coverage for every architecture scenario
+### 🎯 Layer-Specific Template Generation
+- **✅ 15 Focused Templates**: Generated on-demand from modular parts
+- **✅ Build System**: `./templates/build-template.sh` generates all layer combinations
+- **✅ Target × Layer Matrix**: backend/frontend/fullstack × domain/data/infra/presentation/main
+- **✅ Modular Architecture**: 46 template parts for maximum flexibility
+- **✅ JSON Schema Validation**: 16 schemas for layer-specific validation
 
-### 🤖 AI-NOTEs Intelligence System
-- **Strategic Guidance**: AI-NOTEs at critical decision points
-- **FIND/REPLACE Patterns**: 100% coverage with specific guidance
-- **Architecture Validation**: Automatic detection of violations
-- **RLHF Scoring**: -2 to +2 quality assessment
+### 🤖 Enhanced RLHF Integration
+- **Layer-Aware Scoring**: Context-specific architectural validation
+- **Centralized Logic**: All scoring rules in `EnhancedRLHFSystem`
+- **Template Pattern Loading**: Automatic pattern extraction from templates
+- **Score Impact System**: Template-defined penalties and bonuses
+- **Performance Caching**: Pattern caching with 5-minute expiry
+
+### 📊 Advanced Validation & Execution
+- **Pre-execution Validation**: Templates validated before running
+- **Layer Detection**: Automatic layer identification from filenames
+- **Batch Execution**: `--all`, `--layer=domain`, `--target=backend`
+- **Contextual Error Messages**: Layer-specific guidance on failures
+- **Progress Tracking**: Real-time execution monitoring
 
 ### 🔄 Brownfield & Greenfield Support
 - **Greenfield**: Generate complete features from scratch
@@ -155,44 +163,37 @@ feat/user-management/main/
 
 ```
 templates/
-├── parts/
+├── parts/                                # Modular template components
 │   ├── backend/
 │   │   ├── 01-structure.part.regent      # Project structure
 │   │   ├── 02-architecture.part.regent   # Architecture rules
 │   │   ├── 03-rules.part.regent         # Clean Architecture rules
 │   │   └── steps/
 │   │       ├── 01-domain.part.regent    # Domain layer (contracts)
+│   │       ├── 01-domain.part.schema.json # Domain validation schema
 │   │       ├── 02-data.part.regent      # Data layer (implementations)
+│   │       ├── 02-data.part.schema.json # Data validation schema
 │   │       ├── 03-infra.part.regent     # Infrastructure (adapters)
+│   │       ├── 03-infra.part.schema.json # Infra validation schema
 │   │       ├── 04-presentation.part.regent # Presentation (controllers)
-│   │       └── 05-main.part.regent      # Main (composition root)
-│   ├── frontend/
-│   │   ├── 01-structure.part.regent      # Next.js 15 structure
-│   │   ├── 02-architecture.part.regent   # Frontend patterns
-│   │   ├── 03-rules.part.regent         # React/Next.js rules
-│   │   └── steps/
-│   │       ├── 01-domain.part.regent    # Business contracts
-│   │       ├── 02-data.part.regent      # HTTP/Storage protocols
-│   │       ├── 03-infra.part.regent     # Fetch/IndexedDB adapters
-│   │       ├── 04-presentation.part.regent # React components/hooks
-│   │       └── 05-main.part.regent      # App Router composition
-│   ├── fullstack/
-│   │   ├── 01-structure.part.regent      # Unified structure
-│   │   ├── 02-architecture.part.regent   # Fullstack patterns
-│   │   ├── 03-rules.part.regent         # Combined rules
-│   │   └── steps/
-│   │       ├── 01-domain.part.regent    # Shared domain models
-│   │       ├── 02-data.part.regent      # Unified data layer
-│   │       ├── 03-infra.part.regent     # Dual-stack adapters
-│   │       ├── 04-presentation.part.regent # API + UI components
-│   │       └── 05-main.part.regent      # Complete composition
+│   │       ├── 04-presentation.part.schema.json # Presentation schema
+│   │       ├── 05-main.part.regent      # Main (composition root)
+│   │       └── 05-main.part.schema.json # Main validation schema
+│   ├── frontend/                         # (similar structure with schemas)
+│   ├── fullstack/                        # (similar structure with schemas)
 │   └── shared/
 │       ├── 00-header.part.regent         # Shared metadata
+│       ├── 01-footer.part.regent         # RLHF patterns & troubleshooting
 │       └── steps/
 │           └── validation.part.regent    # Validation composites
-├── backend-template.regent              # Complete backend template
-├── frontend-template.regent             # Complete frontend template
-└── fullstack-template.regent           # Complete fullstack template
+├── build-template.sh                     # Generates 15 layer-specific templates
+├── .gitignore                            # Ignores generated templates
+└── [Generated on-demand]:
+    ├── backend-domain-template.regent    # Generated: backend + domain
+    ├── backend-data-template.regent      # Generated: backend + data
+    ├── backend-infra-template.regent     # Generated: backend + infra
+    ├── frontend-presentation-template.regent # Generated: frontend + presentation
+    └── ... (15 total combinations)
 ```
 
 ## 🤖 AI-NOTEs System
@@ -269,36 +270,65 @@ cd spec-kit-clean-archicteture
 npm install
 ```
 
-### Generate Templates
+### Generate Layer-Specific Templates
 
 ```bash
-# Build all layer-specific templates (15 templates total)
+# IMPORTANT: Run from project root, not from templates directory
 ./templates/build-template.sh
+
+# This generates 15 templates:
+# - backend: domain, data, infra, presentation, main
+# - frontend: domain, data, infra, presentation, main
+# - fullstack: domain, data, infra, presentation, main
 ```
 
-This generates templates in the format: `[target]-[layer]-template.regent`
-- Targets: backend, frontend, fullstack
-- Layers: domain, data, infra, presentation, main
+Generated templates follow the pattern: `[target]-[layer]-template.regent`
 
-### Validate Templates
+### Validate Templates with Schemas
 
 ```bash
-# Validate a specific template
+# Validate a specific template against its JSON schema
 npx tsx validate-template.ts templates/backend-domain-template.regent
 
 # Validate all generated templates
 npx tsx validate-template.ts --all
+
+# The validator automatically:
+# - Detects the layer from filename
+# - Loads the appropriate JSON schema
+# - Performs layer-specific validations
+# - Checks for architectural violations
 ```
 
-### Execute a Template
+### Execute Templates with Enhanced System
 
 ```bash
-# Execute a specific layer template
-npx tsx execute-steps.ts templates/backend-domain-template.regent
+# Execute with layer-aware RLHF scoring
+npx tsx execute-steps-enhanced.ts templates/backend-domain-template.regent
 
-# Examples for different layers:
-npx tsx execute-steps.ts templates/frontend-presentation-template.regent
-npx tsx execute-steps.ts templates/fullstack-main-template.regent
+# The enhanced executor provides:
+# - Pre-execution validation
+# - Layer-specific architectural checks
+# - Centralized RLHF scoring
+# - Contextual error messages
+
+# Batch execution options:
+npx tsx execute-steps-enhanced.ts --all              # All templates
+npx tsx execute-steps-enhanced.ts --layer=domain     # All domain templates
+npx tsx execute-steps-enhanced.ts --target=backend   # All backend templates
+```
+
+### RLHF Analysis with Layer Context
+
+```bash
+# Analyze execution with layer awareness
+npx tsx rlhf-system-enhanced.ts analyze implementation.yaml domain backend
+
+# Generate layer-specific report
+npx tsx rlhf-system-enhanced.ts report domain backend
+
+# View loaded patterns for a layer
+npx tsx rlhf-system-enhanced.ts patterns domain
 ```
 
 ### Benefits of This Approach
@@ -321,17 +351,71 @@ npx tsx execute-steps.ts templates/fullstack-main-template.regent
 - **Scalable Structure**: Grows naturally with features
 - **Domain Focus**: Business logic stays pure
 
-## 📊 RLHF Scoring System
+## 📊 Enhanced RLHF Scoring System
 
-The intelligent scoring system evaluates code quality:
+### Layer-Aware Intelligent Scoring
+
+The system now provides context-specific scoring based on architectural layer:
 
 | Score  | Level             | Description                                    |
 | ------ | ----------------- | ---------------------------------------------- |
-| **+2** | 🏆 PERFECT        | Clean Architecture + DDD + All Best Practices |
+| **+2** | 🏆 PERFECT        | Clean Architecture + DDD + Layer Best Practices |
 | **+1** | ✅ GOOD           | Valid implementation following patterns        |
 | **0**  | ⚠️ LOW CONFIDENCE | Missing references or unclear implementation  |
 | **-1** | ❌ RUNTIME ERROR  | Lint failures, test failures, build errors    |
 | **-2** | 💥 CATASTROPHIC   | Architecture violations, dependency issues    |
+
+### Layer-Specific Scoring Rules
+
+#### Domain Layer
+```yaml
+penalties:
+  -2: External dependencies (axios, fetch, prisma)
+  -1: Missing value objects or entities
+bonuses:
+  +1: Proper value objects, aggregate roots
+  +2: Complete ubiquitous language implementation
+```
+
+#### Data Layer
+```yaml
+penalties:
+  -2: Direct DB access without repository pattern
+  -1: Missing interface implementation
+bonuses:
+  +1: Proper protocol implementation
+  +2: Complete DTO mapping
+```
+
+#### Infrastructure Layer
+```yaml
+penalties:
+  -1: Missing error handling
+  -1: No retry logic for external services
+bonuses:
+  +1: Proper adapter pattern
+  +2: Circuit breakers and resilience patterns
+```
+
+#### Presentation Layer
+```yaml
+penalties:
+  -2: Business logic in controllers/components
+  -1: Missing validation
+bonuses:
+  +1: Clean separation of concerns
+  +2: Proper MVC/MVP implementation
+```
+
+#### Main Layer
+```yaml
+penalties:
+  -1: Direct instantiation instead of factories
+  -1: Missing dependency injection
+bonuses:
+  +1: Factory pattern usage
+  +2: Complete composition root
+```
 
 ## 🔄 Brownfield Refactoring
 
@@ -465,10 +549,11 @@ const mockUser = {
 ### Template System Statistics
 - **Total Templates**: 15 layer-specific templates (generated on-demand)
 - **Template Parts**: 46 modular components
-- **JSON Schemas**: 16 schemas for validation
+- **JSON Schemas**: 16 schemas for layer-specific validation
 - **AI-NOTEs**: 500+ strategic guidance notes
-- **RLHF Scoring**: Complete -2 to +2 coverage
-- **Lines of Code**: 15,000+ across all parts
+- **RLHF Integration**: Centralized layer-aware scoring
+- **Pattern Loading**: Automatic extraction from templates
+- **Lines of Code**: 20,000+ across all components
 
 ### Backend Templates (5 Complete Layers)
 - **01-domain.part.regent**: Use cases, entities, errors, value objects
@@ -520,6 +605,39 @@ Benefits:
 - **Error Detection**: Immediate feedback on template errors
 - **Documentation**: Inline documentation from schemas
 
+## 🛠️ Key Tools & Scripts
+
+### Core Executors
+- **`execute-steps-enhanced.ts`**: Layer-aware template executor with pre-validation
+- **`validate-template.ts`**: Unified validator using JSON schemas
+- **`rlhf-system-enhanced.ts`**: Centralized RLHF scoring with layer context
+- **`build-template.sh`**: Generates 15 layer-specific templates
+
+### System Architecture
+```
+┌─────────────────────────────┐
+│   Execute Steps Enhanced    │
+│  - Detects layer from file  │
+│  - Pre-validates template   │
+└────────────┬────────────────┘
+             │
+             ▼
+┌─────────────────────────────┐
+│  Enhanced RLHF System       │
+│  - Centralized scoring      │
+│  - Pattern loading          │
+│  - Layer-aware validation   │
+└────────────┬────────────────┘
+             │
+             ▼
+┌─────────────────────────────┐
+│     Template Patterns       │
+│  - Loaded from parts        │
+│  - Score impacts defined    │
+│  - Layer-specific rules     │
+└─────────────────────────────┘
+```
+
 ## 🤝 Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
@@ -530,6 +648,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - Enhanced testing patterns
 - Performance optimizations
 - Documentation improvements
+- Layer-specific pattern definitions
 
 ## 📝 License
 
