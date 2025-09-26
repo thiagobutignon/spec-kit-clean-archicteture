@@ -1,0 +1,209 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Shared Footer Template Schema",
+  "description": "Schema for validating the shared footer section used across all templates",
+  "type": "object",
+  "required": ["troubleshooting", "refactoring", "learning_patterns", "ai_guidelines", "evaluation"],
+  "properties": {
+    "troubleshooting": {
+      "description": "Common troubleshooting scenarios and solutions",
+      "type": "object",
+      "required": ["lint_fails", "tests_fail", "typescript_fails"],
+      "properties": {
+        "lint_fails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "tests_fail": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "typescript_fails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "refactoring": {
+      "description": "Refactoring checklists and examples",
+      "type": "object",
+      "required": ["before_refactoring", "during_refactoring", "common_scenarios"],
+      "properties": {
+        "before_refactoring": {
+          "type": "string",
+          "minLength": 10
+        },
+        "during_refactoring": {
+          "type": "string",
+          "minLength": 10
+        },
+        "common_scenarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "wrong_example", "correct_example"],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "wrong_example": {
+                "type": "string"
+              },
+              "correct_example": {
+                "type": "string"
+              }
+            }
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "learning_patterns": {
+      "description": "Patterns for continuous learning and improvement",
+      "type": "object",
+      "required": ["common_errors", "success_indicators"],
+      "properties": {
+        "common_errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["pattern", "fix", "score_impact"],
+            "properties": {
+              "pattern": {
+                "description": "Regex or string pattern to detect",
+                "type": "string"
+              },
+              "fix": {
+                "description": "How to fix the detected issue",
+                "type": "string"
+              },
+              "layer": {
+                "description": "Which layer this error applies to",
+                "type": "string",
+                "enum": ["domain", "data", "infra", "presentation", "main", "all"]
+              },
+              "score_impact": {
+                "description": "Impact on RLHF score",
+                "type": "integer",
+                "minimum": -2,
+                "maximum": 2
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "success_indicators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "ai_guidelines": {
+      "description": "Guidelines for AI code generation",
+      "type": "object",
+      "required": ["general"],
+      "properties": {
+        "general": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "layer_specific": {
+          "type": "object",
+          "properties": {
+            "domain": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "infrastructure": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "presentation": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "main": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "evaluation": {
+      "description": "Evaluation and scoring section",
+      "type": "object",
+      "required": ["final_status", "final_rlhf_score", "reviewer_summary", "template_improvement_suggestions"],
+      "properties": {
+        "final_status": {
+          "description": "Final execution status",
+          "type": "string",
+          "enum": ["PENDING", "SUCCESS", "FAILED"]
+        },
+        "final_rlhf_score": {
+          "description": "Final RLHF quality score",
+          "type": ["integer", "null"],
+          "minimum": -2,
+          "maximum": 2
+        },
+        "reviewer_summary": {
+          "description": "Human or automated review summary",
+          "type": "string"
+        },
+        "template_improvement_suggestions": {
+          "description": "Suggestions for improving templates",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["target_template", "target_step_id", "suggestion", "priority"],
+            "properties": {
+              "target_template": {
+                "type": "string"
+              },
+              "target_step_id": {
+                "type": "string"
+              },
+              "suggestion": {
+                "type": "string"
+              },
+              "priority": {
+                "type": "string",
+                "enum": ["low", "medium", "high", "critical"]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
