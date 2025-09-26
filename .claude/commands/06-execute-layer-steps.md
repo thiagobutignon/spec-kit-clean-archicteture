@@ -1,7 +1,7 @@
 ---
 title: "Execute Domain YAML Plan"
 description: "Automated build engineer execution of approved YAML plans with real-time RLHF scoring"
-category: "domain"
+category: "layer"
 stage: "execution"
 priority: 6
 tags:
@@ -13,12 +13,12 @@ tags:
 parameters:
   input:
     type: "yaml"
-    description: "Complete approved YAML plan from /05-evaluate-domain-results"
+    description: "Complete approved YAML plan from /05-evaluate-layer-results"
     required: true
   working_directory:
     type: "path"
-    pattern: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/"
-    example: "spec/001-user-registration/domain/"
+    pattern: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/"
+    example: "spec/001-user-registration/[LAYER]/"
   output_success:
     type: "json"
     format: '{"status": "SUCCESS", "message": "string", "commit_hashes": ["string"], "final_rlhf_score": number}'
@@ -47,9 +47,9 @@ rlhf_scoring:
     emoji: "🏆"
     causes: ["Clean Architecture + DDD + ubiquitous language"]
 execution_script: "npx tsx execute-steps.ts"
-previous_command: "/05-evaluate-domain-results from yaml: <yaml>"
-next_command_success: "/08-apply-domain-improvements"
-next_command_failure: "/07-fix-domain-errors from yaml: <yaml-with-failed-step>"
+previous_command: "/05-evaluate-layer-results from yaml: <yaml>"
+next_command_success: "/08-apply-layer-improvements"
+next_command_failure: "/07-fix-layer-errors from yaml: <yaml-with-failed-step>"
 ---
 
 # Task: Execute Domain YAML Plan
@@ -99,18 +99,18 @@ Act as an **automated build engineer**. Execute the approved YAML implementation
 
 | Parameter | Description | Example |
 |-----------|-------------|---------|
-| **YAML Plan** | Complete approved YAML from /05-evaluate-domain-results | Full YAML content |
-| **Working Directory** | Base path for all file operations | `spec/001-user-registration/domain/` |
+| **YAML Plan** | Complete approved YAML from /05-evaluate-layer-results | Full YAML content |
+| **Working Directory** | Base path for all file operations | `spec/001-user-registration/[LAYER]/` |
 
 ### ⚠️ Important Path Resolution:
 When the plan specifies:
 ```
-path: "src/features/user-registration/domain/usecases/register-user.ts"
+path: "src/features/user-registration/[LAYER]/usecases/register-user.ts"
 ```
 
 Actually create at:
 ```
-spec/001-user-registration/domain/src/features/user-registration/domain/usecases/register-user.ts
+spec/001-user-registration/[LAYER]/src/features/user-registration/[LAYER]/usecases/register-user.ts
 ```
 
 ## 4. Prohibited Actions ❌
@@ -160,7 +160,7 @@ graph TD
 <summary>Success Output with RLHF Scoring</summary>
 
 ```
-🚀 Loading implementation file: spec/001-user-registration/domain/implementation.yaml
+🚀 Loading implementation file: spec/001-user-registration/[LAYER]/implementation.yaml
 🚀 Starting execution of 2 steps...
 
 ▶️  Processing Step 1/2: create-structure
@@ -168,7 +168,7 @@ graph TD
    ✅ Step 'create-structure' completed successfully. RLHF Score: 1
 
 ▶️  Processing Step 2/2: create-use-case-create-user
-   📄 Creating file: src/features/user/domain/use-cases/create-user.ts
+   📄 Creating file: src/features/user/[LAYER]/use-cases/create-user.ts
    🔍 Running lint check...
    ✅ Lint check passed
    🏆 Step 'create-use-case-create-user' completed successfully. RLHF Score: 2
@@ -193,7 +193,7 @@ graph TD
 <summary>Failure Output with RLHF -2</summary>
 
 ```
-🚀 Loading implementation file: spec/001-user-registration/domain/implementation.yaml
+🚀 Loading implementation file: spec/001-user-registration/[LAYER]/implementation.yaml
 🚀 Starting execution of 2 steps...
 
 ▶️  Processing Step 1/2: create-structure
@@ -201,19 +201,19 @@ graph TD
    ✅ Step 'create-structure' completed successfully. RLHF Score: 1
 
 ▶️  Processing Step 2/2: create-use-case-with-axios
-   📄 Creating file: src/features/user/domain/use-cases/fetch-user.ts
+   📄 Creating file: src/features/user/[LAYER]/use-cases/fetch-user.ts
    🔍 Running architecture check...
 
 💥 ERROR: Step 'create-use-case-with-axios' failed. RLHF Score: -2
 🚨 CATASTROPHIC ERROR: Architecture violation detected
-💡 Check: Clean Architecture violations, external dependencies in domain layer
+💡 Check: Clean Architecture violations, external dependencies in selected layer
 
 Aborting execution. The YAML file has been updated with the failure details.
 
 {
   "status": "FAILED",
   "failed_step_id": "create-use-case-with-axios",
-  "error_log": "Architecture violation: axios import found in domain layer",
+  "error_log": "Architecture violation: axios import found in selected layer",
   "failed_step_rlhf_score": -2
 }
 ```
@@ -237,7 +237,7 @@ The `execute-steps.ts` script provides:
 |---------|-------------|
 | **Atomic Commits** | Each step = one Git commit |
 | **Lint Checks** | Automatic TypeScript validation |
-| **Architecture Validation** | Detects domain layer violations |
+| **Architecture Validation** | Detects selected layer violations |
 | **RLHF Scoring** | Real-time score calculation |
 | **Progress Tracking** | Visual step-by-step progress |
 | **Error Recovery** | Updates YAML with failure state |
@@ -270,9 +270,9 @@ If all steps succeed with +2:
 Based on execution results:
 
 ### ✅ If SUCCESS:
-Your domain layer is complete! Consider running RLHF improvements:
+Your selected layer is complete! Consider running RLHF improvements:
 ```bash
-/08-apply-domain-improvements
+/08-apply-layer-improvements
 ```
 
 Or generate a learning report:
@@ -284,12 +284,12 @@ npx tsx rlhf-system.ts report
 
 #### For error fixes:
 ```bash
-/07-fix-domain-errors from yaml: <your-yaml-with-failed-step>
+/07-fix-layer-errors from yaml: <your-yaml-with-failed-step>
 ```
 
 #### After fixing, re-run:
 ```bash
-/06-execute-domain-steps from yaml: <your-fixed-yaml>
+/06-execute-layer-steps from yaml: <your-fixed-yaml>
 ```
 
 > 💡 **Pro Tip**: The execution script maintains state in the YAML. Failed steps are marked, allowing you to fix and resume from the failure point without re-executing successful steps!

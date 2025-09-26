@@ -1,7 +1,7 @@
 ---
 title: "Evaluate Domain YAML Plan"
 description: "Principal engineer architectural review to validate YAML plans against engineering principles before execution"
-category: "domain"
+category: "layer"
 stage: "evaluation"
 priority: 5
 tags:
@@ -13,8 +13,8 @@ tags:
 parameters:
   input:
     type: "yaml"
-    description: "Complete YAML plan from /04-reflect-domain-lessons"
-    location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml"
+    description: "Complete YAML plan from /04-reflect-layer-lessons"
+    location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
     required: true
   output_approved:
     type: "json"
@@ -52,9 +52,9 @@ evaluation_principles:
   - "Atomic Commits"
   - "Ubiquitous Language"
   - "REPLACE/WITH Syntax"
-previous_command: "/04-reflect-domain-lessons from yaml: <refined-yaml>"
-next_command_approved: "/06-execute-domain-steps from yaml: <approved-yaml>"
-next_command_rejected: "/04-reflect-domain-lessons from yaml: <yaml> OR /01-plan-domain-features"
+previous_command: "/04-reflect-layer-lessons from yaml: <refined-yaml>"
+next_command_approved: "/06-execute-layer-steps from yaml: <approved-yaml>"
+next_command_rejected: "/04-reflect-layer-lessons from yaml: <yaml> OR /01-plan-domain-features"
 ---
 
 # Task: Evaluate Domain YAML Plan
@@ -105,7 +105,7 @@ Act as a **Principal Engineer** performing a final architectural review on an im
 
 | Parameter | Type | Location | Description |
 |-----------|------|----------|-------------|
-| **YAML Plan** | YAML | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml` | Complete, potentially revised YAML from /04-reflect-domain-lessons |
+| **YAML Plan** | YAML | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml` | Complete, potentially revised YAML from /04-reflect-layer-lessons |
 
 ## 4. Evaluation Principles (The Constitution)
 
@@ -169,7 +169,7 @@ Evaluate the **entire plan** against these core principles. Each violation impac
 |-------|-------------|--------|
 | **Consistency** | Terms used uniformly | Score ≤ 4 |
 | **Business Alignment** | Matches domain vocabulary | Score ≤ 3 |
-| **Documentation** | @domainConcept tags present | Limits to +1 |
+| **Documentation** | @layerConcept tags present | Limits to +1 |
 
 ### ⚠️ REPLACE/WITH Syntax (RLHF -2 if wrong)
 
@@ -290,7 +290,7 @@ steps:
     # ... (correct branch step)
   - id: "create-use-case-with-axios"
     type: "create_file"
-    path: "src/features/user/domain/use-cases/fetch-user.ts"
+    path: "src/features/user/[LAYER]/use-cases/fetch-user.ts"
     template: |
       import axios from 'axios';
 
@@ -308,7 +308,7 @@ steps:
   "score": 1,
   "report": "CRITICAL: The plan contains catastrophic architecture violations that will cause RLHF -2 scoring.",
   "violations": [
-    "Clean Architecture Violation: The step 'create-use-case-with-axios' imports 'axios' in the domain layer. External dependencies are strictly prohibited in domain layer (RLHF -2)."
+    "Clean Architecture Violation: The step 'create-use-case-with-axios' imports 'axios' in the selected layer. External dependencies are strictly prohibited in selected layer (RLHF -2)."
   ],
   "expected_rlhf_score": -2
 }
@@ -331,7 +331,7 @@ Based on your evaluation results:
 ### ✅ If APPROVED (Score = 5):
 Proceed to execution:
 ```bash
-/06-execute-domain-steps from yaml: <your-approved-yaml>
+/06-execute-layer-steps from yaml: <your-approved-yaml>
 ```
 
 ### ❌ If REJECTED (Score < 5):
@@ -339,7 +339,7 @@ Proceed to execution:
 #### For architectural issues:
 Return to reflection to fix issues:
 ```bash
-/04-reflect-domain-lessons from yaml: <your-yaml>
+/04-reflect-layer-lessons from yaml: <your-yaml>
 ```
 
 #### For structural issues:
