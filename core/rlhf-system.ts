@@ -816,8 +816,10 @@ class EnhancedRLHFSystem {
   private setCachedResult(key: string, result: any): void {
     if (this.patternCache.size >= this.maxCacheSize) {
       const firstKey = this.patternCache.keys().next().value;
-      this.patternCache.delete(firstKey);
-      this.cacheStats.evictions++;
+      if (firstKey !== undefined) {
+        this.patternCache.delete(firstKey);
+        this.cacheStats.evictions++;
+      }
     }
 
     this.patternCache.set(key, {

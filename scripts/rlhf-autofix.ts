@@ -165,7 +165,7 @@ fi
           const conceptName = step.id
             .replace(/create-/, '')
             .replace(/-/g, ' ')
-            .replace(/\b\w/g, l => l.toUpperCase());
+            .replace(/\b\w/g, (l: string) => l.toUpperCase());
 
           step.template = `/**
  * @domainConcept ${conceptName}

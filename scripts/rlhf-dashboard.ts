@@ -274,7 +274,7 @@ class RLHFDashboard {
     const topError = Object.entries(report.summary.commonErrors || {})
       .sort(([, a]: any, [, b]: any) => b - a)[0];
 
-    if (topError && topError[1] > 3) {
+    if (topError && Number(topError[1]) > 3) {
       recommendations.push({
         priority: 'medium',
         message: `"${topError[0]}" errors occurring frequently (${topError[1]} times).`,
