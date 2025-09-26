@@ -6,23 +6,18 @@
  * Integrates best practices from the template validation system
  */
 
-import crypto from 'crypto';
-import os from 'os';
-import yaml from 'yaml';
+import * as crypto from 'crypto';
+import * as os from 'os';
+import * as yaml from 'yaml';
 import 'zx/globals';
 import Logger from './logger';
-import { RLHFSystem } from './rlhf-system';
+import { EnhancedRLHFSystem, LayerInfo } from './rlhf-system-enhanced';
 import { resolveLogDirectory } from './utils/log-path-resolver';
 import { EnhancedTemplateValidator } from './validate-template';
 import type { ValidationResult } from './validate-template';
 
 $.verbose = true;
 $.shell = '/bin/bash';
-
-interface LayerInfo {
-  target: 'backend' | 'frontend' | 'fullstack';
-  layer: 'domain' | 'data' | 'infra' | 'presentation' | 'main';
-}
 
 interface Step {
   id: string;
@@ -63,7 +58,7 @@ interface ImplementationPlan {
 class EnhancedStepExecutor {
   private plan: ImplementationPlan;
   private logger: Logger;
-  private rlhf: RLHFSystem;
+  private rlhf: EnhancedRLHFSystem;
   private validator: EnhancedTemplateValidator;
   private startTime: number = 0;
   private layerInfo: LayerInfo | null = null;
@@ -76,7 +71,7 @@ class EnhancedStepExecutor {
     // Use the utility function to resolve log directory
     const logDir = resolveLogDirectory(implementationPath);
     this.logger = new Logger(logDir);
-    this.rlhf = new RLHFSystem(implementationPath);
+    this.rlhf = new EnhancedRLHFSystem(implementationPath);
     this.validator = new EnhancedTemplateValidator();
 
     // Detect layer from filename
@@ -298,8 +293,8 @@ class EnhancedStepExecutor {
 
         console.error(chalk.red.bold('Aborting execution. The YAML file has been updated with the failure details.'));
 
-        // Trigger RLHF analysis
-        await this.rlhf.analyzeExecution(this.implementationPath);
+        // Trigger RLHF analysis with layer context
+        await this.rlhf.analyzeExecution(this.implementationPath, this.layerInfo || undefined);
 
         process.exit(1);
       }
@@ -312,9 +307,9 @@ class EnhancedStepExecutor {
       console.log(chalk.cyan(`\n📊 ${this.layerInfo.target} / ${this.layerInfo.layer} layer execution complete!`));
     }
 
-    // Perform final RLHF analysis
-    console.log(chalk.blue.bold('\n🤖 Running RLHF analysis...'));
-    await this.rlhf.analyzeExecution(this.implementationPath);
+    // Perform final RLHF analysis with layer context
+    console.log(chalk.blue.bold('\n🤖 Running layer-aware RLHF analysis...'));
+    await this.rlhf.analyzeExecution(this.implementationPath, this.layerInfo || undefined);
 
     // Calculate final score with layer awareness
     const finalScore = await this.calculateFinalLayerAwareScore();
@@ -377,60 +372,22 @@ class EnhancedStepExecutor {
 
   /**
    * Calculate RLHF score with layer-specific adjustments
+   * Now uses centralized scoring from EnhancedRLHFSystem
    */
   private async calculateLayerAwareScore(
     step: Step,
     success: boolean,
     output?: string
   ): Promise<number> {
-    // Get base score from RLHF system
-    let score = await this.rlhf.calculateScore(step.type, success, output, step);
-
-    // Apply layer-specific adjustments
-    if (this.layerInfo && step.type === 'create_file' && step.template) {
-      const template = step.template;
-
-      switch (this.layerInfo.layer) {
-        case 'domain':
-          // Heavy penalty for external dependencies in domain
-          if (template.match(/import\s+(?:axios|fetch|prisma|redis)/)) {
-            score = Math.min(score, -2);
-          }
-          // Bonus for proper domain patterns
-          if (template.includes('ValueObject') || template.includes('AggregateRoot')) {
-            score = Math.min(2, score + 1);
-          }
-          break;
-
-        case 'data':
-          // Penalty for missing interface implementation
-          if (!template.includes('implements')) {
-            score = Math.max(-1, score - 1);
-          }
-          break;
-
-        case 'infra':
-          // Penalty for missing error handling
-          if (!template.includes('try') || !template.includes('catch')) {
-            score = Math.max(-1, score - 1);
-          }
-          break;
-
-        case 'presentation':
-          // Heavy penalty for business logic
-          if (template.match(/business\s+logic|calculateTotal|validateDomain/i)) {
-            score = Math.min(score, -2);
-          }
-          break;
-
-        case 'main':
-          // Bonus for proper factory pattern
-          if (template.match(/factory|Factory|make[A-Z]/)) {
-            score = Math.min(2, score + 1);
-          }
-          break;
-      }
-    }
+    // Use the centralized layer-aware scoring from EnhancedRLHFSystem
+    // This eliminates duplication and ensures consistency
+    const score = await this.rlhf.calculateLayerScore(
+      step.type,
+      success,
+      this.layerInfo || undefined,
+      output,
+      step
+    );
 
     return score;
   }
