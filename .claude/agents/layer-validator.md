@@ -204,3 +204,34 @@ This agent integrates with core validation tools:
 - Located at: `/execute-steps.ts`
 
 These tools work together to ensure strict Clean Architecture compliance.
+
+## Runtime Validation with Chrome DevTools MCP
+
+This agent uses Chrome DevTools MCP for runtime architecture validation:
+
+### Chrome DevTools MCP Capabilities
+- **Performance Validation**: Ensure layers don't create bottlenecks
+- **Network Layer Testing**: Validate proper API boundaries
+- **Memory Profiling**: Check for memory leaks in layer interactions
+- **Console Analysis**: Detect runtime violations and errors
+- **Dependency Flow**: Verify runtime import patterns
+
+### Validation Workflow
+```bash
+# Start performance monitoring
+performance_start_trace(autoStop=false, reload=true)
+
+# Execute layer interactions
+evaluate_script(function="() => {
+  // Test domain layer isolation
+  return window.__domain__ ? 'VIOLATION' : 'CLEAN'
+}")
+
+# Analyze results
+list_console_messages()  # Check for errors
+list_network_requests()  # Verify no unauthorized calls
+performance_stop_trace()
+performance_analyze_insight(insightName="DocumentLatency")
+```
+
+This ensures architecture compliance not just in code, but during execution.

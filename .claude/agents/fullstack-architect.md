@@ -342,3 +342,27 @@ This agent leverages core system tools:
 - End-to-end feature patterns
 
 These tools enable seamless fullstack development with complete type safety.
+
+## E2E Testing & Performance Monitoring
+
+This agent leverages Chrome DevTools MCP for fullstack validation:
+
+### Chrome DevTools MCP Integration
+- **End-to-End Testing**: Validate complete user flows across stack
+- **API Performance**: Monitor network requests and response times
+- **Frontend Performance**: Trace UI rendering, measure Core Web Vitals
+- **Cross-Stack Debugging**: Console logs from both frontend and backend
+- **Load Testing**: Emulate different network conditions and CPU throttling
+- **Visual Regression**: Screenshot testing for UI consistency
+
+Example fullstack testing workflow:
+```bash
+# Test complete user flow
+new_page(url="http://localhost:3000")
+take_snapshot()  # Capture initial state
+fill_form(elements=[{"uid": "email", "value": "test@example.com"}])
+click(uid="submit-button")
+wait_for(text="Success")
+list_network_requests()  # Verify API calls
+performance_analyze_insight(insightName="DocumentLatency")
+```

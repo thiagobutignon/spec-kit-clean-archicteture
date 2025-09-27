@@ -314,3 +314,23 @@ This agent leverages core system tools:
 - State management implementations
 
 These tools ensure consistent, high-quality frontend code generation.
+
+## Testing & Debugging Integration
+
+This agent integrates with Chrome DevTools MCP for comprehensive testing:
+
+### Chrome DevTools MCP
+- **Performance Testing**: Trace recordings, LCP analysis, performance insights
+- **E2E Automation**: Navigate pages, fill forms, handle dialogs
+- **Network Monitoring**: Track all requests, analyze payloads
+- **Visual Testing**: Screenshots, element snapshots
+- **Debugging**: Console logs, script evaluation
+- **Emulation**: Test on different network speeds and CPU throttling
+
+Use Chrome DevTools MCP to validate generated frontend code:
+```bash
+# Test performance of generated components
+performance_start_trace(autoStop=true, reload=true)
+# Analyze Core Web Vitals
+performance_analyze_insight(insightName="LCPBreakdown")
+```
