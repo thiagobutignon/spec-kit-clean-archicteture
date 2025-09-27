@@ -1,5 +1,5 @@
 ---
-title: "Fix Failed Domain Steps"
+title: "Fix Failed Layer Steps"
 description: "Analyze and generate corrective steps for failed YAML implementation plan steps with RLHF score recovery"
 category: "layer"
 stage: "error-recovery"
