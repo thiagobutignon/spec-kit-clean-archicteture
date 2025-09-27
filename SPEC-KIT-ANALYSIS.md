@@ -4,6 +4,28 @@
 
 This document provides a comprehensive analysis of the original spec-kit project and identifies what needs to be adapted or implemented for launching the spec-kit-clean-architecture variant. The analysis is based on a thorough review of all files in the spec-kit/ directory.
 
+## Fundamental Difference: Hybrid vs Pure Generative Approach
+
+### Original Spec-Kit: 100% Generative
+- AI generates **all code** from scratch based on specifications
+- No pre-defined templates or scaffolding
+- Complete flexibility but less consistency
+- Relies entirely on AI understanding of best practices
+
+### Spec-Kit Clean Architecture: Hybrid Approach (Scaffolding + Generative)
+- **Scaffolding**: Pre-defined `.regent` templates enforce Clean Architecture patterns
+- **Generative**: AI fills in and adapts templates based on context
+- **Best of both worlds**:
+  - Templates guarantee architectural consistency
+  - AI adapts to specific requirements
+  - Enforces best practices through structure
+  - Reduces AI hallucination risk
+
+This hybrid approach means we're not simply porting spec-kit, but creating a **guided generative system** where:
+1. Templates provide the skeleton (layers, interfaces, dependency rules)
+2. AI generates the specific implementation (entities, use cases, business logic)
+3. Result: Consistent, high-quality code that follows Clean Architecture principles
+
 ## Current State Assessment
 
 ### What We Have

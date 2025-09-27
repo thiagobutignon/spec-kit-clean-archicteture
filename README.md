@@ -12,6 +12,29 @@
 
 Spec-Kit Clean Architecture is a comprehensive template system that generates production-ready code following Clean Architecture, DDD, TDD, and SOLID principles. With intelligent AI-NOTEs guidance, RLHF scoring, and Claude AI agent integration, it ensures consistent, high-quality code generation for backend, frontend, and fullstack applications.
 
+## 🎯 Hybrid Approach: Scaffolding + AI Generation
+
+Unlike pure generative systems, Spec-Kit Clean Architecture uses a **hybrid approach** that combines the best of both worlds:
+
+### 📏 Scaffolding (Structure & Best Practices)
+- **Pre-defined Templates**: `.regent` files provide architectural skeleton
+- **Enforced Patterns**: Clean Architecture layers, dependency rules, SOLID principles
+- **Consistent Structure**: Every project follows the same proven organization
+- **Best Practices Built-in**: TDD, DDD, proper separation of concerns
+
+### 🤖 AI Generation (Context & Implementation)
+- **Intelligent Filling**: AI adapts templates to your specific requirements
+- **Context-Aware**: Generates entities, use cases, and business logic based on your domain
+- **Flexible Implementation**: While structure is fixed, implementation details are customized
+- **Guided by AI-NOTEs**: Templates contain instructions that guide AI generation
+
+### ✨ Benefits of Hybrid Approach
+- **Consistency**: All projects follow Clean Architecture principles
+- **Quality**: Templates prevent common architectural mistakes
+- **Speed**: Scaffolding provides instant structure, AI fills in details
+- **Reliability**: Reduced hallucination risk compared to pure generation
+- **Maintainability**: Predictable structure makes code easier to maintain
+
 ## 📦 Prerequisites
 
 - **Node.js**: >= 18.0.0

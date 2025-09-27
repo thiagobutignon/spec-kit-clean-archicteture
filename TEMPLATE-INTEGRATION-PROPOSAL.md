@@ -4,6 +4,38 @@
 
 Este documento descreve como os templates Clean Architecture (.regent) se integram com o workflow de 7 comandos do spec-kit, criando um fluxo unificado de desenvolvimento spec-driven com arquitetura limpa.
 
+## Abordagem Híbrida: Scaffolding + Generativo
+
+### Diferença Fundamental dos Projetos
+
+| Aspecto | Spec-Kit Original | Spec-Kit Clean Architecture |
+|---------|------------------|----------------------------|
+| **Geração** | 100% generativa | Híbrida (scaffolding + generativo) |
+| **Templates** | Não existe | .regent files com estrutura pré-definida |
+| **Arquitetura** | AI decide | Enforced by templates |
+| **Consistência** | Varia por geração | Garantida pelos templates |
+| **AI Role** | Gera tudo | Preenche e adapta templates |
+
+### Como Funciona o Modelo Híbrido
+
+1. **Templates como Scaffolding**
+   - Estrutura de camadas pré-definida
+   - Interfaces e contratos estabelecidos
+   - Padrões arquiteturais enforçados
+   - Dependency rules implementadas
+
+2. **AI como Motor Generativo**
+   - Analisa especificações
+   - Identifica entidades e casos de uso
+   - Preenche templates com lógica específica
+   - Adapta ao contexto do domínio
+
+3. **Resultado Final**
+   - Código consistente com Clean Architecture
+   - Implementação específica para o domínio
+   - Best practices garantidas
+   - Redução de erros arquiteturais
+
 ## Workflow Spec-Kit + Clean Architecture
 
 ```mermaid
@@ -154,22 +186,36 @@ backend/
 
 ### 7. `/implement` - Executa Implementação ⚡ **PONTO MÁXIMO**
 
-**Integração**: Aqui os templates .regent são executados!
+**Integração**: Aqui acontece a mágica híbrida - scaffolding + generation!
+
+#### Modelo Híbrido em Ação
 
 ```typescript
-// Processo de implementação
+// Processo híbrido de implementação
 async function implementTask(task: Task) {
+  // 1. SCAFFOLDING: Carrega template estrutural
   const layer = detectLayer(task); // domain, data, presentation, etc.
   const template = loadTemplate(layer); // backend-domain-template.regent
 
-  // Parse template e gera código
+  // Template contém:
+  // - Estrutura de pastas e arquivos
+  // - Interfaces e contratos pré-definidos
+  // - Padrões arquiteturais (Repository, UseCase, etc.)
+  // - AI-NOTEs para guiar a geração
+
+  // 2. GENERATIVO: AI preenche template com contexto específico
   const code = await generateFromTemplate(template, {
-    entities: spec.entities,
-    useCases: spec.useCases,
-    repositories: spec.repositories
+    entities: spec.entities,        // Ex: User, Order, Product
+    useCases: spec.useCases,        // Ex: CreateUser, UpdateOrder
+    repositories: spec.repositories, // Ex: UserRepository interface
+    businessRules: spec.rules,      // Lógica específica do domínio
   });
 
-  // Escreve arquivos na estrutura correta
+  // 3. RESULTADO: Código estruturado + implementação específica
+  // - Estrutura garantida pelo template
+  // - Lógica de negócio gerada pela AI
+  // - Best practices enforçadas automaticamente
+
   await writeFiles(code, task.targetPath);
 }
 ```
@@ -247,13 +293,34 @@ Os templates já existentes são perfeitos! Só precisam ser:
 # → Executa backend-main-template.regent para T013-T014
 ```
 
-## Benefícios da Integração
+## Benefícios da Integração Híbrida
 
-1. **Spec-Driven**: Mantém filosofia de especificação primeiro
-2. **Clean Architecture**: Garante separação de concerns
-3. **Automatização**: Templates geram código consistente
-4. **Testabilidade**: Estrutura facilita testes por camada
-5. **Manutenibilidade**: Código organizado e previsível
+### Vantagens sobre Abordagem 100% Generativa
+
+1. **Consistência Garantida**
+   - Templates enforçam estrutura correta
+   - Impossível violar Clean Architecture
+   - Padrões sempre aplicados corretamente
+
+2. **Menor Taxa de Erro**
+   - AI não precisa "inventar" estrutura
+   - Templates previnem erros arquiteturais
+   - Reduz hallucinations significativamente
+
+3. **Velocidade de Desenvolvimento**
+   - Scaffolding instantâneo da estrutura
+   - AI foca apenas no domínio específico
+   - Menos iterações para código correto
+
+4. **Manutenibilidade Superior**
+   - Estrutura previsível em todos os projetos
+   - Fácil onboarding de novos desenvolvedores
+   - Refatorações mais seguras
+
+5. **Best Practices Built-in**
+   - TDD enforçado pelos templates
+   - SOLID principles na estrutura
+   - DDD patterns pré-implementados
 
 ## Implementação Proposta
 
