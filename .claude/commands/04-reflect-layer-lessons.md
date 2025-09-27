@@ -1,6 +1,6 @@
 ---
-title: "Reflect on Domain YAML Plan"
-description: "Senior architect review to optimize domain YAML plans for maximum RLHF score through reflection and refinement"
+title: "Reflect on Layer YAML Plan"
+description: "Senior architect review to optimize layer YAML plans for maximum RLHF score through reflection and refinement"
 category: "layer"
 stage: "reflection"
 priority: 4
@@ -30,7 +30,7 @@ reflection_areas:
   - "Efficiency"
   - "Ubiquitous Language"
   - "Clean Architecture"
-  - "Domain Documentation"
+  - "Layer Documentation"
 scoring_optimization:
   increase_to_2:
     - "Add ubiquitous language"
@@ -45,7 +45,7 @@ previous_command: "/03-generate-layer-code"
 next_command: "/05-evaluate-layer-results from yaml: <refined-yaml>"
 ---
 
-# Task: Reflect on Domain YAML Plan
+# Task: Reflect on Layer YAML Plan
 
 ## 🤖 RLHF Scoring Optimization
 
@@ -104,7 +104,7 @@ Act as a **senior software architect** reviewing a detailed implementation plan.
 |-------|----------|-----------------|
 | **Branch Step** | Does plan start with `branch` type? | -1 if missing |
 | **PR Step** | Does plan end with `pull_request` type? | -1 if missing |
-| **Branch Naming** | Follows `feat/[feature-name]-domain`? | Style issue |
+| **Branch Naming** | Follows `feat/[feature-name]-[layer]`? | Style issue |
 | **Target Branch** | PR targets correct branch (staging)? | Configuration issue |
 
 ### 💡 Simplicity (KISS Principle)
@@ -146,25 +146,25 @@ Act as a **senior software architect** reviewing a detailed implementation plan.
 |-------|-------------|--------------|
 | **Defined** | `ubiquitousLanguage` object present? | Limits to +1 |
 | **Consistent** | Terms used throughout plan? | Quality indicator |
-| **Documentation** | JSDoc uses domain vocabulary? | +2 requirement |
-| **Commit Messages** | Use domain terms? | Professional quality |
+| **Documentation** | JSDoc uses layer vocabulary? | +2 requirement |
+| **Commit Messages** | Use layer terms? | Professional quality |
 
 ### 🏛️ Clean Architecture Compliance (-2 Prevention)
 
 | Check | Violation | Score Impact |
 |-------|-----------|--------------|
-| **External Deps** | axios, fetch, prisma in domain? | -2 CATASTROPHIC |
+| **External Deps** | axios, fetch, prisma in layer? | -2 CATASTROPHIC |
 | **REPLACE/WITH** | Incorrect format in refactors? | -2 CATASTROPHIC |
 | **Use Case Pattern** | Classes instead of interfaces? | -2 CATASTROPHIC |
-| **Layer Purity** | Implementation in domain? | -2 CATASTROPHIC |
+| **Layer Purity** | Implementation in selected layer? | -2 CATASTROPHIC |
 
-### 📖 Domain Documentation Quality (+1 to +2)
+### 📖 Layer Documentation Quality (+1 to +2)
 
 | Documentation | Requirement | Score Boost |
 |---------------|-------------|-------------|
 | **@layerConcept** | Present in templates? | +0.5 to +1 |
 | **@pattern tags** | Design patterns identified? | +0.5 |
-| **Business Context** | Clear domain explanation? | +0.5 |
+| **Business Context** | Clear layer explanation? | +0.5 |
 | **Error Messages** | Use business language? | Quality indicator |
 
 ## 5. Step-by-Step Execution Plan
@@ -269,7 +269,7 @@ steps:
 ```json
 {
   "status": "REVISED",
-  "reflection": "CRITICAL: Removed axios import (would cause -2 CATASTROPHIC). Added proper domain documentation for +2 score.",
+  "reflection": "CRITICAL: Removed axios import (would cause -2 CATASTROPHIC). Added proper layer documentation for +2 score.",
   "revised_yaml": "Clean template with @layerConcept tags...",
   "estimated_rlhf_score": 2
 }
@@ -283,7 +283,7 @@ steps:
 |---------|--------|-------|--------|
 | **Add JSDoc** | Plain interface | `/** @layerConcept */` | +0.5 to +1 |
 | **Combine Steps** | Create + Refactor | Single create | Efficiency |
-| **Fix Violations** | External imports | Pure domain | Prevents -2 |
+| **Fix Violations** | External imports | Pure layer | Prevents -2 |
 | **Add UL** | No vocabulary | Define terms | Enables +2 |
 | **Document Patterns** | No tags | `@pattern Command` | +0.5 |
 

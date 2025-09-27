@@ -7,7 +7,7 @@ priority: 3
 tags:
   - code-generation
   - yaml-generation
-  - domain-layer
+  - selected-layer
   - rlhf-optimization
   - clean-architecture
 parameters:
@@ -32,8 +32,8 @@ modes:
     requires: ["existing_yaml", "json_plan"]
 workflow_order:
   1: "branch - Creates feature branch"
-  2: "folder - Creates domain structure"
-  3: "domain_steps - All domain implementation"
+  2: "folder - Creates layer structure"
+  3: "layer_steps - All layer implementation"
   4: "pull_request - Creates PR to staging"
 scoring:
   perfect:
@@ -51,7 +51,7 @@ scoring:
   catastrophic:
     score: -2
     causes: ["Architecture violations", "Wrong REPLACE/WITH format"]
-source_template: "templates/DOMAIN_TEMPLATE.yaml"
+source_template: "templates/[LAYER]_TEMPLATE.yaml"
 validation_script: "npx tsx validate-implementation.ts"
 previous_command: "/02-validate-layer-plan from json: <json>"
 next_command: "/04-reflect-layer-lessons from yaml: <generated-yaml>"
@@ -78,7 +78,7 @@ The generated YAML **MUST** follow this exact step order:
 ```mermaid
 graph LR
     A[1. Branch Step] --> B[2. Folder Step]
-    B --> C[3. Domain Steps]
+    B --> C[3. Layer Steps]
     C --> D[4. Pull Request]
     style A fill:#90EE90
     style B fill:#87CEEB
@@ -89,8 +89,8 @@ graph LR
 | Order | Step Type | Purpose | Required |
 |-------|-----------|---------|----------|
 | **FIRST** | `branch` | Creates feature branch | ✅ Mandatory |
-| **SECOND** | `folder` | Creates domain structure | ✅ Mandatory |
-| **MIDDLE** | `domain_steps` | Use cases, errors, test helpers | ✅ Variable count |
+| **SECOND** | `folder` | Creates layer structure | ✅ Mandatory |
+| **MIDDLE** | `layer_steps` | Use cases, errors, test helpers | ✅ Variable count |
 | **LAST** | `pull_request` | Creates PR to staging | ✅ Mandatory |
 
 > 🚨 **WARNING**: Invalid step order will result in RUNTIME ERROR (-1)
@@ -126,7 +126,7 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| **Template** | `templates/DOMAIN_TEMPLATE.yaml` | Master template |
+| **Template** | `templates/[LAYER]_TEMPLATE.yaml` | Master template |
 | **Directives** | `# AI-NOTE:` comments | Must follow all |
 | **Placeholders** | `__PLACEHOLDER__` variables | Must replace all |
 | **Validation** | `validate-implementation.ts` | Must pass validation |
@@ -159,7 +159,7 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
 <details>
 <summary>Expand for Create Mode Steps</summary>
 
-1. **Initialize**: Copy `templates/DOMAIN_TEMPLATE.yaml` verbatim
+1. **Initialize**: Copy `templates/[LAYER]_TEMPLATE.yaml` verbatim
 2. **Generate Steps**:
    - Keep `create-feature-branch` as FIRST step
    - Keep `create-structure` as SECOND step
@@ -167,7 +167,7 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
    - Keep `create-pull-request` as LAST step
 3. **Populate Placeholders**: Replace all `__PLACEHOLDER__` with JSON data
 4. **Add Ubiquitous Language** (if provided) for +2 score
-5. **Add Domain Documentation**: JSDoc with `@layerConcept` tags
+5. **Add Layer Documentation**: JSDoc with `@layerConcept` tags
 
 </details>
 
@@ -225,10 +225,10 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
 
 | Score | Mistake Type | Examples | How to Fix |
 |-------|--------------|----------|------------|
-| **-2** | Critical violations | Wrong REPLACE/WITH format<br>External library imports | Follow template exactly<br>Keep domain pure |
+| **-2** | Critical violations | Wrong REPLACE/WITH format<br>External library imports | Follow template exactly<br>Keep layer pure |
 | **-1** | Runtime issues | Missing placeholders<br>Failed lint/tests | Validate all replacements<br>Check syntax |
 | **0** | Low quality | No pattern references<br>Missing context | Add references array<br>Include descriptions |
-| **+1** | Good but generic | Valid but no ubiquitous language | Add domain vocabulary |
+| **+1** | Good but generic | Valid but no ubiquitous language | Add layer vocabulary |
 | **+2** | Perfect | All requirements met | Maintain excellence |
 
 ## 8. Validation Process
@@ -236,7 +236,7 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
 ### Mandatory Validation Steps:
 
 ```bash
-npx tsx validate-implementation.ts templates/DOMAIN_TEMPLATE.yaml <generated-yaml-path>
+npx tsx validate-implementation.ts templates/[LAYER]_TEMPLATE.yaml <generated-yaml-path>
 ```
 
 ### Self-Correction Loop:
@@ -261,7 +261,7 @@ graph TD
 | Placeholders | All replaced correctly | -1 (Runtime Error) |
 | References | Pattern documentation | 0 (Low Confidence) |
 | Layer Purity | No external deps | -2 (Catastrophic) |
-| Ubiquitous Language | Domain vocabulary | Limits to +1 max |
+| Ubiquitous Language | Layer vocabulary | Limits to +1 max |
 
 ## 9. Example Invocations
 
@@ -340,4 +340,4 @@ After generating your YAML plan, proceed to architectural reflection:
 
 This will refine your YAML plan using Clean Architecture principles and DDD patterns to optimize for RLHF score.
 
-> 💡 **Pro Tip**: Always validate your YAML before delivery. A validated YAML with ubiquitous language and proper domain documentation achieves the coveted +2 RLHF score!
+> 💡 **Pro Tip**: Always validate your YAML before delivery. A validated YAML with ubiquitous language and proper layer documentation achieves the coveted +2 RLHF score!
