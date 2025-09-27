@@ -1,7 +1,7 @@
 ---
-title: "Generate Domain Layer Code"
-description: "Transform validated JSON plans into YAML implementation files for domain layer generation with RLHF optimization"
-category: "domain"
+title: "Generate Selected Layer Code"
+description: "Transform validated JSON plans into YAML implementation files for selected layer generation with RLHF optimization"
+category: "layer"
 stage: "generation"
 priority: 3
 tags:
@@ -21,8 +21,8 @@ parameters:
     required: false
   output:
     type: "yaml"
-    location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml"
-    example: "spec/001-user-registration/domain/implementation.yaml"
+    location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
+    example: "spec/001-user-registration/[LAYER]/implementation.yaml"
 modes:
   create:
     description: "Generate new YAML from JSON plan"
@@ -38,7 +38,7 @@ workflow_order:
 scoring:
   perfect:
     score: 2
-    requires: ["Ubiquitous language", "JSDoc @domainConcept", "DDD patterns", "Clean Architecture"]
+    requires: ["Ubiquitous language", "JSDoc @layerConcept", "DDD patterns", "Clean Architecture"]
   good:
     score: 1
     status: "Valid but missing DDD elements"
@@ -57,7 +57,7 @@ previous_command: "/02-validate-layer-plan from json: <json>"
 next_command: "/04-reflect-layer-lessons from yaml: <generated-yaml>"
 ---
 
-# Task: Generate Domain Layer Code
+# Task: Generate Selected Layer Code
 
 ## 🤖 RLHF Scoring System
 
@@ -101,7 +101,7 @@ Your **only** output is a complete and valid YAML file content.
 
 **Output Location:**
 ```
-spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml
+spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
 ```
 
 **Naming Convention:**
@@ -109,7 +109,7 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml
 |-----------|--------|---------|
 | FEATURE_NUMBER | Sequential 3-digit | 001, 002, 003 |
 | FEATURE_NAME | kebab-case | user-registration |
-| Full Path | Combined | spec/001-user-registration/domain/implementation.yaml |
+| Full Path | Combined | spec/001-user-registration/[LAYER]/implementation.yaml |
 
 ## 2. Prohibited Actions ❌
 
@@ -167,7 +167,7 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml
    - Keep `create-pull-request` as LAST step
 3. **Populate Placeholders**: Replace all `__PLACEHOLDER__` with JSON data
 4. **Add Ubiquitous Language** (if provided) for +2 score
-5. **Add Domain Documentation**: JSDoc with `@domainConcept` tags
+5. **Add Domain Documentation**: JSDoc with `@layerConcept` tags
 
 </details>
 
@@ -215,7 +215,7 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/domain/implementation.yaml
 | Requirement | Implementation | Example |
 |-------------|----------------|---------|
 | **Ubiquitous Language** | Include in JSON and YAML | `"Registration": "Process of creating account"` |
-| **JSDoc Comments** | Add domain concepts | `@domainConcept User Registration` |
+| **JSDoc Comments** | Add layer concepts | `@layerConcept User Registration` |
 | **DDD Terminology** | Use proper terms | Entity, Value Object, Aggregate |
 | **Clean Architecture** | No external deps | No axios, prisma, express imports |
 | **Meaningful Errors** | Business context | `UserAlreadyExistsError` not `Error409` |
@@ -260,7 +260,7 @@ graph TD
 | Step Order | Verify workflow sequence | -1 (Runtime Error) |
 | Placeholders | All replaced correctly | -1 (Runtime Error) |
 | References | Pattern documentation | 0 (Low Confidence) |
-| Domain Purity | No external deps | -2 (Catastrophic) |
+| Layer Purity | No external deps | -2 (Catastrophic) |
 | Ubiquitous Language | Domain vocabulary | Limits to +1 max |
 
 ## 9. Example Invocations
