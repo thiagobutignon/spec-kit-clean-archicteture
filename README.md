@@ -6,12 +6,37 @@
 [![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-✓-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 [![Templates](https://img.shields.io/badge/Templates-Backend%20|%20Frontend%20|%20Fullstack-purple)](./templates)
 [![AI-NOTEs](https://img.shields.io/badge/AI--NOTEs-100%25%20Coverage-orange)](./templates)
+[![Claude AI](https://img.shields.io/badge/Claude%20AI-6%20Agents-cyan)](./.claude/agents)
 
 ## 📋 Overview
 
-Spec-Kit Clean Architecture is a comprehensive template system that generates production-ready code following Clean Architecture, DDD, TDD, and SOLID principles. With intelligent AI-NOTEs guidance and RLHF scoring, it ensures consistent, high-quality code generation for backend, frontend, and fullstack applications.
+Spec-Kit Clean Architecture is a comprehensive template system that generates production-ready code following Clean Architecture, DDD, TDD, and SOLID principles. With intelligent AI-NOTEs guidance, RLHF scoring, and Claude AI agent integration, it ensures consistent, high-quality code generation for backend, frontend, and fullstack applications.
 
-## 🚀 What's New - v5.0 - ENHANCED ARCHITECTURE
+## 📦 Prerequisites
+
+- **Node.js**: >= 18.0.0
+- **TypeScript**: >= 5.0.0
+- **Claude Code CLI**: Latest version installed
+- **Git**: Configured with GitHub credentials
+- **npm/yarn**: Package manager installed
+
+## 🚀 What's New - v6.0 - AI AGENT INTEGRATION
+
+### 🤖 Claude AI Agents (NEW!)
+- **6 Specialized Agents**: Each with deep expertise in specific domains
+- **Automated Workflows**: 8-phase generation process from planning to improvement
+- **Stack-Specific Experts**: Backend, Frontend, and Fullstack specialists
+- **Architecture Validation**: Layer-validator ensures strict compliance
+- **Domain Planning**: DDD expert for feature architecture
+- **Integrated with Core Tools**: Full integration with execute-steps.ts, validate-template.ts, and core/rlhf-system.ts
+
+### 📁 Project Reorganization (NEW!)
+- **Core System**: Centralized in `core/` directory (rlhf-system.ts, logger.ts)
+- **Scripts**: Automation tools in `scripts/` directory
+- **Agent System**: Claude agents in `.claude/agents/`
+- **Command System**: Workflow commands in `.claude/commands/`
+
+## 📚 Previous Release - v5.0 - ENHANCED ARCHITECTURE
 
 ### 🎯 Layer-Specific Template Generation
 - **✅ 15 Focused Templates**: Generated on-demand from modular parts
@@ -38,6 +63,96 @@ Spec-Kit Clean Architecture is a comprehensive template system that generates pr
 - **Greenfield**: Generate complete features from scratch
 - **Brownfield**: Intelligent refactoring with `<<<FIND>>>/<<<REPLACE>>>` patterns
 - **Migration Paths**: Gradual adoption in existing codebases
+
+## 🤖 AI Agent System
+
+### Specialized Agents
+
+Our system includes 6 specialized AI agents that work together to generate perfect Clean Architecture code:
+
+| Agent | Model | Expertise | Integration |
+|-------|-------|-----------|-------------|
+| **clean-architecture-generator** | Opus | Orchestrates complete 8-phase workflow | execute-steps.ts, validate-template.ts, core/rlhf-system.ts |
+| **layer-validator** | Opus | Validates Clean Architecture compliance | Detects violations, predicts RLHF scores |
+| **backend-specialist** | Opus | Backend patterns, Node.js, databases | All 5 backend layers |
+| **frontend-specialist** | Opus | React, Vue, Angular, state management | All 5 frontend layers |
+| **fullstack-architect** | Opus | API contracts, shared types, monorepo | End-to-end integration |
+| **domain-feature-planner** | Opus | DDD, bounded contexts, domain modeling | Business to technical specs |
+
+### 8-Phase Workflow Commands
+
+The agents use these commands sequentially to generate perfect code:
+
+```bash
+# Phase 1: Planning
+/01-plan-layer-features [feature] --layer=[domain|data|infra|presentation|main]
+
+# Phase 2: Validation
+/02-validate-layer-plan from json: [plan]
+
+# Phase 3: Code Generation
+/03-generate-layer-code from json: [validated-plan]
+
+# Phase 4: Reflection (Optimize for RLHF +2)
+/04-reflect-layer-lessons from yaml: [code]
+
+# Phase 5: Evaluation (Architecture Review)
+/05-evaluate-layer-results from yaml: [reflected]
+
+# Phase 6: Execution
+/06-execute-layer-steps from yaml: [approved]
+
+# Phase 7: Error Handling (if needed)
+/07-fix-layer-errors from yaml: [failed]
+
+# Phase 8: Continuous Improvement
+/08-apply-layer-improvements
+```
+
+### Using AI Agents
+
+#### Complete Feature Generation Example
+
+```bash
+# Example: Generate complete user authentication feature
+claude "Use the clean-architecture-generator agent to create user authentication with email and password"
+
+# This will automatically:
+# 1. Plan all 5 layers (domain, data, infra, presentation, main)
+# 2. Generate 20+ files with proper structure
+# 3. Validate Clean Architecture compliance
+# 4. Achieve RLHF score +2 (PERFECT)
+# 5. Create tests for each layer
+```
+
+#### Expected Output Structure
+```
+features/authentication/
+├── login-user/
+│   ├── domain/          # Interfaces and entities
+│   ├── data/            # Use case implementations
+│   ├── infra/           # External adapters
+│   ├── presentation/    # Controllers/Components
+│   └── main/            # Dependency injection
+├── register-user/       # Another use case
+└── shared/              # Shared auth resources
+```
+
+#### Specialist Agent Examples
+
+```bash
+# Backend API Design
+claude "Use the backend-specialist agent to design RESTful API for order management"
+# Output: Complete API with controllers, DTOs, validation, and OpenAPI docs
+
+# Frontend Component Architecture
+claude "Use the frontend-specialist agent to create product catalog with filtering"
+# Output: React components with state management, hooks, and Clean Architecture
+
+# Architecture Validation
+claude "Use the layer-validator agent to check for dependency violations in src/"
+# Output: Detailed report with violations, RLHF score, and fixes
+```
 
 ## 🏛️ Complete Clean Architecture
 
@@ -159,11 +274,37 @@ feat/user-management/main/
   └── routes/user-routes.ts
 ```
 
-## 📁 Complete Template System Structure
+## 📁 Complete Project Structure
 
 ```
-templates/
-├── parts/                                # Modular template components
+spec-kit-clean-archicteture/
+├── .claude/
+│   ├── agents/                          # AI Agent Definitions (NEW!)
+│   │   ├── clean-architecture-generator.md
+│   │   ├── layer-validator.md
+│   │   ├── backend-specialist.md
+│   │   ├── frontend-specialist.md
+│   │   ├── fullstack-architect.md
+│   │   └── domain-feature-planner.md
+│   └── commands/                        # Workflow Commands (NEW!)
+│       ├── 01-plan-layer-features.md
+│       ├── 02-validate-layer-plan.md
+│       ├── 03-generate-layer-code.md
+│       ├── 04-reflect-layer-lessons.md
+│       ├── 05-evaluate-layer-results.md
+│       ├── 06-execute-layer-steps.md
+│       ├── 07-fix-layer-errors.md
+│       └── 08-apply-layer-improvements.md
+├── core/                                # Core System (REORGANIZED!)
+│   ├── rlhf-system.ts                  # Enhanced RLHF with layer awareness
+│   ├── logger.ts                       # Centralized logging
+│   └── utils.ts                        # Shared utilities
+├── scripts/                             # Automation Scripts (REORGANIZED!)
+│   ├── rlhf-autofix.ts                 # Automatic fix generation
+│   ├── rlhf-dashboard.ts               # Score dashboard
+│   └── rollback-manager.ts             # Safe rollback system
+├── templates/
+│   └── parts/                           # Modular template components
 │   ├── backend/
 │   │   ├── 01-structure.part.regent      # Project structure
 │   │   ├── 02-architecture.part.regent   # Architecture rules
@@ -668,6 +809,80 @@ MIT License - See [LICENSE](LICENSE) file for details.
 - **Vitest** - Testing framework
 - **Prisma** - Database ORM
 - **Next.js** - React framework
+
+## 🔧 Troubleshooting
+
+### Common Issues and Solutions
+
+#### Agent-Related Issues
+- **"Agent not found" error**:
+  - Ensure `.claude/agents/` directory exists
+  - Check agent name spelling matches exactly
+  - Run `ls .claude/agents/` to see available agents
+
+#### Template Generation Issues
+- **"Template not found" error**:
+  - Run `./templates/build-template.sh` first
+  - Check for 15 generated templates: `ls templates/*-template.regent`
+  - Ensure you have execute permissions: `chmod +x templates/build-template.sh`
+
+#### RLHF Scoring Issues
+- **Consistently getting negative scores**:
+  - Check for external dependencies in domain layer
+  - Verify REPLACE/WITH syntax in refactoring steps
+  - Use `npx tsx validate-template.ts` before execution
+
+#### MCP Connection Issues
+- **"MCP server connection failed"**:
+  - Check status: `claude mcp list`
+  - Restart server: `claude mcp remove serena && claude mcp add serena ...`
+  - Verify API keys for Context7
+
+#### TypeScript Errors
+- **"Cannot find module" errors**:
+  - Run `npm install` to ensure all dependencies
+  - Check TypeScript version: `npx tsc --version` (should be >= 5.0.0)
+  - Clear TypeScript cache: `npx tsc --build --clean`
+
+## 🔌 MCP Server Integration (Advanced Setup)
+
+### Claude Code MCP Servers
+
+Enhance your Claude Code experience with these optional MCP servers:
+
+#### Serena MCP - Semantic Code Understanding
+```bash
+# Install Serena for semantic code navigation
+claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena-mcp-server
+
+# Features:
+# - Semantic symbol search
+# - Code pattern detection
+# - Architecture validation
+# - Memory persistence
+```
+
+#### Context7 MCP - Up-to-date Documentation
+```bash
+# Install Context7 for latest library docs
+claude mcp add context7 -- npx -y @upstash/context7-mcp --api-key YOUR_API_KEY
+
+# Features:
+# - Real-time documentation
+# - Library version support
+# - Code examples
+# - API references
+```
+
+#### Verify Installation
+```bash
+# List installed servers
+claude mcp list
+
+# Check specific server
+claude mcp get serena
+claude mcp get context7
+```
 
 ## 💬 Support
 
