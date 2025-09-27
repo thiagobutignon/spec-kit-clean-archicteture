@@ -212,6 +212,67 @@ cd spec-kit-clean-archicteture
 npm install
 ```
 
+### MCP Server Setup for Claude Code
+
+To enhance your development experience with semantic code understanding and up-to-date documentation, install the following MCP servers:
+
+#### 1. Serena MCP Server (Semantic Code Understanding)
+Serena provides powerful semantic code understanding and intelligent editing capabilities through language server integration.
+
+```bash
+# Install Serena MCP Server
+claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena-mcp-server
+
+# Alternative: If you have uv installed locally
+claude mcp add serena -- uv run --directory /path/to/serena serena-mcp-server
+```
+
+**Features:**
+- Semantic code search and navigation
+- Intelligent refactoring capabilities
+- Memory system for project context
+- Free alternative to expensive coding assistants
+
+**Configuration Notes:**
+- Add `.serena` to `.gitignore` (stores project memories)
+- Access dashboard at `http://localhost:24282/dashboard/index.html` for monitoring
+
+#### 2. Context7 MCP Server (Up-to-date Documentation)
+Context7 dynamically injects current, version-specific documentation and code examples into your prompts.
+
+```bash
+# Install Context7 MCP Server (with optional API key for higher rate limits)
+claude mcp add context7 -- npx -y @upstash/context7-mcp --api-key YOUR_API_KEY
+
+# Or use HTTP transport
+claude mcp add --transport http context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY: YOUR_API_KEY"
+```
+
+**Features:**
+- Fetches up-to-date library documentation
+- Version-specific code examples
+- Eliminates outdated AI suggestions
+- Works with 500+ libraries
+
+**Usage:**
+- Simply add "use context7" to your prompts
+- Example: "Create a Next.js app with app router. use context7"
+- Get API key at [context7.com/dashboard](https://context7.com/dashboard) (optional)
+
+#### 3. Verify MCP Installation
+
+```bash
+# List all installed MCP servers
+claude mcp list
+
+# Check specific server details
+claude mcp get serena
+claude mcp get context7
+
+# Remove a server if needed
+claude mcp remove <server-name>
+```
+
 ### Using AI Agents
 
 ```bash
