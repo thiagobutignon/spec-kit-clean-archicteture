@@ -5,7 +5,8 @@
 [![RLHF Score](https://img.shields.io/badge/RLHF%20Score-+2%20PERFECT-brightgreen)](https://github.com/thiagobutignon/spec-kit-clean-archicteture)
 [![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-✓-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 [![Templates](https://img.shields.io/badge/Templates-Backend%20|%20Frontend%20|%20Fullstack-purple)](./templates)
-[![Claude AI](https://img.shields.io/badge/Claude%20AI-Agents-orange)](./.claude/agents)
+[![AI-NOTEs](https://img.shields.io/badge/AI--NOTEs-100%25%20Coverage-orange)](./templates)
+[![Claude AI](https://img.shields.io/badge/Claude%20AI-6%20Agents-yellow)](./.claude/agents)
 
 ## 📋 Overview
 
@@ -13,90 +14,66 @@ Spec-Kit Clean Architecture is a comprehensive template system that generates pr
 
 ## 🚀 What's New - v6.0 - AI AGENT INTEGRATION
 
-### 🤖 Claude AI Agents System
+### 🤖 Claude AI Agents (NEW!)
 - **6 Specialized Agents**: Each with deep expertise in specific domains
 - **Automated Workflows**: 8-phase generation process from planning to improvement
 - **Stack-Specific Experts**: Backend, Frontend, and Fullstack specialists
 - **Architecture Validation**: Layer-validator ensures strict compliance
 - **Domain Planning**: DDD expert for feature architecture
+- **Integrated with Core Tools**: Full integration with execute-steps.ts, validate-template.ts, and core/rlhf-system.ts
 
-### 🎯 Layer-Generic Command System
-- **8 Sequential Commands**: Complete workflow automation
-- **Layer Agnostic**: Supports all 5 Clean Architecture layers
-- **RLHF Integration**: Score recovery strategies (+2 target)
-- **Error Recovery**: Automatic fix generation for failed steps
-- **Continuous Learning**: Apply improvements from execution history
+### 📁 Project Reorganization (NEW!)
+- **Core System**: Centralized in `core/` directory (rlhf-system.ts, logger.ts)
+- **Scripts**: Automation tools in `scripts/` directory
+- **Agent System**: Claude agents in `.claude/agents/`
+- **Command System**: Workflow commands in `.claude/commands/`
 
-### 📊 Enhanced System Architecture
-- **Core System Reorganization**: Clean separation of concerns
-  - `core/`: RLHF system, logger, utilities
-  - `scripts/`: Automation and dashboard tools
-  - `templates/`: 15 layer-specific templates
-- **Improved Import Structure**: Centralized dependencies
-- **Performance Optimizations**: Caching with 5-minute expiry
-- **Type Safety**: Full TypeScript coverage
+## 🚀 What's New - v5.0 - ENHANCED ARCHITECTURE
+
+### 🎯 Layer-Specific Template Generation
+- **✅ 15 Focused Templates**: Generated on-demand from modular parts
+- **✅ Build System**: `./templates/build-template.sh` generates all layer combinations
+- **✅ Target × Layer Matrix**: backend/frontend/fullstack × domain/data/infra/presentation/main
+- **✅ Modular Architecture**: 46 template parts for maximum flexibility
+- **✅ JSON Schema Validation**: 16 schemas for layer-specific validation
+
+### 🤖 Enhanced RLHF Integration
+- **Layer-Aware Scoring**: Context-specific architectural validation
+- **Centralized Logic**: All scoring rules in `EnhancedRLHFSystem`
+- **Template Pattern Loading**: Automatic pattern extraction from templates
+- **Score Impact System**: Template-defined penalties and bonuses
+- **Performance Caching**: Pattern caching with 5-minute expiry
+
+### 📊 Advanced Validation & Execution
+- **Pre-execution Validation**: Templates validated before running
+- **Layer Detection**: Automatic layer identification from filenames
+- **Batch Execution**: `--all`, `--layer=domain`, `--target=backend`
+- **Contextual Error Messages**: Layer-specific guidance on failures
+- **Progress Tracking**: Real-time execution monitoring
+
+### 🔄 Brownfield & Greenfield Support
+- **Greenfield**: Generate complete features from scratch
+- **Brownfield**: Intelligent refactoring with `<<<FIND>>>/<<<REPLACE>>>` patterns
+- **Migration Paths**: Gradual adoption in existing codebases
 
 ## 🤖 AI Agent System
 
 ### Specialized Agents
 
-Our system includes 6 specialized AI agents that work together:
+Our system includes 6 specialized AI agents that work together to generate perfect Clean Architecture code:
 
-```mermaid
-graph TD
-    A[User Request] --> B[clean-architecture-generator]
-    B --> C{Stack Type?}
-    C -->|Backend| D[backend-specialist]
-    C -->|Frontend| E[frontend-specialist]
-    C -->|Fullstack| F[fullstack-architect]
-    D --> G[layer-validator]
-    E --> G
-    F --> G
-    G --> H[domain-feature-planner]
-    H --> B
-```
-
-### Agent Descriptions
-
-#### 🎯 clean-architecture-generator
-- **Model**: Opus
-- **Role**: Orchestrates the complete 8-phase workflow
-- **Expertise**: Manages all layer generation from planning to improvement
-- **Integration**: execute-steps.ts, validate-template.ts, core/rlhf-system.ts
-
-#### 🔍 layer-validator
-- **Model**: Opus
-- **Role**: Validates Clean Architecture compliance
-- **Expertise**: Detects violations, dependency issues, and architectural problems
-- **RLHF Scoring**: Predicts scores based on violations (-2 to +2)
-
-#### 💼 backend-specialist
-- **Model**: Opus
-- **Role**: Backend architecture expert
-- **Expertise**: Node.js, TypeScript, Express, database patterns, microservices
-- **Layers**: All 5 backend layers with production-ready patterns
-
-#### 🎨 frontend-specialist
-- **Model**: Opus
-- **Role**: Frontend architecture expert
-- **Expertise**: React, Vue, Angular, state management, UI/UX patterns
-- **Layers**: All 5 frontend layers with modern patterns
-
-#### 🌐 fullstack-architect
-- **Model**: Opus
-- **Role**: End-to-end fullstack expert
-- **Expertise**: API contracts, shared types, monorepo architecture
-- **Integration**: Seamless frontend-backend communication
-
-#### 📐 domain-feature-planner
-- **Model**: Opus
-- **Role**: Domain-Driven Design architect
-- **Expertise**: Bounded contexts, aggregates, domain modeling
-- **Focus**: Business requirements to technical specifications
-
-## 📚 Command System
+| Agent | Model | Expertise | Integration |
+|-------|-------|-----------|-------------|
+| **clean-architecture-generator** | Opus | Orchestrates complete 8-phase workflow | execute-steps.ts, validate-template.ts, core/rlhf-system.ts |
+| **layer-validator** | Opus | Validates Clean Architecture compliance | Detects violations, predicts RLHF scores |
+| **backend-specialist** | Opus | Backend patterns, Node.js, databases | All 5 backend layers |
+| **frontend-specialist** | Opus | React, Vue, Angular, state management | All 5 frontend layers |
+| **fullstack-architect** | Opus | API contracts, shared types, monorepo | End-to-end integration |
+| **domain-feature-planner** | Opus | DDD, bounded contexts, domain modeling | Business to technical specs |
 
 ### 8-Phase Workflow Commands
+
+The agents use these commands sequentially to generate perfect code:
 
 ```bash
 # Phase 1: Planning
@@ -108,10 +85,10 @@ graph TD
 # Phase 3: Code Generation
 /03-generate-layer-code from json: [validated-plan]
 
-# Phase 4: Reflection
+# Phase 4: Reflection (Optimize for RLHF +2)
 /04-reflect-layer-lessons from yaml: [code]
 
-# Phase 5: Evaluation
+# Phase 5: Evaluation (Architecture Review)
 /05-evaluate-layer-results from yaml: [reflected]
 
 # Phase 6: Execution
@@ -124,18 +101,18 @@ graph TD
 /08-apply-layer-improvements
 ```
 
-### Command Features
+### Using AI Agents
 
-| Command | Purpose | RLHF Target | Integration |
-|---------|---------|-------------|-------------|
-| `/01-plan` | Create JSON plan | +1 | Templates |
-| `/02-validate` | Validate structure | +1 | JSON schemas |
-| `/03-generate` | Generate YAML code | +2 | Layer templates |
-| `/04-reflect` | Optimize implementation | +2 | Pattern analysis |
-| `/05-evaluate` | Architecture review | +2 | SOLID/DDD check |
-| `/06-execute` | Run implementation | +2 | execute-steps.ts |
-| `/07-fix` | Fix failures | +2 recovery | Error patterns |
-| `/08-apply` | Learn & improve | Continuous | Template updates |
+```bash
+# Launch the main orchestrator agent
+# Use the Task tool in Claude Code to launch:
+"Use the clean-architecture-generator agent to create user authentication"
+
+# Or use specific specialists:
+"Use the backend-specialist agent for API design"
+"Use the frontend-specialist agent for component architecture"
+"Use the layer-validator agent to check for violations"
+```
 
 ## 🏛️ Complete Clean Architecture
 
@@ -158,19 +135,118 @@ graph TD
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 📁 Project Structure
+## 🎯 Feature-Based Architecture with Use Case Slices
+
+### Hybrid Approach: Feature Modules + Use Case Slices
+
+Our architecture combines the best of both worlds:
+
+```
+src/
+├── features/                         # Feature-based modules
+│   ├── user-management/              # Feature module
+│   │   ├── create-user/              # Use case slice
+│   │   │   ├── domain/               # Domain layer
+│   │   │   ├── data/                 # Data layer
+│   │   │   ├── infra/                # Infrastructure (if needed)
+│   │   │   └── presentation/         # Presentation layer
+│   │   ├── update-user/              # Another use case slice
+│   │   ├── delete-user/              # Another use case slice
+│   │   ├── shared/                   # Shared within feature
+│   │   │   ├── domain/               # Shared entities, VOs
+│   │   │   ├── infra/                # Feature-specific repositories
+│   │   │   └── utils/                # Feature utilities
+│   │   └── main/                     # Feature composition
+│   │       ├── factories/            # Use case factories
+│   │       └── routes/               # Feature routes
+│   ├── authentication/               # Another feature
+│   └── billing/                      # Another feature
+└── shared/                           # Global shared resources
+    ├── domain/                       # Global domain types
+    ├── infra/                        # Global infrastructure
+    └── utils/                        # Global utilities
+```
+
+### Why Feature Modules with Use Case Slices?
+
+**Feature Modules** provide:
+- 🎯 **Domain Cohesion**: Related use cases stay together
+- 📦 **Encapsulation**: Features are self-contained
+- 🔄 **Reusability**: Shared resources within feature boundary
+- 🚀 **Team Scalability**: Teams own entire features
+
+**Use Case Slices** provide:
+- ⚡ **Atomic Delivery**: Each use case is independently deployable
+- 🧪 **Isolated Testing**: Test one use case without affecting others
+- 🔒 **Reduced Coupling**: Use cases don't depend on each other
+- 📝 **Clear Commits**: Each slice = one atomic git commit
+
+### Vertical Slice Architecture
+
+Each use case is implemented vertically through all layers:
+
+```mermaid
+graph TD
+    subgraph "Feature: User Management"
+        subgraph "Use Case: Create User"
+            A1[Domain Interface] --> A2[Data Implementation]
+            A2 --> A3[Infrastructure Adapters]
+            A3 --> A4[Presentation Controller]
+            A4 --> A5[Route/Handler]
+        end
+
+        subgraph "Use Case: Update User"
+            B1[Domain Interface] --> B2[Data Implementation]
+            B2 --> B3[Shared Repository]
+            B3 --> B4[Presentation Controller]
+            B4 --> B5[Route/Handler]
+        end
+    end
+
+    A3 -.-> SR[Shared Repository in Feature]
+    B3 -.-> SR
+```
+
+### Implementation Flow
+
+```yaml
+# 1. Create feature module
+feat/user-management/
+
+# 2. Add first use case slice
+feat/user-management/create-user/
+  ├── domain/usecases/create-user.ts
+  ├── data/usecases/db-create-user.ts
+  └── presentation/controllers/create-user-controller.ts
+
+# 3. Add shared resources when needed
+feat/user-management/shared/
+  ├── domain/entities/user.ts
+  └── infra/db/user-repository.ts
+
+# 4. Add more use cases
+feat/user-management/update-user/
+feat/user-management/delete-user/
+
+# 5. Compose in main
+feat/user-management/main/
+  ├── factories/create-user-factory.ts
+  └── routes/user-routes.ts
+```
+
+## 📁 Complete Project Structure
 
 ```
 spec-kit-clean-archicteture/
 ├── .claude/
-│   ├── agents/                    # AI Agent Definitions
+│   ├── agents/                          # AI Agent Definitions (NEW!)
 │   │   ├── clean-architecture-generator.md
 │   │   ├── layer-validator.md
 │   │   ├── backend-specialist.md
 │   │   ├── frontend-specialist.md
 │   │   ├── fullstack-architect.md
 │   │   └── domain-feature-planner.md
-│   └── commands/                  # Workflow Commands
+│   └── commands/                        # Workflow Commands (NEW!)
 │       ├── 01-plan-layer-features.md
 │       ├── 02-validate-layer-plan.md
 │       ├── 03-generate-layer-code.md
@@ -179,25 +255,108 @@ spec-kit-clean-archicteture/
 │       ├── 06-execute-layer-steps.md
 │       ├── 07-fix-layer-errors.md
 │       └── 08-apply-layer-improvements.md
-├── core/                          # Core System
-│   ├── rlhf-system.ts            # Enhanced RLHF scoring
-│   ├── logger.ts                 # Centralized logging
-│   └── utils.ts                  # Shared utilities
-├── scripts/                       # Automation Scripts
-│   ├── rlhf-autofix.ts          # Automatic fix generation
-│   ├── rlhf-dashboard.ts        # Score dashboard
-│   └── validate-all-templates.ts # Batch validation
-├── templates/                     # Template System
-│   ├── parts/                    # Modular components
-│   │   ├── backend/              # Backend templates
-│   │   ├── frontend/             # Frontend templates
-│   │   ├── fullstack/            # Fullstack templates
-│   │   └── shared/               # Shared components
-│   └── build-template.sh         # Template generator
-├── execute-steps.ts              # Main executor
-├── validate-template.ts          # Template validator
-└── package.json                  # Dependencies
+├── core/                                # Core System (REORGANIZED!)
+│   ├── rlhf-system.ts                  # Enhanced RLHF with layer awareness
+│   ├── logger.ts                       # Centralized logging
+│   └── utils.ts                        # Shared utilities
+├── scripts/                             # Automation Scripts (REORGANIZED!)
+│   ├── rlhf-autofix.ts                 # Automatic fix generation
+│   ├── rlhf-dashboard.ts               # Score dashboard
+│   └── rollback-manager.ts             # Safe rollback system
+├── templates/
+│   └── parts/                           # Modular template components
+│   ├── backend/
+│   │   ├── 01-structure.part.regent      # Project structure
+│   │   ├── 02-architecture.part.regent   # Architecture rules
+│   │   ├── 03-rules.part.regent         # Clean Architecture rules
+│   │   └── steps/
+│   │       ├── 01-domain.part.regent    # Domain layer (contracts)
+│   │       ├── 01-domain.part.schema.json # Domain validation schema
+│   │       ├── 02-data.part.regent      # Data layer (implementations)
+│   │       ├── 02-data.part.schema.json # Data validation schema
+│   │       ├── 03-infra.part.regent     # Infrastructure (adapters)
+│   │       ├── 03-infra.part.schema.json # Infra validation schema
+│   │       ├── 04-presentation.part.regent # Presentation (controllers)
+│   │       ├── 04-presentation.part.schema.json # Presentation schema
+│   │       ├── 05-main.part.regent      # Main (composition root)
+│   │       └── 05-main.part.schema.json # Main validation schema
+│   ├── frontend/                         # (similar structure with schemas)
+│   ├── fullstack/                        # (similar structure with schemas)
+│   └── shared/
+│       ├── 00-header.part.regent         # Shared metadata
+│       ├── 01-footer.part.regent         # RLHF patterns & troubleshooting
+│       └── steps/
+│           └── validation.part.regent    # Validation composites
+├── build-template.sh                     # Generates 15 layer-specific templates
+├── .gitignore                            # Ignores generated templates
+└── [Generated on-demand]:
+    ├── backend-domain-template.regent    # Generated: backend + domain
+    ├── backend-data-template.regent      # Generated: backend + data
+    ├── backend-infra-template.regent     # Generated: backend + infra
+    ├── frontend-presentation-template.regent # Generated: frontend + presentation
+    └── ... (15 total combinations)
 ```
+
+## 🤖 AI-NOTEs System
+
+### Strategic Placement
+AI-NOTEs are placed at critical decision points to guide AI code generation:
+
+```yaml
+# AI-NOTE: Vertical slicing ensures atomic feature delivery
+# Complete one use case through ALL layers before starting another
+execution_order:
+  approach: 'Vertical Slice Architecture'
+
+# AI-NOTE: Dependency direction is INWARD toward domain
+# Any outward dependency is a CRITICAL violation
+dependency_rules:
+  domain:
+    can_import_from: []  # Domain imports nothing
+```
+
+### FIND/REPLACE Patterns
+Every refactoring pattern includes comprehensive AI guidance:
+
+```yaml
+<<<FIND>>>
+# AI-NOTE: Identify axios imports and usage
+# Look for: import axios from 'axios'
+# Replace ALL axios calls with FetchHttpClient
+[ORIGINAL_CODE]
+<<<REPLACE>>>
+# AI-NOTE: Ensure replacement:
+# - Uses FetchHttpClient from infra layer
+# - Implements proper error handling
+# - Uses dependency injection
+[REFACTORED_CODE]
+```
+
+## 🎯 Key Features
+
+### Backend Features (All 5 Layers)
+- **Domain Layer**: Use cases, entities, value objects, domain errors
+- **Data Layer**: Use case implementations, protocols, DTOs
+- **Infrastructure**: Prisma ORM, Redis cache, crypto adapters
+- **Presentation**: Express/Fastify controllers, middleware pipeline
+- **Main Layer**: Composition root, factories, dependency injection
+- **TDD Approach**: RED-GREEN-REFACTOR with Vitest
+
+### Frontend Features (All 5 Layers)
+- **Domain Layer**: Business interfaces, entities, types
+- **Data Layer**: HTTP clients, storage protocols
+- **Infrastructure**: Fetch adapters, IndexedDB, WebSocket
+- **Presentation**: React components, hooks, Server Actions
+- **Main Layer**: Next.js 15 App Router composition, providers
+- **Modern Stack**: Shadcn UI, Tailwind CSS, Zod validation
+
+### Fullstack Features (Complete Integration)
+- **Unified Domain**: Shared business models across stack
+- **Dual Infrastructure**: Backend (Prisma/Redis) + Frontend (Fetch/IndexedDB)
+- **API Routes**: Next.js API handlers with validation
+- **Server Actions**: Direct database mutations
+- **Main Composition**: Unified factories and dependency injection
+- **E2E Type Safety**: Complete TypeScript coverage
 
 ## 🚀 Quick Start
 
@@ -212,201 +371,373 @@ cd spec-kit-clean-archicteture
 npm install
 ```
 
-### MCP Server Setup for Claude Code
-
-To enhance your development experience with semantic code understanding and up-to-date documentation, install the following MCP servers:
-
-#### 1. Serena MCP Server (Semantic Code Understanding)
-Serena provides powerful semantic code understanding and intelligent editing capabilities through language server integration.
+### Generate Layer-Specific Templates
 
 ```bash
-# Install Serena MCP Server
-claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena-mcp-server
-
-# Alternative: If you have uv installed locally
-claude mcp add serena -- uv run --directory /path/to/serena serena-mcp-server
-```
-
-**Features:**
-- Semantic code search and navigation
-- Intelligent refactoring capabilities
-- Memory system for project context
-- Free alternative to expensive coding assistants
-
-**Configuration Notes:**
-- Add `.serena` to `.gitignore` (stores project memories)
-- Access dashboard at `http://localhost:24282/dashboard/index.html` for monitoring
-
-#### 2. Context7 MCP Server (Up-to-date Documentation)
-Context7 dynamically injects current, version-specific documentation and code examples into your prompts.
-
-```bash
-# Install Context7 MCP Server (with optional API key for higher rate limits)
-claude mcp add context7 -- npx -y @upstash/context7-mcp --api-key YOUR_API_KEY
-
-# Or use HTTP transport
-claude mcp add --transport http context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY: YOUR_API_KEY"
-```
-
-**Features:**
-- Fetches up-to-date library documentation
-- Version-specific code examples
-- Eliminates outdated AI suggestions
-- Works with 500+ libraries
-
-**Usage:**
-- Simply add "use context7" to your prompts
-- Example: "Create a Next.js app with app router. use context7"
-- Get API key at [context7.com/dashboard](https://context7.com/dashboard) (optional)
-
-#### 3. Verify MCP Installation
-
-```bash
-# List all installed MCP servers
-claude mcp list
-
-# Check specific server details
-claude mcp get serena
-claude mcp get context7
-
-# Remove a server if needed
-claude mcp remove <server-name>
-```
-
-### Using AI Agents
-
-```bash
-# Use Claude Code to interact with agents
-# Example: Generate a complete user authentication feature
-
-# 1. Plan the feature
-claude "Use the clean-architecture-generator agent to create user authentication"
-
-# 2. The agent will automatically:
-#    - Plan the feature architecture
-#    - Validate the plan
-#    - Generate code for all layers
-#    - Execute implementation
-#    - Handle any errors
-#    - Apply improvements
-```
-
-### Generate Templates
-
-```bash
-# Generate all 15 layer-specific templates
+# IMPORTANT: Run from project root, not from templates directory
 ./templates/build-template.sh
 
-# Templates generated:
+# This generates 15 templates:
 # - backend: domain, data, infra, presentation, main
 # - frontend: domain, data, infra, presentation, main
 # - fullstack: domain, data, infra, presentation, main
 ```
 
-### Execute Templates
+Generated templates follow the pattern: `[target]-[layer]-template.regent`
+
+### Validate Templates with Schemas
 
 ```bash
-# Execute a specific template
+# Validate a specific template against its JSON schema
+npx tsx validate-template.ts templates/backend-domain-template.regent
+
+# Validate all generated templates
+npx tsx validate-template.ts --all
+
+# The validator automatically:
+# - Detects the layer from filename
+# - Loads the appropriate JSON schema
+# - Performs layer-specific validations
+# - Checks for architectural violations
+```
+
+### Execute Templates with Layer-Aware System
+
+```bash
+# Execute with layer-aware RLHF scoring
 npx tsx execute-steps.ts templates/backend-domain-template.regent
 
-# Batch execution
+# The executor provides:
+# - Pre-execution validation
+# - Layer-specific architectural checks
+# - Centralized RLHF scoring
+# - Contextual error messages
+
+# Batch execution options:
 npx tsx execute-steps.ts --all              # All templates
 npx tsx execute-steps.ts --layer=domain     # All domain templates
 npx tsx execute-steps.ts --target=backend   # All backend templates
 ```
 
-## 📊 RLHF Scoring System
+### RLHF Analysis with Layer Context
 
-### Score Levels
+```bash
+# Analyze execution with layer awareness
+npx tsx rlhf-system.ts analyze implementation.yaml domain backend
 
-| Score | Level | Description | Recovery Strategy |
-|-------|-------|-------------|-------------------|
-| **+2** | 🏆 PERFECT | Clean Architecture + DDD + Documentation | Maintain excellence |
-| **+1** | ✅ GOOD | Valid implementation | Add documentation |
-| **0** | ⚠️ LOW CONFIDENCE | Missing references | Add references + docs |
-| **-1** | ❌ RUNTIME ERROR | Lint/type failures | Fix errors + improve |
-| **-2** | 💥 CATASTROPHIC | Architecture violations | Remove violations + docs |
+# Generate layer-specific report
+npx tsx rlhf-system.ts report domain backend
 
-### Layer-Specific Scoring
+# View loaded patterns for a layer
+npx tsx rlhf-system.ts patterns domain
+```
 
-Each layer has specific scoring rules:
+### Benefits of This Approach
 
+#### For Development
+- **Parallel Development**: Multiple devs can work on different use cases
+- **No Merge Conflicts**: Each use case is isolated
+- **Progressive Enhancement**: Add use cases incrementally
+- **Easy Refactoring**: Change one use case without affecting others
+
+#### For Testing
+- **Unit Testing**: Test each layer independently
+- **Integration Testing**: Test vertical slices
+- **Feature Testing**: Test entire features
+- **E2E Testing**: Test user journeys across features
+
+#### For Architecture
+- **Clean Boundaries**: Clear separation of concerns
+- **No Circular Dependencies**: Unidirectional flow
+- **Scalable Structure**: Grows naturally with features
+- **Domain Focus**: Business logic stays pure
+
+## 📊 Enhanced RLHF Scoring System
+
+### Layer-Aware Intelligent Scoring
+
+The system now provides context-specific scoring based on architectural layer:
+
+| Score  | Level             | Description                                    |
+| ------ | ----------------- | ---------------------------------------------- |
+| **+2** | 🏆 PERFECT        | Clean Architecture + DDD + Layer Best Practices |
+| **+1** | ✅ GOOD           | Valid implementation following patterns        |
+| **0**  | ⚠️ LOW CONFIDENCE | Missing references or unclear implementation  |
+| **-1** | ❌ RUNTIME ERROR  | Lint failures, test failures, build errors    |
+| **-2** | 💥 CATASTROPHIC   | Architecture violations, dependency issues    |
+
+### Layer-Specific Scoring Rules
+
+#### Domain Layer
 ```yaml
-# Domain Layer
 penalties:
   -2: External dependencies (axios, fetch, prisma)
-  -1: Missing entities or value objects
+  -1: Missing value objects or entities
 bonuses:
-  +1: Proper aggregate roots, value objects
-  +2: Complete ubiquitous language with @layerConcept tags
+  +1: Proper value objects, aggregate roots
+  +2: Complete ubiquitous language implementation
+```
 
-# Data Layer
+#### Data Layer
+```yaml
 penalties:
-  -2: Direct DB access without repository
-  -1: Missing protocol implementation
+  -2: Direct DB access without repository pattern
+  -1: Missing interface implementation
 bonuses:
-  +1: Repository pattern implementation
-  +2: Complete DTO mapping with documentation
+  +1: Proper protocol implementation
+  +2: Complete DTO mapping
 ```
 
-## 🎯 Feature-Based Architecture
-
-### Hybrid Approach: Feature Modules + Use Case Slices
-
-```
-src/
-├── features/                      # Feature modules
-│   ├── user-management/           # Feature boundary
-│   │   ├── create-user/          # Use case slice
-│   │   │   ├── domain/           # Pure business logic
-│   │   │   ├── data/             # Implementation
-│   │   │   ├── infra/            # External adapters
-│   │   │   └── presentation/     # UI/Controllers
-│   │   ├── update-user/          # Another slice
-│   │   ├── shared/               # Feature-specific shared
-│   │   └── main/                 # Feature composition
-│   └── authentication/           # Another feature
-└── shared/                       # Global shared resources
+#### Infrastructure Layer
+```yaml
+penalties:
+  -1: Missing error handling
+  -1: No retry logic for external services
+bonuses:
+  +1: Proper adapter pattern
+  +2: Circuit breakers and resilience patterns
 ```
 
-## 🛠️ Core Tools
+#### Presentation Layer
+```yaml
+penalties:
+  -2: Business logic in controllers/components
+  -1: Missing validation
+bonuses:
+  +1: Clean separation of concerns
+  +2: Proper MVC/MVP implementation
+```
 
-### Main Executors
+#### Main Layer
+```yaml
+penalties:
+  -1: Direct instantiation instead of factories
+  -1: Missing dependency injection
+bonuses:
+  +1: Factory pattern usage
+  +2: Complete composition root
+```
+
+## 🔄 Brownfield Refactoring
+
+The system includes intelligent refactoring capabilities for existing codebases:
+
+### Automatic Detection
+```yaml
+# The AI identifies violations:
+- Business logic in controllers → Extract to use cases
+- Direct database access → Implement repository pattern
+- axios usage → Replace with FetchHttpClient
+- localStorage in components → Use storage adapters
+```
+
+### Safe Refactoring
+```yaml
+steps:
+  - Create rollback point
+  - Identify violations
+  - Apply transformations
+  - Validate changes
+  - Run tests
+  - Commit if successful
+```
+
+## 🛠️ Template Customization
+
+### Configure for Your Project
+
+1. **Update Placeholders**:
+```yaml
+__PROJECT_NAME__: "my-awesome-app"
+__FEATURE_NAME_PASCAL_CASE__: "UserAuthentication"
+__USE_CASE_NAME_KEBAB_CASE__: "login-user"
+```
+
+2. **Customize Infrastructure**:
+```yaml
+infrastructure:
+  backend:
+    database: "prisma-postgresql"  # or "drizzle"
+    cache: "redis"                  # or "in-memory"
+  frontend:
+    http: "fetch"                   # enforced, no axios
+    storage: "indexedDB"            # or "localStorage"
+```
+
+3. **Add Custom Rules**:
+```yaml
+architecture_rules:
+  custom:
+    - "No console.log in production"
+    - "All async functions must have error handling"
+    - "Components must be under 200 lines"
+```
+
+## 📈 Architecture Compliance
+
+### Dependency Rules Enforcement
+
+```typescript
+// ✅ VALID: Domain imports nothing
+// domain/usecases/login.ts
+export interface Login {
+  execute(input: LoginInput): Promise<LoginOutput>
+}
+
+// ✅ VALID: Data imports from domain
+// data/usecases/remote-login.ts
+import { Login } from '@/domain/usecases/login'
+
+// ❌ INVALID: Domain importing from data (RLHF: -2)
+// domain/usecases/login.ts
+import { HttpClient } from '@/data/protocols/http' // VIOLATION!
+```
+
+### Vertical Slicing
+
+Each feature is implemented completely through all layers:
+
+```
+feature/user-authentication/
+├── domain/
+│   ├── usecases/
+│   ├── entities/
+│   └── errors/
+├── data/
+│   ├── usecases/
+│   └── protocols/
+├── infra/
+│   ├── cache/
+│   └── external/
+└── presentation/
+    ├── controllers/
+    └── middlewares/
+```
+
+## 🧪 Testing Strategy
+
+### Layer-Specific Testing
+
+| Layer | Strategy | Coverage Target | Tools |
+|-------|----------|----------------|--------|
+| **Domain** | Unit Tests | 100% | Vitest |
+| **Data** | Unit + Mocks | 95% | Vitest + Spies |
+| **Infrastructure** | Integration | 80% | Vitest + Test DB |
+| **Presentation** | Unit + E2E | 90% | Vitest + Playwright |
+
+### Test Patterns
+
+```typescript
+// AI-NOTE: NEVER use faker or random data in tests
+// Always use deterministic, fixed test data
+
+// ✅ GOOD: Fixed test data
+const mockUser = {
+  id: 'test-id-123',
+  name: 'Test User',
+  email: 'test@example.com'
+}
+
+// ❌ BAD: Random data (RLHF: -1)
+const mockUser = {
+  id: faker.datatype.uuid(),  // VIOLATION!
+  name: faker.name.findName(), // VIOLATION!
+}
+```
+
+## 📚 Complete Template Coverage
+
+### Template System Statistics
+- **Total Templates**: 15 layer-specific templates (generated on-demand)
+- **Template Parts**: 46 modular components
+- **JSON Schemas**: 16 schemas for layer-specific validation
+- **AI-NOTEs**: 500+ strategic guidance notes
+- **RLHF Integration**: Centralized layer-aware scoring
+- **Pattern Loading**: Automatic extraction from templates
+- **Lines of Code**: 20,000+ across all components
+
+### Backend Templates (5 Complete Layers)
+- **01-domain.part.regent**: Use cases, entities, errors, value objects
+- **02-data.part.regent**: Use case implementations, protocols, DTOs
+- **03-infra.part.regent**: Prisma repositories, Redis cache, crypto adapters
+- **04-presentation.part.regent**: Express/Fastify controllers, middlewares, routes
+- **05-main.part.regent**: Factories, composition root, dependency injection
+
+### Frontend Templates (5 Complete Layers)
+- **01-domain.part.regent**: Business interfaces, entities, types
+- **02-data.part.regent**: HTTP clients, storage protocols
+- **03-infra.part.regent**: Fetch adapters, IndexedDB, WebSocket
+- **04-presentation.part.regent**: React components, hooks, Server Actions
+- **05-main.part.regent**: Next.js 15 App Router, providers, middleware
+
+### Fullstack Templates (5 Complete Layers)
+- **01-domain.part.regent**: Unified domain models
+- **02-data.part.regent**: Shared data layer protocols
+- **03-infra.part.regent**: Dual-stack infrastructure
+- **04-presentation.part.regent**: API routes + UI components
+- **05-main.part.regent**: Complete composition root
+
+### Shared Templates
+- **validation.part.regent**: ValidationComposite pattern for all project types
+
+## 🔍 VS Code Integration
+
+The project includes comprehensive VS Code settings for optimal development:
+
+```json
+{
+  "files.associations": {
+    "*.regent": "yaml"
+  },
+  "yaml.schemas": {
+    // 16 JSON schemas for all layer/target combinations
+    "./templates/parts/backend/steps/01-domain.part.schema.json": ["..."],
+    "./templates/parts/frontend/steps/02-data.part.schema.json": ["..."],
+    "./templates/parts/fullstack/steps/03-infra.part.schema.json": ["..."],
+    // ... all schemas mapped
+  }
+}
+```
+
+Benefits:
+- **IntelliSense**: Auto-completion for template fields
+- **Real-time Validation**: Schema validation as you type
+- **Layer-Specific**: Each layer has its own schema
+- **Error Detection**: Immediate feedback on template errors
+- **Documentation**: Inline documentation from schemas
+
+## 🛠️ Key Tools & Scripts
+
+### Core Executors
 - **`execute-steps.ts`**: Layer-aware template executor with pre-validation
-- **`validate-template.ts`**: Schema-based validation system
-- **`core/rlhf-system.ts`**: Centralized scoring with layer context
-- **`scripts/rlhf-autofix.ts`**: Automatic error recovery
+- **`validate-template.ts`**: Unified validator using JSON schemas
+- **`rlhf-system.ts`**: Centralized RLHF scoring with layer context
+- **`build-template.sh`**: Generates 15 layer-specific templates
 
-### System Flow
-
-```mermaid
-graph TD
-    A[User Request] --> B[AI Agent]
-    B --> C[Command Selection]
-    C --> D[Template Generation]
-    D --> E[Validation]
-    E --> F[Execution]
-    F --> G{Success?}
-    G -->|Yes| H[Apply Improvements]
-    G -->|No| I[Fix Errors]
-    I --> F
-    H --> J[Update Templates]
+### System Architecture
 ```
-
-## 📈 Recent Improvements
-
-### v6.0 Highlights
-- **Reorganized Structure**: Moved core files to `core/` and `scripts/`
-- **Fixed TypeScript Errors**: Resolved all compilation issues
-- **Agent Integration**: Added system tool references to all agents
-- **Command Updates**: Converted from domain-specific to layer-generic
-- **Template Generation**: Successfully built all 15 templates
-
-### Performance Metrics
-- **Build Time**: < 2 seconds for all templates
-- **Validation Speed**: < 100ms per template
-- **RLHF Scoring**: Cached with 5-minute TTL
-- **Agent Response**: < 1 second for most operations
+┌─────────────────────────────┐
+│      Execute Steps          │
+│  - Detects layer from file  │
+│  - Pre-validates template   │
+└────────────┬────────────────┘
+             │
+             ▼
+┌─────────────────────────────┐
+│       RLHF System           │
+│  - Centralized scoring      │
+│  - Pattern loading          │
+│  - Layer-aware validation   │
+└────────────┬────────────────┘
+             │
+             ▼
+┌─────────────────────────────┐
+│     Template Patterns       │
+│  - Loaded from parts        │
+│  - Score impacts defined    │
+│  - Layer-specific rules     │
+└─────────────────────────────┘
+```
 
 ## 🤝 Contributing
 
@@ -415,9 +746,10 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ### Areas for Contribution
 - Additional language support (Python, Go, Rust)
 - More infrastructure adapters (AWS, GCP, Azure)
-- Enhanced AI agent capabilities
+- Enhanced testing patterns
 - Performance optimizations
 - Documentation improvements
+- Layer-specific pattern definitions
 
 ## 📝 License
 
@@ -430,9 +762,53 @@ MIT License - See [LICENSE](LICENSE) file for details.
 - **[Rodrigo Manguinho](https://github.com/rmanguinho)** - Clean Architecture patterns
 - **[Uncle Bob Martin](https://blog.cleancoder.com)** - Clean Architecture principles
 
-### AI Technology
-- **[Claude AI](https://claude.ai)** - Intelligent agent system
-- **[Claude Code](https://claude.ai/code)** - AI-powered development
+### Technologies
+- **TypeScript** - Type-safe development
+- **YAML/JSON** - Configuration and schemas
+- **Claude AI** - Intelligent code generation
+- **Vitest** - Testing framework
+- **Prisma** - Database ORM
+- **Next.js** - React framework
+
+## 🔌 MCP Server Integration (Optional)
+
+### Claude Code MCP Servers
+
+Enhance your Claude Code experience with these MCP servers:
+
+#### Serena MCP - Semantic Code Understanding
+```bash
+# Install Serena for semantic code navigation
+claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena-mcp-server
+
+# Features:
+# - Semantic symbol search
+# - Code pattern detection
+# - Architecture validation
+# - Memory persistence
+```
+
+#### Context7 MCP - Up-to-date Documentation
+```bash
+# Install Context7 for latest library docs
+claude mcp add context7 -- npx -y @upstash/context7-mcp --api-key YOUR_API_KEY
+
+# Features:
+# - Real-time documentation
+# - Library version support
+# - Code examples
+# - API references
+```
+
+#### Verify Installation
+```bash
+# List installed servers
+claude mcp list
+
+# Check specific server
+claude mcp get serena
+claude mcp get context7
+```
 
 ## 💬 Support
 
@@ -445,5 +821,5 @@ MIT License - See [LICENSE](LICENSE) file for details.
 <div align="center">
   <strong>🏗️ Building the future of AI-assisted Clean Architecture</strong>
   <br>
-  <sub>With intelligent agents, comprehensive templates, and RLHF validation</sub>
+  <sub>With intelligent templates, comprehensive AI-NOTEs, and RLHF validation</sub>
 </div>
