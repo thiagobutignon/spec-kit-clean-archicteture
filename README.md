@@ -20,15 +20,22 @@ Spec-Kit Clean Architecture is a comprehensive template system that generates pr
 - **Git**: Configured with GitHub credentials
 - **npm/yarn**: Package manager installed
 
-## 🚀 What's New - v6.0 - AI AGENT INTEGRATION
+## 🚀 What's New - v6.1 - E2E TESTING & PERFORMANCE VALIDATION
 
-### 🤖 Claude AI Agents (NEW!)
+### 🎯 Chrome DevTools MCP Integration (NEW!)
+- **E2E Testing Command**: New `/09-e2e-performance-testing` for comprehensive validation
+- **Performance Monitoring**: Real-time Core Web Vitals and performance insights
+- **Runtime Validation**: Verify Clean Architecture compliance during execution
+- **Visual Testing**: Screenshot-based regression testing
+- **Network Analysis**: API contract validation and monitoring
+
+### 🤖 Claude AI Agents (v6.0)
 - **6 Specialized Agents**: Each with deep expertise in specific domains
-- **Automated Workflows**: 8-phase generation process from planning to improvement
+- **Automated Workflows**: 9-phase generation process (now includes E2E testing)
 - **Stack-Specific Experts**: Backend, Frontend, and Fullstack specialists
-- **Architecture Validation**: Layer-validator ensures strict compliance
+- **Architecture Validation**: Layer-validator with runtime checks via Chrome DevTools
 - **Domain Planning**: DDD expert for feature architecture
-- **Integrated with Core Tools**: Full integration with execute-steps.ts, validate-template.ts, and core/rlhf-system.ts
+- **Integrated with Core Tools**: Full integration with execute-steps.ts, validate-template.ts, core/rlhf-system.ts, and Chrome DevTools MCP
 
 ### 📁 Project Reorganization (NEW!)
 - **Core System**: Centralized in `core/` directory (rlhf-system.ts, logger.ts)
@@ -79,9 +86,9 @@ Our system includes 6 specialized AI agents that work together to generate perfe
 | **fullstack-architect** | Opus | API contracts, shared types, monorepo | End-to-end integration |
 | **domain-feature-planner** | Opus | DDD, bounded contexts, domain modeling | Business to technical specs |
 
-### 8-Phase Workflow Commands
+### 9-Phase Workflow Commands
 
-The agents use these commands sequentially to generate perfect code:
+The agents use these commands sequentially to generate and validate perfect code:
 
 ```bash
 # Phase 1: Planning
@@ -107,6 +114,9 @@ The agents use these commands sequentially to generate perfect code:
 
 # Phase 8: Continuous Improvement
 /08-apply-layer-improvements
+
+# Phase 9: E2E Performance Testing (NEW!)
+/09-e2e-performance-testing --feature_path=[path] --test_type=[full|performance|visual|api]
 ```
 
 ### Using AI Agents
@@ -846,11 +856,32 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ## 🔌 MCP Server Integration (Advanced Setup)
 
-### Claude Code MCP Servers
+### Essential MCP Servers for Development
 
-Enhance your Claude Code experience with these optional MCP servers:
+Enhance your Claude Code experience with these powerful MCP servers:
 
-#### Serena MCP - Semantic Code Understanding
+#### 🔍 Chrome DevTools MCP - E2E Testing & Performance (HIGHLY RECOMMENDED)
+```bash
+# Install Chrome DevTools for automated testing and debugging
+claude mcp add chrome-devtools -- npx chrome-devtools-mcp@latest
+
+# Optional flags:
+# --channel=canary    # Use Chrome Canary
+# --headless=true     # Run in headless mode
+# --isolated=true     # Use isolated user data directory
+
+# Features:
+# - Performance tracing and Core Web Vitals analysis
+# - E2E automation (form filling, clicks, navigation)
+# - Network monitoring and API validation
+# - Visual testing with screenshots
+# - Console debugging and script evaluation
+# - CPU/Network emulation for real-world testing
+```
+
+**Why it's essential**: Validates that your Clean Architecture code performs well in real-world conditions and maintains proper layer boundaries during runtime.
+
+#### 📝 Serena MCP - Semantic Code Understanding
 ```bash
 # Install Serena for semantic code navigation
 claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena-mcp-server
