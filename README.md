@@ -6,11 +6,19 @@
 [![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-✓-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 [![Templates](https://img.shields.io/badge/Templates-Backend%20|%20Frontend%20|%20Fullstack-purple)](./templates)
 [![AI-NOTEs](https://img.shields.io/badge/AI--NOTEs-100%25%20Coverage-orange)](./templates)
-[![Claude AI](https://img.shields.io/badge/Claude%20AI-6%20Agents-yellow)](./.claude/agents)
+[![Claude AI](https://img.shields.io/badge/Claude%20AI-6%20Agents-cyan)](./.claude/agents)
 
 ## 📋 Overview
 
 Spec-Kit Clean Architecture is a comprehensive template system that generates production-ready code following Clean Architecture, DDD, TDD, and SOLID principles. With intelligent AI-NOTEs guidance, RLHF scoring, and Claude AI agent integration, it ensures consistent, high-quality code generation for backend, frontend, and fullstack applications.
+
+## 📦 Prerequisites
+
+- **Node.js**: >= 18.0.0
+- **TypeScript**: >= 5.0.0
+- **Claude Code CLI**: Latest version installed
+- **Git**: Configured with GitHub credentials
+- **npm/yarn**: Package manager installed
 
 ## 🚀 What's New - v6.0 - AI AGENT INTEGRATION
 
@@ -28,7 +36,7 @@ Spec-Kit Clean Architecture is a comprehensive template system that generates pr
 - **Agent System**: Claude agents in `.claude/agents/`
 - **Command System**: Workflow commands in `.claude/commands/`
 
-## 🚀 What's New - v5.0 - ENHANCED ARCHITECTURE
+## 📚 Previous Release - v5.0 - ENHANCED ARCHITECTURE
 
 ### 🎯 Layer-Specific Template Generation
 - **✅ 15 Focused Templates**: Generated on-demand from modular parts
@@ -103,15 +111,47 @@ The agents use these commands sequentially to generate perfect code:
 
 ### Using AI Agents
 
-```bash
-# Launch the main orchestrator agent
-# Use the Task tool in Claude Code to launch:
-"Use the clean-architecture-generator agent to create user authentication"
+#### Complete Feature Generation Example
 
-# Or use specific specialists:
-"Use the backend-specialist agent for API design"
-"Use the frontend-specialist agent for component architecture"
-"Use the layer-validator agent to check for violations"
+```bash
+# Example: Generate complete user authentication feature
+claude "Use the clean-architecture-generator agent to create user authentication with email and password"
+
+# This will automatically:
+# 1. Plan all 5 layers (domain, data, infra, presentation, main)
+# 2. Generate 20+ files with proper structure
+# 3. Validate Clean Architecture compliance
+# 4. Achieve RLHF score +2 (PERFECT)
+# 5. Create tests for each layer
+```
+
+#### Expected Output Structure
+```
+features/authentication/
+├── login-user/
+│   ├── domain/          # Interfaces and entities
+│   ├── data/            # Use case implementations
+│   ├── infra/           # External adapters
+│   ├── presentation/    # Controllers/Components
+│   └── main/            # Dependency injection
+├── register-user/       # Another use case
+└── shared/              # Shared auth resources
+```
+
+#### Specialist Agent Examples
+
+```bash
+# Backend API Design
+claude "Use the backend-specialist agent to design RESTful API for order management"
+# Output: Complete API with controllers, DTOs, validation, and OpenAPI docs
+
+# Frontend Component Architecture
+claude "Use the frontend-specialist agent to create product catalog with filtering"
+# Output: React components with state management, hooks, and Clean Architecture
+
+# Architecture Validation
+claude "Use the layer-validator agent to check for dependency violations in src/"
+# Output: Detailed report with violations, RLHF score, and fixes
 ```
 
 ## 🏛️ Complete Clean Architecture
@@ -770,11 +810,45 @@ MIT License - See [LICENSE](LICENSE) file for details.
 - **Prisma** - Database ORM
 - **Next.js** - React framework
 
-## 🔌 MCP Server Integration (Optional)
+## 🔧 Troubleshooting
+
+### Common Issues and Solutions
+
+#### Agent-Related Issues
+- **"Agent not found" error**:
+  - Ensure `.claude/agents/` directory exists
+  - Check agent name spelling matches exactly
+  - Run `ls .claude/agents/` to see available agents
+
+#### Template Generation Issues
+- **"Template not found" error**:
+  - Run `./templates/build-template.sh` first
+  - Check for 15 generated templates: `ls templates/*-template.regent`
+  - Ensure you have execute permissions: `chmod +x templates/build-template.sh`
+
+#### RLHF Scoring Issues
+- **Consistently getting negative scores**:
+  - Check for external dependencies in domain layer
+  - Verify REPLACE/WITH syntax in refactoring steps
+  - Use `npx tsx validate-template.ts` before execution
+
+#### MCP Connection Issues
+- **"MCP server connection failed"**:
+  - Check status: `claude mcp list`
+  - Restart server: `claude mcp remove serena && claude mcp add serena ...`
+  - Verify API keys for Context7
+
+#### TypeScript Errors
+- **"Cannot find module" errors**:
+  - Run `npm install` to ensure all dependencies
+  - Check TypeScript version: `npx tsc --version` (should be >= 5.0.0)
+  - Clear TypeScript cache: `npx tsc --build --clean`
+
+## 🔌 MCP Server Integration (Advanced Setup)
 
 ### Claude Code MCP Servers
 
-Enhance your Claude Code experience with these MCP servers:
+Enhance your Claude Code experience with these optional MCP servers:
 
 #### Serena MCP - Semantic Code Understanding
 ```bash
