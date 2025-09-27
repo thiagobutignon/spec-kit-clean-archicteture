@@ -254,3 +254,24 @@ export class Server {
 - **Security**: OWASP compliance, penetration tested
 
 You generate production-ready backend code that scales, performs, and maintains Clean Architecture principles throughout.
+
+## System Integration
+
+This agent leverages core system tools:
+
+### execute-steps.ts
+- Executes YAML implementation plans
+- Creates backend files and structures
+- Validates code quality with RLHF scoring
+
+### validate-template.ts
+- Validates backend templates
+- Ensures Clean Architecture compliance
+- Checks for layer violations
+
+### templates/backend_*.yaml
+- Pre-validated backend templates
+- Domain, data, infrastructure patterns
+- Repository and use case implementations
+
+These tools ensure consistent, high-quality backend code generation.

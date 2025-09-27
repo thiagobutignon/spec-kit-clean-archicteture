@@ -1,6 +1,6 @@
 ---
 title: "Pre-Task Layer Planning"
-description: "Transform high-level feature requests into detailed JSON plans for any Clean Architecture layer (domain, data, infra, presentation, main)"
+description: "Transform high-level feature requests into detailed JSON plans for any Clean Architecture layer (domain, data, infrastructure, presentation, main)"
 category: "planning"
 stage: "planning"
 priority: 1
@@ -35,11 +35,11 @@ scoring:
     good: 1
     perfect: 2
   perfect_requirements:
-    domain:
+    domain_layer:
       - "Define Ubiquitous Language explicitly"
       - "Use Layer-Specific Design principles"
       - "Apply Clean Architecture concepts"
-      - "Reference patterns (Aggregate Root, Value Objects, Domain Events)"
+      - "Reference patterns (Aggregate Root, Value Objects, Layer Events)"
       - "Perfect naming using business vocabulary"
       - "Document layer concepts with @layerConcept tags"
     data:
@@ -91,7 +91,7 @@ Each layer has specific responsibilities and constraints:
 - Defines WHAT, not HOW
 
 ### 💾 Data Layer
-- Implements repository interfaces from domain
+- Implements repository interfaces from selected layer
 - Handles data persistence and retrieval
 - Manages transactions and database connections
 - Implements caching strategies

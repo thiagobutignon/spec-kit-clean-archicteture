@@ -27,7 +27,7 @@ rlhf_score_recovery:
   from_catastrophic:
     current: -2
     target: 2
-    strategy: "Remove violations, add domain documentation"
+    strategy: "Remove violations, add layer documentation"
   from_runtime:
     current: -1
     target: 1
@@ -55,7 +55,7 @@ previous_command: "/06-execute-layer-steps from yaml: <yaml>"
 next_command: "/06-execute-layer-steps from yaml: <yaml-with-fix>"
 ---
 
-# Task: Fix Failed Domain Steps
+# Task: Fix Failed Layer Steps
 
 ## 🤖 RLHF Score Recovery Strategy
 
@@ -63,7 +63,7 @@ When fixing failed steps, understand the score impact and recovery path:
 
 | Current Score | Level | Target Score | Recovery Strategy |
 |---------------|-------|--------------|-------------------|
-| **-2** | CATASTROPHIC | +2 | Remove violations + add domain docs |
+| **-2** | CATASTROPHIC | +2 | Remove violations + add layer docs |
 | **-1** | RUNTIME ERROR | +1 | Fix errors + improve implementation |
 | **0** | LOW CONFIDENCE | +2 | Add references + enhance documentation |
 
@@ -89,7 +89,7 @@ graph TD
     C -->|Workflow Step| E[Analyze Workflow Failure]
     D --> F[Generate Code Fix]
     E --> G[Generate Workflow Fix]
-    F --> H[Add Domain Documentation]
+    F --> H[Add Layer Documentation]
     G --> H
     H --> I[Append Fix Step]
     I --> J[Preserve Failed Step]
@@ -144,7 +144,7 @@ graph TD
 | **"lint errors"** | Code style issues | Refactor with fixes | -1 → +1 |
 | **"type errors"** | TypeScript issues | Fix type definitions | -1 → +1 |
 | **"test failures"** | Breaking changes | Update test/implementation | -1 → +1 |
-| **"import violation"** | External deps in domain | Remove dependencies | -2 → +2 |
+| **"import violation"** | External deps in layer | Remove dependencies | -2 → +2 |
 | **"REPLACE/WITH syntax"** | Wrong template format | Fix template syntax | -2 → +1 |
 
 ## 5. Example Fix Steps
@@ -162,10 +162,10 @@ graph TD
   rlhf_score: null
   execution_log: ''
   action:
-    branch_name: 'feat/user-profile-domain'
+    branch_name: 'feat/user-profile-[layer]'
   validation_script: |
     echo "🌿 Checking out existing branch..."
-    git checkout feat/user-profile-domain
+    git checkout feat/user-profile-[layer]
     if [ $? -eq 0 ]; then
       echo "✅ Successfully switched to existing branch"
     else
@@ -193,14 +193,14 @@ graph TD
   execution_log: ''
   action:
     target_branch: 'staging'
-    source_branch: 'feat/user-profile-domain'
+    source_branch: 'feat/user-profile-[layer]'
     title: 'feat(user-profile): implement selected layer'
   validation_script: |
     echo "📤 Pushing branch to remote..."
-    git push --set-upstream origin feat/user-profile-domain
+    git push --set-upstream origin feat/user-profile-[layer]
 
     echo "📋 GitHub CLI not available. Please create PR manually at:"
-    echo "https://github.com/$(git remote get-url origin | sed 's/.*github.com[:/]\(.*\)\.git/\1/')/pull/new/feat/user-profile-domain"
+    echo "https://github.com/$(git remote get-url origin | sed 's/.*github.com[:/]\(.*\)\.git/\1/')/pull/new/feat/user-profile-[layer]"
     echo "✅ Branch pushed successfully. Manual PR creation required."
   references:
     - type: 'internal_correction'
@@ -212,12 +212,12 @@ graph TD
 ### Example 3: 🏆 Fixing Lint Error (Target RLHF +2)
 
 <details>
-<summary>Lint Error Fix with Domain Documentation</summary>
+<summary>Lint Error Fix with Layer Documentation</summary>
 
 ```yaml
 - id: 'fix-for-create-use-case-get-user'
   type: 'refactor_file'
-  description: 'Fix lint errors in GetUser use case with domain documentation'
+  description: 'Fix lint errors in GetUser use case with layer documentation'
   status: 'PENDING'
   rlhf_score: null
   execution_log: ''
@@ -232,7 +232,7 @@ graph TD
     /**
      * @layerConcept User Retrieval
      * @pattern Use Case Interface
-     * @description Retrieves user information from the domain
+     * @description Retrieves user information from the layer
      */
     export interface GetUser {
       execute(input: GetUserInput): Promise<GetUserOutput>;
@@ -242,7 +242,7 @@ graph TD
     echo "🔍 Running lint check..."
     yarn lint
     echo "✅ Lint check passed"
-    echo "🏆 Added domain documentation for RLHF +2 score"
+    echo "🏆 Added layer documentation for RLHF +2 score"
   references:
     - type: 'internal_correction'
       source: 'self'
@@ -278,7 +278,7 @@ graph TD
     /**
      * @layerConcept User Fetching
      * @pattern Clean Architecture - Selected Layer
-     * @principle No external dependencies in domain
+     * @principle No external dependencies in selected layer
      */
     export interface FetchUser {
       execute(input: FetchUserInput): Promise<FetchUserOutput>;
@@ -286,8 +286,8 @@ graph TD
     <<</WITH>>>
   validation_script: |
     echo "🏗️ Verifying Clean Architecture compliance..."
-    grep -r "import.*from.*axios" src/features/*/[LAYER]/ && echo "❌ Found axios in domain" && exit 1
-    echo "✅ Domain layer is clean - no external dependencies"
+    grep -r "import.*from.*axios" src/features/*/[LAYER]/ && echo "❌ Found axios in layer" && exit 1
+    echo "✅ Selected layer is clean - no external dependencies"
     echo "🏆 Architecture violation fixed for RLHF +2 score"
   references:
     - type: 'architecture_fix'
@@ -333,7 +333,7 @@ Your **only** output is the complete **updated YAML file** with:
 - New fix step appended at the end
 - All fields properly formatted
 - References explaining the fix
-- Domain documentation for +2 score
+- Layer documentation for +2 score
 
 ## 📍 Next Step
 
@@ -349,4 +349,4 @@ This will re-execute your plan with the fix applied. The execution will:
 3. Execute your new fix step
 4. Continue with remaining steps
 
-> 💡 **Pro Tip**: Always aim for RLHF +2 when fixing errors. Add domain documentation, references, and validation scripts to turn a failure into an opportunity for excellence!
+> 💡 **Pro Tip**: Always aim for RLHF +2 when fixing errors. Add layer documentation, references, and validation scripts to turn a failure into an opportunity for excellence!
