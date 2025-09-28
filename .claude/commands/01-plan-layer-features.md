@@ -360,7 +360,7 @@ Your final JSON must follow this structure:
       "id": "step-identifier",
       "type": "[create_file|refactor_file]",
       "description": "Step description",
-      "path": "src/[layer]/path/to/file.ts",
+      "path": "src/features/[FEATURE_NAME]/[USE_CASE_NAME]/[layer]/path/to/file.ts",
       "template": "// Code template with placeholders",
       "references": []
     }
@@ -385,7 +385,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-register-user-use-case",
       "type": "create_file",
-      "path": "src/[LAYER]/use-cases/register-user.ts",
+      "path": "src/features/[FEATURE_NAME]/[USE_CASE_NAME]/[LAYER]/use-cases/register-user.ts",
       "template": "export interface RegisterUser {\n  execute(input: RegisterUserInput): Promise<RegisterUserOutput>;\n}"
     }
   ]
@@ -406,7 +406,7 @@ Your final JSON must follow this structure:
     {
       "id": "implement-user-repository",
       "type": "create_file",
-      "path": "src/data/repositories/user-repository.ts",
+      "path": "src/features/[FEATURE_NAME]/[USE_CASE_NAME]/data/repositories/user-repository.ts",
       "template": "export class UserRepositoryImpl implements UserRepository {\n  // Implementation\n}"
     }
   ]
@@ -426,7 +426,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-email-service",
       "type": "create_file",
-      "path": "src/infra/services/email-service.ts",
+      "path": "src/features/[FEATURE_NAME]/[USE_CASE_NAME]/infra/services/email-service.ts",
       "template": "export class SendGridEmailService implements EmailService {\n  // SendGrid implementation\n}"
     }
   ]
@@ -447,7 +447,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-user-controller",
       "type": "create_file",
-      "path": "src/presentation/controllers/user-controller.ts",
+      "path": "src/features/[FEATURE_NAME]/[USE_CASE_NAME]/presentation/controllers/user-controller.ts",
       "template": "export class UserController {\n  // REST endpoints\n}"
     }
   ]
@@ -467,7 +467,7 @@ Your final JSON must follow this structure:
     {
       "id": "setup-dependency-injection",
       "type": "create_file",
-      "path": "src/main/container.ts",
+      "path": "src/features/[FEATURE_NAME]/[USE_CASE_NAME]/main/container.ts",
       "template": "export const container = new Container();\n// Bindings"
     }
   ]

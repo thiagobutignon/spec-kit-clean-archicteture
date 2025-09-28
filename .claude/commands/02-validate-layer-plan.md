@@ -258,7 +258,7 @@ graph TD
       "id": "create-use-case-create-user-account",
       "type": "create_file",
       "description": "Create user account",
-      "path": "src/features/some-other-feature/use-cases/create.ts",
+      "path": "src/features/some-other-feature/create-user/domain/use-cases/create.ts",
       "references": [],
       "template": "import axios from 'axios';\n\nclass CreateUserAccount {\n  // Implementation here\n}"
     }
@@ -272,7 +272,7 @@ graph TD
 {
   "status": "FAILED",
   "errors": [
-    "Path inconsistency: 'src/features/some-other-feature' doesn't match featureName 'UserAccount' (RLHF: -1)",
+    "Path inconsistency: 'src/features/some-other-feature/create-user/domain/use-cases' doesn't match featureName 'UserAccount' (RLHF: -1)",
     "Empty references array: Missing pattern documentation (RLHF: 0)",
     "External dependency detected: 'axios' import forbidden in domain (RLHF: -2)",
     "Use case as class: Must be interface, not class (RLHF: -2)",
