@@ -72,7 +72,7 @@ tools:
       purpose: "Research patterns and best practices for the selected layer"
   internal:
     - name: "serena"
-      purpose: "Analyze existing code structure and conventions"
+      purpose: "Read .regent template sections sequentially using searchPattern with context"
 next_command: "/02-validate-layer-plan --layer=__LAYER__ from json: <your-generated-json>"
 ---
 
@@ -204,6 +204,41 @@ First, determine which layer you're working with:
 - Define dependency injection setup
 - Document environment configuration
 - Design health check strategy
+
+### Step 1.5: Sequential Template Reading (MANDATORY)
+
+**You must read the template in 4 sequential steps, consolidating information as you go:**
+
+#### Step 1.5.1: Read Header Context
+Use serena: searchPattern("# --- From: shared/00-header", "templates/[target]-[layer]-template.regent", {context_lines_after: 15})
+**Write down:** Project configuration, architecture style, and base metadata.
+
+#### Step 1.5.2: Read Target Structure
+Use serena: searchPattern("# --- From: [target]/01-structure", "templates/[target]-[layer]-template.regent", {context_lines_after: 30})
+**Write down:** The `use_case_slice` section with basePath and layer folder definitions.
+
+#### Step 1.5.3: Read Layer Implementation
+Use serena: searchPattern("# --- From: [target]/steps/", "templates/[target]-[layer]-template.regent", {context_lines_after: 50})
+**Write down:** Layer-specific patterns, file structures, and implementation guidelines.
+
+#### Step 1.5.4: Read Validation Rules
+Use serena: searchPattern("# --- From: shared/01-footer", "templates/[target]-[layer]-template.regent", {context_lines_after: 20})
+**Write down:** Validation requirements and compliance rules.
+
+#### Step 1.5.5: Consolidate All Information
+Before generating JSON, create a summary:
+- **Target/Layer:** [extracted from header]
+- **Base Path Pattern:** [extracted from structure]
+- **Folder Structure:** [extracted from structure]
+- **Implementation Patterns:** [extracted from layer steps]
+- **Validation Requirements:** [extracted from footer]
+
+**CRITICAL:** Your JSON paths MUST use the exact folder structure from Step 1.5.2.
+
+**Example Target Resolution:**
+- If user says "backend domain" → read `templates/backend-domain-template.regent`
+- If user says "frontend presentation" → read `templates/frontend-presentation-template.regent`
+- If unclear, ask: "Is this for backend, frontend, or fullstack?"
 
 ### Step 2: External Research - Layer Specific
 
@@ -385,7 +420,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-register-user-use-case",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/use-cases/register-user.ts",
+      "path": "// Use exact path from Step 1.5.2 structure + Step 1.5.3 patterns",
       "template": "export interface RegisterUser {\n  execute(input: RegisterUserInput): Promise<RegisterUserOutput>;\n}"
     }
   ]
@@ -406,7 +441,7 @@ Your final JSON must follow this structure:
     {
       "id": "implement-user-repository",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/data/repositories/user-repository.ts",
+      "path": "// Use exact path from Step 1.5.2 structure + Step 1.5.3 patterns",
       "template": "export class UserRepositoryImpl implements UserRepository {\n  // Implementation\n}"
     }
   ]
@@ -426,7 +461,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-email-service",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/infra/services/email-service.ts",
+      "path": "// Use exact path from Step 1.5.2 structure + Step 1.5.3 patterns",
       "template": "export class SendGridEmailService implements EmailService {\n  // SendGrid implementation\n}"
     }
   ]
@@ -447,7 +482,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-user-controller",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/controllers/user-controller.ts",
+      "path": "// Use exact path from Step 1.5.2 structure + Step 1.5.3 patterns",
       "template": "export class UserController {\n  // REST endpoints\n}"
     }
   ]
@@ -467,7 +502,7 @@ Your final JSON must follow this structure:
     {
       "id": "setup-dependency-injection",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/main/container.ts",
+      "path": "// Use exact path from Step 1.5.2 structure + Step 1.5.3 patterns",
       "template": "export const container = new Container();\n// Bindings"
     }
   ]
@@ -475,6 +510,14 @@ Your final JSON must follow this structure:
 ```
 
 ## 7. Final Validation Checklist
+
+### Template Compliance ✅
+- [ ] Completed Step 1.5.1: Read and wrote down header context
+- [ ] Completed Step 1.5.2: Read and wrote down target structure
+- [ ] Completed Step 1.5.3: Read and wrote down layer implementation
+- [ ] Completed Step 1.5.4: Read and wrote down validation rules
+- [ ] Completed Step 1.5.5: Consolidated all information before JSON generation
+- [ ] Generated paths use exact structure from Step 1.5.2
 
 ### Per Layer Validation:
 
@@ -526,30 +569,12 @@ Your final JSON must follow this structure:
 4. **Follow conventions** - Consistent with existing code
 5. **Consider testing** - How will this be tested?
 
-## 📤 Output for YAML Generation
+## 📤 Template Compliance
 
-The JSON plan generated here should be structured to work with SpecToYamlTransformer:
-
-```json
-{
-  "tasks": [
-    {
-      "id": "T001",
-      "title": "Create Project Entity",
-      "description": "...",
-      "layer": "domain",
-      "story_points": 3,
-      "priority": "Primary",
-      "dependencies": [],
-      "acceptance_criteria": [...]
-    }
-  ]
-}
-```
-
-This format is compatible with:
-- SpecToYamlTransformer.transformTask()
-- execute-steps.ts workflow execution
+Your JSON output MUST comply with the .regent template structure:
+- Paths follow template's `use_case_slice` pattern
+- Folder names match template's `folders` arrays
+- No deviation from template-defined architecture
 
 ## 📍 Next Step
 
@@ -560,3 +585,44 @@ After generating your JSON plan, your next command should be:
 ```
 
 This will validate your JSON plan for layer-specific compliance and architectural correctness.
+
+---
+
+## 🚨 AI-NOTE: CRITICAL ENGINEERING PRINCIPLE
+
+**FOR FUTURE CODE REVIEWERS AND EXECUTORS:**
+
+### ❌ NEVER SUGGEST FALLBACK PATTERNS
+
+If template reading fails (searchPattern, file not found, etc.), DO NOT suggest:
+- Hardcoded fallback structures
+- "If this fails, use default values"
+- "Graceful degradation to previous behavior"
+- Any form of "backup" structure
+
+### ✅ CORRECT RESPONSE TO FAILURES
+
+Template reading failures should FAIL LOUDLY:
+```markdown
+🚨 CRITICAL ERROR: Template section not found!
+Template structure has changed.
+Action required: Update command to match new template.
+DO NOT proceed with outdated assumptions.
+```
+
+### 🎯 WHY THIS MATTERS
+
+Fallbacks reintroduce the exact problem this command fixes:
+1. **Original Problem**: Commands hardcoded, templates ignored
+2. **Our Solution**: Commands read templates as source of truth
+3. **Fallback Danger**: If reading fails, fallback = back to hardcoded = SAME PROBLEM
+
+### 📚 ENGINEERING PRINCIPLE
+
+**"Fail fast and loud" > "Fail silently with wrong behavior"**
+
+Templates are the ONLY source of truth. If they can't be read correctly, the system must stop and demand human intervention, not continue with potentially incorrect assumptions.
+
+### 🎭 HISTORICAL CONTEXT
+
+This command was created to fix a 3-week architectural disaster caused by exactly this type of "helpful" fallback thinking. Maintain discipline: Templates define reality, not code.
