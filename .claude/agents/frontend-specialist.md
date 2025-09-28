@@ -298,17 +298,17 @@ You generate production-ready frontend code that provides excellent user experie
 
 This agent leverages core system tools:
 
-### execute-steps.ts
+### .regent/config/execute-steps.ts
 - Executes YAML implementation plans
 - Creates frontend components and structures
 - Validates code quality with RLHF scoring
 
-### validate-template.ts
+### .regent/config/validate-template.ts
 - Validates frontend templates
 - Ensures Clean Architecture compliance
 - Checks for UI/component best practices
 
-### templates/frontend_*.yaml
+### .regent/templates/frontend_*.yaml
 - Pre-validated frontend templates
 - Component, hook, and service patterns
 - State management implementations

@@ -46,7 +46,7 @@ rlhf_scoring:
     score: 2
     emoji: "🏆"
     causes: ["Clean Architecture + DDD + ubiquitous language"]
-execution_script: "npx tsx execute-steps.ts"
+execution_script: "npx tsx .regent/config/execute-steps.ts"
 previous_command: "/05-evaluate-layer-results from yaml: <yaml>"
 next_command_success: "/08-apply-layer-improvements"
 next_command_failure: "/07-fix-layer-errors from yaml: <yaml-with-failed-step>"
@@ -56,7 +56,7 @@ next_command_failure: "/07-fix-layer-errors from yaml: <yaml-with-failed-step>"
 
 ## 🤖 RLHF Scoring During Execution
 
-The execute-steps.ts script automatically calculates RLHF scores for each step:
+The .regent/config/execute-steps.ts script automatically calculates RLHF scores for each step:
 
 | Score | Level | Emoji | Meaning |
 |-------|-------|-------|---------|
@@ -126,7 +126,7 @@ spec/001-user-registration/[LAYER]/src/features/user-registration/[LAYER]/usecas
 
 ```mermaid
 graph TD
-    A[Initialize Execution] --> B[Load execute-steps.ts]
+    A[Initialize Execution] --> B[Load .regent/config/execute-steps.ts]
     B --> C[Run Script with YAML]
     C --> D[Stream Output]
     D --> E{Monitor Exit Code}
@@ -141,10 +141,10 @@ graph TD
 ### Execution Steps:
 
 1. **Initialize**: Announce start of execution
-2. **Load Script**: Load `execute-steps.ts` from toolchain
+2. **Load Script**: Load `.regent/config/execute-steps.ts` from toolchain
 3. **Execute Script**:
    ```bash
-   npx tsx execute-steps.ts {{path_to_input_yaml}}
+   npx tsx .regent/config/execute-steps.ts {{path_to_input_yaml}}
    ```
 4. **Stream Output**: Real-time stdout/stderr with RLHF scores
 5. **Monitor Exit Code**: Wait for completion
@@ -231,7 +231,7 @@ Aborting execution. The YAML file has been updated with the failure details.
 
 ## 8. Script Capabilities
 
-The `execute-steps.ts` script provides:
+The `.regent/config/execute-steps.ts` script provides:
 
 | Feature | Description |
 |---------|-------------|
