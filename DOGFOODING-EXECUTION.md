@@ -10,10 +10,10 @@ Execute fresh REGENT CLI dogfooding with zero prior assumptions. Test real user 
 
 ## 🔧 Environment Setup
 ### Pre-requisites
-- [ ] Uninstall existing `regent` globally: `npm uninstall -g regent`
-- [ ] Uninstall existing `spec-ca` globally: `npm uninstall -g spec-ca`
-- [ ] Clear npm cache: `npm cache clean --force`
-- [ ] Install fresh REGENT: `npm install -g .` (from project root)
+- [x] Uninstall existing `regent` globally: `npm uninstall -g regent`
+- [x] Uninstall existing `spec-ca` globally: `npm uninstall -g spec-ca`
+- [x] Clear npm cache: `npm cache clean --force`
+- [x] Install fresh REGENT: `npm install -g .` (from project root)
 
 ## 📋 Execution Phases
 
