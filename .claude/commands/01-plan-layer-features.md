@@ -360,7 +360,7 @@ Your final JSON must follow this structure:
       "id": "step-identifier",
       "type": "[create_file|refactor_file]",
       "description": "Step description",
-      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__LAYER__/path/to/file.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/path/to/file.ts",
       "template": "// Code template with placeholders",
       "references": []
     }
@@ -385,7 +385,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-register-user-use-case",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__LAYER__/use-cases/register-user.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/use-cases/register-user.ts",
       "template": "export interface RegisterUser {\n  execute(input: RegisterUserInput): Promise<RegisterUserOutput>;\n}"
     }
   ]
