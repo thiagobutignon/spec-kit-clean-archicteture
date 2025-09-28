@@ -1,20 +1,26 @@
-# CLI Dogfooding Execution Tracker
+# REGENT CLI Dogfooding Execution Tracker
 
 ## 🎯 Mission
-Execute fresh CLI dogfooding with zero prior assumptions. Test real user onboarding experience and validate that the CLI provides seamless developer experience for Clean Architecture implementation.
+Execute fresh REGENT CLI dogfooding with zero prior assumptions. Test real user onboarding experience and validate that the CLI provides seamless developer experience for Clean Architecture implementation.
 
 ## 👥 Role Assignments
 - **Fresh Dogfooder**: New Claude executor (zero context, fresh perspective)
 - **Bug Mapper**: Current Claude (maps issues found during dogfooding, maintains BUG-MAPPING-REPORT.md)
 - **Reviewer**: Continues PR reviews and maintains code quality
 
+## 🔧 Environment Setup
+### Pre-requisites
+- [ ] Uninstall existing `regent` globally: `npm uninstall -g regent`
+- [ ] Uninstall existing `spec-ca` globally: `npm uninstall -g spec-ca`
+- [ ] Clear npm cache: `npm cache clean --force`
+- [ ] Install fresh REGENT: `npm install -g .` (from project root)
+
 ## 📋 Execution Phases
 
 ### Phase 1: Initial CLI Setup ⚙️
-- [ ] Install CLI globally via npm
-- [ ] Test `spec-kit --help` command
-- [ ] Verify all slash commands are available in Claude Code
-- [ ] Test basic command recognition
+- [ ] Verify `regent --help` works
+- [ ] Test `regent --version`
+- [ ] List all available commands
 - [ ] Document first impressions and setup friction
 - [ ] Validate CLI can be found in PATH
 
@@ -26,7 +32,7 @@ Execute fresh CLI dogfooding with zero prior assumptions. Test real user onboard
 - `/implement` (orchestrator)
 
 ### Phase 2: Project Initialization 🚀
-- [ ] Run `spec-kit init` on completely fresh project
+- [ ] Run `regent init` on completely fresh project
 - [ ] Follow all prompts naturally (no shortcuts or expert knowledge)
 - [ ] Document user experience gaps and unclear messaging
 - [ ] Test generated project structure matches expectations
@@ -41,7 +47,7 @@ Execute fresh CLI dogfooding with zero prior assumptions. Test real user onboard
 - [ ] TypeScript configuration properly set up
 - [ ] Clean Architecture layers properly scaffolded
 
-### Phase 3: Feature Development Flow 🔄
+### Phase 3: Clean Architecture Workflow 🔄
 - [ ] Use `/01-plan-layer-features` for a real feature (suggest: user authentication)
 - [ ] Execute `/02-validate-layer-plan` and verify validation works
 - [ ] Run `/03-generate-layer-code` and check YAML output quality
@@ -58,7 +64,7 @@ Execute fresh CLI dogfooding with zero prior assumptions. Test real user onboard
 - [ ] RLHF scores accurately reflect code quality (-2 to +2 scale)
 
 ### Phase 4: Real Development Test 🏗️
-- [ ] Implement actual feature using CLI (not just examples)
+- [ ] Implement actual feature using REGENT (not just examples)
 - [ ] Follow Clean Architecture layer constraints strictly
 - [ ] Test GitFlow enforcement (branches, commits, PRs)
 - [ ] Verify RLHF scoring works for real code
@@ -175,13 +181,13 @@ When ready to start fresh dogfooding, provide this context-free starting prompt:
 **FRESH DOGFOODING PROMPT:**
 
 ```
-You are testing a CLI tool called 'spec-kit' for the first time. You have no prior knowledge of this tool or its architecture patterns.
+You are testing a CLI tool called 'regent' for the first time. You have no prior knowledge of this tool or its architecture patterns.
 
 Your mission: Install and explore this CLI as a new developer would, documenting every step of your experience.
 
 Start by:
 1. Understanding what this tool does
-2. Installing it properly
+2. Installing it globally
 3. Exploring available commands
 4. Trying to build something real with it
 
@@ -193,7 +199,7 @@ Document everything:
 
 Be completely honest about the user experience. Don't assume anything or use expert knowledge.
 
-Ready? Start with: "I'm exploring a new CLI tool called spec-kit for the first time..."
+Ready? Start with: "I'm exploring a new CLI tool called regent for the first time..."
 ```
 
 ---
