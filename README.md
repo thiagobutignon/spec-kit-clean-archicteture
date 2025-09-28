@@ -1,16 +1,16 @@
 # 🏗️ Spec-Kit Clean Architecture
 
-> **Scaffolding + AI Generation for Deterministic Code Quality**
+> **Scaffolding + AI Generation for Clean Architecture Implementation**
 
-[![RLHF Score](https://img.shields.io/badge/RLHF%20Score-+2%20PERFECT-brightgreen)](https://github.com/thiagobutignon/spec-kit-clean-archicteture)
+[![RLHF Score](https://img.shields.io/badge/RLHF%20Score-Validation%20System-brightgreen)](https://github.com/thiagobutignon/spec-kit-clean-archicteture)
 [![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-✓-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 [![Templates](https://img.shields.io/badge/Templates-Backend%20|%20Frontend%20|%20Fullstack-purple)](./templates)
-[![AI-NOTEs](https://img.shields.io/badge/AI--NOTEs-100%25%20Coverage-orange)](./templates)
+[![AI-NOTEs](https://img.shields.io/badge/AI--NOTEs-Guided%20Generation-orange)](./templates)
 [![Claude AI](https://img.shields.io/badge/Claude%20AI-6%20Agents-cyan)](./.claude/agents)
 
 ## 📋 Overview
 
-Spec-Kit Clean Architecture addresses common problems in AI code generation: monolithic files (>200 lines) and absence of architectural structure. Our approach combines modular scaffolding with intelligent template editing, following Clean Architecture, DDD, TDD, and SOLID principles, simulating senior developer workflow to produce deterministic, maintainable code.
+Spec-Kit Clean Architecture addresses common problems in AI code generation: monolithic files (>200 lines) and absence of architectural structure. The system combines modular scaffolding with template-based generation, following Clean Architecture, DDD, TDD, and SOLID principles to produce maintainable code.
 
 ## 🔧 Technical Approach
 
@@ -20,7 +20,7 @@ Current AI code generation typically produces:
 
 - **Monolithic files**: 200+ line files with mixed responsibilities
 - **Architectural inconsistency**: No structural enforcement or patterns
-- **Unpredictable quality**: Same input generates different output quality
+- **Variable quality**: Same input may generate different output quality
 
 ### Solution: Scaffolding + AI Generation Hybrid
 
@@ -52,10 +52,10 @@ features/user/
 - **Context7 MCP**: Updates with current programming practices
 - **Chrome DevTools MCP**: Real-time bug inspection and corrections
 
-#### 4. **Deterministic Development Cycle**
+#### 4. **Structured Development Cycle**
 
 ```bash
-# Automated TDD flow
+# TDD workflow
 git checkout -b feat/user/create-user
 # 1. RED: Initial failing unit test
 npm test -- create-user.spec.ts  # Expected failure
@@ -77,14 +77,14 @@ claude /review  # Review via Claude Code
 
 ### Outcome
 
-This process enables nearly deterministic deliveries in both **Greenfield** and **Brownfield** projects, maintaining quality, predictability, and clean architecture.
+This process enables consistent deliveries in both **Greenfield** and **Brownfield** projects, maintaining quality and clean architecture.
 
 - **Serena MCP**: Semantic codebase analysis and intelligent search
-- **Context7 MCP**: Always current programming knowledge and best practices
+- **Context7 MCP**: Current programming knowledge and best practices
 - **Chrome DevTools MCP**: Runtime debugging and performance insights
-- **Verified Information**: Reduces AI hallucinations through factual context
+- **Verified Information**: Reduces errors through factual context
 
-### 🎯 Why This Achieves Deterministic Results
+### 🎯 Architecture Benefits
 
 #### **Feature Slice Architecture**
 
@@ -104,23 +104,23 @@ features/user/
     └── main/
 ```
 
-#### **Predictable Quality Outcomes**
+#### **Quality Outcomes**
 
-- **Input Consistency**: Same specification + same templates = same output
-- **Architectural Compliance**: Clean Architecture violations mathematically impossible
-- **Professional Patterns**: TDD, atomic commits, proper PR workflow built-in
-- **Scalable Approach**: Works from prototype to enterprise scale
+- **Input Consistency**: Templates provide consistent structure
+- **Architectural Compliance**: Built-in validation prevents violations
+- **Development Patterns**: TDD, atomic commits, PR workflow integrated
+- **Scalable Approach**: Suitable for various project sizes
 
 ### 🚀 Technical Differentiation
 
 | Aspect           | Traditional Scaffolding    | Pure AI Generation    | Spec-Kit Clean Architecture     |
 | ---------------- | -------------------------- | --------------------- | ------------------------------- |
 | **Structure**    | Rigid, requires adaptation | None, variable output | Flexible within constraints     |
-| **Quality**      | Consistent but basic       | Unpredictable         | Deterministic, professional     |
-| **Architecture** | Basic patterns             | No enforcement        | Clean Architecture guaranteed   |
+| **Quality**      | Consistent but basic       | Variable              | Consistent with validation      |
+| **Architecture** | Basic patterns             | No enforcement        | Clean Architecture enforced     |
 | **Learning**     | Static                     | None                  | Continuous improvement via RLHF |
-| **Context**      | Limited                    | AI knowledge only     | Rich, verified, real-time       |
-| **Workflow**     | Manual adaptation          | Ad-hoc                | Senior developer simulation     |
+| **Context**      | Limited                    | AI knowledge only     | Multiple context sources        |
+| **Workflow**     | Manual adaptation          | Ad-hoc                | Structured development process  |
 
 ## 📦 Prerequisites
 
@@ -192,7 +192,7 @@ features/user/
 
 ### Specialized Agents
 
-Our system includes 6 specialized AI agents that work together to generate perfect Clean Architecture code:
+Our system includes 6 specialized AI agents that work together to generate Clean Architecture compliant code:
 
 | Agent                            | Model | Expertise                               | Integration                                                 |
 | -------------------------------- | ----- | --------------------------------------- | ----------------------------------------------------------- |
@@ -205,7 +205,7 @@ Our system includes 6 specialized AI agents that work together to generate perfe
 
 ### 9-Phase Workflow Commands
 
-The agents use these commands sequentially to generate and validate perfect code:
+The agents use these commands sequentially to generate and validate code:
 
 ```bash
 # Phase 1: Planning
@@ -248,8 +248,8 @@ claude "Use the clean-architecture-generator agent to create user authentication
 # 1. Plan all 5 layers (domain, data, infra, presentation, main)
 # 2. Generate 20+ files with proper structure
 # 3. Validate Clean Architecture compliance
-# 4. Achieve RLHF score +2 (PERFECT)
-# 5. Create tests for each layer
+# 4. Achieve RLHF score +2 (EXCELLENT)
+# 5. Generate tests for each layer
 ```
 
 #### Expected Output Structure
@@ -638,7 +638,7 @@ The system now provides context-specific scoring based on architectural layer:
 
 | Score  | Level             | Description                                     |
 | ------ | ----------------- | ----------------------------------------------- |
-| **+2** | 🏆 PERFECT        | Clean Architecture + DDD + Layer Best Practices |
+| **+2** | 🏆 EXCELLENT      | Clean Architecture + DDD + Layer Best Practices |
 | **+1** | ✅ GOOD           | Valid implementation following patterns         |
 | **0**  | ⚠️ LOW CONFIDENCE | Missing references or unclear implementation    |
 | **-1** | ❌ RUNTIME ERROR  | Lint failures, test failures, build errors      |
@@ -808,16 +808,16 @@ feature/user-authentication/
 
 | Layer              | Strategy     | Coverage Target | Tools               |
 | ------------------ | ------------ | --------------- | ------------------- |
-| **Domain**         | Unit Tests   | 100%            | Vitest              |
-| **Data**           | Unit + Mocks | 95%             | Vitest + Spies      |
+| **Domain**         | Unit Tests   | High            | Vitest              |
+| **Data**           | Unit + Mocks | High            | Vitest + Spies      |
 | **Infrastructure** | Integration  | 80%             | Vitest + Test DB    |
-| **Presentation**   | Unit + E2E   | 90%             | Vitest + Playwright |
+| **Presentation**   | Unit + E2E   | High            | Vitest + Playwright |
 
 ### Test Patterns
 
 ```typescript
-// AI-NOTE: NEVER use faker or random data in tests
-// Always use deterministic, fixed test data
+// AI-NOTE: Avoid random data in tests
+// Use deterministic, fixed test data
 
 // ✅ GOOD: Fixed test data
 const mockUser = {
@@ -840,10 +840,10 @@ const mockUser = {
 - **Total Templates**: 15 layer-specific templates (generated on-demand)
 - **Template Parts**: 46 modular components
 - **JSON Schemas**: 16 schemas for layer-specific validation
-- **AI-NOTEs**: 500+ strategic guidance notes
+- **AI-NOTEs**: Strategic guidance notes throughout templates
 - **RLHF Integration**: Centralized layer-aware scoring
 - **Pattern Loading**: Automatic extraction from templates
-- **Lines of Code**: 20,000+ across all components
+- **Template Coverage**: Comprehensive layer implementation
 
 ### Backend Templates (5 Complete Layers)
 
@@ -1034,7 +1034,7 @@ claude mcp add chrome-devtools -- npx chrome-devtools-mcp@latest
 # - CPU/Network emulation for real-world testing
 ```
 
-**Why it's essential**: Validates that your Clean Architecture code performs well in real-world conditions and maintains proper layer boundaries during runtime.
+**Purpose**: Validates Clean Architecture implementation in runtime conditions and ensures proper layer boundaries.
 
 #### 📝 Serena MCP - Semantic Code Understanding
 
@@ -1082,7 +1082,7 @@ claude mcp get context7
 ---
 
 <div align="center">
-  <strong>🏗️ Building the future of AI-assisted Clean Architecture</strong>
+  <strong>🏗️ AI-assisted Clean Architecture Implementation</strong>
   <br>
-  <sub>With intelligent templates, comprehensive AI-NOTEs, and RLHF validation</sub>
+  <sub>With template-based generation, AI guidance notes, and RLHF validation</sub>
 </div>
