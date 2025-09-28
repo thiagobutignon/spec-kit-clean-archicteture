@@ -23,7 +23,7 @@ parameters:
     required: false
   output:
     type: "yaml"
-    location: "././spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
+    location: "./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
     example: "./spec/001-user-registration/[LAYER]/implementation.yaml"
 modes:
   create:
