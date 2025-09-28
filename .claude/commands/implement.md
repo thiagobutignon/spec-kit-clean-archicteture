@@ -1,43 +1,49 @@
-# /implement Command
+---
+title: "Execute Implementation"
+description: "Orchestrates proper workflow for task implementation"
+category: "implementation"
+stage: "execution"
+priority: 5
+tags:
+  - implementation
+  - orchestrator
+  - workflow
+parameters:
+  task_id:
+    type: "string"
+    description: "Task ID to implement"
+    required: true
+next_command: "Automatically calls /01-plan-layer-features"
+---
 
-## Purpose
-Executes a task by transforming it from spec-kit documentation to YAML workflow and running it through execute-steps.ts.
+# /implement Command - Workflow Orchestrator
 
-## Usage
-```bash
-/implement T001
-```
+## ⚠️ Issue #76 Fix
 
-## Implementation
+This command orchestrates the proper workflow. It does NOT execute directly.
 
-This command uses the SpecToYamlTransformer created in Issue #77 (PR #80) to:
+## When you receive: `/implement T001`
 
-1. Read task from `.specify/tasks/TASK-LIST-SPEC-001-cli.md`
-2. Transform to YAML workflow with GitFlow steps
-3. Save to `.regent/workflows/{taskId}-workflow.yaml`
-4. Execute via `../../execute-steps.ts`
+Execute these commands IN ORDER:
 
-## Code Integration
+1. **First**: `/01-plan-layer-features for task: T001`
+   - Generates JSON plan
 
-```javascript
-import { implementCommand } from './packages/cli/src/commands/implement.js';
+2. **Second**: `/02-validate-layer-plan`
+   - Validates architecture
 
-// Execute task
-await implementCommand('T001');
-```
+3. **Third**: `/03-generate-layer-code`
+   - Generates YAML workflow
 
-## Workflow Steps Generated
+4. **Fourth**: `/06-execute-layer-steps`
+   - Executes with RLHF scoring
 
-- Create feature branch
-- Create directories
-- Create implementation files
-- Create test files
-- Run validation (test, lint, typecheck)
-- Commit changes
-- Create pull request
+## DO NOT:
+- Use SpecToYamlTransformer directly
+- Call execute-steps.ts directly
+- Skip any step above
+- Create files without workflow
 
-## Related Issues
-
-- Fixes: #76
-- Depends on: #77 (SpecToYamlTransformer - completed)
-- Uses: execute-steps.ts (existing in project root)
+## Why This Workflow:
+Issue #76 identified that /implement was bypassing validation.
+This ensures proper Clean Architecture validation at each step.
