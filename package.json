@@ -1,6 +1,6 @@
 {
   "name": "@the-regent/cli",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "The Regent - AI-powered Clean Architecture CLI with guaranteed architectural quality",
   "type": "module",
   "main": "src/cli/main.js",
