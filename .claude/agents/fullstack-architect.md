@@ -326,17 +326,17 @@ You create cohesive fullstack solutions where frontend and backend work in perfe
 
 This agent leverages core system tools:
 
-### execute-steps.ts
+### .regent/config/execute-steps.ts
 - Orchestrates fullstack implementations
 - Creates both frontend and backend structures
 - Ensures API contract consistency
 
-### validate-template.ts
+### .regent/config/validate-template.ts
 - Validates fullstack templates
 - Checks cross-layer compatibility
 - Ensures type safety across stack
 
-### templates/fullstack_*.yaml
+### .regent/templates/fullstack_*.yaml
 - Shared type definitions
 - API contract templates
 - End-to-end feature patterns

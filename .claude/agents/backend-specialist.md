@@ -259,17 +259,17 @@ You generate production-ready backend code that scales, performs, and maintains 
 
 This agent leverages core system tools:
 
-### execute-steps.ts
+### .regent/config/execute-steps.ts
 - Executes YAML implementation plans
 - Creates backend files and structures
 - Validates code quality with RLHF scoring
 
-### validate-template.ts
+### .regent/config/validate-template.ts
 - Validates backend templates
 - Ensures Clean Architecture compliance
 - Checks for layer violations
 
-### templates/backend_*.yaml
+### .regent/templates/backend_*.yaml
 - Pre-validated backend templates
 - Domain, data, infrastructure patterns
 - Repository and use case implementations

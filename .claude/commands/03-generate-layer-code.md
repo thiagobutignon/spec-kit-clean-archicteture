@@ -51,7 +51,7 @@ scoring:
   catastrophic:
     score: -2
     causes: ["Architecture violations", "Wrong REPLACE/WITH format"]
-source_template: "templates/[LAYER]_TEMPLATE.yaml"
+source_template: ".regent/templates/[LAYER]_TEMPLATE.yaml"
 validation_script: "npx tsx validate-implementation.ts"
 previous_command: "/02-validate-layer-plan from json: <json>"
 next_command: "/04-reflect-layer-lessons from yaml: <generated-yaml>"
@@ -126,7 +126,7 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| **Template** | `templates/[LAYER]_TEMPLATE.yaml` | Master template |
+| **Template** | `.regent/templates/[LAYER]_TEMPLATE.yaml` | Master template |
 | **Directives** | `# AI-NOTE:` comments | Must follow all |
 | **Placeholders** | `__PLACEHOLDER__` variables | Must replace all |
 | **Validation** | `validate-implementation.ts` | Must pass validation |
@@ -159,7 +159,7 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
 <details>
 <summary>Expand for Create Mode Steps</summary>
 
-1. **Initialize**: Copy `templates/[LAYER]_TEMPLATE.yaml` verbatim
+1. **Initialize**: Copy `.regent/templates/[LAYER]_TEMPLATE.yaml` verbatim
 2. **Generate Steps**:
    - Keep `create-feature-branch` as FIRST step
    - Keep `create-structure` as SECOND step
@@ -236,7 +236,7 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
 ### Mandatory Validation Steps:
 
 ```bash
-npx tsx validate-implementation.ts templates/[LAYER]_TEMPLATE.yaml <generated-yaml-path>
+npx tsx .regent/config/validate-template.ts .regent/templates/[LAYER]_TEMPLATE.yaml <generated-yaml-path>
 ```
 
 ### Self-Correction Loop:
@@ -324,7 +324,7 @@ After you generate the YAML:
 graph LR
     A[AI Generates YAML] --> B[User Reviews]
     B --> C{Correct?}
-    C -->|Yes| D[User Runs execute-steps.ts]
+    C -->|Yes| D[User Runs .regent/config/execute-steps.ts]
     C -->|No| E[User Requests Changes]
     E --> A
     style D fill:#90EE90

@@ -185,11 +185,11 @@ You never compromise on architectural integrity and always provide clear, action
 
 This agent integrates with core validation tools:
 
-### validate-template.ts
+### .regent/config/validate-template.ts
 - Primary validation engine
 - JSON schema validation
 - Template compliance checking
-- Located at: `/validate-template.ts`
+- Located at: `/.regent/config/validate-template.ts`
 
 ### core/rlhf-system.ts
 - Architectural scoring system
@@ -197,11 +197,11 @@ This agent integrates with core validation tools:
 - Layer-aware validation rules
 - Located at: `/core/rlhf-system.ts`
 
-### execute-steps.ts
+### .regent/config/execute-steps.ts
 - Runtime validation during execution
 - Step-by-step verification
 - Error detection and reporting
-- Located at: `/execute-steps.ts`
+- Located at: `/.regent/config/execute-steps.ts`
 
 These tools work together to ensure strict Clean Architecture compliance.
 

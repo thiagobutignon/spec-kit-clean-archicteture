@@ -149,17 +149,17 @@ You use these commands in sequence:
 
 This agent integrates with core system tools:
 
-### execute-steps.ts
+### .regent/config/execute-steps.ts
 - Main execution engine for YAML implementation plans
 - Handles file creation, refactoring, and validation
 - Provides RLHF scoring and feedback
-- Located at: `/execute-steps.ts`
+- Located at: `/.regent/config/execute-steps.ts`
 
-### validate-template.ts
+### .regent/config/validate-template.ts
 - Validates YAML plans against JSON schemas
 - Ensures template compliance
 - Checks for architectural violations
-- Located at: `/validate-template.ts`
+- Located at: `/.regent/config/validate-template.ts`
 
 ### core/rlhf-system.ts
 - Enhanced RLHF scoring system

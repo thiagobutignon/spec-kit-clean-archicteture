@@ -23,8 +23,8 @@ parameters:
     format: '{"improvements_applied": [], "metrics": {}, "next_steps": []}'
   templates_updated:
     type: "file"
-    location: "templates/DOMAIN_TEMPLATE.yaml"
-    backup: "templates/.backup/DOMAIN_TEMPLATE.yaml.bak"
+    location: ".regent/templates/DOMAIN_TEMPLATE.yaml"
+    backup: ".regent/templates/.backup/DOMAIN_TEMPLATE.yaml.bak"
 rlhf_score_patterns:
   catastrophic:
     score: -2
@@ -390,8 +390,8 @@ Return to the beginning of the pipeline:
 ### 2. Review Improvements
 Check updated templates and patterns:
 ```bash
-cat templates/DOMAIN_TEMPLATE.yaml
-diff templates/.backup/DOMAIN_TEMPLATE.yaml.bak templates/DOMAIN_TEMPLATE.yaml
+cat .regent/templates/DOMAIN_TEMPLATE.yaml
+diff .regent/templates/.backup/DOMAIN_TEMPLATE.yaml.bak .regent/templates/DOMAIN_TEMPLATE.yaml
 ```
 
 ### 3. Generate Reports
