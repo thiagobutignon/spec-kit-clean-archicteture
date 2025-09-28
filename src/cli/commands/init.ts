@@ -45,19 +45,22 @@ export async function initCommand(projectName: string | undefined, options: Init
   const projectPath = options.here ? currentDir : path.join(currentDir, projectName!);
   const displayName = options.here ? path.basename(currentDir) : projectName!;
 
+  // Check if we're in an existing project
+  const isExistingProject = options.here || await fs.pathExists(path.join(projectPath, 'package.json'));
+
   console.log(chalk.cyan('Setup Configuration:'));
   console.log(`  Project: ${chalk.green(displayName)}`);
   console.log(`  Path: ${chalk.dim(projectPath)}`);
+  console.log(`  Mode: ${chalk.yellow(isExistingProject ? 'Existing Project' : 'New Project')}`);
   console.log(`  AI Assistant: ${chalk.yellow(options.ai || 'claude (default)')}`);
   console.log();
 
   try {
     // Create project structure
-    await createProjectStructure(projectPath, options);
+    await createProjectStructure(projectPath, options, isExistingProject);
 
-    // Initialize git if requested
-    // Initialize git by default unless explicitly disabled
-    if (options.git !== false) {
+    // Initialize git if requested and not existing
+    if (options.git !== false && !isExistingProject) {
       await initializeGit(projectPath);
     }
 
@@ -65,7 +68,7 @@ export async function initCommand(projectName: string | undefined, options: Init
     console.log(chalk.green.bold('✅ Project initialized successfully!\n'));
 
     // Show next steps
-    showNextSteps(displayName, options.here);
+    showNextSteps(displayName, options.here, isExistingProject);
 
   } catch (error) {
     console.error(chalk.red('❌ Failed to initialize project:'), error);
@@ -73,11 +76,16 @@ export async function initCommand(projectName: string | undefined, options: Init
   }
 }
 
-async function createProjectStructure(projectPath: string, options: InitOptions): Promise<void> {
-  console.log(chalk.cyan('📁 Creating project structure...'));
+async function createProjectStructure(projectPath: string, options: InitOptions, isExistingProject: boolean): Promise<void> {
+  console.log(chalk.cyan('📁 Setting up Spec-Kit structure...'));
 
-  // Create directories
-  const directories = [
+  // Create spec-kit specific directories
+  const specKitDirs = [
+    '.regent',
+    '.regent/core',
+    '.regent/scripts',
+    '.regent/templates',
+    '.regent/config',
     '.specify',
     '.specify/memory',
     '.specify/specs',
@@ -86,121 +94,156 @@ async function createProjectStructure(projectPath: string, options: InitOptions)
     '.specify/scripts',
     '.claude',
     '.claude/commands',
-    '.claude/agents',
-    '.vscode',
-    'src',
-    'core',
-    'scripts',
-    'templates'
+    '.claude/agents'
   ];
 
-  for (const dir of directories) {
+  for (const dir of specKitDirs) {
     await fs.ensureDir(path.join(projectPath, dir));
   }
 
-  // Copy existing .claude content if it exists
+  // Copy .claude content (always safe to copy)
   const sourceClaudeDir = path.join(packageRoot, '.claude');
   const targetClaudeDir = path.join(projectPath, '.claude');
 
   if (await fs.pathExists(sourceClaudeDir)) {
-    console.log(chalk.cyan('📋 Copying Claude configuration...'));
-    await fs.copy(sourceClaudeDir, targetClaudeDir);
-  } else {
-    console.log(chalk.yellow('⚠️  Warning: Claude configuration not found in package'));
+    console.log(chalk.cyan('📋 Setting up Claude AI configuration...'));
+    await fs.copy(sourceClaudeDir, targetClaudeDir, { overwrite: true });
   }
 
-  // Copy templates
+  // Copy templates to .regent/templates
   const sourceTemplatesDir = path.join(packageRoot, 'templates');
-  const targetTemplatesDir = path.join(projectPath, 'templates');
+  const targetTemplatesDir = path.join(projectPath, '.regent/templates');
 
   if (await fs.pathExists(sourceTemplatesDir)) {
-    console.log(chalk.cyan('📄 Copying Clean Architecture templates...'));
-    await fs.copy(sourceTemplatesDir, targetTemplatesDir);
-  } else {
-    console.log(chalk.yellow('⚠️  Warning: Templates not found in package'));
+    console.log(chalk.cyan('📄 Installing Clean Architecture templates...'));
+    await fs.copy(sourceTemplatesDir, targetTemplatesDir, { overwrite: true });
   }
 
-  // Copy core files if they exist
+  // Copy core files to .regent/core
   const sourceCoreDir = path.join(packageRoot, 'core');
-  const targetCoreDir = path.join(projectPath, 'core');
+  const targetCoreDir = path.join(projectPath, '.regent/core');
 
   if (await fs.pathExists(sourceCoreDir)) {
-    console.log(chalk.cyan('🎯 Copying core system files...'));
-    await fs.copy(sourceCoreDir, targetCoreDir);
-  } else {
-    console.log(chalk.yellow('⚠️  Warning: Core files not found in package'));
+    console.log(chalk.cyan('🎯 Installing core system files...'));
+    await fs.copy(sourceCoreDir, targetCoreDir, { overwrite: true });
   }
 
-  // Copy scripts if they exist
+  // Copy scripts to .regent/scripts
   const sourceScriptsDir = path.join(packageRoot, 'scripts');
-  const targetScriptsDir = path.join(projectPath, 'scripts');
+  const targetScriptsDir = path.join(projectPath, '.regent/scripts');
 
   if (await fs.pathExists(sourceScriptsDir)) {
-    console.log(chalk.cyan('📜 Copying utility scripts...'));
-    await fs.copy(sourceScriptsDir, targetScriptsDir);
-  } else {
-    console.log(chalk.yellow('⚠️  Warning: Scripts not found in package'));
+    console.log(chalk.cyan('📜 Installing utility scripts...'));
+    await fs.copy(sourceScriptsDir, targetScriptsDir, { overwrite: true });
   }
 
-  // Copy .vscode settings if they exist
-  const sourceVscodeDir = path.join(packageRoot, '.vscode');
-  const targetVscodeDir = path.join(projectPath, '.vscode');
-
-  if (await fs.pathExists(sourceVscodeDir)) {
-    console.log(chalk.cyan('⚙️  Copying VS Code configuration...'));
-    await fs.copy(sourceVscodeDir, targetVscodeDir);
-  } else {
-    console.log(chalk.yellow('⚠️  Warning: VS Code configuration not found in package'));
-  }
-
-  // Copy root TypeScript files
-  const rootTsFiles = [
+  // Copy config files to .regent/config
+  const configFiles = [
     'execute-steps.ts',
     'validate-template.ts',
-    'tsconfig.json',
-    'vitest.config.ts',
-    'eslint.config.js',
     'regent.schema.json'
   ];
 
-  console.log(chalk.cyan('📝 Copying configuration and utility files...'));
-  for (const file of rootTsFiles) {
+  console.log(chalk.cyan('⚙️ Installing configuration files...'));
+  for (const file of configFiles) {
     const sourcePath = path.join(packageRoot, file);
-    const targetPath = path.join(projectPath, file);
+    const targetPath = path.join(projectPath, '.regent/config', file);
 
     if (await fs.pathExists(sourcePath)) {
       await fs.copy(sourcePath, targetPath);
-    } else {
-      console.log(chalk.yellow(`⚠️  Warning: ${file} not found in package`));
     }
   }
 
-  // Create initial files
-  await createInitialFiles(projectPath, options);
+  // Only copy project config files if they don't exist
+  await copyProjectConfigFiles(projectPath, isExistingProject);
+
+  // Create initial files if new project
+  if (!isExistingProject) {
+    await createInitialFiles(projectPath, options);
+  } else {
+    await updateExistingProject(projectPath);
+  }
+}
+
+async function copyProjectConfigFiles(projectPath: string, isExistingProject: boolean): Promise<void> {
+  // VS Code settings - merge if exists
+  const vscodeSettingsPath = path.join(projectPath, '.vscode/settings.json');
+  const sourceVscodeSettings = path.join(packageRoot, '.vscode/settings.json');
+
+  if (!await fs.pathExists(vscodeSettingsPath) && await fs.pathExists(sourceVscodeSettings)) {
+    console.log(chalk.cyan('⚙️ Adding VS Code configuration...'));
+    await fs.ensureDir(path.join(projectPath, '.vscode'));
+    await fs.copy(sourceVscodeSettings, vscodeSettingsPath);
+  }
+
+  // TypeScript config - only if doesn't exist
+  const tsconfigPath = path.join(projectPath, 'tsconfig.json');
+  if (!await fs.pathExists(tsconfigPath)) {
+    const tsconfig = {
+      "compilerOptions": {
+        "target": "ES2022",
+        "module": "ES2022",
+        "lib": ["ES2022"],
+        "moduleResolution": "node",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true,
+        "paths": {
+          "@/*": ["./src/*"],
+          "@regent/*": ["./.regent/*"]
+        }
+      },
+      "include": ["src/**/*", ".regent/**/*"],
+      "exclude": ["node_modules", "dist"]
+    };
+    await fs.writeJson(tsconfigPath, tsconfig, { spaces: 2 });
+  }
+
+  // ESLint config - only if doesn't exist
+  const eslintPath = path.join(projectPath, 'eslint.config.js');
+  if (!await fs.pathExists(eslintPath)) {
+    const eslintConfig = await fs.readFile(path.join(packageRoot, 'eslint.config.js'), 'utf-8');
+    await fs.writeFile(eslintPath, eslintConfig);
+  }
+
+  // Vitest config - only if doesn't exist
+  const vitestPath = path.join(projectPath, 'vitest.config.ts');
+  if (!await fs.pathExists(vitestPath)) {
+    const vitestConfig = await fs.readFile(path.join(packageRoot, 'vitest.config.ts'), 'utf-8');
+    await fs.writeFile(vitestPath, vitestConfig);
+  }
 }
 
 async function createInitialFiles(projectPath: string, _options: InitOptions): Promise<void> {
-  const packageJson = {
-    name: path.basename(projectPath),
-    version: '1.0.0',
-    type: 'module',
-    scripts: {
-      'dev': 'tsx src/main.ts',
-      'build': 'tsc',
-      'lint': 'eslint .',
-      'test': 'vitest',
-      'templates:build': './templates/build-template.sh',
-      'templates:validate': 'tsx validate-template.ts'
-    },
-    devDependencies: {
-      'typescript': '^5.0.0',
-      'tsx': '^4.0.0',
-      '@types/node': '^20.0.0',
-      'vitest': '^1.0.0'
-    }
-  };
-
-  await fs.writeJson(path.join(projectPath, 'package.json'), packageJson, { spaces: 2 });
+  // Create a minimal package.json if it doesn't exist
+  const packageJsonPath = path.join(projectPath, 'package.json');
+  if (!await fs.pathExists(packageJsonPath)) {
+    const packageJson = {
+      name: path.basename(projectPath),
+      version: '1.0.0',
+      type: 'module',
+      scripts: {
+        'dev': 'tsx src/main.ts',
+        'build': 'tsc',
+        'lint': 'eslint .',
+        'test': 'vitest',
+        'regent:build': 'cd .regent && ./templates/build-template.sh',
+        'regent:validate': 'tsx .regent/config/validate-template.ts',
+        'regent:execute': 'tsx .regent/config/execute-steps.ts'
+      },
+      devDependencies: {
+        'typescript': '^5.0.0',
+        'tsx': '^4.0.0',
+        '@types/node': '^20.0.0',
+        'vitest': '^1.0.0',
+        'eslint': '^9.0.0'
+      }
+    };
+    await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
+  }
 
   // Create constitution.md
   const constitution = `# Project Constitution
@@ -255,7 +298,9 @@ async function createInitialFiles(projectPath: string, _options: InitOptions): P
   await fs.writeFile(path.join(projectPath, '.specify/memory/constitution.md'), constitution);
 
   // Create .gitignore
-  const gitignore = `# Dependencies
+  const gitignorePath = path.join(projectPath, '.gitignore');
+  if (!await fs.pathExists(gitignorePath)) {
+    const gitignore = `# Dependencies
 node_modules/
 .pnp
 .pnp.js
@@ -277,7 +322,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Runtime data
+# Environment
 .DS_Store
 .env.local
 .env.development.local
@@ -285,7 +330,6 @@ yarn-error.log*
 .env.production.local
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -302,13 +346,63 @@ Thumbs.db
 # Spec-kit clean architecture
 .rlhf/
 .logs/
-generated-templates/
-*-template.regent
+.regent/templates/*-template.regent
+!.regent/templates/parts/
 `;
+    await fs.writeFile(gitignorePath, gitignore);
+  }
 
-  await fs.writeFile(path.join(projectPath, '.gitignore'), gitignore);
+  // Create src directory with placeholder
+  const srcPath = path.join(projectPath, 'src');
+  await fs.ensureDir(srcPath);
+
+  const mainTsPath = path.join(srcPath, 'main.ts');
+  if (!await fs.pathExists(mainTsPath)) {
+    const mainContent = `// Entry point for your Clean Architecture application
+console.log('🚀 Clean Architecture Project');
+`;
+    await fs.writeFile(mainTsPath, mainContent);
+  }
 
   console.log(chalk.green('✅ Created initial project files'));
+}
+
+async function updateExistingProject(projectPath: string): Promise<void> {
+  // Update package.json scripts if it exists
+  const packageJsonPath = path.join(projectPath, 'package.json');
+
+  if (await fs.pathExists(packageJsonPath)) {
+    console.log(chalk.cyan('📦 Updating package.json scripts...'));
+
+    const packageJson = await fs.readJson(packageJsonPath);
+
+    // Add spec-kit specific scripts
+    packageJson.scripts = packageJson.scripts || {};
+    packageJson.scripts['regent:build'] = 'cd .regent && ./templates/build-template.sh';
+    packageJson.scripts['regent:validate'] = 'tsx .regent/config/validate-template.ts';
+    packageJson.scripts['regent:execute'] = 'tsx .regent/config/execute-steps.ts';
+
+    await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
+  }
+
+  // Create constitution if doesn't exist
+  const constitutionPath = path.join(projectPath, '.specify/memory/constitution.md');
+  if (!await fs.pathExists(constitutionPath)) {
+    const constitution = `# Project Constitution
+
+## Clean Architecture Principles
+This document defines the architectural principles for this project.
+Customize it according to your specific needs.
+
+### Core Principles
+- Clean Architecture compliance
+- Test-driven development
+- Domain-driven design
+`;
+    await fs.writeFile(constitutionPath, constitution);
+  }
+
+  console.log(chalk.green('✅ Updated existing project'));
 }
 
 async function initializeGit(projectPath: string): Promise<void> {
@@ -328,7 +422,7 @@ async function initializeGit(projectPath: string): Promise<void> {
   }
 }
 
-function showNextSteps(projectName: string, isHere: boolean): void {
+function showNextSteps(projectName: string, isHere: boolean, isExistingProject: boolean): void {
   console.log(chalk.cyan.bold('📋 Next Steps:'));
   console.log();
 
@@ -347,8 +441,18 @@ function showNextSteps(projectName: string, isHere: boolean): void {
   console.log();
 
   console.log(chalk.cyan.bold('💡 Pro Tips:'));
-  console.log(`• Use ${chalk.green('/01-plan-layer-features')} for detailed layer planning`);
-  console.log(`• Run ${chalk.yellow('npm run templates:build')} to generate all layer templates`);
+  console.log(`• Templates are in ${chalk.blue('.regent/templates/')} directory`);
+  console.log(`• Core files are in ${chalk.blue('.regent/core/')} directory`);
+  console.log(`• Use ${chalk.green('npm run regent:build')} to generate layer templates`);
   console.log(`• Check ${chalk.blue('.specify/memory/constitution.md')} for project principles`);
+
+  if (isExistingProject) {
+    console.log();
+    console.log(chalk.yellow.bold('⚠️ Existing Project Notice:'));
+    console.log(`• Spec-Kit files were added to ${chalk.blue('.regent/')} directory`);
+    console.log(`• Your existing files were not modified`);
+    console.log(`• Review ${chalk.blue('package.json')} for new scripts`);
+  }
+
   console.log();
 }
