@@ -19,10 +19,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@/domain/*": ["src/features/*/domain/*"],
-      "@/data/*": ["src/features/*/data/*"],
-      "@/infra/*": ["src/features/*/infra/*"],
-      "@/presentation/*": ["src/features/*/presentation/*"],
+      "@/domain/*": ["src/features/project-init/domain/*"],
+      "@/data/*": ["src/features/project-init/data/*"],
+      "@/infra/*": ["src/features/project-init/infra/*"],
+      "@/presentation/*": ["src/features/project-init/presentation/*"],
       "@/main/*": ["src/main/*"],
       "@/shared/*": ["src/shared/*"]
     }
