@@ -2,12 +2,14 @@
 
 > **Scaffolding + AI Generation for Clean Architecture Implementation**
 
+[![NPM Version](https://img.shields.io/npm/v/spec-kit-clean-architecture)](https://www.npmjs.com/package/spec-kit-clean-architecture)
+[![NPM Downloads](https://img.shields.io/npm/dm/spec-kit-clean-architecture)](https://www.npmjs.com/package/spec-kit-clean-architecture)
 [![RLHF Score](https://img.shields.io/badge/RLHF%20Score-Validation%20System-brightgreen)](https://github.com/thiagobutignon/spec-kit-clean-archicteture)
 [![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-✓-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 [![Templates](https://img.shields.io/badge/Templates-Backend%20|%20Frontend%20|%20Fullstack-purple)](./templates)
 [![AI-NOTEs](https://img.shields.io/badge/AI--NOTEs-Guided%20Generation-orange)](./templates)
 [![Claude AI](https://img.shields.io/badge/Claude%20AI-6%20Agents-cyan)](./.claude/agents)
-[![CLI Tool](https://img.shields.io/badge/CLI-spec--ca-blue)](./bin/spec-ca)
+[![CLI Tool](https://img.shields.io/badge/CLI-spec--ca-blue)](https://www.npmjs.com/package/spec-kit-clean-architecture)
 
 ## 📋 Overview
 
@@ -17,6 +19,19 @@ Spec-Kit Clean Architecture addresses common problems in AI code generation: mon
 
 ### Installation
 
+#### Option 1: NPM (Recommended)
+
+```bash
+# Install globally from NPM
+npm install -g spec-kit-clean-architecture
+
+# Verify installation
+spec-ca --version
+spec-ca --help
+```
+
+#### Option 2: From Source
+
 ```bash
 # Clone the repository
 git clone https://github.com/thiagobutignon/spec-kit-clean-archicteture.git
@@ -25,7 +40,7 @@ cd spec-kit-clean-archicteture
 # Install dependencies
 npm install
 
-# Make CLI available globally (optional)
+# Make CLI available globally
 npm link
 ```
 
@@ -360,23 +375,35 @@ features/user/
 | **Context**      | Limited                    | AI knowledge only     | Multiple context sources        |
 | **Workflow**     | Manual adaptation          | Ad-hoc                | Structured development process  |
 
-## 🚀 What's New - v7.0 - COMPLETE CLI INTEGRATION
+## 🚀 What's New - v1.0.0 - NPM PUBLISHED!
 
-### 🎯 Spec-Kit CLI Integration (NEW!)
+### 📦 **NPM Package Available** (NEW!)
 
-- **Complete CLI Tool**: `spec-ca` command-line interface for project initialization
+```bash
+# Install globally from NPM
+npm install -g spec-kit-clean-architecture
+
+# Use anywhere
+spec-ca init my-project --ai claude
+```
+
+**🌍 Official NPM Package**: https://www.npmjs.com/package/spec-kit-clean-architecture
+
+### 🎯 Complete CLI Integration
+
+- **Global CLI Tool**: `spec-ca` available after NPM install
 - **Hybrid Workflow**: Seamless integration between spec-driven and layer-driven development
 - **7 Spec-Driven Commands**: Full workflow from `/constitution` to `/implement`
 - **Project Structure**: Automatic `.specify/` directory setup with constitution template
 - **Multi-AI Support**: Compatible with Claude, Gemini, Copilot, and Cursor
+- **15 Templates**: Backend, Frontend, and Fullstack .regent templates included
 
 ### 📦 Prerequisites
 
-- **Node.js**: >= 18.0.0
-- **TypeScript**: >= 5.0.0
+- **Node.js**: >= 18.0.0 (required for NPM install)
 - **Claude Code CLI**: Latest version installed (for best experience)
-- **Git**: Configured with GitHub credentials
-- **npm/yarn**: Package manager installed
+- **Git**: Configured with GitHub credentials (for project initialization)
+- **NPM**: For global installation and updates
 
 ## 🚀 Previous Release - v6.1 - E2E TESTING & PERFORMANCE VALIDATION
 
