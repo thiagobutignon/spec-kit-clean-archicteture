@@ -72,7 +72,7 @@ tools:
       purpose: "Research patterns and best practices for the selected layer"
   internal:
     - name: "serena"
-      purpose: "Read .regent templates and analyze existing code structure"
+      purpose: "Read .regent template sections sequentially using searchPattern with context"
 next_command: "/02-validate-layer-plan --layer=__LAYER__ from json: <your-generated-json>"
 ---
 
@@ -205,31 +205,40 @@ First, determine which layer you're working with:
 - Document environment configuration
 - Design health check strategy
 
-### Step 1.5: Read Architecture Template (MANDATORY)
+### Step 1.5: Sequential Template Reading (MANDATORY)
 
-**Before generating ANY JSON, you MUST read the appropriate .regent template:**
+**You must read the template in 4 sequential steps, consolidating information as you go:**
 
-1. **Determine target type**: backend, frontend, or fullstack (ask user if unclear)
-2. **Read the template**: Use serena to read `templates/[target]-[layer]-template.regent`
-   - Example: `templates/backend-domain-template.regent` for backend domain
-   - Example: `templates/frontend-presentation-template.regent` for frontend presentation
-3. **Extract structure**: Look for the `use_case_slice` section in the template
-4. **Follow template patterns**: Your JSON MUST match the folder structure defined in the template
+#### Step 1.5.1: Read Header Context
+Use serena: searchPattern("# --- From: shared/00-header", "templates/[target]-[layer]-template.regent", {context_lines_after: 15})
+**Write down:** Project configuration, architecture style, and base metadata.
 
-**Template Structure Example (from backend-domain-template.regent):**
-```yaml
-use_case_slice:
-  basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
-  layers:
-    domain:
-      folders: ['usecases', 'errors']
-    data:
-      folders: ['usecases']
-    presentation:
-      folders: ['controllers', 'errors']
-```
+#### Step 1.5.2: Read Target Structure
+Use serena: searchPattern("# --- From: [target]/01-structure", "templates/[target]-[layer]-template.regent", {context_lines_after: 30})
+**Write down:** The `use_case_slice` section with basePath and layer folder definitions.
 
-**CRITICAL**: Your generated paths MUST follow this exact structure from the template.
+#### Step 1.5.3: Read Layer Implementation
+Use serena: searchPattern("# --- From: [target]/steps/", "templates/[target]-[layer]-template.regent", {context_lines_after: 50})
+**Write down:** Layer-specific patterns, file structures, and implementation guidelines.
+
+#### Step 1.5.4: Read Validation Rules
+Use serena: searchPattern("# --- From: shared/01-footer", "templates/[target]-[layer]-template.regent", {context_lines_after: 20})
+**Write down:** Validation requirements and compliance rules.
+
+#### Step 1.5.5: Consolidate All Information
+Before generating JSON, create a summary:
+- **Target/Layer:** [extracted from header]
+- **Base Path Pattern:** [extracted from structure]
+- **Folder Structure:** [extracted from structure]
+- **Implementation Patterns:** [extracted from layer steps]
+- **Validation Requirements:** [extracted from footer]
+
+**CRITICAL:** Your JSON paths MUST use the exact folder structure from Step 1.5.2.
+
+**Example Target Resolution:**
+- If user says "backend domain" → read `templates/backend-domain-template.regent`
+- If user says "frontend presentation" → read `templates/frontend-presentation-template.regent`
+- If unclear, ask: "Is this for backend, frontend, or fullstack?"
 
 ### Step 2: External Research - Layer Specific
 
@@ -411,7 +420,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-register-user-use-case",
       "type": "create_file",
-      "path": "// Path MUST follow structure from .regent template - see Step 1.5",
+      "path": "// Use exact path from Step 1.5.2 structure + Step 1.5.3 patterns",
       "template": "export interface RegisterUser {\n  execute(input: RegisterUserInput): Promise<RegisterUserOutput>;\n}"
     }
   ]
@@ -432,7 +441,7 @@ Your final JSON must follow this structure:
     {
       "id": "implement-user-repository",
       "type": "create_file",
-      "path": "// Path MUST follow structure from .regent template - see Step 1.5",
+      "path": "// Use exact path from Step 1.5.2 structure + Step 1.5.3 patterns",
       "template": "export class UserRepositoryImpl implements UserRepository {\n  // Implementation\n}"
     }
   ]
@@ -452,7 +461,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-email-service",
       "type": "create_file",
-      "path": "// Path MUST follow structure from .regent template - see Step 1.5",
+      "path": "// Use exact path from Step 1.5.2 structure + Step 1.5.3 patterns",
       "template": "export class SendGridEmailService implements EmailService {\n  // SendGrid implementation\n}"
     }
   ]
@@ -473,7 +482,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-user-controller",
       "type": "create_file",
-      "path": "// Path MUST follow structure from .regent template - see Step 1.5",
+      "path": "// Use exact path from Step 1.5.2 structure + Step 1.5.3 patterns",
       "template": "export class UserController {\n  // REST endpoints\n}"
     }
   ]
@@ -493,7 +502,7 @@ Your final JSON must follow this structure:
     {
       "id": "setup-dependency-injection",
       "type": "create_file",
-      "path": "// Path MUST follow structure from .regent template - see Step 1.5",
+      "path": "// Use exact path from Step 1.5.2 structure + Step 1.5.3 patterns",
       "template": "export const container = new Container();\n// Bindings"
     }
   ]
@@ -503,10 +512,12 @@ Your final JSON must follow this structure:
 ## 7. Final Validation Checklist
 
 ### Template Compliance ✅
-- [ ] Read appropriate .regent template file
-- [ ] Extracted folder structure from template
-- [ ] Generated paths follow template pattern
-- [ ] No hardcoded structures used
+- [ ] Completed Step 1.5.1: Read and wrote down header context
+- [ ] Completed Step 1.5.2: Read and wrote down target structure
+- [ ] Completed Step 1.5.3: Read and wrote down layer implementation
+- [ ] Completed Step 1.5.4: Read and wrote down validation rules
+- [ ] Completed Step 1.5.5: Consolidated all information before JSON generation
+- [ ] Generated paths use exact structure from Step 1.5.2
 
 ### Per Layer Validation:
 
