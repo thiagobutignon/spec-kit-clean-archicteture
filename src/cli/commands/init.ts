@@ -18,12 +18,13 @@ interface InitOptions {
   debug?: boolean;
 }
 
-const AI_CHOICES = {
-  'claude': 'Claude Code',
-  'gemini': 'Gemini CLI',
-  'copilot': 'GitHub Copilot',
-  'cursor': 'Cursor'
-};
+// AI assistant options for future use
+// const AI_CHOICES = {
+//   'claude': 'Claude Code',
+//   'gemini': 'Gemini CLI',
+//   'copilot': 'GitHub Copilot',
+//   'cursor': 'Cursor'
+// };
 
 export async function initCommand(projectName: string | undefined, options: InitOptions): Promise<void> {
   console.log(chalk.cyan('🏗️ Initializing Spec-Kit Clean Architecture project...\n'));
@@ -55,6 +56,7 @@ export async function initCommand(projectName: string | undefined, options: Init
     await createProjectStructure(projectPath, options);
 
     // Initialize git if requested
+    // Initialize git by default unless explicitly disabled
     if (options.git !== false) {
       await initializeGit(projectPath);
     }
@@ -151,11 +153,33 @@ async function createProjectStructure(projectPath: string, options: InitOptions)
     console.log(chalk.yellow('⚠️  Warning: VS Code configuration not found in package'));
   }
 
+  // Copy root TypeScript files
+  const rootTsFiles = [
+    'execute-steps.ts',
+    'validate-template.ts',
+    'tsconfig.json',
+    'vitest.config.ts',
+    'eslint.config.js',
+    'regent.schema.json'
+  ];
+
+  console.log(chalk.cyan('📝 Copying configuration and utility files...'));
+  for (const file of rootTsFiles) {
+    const sourcePath = path.join(packageRoot, file);
+    const targetPath = path.join(projectPath, file);
+
+    if (await fs.pathExists(sourcePath)) {
+      await fs.copy(sourcePath, targetPath);
+    } else {
+      console.log(chalk.yellow(`⚠️  Warning: ${file} not found in package`));
+    }
+  }
+
   // Create initial files
   await createInitialFiles(projectPath, options);
 }
 
-async function createInitialFiles(projectPath: string, options: InitOptions): Promise<void> {
+async function createInitialFiles(projectPath: string, _options: InitOptions): Promise<void> {
   const packageJson = {
     name: path.basename(projectPath),
     version: '1.0.0',
