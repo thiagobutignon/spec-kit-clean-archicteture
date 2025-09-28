@@ -1,6 +1,6 @@
 {
   "name": "spec-kit-clean-architecture",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "CLI tool for spec-driven Clean Architecture development with AI-assisted code generation",
   "type": "module",
   "main": "src/cli/main.js",

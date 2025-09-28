@@ -10,6 +10,13 @@ import chalk from 'chalk';
 import { initCommand } from './commands/init.js';
 import { checkCommand } from './commands/check.js';
 import { showBanner } from './utils/banner.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf-8'));
 
 const program = new Command();
 
@@ -17,7 +24,7 @@ const program = new Command();
 program
   .name('spec-ca')
   .description('Spec-Kit Clean Architecture - AI-assisted development with guaranteed architectural quality')
-  .version('1.0.0');
+  .version(packageJson.version);
 
 // Custom help display
 const originalHelp = program.help;
