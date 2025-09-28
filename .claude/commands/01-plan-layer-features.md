@@ -25,8 +25,8 @@ parameters:
     required: true
   output_location:
     type: "path"
-    pattern: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/plan.json"
-    example: "spec/001-user-registration/[LAYER]/plan.json"
+    pattern: "./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/plan.json"
+    example: "./spec/001-user-registration/[LAYER]/plan.json"
 scoring:
   levels:
     catastrophic: -2
@@ -140,8 +140,8 @@ Each layer has specific requirements for perfect score - see `scoring.perfect_re
 Your **only** output for this task is a single, complete, and well-formed **JSON object**. This JSON will serve as the input for the `/03-generate-layer-code` command.
 
 **OUTPUT LOCATION**:
-- Save at: `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/plan.json`
-- Example: `spec/001-user-registration/[LAYER]/plan.json`
+- Save at: `./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/plan.json`
+- Example: `./spec/001-user-registration/[LAYER]/plan.json`
 - Feature numbers should be sequential (001, 002, 003, etc.)
 
 ## 2. Layer Selection

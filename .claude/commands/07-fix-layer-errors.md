@@ -17,12 +17,12 @@ parameters:
     required: true
   working_directory:
     type: "path"
-    pattern: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/"
+    pattern: "./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/"
     description: "Base path for all file operations"
   output:
     type: "yaml"
     description: "Updated YAML with fix step appended"
-    location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
+    location: "./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
 rlhf_score_recovery:
   from_catastrophic:
     current: -2
@@ -76,7 +76,7 @@ Analyze a failed step in a YAML implementation plan and generate a **new correct
 | Input | Description |
 |-------|-------------|
 | **YAML with Failures** | Contains steps with `status: 'FAILED'` |
-| **Working Directory** | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/` |
+| **Working Directory** | `./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/` |
 | **Fix Strategy** | Append new fix step, preserve failed step |
 
 ## 3. Step-by-Step Execution Plan

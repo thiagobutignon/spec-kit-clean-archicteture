@@ -14,7 +14,7 @@ parameters:
   input:
     type: "yaml"
     description: "Complete YAML plan from /04-reflect-layer-lessons"
-    location: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
+    location: "./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
     required: true
   output_approved:
     type: "json"
@@ -105,7 +105,7 @@ Act as a **Principal Engineer** performing a final architectural review on an im
 
 | Parameter | Type | Location | Description |
 |-----------|------|----------|-------------|
-| **YAML Plan** | YAML | `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml` | Complete, potentially revised YAML from /04-reflect-layer-lessons |
+| **YAML Plan** | YAML | `./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml` | Complete, potentially revised YAML from /04-reflect-layer-lessons |
 
 ## 4. Evaluation Principles (The Constitution)
 

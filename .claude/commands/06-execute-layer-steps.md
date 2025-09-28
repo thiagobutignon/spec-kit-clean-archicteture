@@ -17,8 +17,8 @@ parameters:
     required: true
   working_directory:
     type: "path"
-    pattern: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/"
-    example: "spec/001-user-registration/[LAYER]/"
+    pattern: "./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/"
+    example: "./spec/001-user-registration/[LAYER]/"
   output_success:
     type: "json"
     format: '{"status": "SUCCESS", "message": "string", "commit_hashes": ["string"], "final_rlhf_score": number}'
@@ -100,7 +100,7 @@ Act as an **automated build engineer**. Execute the approved YAML implementation
 | Parameter | Description | Example |
 |-----------|-------------|---------|
 | **YAML Plan** | Complete approved YAML from /05-evaluate-layer-results | Full YAML content |
-| **Working Directory** | Base path for all file operations | `spec/001-user-registration/[LAYER]/` |
+| **Working Directory** | Base path for all file operations | `./spec/001-user-registration/[LAYER]/` |
 
 ### ⚠️ Important Path Resolution:
 When the plan specifies:
@@ -110,7 +110,7 @@ path: "src/features/user-registration/[LAYER]/usecases/register-user.ts"
 
 Actually create at:
 ```
-spec/001-user-registration/[LAYER]/src/features/user-registration/[LAYER]/usecases/register-user.ts
+./spec/001-user-registration/[LAYER]/src/features/user-registration/[LAYER]/usecases/register-user.ts
 ```
 
 ## 4. Prohibited Actions ❌
@@ -160,7 +160,7 @@ graph TD
 <summary>Success Output with RLHF Scoring</summary>
 
 ```
-🚀 Loading implementation file: spec/001-user-registration/[LAYER]/implementation.yaml
+🚀 Loading implementation file: ./spec/001-user-registration/[LAYER]/implementation.yaml
 🚀 Starting execution of 2 steps...
 
 ▶️  Processing Step 1/2: create-structure
@@ -193,7 +193,7 @@ graph TD
 <summary>Failure Output with RLHF -2</summary>
 
 ```
-🚀 Loading implementation file: spec/001-user-registration/[LAYER]/implementation.yaml
+🚀 Loading implementation file: ./spec/001-user-registration/[LAYER]/implementation.yaml
 🚀 Starting execution of 2 steps...
 
 ▶️  Processing Step 1/2: create-structure
