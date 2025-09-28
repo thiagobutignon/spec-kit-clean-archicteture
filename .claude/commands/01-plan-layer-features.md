@@ -25,8 +25,8 @@ parameters:
     required: true
   output_location:
     type: "path"
-    pattern: "spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/plan.json"
-    example: "spec/001-user-registration/[LAYER]/plan.json"
+    pattern: "./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/plan.json"
+    example: "./spec/001-user-registration/__LAYER__/plan.json"
 scoring:
   levels:
     catastrophic: -2
@@ -73,7 +73,7 @@ tools:
   internal:
     - name: "serena"
       purpose: "Analyze existing code structure and conventions"
-next_command: "/02-validate-layer-plan --layer=[LAYER] from json: <your-generated-json>"
+next_command: "/02-validate-layer-plan --layer=__LAYER__ from json: <your-generated-json>"
 ---
 
 # Task: Pre-Task Layer Planning
@@ -140,8 +140,8 @@ Each layer has specific requirements for perfect score - see `scoring.perfect_re
 Your **only** output for this task is a single, complete, and well-formed **JSON object**. This JSON will serve as the input for the `/03-generate-layer-code` command.
 
 **OUTPUT LOCATION**:
-- Save at: `spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/plan.json`
-- Example: `spec/001-user-registration/[LAYER]/plan.json`
+- Save at: `./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/plan.json`
+- Example: `./spec/001-user-registration/__LAYER__/plan.json`
 - Feature numbers should be sequential (001, 002, 003, etc.)
 
 ## 2. Layer Selection
@@ -253,7 +253,7 @@ import { PrismaClient } from '@prisma/client'; // ❌ Database
 #### Data Layer Validation:
 ```typescript
 // REQUIRED patterns:
-import { Repository } from '../[LAYER]/repositories'; // ✅ Implement domain interface
+import { Repository } from '../__LAYER__/repositories'; // ✅ Implement domain interface
 // FORBIDDEN:
 import { Controller } from 'express'; // ❌ Presentation layer
 ```
@@ -263,7 +263,7 @@ import { Controller } from 'express'; // ❌ Presentation layer
 // ALLOWED:
 import axios from 'axios'; // ✅ External service client
 // FORBIDDEN:
-import { User } from '../[LAYER]/entities'; // ❌ Domain logic
+import { User } from '../__LAYER__/entities'; // ❌ Domain logic
 ```
 
 #### Presentation Layer Validation:
@@ -271,7 +271,7 @@ import { User } from '../[LAYER]/entities'; // ❌ Domain logic
 // ALLOWED:
 import { Request, Response } from 'express'; // ✅ HTTP handling
 // REQUIRED:
-import { UseCase } from '../[LAYER]/use-cases'; // ✅ Call domain use cases
+import { UseCase } from '../__LAYER__/use-cases'; // ✅ Call domain use cases
 ```
 
 #### Main Layer Validation:
@@ -360,7 +360,7 @@ Your final JSON must follow this structure:
       "id": "step-identifier",
       "type": "[create_file|refactor_file]",
       "description": "Step description",
-      "path": "src/features/[FEATURE_NAME]/[USE_CASE_NAME]/[layer]/path/to/file.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__LAYER__/path/to/file.ts",
       "template": "// Code template with placeholders",
       "references": []
     }
@@ -385,7 +385,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-register-user-use-case",
       "type": "create_file",
-      "path": "src/features/[FEATURE_NAME]/[USE_CASE_NAME]/[LAYER]/use-cases/register-user.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__LAYER__/use-cases/register-user.ts",
       "template": "export interface RegisterUser {\n  execute(input: RegisterUserInput): Promise<RegisterUserOutput>;\n}"
     }
   ]
@@ -406,7 +406,7 @@ Your final JSON must follow this structure:
     {
       "id": "implement-user-repository",
       "type": "create_file",
-      "path": "src/features/[FEATURE_NAME]/[USE_CASE_NAME]/data/repositories/user-repository.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/data/repositories/user-repository.ts",
       "template": "export class UserRepositoryImpl implements UserRepository {\n  // Implementation\n}"
     }
   ]
@@ -426,7 +426,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-email-service",
       "type": "create_file",
-      "path": "src/features/[FEATURE_NAME]/[USE_CASE_NAME]/infra/services/email-service.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/infra/services/email-service.ts",
       "template": "export class SendGridEmailService implements EmailService {\n  // SendGrid implementation\n}"
     }
   ]
@@ -447,7 +447,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-user-controller",
       "type": "create_file",
-      "path": "src/features/[FEATURE_NAME]/[USE_CASE_NAME]/presentation/controllers/user-controller.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/controllers/user-controller.ts",
       "template": "export class UserController {\n  // REST endpoints\n}"
     }
   ]
@@ -467,7 +467,7 @@ Your final JSON must follow this structure:
     {
       "id": "setup-dependency-injection",
       "type": "create_file",
-      "path": "src/features/[FEATURE_NAME]/[USE_CASE_NAME]/main/container.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/main/container.ts",
       "template": "export const container = new Container();\n// Bindings"
     }
   ]

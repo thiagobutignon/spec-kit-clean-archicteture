@@ -37,9 +37,9 @@ Create a comprehensive specification that maps user requirements to Clean Archit
 
 ### 1. Feature Identity
 ```markdown
-# Feature: [FEATURE_NAME]
+# Feature: __FEATURE_NAME__
 
-**Spec ID**: SPEC-[NUMBER]-[FEATURE_SLUG]
+**Spec ID**: SPEC-__NUMBER__-__FEATURE_SLUG__
 **Created**: [DATE]
 **Status**: Draft
 **Priority**: [High/Medium/Low]

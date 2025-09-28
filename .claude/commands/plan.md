@@ -37,10 +37,10 @@ Create a comprehensive plan that respects Clean Architecture dependency rules an
 
 ### 1. Plan Identity
 ```markdown
-# Implementation Plan: [FEATURE_NAME]
+# Implementation Plan: __FEATURE_NAME__
 
-**Plan ID**: PLAN-[SPEC_ID]-[TARGET]
-**Source Spec**: [SPEC_ID]
+**Plan ID**: PLAN-__SPEC_ID__-__TARGET__
+**Source Spec**: __SPEC_ID__
 **Target**: [backend/frontend/fullstack]
 **Created**: [DATE]
 **Status**: Draft
