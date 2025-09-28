@@ -1,11 +1,11 @@
 {
-  "name": "spec-kit-clean-architecture",
-  "version": "1.0.6",
-  "description": "CLI tool for spec-driven Clean Architecture development with AI-assisted code generation",
+  "name": "@the-regent/cli",
+  "version": "2.0.0",
+  "description": "The Regent - AI-powered Clean Architecture CLI with guaranteed architectural quality",
   "type": "module",
   "main": "src/cli/main.js",
   "bin": {
-    "spec-ca": "./bin/spec-ca"
+    "regent": "./bin/regent"
   },
   "files": [
     "bin/**/*",
@@ -31,13 +31,13 @@
     "tdd",
     "ddd"
   ],
-  "homepage": "https://github.com/thiagobutignon/spec-kit-clean-archicteture#readme",
+  "homepage": "https://github.com/thiagobutignon/the-regent#readme",
   "bugs": {
-    "url": "https://github.com/thiagobutignon/spec-kit-clean-archicteture/issues"
+    "url": "https://github.com/thiagobutignon/the-regent/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thiagobutignon/spec-kit-clean-archicteture.git"
+    "url": "git+https://github.com/thiagobutignon/the-regent.git"
   },
   "author": "Thiago Butignon <thiagobutignon@gmail.com>",
   "license": "MIT",
@@ -76,10 +76,12 @@
     "zx": "^8.8.1"
   },
   "dependencies": {
+    "@types/inquirer": "^9.0.9",
     "ajv": "^8.17.1",
     "chalk": "^5.6.2",
     "commander": "^14.0.1",
     "fs-extra": "^11.3.2",
+    "inquirer": "^12.9.6",
     "shelljs": "^0.10.0",
     "zod": "^3.23.0"
   }
