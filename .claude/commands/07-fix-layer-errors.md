@@ -17,12 +17,12 @@ parameters:
     required: true
   working_directory:
     type: "path"
-    pattern: "./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/"
+    pattern: "./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/"
     description: "Base path for all file operations"
   output:
     type: "yaml"
     description: "Updated YAML with fix step appended"
-    location: "./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
+    location: "./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/implementation.yaml"
 rlhf_score_recovery:
   from_catastrophic:
     current: -2
@@ -76,7 +76,7 @@ Analyze a failed step in a YAML implementation plan and generate a **new correct
 | Input | Description |
 |-------|-------------|
 | **YAML with Failures** | Contains steps with `status: 'FAILED'` |
-| **Working Directory** | `./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/` |
+| **Working Directory** | `./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/` |
 | **Fix Strategy** | Append new fix step, preserve failed step |
 
 ## 3. Step-by-Step Execution Plan
@@ -221,7 +221,7 @@ graph TD
   status: 'PENDING'
   rlhf_score: null
   execution_log: ''
-  path: 'src/features/user/[LAYER]/use-cases/get-user.ts'
+  path: 'src/features/user/__LAYER__/use-cases/get-user.ts'
   template: |
     <<<REPLACE>>>
     export interface GetUser {
@@ -265,7 +265,7 @@ graph TD
   status: 'PENDING'
   rlhf_score: null
   execution_log: ''
-  path: 'src/features/user/[LAYER]/use-cases/fetch-user.ts'
+  path: 'src/features/user/__LAYER__/use-cases/fetch-user.ts'
   template: |
     <<<REPLACE>>>
     import axios from 'axios';
@@ -286,7 +286,7 @@ graph TD
     <<</WITH>>>
   validation_script: |
     echo "🏗️ Verifying Clean Architecture compliance..."
-    grep -r "import.*from.*axios" src/features/*/[LAYER]/ && echo "❌ Found axios in layer" && exit 1
+    grep -r "import.*from.*axios" src/features/*/__LAYER__/ && echo "❌ Found axios in layer" && exit 1
     echo "✅ Selected layer is clean - no external dependencies"
     echo "🏆 Architecture violation fixed for RLHF +2 score"
   references:

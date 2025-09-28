@@ -243,7 +243,7 @@ src/features/[domain]/[use-case]/
 
 ### Implementation Reports
 ```
-.specify/implementation/[FEATURE_NAME]/
+.specify/implementation/__FEATURE_NAME__/
 ├── implementation-report.md           # Summary of generated code
 ├── rlhf-scores.json                  # RLHF scores per file
 ├── architecture-validation.md        # Compliance report

@@ -213,7 +213,7 @@ graph TD
       "id": "create-use-case-create-user-account",
       "type": "create_file",
       "description": "Create user account use case",
-      "path": "src/features/user-account/[LAYER]/use-cases/create-user-account.ts",
+      "path": "src/features/user-account/__LAYER__/use-cases/create-user-account.ts",
       "references": [
         {
           "type": "external_pattern",

@@ -14,7 +14,7 @@ parameters:
   input:
     type: "yaml"
     description: "Complete validated YAML from /03-generate-layer-code"
-    location: "./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
+    location: "./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/implementation.yaml"
     required: true
   output_success:
     type: "json"
@@ -94,7 +94,7 @@ Act as a **senior software architect** reviewing a detailed implementation plan.
 
 | Parameter | Type | Location | Purpose |
 |-----------|------|----------|---------|
-| **YAML Plan** | YAML | `./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml` | Complete validated plan from /03-generate-layer-code |
+| **YAML Plan** | YAML | `./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/implementation.yaml` | Complete validated plan from /03-generate-layer-code |
 
 ## 4. Reflection Checklist (Guiding Questions)
 

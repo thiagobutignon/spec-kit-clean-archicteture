@@ -17,8 +17,8 @@ parameters:
     required: true
   working_directory:
     type: "path"
-    pattern: "./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/"
-    example: "./spec/001-user-registration/[LAYER]/"
+    pattern: "./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/"
+    example: "./spec/001-user-registration/__LAYER__/"
   output_success:
     type: "json"
     format: '{"status": "SUCCESS", "message": "string", "commit_hashes": ["string"], "final_rlhf_score": number}'
@@ -100,17 +100,17 @@ Act as an **automated build engineer**. Execute the approved YAML implementation
 | Parameter | Description | Example |
 |-----------|-------------|---------|
 | **YAML Plan** | Complete approved YAML from /05-evaluate-layer-results | Full YAML content |
-| **Working Directory** | Base path for all file operations | `./spec/001-user-registration/[LAYER]/` |
+| **Working Directory** | Base path for all file operations | `./spec/001-user-registration/__LAYER__/` |
 
 ### ⚠️ Important Path Resolution:
 When the plan specifies:
 ```
-path: "src/features/user-registration/[LAYER]/usecases/register-user.ts"
+path: "src/features/user-registration/__LAYER__/usecases/register-user.ts"
 ```
 
 Actually create at:
 ```
-./spec/001-user-registration/[LAYER]/src/features/user-registration/[LAYER]/usecases/register-user.ts
+./spec/001-user-registration/__LAYER__/src/features/user-registration/__LAYER__/usecases/register-user.ts
 ```
 
 ## 4. Prohibited Actions ❌
@@ -160,7 +160,7 @@ graph TD
 <summary>Success Output with RLHF Scoring</summary>
 
 ```
-🚀 Loading implementation file: ./spec/001-user-registration/[LAYER]/implementation.yaml
+🚀 Loading implementation file: ./spec/001-user-registration/__LAYER__/implementation.yaml
 🚀 Starting execution of 2 steps...
 
 ▶️  Processing Step 1/2: create-structure
@@ -168,7 +168,7 @@ graph TD
    ✅ Step 'create-structure' completed successfully. RLHF Score: 1
 
 ▶️  Processing Step 2/2: create-use-case-create-user
-   📄 Creating file: src/features/user/[LAYER]/use-cases/create-user.ts
+   📄 Creating file: src/features/user/__LAYER__/use-cases/create-user.ts
    🔍 Running lint check...
    ✅ Lint check passed
    🏆 Step 'create-use-case-create-user' completed successfully. RLHF Score: 2
@@ -193,7 +193,7 @@ graph TD
 <summary>Failure Output with RLHF -2</summary>
 
 ```
-🚀 Loading implementation file: ./spec/001-user-registration/[LAYER]/implementation.yaml
+🚀 Loading implementation file: ./spec/001-user-registration/__LAYER__/implementation.yaml
 🚀 Starting execution of 2 steps...
 
 ▶️  Processing Step 1/2: create-structure
@@ -201,7 +201,7 @@ graph TD
    ✅ Step 'create-structure' completed successfully. RLHF Score: 1
 
 ▶️  Processing Step 2/2: create-use-case-with-axios
-   📄 Creating file: src/features/user/[LAYER]/use-cases/fetch-user.ts
+   📄 Creating file: src/features/user/__LAYER__/use-cases/fetch-user.ts
    🔍 Running architecture check...
 
 💥 ERROR: Step 'create-use-case-with-axios' failed. RLHF Score: -2

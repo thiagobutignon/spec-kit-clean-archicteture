@@ -13,7 +13,7 @@ tags:
 parameters:
   feature_path:
     type: "path"
-    pattern: "features/[FEATURE_NAME]/"
+    pattern: "features/__FEATURE_NAME__/"
     description: "Path to the feature being tested"
   test_type:
     type: "enum"

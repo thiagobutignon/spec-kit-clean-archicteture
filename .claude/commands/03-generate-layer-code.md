@@ -23,8 +23,8 @@ parameters:
     required: false
   output:
     type: "yaml"
-    location: "./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
-    example: "./spec/001-user-registration/[LAYER]/implementation.yaml"
+    location: "./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/implementation.yaml"
+    example: "./spec/001-user-registration/__LAYER__/implementation.yaml"
 modes:
   create:
     description: "Generate new YAML from JSON plan"
@@ -103,7 +103,7 @@ Your **only** output is a complete and valid YAML file content.
 
 **Output Location:**
 ```
-./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
+./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/implementation.yaml
 ```
 
 **Naming Convention:**
@@ -111,7 +111,7 @@ Your **only** output is a complete and valid YAML file content.
 |-----------|--------|---------|
 | FEATURE_NUMBER | Sequential 3-digit | 001, 002, 003 |
 | FEATURE_NAME | kebab-case | user-registration |
-| Full Path | Combined | ./spec/001-user-registration/[LAYER]/implementation.yaml |
+| Full Path | Combined | ./spec/001-user-registration/__LAYER__/implementation.yaml |
 
 ## 2. Prohibited Actions ❌
 

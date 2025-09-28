@@ -44,7 +44,7 @@ Tasks are organized by **Clean Architecture layers** with **strict dependency or
 ## 📝 Task List Structure
 
 ```markdown
-# Implementation Tasks: [FEATURE_NAME]
+# Implementation Tasks: __FEATURE_NAME__
 
 **Generated From**: [PLAN_ID]
 **Target**: [backend/frontend/fullstack]

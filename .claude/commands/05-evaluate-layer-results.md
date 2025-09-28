@@ -14,7 +14,7 @@ parameters:
   input:
     type: "yaml"
     description: "Complete YAML plan from /04-reflect-layer-lessons"
-    location: "./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml"
+    location: "./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/implementation.yaml"
     required: true
   output_approved:
     type: "json"
@@ -105,7 +105,7 @@ Act as a **Principal Engineer** performing a final architectural review on an im
 
 | Parameter | Type | Location | Description |
 |-----------|------|----------|-------------|
-| **YAML Plan** | YAML | `./spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml` | Complete, potentially revised YAML from /04-reflect-layer-lessons |
+| **YAML Plan** | YAML | `./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/implementation.yaml` | Complete, potentially revised YAML from /04-reflect-layer-lessons |
 
 ## 4. Evaluation Principles (The Constitution)
 
@@ -290,7 +290,7 @@ steps:
     # ... (correct branch step)
   - id: "create-use-case-with-axios"
     type: "create_file"
-    path: "src/features/user/[LAYER]/use-cases/fetch-user.ts"
+    path: "src/features/user/__LAYER__/use-cases/fetch-user.ts"
     template: |
       import axios from 'axios';
 
