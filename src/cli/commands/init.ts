@@ -2,6 +2,13 @@ import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
 import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// Get the directory where this package is installed
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageRoot = path.resolve(__dirname, '..', '..', '..');
 
 interface InitOptions {
   ai?: string;
@@ -87,21 +94,25 @@ async function createProjectStructure(projectPath: string, options: InitOptions)
   }
 
   // Copy existing .claude content if it exists
-  const sourceClaudeDir = path.join(process.cwd(), '.claude');
+  const sourceClaudeDir = path.join(packageRoot, '.claude');
   const targetClaudeDir = path.join(projectPath, '.claude');
 
   if (await fs.pathExists(sourceClaudeDir)) {
-    console.log(chalk.cyan('📋 Copying existing Claude configuration...'));
+    console.log(chalk.cyan('📋 Copying Claude configuration...'));
     await fs.copy(sourceClaudeDir, targetClaudeDir);
+  } else {
+    console.log(chalk.yellow('⚠️  Warning: Claude configuration not found in package'));
   }
 
   // Copy templates
-  const sourceTemplatesDir = path.join(process.cwd(), 'templates');
+  const sourceTemplatesDir = path.join(packageRoot, 'templates');
   const targetTemplatesDir = path.join(projectPath, 'templates');
 
   if (await fs.pathExists(sourceTemplatesDir)) {
     console.log(chalk.cyan('📄 Copying Clean Architecture templates...'));
     await fs.copy(sourceTemplatesDir, targetTemplatesDir);
+  } else {
+    console.log(chalk.yellow('⚠️  Warning: Templates not found in package'));
   }
 
   // Create initial files
