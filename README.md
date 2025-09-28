@@ -194,16 +194,16 @@ Spec-Kit Clean Architecture uniquely combines **GitHub's spec-kit workflow** wit
 
 ```mermaid
 graph LR
-    A[User Intent] --> B[/constitution]
-    B --> C[/specify]
-    C --> D[/clarify]
-    D --> E[/plan]
-    E --> F[/tasks]
+    A[User Intent] --> B[constitution]
+    B --> C[specify]
+    C --> D[clarify]
+    D --> E[plan]
+    E --> F[tasks]
 
-    F --> G[/01-plan-layer-features]
-    G --> H[/02-validate-layer-plan]
-    H --> I[/03-generate-layer-code]
-    I --> J[/implement]
+    F --> G[01-plan-layer-features]
+    G --> H[02-validate-layer-plan]
+    H --> I[03-generate-layer-code]
+    I --> J[implement]
 
     J --> K[.regent Templates]
     K --> L[RLHF Validation]
