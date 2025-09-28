@@ -1,7 +1,13 @@
-# REGENT CLI Dogfooding Execution Tracker
+# REGENT CLI Dogfooding Execution - Failed with Critical Learnings
 
 ## 🎯 Mission
 Execute fresh REGENT CLI dogfooding with zero prior assumptions. Test real user onboarding experience and validate that the CLI provides seamless developer experience for Clean Architecture implementation.
+
+## ⚠️ DOGFOODING STATUS: FAILED
+**Reason**: Critical architectural mismatch between command system and template system
+**Blocking Issue**: #93 - Commands do not use .regent templates
+**Date**: 2024-09-28
+**Version Tested**: regent-cli@2.0.1
 
 ## 👥 Role Assignments
 - **Fresh Dogfooder**: New Claude executor (zero context, fresh perspective)
@@ -57,31 +63,52 @@ Execute fresh REGENT CLI dogfooding with zero prior assumptions. Test real user 
 
 ### Phase 3: Clean Architecture Workflow 🔄
 - [x] Use `/01-plan-layer-features` for a real feature (suggest: user authentication)
-- [ ] Execute `/02-validate-layer-plan` and verify validation works
-- [ ] Run `/03-generate-layer-code` and check YAML output quality
-- [ ] Complete `/06-execute-layer-steps` and monitor execution
-- [ ] Document workflow friction points and unclear guidance
+- [ ] ❌ BLOCKED: Execute `/02-validate-layer-plan` - Cannot proceed due to Issue #93
+- [ ] ❌ BLOCKED: Run `/03-generate-layer-code` - Cannot proceed due to Issue #93
+- [ ] ❌ BLOCKED: Complete `/06-execute-layer-steps` - Cannot proceed due to Issue #93
+- [x] Document workflow friction points and unclear guidance
 - [ ] Test error handling when steps fail
 - [ ] Verify RLHF scoring provides meaningful feedback
 
 **Workflow Validation:**
-- [x] Plan → Validate → Generate → Execute sequence works smoothly (Step 1 complete)
+- ❌ Plan → Validate → Generate → Execute sequence BROKEN (Critical architectural mismatch)
 - [x] Each step provides clear feedback to user
 - [ ] Error messages are actionable and helpful
-- [ ] Generated code follows Clean Architecture principles
+- ❌ Generated code DOES NOT follow Clean Architecture templates
 - [ ] RLHF scores accurately reflect code quality (-2 to +2 scale)
 
 **Phase 3.1: /01-plan-layer-features Results**
-✅ Command executed successfully for "user authentication"
-✅ Generated comprehensive JSON plan at `spec/001-user-authentication/domain/plan.json`
-✅ Plan includes:
-  - Ubiquitous Language definitions (7 terms)
-  - Business Rules (4 rules)
-  - 13 implementation steps
-  - 6 high-level tasks (T001-T006)
-  - Proper Clean Architecture structure
-✅ Clear next step guidance provided
-⚠️ Mixed format: both "steps" and "tasks" arrays (may need clarification)
+⚠️ Command executed but with CRITICAL ISSUES:
+❌ **DOES NOT** read .regent templates
+❌ **DOES NOT** follow Vertical Slice Architecture
+❌ Generated incompatible structure at `spec/001-user-authentication/domain/plan.json`
+❌ Plan structure mismatches template expectations:
+  - Uses `entities` instead of `models`
+  - Creates `value-objects` at wrong level
+  - Missing use-case slices pattern
+  - Wrong folder hierarchy (horizontal vs vertical slicing)
+⚠️ Mixed format: both "steps" and "tasks" arrays (Issue #92)
+
+## 🔴 CRITICAL FINDINGS
+
+### Issue #93: Command-Template Complete Disconnection
+**Severity**: CRITICAL - Blocks entire workflow
+**Root Cause**: `/01-plan-layer-features` command never reads or uses .regent templates
+**Impact**:
+- Generated structure incompatible with templates
+- Subsequent commands will fail
+- Workflow integration completely broken
+
+**Evidence**:
+```
+Generated: src/features/user-authentication/domain/entities/user.ts
+Expected:  src/features/user/create-user/domain/usecases/create-user.ts
+```
+
+### Architectural Mismatch
+- **Command uses**: Horizontal layering (domain/data/infra grouped)
+- **Templates use**: Vertical slicing (use-case based organization)
+- **Result**: Complete structural incompatibility
 
 ### Phase 4: Real Development Test 🏗️
 - [ ] Implement actual feature using REGENT (not just examples)
@@ -243,27 +270,75 @@ As Bug Mapper, when fresh dogfooding begins:
 
 ## 📈 Progress Tracking
 
-### Current System Health (Pre-Fresh Dogfooding)
-- ✅ Core Architecture: Implemented
+### System Health (Post-Dogfooding Failure)
+- ✅ Core Architecture: Implemented (but disconnected)
 - ✅ GitFlow Integration: Working
 - ✅ RLHF Scoring: Functional
-- ✅ spec-kit ↔ .regent Bridge: Operational
+- ❌ spec-kit ↔ .regent Bridge: **BROKEN** (commands don't use templates)
 - ⚠️ Template Coverage: 60% (15/25 templates)
-- ⚠️ Documentation: Needs fresh-user validation
+- ❌ Documentation: Describes non-existent integration
 
-### Success Definition
-Fresh dogfooding is successful when a new developer can:
-1. Install the CLI without assistance
-2. Create a working project using the tool
-3. Implement a complete feature following Clean Architecture
-4. Get meaningful feedback from the RLHF system
-5. Successfully complete the GitFlow process
+### Failure Analysis
+Dogfooding failed at Phase 3 because:
+1. ✅ CLI installs correctly
+2. ✅ Project initialization works
+3. ❌ Feature implementation FAILS due to architectural mismatch
+4. ❌ Commands generate incompatible structures
+5. ❌ Templates are never consulted
+
+## 📚 LESSONS LEARNED FROM FAILURE
+
+### 1. **System Integration Gap**
+The most critical discovery: The command system (`.claude/commands/`) and template system (`.regent/templates/`) operate independently without integration.
+
+### 2. **Architectural Pattern Mismatch**
+- **Commands assume**: Traditional horizontal layering
+- **Templates implement**: Modern vertical slicing
+- **Result**: Complete incompatibility
+
+### 3. **Missing Validation Layer**
+No validation exists to ensure commands generate template-compatible structures.
+
+### 4. **Documentation vs Reality**
+Documentation describes an integrated system, but implementation shows disconnected subsystems.
+
+### 5. **Testing Gap**
+End-to-end workflow testing would have caught this integration failure early.
+
+## 🔧 REQUIRED FIXES
+
+### Priority 1: Critical (Blocks Everything)
+- **Issue #93**: Commands must read and use .regent templates
+- **Issue #92**: Standardize JSON plan format
+
+### Priority 2: High (Major UX Issues)
+- **Issue #90**: Update check command references
+- **Issue #88**: Fix version flag convention
+- **Issue #87**: Update banner references
+
+### Priority 3: Medium (Feature Gaps)
+- **Issue #91**: Add MCP tools detection
+- **Issue #70**: Complete missing templates
+
+## 🚀 RECOMMENDATIONS
+
+### Immediate Actions
+1. **STOP** further dogfooding until Issue #93 is resolved
+2. **FIX** the command-template integration
+3. **ADD** validation between commands and templates
+4. **TEST** end-to-end workflow before next dogfooding
+
+### Long-term Improvements
+1. **Unify** command and template systems
+2. **Create** integration tests for full workflow
+3. **Document** actual implementation (not ideal)
+4. **Add** template validation to commands
 
 ---
 
-*This document serves as the coordination hub between Bug Mapper and Fresh Dogfooder roles. Update as insights emerge from fresh dogfooding execution.*
+*This document captures the failed dogfooding attempt and critical learnings about system architecture mismatch.*
 
 **Last Updated**: 2024-09-28
-**System Status**: Ready for fresh dogfooding
-**Known Critical Issues**: 0 (all resolved)
-**Template Coverage**: 60% (sufficient for backend/domain testing)
+**System Status**: BROKEN - Critical architectural issues found
+**Blocking Issues**: #93 (command-template disconnection)
+**Template Coverage**: 60% (but unusable due to integration failure)
