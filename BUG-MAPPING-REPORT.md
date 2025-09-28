@@ -1,16 +1,16 @@
 # 🗺️ Bug Mapping Report
 ## Executive Summary
 
-Durante o desenvolvimento e dogfooding da CLI spec-kit-clean-architecture, foram identificadas e resolvidas **5 issues críticas** que revelaram problemas arquiteturais fundamentais. Este relatório documenta todas as descobertas, soluções implementadas e insights para transfer de conhecimento.
+During development and dogfooding of the CLI spec-kit-clean-architecture, **5 critical issues** were identified and resolved that revealed fundamental architectural problems. This report documents all discoveries, implemented solutions, and insights for knowledge transfer.
 
-**Issues Resolvidas:**
+**Resolved Issues:**
 - ✅ Issue #76: /implement command bypasses workflow
 - ✅ Issue #77: SpecToYamlTransformer missing
 - ✅ Issue #78: GitFlow enforcement missing
 - ✅ Issue #75: spec-kit/.regent integration gap
 - ✅ Issue #69: Path inconsistency in documentation
 
-**Impact Total:** Eliminação do anti-pattern "Parallel Evolution" e criação de arquitetura integrada e funcional.
+**Total Impact:** Elimination of "Parallel Evolution" anti-pattern and creation of integrated, functional architecture.
 
 ---
 
@@ -127,8 +127,8 @@ Durante o desenvolvimento e dogfooding da CLI spec-kit-clean-architecture, foram
 - **-2 Catastrophic**: Architecture violations
 
 ### 4. Template-Based Generation
-**Descoberta**: Sistema usa templates .regent para geração:
-```
+**Discovery**: System uses .regent templates for generation:
+```text
 .regent/templates/[target]-[layer]-template.regent
 ```
 
@@ -201,11 +201,13 @@ O sistema está **95% funcional** com arquitetura sólida. As 5 issues críticas
 /06-execute-layer-steps      # Execução com RLHF
 ```
 
-#### 2. **Workflow Correto**
+#### 2. **Correct Workflow**
 ```mermaid
 graph LR
     A[Plan] --> B[Validate] --> C[Generate] --> D[Execute]
 ```
+
+*Text fallback: Plan → Validate → Generate → Execute*
 
 #### 3. **SpecToYamlTransformer Usage**
 ```typescript
