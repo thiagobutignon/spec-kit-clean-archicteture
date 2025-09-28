@@ -526,6 +526,31 @@ Your final JSON must follow this structure:
 4. **Follow conventions** - Consistent with existing code
 5. **Consider testing** - How will this be tested?
 
+## 📤 Output for YAML Generation
+
+The JSON plan generated here should be structured to work with SpecToYamlTransformer:
+
+```json
+{
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "Create Project Entity",
+      "description": "...",
+      "layer": "domain",
+      "story_points": 3,
+      "priority": "Primary",
+      "dependencies": [],
+      "acceptance_criteria": [...]
+    }
+  ]
+}
+```
+
+This format is compatible with:
+- SpecToYamlTransformer.transformTask()
+- execute-steps.ts workflow execution
+
 ## 📍 Next Step
 
 After generating your JSON plan, your next command should be:
