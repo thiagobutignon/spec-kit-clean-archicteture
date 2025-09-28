@@ -1,6 +1,6 @@
 ---
 title: "Generate Selected Layer Code"
-description: "Transform validated JSON plans into YAML implementation files for selected layer generation with RLHF optimization"
+description: "Transform validated JSON plans into YAML implementation files for multi-target Clean Architecture layer generation with RLHF optimization"
 category: "layer"
 stage: "generation"
 priority: 3
@@ -10,6 +10,8 @@ tags:
   - selected-layer
   - rlhf-optimization
   - clean-architecture
+  - multi-target
+  - template-resolution
 parameters:
   input:
     type: "json"
@@ -51,7 +53,7 @@ scoring:
   catastrophic:
     score: -2
     causes: ["Architecture violations", "Wrong REPLACE/WITH format"]
-source_template: ".regent/templates/[LAYER]_TEMPLATE.yaml"
+source_template: ".regent/templates/[TARGET]-[LAYER]-template.regent"
 validation_script: "npx tsx validate-implementation.ts"
 previous_command: "/02-validate-layer-plan from json: <json>"
 next_command: "/04-reflect-layer-lessons from yaml: <generated-yaml>"
@@ -126,10 +128,109 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| **Template** | `.regent/templates/[LAYER]_TEMPLATE.yaml` | Master template |
+| **Template** | `.regent/templates/[TARGET]-[LAYER]-template.regent` | Master template (e.g., backend-domain-template.regent) |
 | **Directives** | `# AI-NOTE:` comments | Must follow all |
 | **Placeholders** | `__PLACEHOLDER__` variables | Must replace all |
-| **Validation** | `validate-implementation.ts` | Must pass validation |
+| **Validation** | `.regent/config/validate-template.ts` | Must pass validation |
+
+## 3.1 Template Resolution Strategy 🎯
+
+### Multi-Target Clean Architecture Matrix
+
+The Regent supports multiple targets and layers, creating a powerful matrix of architectural possibilities:
+
+| Target | Layers | Template Example |
+|--------|--------|------------------|
+| **backend** | domain, data, infrastructure, presentation, main | `backend-domain-template.regent` |
+| **frontend** | domain, data, infrastructure, presentation, main | `frontend-presentation-template.regent` |
+| **fullstack** | All layers for both targets | `fullstack-domain-template.regent` |
+| **mobile** | domain, data, infrastructure, presentation | `mobile-data-template.regent` |
+| **api** | domain, data, infrastructure | `api-infrastructure-template.regent` |
+
+### Template Discovery Algorithm
+
+```mermaid
+graph TD
+    A[Start: Read JSON Plan] --> B{Determine Target}
+    B --> C[Extract from project config]
+    B --> D[Infer from context]
+    B --> E[User specification]
+
+    C --> F[Determine Layer]
+    D --> F
+    E --> F
+
+    F --> G[Construct Template Path]
+    G --> H{Template Exists?}
+
+    H -->|Yes| I[Load Template]
+    H -->|No| J{Fallback Available?}
+
+    J -->|Yes| K[Load Fallback Template]
+    J -->|No| L[RUNTIME ERROR -1]
+
+    I --> M[Process Template]
+    K --> M
+
+    style L fill:#ff6b6b
+    style M fill:#51cf66
+```
+
+### Resolution Steps
+
+1. **Target Determination**:
+   ```
+   Order of precedence:
+   a) Explicit in command args: "target=backend"
+   b) From project config: .regent/config/project.json
+   c) From JSON plan metadata: plan.target field
+   d) Inferred from context: CLI path suggests backend
+   e) Default fallback: backend (most common)
+   ```
+
+2. **Layer Identification**:
+   ```
+   From JSON plan: plan.layer field (required)
+   Valid values: domain | data | infrastructure | presentation | main
+   ```
+
+3. **Template Path Construction**:
+   ```typescript
+   const templatePath = `.regent/templates/${target}-${layer}-template.regent`;
+   ```
+
+4. **Validation Before Processing**:
+   ```typescript
+   if (!fs.existsSync(templatePath)) {
+     // Check for fallback template
+     const fallbackPath = `.regent/templates/generic-${layer}-template.regent`;
+     if (!fs.existsSync(fallbackPath)) {
+       throw new Error(`Template not found: ${templatePath}`);
+       // Results in RLHF score: -1 (Runtime Error)
+     }
+   }
+   ```
+
+### RLHF Score Impact by Template Selection
+
+| Scenario | Template Result | RLHF Score | Impact |
+|----------|-----------------|------------|--------|
+| Exact match found | `backend-domain-template.regent` | Path to +2 | Optimal generation |
+| Fallback used | `generic-domain-template.regent` | Max +1 | Missing target optimizations |
+| Wrong template | Using frontend template for backend | -2 | Architecture violation |
+| Template missing | No template or fallback | -1 | Runtime error |
+
+### Template Capabilities Matrix
+
+Different templates have different capabilities based on their target:
+
+| Template Type | Special Features | Use When |
+|---------------|------------------|----------|
+| **backend-*** | Prisma, Express, Node.js patterns | Building server-side features |
+| **frontend-*** | React, Next.js, Component patterns | Building UI features |
+| **fullstack-*** | Shared types, API contracts | Building end-to-end features |
+| **mobile-*** | React Native, Expo patterns | Building mobile features |
+| **api-*** | OpenAPI, GraphQL schemas | Building API-only features |
 
 ## 4. Input Parameters
 
@@ -137,6 +238,8 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
 ```json
 {
   "featureName": "string",
+  "layer": "domain | data | infrastructure | presentation | main",  // Required
+  "target": "backend | frontend | fullstack | mobile | api",  // Optional, defaults to backend
   "ubiquitousLanguage": {  // Optional but needed for +2 score
     "term": "definition"
   },
@@ -159,7 +262,7 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
 <details>
 <summary>Expand for Create Mode Steps</summary>
 
-1. **Initialize**: Copy `.regent/templates/[LAYER]_TEMPLATE.yaml` verbatim
+1. **Initialize**: Copy `.regent/templates/[TARGET]-[LAYER]-template.regent` verbatim (e.g., backend-domain-template.regent)
 2. **Generate Steps**:
    - Keep `create-feature-branch` as FIRST step
    - Keep `create-structure` as SECOND step
@@ -236,7 +339,7 @@ spec/[FEATURE_NUMBER]-[FEATURE_NAME]/[LAYER]/implementation.yaml
 ### Mandatory Validation Steps:
 
 ```bash
-npx tsx .regent/config/validate-template.ts .regent/templates/[LAYER]_TEMPLATE.yaml <generated-yaml-path>
+npx tsx .regent/config/validate-template.ts .regent/templates/[TARGET]-[LAYER]-template.regent <generated-yaml-path>
 ```
 
 ### Self-Correction Loop:

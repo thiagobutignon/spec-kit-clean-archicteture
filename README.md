@@ -1,12 +1,12 @@
 # 👑 The Regent
 
-> **AI-Powered Clean Architecture CLI with Guaranteed Quality**
+> **Multi-Target Clean Architecture Platform with AI-Powered Generation and Guaranteed Quality**
 
 [![NPM Version](https://img.shields.io/npm/v/@the-regent/cli)](https://www.npmjs.com/package/@the-regent/cli)
 [![NPM Downloads](https://img.shields.io/npm/dm/@the-regent/cli)](https://www.npmjs.com/package/@the-regent/cli)
 [![RLHF Score](https://img.shields.io/badge/RLHF%20Score-Validation%20System-brightgreen)](https://github.com/thiagobutignon/the-regent)
 [![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-✓-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-[![Templates](https://img.shields.io/badge/Templates-Backend%20|%20Frontend%20|%20Fullstack-purple)](./templates)
+[![Multi-Target](https://img.shields.io/badge/Multi--Target-25%2B%20Template%20Combinations-purple)](./templates)
 [![AI-NOTEs](https://img.shields.io/badge/AI--NOTEs-Guided%20Generation-orange)](./templates)
 [![Claude AI](https://img.shields.io/badge/Claude%20AI-6%20Agents-cyan)](./.claude/agents)
 [![CLI Tool](https://img.shields.io/badge/CLI-regent-blue)](https://www.npmjs.com/package/@the-regent/cli)
@@ -14,6 +14,70 @@
 ## 📋 Overview
 
 The Regent addresses common problems in AI code generation: monolithic files (>200 lines) and absence of architectural structure. The system combines modular scaffolding with template-based generation, following Clean Architecture, DDD, TDD, and SOLID principles to produce maintainable code.
+
+## 🔬 The Multi-Target Architecture Discovery
+
+### From Bug Fix to Architectural Revelation
+
+What started as a simple template path correction (`[LAYER]_TEMPLATE.yaml` → `[TARGET]-[LAYER]-template.regent`) revealed The Regent's hidden power: **Multi-Target Clean Architecture**.
+
+### The Architecture Matrix
+
+The Regent isn't just a Clean Architecture generator - it's a **deterministic multi-context generation platform** with a powerful matrix of possibilities:
+
+```
+Targets × Layers = Optimized Templates
+5 targets × 5 layers = 25+ specialized combinations
+```
+
+| Target | Optimized For | Template Examples |
+|--------|--------------|-------------------|
+| **backend** | Node.js, Express, Prisma | `backend-domain-template.regent` |
+| **frontend** | React, Next.js, Components | `frontend-presentation-template.regent` |
+| **fullstack** | Shared types, API contracts | `fullstack-data-template.regent` |
+| **mobile** | React Native, Expo | `mobile-infrastructure-template.regent` |
+| **api** | OpenAPI, GraphQL | `api-domain-template.regent` |
+
+### Template Resolution Intelligence
+
+Each template combination carries specific semantic meaning and contextual optimizations:
+
+```mermaid
+graph LR
+    A[JSON Plan] --> B{Determine Target}
+    B --> C[Select Template]
+    C --> D{Template Exists?}
+    D -->|Yes| E[RLHF +2: Perfect]
+    D -->|Fallback| F[RLHF +1: Good]
+    D -->|Wrong| G[RLHF -2: Fatal]
+
+    style E fill:#51cf66
+    style F fill:#ffd43b
+    style G fill:#ff6b6b
+```
+
+### The RLHF Feedback Loop
+
+The Regent's scoring system creates a quantifiable improvement cycle:
+
+- **+2 PERFECT**: Exact template match with DDD patterns
+- **+1 GOOD**: Generic fallback maintains functionality
+- **0 LOW**: System uncertainty prevents hallucinations
+- **-1 ERROR**: Runtime failures are learning opportunities
+- **-2 FATAL**: Architecture violations trigger corrections
+
+### Why This Matters
+
+This architecture transforms The Regent from a **prescriptive tool** into an **adaptive platform**:
+
+1. **Deterministic Context**: Each target-layer pair has predictable, optimized behavior
+2. **Graceful Degradation**: System maintains functionality even without exact templates
+3. **Guided Evolution**: RLHF scores quantify and guide improvements
+4. **Natural Extensibility**: New targets follow established patterns
+
+### The Real Power
+
+The true "secret sauce" isn't just generating code - it's generating **contextually optimized code** for your specific architecture needs while maintaining Clean Architecture principles as invariants.
 
 ## 🚀 Quick Start
 
@@ -1351,6 +1415,72 @@ claude mcp get serena
 claude mcp get context7
 ```
 
+## 🎯 Extending Multi-Target Architecture
+
+The Regent's template system is designed for extensibility. Contributing new target-layer combinations follows a clear pattern:
+
+### Adding New Targets
+
+```bash
+# Example: Adding IoT target support
+.regent/templates/
+├── iot-domain-template.regent      # IoT-specific domain patterns
+├── iot-data-template.regent        # IoT data protocols
+├── iot-infrastructure-template.regent  # Device integrations
+├── iot-presentation-template.regent    # Device UI patterns
+└── iot-main-template.regent        # IoT bootstrap
+```
+
+### Template Structure Pattern
+
+Each template follows the established pattern:
+
+```yaml
+# iot-domain-template.regent
+version: '3.0.0'
+metadata:
+  title: 'IoT Domain Layer Template'
+  target: 'iot'
+  layer: 'domain'
+  specializations:
+    - 'Device protocols'
+    - 'Sensor data models'
+    - 'Edge computing patterns'
+
+# AI-NOTEs guide generation
+# Template blocks define structure
+# Placeholders ensure consistency
+```
+
+### RLHF Score Optimization
+
+New templates inherit the scoring system:
+
+- **+2 PERFECT**: Include DDD patterns, ubiquitous language, target optimizations
+- **+1 GOOD**: Basic functionality without target-specific features
+- **0 LOW**: Generic fallback when no specialized template exists
+
+### Contributing Templates
+
+1. **Identify Target**: What architecture context needs optimization?
+2. **Define Patterns**: What patterns are unique to this target?
+3. **Create Templates**: Follow the `[TARGET]-[LAYER]-template.regent` convention
+4. **Add AI-NOTEs**: Guide AI generation with contextual comments
+5. **Test RLHF**: Validate templates generate +2 scores
+
+### Future Targets
+
+The architecture supports any target that benefits from specialized patterns:
+
+- **serverless**: Lambda, Vercel Functions, Edge Workers
+- **blockchain**: Smart contracts, DeFi protocols
+- **desktop**: Electron, Tauri, native apps
+- **microservices**: Service mesh, API gateways
+- **iot**: Device protocols, edge computing
+- **ai-ml**: Model serving, data pipelines
+
+Each new target multiplies The Regent's capabilities while maintaining architectural consistency.
+
 ## 💬 Support
 
 - **Issues**: [GitHub Issues](https://github.com/thiagobutignon/spec-kit-clean-archicteture/issues)
@@ -1360,7 +1490,7 @@ claude mcp get context7
 ---
 
 <div align="center">
-  <strong>🏗️ AI-assisted Clean Architecture Implementation</strong>
+  <strong>🏗️ Multi-Target Clean Architecture Platform</strong>
   <br>
-  <sub>With template-based generation, AI guidance notes, and RLHF validation</sub>
+  <sub>25+ Template Combinations • AI-Guided Generation • RLHF Validation • Adaptive Architecture</sub>
 </div>
