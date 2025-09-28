@@ -1,19 +1,19 @@
-# 🏗️ Spec-Kit Clean Architecture
+# 👑 The Regent
 
-> **Scaffolding + AI Generation for Clean Architecture Implementation**
+> **AI-Powered Clean Architecture CLI with Guaranteed Quality**
 
-[![NPM Version](https://img.shields.io/npm/v/spec-kit-clean-architecture)](https://www.npmjs.com/package/spec-kit-clean-architecture)
-[![NPM Downloads](https://img.shields.io/npm/dm/spec-kit-clean-architecture)](https://www.npmjs.com/package/spec-kit-clean-architecture)
-[![RLHF Score](https://img.shields.io/badge/RLHF%20Score-Validation%20System-brightgreen)](https://github.com/thiagobutignon/spec-kit-clean-archicteture)
+[![NPM Version](https://img.shields.io/npm/v/@the-regent/cli)](https://www.npmjs.com/package/@the-regent/cli)
+[![NPM Downloads](https://img.shields.io/npm/dm/@the-regent/cli)](https://www.npmjs.com/package/@the-regent/cli)
+[![RLHF Score](https://img.shields.io/badge/RLHF%20Score-Validation%20System-brightgreen)](https://github.com/thiagobutignon/the-regent)
 [![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-✓-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 [![Templates](https://img.shields.io/badge/Templates-Backend%20|%20Frontend%20|%20Fullstack-purple)](./templates)
 [![AI-NOTEs](https://img.shields.io/badge/AI--NOTEs-Guided%20Generation-orange)](./templates)
 [![Claude AI](https://img.shields.io/badge/Claude%20AI-6%20Agents-cyan)](./.claude/agents)
-[![CLI Tool](https://img.shields.io/badge/CLI-spec--ca-blue)](https://www.npmjs.com/package/spec-kit-clean-architecture)
+[![CLI Tool](https://img.shields.io/badge/CLI-regent-blue)](https://www.npmjs.com/package/@the-regent/cli)
 
 ## 📋 Overview
 
-Spec-Kit Clean Architecture addresses common problems in AI code generation: monolithic files (>200 lines) and absence of architectural structure. The system combines modular scaffolding with template-based generation, following Clean Architecture, DDD, TDD, and SOLID principles to produce maintainable code.
+The Regent addresses common problems in AI code generation: monolithic files (>200 lines) and absence of architectural structure. The system combines modular scaffolding with template-based generation, following Clean Architecture, DDD, TDD, and SOLID principles to produce maintainable code.
 
 ## 🚀 Quick Start
 
@@ -23,19 +23,19 @@ Spec-Kit Clean Architecture addresses common problems in AI code generation: mon
 
 ```bash
 # Install globally from NPM
-npm install -g spec-kit-clean-architecture
+npm install -g @the-regent/cli
 
 # Verify installation
-spec-ca --version
-spec-ca --help
+regent --version
+regent --help
 ```
 
 #### Option 2: From Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/thiagobutignon/spec-kit-clean-archicteture.git
-cd spec-kit-clean-archicteture
+git clone https://github.com/thiagobutignon/the-regent.git
+cd the-regent
 
 # Install dependencies
 npm install
@@ -47,14 +47,17 @@ npm link
 ### Create Your First Project
 
 ```bash
-# Initialize a new Clean Architecture project
-spec-ca init my-project --ai claude
+# Initialize a new Clean Architecture project (interactive mode)
+regent init
+
+# Or with parameters
+regent init my-project --ai claude
 
 # Or initialize in current directory
-spec-ca init . --ai claude --here
+regent init --here --ai claude
 
 # Check system requirements
-spec-ca check
+regent check
 ```
 
 ### Start Development Workflow
@@ -83,15 +86,15 @@ cd my-project
 
 ## 🎯 CLI Tool
 
-The **`spec-ca`** CLI provides a complete toolkit for spec-driven Clean Architecture development:
+The **`regent`** CLI provides a complete toolkit for spec-driven Clean Architecture development:
 
 ### Commands
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `spec-ca init [project]` | Initialize new Clean Architecture project | `spec-ca init my-app --ai claude` |
-| `spec-ca check` | Validate system requirements | `spec-ca check` |
-| `spec-ca --help` | Show usage information | `spec-ca --help` |
+| `regent init [project]` | Initialize new Clean Architecture project | `regent init my-app --ai claude` |
+| `regent check` | Validate system requirements | `regent check` |
+| `regent --help` | Show usage information | `regent --help` |
 
 ### Workflow Commands (within projects)
 

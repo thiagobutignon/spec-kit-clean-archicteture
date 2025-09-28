@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Spec-Kit Clean Architecture CLI
+ * The Regent CLI
  * Main entry point for the CLI application
  */
 
@@ -22,15 +22,15 @@ const program = new Command();
 
 // CLI metadata
 program
-  .name('spec-ca')
-  .description('Spec-Kit Clean Architecture - AI-assisted development with guaranteed architectural quality')
+  .name('regent')
+  .description('The Regent - AI-powered Clean Architecture CLI with guaranteed architectural quality')
   .version(packageJson.version);
 
 // Custom help display
-const originalHelp = program.help;
-program.help = function(options) {
+const originalHelp = program.help.bind(program);
+program.help = function(options?: any) {
   showBanner();
-  originalHelp.call(this, options);
+  return originalHelp(options);
 };
 
 // Commands

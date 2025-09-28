@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import inquirer from 'inquirer';
 
 // Get the directory where this package is installed
 const __filename = fileURLToPath(import.meta.url);
@@ -18,26 +19,51 @@ interface InitOptions {
   debug?: boolean;
 }
 
-// AI assistant options for future use
-// const AI_CHOICES = {
-//   'claude': 'Claude Code',
-//   'gemini': 'Gemini CLI',
-//   'copilot': 'GitHub Copilot',
-//   'cursor': 'Cursor'
-// };
+// AI assistant options
+const AI_ASSISTANTS = [
+  { name: 'Claude Code (Anthropic)', value: 'claude' },
+  { name: 'Gemini CLI (Google)', value: 'gemini' },
+  { name: 'GitHub Copilot', value: 'copilot' },
+  { name: 'Cursor AI', value: 'cursor' }
+];
 
 export async function initCommand(projectName: string | undefined, options: InitOptions): Promise<void> {
-  console.log(chalk.cyan('🏗️ Initializing Spec-Kit Clean Architecture project...\n'));
+  console.log(chalk.cyan('🏗️ Initializing The Regent Clean Architecture project...\n'));
 
-  // Validate project name and options
+  // Interactive mode for project name if not provided
   if (!options.here && !projectName) {
-    console.error(chalk.red('Error: Must specify either a project name or use --here flag'));
-    process.exit(1);
+    const answers = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'projectName',
+        message: 'What is the name of your project?',
+        validate: (input: string) => {
+          if (!input.trim()) return 'Project name is required';
+          if (!/^[a-z0-9-]+$/.test(input)) return 'Project name must contain only lowercase letters, numbers, and hyphens';
+          return true;
+        }
+      }
+    ]);
+    projectName = answers.projectName;
   }
 
   if (options.here && projectName) {
     console.error(chalk.red('Error: Cannot specify both project name and --here flag'));
     process.exit(1);
+  }
+
+  // Interactive mode for AI assistant if not provided
+  if (!options.ai) {
+    const answers = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'ai',
+        message: 'Which AI assistant will you be using?',
+        choices: AI_ASSISTANTS,
+        default: 'claude'
+      }
+    ]);
+    options.ai = answers.ai;
   }
 
   // Determine project path
@@ -52,7 +78,7 @@ export async function initCommand(projectName: string | undefined, options: Init
   console.log(`  Project: ${chalk.green(displayName)}`);
   console.log(`  Path: ${chalk.dim(projectPath)}`);
   console.log(`  Mode: ${chalk.yellow(isExistingProject ? 'Existing Project' : 'New Project')}`);
-  console.log(`  AI Assistant: ${chalk.yellow(options.ai || 'claude (default)')}`);
+  console.log(`  AI Assistant: ${chalk.yellow(options.ai)}`);
   console.log();
 
   try {
@@ -68,7 +94,7 @@ export async function initCommand(projectName: string | undefined, options: Init
     console.log(chalk.green.bold('✅ Project initialized successfully!\n'));
 
     // Show next steps
-    showNextSteps(displayName, options.here, isExistingProject);
+    showNextSteps(displayName, options.here ?? false, isExistingProject);
 
   } catch (error) {
     console.error(chalk.red('❌ Failed to initialize project:'), error);
@@ -77,7 +103,7 @@ export async function initCommand(projectName: string | undefined, options: Init
 }
 
 async function createProjectStructure(projectPath: string, options: InitOptions, isExistingProject: boolean): Promise<void> {
-  console.log(chalk.cyan('📁 Setting up Spec-Kit structure...'));
+  console.log(chalk.cyan('📁 Setting up The Regent structure...'));
 
   // Create spec-kit specific directories
   const specKitDirs = [
@@ -449,7 +475,7 @@ function showNextSteps(projectName: string, isHere: boolean, isExistingProject: 
   if (isExistingProject) {
     console.log();
     console.log(chalk.yellow.bold('⚠️ Existing Project Notice:'));
-    console.log(`• Spec-Kit files were added to ${chalk.blue('.regent/')} directory`);
+    console.log(`• The Regent files were added to ${chalk.blue('.regent/')} directory`);
     console.log(`• Your existing files were not modified`);
     console.log(`• Review ${chalk.blue('package.json')} for new scripts`);
   }
