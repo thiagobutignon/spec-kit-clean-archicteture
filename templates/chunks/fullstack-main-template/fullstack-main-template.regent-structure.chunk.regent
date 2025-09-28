@@ -1,0 +1,25 @@
+# CHUNK: structure
+# Lines: 1519-1538
+# Estimated tokens: 174
+# Original: fullstack-main-template.regent
+# =============================================
+
+structure:
+  main_structure:
+    description: 'Setup main layer for Next.js 15 fullstack architecture'
+    folders:
+      - 'src/app'
+      - 'src/app/(features)'
+      - 'src/app/api'
+      - 'src/shared/main/config'
+      - 'src/shared/main/factories'
+      - 'src/shared/main/composites'
+      - 'src/shared/main/providers'
+      - 'src/shared/main/adapters'
+      - 'src/shared/main/middleware'
+      - 'src/shared/main/lib'
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER IMPLEMENTATION STEPS
+# Following Factory and Composite Patterns for Fullstack Next.js 15
+# ------------------------------------------------------------------------------

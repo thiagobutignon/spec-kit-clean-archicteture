@@ -1,0 +1,22 @@
+# CHUNK: structure
+# Lines: 2134-2150
+# Estimated tokens: 142
+# Original: frontend-presentation-template.regent
+# =============================================
+
+structure:
+  validation_structure:
+    description: 'Setup validation layer structure'
+    folders:
+      - 'src/validation'
+      - 'src/validation/protocols'
+      - 'src/validation/validators'
+      - 'src/validation/errors'
+      - 'tests/validation'
+      - 'tests/validation/validators'
+      - 'tests/validation/mocks'
+
+# ------------------------------------------------------------------------------
+# VALIDATION IMPLEMENTATION STEPS
+# Following TDD: RED -> GREEN -> REFACTOR
+# ------------------------------------------------------------------------------

@@ -1,0 +1,10 @@
+# CHUNK: frontend/01-structure.part.regent
+# Lines: 60-64
+# Estimated tokens: 76
+# Original: frontend-presentation-template.regent
+# =============================================
+
+# --- From: frontend/01-structure.part.regent ---
+# ============= BEGIN STRUCTURE NEXT.JS 15 + CLEAN ARCHITECTURE =============
+  # AI-NOTE: Hybrid Architecture - "Feature Module with Use Case Slices"
+  # Features are modules containing atomic use case slices for domain cohesion and generation safety

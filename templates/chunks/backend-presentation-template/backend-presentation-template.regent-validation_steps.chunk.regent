@@ -1,0 +1,911 @@
+# CHUNK: validation_steps
+# Lines: 2051-2956
+# Estimated tokens: 8154
+# Original: backend-presentation-template.regent
+# =============================================
+
+  validation_steps:
+    # === STEP 1: CREATE VALIDATION BRANCH ===
+    - id: 'create-validation-branch'
+      type: 'validation'
+      description: 'Create feature branch for validation implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Create and checkout validation feature branch'
+        scripts:
+          - name: 'Create validation branch'
+            command: |
+              git checkout -b "feat/__FEATURE_NAME_KEBAB_CASE__-validation"
+              echo "✅ Created branch: feat/__FEATURE_NAME_KEBAB_CASE__-validation"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: TDD RED - CREATE VALIDATION PROTOCOLS ===
+    - id: 'test-validation-protocols'
+      type: 'test'
+      description: 'TDD RED: Create validation protocol tests (should fail)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/tests/validation/protocols/validation.spec.ts'
+      template: |
+        import { Validation } from '@/validation/protocols'
+
+        describe('Validation Protocol', () => {
+          test('Should have validate method', () => {
+            const validation: Validation = {
+              validate: jest.fn()
+            }
+
+            const input = { field: 'value' }
+            validation.validate(input)
+
+            expect(validation.validate).toHaveBeenCalledWith(input)
+          })
+        })
+
+    # === STEP 3: TDD RED - CREATE ERROR TESTS ===
+    - id: 'test-validation-errors'
+      type: 'create_file'
+      description: 'TDD RED: Create validation error tests'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/tests/validation/errors/validation-errors.spec.ts'
+      template: |
+        import {
+          MissingParamError,
+          InvalidParamError,
+          MinLengthError,
+          MaxLengthError
+        } from '@/validation/errors'
+
+        describe('Validation Errors', () => {
+          describe('MissingParamError', () => {
+            test('Should return correct error message', () => {
+              const error = new MissingParamError('email')
+              expect(error.message).toBe('Missing param: email')
+              expect(error.name).toBe('MissingParamError')
+            })
+          })
+
+          describe('InvalidParamError', () => {
+            test('Should return correct error message', () => {
+              const error = new InvalidParamError('email')
+              expect(error.message).toBe('Invalid param: email')
+              expect(error.name).toBe('InvalidParamError')
+            })
+          })
+
+          describe('MinLengthError', () => {
+            test('Should return correct error message', () => {
+              const error = new MinLengthError('password', 8)
+              expect(error.message).toBe('password must be at least 8 characters')
+              expect(error.name).toBe('MinLengthError')
+            })
+          })
+
+          describe('MaxLengthError', () => {
+            test('Should return correct error message', () => {
+              const error = new MaxLengthError('name', 50)
+              expect(error.message).toBe('name must be at most 50 characters')
+              expect(error.name).toBe('MaxLengthError')
+            })
+          })
+        })
+
+    # === STEP 4: TDD RED - CREATE VALIDATOR TESTS ===
+    - id: 'test-required-field-validation'
+      type: 'create_file'
+      description: 'TDD RED: Create RequiredFieldValidation tests'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/tests/validation/validators/required-field-validation.spec.ts'
+      template: |
+        import { RequiredFieldValidation } from '@/validation/validators'
+        import { MissingParamError } from '@/validation/errors'
+
+        const makeSut = (fieldName: string): RequiredFieldValidation => {
+          return new RequiredFieldValidation(fieldName)
+        }
+
+        describe('RequiredFieldValidation', () => {
+          test('Should return MissingParamError if field is missing', () => {
+            const sut = makeSut('email')
+            const error = sut.validate({ name: 'John' })
+            expect(error).toEqual(new MissingParamError('email'))
+          })
+
+          test('Should return MissingParamError if field is empty', () => {
+            const sut = makeSut('email')
+            const error = sut.validate({ email: '' })
+            expect(error).toEqual(new MissingParamError('email'))
+          })
+
+          test('Should return null if field is present', () => {
+            const sut = makeSut('email')
+            const error = sut.validate({ email: 'john@example.com' })
+            expect(error).toBeNull()
+          })
+
+          test('Should return null if field is 0', () => {
+            const sut = makeSut('age')
+            const error = sut.validate({ age: 0 })
+            expect(error).toBeNull()
+          })
+
+          test('Should return null if field is false', () => {
+            const sut = makeSut('active')
+            const error = sut.validate({ active: false })
+            expect(error).toBeNull()
+          })
+        })
+
+    # === STEP 5: TDD RED - CREATE EMAIL VALIDATION TESTS ===
+    - id: 'test-email-validation'
+      type: 'create_file'
+      description: 'TDD RED: Create EmailValidation tests'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/tests/validation/validators/email-validation.spec.ts'
+      template: |
+        import { EmailValidation } from '@/validation/validators'
+        import { InvalidParamError } from '@/validation/errors'
+        import { EmailValidator } from '@/validation/protocols'
+
+        const makeEmailValidator = (): EmailValidator => {
+          class EmailValidatorStub implements EmailValidator {
+            isValid(email: string): boolean {
+              return true
+            }
+          }
+          return new EmailValidatorStub()
+        }
+
+        const makeSut = (): { sut: EmailValidation, emailValidatorStub: EmailValidator } => {
+          const emailValidatorStub = makeEmailValidator()
+          const sut = new EmailValidation('email', emailValidatorStub)
+          return {
+            sut,
+            emailValidatorStub
+          }
+        }
+
+        describe('EmailValidation', () => {
+          test('Should return InvalidParamError if email is invalid', () => {
+            const { sut, emailValidatorStub } = makeSut()
+            jest.spyOn(emailValidatorStub, 'isValid').mockReturnValueOnce(false)
+            const error = sut.validate({ email: 'invalid_email' })
+            expect(error).toEqual(new InvalidParamError('email'))
+          })
+
+          test('Should call EmailValidator with correct email', () => {
+            const { sut, emailValidatorStub } = makeSut()
+            const isValidSpy = jest.spyOn(emailValidatorStub, 'isValid')
+            sut.validate({ email: 'john@example.com' })
+            expect(isValidSpy).toHaveBeenCalledWith('john@example.com')
+          })
+
+          test('Should return null if email is valid', () => {
+            const { sut } = makeSut()
+            const error = sut.validate({ email: 'john@example.com' })
+            expect(error).toBeNull()
+          })
+        })
+
+    # === STEP 6: TDD RED - CREATE VALIDATION COMPOSITE TESTS ===
+    - id: 'test-validation-composite'
+      type: 'create_file'
+      description: 'TDD RED: Create ValidationComposite tests'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/tests/validation/validators/validation-composite.spec.ts'
+      template: |
+        import { ValidationComposite } from '@/validation/validators'
+        import { Validation } from '@/validation/protocols'
+        import { InvalidParamError, MissingParamError } from '@/validation/errors'
+
+        const makeValidation = (): Validation => {
+          class ValidationStub implements Validation {
+            validate(input: any): Error | null {
+              return null
+            }
+          }
+          return new ValidationStub()
+        }
+
+        const makeSut = (): { sut: ValidationComposite, validationStubs: Validation[] } => {
+          const validationStubs = [makeValidation(), makeValidation()]
+          const sut = new ValidationComposite(validationStubs)
+          return {
+            sut,
+            validationStubs
+          }
+        }
+
+        describe('ValidationComposite', () => {
+          test('Should return error if any validation fails', () => {
+            const { sut, validationStubs } = makeSut()
+            const error = new MissingParamError('field')
+            jest.spyOn(validationStubs[1], 'validate').mockReturnValueOnce(error)
+            const result = sut.validate({ field: 'value' })
+            expect(result).toEqual(error)
+          })
+
+          test('Should return first error if more than one validation fails', () => {
+            const { sut, validationStubs } = makeSut()
+            const firstError = new MissingParamError('field')
+            const secondError = new InvalidParamError('field')
+            jest.spyOn(validationStubs[0], 'validate').mockReturnValueOnce(firstError)
+            jest.spyOn(validationStubs[1], 'validate').mockReturnValueOnce(secondError)
+            const result = sut.validate({ field: 'value' })
+            expect(result).toEqual(firstError)
+          })
+
+          test('Should return null if all validations succeed', () => {
+            const { sut } = makeSut()
+            const result = sut.validate({ field: 'value' })
+            expect(result).toBeNull()
+          })
+
+          test('Should call all validations with correct input', () => {
+            const { sut, validationStubs } = makeSut()
+            const input = { field: 'value' }
+            const validateSpy0 = jest.spyOn(validationStubs[0], 'validate')
+            const validateSpy1 = jest.spyOn(validationStubs[1], 'validate')
+            sut.validate(input)
+            expect(validateSpy0).toHaveBeenCalledWith(input)
+            expect(validateSpy1).toHaveBeenCalledWith(input)
+          })
+        })
+
+    # === STEP 7: VERIFY RED PHASE ===
+    - id: 'verify-red-phase'
+      type: 'validation'
+      description: 'TDD RED: Verify all tests fail as expected'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to verify they fail (RED phase)'
+        scripts:
+          - name: 'Verify failing tests'
+            command: |
+              echo "🔴 TDD RED: Running tests - they should FAIL..."
+              npm test -- validation || {
+                echo "✅ Good! Tests are failing as expected (RED phase)"
+                echo "   Now implementing validation layer..."
+                exit 0
+              }
+              echo "❌ ERROR: Tests should fail in RED phase but they passed!"
+              exit 1
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 8: TDD GREEN - IMPLEMENT PROTOCOLS ===
+    - id: 'create-validation-protocols'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement validation protocols'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/protocols/validation.ts'
+      template: |
+        /**
+         * Validation protocol for field validation
+         * @interface Validation
+         */
+        export interface Validation {
+          /**
+           * Validates input and returns error if validation fails
+           * @param input - The input object to validate
+           * @returns Error if validation fails, null otherwise
+           */
+          validate(input: any): Error | null
+        }
+
+    - id: 'create-email-validator-protocol'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement EmailValidator protocol'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/protocols/email-validator.ts'
+      template: |
+        /**
+         * Email validation protocol
+         * @interface EmailValidator
+         */
+        export interface EmailValidator {
+          /**
+           * Checks if email is valid
+           * @param email - Email to validate
+           * @returns true if valid, false otherwise
+           */
+          isValid(email: string): boolean
+        }
+
+    - id: 'create-protocols-index'
+      type: 'create_file'
+      description: 'TDD GREEN: Create protocols index'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/protocols/index.ts'
+      template: |
+        export * from './validation'
+        export * from './email-validator'
+
+    # === STEP 9: TDD GREEN - IMPLEMENT ERRORS ===
+    - id: 'create-validation-errors'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement validation errors'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/errors/index.ts'
+      template: |
+        /**
+         * Error thrown when a required parameter is missing
+         */
+        export class MissingParamError extends Error {
+          constructor(paramName: string) {
+            super(`Missing param: ${paramName}`)
+            this.name = 'MissingParamError'
+          }
+        }
+
+        /**
+         * Error thrown when a parameter is invalid
+         */
+        export class InvalidParamError extends Error {
+          constructor(paramName: string) {
+            super(`Invalid param: ${paramName}`)
+            this.name = 'InvalidParamError'
+          }
+        }
+
+        /**
+         * Error thrown when field length is below minimum
+         */
+        export class MinLengthError extends Error {
+          constructor(fieldName: string, minLength: number) {
+            super(`${fieldName} must be at least ${minLength} characters`)
+            this.name = 'MinLengthError'
+          }
+        }
+
+        /**
+         * Error thrown when field length exceeds maximum
+         */
+        export class MaxLengthError extends Error {
+          constructor(fieldName: string, maxLength: number) {
+            super(`${fieldName} must be at most ${maxLength} characters`)
+            this.name = 'MaxLengthError'
+          }
+        }
+
+    # === STEP 10: TDD GREEN - IMPLEMENT VALIDATORS ===
+    - id: 'create-required-field-validation'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement RequiredFieldValidation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/required-field-validation.ts'
+      template: |
+        import { Validation } from '@/validation/protocols'
+        import { MissingParamError } from '@/validation/errors'
+
+        /**
+         * Validates that a required field is present and not empty
+         */
+        export class RequiredFieldValidation implements Validation {
+          constructor(private readonly fieldName: string) {}
+
+          validate(input: any): Error | null {
+            const value = input[this.fieldName]
+
+            // Check if field exists and is not empty string
+            // Allow 0, false, and other falsy values except undefined, null, and empty string
+            if (value === undefined || value === null || value === '') {
+              return new MissingParamError(this.fieldName)
+            }
+
+            return null
+          }
+        }
+
+    - id: 'create-email-validation'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement EmailValidation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/email-validation.ts'
+      template: |
+        import { Validation, EmailValidator } from '@/validation/protocols'
+        import { InvalidParamError } from '@/validation/errors'
+
+        /**
+         * Validates email format using EmailValidator protocol
+         */
+        export class EmailValidation implements Validation {
+          constructor(
+            private readonly fieldName: string,
+            private readonly emailValidator: EmailValidator
+          ) {}
+
+          validate(input: any): Error | null {
+            const email = input[this.fieldName]
+
+            if (email && !this.emailValidator.isValid(email)) {
+              return new InvalidParamError(this.fieldName)
+            }
+
+            return null
+          }
+        }
+
+    - id: 'create-compare-fields-validation'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement CompareFieldsValidation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/compare-fields-validation.ts'
+      template: |
+        import { Validation } from '@/validation/protocols'
+        import { InvalidParamError } from '@/validation/errors'
+
+        /**
+         * Validates that two fields have the same value
+         */
+        export class CompareFieldsValidation implements Validation {
+          constructor(
+            private readonly fieldName: string,
+            private readonly fieldToCompareName: string
+          ) {}
+
+          validate(input: any): Error | null {
+            if (input[this.fieldName] !== input[this.fieldToCompareName]) {
+              return new InvalidParamError(this.fieldToCompareName)
+            }
+
+            return null
+          }
+        }
+
+    - id: 'create-min-length-validation'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement MinLengthValidation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/min-length-validation.ts'
+      template: |
+        import { Validation } from '@/validation/protocols'
+        import { MinLengthError } from '@/validation/errors'
+
+        /**
+         * Validates minimum field length
+         */
+        export class MinLengthValidation implements Validation {
+          constructor(
+            private readonly fieldName: string,
+            private readonly minLength: number
+          ) {}
+
+          validate(input: any): Error | null {
+            const value = input[this.fieldName]
+
+            if (value && value.length < this.minLength) {
+              return new MinLengthError(this.fieldName, this.minLength)
+            }
+
+            return null
+          }
+        }
+
+    - id: 'create-max-length-validation'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement MaxLengthValidation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/max-length-validation.ts'
+      template: |
+        import { Validation } from '@/validation/protocols'
+        import { MaxLengthError } from '@/validation/errors'
+
+        /**
+         * Validates maximum field length
+         */
+        export class MaxLengthValidation implements Validation {
+          constructor(
+            private readonly fieldName: string,
+            private readonly maxLength: number
+          ) {}
+
+          validate(input: any): Error | null {
+            const value = input[this.fieldName]
+
+            if (value && value.length > this.maxLength) {
+              return new MaxLengthError(this.fieldName, this.maxLength)
+            }
+
+            return null
+          }
+        }
+
+    - id: 'create-validation-composite'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement ValidationComposite'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/validation-composite.ts'
+      template: |
+        import { Validation } from '@/validation/protocols'
+
+        /**
+         * Composite pattern for combining multiple validations
+         */
+        export class ValidationComposite implements Validation {
+          constructor(private readonly validations: Validation[]) {}
+
+          validate(input: any): Error | null {
+            for (const validation of this.validations) {
+              const error = validation.validate(input)
+              if (error) {
+                return error
+              }
+            }
+
+            return null
+          }
+        }
+
+    - id: 'create-validators-index'
+      type: 'create_file'
+      description: 'TDD GREEN: Create validators index'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/index.ts'
+      template: |
+        export * from './required-field-validation'
+        export * from './email-validation'
+        export * from './compare-fields-validation'
+        export * from './min-length-validation'
+        export * from './max-length-validation'
+        export * from './validation-composite'
+
+    # === STEP 11: TDD GREEN - CREATE EMAIL VALIDATOR ADAPTER ===
+    - id: 'create-email-validator-adapter'
+      type: 'conditional_file'
+      description: 'TDD GREEN: Create EmailValidatorAdapter'
+      condition: '__PROJECT_TYPE__ !== "frontend"' # Backend and Fullstack need this
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/infra/validators/email-validator-adapter.ts'
+      template: |
+        import { EmailValidator } from '@/validation/protocols'
+        import validator from 'validator'
+
+        /**
+         * Adapter for validator.js email validation
+         */
+        export class EmailValidatorAdapter implements EmailValidator {
+          isValid(email: string): boolean {
+            return validator.isEmail(email)
+          }
+        }
+
+    - id: 'create-zod-email-validator'
+      type: 'conditional_file'
+      description: 'TDD GREEN: Create Zod EmailValidator'
+      condition: '__PROJECT_TYPE__ === "frontend" || __PROJECT_TYPE__ === "fullstack"'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/infra/validators/zod-email-validator.ts'
+      template: |
+        import { EmailValidator } from '@/validation/protocols'
+        import { z } from 'zod'
+
+        /**
+         * Zod-based email validator for frontend/fullstack
+         */
+        export class ZodEmailValidator implements EmailValidator {
+          private readonly schema = z.string().email()
+
+          isValid(email: string): boolean {
+            const result = this.schema.safeParse(email)
+            return result.success
+          }
+        }
+
+    # === STEP 12: TDD GREEN - CREATE VALIDATION FACTORY ===
+    - id: 'create-validation-factory'
+      type: 'create_file'
+      description: 'TDD GREEN: Create validation factory example'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/factories/__USE_CASE_NAME_KEBAB_CASE__-validation-factory.ts'
+      template: |
+        import {
+          ValidationComposite,
+          RequiredFieldValidation,
+          EmailValidation,
+          MinLengthValidation,
+          CompareFieldsValidation
+        } from '@/validation/validators'
+        import { Validation } from '@/validation/protocols'
+        // AI-NOTE: Import appropriate EmailValidator based on project type
+        // Backend: import { EmailValidatorAdapter } from '@/infra/validators/email-validator-adapter'
+        // Frontend: import { ZodEmailValidator } from '@/infra/validators/zod-email-validator'
+
+        /**
+         * Factory for creating __USE_CASE_NAME_PASCAL_CASE__ validation
+         * @example
+         * const validation = make__USE_CASE_NAME_PASCAL_CASE__Validation()
+         * const error = validation.validate(input)
+         */
+        export const make__USE_CASE_NAME_PASCAL_CASE__Validation = (): Validation => {
+          const validations: Validation[] = []
+
+          // Required fields
+          const requiredFields = ['email', 'password', 'name']
+          for (const field of requiredFields) {
+            validations.push(new RequiredFieldValidation(field))
+          }
+
+          // Email validation
+          // AI-NOTE: Use appropriate EmailValidator
+          // const emailValidator = new EmailValidatorAdapter() // Backend
+          // const emailValidator = new ZodEmailValidator() // Frontend
+          // validations.push(new EmailValidation('email', emailValidator))
+
+          // Password minimum length
+          validations.push(new MinLengthValidation('password', 8))
+
+          // Password confirmation
+          validations.push(new CompareFieldsValidation('password', 'passwordConfirmation'))
+
+          return new ValidationComposite(validations)
+        }
+
+    # === STEP 13: VERIFY GREEN PHASE ===
+    - id: 'verify-green-phase'
+      type: 'validation'
+      description: 'TDD GREEN: Verify all tests pass'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to ensure they pass (GREEN phase)'
+        scripts:
+          - name: 'Verify passing tests'
+            command: |
+              echo "🟢 TDD GREEN: Running tests - they should PASS now..."
+              npm test -- validation || {
+                echo "❌ ERROR: Tests are still failing after implementation!"
+                echo "   Review the implementation and fix issues."
+                exit 1
+              }
+              echo "✅ Excellent! All validation tests are passing (GREEN phase)"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 14: TDD REFACTOR - IMPROVE CODE QUALITY ===
+    - id: 'refactor-validation-layer'
+      type: 'validation'
+      description: 'TDD REFACTOR: Improve validation code quality'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      condition: '__NEEDS_REFACTORING__'
+      run_scripts:
+        description: 'Refactor while keeping tests green'
+        scripts:
+          - name: 'Refactor validation layer'
+            command: |
+              echo "♻️ TDD REFACTOR: Improving validation layer..."
+              echo "   Common refactorings:"
+              echo "   - Extract validation builders"
+              echo "   - Add custom validation types"
+              echo "   - Improve error messages"
+              echo "   - Add validation middleware"
+
+              # Run tests before refactoring
+              npm test -- validation || {
+                echo "❌ Tests must be green before refactoring!"
+                exit 1
+              }
+
+              # AI-NOTE: Apply refactorings here
+
+              # Run tests after refactoring
+              npm test -- validation || {
+                echo "❌ Refactoring broke tests! Revert changes."
+                exit 1
+              }
+
+              echo "✅ Refactoring complete - tests still green!"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 15: CREATE INTEGRATION EXAMPLE ===
+    - id: 'create-integration-example'
+      type: 'create_file'
+      description: 'Create example of validation integration'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/docs/validation-integration.md'
+      template: |
+        # Validation Layer Integration Guide
+
+        ## Backend Integration (Express/Node.js)
+
+        ```typescript
+        // In presentation layer controller
+        import { makeSignUpValidation } from '@/validation/factories'
+
+        export class SignUpController {
+          constructor(
+            private readonly validation: Validation,
+            private readonly signUp: SignUp
+          ) {}
+
+          async handle(request: HttpRequest): Promise<HttpResponse> {
+            const error = this.validation.validate(request.body)
+            if (error) {
+              return badRequest(error)
+            }
+
+            // Continue with use case execution
+          }
+        }
+
+        // In factory
+        const validation = makeSignUpValidation()
+        const controller = new SignUpController(validation, signUpUseCase)
+        ```
+
+        ## Frontend Integration (Next.js/React)
+
+        ```typescript
+        // In Server Action
+        'use server'
+        import { makeSignUpValidation } from '@/validation/factories'
+
+        export async function signUpAction(formData: FormData) {
+          const validation = makeSignUpValidation()
+          const input = Object.fromEntries(formData)
+
+          const error = validation.validate(input)
+          if (error) {
+            return { success: false, error: error.message }
+          }
+
+          // Continue with use case
+        }
+        ```
+
+        ## Custom Validators
+
+        ```typescript
+        // Create custom validator
+        export class CpfValidation implements Validation {
+          constructor(private readonly fieldName: string) {}
+
+          validate(input: any): Error | null {
+            const cpf = input[this.fieldName]
+            if (!isValidCpf(cpf)) {
+              return new InvalidParamError(this.fieldName)
+            }
+            return null
+          }
+        }
+
+        // Add to factory
+        validations.push(new CpfValidation('cpf'))
+        ```
+
+# ------------------------------------------------------------------------------
+# VALIDATION REFACTORING PATTERNS
+# ------------------------------------------------------------------------------
+
+validation_refactoring_patterns:
+  - id: 'extract-validation-logic'
+    description: 'Extract inline validation to validation layer'
+    detection:
+      - 'Validation logic in controllers'
+      - 'Validation logic in use cases'
+      - 'Repeated validation code'
+    example:
+      original: |
+        # AI-NOTE: Extract validation from controller to validation layer
+        <<<FIND>>>
+        export class SignUpController {
+          async handle(request: HttpRequest): Promise<HttpResponse> {
+            // Inline validation
+            if (!request.body.email) {
+              return badRequest(new Error('Email is required'))
+            }
+            if (!request.body.password) {
+              return badRequest(new Error('Password is required'))
+            }
+            if (request.body.password.length < 8) {
+              return badRequest(new Error('Password too short'))
+            }
+
+            // Use case execution
+            const result = await this.signUp.execute(request.body)
+            return ok(result)
+          }
+        }
+        <<</FIND>>>
+        <<<REPLACE>>>
+        export class SignUpController {
+          constructor(
+            private readonly validation: Validation,
+            private readonly signUp: SignUp
+          ) {}
+
+          async handle(request: HttpRequest): Promise<HttpResponse> {
+            // Delegate to validation layer
+            const error = this.validation.validate(request.body)
+            if (error) {
+              return badRequest(error)
+            }
+
+            // Use case execution
+            const result = await this.signUp.execute(request.body)
+            return ok(result)
+          }
+        }
+        <<</REPLACE>>>
+      category: 'architecture'
+      severity: 'HIGH'
+      rlhf_impact: 2
+
+# ------------------------------------------------------------------------------
+# VALIDATION ANTI-PATTERNS
+# ------------------------------------------------------------------------------
+
+validation_anti_patterns:
+  - name: 'Validation in Use Cases'
+    description: 'Use cases should not contain validation logic'
+    example: 'if (!email || !password) throw new Error("Invalid input")'
+    correct: 'Validation should be in presentation layer before use case'
+    rlhf_impact: -2
+
+  - name: 'Duplicate Validation'
+    description: 'Same validation logic repeated in multiple places'
+    example: 'Email validation in controller and use case'
+    correct: 'Use ValidationComposite to reuse validation logic'
+    rlhf_impact: -1
+
+  - name: 'Business Rules in Validators'
+    description: 'Validators should not contain business logic'
+    example: 'Checking if user exists in EmailValidation'
+    correct: 'Keep validators focused on format/structure validation'
+    rlhf_impact: -2
+
+  - name: 'Hardcoded Error Messages'
+    description: 'Error messages hardcoded in multiple places'
+    example: 'return { error: "Email is required" }'
+    correct: 'Use error classes with consistent messages'
+    rlhf_impact: -1
+
+  - name: 'Missing Validation Composition'
+    description: 'Not using composite pattern for multiple validations'
+    example: 'Multiple if statements for validation'
+    correct: 'Use ValidationComposite to combine validators'
+    rlhf_impact: -1

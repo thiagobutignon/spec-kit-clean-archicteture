@@ -1,0 +1,13 @@
+# CHUNK: fullstack/steps/05-main.part.regent
+# Lines: 1485-1492
+# Estimated tokens: 118
+# Original: fullstack-main-template.regent
+# =============================================
+
+# --- From: fullstack/steps/05-main.part.regent ---
+# ------------------------------------------------------------------------------
+# FULLSTACK MAIN LAYER TEMPLATE
+# Next.js 15 App Router - Complete Fullstack Composition Root
+# Supports: Next.js 15 with App Router, API Routes, Server Components, and Server Actions
+# Pattern: Factory Pattern, Composite Pattern, Full Dependency Injection
+# ------------------------------------------------------------------------------

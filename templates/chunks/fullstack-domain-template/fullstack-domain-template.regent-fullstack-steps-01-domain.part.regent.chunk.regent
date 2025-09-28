@@ -1,0 +1,20 @@
+# CHUNK: fullstack/steps/01-domain.part.regent
+# Lines: 1485-1499
+# Estimated tokens: 214
+# Original: fullstack-domain-template.regent
+# =============================================
+
+# --- From: fullstack/steps/01-domain.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: DOMAIN LAYER IMPLEMENTATION STEPS FOR FULLSTACK
+  # These steps create shared domain interfaces and types following Clean Architecture
+  # for unified Next.js 15 fullstack development (frontend + backend)
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # DOMAIN LAYER STEPS SECTION
+  # Steps for generating shared domain layer artifacts in fullstack features
+  # Following "Feature Module with Use Case Slices" architecture for Next.js 15
+  # Domain layer is 100% shared between frontend and backend
+  # ------------------------------------------------------------------------------

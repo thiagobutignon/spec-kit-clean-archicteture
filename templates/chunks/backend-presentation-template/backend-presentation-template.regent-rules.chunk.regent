@@ -1,0 +1,427 @@
+# CHUNK: rules
+# Lines: 711-1132
+# Estimated tokens: 4336
+# Original: backend-presentation-template.regent
+# =============================================
+
+  rules:
+    # Domain layer rules (modern approach)
+    domain:
+      allowed:
+        - 'Type definitions and interfaces (Models)'
+        - 'Use case interfaces with single execute() method'
+        - 'Separate Input and Output types for each use case'
+        - 'Simple data models without behavior'
+        - 'JSDoc documentation for all public interfaces'
+        - 'ES2015 module exports (export type, export interface)'
+
+      forbidden:
+        - 'Multiple methods in a single use case interface'
+        - 'Combined operations (e.g., CreateUserAndSendEmail)'
+        - 'Framework dependencies (Express, third-party libraries)'
+        - 'External libraries (HTTP or database clients)'
+        - 'Implementation details of any kind'
+        - 'UI components or presentation logic'
+        - 'HTTP/Database/File system operations'
+        - 'Environment variables or configuration'
+        - 'Console.log or any I/O operations'
+        - 'Implementation of business logic (only interfaces allowed)'
+        - 'Validation implementations'
+        - 'Error throwing or handling'
+        - 'Dependency injection'
+        - 'Domain entities with methods/behavior (use simple data structures)'
+
+      should:
+        - 'Define business entities and value objects'
+        - 'Contain only interfaces and types'
+        - 'Be framework-agnostic'
+        - 'Follow domain-driven design principles'
+
+      should_not:
+        - 'Import from other layers'
+        - 'Contain implementation details'
+        - 'Have framework dependencies'
+      use_case:
+        should:
+          - 'Have only ONE execute() method per interface'
+          - 'Define separate Input and Output types'
+          - 'Have EXACTLY ONE responsibility (one business operation)'
+          - 'Be named with single verb describing ONE action (__USE_CASE_NAME__, not __USE_CASE_NAME__And__OTHER_ACTION__)'
+          - 'Include comprehensive JSDoc documentation'
+          - 'Return Promise<Output> from execute method'
+          - 'Be framework agnostic'
+          - 'Follow naming convention: VerbNoun (e.g., __USE_CASE_EXAMPLE_1__, __USE_CASE_EXAMPLE_2__, __USE_CASE_EXAMPLE_3__)'
+        should_not:
+          - 'Have multiple methods (no __METHOD_1__() AND __METHOD_2__() in same interface)'
+          - 'Combine multiple operations (__USE_CASE_NAME__And__OTHER_ACTION__ violates SRP)'
+          - 'Contain implementation logic'
+          - 'Know about HTTP, databases, or external services'
+          - 'Import from data, presentation, or infrastructure layers'
+          - 'Have side effects'
+          - 'Use generic method names like handle(), process(), or run()'
+
+    # Data layer rules
+    data:
+      should:
+        - 'Implement domain use case interfaces'
+        - 'Use constructor injection for dependencies'
+        - 'Define protocols for external dependencies'
+        - 'Use prefix naming (Db__USE_CASE_NAME__, Remote__USE_CASE_NAME__)'
+        - 'Handle errors and status codes appropriately'
+        - 'Keep business logic minimal (only orchestration)'
+        - 'Return domain types, not infrastructure types'
+
+      should_not:
+        - 'Import from infrastructure layer directly'
+        - 'Contain complex business logic (belongs in domain)'
+        - 'Expose infrastructure details to domain'
+        - 'Use concrete implementations instead of protocols'
+        - 'Have direct database or HTTP calls (use protocols)'
+
+    # Infrastructure layer rules
+    infra:
+      should:
+        - 'Implement data layer protocols'
+        - 'Use native Fetch API instead of axios'
+        - 'Use Prisma ORM for database operations'
+        - 'Support PostgreSQL with pgvector extension'
+        - 'Use Redis for caching when needed'
+        - 'Provide single FetchHttpClient for all HTTP needs'
+        - 'Handle connection management and retries'
+        - 'Use environment variables for configuration'
+
+      should_not:
+        - 'Import from domain or use case layers'
+        - 'Contain business logic'
+        - 'Use multiple HTTP client implementations'
+        - 'Expose database-specific types to other layers'
+        - 'Use axios or other HTTP libraries (use Fetch API)'
+        - 'Use MongoDB (use Prisma with PostgreSQL)'
+
+    # Presentation layer rules
+    presentation:
+      should:
+        - 'Use Express for HTTP server and routing'
+        - 'Implement Controller interface with handle method'
+        - 'Return standardized HTTP responses (ok, badRequest, etc.)'
+        - 'Use middlewares for cross-cutting concerns'
+        - 'Handle errors gracefully with try/catch'
+        - 'Validate requests before processing'
+        - 'Use RESTful API design principles'
+        - 'Implement proper HTTP status codes'
+
+      should_not:
+        - 'Use GraphQL (use REST with Express)'
+        - 'Import from data or infra layers directly'
+        - 'Contain business logic (belongs in use cases)'
+        - 'Make direct HTTP calls (use data layer)'
+        - 'Expose internal implementation details'
+        - 'Implement middleware that does not follow the Express middleware signature (req, res, next)'
+
+    # Error rules
+    error:
+      should:
+        - 'Extend the native Error class'
+        - 'Have descriptive names ending with Error'
+        - 'Contain meaningful error messages'
+        - 'Represent business rule violations'
+        - 'Be thrown when domain invariants are violated'
+
+      should_not:
+        - 'Contain HTTP status codes'
+        - 'Include technical/implementation details'
+        - 'Expose sensitive information'
+        - 'Import external dependencies'
+
+    # Test helper rules
+    test_helper:
+      should:
+        - 'Create mock/stub implementations of use cases'
+        - 'Generate fake test data'
+        - 'Be pure functions that return consistent data'
+        - 'Help reduce test boilerplate'
+        - 'Use ONLY Vitest (Jest is prohibited)'
+
+      should_not:
+        - 'Make real API calls or database queries'
+        - 'Depend on external services'
+        - 'Contain test assertions (those belong in test files)'
+        - 'Have side effects or maintain state'
+        - 'Use Jest (use Vitest instead)'
+
+    # Validation rules
+    validation:
+      should:
+        - 'Implement FieldValidation interface for field validators'
+        - 'Use ValidationComposite to combine multiple validators'
+        - 'Use ValidationBuilder for fluent validation construction'
+        - 'Create factory functions for validation composites'
+        - 'Validate individual fields with specific rules'
+        - 'Return descriptive error messages'
+        - 'Support chaining of validation rules'
+        - 'Use static build() method for composite creation'
+      should_not:
+        - 'Import from domain layer'
+        - 'Import from data or infra layers'
+        - 'Contain business logic (only validation rules)'
+        - 'Throw exceptions (return Error objects instead)'
+        - 'Access external services or databases'
+        - 'Use async validation (keep validators synchronous)'
+
+    # Main layer rules
+    main:
+      should:
+        - 'Create factory functions for controllers'
+        - 'Wire up all dependencies using composition'
+        - 'Apply decorators for cross-cutting concerns (logging, monitoring)'
+        - 'Configure Express routes and middlewares'
+        - 'Setup Swagger documentation'
+        - 'Handle environment configuration'
+        - 'Use adapters for framework integration'
+        - 'Return decorated controllers from factories'
+        - 'Setup dependency injection container'
+        - 'Configure database connections and migrations'
+        - 'Initialize monitoring and health checks'
+
+      should_not:
+        - 'Contain business logic (only wiring)'
+        - 'Have direct database or API calls'
+        - 'Include complex algorithms or calculations'
+        - 'Store application state'
+        - 'Define new interfaces or types (only use existing ones)'
+        - 'Handle request/response logic (belongs in presentation)'
+
+    # Reference patterns
+    reference_patterns:
+      clean_architecture:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'clean architecture use case'
+        url: 'https://github.com/...'
+        description: 'Following Clean Architecture pattern.'
+
+      ddd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'domain driven design'
+        url: 'https://github.com/...'
+        description: 'Following DDD patterns.'
+
+      tdd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'test driven development'
+        url: 'https://github.com/...'
+        description: 'Following TDD patterns.'
+
+    # Learning patterns
+    learning_patterns:
+      common_errors:
+        - pattern: 'import axios'
+          fix: 'Use Fetch API instead of axios in infra layer'
+          score_impact: -2
+
+        - pattern: '__USE_CASE_NAME__And__OTHER_ACTION__'
+          fix: 'Split into two separate use cases (SRP violation)'
+          score_impact: -1
+
+        - pattern: 'missing @domainConcept'
+          fix: 'Add domain concept documentation for +2 score'
+          score_impact: +1
+
+      success_indicators:
+        - 'Uses ubiquitous language consistently'
+        - 'Follows single responsibility principle'
+        - 'No dependency violations'
+        - 'Comprehensive test coverage'
+        - 'Clean git history with atomic commits'
+
+    # Required protocols for all layers
+    required_protocols:
+      # Domain Layer
+      domain:
+        - 'All use cases must have single execute() method'
+        - 'All use cases must define separate Input and Output types'
+        - 'All domain types must be immutable'
+        - 'No use case can perform multiple operations (SRP)'
+        - 'All models must be simple DTOs without behavior'
+
+      # Data Layer
+      data:
+        - 'All implementations must inject dependencies via constructor'
+        - 'All protocols must be interfaces, not concrete classes'
+        - 'All implementations must use Db or Remote prefix'
+        - 'Must return domain types, not infrastructure types'
+        - 'Must handle errors and map status codes appropriately'
+
+      # Infrastructure Layer
+      infra:
+        - 'All adapters must implement data layer protocols'
+        - 'HTTP clients must use Fetch API, not axios'
+        - 'Database repositories must use Prisma with PostgreSQL'
+        - 'All external configs must come from environment variables'
+        - 'Must not expose infrastructure types to other layers'
+
+      # Presentation Layer
+      presentation:
+        - 'Controllers must implement handle() method'
+        - 'Controllers must return HTTP helpers (ok, badRequest, etc.)'
+        - 'Middlewares must implement handle() with next parameter'
+        - 'Request handlers must validate input before processing'
+        - 'Response handlers must use standard HTTP status codes'
+
+      # Validation Layer
+      validation:
+        - 'All validators must implement FieldValidation interface'
+        - 'Validators must return Error or undefined'
+        - 'ValidationComposite must use static build() method'
+        - 'Validation must be synchronous (no async/await)'
+        - 'Factory functions must return ValidationComposite (make__USE_CASE_NAME__Validation)'
+
+      # Main Layer
+      main:
+        - 'All factories must return configured instances'
+        - 'Factory functions must wire all dependencies'
+        - 'No business logic allowed (only composition)'
+        - 'Routes must use adapter pattern for framework integration'
+        - 'Must not define new types (use existing from other layers)'
+
+      # Cross-cutting Concerns
+      general:
+        - 'All public interfaces must have JSDoc documentation'
+        - 'All errors must extend native Error class'
+        - 'All test helpers must be pure functions'
+        - 'All tests must use Vitest, not Jest'
+        - 'No use of faker - fixed test data only'
+
+    # Documentation standards (JSDoc)
+    documentation:
+      # Domain Layer Documentation
+      domain:
+        use_case_interface:
+          - '@description - Clear description of the use case purpose'
+          - '@example - Usage example with execute() method'
+          - '@see - Reference to related use cases or documentation'
+        input_output_types:
+          - '@typedef - Define Input and Output types'
+          - '@property - Document each field with type and constraints'
+          - '@example - Show valid input/output instances'
+        model_type:
+          - '@typedef - Define the domain model'
+          - '@property - Document each property with business rules'
+          - '@example - Show valid model instance'
+
+      # Data Layer Documentation
+      data:
+        protocol_interface:
+          - '@interface - Define protocol contracts'
+          - '@method - Document each method signature'
+          - '@throws - Document possible errors'
+        implementation_class:
+          - '@class - Describe the use case implementation'
+          - '@implements - List implemented interfaces'
+          - '@constructor - Document dependency injection'
+          - '@method - Document orchestration logic'
+
+      # Infrastructure Layer Documentation
+      infra:
+        adapter_class:
+          - '@class - Describe the adapter purpose'
+          - '@implements - Protocol being implemented'
+          - '@dependency - External libraries used'
+        database_repository:
+          - '@class - Repository implementation'
+          - '@method - Document CRUD operations'
+          - '@throws - Database-specific errors'
+        http_client:
+          - '@class - HTTP client implementation'
+          - '@method - Document request/response handling'
+          - '@throws - Network-related errors'
+
+      # Presentation Layer Documentation
+      presentation:
+        controller:
+          - '@class - Controller description'
+          - '@route - HTTP route and method'
+          - '@param - Request parameters'
+          - '@returns - HTTP response format'
+          - '@throws - HTTP error responses'
+        middleware:
+          - '@function - Middleware purpose'
+          - '@param - Request, Response, Next'
+          - '@throws - Authorization/validation errors'
+        route_handler:
+          - '@function - Route handler description'
+          - '@param - Request and response objects'
+          - '@returns - HTTP response with status and data'
+          - '@throws - HTTP error responses'
+
+      # Validation Layer Documentation
+      validation:
+        validator_class:
+          - '@class - Validator description'
+          - '@implements - FieldValidation interface'
+          - '@method - validate() method logic'
+          - '@returns - Error or undefined'
+        composite:
+          - '@class - ValidationComposite'
+          - '@method - Combines multiple validators'
+          - '@returns - First error found or undefined'
+
+      # Main Layer Documentation
+      main:
+        factory:
+          - '@function - Factory function description'
+          - '@returns - Configured instance with dependencies'
+          - '@example - How to use the factory'
+        route:
+          - '@function - Route configuration'
+          - '@param - Express router instance'
+          - '@middleware - Applied middlewares'
+        composition:
+          - '@function - Dependency composition'
+          - '@returns - Fully configured instance with dependencies injected'
+
+      example_template: |
+        /**
+        * @description __USE_CASE_DESCRIPTION__
+        * @example
+        * const __USE_CASE_NAME_CAMEL_CASE__ = new __USE_CASE_NAME_PASCAL_CASE__Impl(__DEPENDENCY_NAME__)
+        * const result = await __USE_CASE_NAME_CAMEL_CASE__.execute({
+        *   __INPUT_FIELD_1__: '__EXAMPLE_VALUE_1__',
+        *   __INPUT_FIELD_2__: '__EXAMPLE_VALUE_2__',
+        *   __INPUT_FIELD_3__: '__EXAMPLE_VALUE_3__'
+        * })
+        * @see {@link __RELATED_USE_CASE__} for __RELATED_DESCRIPTION__
+        */
+        export interface __USE_CASE_NAME_PASCAL_CASE__ {
+          execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output>
+        }
+
+        /**
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Input
+        * @property {string} __INPUT_FIELD_1__ - __FIELD_1_DESCRIPTION__ (__FIELD_1_CONSTRAINTS__)
+        * @property {string} __INPUT_FIELD_2__ - __FIELD_2_DESCRIPTION__
+        * @property {string} __INPUT_FIELD_3__ - __FIELD_3_DESCRIPTION__ (__FIELD_3_CONSTRAINTS__)
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Input = {
+          __INPUT_FIELD_1__: string
+          __INPUT_FIELD_2__: string
+          __INPUT_FIELD_3__: string
+        }
+
+        /**
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Output
+        * @property {string} __OUTPUT_FIELD_1__ - __OUTPUT_FIELD_1_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_2__ - __OUTPUT_FIELD_2_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_3__ - __OUTPUT_FIELD_3_DESCRIPTION__
+        * @property {Date} __TIMESTAMP_FIELD__ - __TIMESTAMP_DESCRIPTION__
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Output = {
+          __OUTPUT_FIELD_1__: string
+          __OUTPUT_FIELD_2__: string
+          __OUTPUT_FIELD_3__: string
+          __TIMESTAMP_FIELD__: Date
+        }
+
+

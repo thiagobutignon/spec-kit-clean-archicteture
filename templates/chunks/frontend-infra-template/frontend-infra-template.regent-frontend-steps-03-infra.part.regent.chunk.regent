@@ -1,0 +1,20 @@
+# CHUNK: frontend/steps/03-infra.part.regent
+# Lines: 1183-1197
+# Estimated tokens: 221
+# Original: frontend-infra-template.regent
+# =============================================
+
+# --- From: frontend/steps/03-infra.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: INFRASTRUCTURE LAYER IMPLEMENTATION STEPS FOR FRONTEND (TDD)
+  # These steps implement infra layer following RED-GREEN-REFACTOR cycle
+  # Specific to frontend with Fetch API, Cache, Storage, and Next.js 15 patterns
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # INFRASTRUCTURE LAYER STEPS SECTION
+  # Steps for generating infrastructure layer artifacts in frontend features
+  # Following Test-Driven Development (RED-GREEN-REFACTOR) methodology
+  # Using Fetch API, localStorage, sessionStorage, and frontend-specific patterns
+  # ------------------------------------------------------------------------------

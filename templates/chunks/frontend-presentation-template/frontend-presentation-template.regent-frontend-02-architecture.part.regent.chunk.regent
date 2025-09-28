@@ -1,0 +1,14 @@
+# CHUNK: frontend/02-architecture.part.regent
+# Lines: 287-295
+# Estimated tokens: 139
+# Original: frontend-presentation-template.regent
+# =============================================
+
+# --- From: frontend/02-architecture.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # FRONTEND ARCHITECTURAL RULES SECTION - NEXT.JS 15 + CLEAN ARCHITECTURE
+  # These rules define the Clean Architecture boundaries for React/Next.js frontend
+  # AI-NOTE: Frontend follows same Clean Architecture principles adapted for React/Next.js
+  # AI-NOTE: Server components and client components have different dependency rules
+  # ------------------------------------------------------------------------------

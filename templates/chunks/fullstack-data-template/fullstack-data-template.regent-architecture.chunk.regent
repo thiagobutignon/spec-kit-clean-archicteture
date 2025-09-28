@@ -1,0 +1,28 @@
+# CHUNK: architecture
+# Lines: 859-881
+# Estimated tokens: 287
+# Original: fullstack-data-template.regent
+# =============================================
+
+        architecture:
+          - "Layer Separation: Keep business rules independent of frameworks"
+          - "Dependency Direction: Always point toward the domain core"
+          - "Interface Segregation: Define minimal, focused interfaces"
+          - "Single Responsibility: Each class/function has one reason to change"
+          - "Open/Closed: Open for extension, closed for modification"
+
+        testing:
+          - "Test Pyramid: More unit tests, fewer integration tests, minimal E2E"
+          - "Fast Feedback: Unit tests run in milliseconds"
+          - "Isolated Tests: Each test can run independently"
+          - "Deterministic: Tests produce same results every time"
+          - "Readable: Tests serve as documentation for behavior"
+
+        deployment:
+          - "Environment Parity: Development, staging, and production match"
+          - "Immutable Builds: Same artifact deployed across environments"
+          - "Health Checks: Monitor both frontend and backend health"
+          - "Rollback Strategy: Ability to quickly revert problematic deployments"
+          - "Feature Flags: Control feature rollout independently"
+
+

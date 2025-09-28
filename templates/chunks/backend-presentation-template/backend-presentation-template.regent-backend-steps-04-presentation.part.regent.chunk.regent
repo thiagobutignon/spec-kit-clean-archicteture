@@ -1,0 +1,19 @@
+# CHUNK: backend/steps/04-presentation.part.regent
+# Lines: 1133-1146
+# Estimated tokens: 196
+# Original: backend-presentation-template.regent
+# =============================================
+
+# --- From: backend/steps/04-presentation.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: PRESENTATION LAYER IMPLEMENTATION STEPS FOR BACKEND
+  # These steps create controllers, middlewares, and HTTP protocols
+  # following Clean Architecture and Vertical Slice patterns for Node.js/Express
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION LAYER STEPS SECTION
+  # Steps for generating presentation layer artifacts in backend features
+  # Following "Feature Module with Use Case Slices" architecture
+  # ------------------------------------------------------------------------------

@@ -1,0 +1,1011 @@
+# CHUNK: main_steps
+# Lines: 1540-2545
+# Estimated tokens: 9586
+# Original: fullstack-main-template.regent
+# =============================================
+
+  main_steps:
+    # === STEP 1: CREATE MAIN BRANCH ===
+    - id: 'create-main-branch-fullstack'
+      type: 'validation'
+      description: 'Create feature branch for fullstack main layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Create and checkout fullstack main layer branch'
+        scripts:
+          - name: 'Create main branch'
+            command: |
+              git checkout -b "feat/__FEATURE_NAME_KEBAB_CASE__-fullstack-main"
+              echo "✅ Created branch: feat/__FEATURE_NAME_KEBAB_CASE__-fullstack-main"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: CREATE ENVIRONMENT CONFIGURATION ===
+    - id: 'create-env-config-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack environment configuration'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/shared/main/config/env.ts'
+      template: |
+        /**
+         * Fullstack environment configuration
+         * @layer Main Layer - Configuration
+         * @pattern Configuration Pattern
+         */
+        const config = {
+          // App Configuration
+          nodeEnv: process.env.NODE_ENV || 'development',
+          port: process.env.PORT || 3000,
+          appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+
+          // Database Configuration
+          mongoUrl: process.env.MONGO_URL || 'mongodb://localhost:27017/__PROJECT_NAME__',
+          postgresUrl: process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/__PROJECT_NAME__',
+
+          // Cache Configuration
+          redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
+
+          // Authentication Configuration
+          jwtSecret: process.env.JWT_SECRET || 'your-secret-key',
+          nextAuthSecret: process.env.NEXTAUTH_SECRET || 'your-nextauth-secret',
+          nextAuthUrl: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+
+          // API Configuration
+          apiPrefix: '/api',
+          corsOrigin: process.env.CORS_ORIGIN || '*',
+          rateLimitWindow: parseInt(process.env.RATE_LIMIT_WINDOW || '900000'), // 15 minutes
+          rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX || '100'),
+
+          // External Services
+          uploadthingSecret: process.env.UPLOADTHING_SECRET,
+          uploadthingAppId: process.env.UPLOADTHING_APP_ID,
+        } as const
+
+        export default config
+
+    # === STEP 3: CREATE ROOT LAYOUT ===
+    - id: 'create-root-layout-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack root layout with providers'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/app/layout.tsx'
+      template: |
+        import type { Metadata } from 'next'
+        import { Inter } from 'next/font/google'
+        import './globals.css'
+        import { RootProviders } from '@/shared/main/providers/root-providers'
+        import { ThemeProvider } from '@/shared/main/providers/theme-provider'
+        import { SessionProvider } from '@/shared/main/providers/session-provider'
+        import config from '@/shared/main/config/env'
+
+        const inter = Inter({ subsets: ['latin'] })
+
+        /**
+         * Root metadata for fullstack application
+         * @layer Main Layer - App Router
+         */
+        export const metadata: Metadata = {
+          title: {
+            default: '__PROJECT_NAME__',
+            template: '%s | __PROJECT_NAME__'
+          },
+          description: 'Full-stack Clean Architecture Next.js 15 Application',
+          metadataBase: new URL(config.appUrl),
+          openGraph: {
+            title: '__PROJECT_NAME__',
+            description: 'Full-stack Clean Architecture Next.js 15 Application',
+            url: config.appUrl,
+            siteName: '__PROJECT_NAME__',
+            locale: 'en_US',
+            type: 'website',
+          },
+          twitter: {
+            card: 'summary_large_image',
+            title: '__PROJECT_NAME__',
+            description: 'Full-stack Clean Architecture Next.js 15 Application',
+          },
+        }
+
+        /**
+         * Root layout component for fullstack app
+         * @layer Main Layer - App Router
+         * @pattern Provider Pattern, Server Component
+         */
+        export default function RootLayout({
+          children,
+        }: {
+          children: React.ReactNode
+        }) {
+          return (
+            <html lang="en" suppressHydrationWarning>
+              <body className={inter.className}>
+                <SessionProvider>
+                  <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                  >
+                    <RootProviders>
+                      {children}
+                    </RootProviders>
+                  </ThemeProvider>
+                </SessionProvider>
+              </body>
+            </html>
+          )
+        }
+
+    # === STEP 4: CREATE ROOT PROVIDERS ===
+    - id: 'create-root-providers-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack root providers'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/shared/main/providers/root-providers.tsx'
+      template: |
+        'use client'
+
+        import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+        import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+        import { useState } from 'react'
+        import { Toaster } from '@/shared/presentation/ui/toaster'
+        import { AppContextProvider } from '@/shared/main/providers/app-context-provider'
+        import config from '@/shared/main/config/env'
+
+        /**
+         * Root providers for fullstack application
+         * @layer Main Layer - Providers
+         * @pattern Provider Pattern, Client Component
+         */
+        export function RootProviders({ children }: { children: React.ReactNode }) {
+          const [queryClient] = useState(
+            () =>
+              new QueryClient({
+                defaultOptions: {
+                  queries: {
+                    staleTime: 60 * 1000, // 1 minute
+                    gcTime: 5 * 60 * 1000, // 5 minutes
+                    retry: (failureCount, error: any) => {
+                      // Don't retry on 4xx errors
+                      if (error?.status >= 400 && error?.status < 500) {
+                        return false
+                      }
+                      return failureCount < 3
+                    },
+                  },
+                  mutations: {
+                    retry: false,
+                  },
+                },
+              })
+          )
+
+          return (
+            <QueryClientProvider client={queryClient}>
+              <AppContextProvider>
+                {children}
+                <Toaster />
+                {config.nodeEnv === 'development' && (
+                  <ReactQueryDevtools initialIsOpen={false} />
+                )}
+              </AppContextProvider>
+            </QueryClientProvider>
+          )
+        }
+
+    # === STEP 5: CREATE API ROUTE HANDLER FACTORY ===
+    - id: 'create-api-handler-factory'
+      type: 'create_file'
+      description: 'Create factory for API route handlers'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/shared/main/factories/api-handler-factory.ts'
+      template: |
+        import { NextRequest, NextResponse } from 'next/server'
+        import { ZodSchema } from 'zod'
+        import { makeLoggerDecorator } from './decorators/logger-factory'
+
+        /**
+         * Factory for creating API route handlers with validation and error handling
+         * @layer Main Layer - Factory
+         * @pattern Factory Pattern, Error Handling
+         */
+        export function createApiHandler<T = any>({
+          schema,
+          handler,
+          requireAuth = false,
+        }: {
+          schema?: ZodSchema<T>
+          handler: (data: T, request: NextRequest) => Promise<any>
+          requireAuth?: boolean
+        }) {
+          return async function apiHandler(request: NextRequest) {
+            try {
+              // Authentication check
+              if (requireAuth) {
+                const session = await getServerSession()
+                if (!session) {
+                  return NextResponse.json(
+                    { error: 'Unauthorized' },
+                    { status: 401 }
+                  )
+                }
+              }
+
+              // Parse and validate request body
+              let data: T
+              if (schema) {
+                const body = await request.json()
+                const result = schema.safeParse(body)
+
+                if (!result.success) {
+                  return NextResponse.json(
+                    { error: 'Validation failed', details: result.error.issues },
+                    { status: 400 }
+                  )
+                }
+                data = result.data
+              } else {
+                data = {} as T
+              }
+
+              // Execute handler
+              const result = await handler(data, request)
+
+              return NextResponse.json(result, { status: 200 })
+
+            } catch (error) {
+              console.error('API handler error:', error)
+
+              // Handle known errors
+              if (error instanceof Error) {
+                if (error.message.includes('not found')) {
+                  return NextResponse.json(
+                    { error: 'Resource not found' },
+                    { status: 404 }
+                  )
+                }
+
+                if (error.message.includes('unauthorized')) {
+                  return NextResponse.json(
+                    { error: 'Unauthorized' },
+                    { status: 401 }
+                  )
+                }
+              }
+
+              return NextResponse.json(
+                { error: 'Internal server error' },
+                { status: 500 }
+              )
+            }
+          }
+        }
+
+        // AI-NOTE: Import getServerSession based on your auth provider
+        async function getServerSession() {
+          // Implementation depends on your auth solution
+          // NextAuth: import { getServerSession } from 'next-auth'
+          // Auth0: implementation for Auth0
+          // Clerk: implementation for Clerk
+          return null
+        }
+
+    # === STEP 6: CREATE FEATURE COMPOSITE ===
+    - id: 'create-feature-composite-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack composite component'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main/composites/__USE_CASE_NAME_KEBAB_CASE__-composite.tsx'
+      template: |
+        import { Suspense } from 'react'
+        import { __USE_CASE_NAME_PASCAL_CASE__Form } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components'
+        import { __USE_CASE_NAME_PASCAL_CASE__Loading } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components/loading'
+        import { make__USE_CASE_NAME_PASCAL_CASE__Props } from '../factories/__USE_CASE_NAME_KEBAB_CASE__-factory'
+
+        /**
+         * Fullstack composite component for __USE_CASE_NAME_PASCAL_CASE__
+         * @layer Main Layer - Composite
+         * @pattern Composite Pattern, Server Component
+         */
+        export async function __USE_CASE_NAME_PASCAL_CASE__Composite() {
+          // Server-side data fetching and dependency injection
+          const props = await make__USE_CASE_NAME_PASCAL_CASE__Props()
+
+          return (
+            <Suspense fallback={<__USE_CASE_NAME_PASCAL_CASE__Loading />}>
+              <__USE_CASE_NAME_PASCAL_CASE__Form {...props} />
+            </Suspense>
+          )
+        }
+
+    # === STEP 7: CREATE COMPONENT FACTORY ===
+    - id: 'create-component-factory-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack component factory'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/__USE_CASE_NAME_KEBAB_CASE__-factory.ts'
+      template: |
+        import { makeDb__USE_CASE_NAME_PASCAL_CASE__ } from './usecases/__USE_CASE_NAME_KEBAB_CASE__-factory'
+        import { make__USE_CASE_NAME_PASCAL_CASE__Validation } from './validation/__USE_CASE_NAME_KEBAB_CASE__-validation-factory'
+        import { cache } from 'react'
+
+        /**
+         * Factory for __USE_CASE_NAME_PASCAL_CASE__ component props (cached)
+         * @layer Main Layer - Factory
+         * @pattern Factory Pattern, React Cache, Dependency Injection
+         */
+        export const make__USE_CASE_NAME_PASCAL_CASE__Props = cache(async () => {
+          const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+
+          // AI-NOTE: Server-side data fetching can happen here
+          // const initialData = await useCase.getInitialData()
+
+          return {
+            useCase,
+            validation: make__USE_CASE_NAME_PASCAL_CASE__Validation(),
+            // initialData,
+          }
+        })
+
+    # === STEP 8: CREATE USE CASE FACTORY ===
+    - id: 'create-usecase-factory-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack use case factory'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/usecases/__USE_CASE_NAME_KEBAB_CASE__-factory.ts'
+      template: |
+        import { Db__USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases'
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases'
+        import { make__FEATURE_NAME_PASCAL_CASE__Repository } from './repository-factory'
+        import { makeCacheRepository } from '@/shared/main/factories/cache'
+        import { makeLogger } from '@/shared/main/factories/logger'
+
+        /**
+         * Factory for __USE_CASE_NAME_PASCAL_CASE__ use case (fullstack)
+         * @layer Main Layer - Factory
+         * @pattern Factory Pattern, Dependency Injection
+         */
+        export const makeDb__USE_CASE_NAME_PASCAL_CASE__ = (): __USE_CASE_NAME_PASCAL_CASE__ => {
+          const repository = make__FEATURE_NAME_PASCAL_CASE__Repository()
+          const cacheRepository = makeCacheRepository()
+          const logger = makeLogger()
+
+          return new Db__USE_CASE_NAME_PASCAL_CASE__(
+            repository,
+            cacheRepository,
+            logger
+          )
+        }
+
+    # === STEP 9: CREATE SERVER ACTION ===
+    - id: 'create-server-action-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack Server Action'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/actions/__USE_CASE_NAME_KEBAB_CASE__-action.ts'
+      template: |
+        'use server'
+
+        import { revalidatePath, revalidateTag } from 'next/cache'
+        import { redirect } from 'next/navigation'
+        import { makeDb__USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/usecases'
+        import { make__USE_CASE_NAME_PASCAL_CASE__Validation } from '@/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/validation'
+        import { ActionResult } from '@/shared/presentation/protocols'
+        import { getServerSession } from '@/shared/main/lib/auth'
+
+        /**
+         * Server Action for __USE_CASE_NAME_PASCAL_CASE__ (fullstack)
+         * @layer Presentation Layer - Server Action
+         * @pattern Server Action, Form Handling, Authentication
+         */
+        export async function __USE_CASE_NAME_CAMEL_CASE__Action(
+          prevState: ActionResult | null,
+          formData: FormData
+        ): Promise<ActionResult> {
+          try {
+            // Authentication check
+            const session = await getServerSession()
+            if (!session) {
+              return { success: false, error: 'Authentication required' }
+            }
+
+            // Convert FormData to object
+            const data = Object.fromEntries(formData)
+
+            // Validate input
+            const validation = make__USE_CASE_NAME_PASCAL_CASE__Validation()
+            const error = validation.validate(data)
+            if (error) {
+              return { success: false, error: error.message }
+            }
+
+            // Execute use case
+            const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+            const result = await useCase.execute({
+              ...data,
+              userId: session.user.id
+            })
+
+            // Revalidate cache and redirect
+            revalidateTag('__FEATURE_NAME_KEBAB_CASE__')
+            revalidatePath('/__FEATURE_NAME_KEBAB_CASE__')
+
+            if (result.id) {
+              redirect(`/__FEATURE_NAME_KEBAB_CASE__/${result.id}`)
+            }
+
+            return { success: true, data: result }
+          } catch (error) {
+            console.error('Server action error:', error)
+            return {
+              success: false,
+              error: error instanceof Error ? error.message : 'An error occurred'
+            }
+          }
+        }
+
+    # === STEP 10: CREATE API ROUTE ===
+    - id: 'create-api-route-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack API route'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/app/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/route.ts'
+      template: |
+        import { NextRequest } from 'next/server'
+        import { createApiHandler } from '@/shared/main/factories/api-handler-factory'
+        import { makeDb__USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/usecases'
+        import { __USE_CASE_NAME_CAMEL_CASE__Schema } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/validation/schemas'
+
+        /**
+         * API Route for __USE_CASE_NAME_PASCAL_CASE__ (fullstack)
+         * @layer App Router - API Route
+         * @pattern Route Handler, Factory Pattern
+         */
+
+        // POST handler
+        export const POST = createApiHandler({
+          schema: __USE_CASE_NAME_CAMEL_CASE__Schema,
+          requireAuth: true,
+          handler: async (data, request) => {
+            const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+
+            // Extract user info from request if needed
+            // const session = await getServerSession()
+
+            return await useCase.execute(data)
+          }
+        })
+
+        // GET handler
+        export const GET = createApiHandler({
+          requireAuth: true,
+          handler: async (_, request) => {
+            const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+
+            // Extract query parameters
+            const { searchParams } = new URL(request.url)
+            const page = parseInt(searchParams.get('page') || '1')
+            const limit = parseInt(searchParams.get('limit') || '10')
+
+            return await useCase.list({ page, limit })
+          }
+        })
+
+        // PUT handler
+        export const PUT = createApiHandler({
+          schema: __USE_CASE_NAME_CAMEL_CASE__Schema,
+          requireAuth: true,
+          handler: async (data, request) => {
+            const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+
+            // Extract ID from URL
+            const url = new URL(request.url)
+            const pathSegments = url.pathname.split('/')
+            const id = pathSegments[pathSegments.length - 1]
+
+            return await useCase.update(id, data)
+          }
+        })
+
+        // DELETE handler
+        export const DELETE = createApiHandler({
+          requireAuth: true,
+          handler: async (_, request) => {
+            const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+
+            // Extract ID from URL
+            const url = new URL(request.url)
+            const pathSegments = url.pathname.split('/')
+            const id = pathSegments[pathSegments.length - 1]
+
+            return await useCase.delete(id)
+          }
+        })
+
+    # === STEP 11: CREATE PAGE COMPOSER ===
+    - id: 'create-page-composer-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack page composer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main/pages/__FEATURE_NAME_KEBAB_CASE__-page-composer.tsx'
+      template: |
+        import { __USE_CASE_NAME_PASCAL_CASE__Composite } from '../composites/__USE_CASE_NAME_KEBAB_CASE__-composite'
+        import { PageHeader } from '@/shared/presentation/components/page-header'
+        import { ErrorBoundary } from '@/shared/presentation/components/error-boundary'
+        // AI-NOTE: Import other use case composites
+
+        /**
+         * Fullstack page composer for __FEATURE_NAME_PASCAL_CASE__ feature
+         * @layer Main Layer - Page Composer
+         * @pattern Composite Pattern, Server Component
+         */
+        export function __FEATURE_NAME_PASCAL_CASE__PageComposer() {
+          return (
+            <div className="container mx-auto py-8">
+              <PageHeader
+                title="__FEATURE_NAME_PASCAL_CASE__"
+                description="Manage your __FEATURE_NAME_KEBAB_CASE__ data"
+              />
+
+              <div className="grid gap-8">
+                <ErrorBoundary fallback={<div>Something went wrong</div>}>
+                  <__USE_CASE_NAME_PASCAL_CASE__Composite />
+                </ErrorBoundary>
+
+                {/* AI-NOTE: Add other use case composites */}
+              </div>
+            </div>
+          )
+        }
+
+    # === STEP 12: CREATE FEATURE PAGE ===
+    - id: 'create-feature-page-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack feature page'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/app/(features)/__FEATURE_NAME_KEBAB_CASE__/page.tsx'
+      template: |
+        import { Metadata } from 'next'
+        import { __FEATURE_NAME_PASCAL_CASE__PageComposer } from '@/features/__FEATURE_NAME_KEBAB_CASE__/main/pages'
+        import { getServerSession } from '@/shared/main/lib/auth'
+        import { redirect } from 'next/navigation'
+
+        /**
+         * Generate metadata for __FEATURE_NAME_PASCAL_CASE__ page
+         * @layer App Router - Metadata
+         */
+        export async function generateMetadata(): Promise<Metadata> {
+          // AI-NOTE: Can fetch dynamic data for metadata here
+          return {
+            title: '__FEATURE_NAME_PASCAL_CASE__',
+            description: 'Manage your __FEATURE_NAME_KEBAB_CASE__ data',
+            openGraph: {
+              title: '__FEATURE_NAME_PASCAL_CASE__',
+              description: 'Manage your __FEATURE_NAME_KEBAB_CASE__ data',
+            },
+          }
+        }
+
+        /**
+         * __FEATURE_NAME_PASCAL_CASE__ page component (fullstack)
+         * @layer App Router - Page
+         * @pattern Server Component, Authentication
+         */
+        export default async function __FEATURE_NAME_PASCAL_CASE__Page() {
+          // Server-side authentication check
+          const session = await getServerSession()
+          if (!session) {
+            redirect('/auth/signin')
+          }
+
+          return <__FEATURE_NAME_PASCAL_CASE__PageComposer />
+        }
+
+    # === STEP 13: CREATE MIDDLEWARE ===
+    - id: 'create-middleware-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack Next.js middleware'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/middleware.ts'
+      template: |
+        import { NextResponse } from 'next/server'
+        import type { NextRequest } from 'next/server'
+        import { getToken } from 'next-auth/jwt'
+        import { rateLimit } from './shared/main/lib/rate-limit'
+        import config from './shared/main/config/env'
+
+        /**
+         * Next.js Middleware for fullstack app
+         * @layer Main Layer - Middleware
+         * @pattern Edge Runtime, Authentication, Rate Limiting, Security
+         */
+        export async function middleware(request: NextRequest) {
+          const response = NextResponse.next()
+
+          // Add security headers
+          response.headers.set('X-Frame-Options', 'DENY')
+          response.headers.set('X-Content-Type-Options', 'nosniff')
+          response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+          response.headers.set(
+            'Strict-Transport-Security',
+            'max-age=31536000; includeSubDomains'
+          )
+
+          const { pathname } = request.nextUrl
+
+          // Rate limiting for API routes
+          if (pathname.startsWith('/api/')) {
+            try {
+              await rateLimit(request)
+            } catch (error) {
+              return NextResponse.json(
+                { error: 'Too many requests' },
+                { status: 429 }
+              )
+            }
+          }
+
+          // Authentication for protected routes
+          const protectedPaths = ['/dashboard', '/profile', '/admin', '/(features)']
+          const isProtectedPath = protectedPaths.some(path =>
+            pathname.startsWith(path)
+          )
+
+          if (isProtectedPath) {
+            const token = await getToken({
+              req: request,
+              secret: config.nextAuthSecret,
+            })
+
+            if (!token) {
+              const url = new URL('/auth/signin', request.url)
+              url.searchParams.set('callbackUrl', pathname)
+              return NextResponse.redirect(url)
+            }
+
+            // Add user info to headers for API routes
+            if (pathname.startsWith('/api/')) {
+              response.headers.set('x-user-id', token.sub || '')
+              response.headers.set('x-user-email', token.email || '')
+            }
+          }
+
+          // CORS for API routes
+          if (pathname.startsWith('/api/')) {
+            response.headers.set('Access-Control-Allow-Origin', config.corsOrigin)
+            response.headers.set(
+              'Access-Control-Allow-Methods',
+              'GET, POST, PUT, DELETE, OPTIONS'
+            )
+            response.headers.set(
+              'Access-Control-Allow-Headers',
+              'Content-Type, Authorization'
+            )
+
+            // Handle preflight requests
+            if (request.method === 'OPTIONS') {
+              return new Response(null, { status: 200, headers: response.headers })
+            }
+          }
+
+          return response
+        }
+
+        export const config = {
+          matcher: [
+            /*
+             * Match all request paths except:
+             * - _next/static (static files)
+             * - _next/image (image optimization files)
+             * - favicon.ico, robots.txt, sitemap.xml
+             */
+            '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
+          ],
+        }
+
+    # === STEP 14: CREATE DATABASE FACTORY ===
+    - id: 'create-database-factory'
+      type: 'create_file'
+      description: 'Create database connection factory'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/shared/main/factories/database-factory.ts'
+      template: |
+        import { PrismaClient } from '@prisma/client'
+        import config from '../config/env'
+
+        /**
+         * Database connection factory
+         * @layer Main Layer - Factory
+         * @pattern Singleton, Factory Pattern
+         */
+
+        const globalForPrisma = globalThis as unknown as {
+          prisma: PrismaClient | undefined
+        }
+
+        export const db = globalForPrisma.prisma ?? new PrismaClient({
+          log: config.nodeEnv === 'development' ? ['query', 'error', 'warn'] : ['error'],
+        })
+
+        if (config.nodeEnv !== 'production') globalForPrisma.prisma = db
+
+        /**
+         * Factory for database connection
+         */
+        export const makeDb = () => db
+
+        /**
+         * Alternative: MongoDB connection factory
+         */
+        // import { MongoClient } from 'mongodb'
+        //
+        // let client: MongoClient
+        // let clientPromise: Promise<MongoClient>
+        //
+        // if (config.nodeEnv === 'development') {
+        //   const globalWithMongo = global as typeof globalThis & {
+        //     _mongoClientPromise?: Promise<MongoClient>
+        //   }
+        //
+        //   if (!globalWithMongo._mongoClientPromise) {
+        //     client = new MongoClient(config.mongoUrl)
+        //     globalWithMongo._mongoClientPromise = client.connect()
+        //   }
+        //   clientPromise = globalWithMongo._mongoClientPromise
+        // } else {
+        //   client = new MongoClient(config.mongoUrl)
+        //   clientPromise = client.connect()
+        // }
+        //
+        // export const makeMongoDb = () => clientPromise
+
+    # === STEP 15: CREATE E2E TESTS ===
+    - id: 'create-e2e-tests-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack E2E tests'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/e2e/__FEATURE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { test, expect } from '@playwright/test'
+
+        /**
+         * E2E tests for __FEATURE_NAME_PASCAL_CASE__ feature (fullstack)
+         * @layer Main Layer - E2E Tests
+         * @pattern E2E Testing, Authentication Flow
+         */
+        test.describe('__FEATURE_NAME_PASCAL_CASE__ Fullstack Feature', () => {
+          test.beforeEach(async ({ page }) => {
+            // Mock authentication or login
+            await page.goto('/auth/signin')
+            await page.fill('input[name="email"]', 'test@example.com')
+            await page.fill('input[name="password"]', 'password123')
+            await page.click('button[type="submit"]')
+
+            // Navigate to feature page
+            await page.goto('/__FEATURE_NAME_KEBAB_CASE__')
+          })
+
+          test('should display authenticated feature page', async ({ page }) => {
+            await expect(page).toHaveTitle(/__FEATURE_NAME_PASCAL_CASE__/)
+            await expect(page.locator('h1')).toContainText('__FEATURE_NAME_PASCAL_CASE__')
+          })
+
+          test('should submit form with Server Action', async ({ page }) => {
+            // Fill form fields
+            await page.fill('input[name="name"]', 'Test Name')
+            await page.fill('input[name="email"]', 'test@example.com')
+
+            // Submit form (Server Action)
+            await page.click('button[type="submit"]')
+
+            // Check success message or redirect
+            await expect(page.locator('[role="alert"]')).toContainText('Success')
+          })
+
+          test('should work with API endpoints', async ({ page }) => {
+            // Test API route directly
+            const response = await page.request.post('/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__', {
+              data: {
+                name: 'API Test',
+                email: 'api@example.com'
+              }
+            })
+
+            expect(response.ok()).toBeTruthy()
+            const data = await response.json()
+            expect(data).toHaveProperty('id')
+          })
+
+          test('should handle authentication errors', async ({ page }) => {
+            // Clear auth cookies
+            await page.context().clearCookies()
+
+            // Try to access protected page
+            await page.goto('/__FEATURE_NAME_KEBAB_CASE__')
+
+            // Should redirect to signin
+            await expect(page.url()).toContain('/auth/signin')
+          })
+
+          test('should validate forms client and server side', async ({ page }) => {
+            // Submit empty form
+            await page.click('button[type="submit"]')
+
+            // Check client-side validation
+            await expect(page.locator('[role="alert"]')).toContainText('Required')
+
+            // Fill invalid data
+            await page.fill('input[name="email"]', 'invalid-email')
+            await page.click('button[type="submit"]')
+
+            // Check server-side validation
+            await expect(page.locator('[role="alert"]')).toContainText('Invalid')
+          })
+        })
+
+    # === STEP 16: CREATE PR ===
+    - id: 'create-pr-fullstack-main'
+      type: 'validation'
+      description: 'Create Pull Request for fullstack main layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Create PR using GitHub CLI'
+        scripts:
+          - name: 'Push and create PR'
+            command: |
+              git add .
+              git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement fullstack main layer for Next.js 15"
+              git push -u origin "feat/__FEATURE_NAME_KEBAB_CASE__-fullstack-main"
+
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): add fullstack main layer for Next.js 15" \
+                --body "## Summary
+
+              Implemented fullstack main layer for __FEATURE_NAME_PASCAL_CASE__ feature in Next.js 15.
+
+              ## Changes
+              - ✅ Created root layout with providers and session management
+              - ✅ Implemented composite components with server-side data fetching
+              - ✅ Created factories for complete dependency injection
+              - ✅ Added Server Actions with authentication and validation
+              - ✅ Setup API route handlers with error handling
+              - ✅ Configured middleware for auth, CORS, and security
+              - ✅ Added database connection factory
+              - ✅ Created E2E tests with authentication flow
+
+              ## Architecture
+              - App Router with Server Components and API Routes
+              - Factory Pattern for complete dependency injection
+              - Composite Pattern for page assembly
+              - Server Actions and API Routes for data mutations
+              - Edge Runtime middleware for auth and security
+              - Database connection with Prisma/MongoDB
+
+              ## Testing
+              - [ ] Unit tests pass
+              - [ ] E2E tests pass with authentication
+              - [ ] API endpoints tested
+              - [ ] Manual testing completed
+              " \
+                --assignee @me \
+                --label "feature,fullstack,nextjs15,main-layer"
+            workingDirectory: '__PROJECT_NAME__'
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER REFACTORING PATTERNS
+# ------------------------------------------------------------------------------
+
+main_refactoring_patterns:
+  - id: 'combine-api-server-actions'
+    description: 'Combine API routes and Server Actions for better fullstack architecture'
+    detection:
+      - 'Duplicate logic between API routes and Server Actions'
+      - 'Client-side API calls that could be Server Actions'
+      - 'Missing authentication in Server Actions'
+    example:
+      original: |
+        # AI-NOTE: Combine API route and Server Action logic
+        <<<FIND>>>
+        // Separate API route
+        export async function POST(request: NextRequest) {
+          const body = await request.json()
+          const useCase = makeCreateUser()
+          return NextResponse.json(await useCase.execute(body))
+        }
+
+        // Separate Server Action
+        export async function createUserAction(formData: FormData) {
+          const data = Object.fromEntries(formData)
+          const useCase = makeCreateUser()
+          return await useCase.execute(data)
+        }
+        <<</FIND>>>
+        <<<REPLACE>>>
+        // Unified handler factory
+        const createUserHandler = createApiHandler({
+          schema: createUserSchema,
+          requireAuth: true,
+          handler: async (data) => {
+            const useCase = makeCreateUser()
+            return await useCase.execute(data)
+          }
+        })
+
+        // API route
+        export const POST = createUserHandler
+
+        // Server Action
+        export async function createUserAction(formData: FormData) {
+          const data = Object.fromEntries(formData)
+          return createUserHandler.execute(data)
+        }
+        <<</REPLACE>>>
+      category: 'architecture'
+      severity: 'HIGH'
+      rlhf_impact: 2
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER ANTI-PATTERNS
+# ------------------------------------------------------------------------------
+
+main_anti_patterns:
+  - name: 'Business Logic in API Routes'
+    description: 'API routes should not contain business logic'
+    example: 'Complex calculations or business rules directly in route handlers'
+    correct: 'Delegate to use cases through factories'
+    rlhf_impact: -2
+
+  - name: 'Missing Authentication in Server Actions'
+    description: 'Server Actions without proper authentication checks'
+    example: 'Server Action that modifies data without checking user session'
+    correct: 'Always validate authentication in Server Actions'
+    rlhf_impact: -2
+
+  - name: 'Inconsistent Error Handling'
+    description: 'Different error handling between API routes and Server Actions'
+    example: 'API returns JSON errors, Server Actions throw exceptions'
+    correct: 'Use consistent error handling patterns across both'
+    rlhf_impact: -1
+
+  - name: 'Direct Database Access'
+    description: 'Components or actions accessing database directly'
+    example: 'prisma.user.create() in Server Action'
+    correct: 'Use repositories and use cases through factories'
+    rlhf_impact: -2
+
+  - name: 'Missing Cache Invalidation'
+    description: 'Server Actions not invalidating relevant cache'
+    example: 'Mutating data without revalidateTag() or revalidatePath()'
+    correct: 'Always invalidate relevant cache after mutations'
+    rlhf_impact: -1

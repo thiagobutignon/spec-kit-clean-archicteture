@@ -1,0 +1,324 @@
+# CHUNK: structure
+# Lines: 66-384
+# Estimated tokens: 3325
+# Original: fullstack-infra-template.regent
+# =============================================
+
+structure:
+  # Next.js 15 App Router (Pages + API Routes)
+  app:
+    basePath: '__PROJECT_NAME__/src/app'
+    folders:
+      # Frontend routes
+      - '(features)'              # Route group for features
+      - '__FEATURE_NAME__'        # Feature pages
+      - '_components'             # Private app components
+
+      # API Routes (Backend)
+      - 'api'                     # API root
+      - 'api/__FEATURE_NAME__'    # Feature API endpoints
+      - 'api/auth'                # Authentication endpoints
+      - 'api/health'              # Health check endpoint
+    files:
+      # Frontend files
+      - 'layout.tsx'
+      - 'page.tsx'
+      - 'loading.tsx'
+      - 'error.tsx'
+      - 'not-found.tsx'
+      - 'global-error.tsx'
+
+      # Middleware
+      - 'middleware.ts'           # Next.js middleware for auth, etc.
+
+  # Feature Module: Unified frontend + backend for a business domain
+  # __FEATURE_NAME_KEBAB_CASE__ = user, product, order, etc.
+  feature_module:
+    basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__'
+
+    # 1. Use Case Slices: Each folder is self-contained, atomic use case
+    # __USE_CASE_NAME_KEBAB_CASE__ = create-user, get-users, etc.
+    use_case_slice:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+      layers:
+        # Domain Layer: Core business logic (shared between frontend/backend)
+        domain:
+          folders:
+            - 'entities'      # Business entities
+            - 'usecases'      # Use case interfaces
+            - 'errors'        # Domain errors
+            - 'types'         # Domain types
+
+        # Data Layer: Data operations
+        data:
+          folders:
+            - 'usecases'      # Use case implementations
+            - 'dto'           # Data transfer objects
+            - 'mappers'       # Data mappers
+
+        # Infrastructure Layer: Use case specific adapters only
+        # Note: Concrete repository implementations live in feature_shared/infra
+        infra:
+          folders:
+            - 'cache'         # Use case specific cache strategies
+            - 'external'      # External API calls specific to this use case
+
+        # Presentation Layer: UI and API handlers
+        presentation:
+          folders:
+            # Frontend
+            - 'components'    # React components for this use case
+            - 'hooks'         # React hooks for this use case
+            - 'actions'       # Server Actions ('use server')
+
+            # Backend
+            - 'handlers'      # API route handlers
+            - 'middleware'    # Use case specific middleware
+
+        # Validation Layer
+        validation:
+          folders:
+            - 'schemas'       # Zod schemas (shared frontend/backend)
+            - 'validators'    # Custom validators
+            - 'rules'         # Business rules
+
+        # Main Layer: Composition
+        main:
+          folders:
+            - 'composites'    # Frontend composites
+            - 'factories'     # Dependency injection
+            - 'routes'        # API route definitions
+
+        # Integration and E2E tests only (not unit tests)
+        __tests__:
+          folders:
+            - 'integration'   # Tests that cross layers
+            - 'e2e'           # E2E tests (Playwright)
+        # Note: Unit tests are placed side by side with source files:
+        # - domain/usecases/create-user.ts + create-user.spec.ts
+        # - data/usecases/db-create-user.ts + db-create-user.spec.ts
+        # - presentation/components/create-user-form.tsx + create-user-form.spec.tsx
+        # - presentation/handlers/create-user-handler.ts + create-user-handler.spec.ts
+
+    # 2. Feature-Specific Shared: Code shared within this feature
+    feature_shared:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+      layers:
+        domain:
+          folders:
+            - 'models'        # Shared models (used by frontend + backend)
+            - 'repositories'  # Repository interfaces
+            - 'value-objects' # Value objects
+            - 'constants'     # Feature constants
+
+        infra:
+          folders:
+            - 'db'            # Database repository implementations
+            - 'api-client'    # Internal API client for frontend
+            - 'services'      # Feature services
+
+        presentation:
+          folders:
+            - 'ui'            # Shared UI components
+            - 'styles'        # Feature styles
+            - 'utils'         # Presentation utilities
+            - 'types'         # TypeScript types for API
+
+    # 3. Feature Main: Integration point
+    feature_main:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+      folders:
+        - 'pages'             # Page composers for App Router
+        - 'api-routes'        # API route aggregation (handlers for src/app/api)
+        - 'config'            # Feature configuration
+        - 'docs'              # Feature documentation
+
+  # Global Shared Code (truly generic, app-wide)
+  shared:
+    basePath: '__PROJECT_NAME__/src/shared'
+    layers:
+      # Domain Layer
+      domain:
+        folders:
+          - 'errors'          # Base error classes
+          - 'protocols'       # Domain protocols
+          - 'types'           # Shared types
+          - 'value-objects'   # Generic value objects
+
+      # Data Layer
+      data:
+        folders:
+          - 'protocols'       # Data protocols
+          - 'helpers'         # Data helpers
+          - 'dto'             # Shared DTOs
+
+      # Infrastructure Layer
+      infra:
+        folders:
+          # Backend focused
+          - 'db'              # Database client (Prisma/Drizzle)
+          - 'cache'           # Cache client (Redis)
+          - 'queue'           # Queue system (BullMQ)
+          - 'email'           # Email service
+          - 'storage'         # File storage (S3, local)
+
+          # Frontend focused
+          - 'http'            # HTTP client (fetch wrapper)
+          - 'websocket'       # WebSocket client
+          - 'local-storage'   # LocalStorage wrapper
+
+          # Shared
+          - 'auth'            # Authentication (NextAuth, Clerk)
+          - 'telemetry'       # Monitoring (Sentry, DataDog)
+          - 'logger'          # Logging system
+
+      # Presentation Layer
+      presentation:
+        folders:
+          # UI Components
+          - 'components'      # Shared UI components
+          - 'ui'              # shadcn/ui components
+          - 'layouts'         # Shared layouts
+          - 'providers'       # Context providers
+
+          # Utilities
+          - 'hooks'           # Shared React hooks
+          - 'utils'           # Presentation utils
+          - 'styles'          # Global styles
+
+          # API
+          - 'middleware'      # Shared API middleware
+          - 'responses'       # Standard API responses
+
+      # Validation Layer
+      validation:
+        folders:
+          - 'schemas'         # Shared Zod schemas
+          - 'validators'      # Shared validators
+          - 'rules'           # Business rules
+
+      # Main Layer
+      main:
+        folders:
+          - 'config'          # App configuration
+          - 'lib'             # Utility libraries
+          - 'adapters'        # Adapters
+          - 'factories'       # Shared factories
+
+# Example of Fullstack Use Case Implementation
+integration:
+  use_case_example:
+    # Task: "Generate create-user use case for fullstack Next.js 15"
+    # __FEATURE_NAME_KEBAB_CASE__ = user
+    # __USE_CASE_NAME_KEBAB_CASE__ = create-user
+
+    # STEP 1: Create Feature directories
+    create_feature_structure:
+      - 'src/features/user/'
+      - 'src/features/user/shared/'
+      - 'src/features/user/main/'
+
+    # STEP 2: Create Use Case Slice
+    create_slice_directory:
+      - 'src/features/user/create-user/'
+
+    # STEP 3: Create slice files (Frontend + Backend) WITH TESTS
+    create_slice_files:
+      # Domain (shared) with unit tests
+      - 'src/features/user/create-user/domain/entities/user.ts'
+      - 'src/features/user/create-user/domain/entities/user.spec.ts'
+      - 'src/features/user/create-user/domain/usecases/create-user.ts'
+      - 'src/features/user/create-user/domain/usecases/create-user.spec.ts'
+      - 'src/features/user/create-user/domain/types/create-user-dto.ts'
+
+      # Data with unit tests
+      - 'src/features/user/create-user/data/usecases/db-create-user.ts'
+      - 'src/features/user/create-user/data/usecases/db-create-user.spec.ts'
+      - 'src/features/user/create-user/data/mappers/user-mapper.ts'
+      - 'src/features/user/create-user/data/mappers/user-mapper.spec.ts'
+
+      # Note: Repository implementation lives in shared/infra/db
+      # Use case will receive repository interface via dependency injection
+
+      # Validation (shared frontend/backend) with unit tests
+      - 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+      - 'src/features/user/create-user/validation/schemas/create-user-schema.spec.ts'
+
+      # Presentation - Frontend with unit tests
+      - 'src/features/user/create-user/presentation/components/create-user-form.tsx'
+      - 'src/features/user/create-user/presentation/components/create-user-form.spec.tsx'
+      - 'src/features/user/create-user/presentation/hooks/use-create-user.ts'
+      - 'src/features/user/create-user/presentation/hooks/use-create-user.spec.ts'
+      - 'src/features/user/create-user/presentation/actions/create-user-action.ts'
+      - 'src/features/user/create-user/presentation/actions/create-user-action.spec.ts'
+
+      # Presentation - Backend with unit tests
+      - 'src/features/user/create-user/presentation/handlers/create-user-handler.ts'
+      - 'src/features/user/create-user/presentation/handlers/create-user-handler.spec.ts'
+
+      # Main with unit tests
+      - 'src/features/user/create-user/main/composites/create-user-page.tsx'
+      - 'src/features/user/create-user/main/composites/create-user-page.spec.tsx'
+      - 'src/features/user/create-user/main/factories/create-user-factory.ts'
+      - 'src/features/user/create-user/main/factories/create-user-factory.spec.ts'
+      - 'src/features/user/create-user/main/routes/create-user-route.ts'
+      - 'src/features/user/create-user/main/routes/create-user-route.spec.ts'
+
+      # Integration and E2E tests
+      - 'src/features/user/create-user/__tests__/integration/create-user.integration.spec.ts'
+      - 'src/features/user/create-user/__tests__/e2e/create-user.e2e.spec.ts'
+
+    # STEP 4: Feature shared files
+    feature_shared_files:
+      - create_if_not_exists: 'src/features/user/shared/domain/models/user-model.ts'
+      - create_if_not_exists: 'src/features/user/shared/domain/repositories/user-repository.ts'
+      - create_if_not_exists: 'src/features/user/shared/infra/db/prisma-user-repository.ts'
+      - create_if_not_exists: 'src/features/user/shared/infra/api-client/user-api.ts'
+
+    # STEP 5: Integrate with Next.js
+    integrate_nextjs:
+      # Frontend - App Router page
+      - create_if_not_exists: 'src/app/(features)/users/create/page.tsx'
+      - modify: 'src/app/(features)/users/create/page.tsx'
+        action: 'Import and render CreateUserPage from feature'
+
+      # Backend - API Route
+      - create_if_not_exists: 'src/app/api/users/route.ts'
+      - modify: 'src/app/api/users/route.ts'
+        action: 'Import and use createUserHandler from feature'
+
+      # Feature main integration
+      - create_if_not_exists: 'src/features/user/main/pages/user-pages.tsx'
+      - create_if_not_exists: 'src/features/user/main/api-routes/user-api-routes.ts'
+
+  example_flow:
+    # Frontend Flow
+    frontend:
+      1_user_visits: 'src/app/(features)/users/create/page.tsx'
+      2_page_renders: 'src/features/user/create-user/main/composites/create-user-page.tsx'
+      3_form_component: 'src/features/user/create-user/presentation/components/create-user-form.tsx'
+      4_validation: 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+      5_server_action: 'src/features/user/create-user/presentation/actions/create-user-action.ts'
+      6_or_api_call: 'src/features/user/shared/infra/api-client/user-api.ts'
+
+    # Backend Flow
+    backend:
+      1_api_route: 'src/app/api/users/route.ts'
+      2_handler: 'src/features/user/create-user/presentation/handlers/create-user-handler.ts'
+      3_validation: 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+      4_use_case: 'src/features/user/create-user/data/usecases/db-create-user.ts'
+      5_repository_interface: 'src/features/user/shared/domain/repositories/user-repository.ts'
+      6_repository_impl: 'src/features/user/shared/infra/db/prisma-user-repository.ts'
+      7_factory_injection: 'src/features/user/create-user/main/factories/create-user-factory.ts'
+
+    # Benefits
+    benefits:
+      - 'Single codebase for frontend and backend'
+      - 'Shared validation schemas (Zod) between client and server'
+      - 'Type safety across the entire stack'
+      - 'Server Actions for seamless client-server communication'
+      - 'API Routes for RESTful endpoints when needed'
+      - 'Perfect isolation per use case'
+      - 'Feature-level shared code without global pollution'
+
+# ============= END STRUCTURE FULLSTACK NEXT.JS 15 =============

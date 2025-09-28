@@ -1,0 +1,11 @@
+# CHUNK: fullstack/01-structure.part.regent
+# Lines: 60-65
+# Estimated tokens: 79
+# Original: fullstack-main-template.regent
+# =============================================
+
+# --- From: fullstack/01-structure.part.regent ---
+# ============= BEGIN STRUCTURE FULLSTACK NEXT.JS 15 =============
+  # AI-NOTE: Full Next.js 15 with App Router + API Routes
+  # Hybrid Architecture - "Feature Module with Use Case Slices"
+  # Single project for both frontend and backend using Next.js capabilities

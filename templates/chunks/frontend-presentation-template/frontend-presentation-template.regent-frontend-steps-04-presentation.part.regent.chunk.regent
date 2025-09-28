@@ -1,0 +1,20 @@
+# CHUNK: frontend/steps/04-presentation.part.regent
+# Lines: 1183-1197
+# Estimated tokens: 214
+# Original: frontend-presentation-template.regent
+# =============================================
+
+# --- From: frontend/steps/04-presentation.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: PRESENTATION LAYER IMPLEMENTATION STEPS FOR FRONTEND
+  # These steps create Next.js 15 components with Shadcn UI, Server Actions,
+  # and React Hooks following Clean Architecture and Vertical Slice patterns
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION LAYER STEPS SECTION
+  # Steps for generating presentation layer artifacts in frontend features
+  # Following "Feature Module with Use Case Slices" architecture
+  # Adapted for Next.js 15 App Router, Shadcn UI, Tailwind CSS
+  # ------------------------------------------------------------------------------

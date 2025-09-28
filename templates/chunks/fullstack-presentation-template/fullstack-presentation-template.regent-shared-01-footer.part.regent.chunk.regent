@@ -1,0 +1,273 @@
+# CHUNK: shared/01-footer.part.regent
+# Lines: 3374-3641
+# Estimated tokens: 2721
+# Original: fullstack-presentation-template.regent
+# =============================================
+
+# --- From: shared/01-footer.part.regent ---
+  # ============= BEGIN FOOTER SECTION =============
+
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: IMMUTABLE DOCUMENTATION SECTIONS AHEAD.
+  # Copy these sections verbatim. The [placeholders] inside the commands
+  # are for HUMAN examples and MUST NOT be replaced by the AI.
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # TROUBLESHOOTING & RECOVERY
+  # ------------------------------------------------------------------------------
+
+  troubleshooting:
+    lint_fails:
+      - 'DO NOT commit - Fix all lint errors first'
+      - 'Check for unused imports'
+      - 'Verify proper TypeScript types'
+      - 'Ensure no console.log statements'
+      - 'Run yarn lint --fix to auto-fix when possible'
+
+    tests_fail:
+      - 'DO NOT commit - All tests must pass'
+      - 'Check if mocks match the actual interfaces'
+      - 'Verify Input/Output types are correct'
+      - 'Ensure test coverage meets requirements'
+      - 'Run specific test: yarn test [test-file-path]'
+
+    typescript_fails:
+      - 'Check all type definitions match'
+      - 'Ensure no missing imports'
+      - 'Verify interface implementations are complete'
+      - 'Run yarn tsc --noEmit to check types'
+
+  # Refactoring checklist
+  refactoring:
+    before_refactoring: |
+      # Check current status and differences
+      echo "📊 Checking current changes..."
+      git status
+      git diff
+
+      # Ensure clean working directory
+      echo "✅ Saving current work..."
+      git stash save "WIP: before refactoring"
+
+      # Create refactoring branch
+      echo "🌿 Creating refactor branch..."
+      git checkout -b refactor/[feature-name]
+
+      # Run tests to ensure starting point is stable
+      echo "🧪 Validating current state..."
+      yarn test --run
+      if [ $? -ne 0 ]; then
+        echo "❌ Tests failing before refactor - fix first!"
+        exit 1
+      fi
+      echo "✅ Ready to refactor"
+
+    during_refactoring: |
+      # After each change, check what was modified
+      echo "🔍 Reviewing changes..."
+      git diff --stat
+      git diff
+
+      # Validate the change
+      yarn lint && yarn test --run
+
+      # Commit atomically
+      git add -p  # Interactive staging
+      git commit -m "refactor([feature-name]): [specific change description]"
+
+      # Show what was changed
+      git show --stat
+
+    common_scenarios:
+      - name: 'Splitting a use case'
+        wrong_example: |
+          interface CreateUserAndSendEmail {
+            execute: (input: CreateUserAndSendEmailInput) => Promise<CreateUserAndSendEmailOutput>
+          }
+        correct_example: |
+          interface CreateUser{
+            execute: (input: CreateUserInput) => Promise<CreateUserOutput>
+          }
+          interface SendWelcomeEmail {
+            execute: (input: SendWelcomeEmailInput) => Promise<SendWelcomeEmailOutput>
+          }
+
+      - name: 'Renaming domain errors'
+        wrong_example: |
+          export class ErrorUserExists extends Error {
+            constructor() {
+              super('Error: user exists')
+              this.name = 'ErrorUserExists'
+            }
+          }
+        correct_example: |
+          export class UserAlreadyExistsError extends Error {
+            constructor() {
+              super('User with this email already exists')
+              this.name = 'UserAlreadyExistsError'
+            }
+          }
+
+  # ------------------------------------------------------------------------------
+  # LEARNING & IMPROVEMENT PATTERNS
+  # The system tracks these patterns to improve over time
+  # ------------------------------------------------------------------------------
+  learning_patterns:
+    common_errors:
+      # Domain Layer Violations
+      - pattern: 'import axios|fetch|prisma|redis'
+        fix: 'Remove external library imports from domain layer'
+        layer: 'domain'
+        score_impact: -2
+
+      - pattern: 'CreateUserAndSend|GetDataAndFormat'
+        fix: 'Split into two separate use cases (SRP violation)'
+        layer: 'domain'
+        score_impact: -1
+
+      - pattern: 'missing @domainConcept'
+        fix: 'Add domain concept documentation for +2 score'
+        layer: 'domain'
+        score_impact: +1
+
+      # Data Layer Violations
+      - pattern: 'direct database access in data layer'
+        fix: 'Use repository protocols instead of direct database access'
+        layer: 'data'
+        score_impact: -2
+
+      - pattern: 'business logic in data layer'
+        fix: 'Move business logic to domain layer'
+        layer: 'data'
+        score_impact: -1
+
+      # Infrastructure Layer Violations
+      - pattern: 'business logic in infrastructure'
+        fix: 'Infrastructure should only contain adapters and implementations'
+        layer: 'infra'
+        score_impact: -2
+
+      - pattern: 'missing error handling in adapters'
+        fix: 'Add proper error handling and recovery in infrastructure adapters'
+        layer: 'infra'
+        score_impact: -1
+
+      # Presentation Layer Violations
+      - pattern: 'business logic in controllers|components'
+        fix: 'Move business logic to use cases in domain layer'
+        layer: 'presentation'
+        score_impact: -2
+
+      - pattern: 'direct database access from presentation'
+        fix: 'Use use cases and factories from main layer'
+        layer: 'presentation'
+        score_impact: -2
+
+      # Main Layer Violations
+      - pattern: 'business logic in factories'
+        fix: 'Main layer should only compose, not implement business logic'
+        layer: 'main'
+        score_impact: -2
+
+      - pattern: 'missing dependency injection'
+        fix: 'Use factories and dependency injection for all dependencies'
+        layer: 'main'
+        score_impact: -1
+
+    success_indicators:
+      - 'Uses ubiquitous language consistently across all layers'
+      - 'Follows single responsibility principle in every component'
+      - 'No dependency violations between layers'
+      - 'Comprehensive test coverage (Domain: 100%, Data: 95%, Infra: 80%, Presentation: 90%)'
+      - 'Clean git history with atomic commits'
+      - 'Proper error handling at each layer boundary'
+      - 'Clear separation of concerns between layers'
+      - 'Type safety maintained throughout the stack'
+
+  # AI Guidelines for All Layers
+  ai_guidelines:
+    general:
+      - 'Always validate before committing: Run lint first, Run tests second, Only commit if both pass'
+      - 'If generation fails: Identify the specific error, Fix only that error, Re-run validation, Do NOT proceed until fixed'
+      - 'MUST generate different case styles from the input names (e.g., "Add Item To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart, lower case=add item to cart).'
+      - 'MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__) with actual values'
+      - 'MUST NOT leave any placeholder variables in the final implementation'
+      - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery'
+      - 'MUST use vitest for backend, @testing-library/react for frontend'
+      - 'When in doubt: Choose simplicity over complexity, Split rather than combine, Ask for clarification rather than assume'
+
+    layer_specific:
+      domain:
+        - 'Follow the principle: One use case = One file = One responsibility'
+        - 'If tempted to add "And" in a use case name, split it'
+        - 'MUST follow all domain rules - no business logic implementation, only contracts'
+        - 'No external dependencies allowed in domain layer'
+        - 'Use value objects for domain concepts'
+        - 'Define clear domain errors with meaningful messages'
+
+      data:
+        - 'Implement use cases defined in domain layer'
+        - 'Use repository protocols for data access'
+        - 'Transform external data to domain models'
+        - 'Handle data-specific errors and map to domain errors'
+        - 'No direct database or API calls'
+
+      infrastructure:
+        - 'Implement repository interfaces defined in data layer'
+        - 'Handle external service integrations (database, cache, APIs)'
+        - 'Provide concrete implementations of protocols'
+        - 'Include proper error handling and retry logic'
+        - 'Use appropriate design patterns (Adapter, Facade)'
+
+      presentation:
+        - 'Controllers/Components should be thin - delegate to use cases'
+        - 'Handle input validation and transformation'
+        - 'Format responses for clients'
+        - 'Implement proper error responses'
+        - 'For frontend: Use hooks for business logic extraction'
+        - 'For backend: Use middleware for cross-cutting concerns'
+
+      main:
+        - 'Composition root only - no business logic'
+        - 'Wire up all dependencies using factories'
+        - 'Configure dependency injection'
+        - 'Setup application bootstrap and configuration'
+        - 'For Next.js: Configure providers and middleware'
+        - 'For Express/Fastify: Setup server and routes'
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: TASK EVALUATION SECTION.
+  # After the entire execution is complete, this section will be populated by a
+  # human reviewer or an evaluation script.
+  # ------------------------------------------------------------------------------
+
+  evaluation:
+    # AI-NOTE: This final_status will be 'SUCCESS' if all steps passed, or 'FAILED' if any step failed.
+    final_status: 'PENDING' # PENDING | SUCCESS | FAILED
+    # AI-NOTE: The final_rlhf_score is calculated automatically based on execution quality
+    # -2: Catastrophic errors (architecture violations, wrong REPLACE/WITH format)
+    # -1: Runtime errors (lint, tests, git failures)
+    #  0: Low confidence (system uncertain, prevents hallucinations)
+    # +1: Good execution but missing DDD elements
+    # +2: Perfect with Clean Architecture, DDD, ubiquitous language
+    final_rlhf_score: null # -2, -1, 0, 1, 2
+    # AI-NOTE: The system automatically analyzes patterns and learns from each execution
+    # This text is enhanced by automated RLHF analysis for continuous improvement
+    reviewer_summary: |
+      - What went well:
+        - ...
+      - Areas for improvement:
+        - ...
+    # AI-NOTE: This section lists actionable suggestions for improving the master templates or prompts.
+    # This is the key to the continuous learning loop.
+    template_improvement_suggestions:
+      - target_template: '[layer].template.yaml'
+        target_step_id: '[step-id]'
+        suggestion: '[specific improvement suggestion based on execution results]'
+        priority: 'medium'
+        
+  # ============= END FOOTER SECTION =============
+
+  # End of TEMPLATE.yaml

@@ -1,0 +1,22 @@
+# CHUNK: fullstack/steps/04-presentation.part.regent
+# Lines: 1485-1501
+# Estimated tokens: 239
+# Original: fullstack-presentation-template.regent
+# =============================================
+
+# --- From: fullstack/steps/04-presentation.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: PRESENTATION LAYER IMPLEMENTATION STEPS FOR FULLSTACK
+  # These steps create both backend (API handlers) and frontend (components)
+  # using Next.js 15 as a unified fullstack framework
+  # Backend: API Route Handlers with middleware
+  # Frontend: Server Actions, Components with Shadcn UI, React Hooks
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION LAYER STEPS SECTION
+  # Steps for generating presentation layer artifacts in fullstack features
+  # Following "Feature Module with Use Case Slices" architecture
+  # Single codebase with Next.js 15 for both frontend and backend
+  # ------------------------------------------------------------------------------

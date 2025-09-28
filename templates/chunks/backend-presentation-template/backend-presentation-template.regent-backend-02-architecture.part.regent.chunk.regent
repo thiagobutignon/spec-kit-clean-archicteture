@@ -1,0 +1,14 @@
+# CHUNK: backend/02-architecture.part.regent
+# Lines: 271-279
+# Estimated tokens: 123
+# Original: backend-presentation-template.regent
+# =============================================
+
+# --- From: backend/02-architecture.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # ARCHITECTURAL RULES SECTION
+  # These rules define the Clean Architecture boundaries and dependencies
+  # AI-NOTE: These rules are CRITICAL - any violation should trigger RLHF score: -2
+  # AI-NOTE: Use these rules to validate generated code and refactoring decisions
+  # ------------------------------------------------------------------------------

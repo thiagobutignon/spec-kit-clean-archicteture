@@ -1,0 +1,12 @@
+# CHUNK: fullstack/02-architecture.part.regent
+# Lines: 385-391
+# Estimated tokens: 95
+# Original: fullstack-infra-template.regent
+# =============================================
+
+# --- From: fullstack/02-architecture.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # FULLSTACK ARCHITECTURAL RULES SECTION - NEXT.JS 15 UNIFIED STACK
+  # These rules define Clean Architecture for integrated frontend + backend development
+  # ------------------------------------------------------------------------------

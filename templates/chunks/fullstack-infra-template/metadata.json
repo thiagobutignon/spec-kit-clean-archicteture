@@ -1,0 +1,103 @@
+{
+  "originalFile": "/Users/thiagobutignon/dev/spec-kit-clean-archicteture/templates/fullstack-infra-template.regent",
+  "totalLines": 3212,
+  "totalTokens": 33363,
+  "chunks": [
+    {
+      "id": "fullstack-infra-template.regent-shared/00-header.part.regent",
+      "section": "shared/00-header.part.regent",
+      "lineStart": 11,
+      "lineEnd": 33,
+      "tokens": 287,
+      "file": "fullstack-infra-template.regent-shared-00-header.part.regent.chunk.regent"
+    },
+    {
+      "id": "fullstack-infra-template.regent-metadata",
+      "section": "metadata",
+      "lineStart": 34,
+      "lineEnd": 59,
+      "tokens": 225,
+      "file": "fullstack-infra-template.regent-metadata.chunk.regent"
+    },
+    {
+      "id": "fullstack-infra-template.regent-fullstack/01-structure.part.regent",
+      "section": "fullstack/01-structure.part.regent",
+      "lineStart": 60,
+      "lineEnd": 65,
+      "tokens": 79,
+      "file": "fullstack-infra-template.regent-fullstack-01-structure.part.regent.chunk.regent"
+    },
+    {
+      "id": "fullstack-infra-template.regent-structure",
+      "section": "structure",
+      "lineStart": 66,
+      "lineEnd": 384,
+      "tokens": 3325,
+      "file": "fullstack-infra-template.regent-structure.chunk.regent"
+    },
+    {
+      "id": "fullstack-infra-template.regent-fullstack/02-architecture.part.regent",
+      "section": "fullstack/02-architecture.part.regent",
+      "lineStart": 385,
+      "lineEnd": 391,
+      "tokens": 95,
+      "file": "fullstack-infra-template.regent-fullstack-02-architecture.part.regent.chunk.regent"
+    },
+    {
+      "id": "fullstack-infra-template.regent-architecture",
+      "section": "architecture",
+      "lineStart": 392,
+      "lineEnd": 858,
+      "tokens": 5665,
+      "file": "fullstack-infra-template.regent-architecture.chunk.regent"
+    },
+    {
+      "id": "fullstack-infra-template.regent-architecture",
+      "section": "architecture",
+      "lineStart": 859,
+      "lineEnd": 881,
+      "tokens": 287,
+      "file": "fullstack-infra-template.regent-architecture.chunk.regent"
+    },
+    {
+      "id": "fullstack-infra-template.regent-fullstack/03-rules.part.regent",
+      "section": "fullstack/03-rules.part.regent",
+      "lineStart": 882,
+      "lineEnd": 903,
+      "tokens": 280,
+      "file": "fullstack-infra-template.regent-fullstack-03-rules.part.regent.chunk.regent"
+    },
+    {
+      "id": "fullstack-infra-template.regent-rules",
+      "section": "rules",
+      "lineStart": 904,
+      "lineEnd": 1484,
+      "tokens": 6542,
+      "file": "fullstack-infra-template.regent-rules.chunk.regent"
+    },
+    {
+      "id": "fullstack-infra-template.regent-fullstack/steps/03-infra.part.regent",
+      "section": "fullstack/steps/03-infra.part.regent",
+      "lineStart": 1485,
+      "lineEnd": 1499,
+      "tokens": 223,
+      "file": "fullstack-infra-template.regent-fullstack-steps-03-infra.part.regent.chunk.regent"
+    },
+    {
+      "id": "fullstack-infra-template.regent-infra_steps",
+      "section": "infra_steps",
+      "lineStart": 1500,
+      "lineEnd": 2944,
+      "tokens": 13634,
+      "file": "fullstack-infra-template.regent-infra_steps.chunk.regent"
+    },
+    {
+      "id": "fullstack-infra-template.regent-shared/01-footer.part.regent",
+      "section": "shared/01-footer.part.regent",
+      "lineStart": 2945,
+      "lineEnd": 3212,
+      "tokens": 2721,
+      "file": "fullstack-infra-template.regent-shared-01-footer.part.regent.chunk.regent"
+    }
+  ]
+}

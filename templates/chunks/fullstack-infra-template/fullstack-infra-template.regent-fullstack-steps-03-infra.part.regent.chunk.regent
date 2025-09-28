@@ -1,0 +1,20 @@
+# CHUNK: fullstack/steps/03-infra.part.regent
+# Lines: 1485-1499
+# Estimated tokens: 223
+# Original: fullstack-infra-template.regent
+# =============================================
+
+# --- From: fullstack/steps/03-infra.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: INFRASTRUCTURE LAYER IMPLEMENTATION STEPS FOR FULLSTACK
+  # These steps create concrete implementations of data layer protocols
+  # Split into backend (database, cache) and frontend (HTTP, storage) infrastructure
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # INFRASTRUCTURE LAYER STEPS SECTION
+  # Steps for generating infrastructure layer artifacts in fullstack features
+  # Following "Feature Module with Use Case Slices" architecture for Next.js 15
+  # Infrastructure layer is split between backend and frontend implementations
+  # ------------------------------------------------------------------------------

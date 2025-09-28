@@ -1,0 +1,95 @@
+{
+  "originalFile": "/Users/thiagobutignon/dev/spec-kit-clean-archicteture/templates/frontend-infra-template.regent",
+  "totalLines": 2948,
+  "totalTokens": 31582,
+  "chunks": [
+    {
+      "id": "frontend-infra-template.regent-shared/00-header.part.regent",
+      "section": "shared/00-header.part.regent",
+      "lineStart": 11,
+      "lineEnd": 33,
+      "tokens": 287,
+      "file": "frontend-infra-template.regent-shared-00-header.part.regent.chunk.regent"
+    },
+    {
+      "id": "frontend-infra-template.regent-metadata",
+      "section": "metadata",
+      "lineStart": 34,
+      "lineEnd": 59,
+      "tokens": 225,
+      "file": "frontend-infra-template.regent-metadata.chunk.regent"
+    },
+    {
+      "id": "frontend-infra-template.regent-frontend/01-structure.part.regent",
+      "section": "frontend/01-structure.part.regent",
+      "lineStart": 60,
+      "lineEnd": 64,
+      "tokens": 76,
+      "file": "frontend-infra-template.regent-frontend-01-structure.part.regent.chunk.regent"
+    },
+    {
+      "id": "frontend-infra-template.regent-structure",
+      "section": "structure",
+      "lineStart": 65,
+      "lineEnd": 286,
+      "tokens": 2491,
+      "file": "frontend-infra-template.regent-structure.chunk.regent"
+    },
+    {
+      "id": "frontend-infra-template.regent-frontend/02-architecture.part.regent",
+      "section": "frontend/02-architecture.part.regent",
+      "lineStart": 287,
+      "lineEnd": 295,
+      "tokens": 139,
+      "file": "frontend-infra-template.regent-frontend-02-architecture.part.regent.chunk.regent"
+    },
+    {
+      "id": "frontend-infra-template.regent-architecture",
+      "section": "architecture",
+      "lineStart": 296,
+      "lineEnd": 697,
+      "tokens": 4692,
+      "file": "frontend-infra-template.regent-architecture.chunk.regent"
+    },
+    {
+      "id": "frontend-infra-template.regent-frontend/03-rules.part.regent",
+      "section": "frontend/03-rules.part.regent",
+      "lineStart": 698,
+      "lineEnd": 718,
+      "tokens": 248,
+      "file": "frontend-infra-template.regent-frontend-03-rules.part.regent.chunk.regent"
+    },
+    {
+      "id": "frontend-infra-template.regent-rules",
+      "section": "rules",
+      "lineStart": 719,
+      "lineEnd": 1182,
+      "tokens": 4808,
+      "file": "frontend-infra-template.regent-rules.chunk.regent"
+    },
+    {
+      "id": "frontend-infra-template.regent-frontend/steps/03-infra.part.regent",
+      "section": "frontend/steps/03-infra.part.regent",
+      "lineStart": 1183,
+      "lineEnd": 1197,
+      "tokens": 221,
+      "file": "frontend-infra-template.regent-frontend-steps-03-infra.part.regent.chunk.regent"
+    },
+    {
+      "id": "frontend-infra-template.regent-infra_steps",
+      "section": "infra_steps",
+      "lineStart": 1198,
+      "lineEnd": 2680,
+      "tokens": 15674,
+      "file": "frontend-infra-template.regent-infra_steps.chunk.regent"
+    },
+    {
+      "id": "frontend-infra-template.regent-shared/01-footer.part.regent",
+      "section": "shared/01-footer.part.regent",
+      "lineStart": 2681,
+      "lineEnd": 2948,
+      "tokens": 2721,
+      "file": "frontend-infra-template.regent-shared-01-footer.part.regent.chunk.regent"
+    }
+  ]
+}

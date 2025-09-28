@@ -1,0 +1,13 @@
+# CHUNK: fullstack/steps/02-data.part.regent
+# Lines: 1485-1492
+# Estimated tokens: 114
+# Original: fullstack-data-template.regent
+# =============================================
+
+# --- From: fullstack/steps/02-data.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: DATA LAYER IMPLEMENTATION STEPS FOR FULLSTACK (TDD)
+  # Simplified to match real codebase patterns - separate Db and Remote implementations
+  # Based on real code: DbAddAccount (backend) and RemoteAuthentication (frontend)
+  # ------------------------------------------------------------------------------

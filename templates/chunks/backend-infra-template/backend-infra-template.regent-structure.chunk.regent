@@ -1,0 +1,212 @@
+# CHUNK: structure
+# Lines: 64-270
+# Estimated tokens: 2356
+# Original: backend-infra-template.regent
+# =============================================
+
+  structure:
+    # Main application structure (entry point)
+    app:
+      basePath: '__PROJECT_NAME__/src'
+      folders:
+        - 'main'           # Application bootstrap and configuration
+        - 'shared'         # Truly generic, app-wide shared code
+        - 'features'       # Feature modules
+
+    # Feature Module: Container for a business domain (e.g., user, product)
+    # __FEATURE_NAME_KEBAB_CASE__ = user, product, etc.
+    feature_module:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__'
+
+      # 1. Use Case Slices: Each folder is self-contained, atomic use case
+      # __USE_CASE_NAME_KEBAB_CASE__ = create-user, delete-user, etc.
+      use_case_slice:
+        basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+        layers:
+          domain:
+            folders:
+              - 'usecases'      # Interface for this specific use case
+              - 'errors'        # Use case specific domain errors
+            # Unit tests: create-user.ts + create-user.spec.ts (side by side)
+          data:
+            folders:
+              - 'usecases'      # Implementation for this specific use case
+            # Unit tests: db-create-user.ts + db-create-user.spec.ts (side by side)
+          presentation:
+            folders:
+              - 'controllers'   # Controller for this specific use case
+              - 'errors'        # HTTP errors specific to this use case
+            # Unit tests: create-user-controller.ts + create-user-controller.spec.ts
+          validation:
+            folders:
+              - 'validators'    # Validator for this specific use case
+              - 'schemas'       # Schema for this specific use case
+            # Unit tests: create-user-validator.spec.ts + create-user-schema.spec.ts
+          main:
+            folders:
+              - 'factories'     # Factory for this specific use case
+            # Unit tests: create-user-controller-factory.spec.ts
+          # Integration and E2E tests only (not unit tests)
+          __tests__:
+            folders:
+              - 'integration'   # Tests that cross layers
+              - 'e2e'          # End-to-end tests
+
+      # 2. Feature-Specific Shared: Code shared ONLY within this feature
+      feature_shared:
+        basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+        layers:
+          domain:
+            folders:
+              - 'models'        # e.g., user-model.ts (shared by all user use cases)
+              - 'repositories'  # e.g., user-repository.ts (interface)
+              - 'errors'        # e.g., user-not-found-error.ts
+              - 'value-objects' # e.g., email-value-object.ts
+          infra:
+            folders:
+              - 'db'            # e.g., user-prisma-repository.ts (implementation)
+          presentation:
+            folders:
+              - 'protocols'     # e.g., user-http-protocols.ts
+              - 'errors'        # e.g., user-http-errors.ts
+
+      # 3. Feature Main/Integration: Connects all slices to main application
+      feature_main:
+        basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+        folders:
+          - 'routes'        # e.g., user-routes.ts (aggregates all use case routes)
+          - 'config'        # Feature-level configuration
+          - 'docs'          # Feature documentation
+
+  # Integration between features and main application
+  integration:
+    main_server:
+      basePath: '__PROJECT_NAME__/src/main'
+      folders:
+        - 'config'          # Server configuration (express, fastify, etc)
+        - 'routes'          # Route aggregation from all features
+        - 'middlewares'     # Global middlewares
+        - 'adapters'        # Framework adapters
+        - 'docs'            # API documentation (Swagger, etc)
+      files:
+        - 'server.ts'       # Main server file
+        - 'app.ts'          # Application setup
+
+    shared:
+      basePath: '__PROJECT_NAME__/src/shared'
+      layers:
+        domain:
+          folders:
+            - 'errors'          # Base error classes
+            - 'protocols'       # Domain contracts/interfaces
+            - 'types'           # Shared domain types
+            - 'value-objects'   # Shared value objects
+
+        data:
+          folders:
+            - 'protocols'       # Data layer protocols
+            - 'helpers'         # Data transformation helpers
+
+        infra:
+          folders:
+            - 'cryptography'    # Shared encryption/hashing adapters (bcrypt, jwt)
+            - 'http'            # Shared HTTP clients and adapters
+            - 'validators'      # Shared validators (email, cpf, etc)
+            - 'cache'           # Shared cache implementations (Redis, memory)
+            - 'telemetry'       # Shared logging and monitoring
+            - 'messaging'       # Shared message queue adapters
+
+        presentation:
+          folders:
+            - 'protocols'       # Presentation protocols
+            - 'helpers'         # Presentation helpers
+            - 'middlewares'     # Shared middlewares
+
+        main:
+          folders:
+            - 'adapters'        # Shared adapters
+            - 'decorators'      # Shared decorators
+            - 'factories'       # Shared factories
+
+    # Example of Hybrid Architecture workflow
+    use_case_example:
+      # Task: "Generate create-user use case for user feature"
+      # __FEATURE_NAME_KEBAB_CASE__ = user
+      # __USE_CASE_NAME_KEBAB_CASE__ = create-user
+
+      # STEP 1: Create Feature directories (if not exist)
+      create_feature_structure:
+        - 'src/features/user/'
+        - 'src/features/user/shared/'     # Feature-specific shared code
+        - 'src/features/user/main/'       # Feature integration
+
+      # STEP 2: Create Use Case Slice directory (isolated)
+      create_slice_directory:
+        - 'src/features/user/create-user/' # Self-contained use case
+
+      # STEP 3: Create NEW files (totally isolated within slice) WITH TESTS
+      create_slice_files:
+        # Domain layer with unit tests
+        - 'src/features/user/create-user/domain/usecases/create-user.ts'
+        - 'src/features/user/create-user/domain/usecases/create-user.spec.ts'
+        - 'src/features/user/create-user/domain/errors/create-user-errors.ts'
+
+        # Data layer with unit tests
+        - 'src/features/user/create-user/data/usecases/db-create-user.ts'
+        - 'src/features/user/create-user/data/usecases/db-create-user.spec.ts'
+
+        # Presentation layer with unit tests
+        - 'src/features/user/create-user/presentation/controllers/create-user-controller.ts'
+        - 'src/features/user/create-user/presentation/controllers/create-user-controller.spec.ts'
+        - 'src/features/user/create-user/presentation/errors/create-user-http-errors.ts'
+
+        # Validation layer with unit tests
+        - 'src/features/user/create-user/validation/validators/create-user-validator.ts'
+        - 'src/features/user/create-user/validation/validators/create-user-validator.spec.ts'
+        - 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+        - 'src/features/user/create-user/validation/schemas/create-user-schema.spec.ts'
+
+        # Main layer with unit tests
+        - 'src/features/user/create-user/main/factories/create-user-controller-factory.ts'
+        - 'src/features/user/create-user/main/factories/create-user-controller-factory.spec.ts'
+
+        # Integration tests (cross-layer)
+        - 'src/features/user/create-user/__tests__/integration/create-user.integration.spec.ts'
+
+      # STEP 4: Check/Modify FEATURE-SPECIFIC shared code
+      feature_shared_files:
+        - create_if_not_exists: 'src/features/user/shared/domain/models/user-model.ts'
+        - create_if_not_exists: 'src/features/user/shared/domain/repositories/user-repository.ts'
+        - modify: 'src/features/user/shared/domain/repositories/user-repository.ts'
+          action: 'Add add() method to interface'
+        - create_if_not_exists: 'src/features/user/shared/infra/db/user-prisma-repository.ts'
+        - modify: 'src/features/user/shared/infra/db/user-prisma-repository.ts'
+          action: 'Implement add() method'
+
+      # STEP 5: Integrate route
+      integrate_route:
+        - create_if_not_exists: 'src/features/user/main/routes/user-routes.ts'
+        - modify: 'src/features/user/main/routes/user-routes.ts'
+          action: 'Add POST /users route importing from ../create-user/main/factories'
+
+      # RESULT: Perfect isolation
+      # - Use case slice is completely isolated in its own directory
+      # - Feature-specific shared code stays within the feature
+      # - Global shared remains unpolluted
+      # - Zero risk of affecting other use cases (delete-user, update-user)
+
+    example_integration:
+      # How features connect to the main application
+      feature_route: 'src/features/user/main/routes/user-routes.ts'
+      imports_to: 'src/main/routes/index.ts'
+
+      use_case_factory: 'src/features/user/create-user/main/factories/create-user-controller-factory.ts'
+      used_in: 'src/features/user/main/routes/user-routes.ts'
+
+      feature_shared_model: 'src/features/user/shared/domain/models/user-model.ts'
+      used_by_slices: 'src/features/user/*/domain/usecases/*.ts'
+
+      global_shared_protocol: 'src/shared/protocols/http.ts'
+      used_by_features: 'src/features/*/shared/presentation/protocols'
+
+

@@ -1,0 +1,415 @@
+# CHUNK: architecture
+# Lines: 280-689
+# Estimated tokens: 4856
+# Original: backend-infra-template.regent
+# =============================================
+
+  architecture:
+    folder_structure:
+      use_case_slice: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+      feature_shared: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+      feature_main: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+      global_shared: '__PROJECT_NAME__/src/shared'
+      main_server: '__PROJECT_NAME__/src/main'
+
+    execution_order:
+      # AI-NOTE: Vertical slicing ensures atomic feature delivery
+      # Each use case should be independently deployable and testable
+      # Complete one use case through ALL layers before starting another
+      description: 'Use cases are implemented vertically, crossing all layers atomically'
+      approach: 'Vertical Slice Architecture - One use case at a time, through all layers'
+      sequence_per_use_case:
+        1: 'domain'     # Use case interface and models
+        2: 'data'       # Use case implementation
+        3: 'infra'      # Repository implementation (only if new repository needed in feature/shared)
+        4: 'validation' # Input validation for the use case
+        5: 'presentation' # Controller for the use case
+        6: 'main'       # Factory and route integration
+        7: 'integration' # Connect to feature main routes
+
+      workflow_diagram: |
+        ```mermaid
+        graph TD
+          Start([Start Use Case Implementation])
+
+          %% Branch Creation
+          B1[Create Branch: feat/__FEATURE_NAME__/__USE_CASE_NAME__]
+
+          %% Use Case Slice - Vertical Development
+          UC1[Create Use Case Directory Structure]
+
+          %% Domain Slice
+          D1[Create Domain Interface]
+          D2[Write Domain Tests - TDD Red]
+          D3[Run: yarn test:unit - Expect Failure]
+          D4[Git Commit: 'test(domain): add __USE_CASE__ tests']
+
+          %% Data Slice
+          DT1[Implement Data Use Case]
+          DT2[Write Data Tests]
+          DT3[Run: yarn test:unit - Green]
+          DT4[Git Commit: 'feat(data): implement __USE_CASE__']
+
+          %% Infra Slice (if needed)
+          %% AI-NOTE: Repository creation is CONDITIONAL
+          %% Only create if no existing repository handles this entity
+          I1[Check if Repository Exists]
+          I2{Need New Repository?}
+          I3[Implement Repository in Feature Shared]
+          I4[Write Repository Tests]
+          I5[Run: yarn test:unit - Green]
+          I6[Git Commit: 'feat(infra): add repository for __USE_CASE__']
+
+          %% Validation Slice
+          V1[Create Validation Schema]
+          V2[Create Validators]
+          V3[Write Validation Tests]
+          V4[Run: yarn test:unit - Green]
+          V5[Git Commit: 'feat(validation): add __USE_CASE__ validation']
+
+          %% Presentation Slice
+          P1[Create Controller]
+          P2[Write Controller Tests]
+          P3[Run: yarn test:unit - Green]
+          P4[Git Commit: 'feat(presentation): add __USE_CASE__ controller']
+
+          %% Main Slice
+          M1[Create Controller Factory]
+          M2[Write Factory Tests]
+          M3[Run: yarn test:unit - Green]
+          M4[Git Commit: 'feat(main): add __USE_CASE__ factory']
+
+          %% Feature Integration
+          FI1[Update Feature Routes]
+          FI2[Add Route for Use Case]
+          FI3[Update API Documentation]
+          FI4[Git Commit: 'feat(routes): integrate __USE_CASE__ route']
+
+          %% Integration Testing
+          IT1[Write Integration Tests]
+          IT2[Run: yarn test:integration]
+          IT3[Write E2E Tests]
+          IT4[Run: yarn test:e2e]
+          IT5[Git Commit: 'test(integration): add __USE_CASE__ integration tests']
+
+          %% Final Steps
+          F1[Run All Tests]
+          F2[Run: yarn lint]
+          F3[Run: yarn build]
+          F4[Git Push: Push Branch]
+          F5[Create PR: '__FEATURE__/__USE_CASE__ Implementation']
+
+          End([Use Case Complete])
+
+          %% Flow - Vertical Development Through Layers
+          Start --> B1
+          B1 --> UC1
+
+          %% Domain Flow
+          UC1 --> D1 --> D2 --> D3 --> D4
+
+          %% Data Flow
+          D4 --> DT1 --> DT2 --> DT3 --> DT4
+
+          %% Infra Flow (conditional)
+          DT4 --> I1 --> I2
+          I2 -->|Yes| I3 --> I4 --> I5 --> I6
+          I2 -->|No| V1
+          I6 --> V1
+
+          %% Validation Flow
+          V1 --> V2 --> V3 --> V4 --> V5
+
+          %% Presentation Flow
+          V5 --> P1 --> P2 --> P3 --> P4
+
+          %% Main Flow
+          P4 --> M1 --> M2 --> M3 --> M4
+
+          %% Feature Integration Flow
+          M4 --> FI1 --> FI2 --> FI3 --> FI4
+
+          %% Testing Flow
+          FI4 --> IT1 --> IT2 --> IT3 --> IT4 --> IT5
+
+          %% Final Flow
+          IT5 --> F1 --> F2 --> F3 --> F4 --> F5 --> End
+
+          classDef branch fill:#FFF9C4,stroke:#F57C00,stroke-width:2px
+          classDef domain fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px
+          classDef data fill:#E3F2FD,stroke:#2196F3,stroke-width:2px
+          classDef infra fill:#FFF3E0,stroke:#FF9800,stroke-width:2px
+          classDef validation fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
+          classDef presentation fill:#FCE4EC,stroke:#E91E63,stroke-width:2px
+          classDef main fill:#E0F2F1,stroke:#009688,stroke-width:2px
+          classDef integration fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
+          classDef testing fill:#FFEBEE,stroke:#F44336,stroke-width:2px
+          classDef final fill:#E8EAF6,stroke:#3F51B5,stroke-width:2px
+
+          class B1,UC1 branch
+          class D1,D2,D3,D4 domain
+          class DT1,DT2,DT3,DT4 data
+          class I1,I2,I3,I4,I5,I6 infra
+          class V1,V2,V3,V4,V5 validation
+          class P1,P2,P3,P4 presentation
+          class M1,M2,M3,M4 main
+          class FI1,FI2,FI3,FI4 integration
+          class IT1,IT2,IT3,IT4,IT5 testing
+          class F1,F2,F3,F4,F5 final
+        ```
+
+      git_workflow_per_use_case:
+        description: 'Vertical slice development - one complete use case at a time'
+        example_use_case: 'create-user in user feature'
+
+        workflow_steps:
+          - 'git checkout -b feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'Create use case slice directory: src/features/__FEATURE_NAME__/__USE_CASE_NAME__'
+
+        domain_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/usecases/__USE_CASE__.ts'
+          - 'Write domain tests (TDD - RED) → yarn test:unit (expect failure)'
+          - 'git add → git commit -m "test(domain): add failing tests for __USE_CASE__"'
+          - 'Create domain interface → yarn test:unit → yarn lint'
+          - 'git add → git commit -m "feat(domain): add __USE_CASE__ interface"'
+
+        data_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/data/usecases/db-__USE_CASE__.ts'
+          - 'Implement use case → yarn test:unit (GREEN) → yarn lint'
+          - 'git add → git commit -m "feat(data): implement __USE_CASE__"'
+
+        infra_slice_if_needed:
+          - 'IMPORTANT: Infra layer is NOT in use case slice - it goes in feature/shared'
+          - 'Check if repository exists in: src/features/__FEATURE_NAME__/shared/infra/db/'
+          - 'Only create new repository if needed for this use case:'
+          - '  Create: src/features/__FEATURE_NAME__/shared/infra/db/__ENTITY__-repository.ts'
+          - '  Write repository tests → yarn test:unit → yarn lint'
+          - '  git add → git commit -m "feat(infra): add __ENTITY__ repository for __FEATURE__"'
+          - 'If repository already exists, skip this step entirely'
+
+        validation_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/validation/validators/__USE_CASE__-validator.ts'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/validation/schemas/__USE_CASE__-schema.ts'
+          - 'Write validation tests → yarn test:unit → yarn lint'
+          - 'git add → git commit -m "feat(validation): add __USE_CASE__ validation"'
+
+        presentation_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/controllers/__USE_CASE__-controller.ts'
+          - 'Write controller tests (TDD) → yarn test:unit → yarn lint'
+          - 'git add → git commit -m "feat(presentation): add __USE_CASE__ controller"'
+
+        main_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/main/factories/__USE_CASE__-controller-factory.ts'
+          - 'Wire dependencies → yarn test:unit → yarn lint'
+          - 'git add → git commit -m "feat(main): add __USE_CASE__ factory"'
+
+        feature_integration:
+          - 'Update: src/features/__FEATURE_NAME__/main/routes/__FEATURE__-routes.ts'
+          - 'Add route for new use case → import factory from ../__USE_CASE_NAME__/main/factories'
+          - 'Update API documentation if needed'
+          - 'git add → git commit -m "feat(routes): integrate __USE_CASE__ route"'
+
+        integration_testing:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__tests__/integration/__USE_CASE__.integration.spec.ts'
+          - 'Write integration tests → yarn test:integration'
+          - 'Write E2E tests if needed → yarn test:e2e'
+          - 'git add → git commit -m "test(integration): add __USE_CASE__ integration tests"'
+
+        finalization:
+          - 'Run full test suite → yarn test'
+          - 'Run linting → yarn lint'
+          - 'Run build → yarn build'
+          - 'git push origin feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'gh pr create --base main --title "feat(__FEATURE__): implement __USE_CASE__ use case"'
+
+        benefits:
+          - 'Atomic delivery: Each PR delivers a complete, working feature'
+          - 'Reduced integration risk: No big bang integration at the end'
+          - 'Faster feedback: Working software delivered incrementally'
+          - 'Better testing: Each slice can be tested in isolation and integrated'
+          - 'Cleaner git history: Each commit represents a logical unit of work'  
+
+    dependency_rules:
+      # AI-NOTE: Dependency direction is INWARD toward domain
+      # Any outward dependency is a CRITICAL violation
+      # Use these rules to validate imports in generated code
+      domain:
+        can_import_from: []  # Domain layer is the core - imports nothing
+        cannot_import_from: ['data', 'infra', 'presentation', 'validation', 'main']
+        notes: 'Domain defines business rules and contracts - must remain framework agnostic'
+
+      data:
+        can_import_from: ['domain']  # Data layer implements domain interfaces
+        cannot_import_from: ['infra', 'presentation', 'validation', 'main']
+        notes: 'Data orchestrates use cases but delegates infrastructure concerns to infra layer'
+
+      infra:
+        can_import_from: ['data', 'domain']  # Infrastructure implements data protocols
+        cannot_import_from: ['presentation', 'main']
+        notes: 'Infrastructure provides concrete implementations for data layer protocols'
+
+      presentation:
+        can_import_from: ['domain', 'validation']  # Presentation uses domain models and validation
+        cannot_import_from: ['data', 'infra', 'main']
+        notes: 'Presentation handles HTTP concerns - uses domain models and validation rules'
+
+      validation:
+        can_import_from: []  # Validation layer is independent - no imports
+        cannot_import_from: ['domain', 'data', 'infra', 'presentation', 'main']
+        notes: 'Validation is pure - implements generic validation interfaces, not presentation-specific'
+
+      main:
+        can_import_from: ['data', 'domain', 'infra', 'presentation', 'validation']  # Main layer composes everything
+        cannot_import_from: []  # Main is the composition root
+        notes: 'Main is the composition root - wires all dependencies and creates factories'
+
+    # Clean Architecture principles and practices
+    principles:
+      core_principles:
+        - "Independence: Business rules don't know about outside world"
+        - "Testability: Business rules can be tested without UI, Database, Web Server, etc."
+        - "Flexibility: UI, Database, and any external agency are plugins"
+        - "Separation: Business rules are the core, everything else is detail"
+        - "Dependency Rule: Dependencies point inward toward the domain"
+
+      design_patterns:
+        domain:
+          - "Interface Pattern: Define contracts for use cases"
+          - "ES2015 Modules: Use import/export for code organization"
+          - "Type Exports: Separate types for Input and Output"
+          - "Single Method Pattern: One execute() method per use case"
+          - "Port Pattern: Define boundaries for external communication"
+          - "DTO Pattern: Simple data transfer objects without behavior"
+
+        data:
+          - "Implementation Pattern: Concrete implementations of domain use cases"
+          - "Repository Pattern: Define protocols for data persistence"
+          - "Protocol Pattern: Abstractions for external dependencies (HTTP, DB, Crypto)"
+          - "Dependency Injection: Constructor injection of protocols"
+          - "Prefix Pattern: Use 'Db' or 'Remote' prefix for implementations"
+
+        infra:
+          - "Adapter Pattern: Implement data protocols (FetchHttpClient, PrismaAdapter)"
+          - "Single HTTP Client: One FetchClient for all HTTP operations"
+          - "ORM Pattern: Prisma for PostgreSQL + pgvector support"
+          - "Cache Pattern: Redis adapter for caching strategies"
+          - "Helper Pattern: Database and cache helpers for connections"
+
+        presentation:
+          - "Controller Pattern: Express controllers for REST API"
+          - "Middleware Pattern: Express middleware pipeline"
+          - "Helper Pattern: HTTP response helpers (ok, badRequest, etc.)"
+          - "Protocol Pattern: Define controller and validation interfaces"
+          - "Error Handling: Centralized error middleware"
+          - "Request Validation: Input sanitization and validation"
+
+        validation:
+          - "Composite Pattern: Combine multiple field validators (ValidationComposite)"
+          - "Builder Pattern: Fluent interface for validation construction (ValidationBuilder)"
+          - "Factory Pattern: Create validation composites (makeLoginValidation, makeSignupValidation)"
+
+        main:
+          - "Factory Pattern: Create controllers with all dependencies (makeLoginController)"
+          - "Decorator Pattern: Add logging and monitoring (LogControllerDecorator)"
+          - "Adapter Pattern: Express route and middleware adapters"
+          - "Composition Root: Wire up controllers, middlewares, and routes"
+          - "Configuration Pattern: Centralized app, env, and swagger config"
+          - "Dependency Injection: IoC container for dependency management"
+          - "Route Aggregation: Collect routes from all features"
+
+      testing_strategy:
+        # AI-NOTE: Testing strategy varies by layer
+        # Domain: Pure unit tests with no external dependencies
+        # Data: Unit tests with mocked protocols
+        # Infra: Integration tests with real databases
+        domain:
+          approach: "Unit Tests - Pure functions and business logic"
+          coverage_target: "100%"
+          tools: ["Vitest", "Testing Library"]
+          practices:
+            # AI-NOTE: NEVER use faker or random data in tests
+            # Always use deterministic, fixed test data
+            - "Use fixed test data helpers instead of faker"
+            - "Create mock factories with deterministic data"
+            - "Test domain models and use case interfaces"
+            - "Use mockAddAccountParams() with fixed values"
+            - "Keep test helpers in tests/domain/mocks directory"
+            - "No external dependencies or randomness in tests"
+
+        data:
+          approach: "Unit Tests with Mocks"
+          coverage_target: "95%"
+          tools: ["Vitest", "vi.spyOn", "vi.fn"]
+          practices:
+            - "Create spy classes (HasherSpy, RepositorySpy)"
+            - "Use makeSut() factory for test setup"
+            - "Mock protocol implementations with classes"
+            - "Use vi.spyOn() for spying on methods"
+            - "Test error cases with throwError helper"
+            - "Verify method calls and parameters"
+            - "Use fixed test data from mocks directory"
+
+        infra:
+          approach: "Integration Tests"
+          coverage_target: "80%"
+          tools: ["Vitest", "Prisma test database", "Module mocking"]
+          practices:
+            - "Use vi.mock() to mock external modules (bcrypt, jsonwebtoken)"
+            - "Test with Prisma test client and PostgreSQL"
+            - "Clean database between tests with Prisma reset"
+            - "Use makeSut() factory pattern"
+            - "Mock localStorage with jsdom or happy-dom"
+            - "Use vi.mock() for Fetch API mocking"
+            - "Use fixed test data - no faker"
+
+        presentation:
+          approach: "Unit Tests for Controllers and Middlewares"
+          coverage_target: "90%"
+          tools: ["Vitest", "HTTP helpers (ok, badRequest, serverError)"]
+          practices:
+            - "Use spy classes (AuthenticationSpy, ValidationSpy)"
+            - "Test controller handle() method"
+            - "Use makeSut() factory with dependency injection"
+            - "Test HTTP response helpers (ok, badRequest, unauthorized)"
+            - "Mock requests with fixed data"
+            - "Test error scenarios with throwError helper"
+            - "Test middleware chain execution"
+            - "Verify proper error propagation"
+
+        validation:
+          approach: "Unit Tests - Validation logic"
+          coverage_target: "100%"
+          tools: ["Vitest", "ValidationSpy for mocking"]
+          practices:
+            - "Test each validator independently (RequiredField, Email, MinLength)"
+            - "Test ValidationComposite with multiple validators"
+            - "Use makeSut() factory for validator creation"
+            - "Test specific error types (MissingParamError, InvalidFieldError)"
+            - "Test validation factories return correct composites"
+            - "Test edge cases (empty fields, invalid formats)"
+            - "Use fixed field names and error messages"
+
+        main:
+          approach: "E2E and Integration Tests"
+          coverage_target: "70%"
+          tools: ["Vitest", "Playwright", "MSW"]
+          practices:
+            - "Test complete user flows with Playwright"
+            - "Test factory functions with Vitest"
+            - "Mock HTTP layer with MSW"
+            - "Verify dependency wiring"
+            - "Use fixed test data for E2E scenarios"
+            - "No faker in integration tests"
+
+      best_practices:
+        - "SOLID Principles: Single Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, Dependency Inversion"
+        - "DRY: Don't Repeat Yourself - Extract common logic"
+        - "KISS: Keep It Simple, Silly - Avoid over-engineering"
+        - "YAGNI: You Aren't Gonna Need It - Build only what's needed"
+        - "SOC: Separation of Concerns - Each layer has its responsibility"
+        - "Small Commits: Make atomic, focused commits"
+        - "Composition over Inheritance: Favor object composition"
+        - "Conventional Commits: Use semantic commit messages"
+        - "TDD: Write tests first, then implementation"
+        - "Clean Code: Self-documenting, readable code"
+

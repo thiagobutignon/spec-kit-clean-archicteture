@@ -1,0 +1,31 @@
+# CHUNK: metadata
+# Lines: 1493-1518
+# Estimated tokens: 184
+# Original: fullstack-main-template.regent
+# =============================================
+
+metadata:
+  layer: 'main'
+  project_type: 'fullstack'
+  architecture_style: 'clean'
+  framework: 'nextjs15'
+  rendering: 'rsc' # React Server Components
+  api: 'routes' # Next.js API Routes
+  patterns:
+    - 'composition-root'
+    - 'factory-pattern'
+    - 'composite-pattern'
+    - 'provider-pattern'
+    - 'server-components'
+    - 'server-actions'
+    - 'api-routes'
+  references:
+    - 'Next.js 15 App Router documentation'
+    - 'Next.js API Routes'
+    - 'React Server Components'
+    - 'Clean Architecture principles'
+    - 'Factory Pattern'
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER STRUCTURE
+# ------------------------------------------------------------------------------

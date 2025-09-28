@@ -1,0 +1,135 @@
+{
+  "originalFile": "/Users/thiagobutignon/dev/spec-kit-clean-archicteture/templates/backend-presentation-template.regent",
+  "totalLines": 3224,
+  "totalTokens": 32805,
+  "chunks": [
+    {
+      "id": "backend-presentation-template.regent-shared/00-header.part.regent",
+      "section": "shared/00-header.part.regent",
+      "lineStart": 11,
+      "lineEnd": 33,
+      "tokens": 287,
+      "file": "backend-presentation-template.regent-shared-00-header.part.regent.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-metadata",
+      "section": "metadata",
+      "lineStart": 34,
+      "lineEnd": 59,
+      "tokens": 225,
+      "file": "backend-presentation-template.regent-metadata.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-backend/01-structure.part.regent",
+      "section": "backend/01-structure.part.regent",
+      "lineStart": 60,
+      "lineEnd": 63,
+      "tokens": 56,
+      "file": "backend-presentation-template.regent-backend-01-structure.part.regent.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-structure",
+      "section": "structure",
+      "lineStart": 64,
+      "lineEnd": 270,
+      "tokens": 2356,
+      "file": "backend-presentation-template.regent-structure.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-backend/02-architecture.part.regent",
+      "section": "backend/02-architecture.part.regent",
+      "lineStart": 271,
+      "lineEnd": 279,
+      "tokens": 123,
+      "file": "backend-presentation-template.regent-backend-02-architecture.part.regent.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-architecture",
+      "section": "architecture",
+      "lineStart": 280,
+      "lineEnd": 689,
+      "tokens": 4856,
+      "file": "backend-presentation-template.regent-architecture.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-backend/03-rules.part.regent",
+      "section": "backend/03-rules.part.regent",
+      "lineStart": 690,
+      "lineEnd": 710,
+      "tokens": 248,
+      "file": "backend-presentation-template.regent-backend-03-rules.part.regent.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-rules",
+      "section": "rules",
+      "lineStart": 711,
+      "lineEnd": 1132,
+      "tokens": 4336,
+      "file": "backend-presentation-template.regent-rules.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-backend/steps/04-presentation.part.regent",
+      "section": "backend/steps/04-presentation.part.regent",
+      "lineStart": 1133,
+      "lineEnd": 1146,
+      "tokens": 196,
+      "file": "backend-presentation-template.regent-backend-steps-04-presentation.part.regent.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-presentation_steps",
+      "section": "presentation_steps",
+      "lineStart": 1147,
+      "lineEnd": 2005,
+      "tokens": 8836,
+      "file": "backend-presentation-template.regent-presentation_steps.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-shared/steps/validation.part.regent",
+      "section": "shared/steps/validation.part.regent",
+      "lineStart": 2006,
+      "lineEnd": 2013,
+      "tokens": 102,
+      "file": "backend-presentation-template.regent-shared-steps-validation.part.regent.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-metadata",
+      "section": "metadata",
+      "lineStart": 2014,
+      "lineEnd": 2032,
+      "tokens": 165,
+      "file": "backend-presentation-template.regent-metadata.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-structure",
+      "section": "structure",
+      "lineStart": 2033,
+      "lineEnd": 2049,
+      "tokens": 142,
+      "file": "backend-presentation-template.regent-structure.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-steps",
+      "section": "steps",
+      "lineStart": 2050,
+      "lineEnd": 2050,
+      "tokens": 2,
+      "file": "backend-presentation-template.regent-steps.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-validation_steps",
+      "section": "validation_steps",
+      "lineStart": 2051,
+      "lineEnd": 2956,
+      "tokens": 8154,
+      "file": "backend-presentation-template.regent-validation_steps.chunk.regent"
+    },
+    {
+      "id": "backend-presentation-template.regent-shared/01-footer.part.regent",
+      "section": "shared/01-footer.part.regent",
+      "lineStart": 2957,
+      "lineEnd": 3224,
+      "tokens": 2721,
+      "file": "backend-presentation-template.regent-shared-01-footer.part.regent.chunk.regent"
+    }
+  ]
+}

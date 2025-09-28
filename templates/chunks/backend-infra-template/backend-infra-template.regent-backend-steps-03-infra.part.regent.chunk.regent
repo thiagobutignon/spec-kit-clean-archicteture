@@ -1,0 +1,21 @@
+# CHUNK: backend/steps/03-infra.part.regent
+# Lines: 1133-1148
+# Estimated tokens: 239
+# Original: backend-infra-template.regent
+# =============================================
+
+# --- From: backend/steps/03-infra.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: INFRASTRUCTURE LAYER IMPLEMENTATION STEPS FOR BACKEND WITH TDD
+  # Following Test-Driven Development (TDD): RED → GREEN → REFACTOR
+  # Tests are created FIRST (RED), then implementation (GREEN), then optimized (REFACTOR)
+  # Infrastructure layer provides concrete implementations of data layer protocols
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # INFRASTRUCTURE LAYER STEPS SECTION
+  # Steps for implementing infrastructure layer following TDD methodology
+  # Each infrastructure component implementation starts with failing tests
+  # Following "Feature Module with Use Case Slices" architecture
+  # ------------------------------------------------------------------------------

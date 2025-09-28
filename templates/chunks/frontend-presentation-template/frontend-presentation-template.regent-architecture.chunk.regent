@@ -1,0 +1,407 @@
+# CHUNK: architecture
+# Lines: 296-697
+# Estimated tokens: 4692
+# Original: frontend-presentation-template.regent
+# =============================================
+
+  architecture:
+    folder_structure:
+      use_case_slice: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+      feature_shared: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+      feature_main: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+      global_shared: '__PROJECT_NAME__/src/shared'
+      app_router: '__PROJECT_NAME__/src/app'
+
+    execution_order:
+      # AI-NOTE: Frontend vertical slicing includes UI components
+      # Server Actions should be created before client hooks
+      # Components should be tested in isolation before integration
+      description: 'Frontend use cases are implemented vertically, from domain to UI components'
+      approach: 'Vertical Slice Architecture - One feature at a time, through all frontend layers'
+      sequence_per_use_case:
+        1: 'domain'      # Use case interface and entities
+        2: 'data'        # HTTP clients and remote implementations
+        3: 'validation'  # Zod schemas and form validation
+        4: 'presentation'# Actions, components, and hooks
+        5: 'main'        # Composite components
+        6: 'integration' # Connect to App Router
+
+      workflow_diagram: |
+        ```mermaid
+        graph TD
+          Start([Start Frontend Use Case])
+
+          %% Branch Creation
+          B1[Create Branch: feat/__FEATURE_NAME__/__USE_CASE_NAME__]
+
+          %% Use Case Slice Directory
+          UC1[Create Use Case Directory Structure]
+
+          %% Domain Slice
+          D1[Create Domain Interface]
+          D2[Write Domain Tests - TDD Red]
+          D3[Run: npm test - Expect Failure]
+          D4[Git Commit: 'test(domain): add __USE_CASE__ tests']
+
+          %% Data Slice
+          DT1[Create Remote Implementation]
+          DT2[Write HTTP Client Tests]
+          DT3[Run: npm test - Green]
+          DT4[Git Commit: 'feat(data): implement remote __USE_CASE__']
+
+          %% Validation Slice
+          V1[Create Zod Schema]
+          V2[Create Form Validators]
+          V3[Write Validation Tests]
+          V4[Run: npm test - Green]
+          V5[Git Commit: 'feat(validation): add __USE_CASE__ schema']
+
+          %% Presentation Slice - Actions
+          %% AI-NOTE: Server Actions use 'use server' directive
+          %% Must handle form validation and error states
+          PA1[Create Server Actions]
+          PA2[Write Action Tests]
+          PA3[Run: npm test - Green]
+          PA4[Git Commit: 'feat(actions): add __USE_CASE__ server action']
+
+          %% Presentation Slice - Hooks
+          PH1[Create Custom Hooks]
+          PH2[Write Hook Tests]
+          PH3[Run: npm test - Green]
+          PH4[Git Commit: 'feat(hooks): add use-__USE_CASE__ hook']
+
+          %% Presentation Slice - Components
+          PC1[Create UI Components]
+          PC2[Write Component Tests]
+          PC3[Run: npm test - Green]
+          PC4[Git Commit: 'feat(components): add __USE_CASE__ form/ui']
+
+          %% Main Slice - Composite
+          M1[Create Composite Component]
+          M2[Wire Dependencies]
+          M3[Write Composite Tests]
+          M4[Run: npm test - Green]
+          M5[Git Commit: 'feat(main): add __USE_CASE__ composite']
+
+          %% Feature Integration
+          FI1[Update Feature Page Composer]
+          FI2[Integrate Composite in Feature Main]
+          FI3[Test Feature Integration]
+          FI4[Git Commit: 'feat(pages): integrate __USE_CASE__ in page']
+
+          %% App Router Integration
+          AR1[Update App Router Page]
+          AR2[Import Feature Page Composer]
+          AR3[Test App Router Integration]
+          AR4[Git Commit: 'feat(app): integrate __USE_CASE__ in app router']
+
+          %% Testing
+          IT1[Write Integration Tests]
+          IT2[Run: npm run test:integration]
+          IT3[Write E2E Tests with Playwright/Cypress]
+          IT4[Run: npm run test:e2e]
+          IT5[Git Commit: 'test(e2e): add __USE_CASE__ e2e tests']
+
+          %% Final Steps
+          F1[Run All Tests]
+          F2[Run: npm run lint]
+          F3[Run: npm run build]
+          F4[Run: npm run type-check]
+          F5[Git Push: Push Branch]
+          F6[Create PR: '__FEATURE__/__USE_CASE__ Frontend Implementation']
+
+          End([Frontend Use Case Complete])
+
+          %% Flow - Vertical Development Through Frontend Layers
+          Start --> B1
+          B1 --> UC1
+
+          %% Domain Flow
+          UC1 --> D1 --> D2 --> D3 --> D4
+
+          %% Data Flow
+          D4 --> DT1 --> DT2 --> DT3 --> DT4
+
+          %% Validation Flow
+          DT4 --> V1 --> V2 --> V3 --> V4 --> V5
+
+          %% Presentation Flow - Actions
+          V5 --> PA1 --> PA2 --> PA3 --> PA4
+
+          %% Presentation Flow - Hooks
+          PA4 --> PH1 --> PH2 --> PH3 --> PH4
+
+          %% Presentation Flow - Components
+          PH4 --> PC1 --> PC2 --> PC3 --> PC4
+
+          %% Main Flow
+          PC4 --> M1 --> M2 --> M3 --> M4 --> M5
+
+          %% Feature Integration Flow
+          M5 --> FI1 --> FI2 --> FI3 --> FI4
+
+          %% App Router Integration Flow
+          FI4 --> AR1 --> AR2 --> AR3 --> AR4
+
+          %% Testing Flow
+          AR4 --> IT1 --> IT2 --> IT3 --> IT4 --> IT5
+
+          %% Final Flow
+          IT5 --> F1 --> F2 --> F3 --> F4 --> F5 --> F6 --> End
+
+          classDef branch fill:#FFF9C4,stroke:#F57C00,stroke-width:2px
+          classDef domain fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px
+          classDef data fill:#E3F2FD,stroke:#2196F3,stroke-width:2px
+          classDef validation fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
+          classDef presentation fill:#FCE4EC,stroke:#E91E63,stroke-width:2px
+          classDef main fill:#E0F2F1,stroke:#009688,stroke-width:2px
+          classDef integration fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
+          classDef testing fill:#FFEBEE,stroke:#F44336,stroke-width:2px
+          classDef final fill:#E8EAF6,stroke:#3F51B5,stroke-width:2px
+
+          class B1,UC1 branch
+          class D1,D2,D3,D4 domain
+          class DT1,DT2,DT3,DT4 data
+          class V1,V2,V3,V4,V5 validation
+          class PA1,PA2,PA3,PA4,PH1,PH2,PH3,PH4,PC1,PC2,PC3,PC4 presentation
+          class M1,M2,M3,M4,M5 main
+          class FI1,FI2,FI3,FI4,AR1,AR2,AR3,AR4 integration
+          class IT1,IT2,IT3,IT4,IT5 testing
+          class F1,F2,F3,F4,F5,F6 final
+        ```
+
+      git_workflow_per_use_case:
+        description: 'Vertical slice development for Next.js - one complete feature at a time'
+        example_use_case: 'create-user form in user feature'
+
+        workflow_steps:
+          - 'git checkout -b feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'Create use case slice directory: src/features/__FEATURE_NAME__/__USE_CASE_NAME__'
+
+        domain_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/usecases/__USE_CASE__.ts'
+          - 'Write domain tests (TDD - RED) → npm test (expect failure)'
+          - 'git add → git commit -m "test(domain): add failing tests for __USE_CASE__"'
+          - 'Create domain interface → npm test → npm run lint'
+          - 'git add → git commit -m "feat(domain): add __USE_CASE__ interface"'
+
+        data_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/data/usecases/remote-__USE_CASE__.ts'
+          - 'Implement HTTP client for use case → npm test → npm run lint'
+          - 'git add → git commit -m "feat(data): implement remote __USE_CASE__"'
+
+        validation_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/validation/schemas/__USE_CASE__-schema.ts'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/validation/validators/__USE_CASE__-validator.ts'
+          - 'Write validation tests → npm test → npm run lint'
+          - 'git add → git commit -m "feat(validation): add __USE_CASE__ schema and validators"'
+
+        presentation_slice_actions:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/actions/__USE_CASE__-action.ts'
+          - 'Write server action tests → npm test → npm run lint'
+          - 'git add → git commit -m "feat(actions): add __USE_CASE__ server action"'
+
+        presentation_slice_hooks:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/hooks/use-__USE_CASE__.ts'
+          - 'Write hook tests (React Testing Library) → npm test → npm run lint'
+          - 'git add → git commit -m "feat(hooks): add use-__USE_CASE__ hook"'
+
+        presentation_slice_components:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/components/__USE_CASE__-form.tsx'
+          - 'Write component tests (React Testing Library) → npm test → npm run lint'
+          - 'git add → git commit -m "feat(components): add __USE_CASE__ form component"'
+
+        main_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/main/composites/__USE_CASE__-composite.tsx'
+          - 'Wire all dependencies (hooks, actions, components) → npm test → npm run lint'
+          - 'git add → git commit -m "feat(main): add __USE_CASE__ composite"'
+
+        feature_integration:
+          - 'Update: src/features/__FEATURE_NAME__/main/pages/__FEATURE__-page-composer.tsx'
+          - 'Import and compose use case composite → import from ../__USE_CASE_NAME__/main/composites'
+          - 'Test feature page integration → npm test'
+          - 'git add → git commit -m "feat(pages): integrate __USE_CASE__ in feature page"'
+
+        app_router_integration:
+          - 'Update: src/app/(features)/__FEATURE_NAME__/page.tsx'
+          - 'Import feature page composer → from ../../../features/__FEATURE_NAME__/main/pages'
+          - 'Test app router integration → npm run dev → manual test'
+          - 'git add → git commit -m "feat(app): integrate __USE_CASE__ in app router"'
+
+        integration_testing:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__tests__/integration/__USE_CASE__.integration.spec.ts'
+          - 'Write integration tests → npm run test:integration'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__tests__/e2e/__USE_CASE__.e2e.spec.ts'
+          - 'Write E2E tests → npm run test:e2e'
+          - 'git add → git commit -m "test(e2e): add __USE_CASE__ integration and e2e tests"'
+
+        finalization:
+          - 'Run full test suite → npm test'
+          - 'Run linting → npm run lint'
+          - 'Run type checking → npm run type-check'
+          - 'Run build → npm run build'
+          - 'git push origin feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'gh pr create --base main --title "feat(__FEATURE__): implement __USE_CASE__ frontend feature"'
+
+        benefits:
+          - 'Atomic delivery: Each PR delivers a complete, working frontend feature'
+          - 'Component isolation: Each slice can be developed and tested independently'
+          - 'Type safety: Full TypeScript coverage from domain to UI'
+          - 'Test coverage: Unit, integration, and E2E tests for complete confidence'
+          - 'Next.js optimization: Leverages App Router, Server Actions, and RSC patterns'
+
+    dependency_rules:
+      domain:
+        can_import_from: []  # Domain layer is the core - imports nothing
+        cannot_import_from: ['data', 'infra', 'presentation', 'validation', 'main']
+
+      data:
+        can_import_from: ['domain']  # Data layer implements domain interfaces
+        cannot_import_from: ['presentation', 'validation', 'main']
+
+      validation:
+        can_import_from: ['domain']  # Zod schemas validate domain entities and DTOs
+        cannot_import_from: ['data', 'presentation', 'main']
+
+      presentation:
+        can_import_from: ['domain', 'validation']  # Presentation uses domain and validation
+        cannot_import_from: ['data', 'main']
+
+      main:
+        can_import_from: ['data', 'domain', 'presentation', 'validation']  # Main layer composes everything
+        cannot_import_from: []  # Main is the composition root
+
+    # Clean Architecture principles adapted for React/Next.js
+    principles:
+      core_principles:
+        - "Component Independence: UI components don't depend on external libraries directly"
+        - "Testability: Business logic can be tested without DOM, API, or framework dependencies"
+        - "Framework Independence: Business rules don't depend on Next.js or React specifics"
+        - "Separation: Business rules are isolated from UI concerns"
+        - "Dependency Rule: Dependencies point inward toward the domain"
+
+      design_patterns:
+        domain:
+          - "Interface Pattern: Define contracts for use cases and entities"
+          - "ES2015 Modules: Use import/export for code organization"
+          - "Type Exports: Separate types for Input and Output DTOs"
+          - "Single Method Pattern: One execute() method per use case"
+          - "Entity Pattern: Rich domain models with behavior"
+
+        data:
+          - "Repository Pattern: HTTP clients implementing domain repositories"
+          - "Adapter Pattern: Transform external API data to domain entities"
+          - "Cache Pattern: Next.js cache and SWR/React Query integration"
+          - "Error Handling: Transform HTTP errors to domain errors"
+          - "Fetch Wrapper: Centralized HTTP client with interceptors"
+
+        validation:
+          - "Schema Validation: Zod schemas for runtime type validation"
+          - "Form Validation: Integration with React Hook Form"
+          - "Composite Pattern: Combine multiple field validators"
+          - "Builder Pattern: Fluent interface for validation construction"
+          - "Error Mapping: Transform validation errors to user-friendly messages"
+
+        presentation:
+          actions:
+            - "Server Actions: Next.js 15 server-side form handling"
+            - "Progressive Enhancement: Works without JavaScript"
+            - "Error Boundaries: Graceful error handling in actions"
+            - "Revalidation: Automatic cache invalidation after mutations"
+          components:
+            - "Composition Pattern: Small, composable UI components"
+            - "Controlled Components: React controlled inputs with state"
+            - "Compound Components: Complex components built from simpler ones"
+            - "Render Props: Flexible component composition patterns"
+            - "Shadcn/ui: Consistent design system components"
+          hooks:
+            - "Custom Hooks: Encapsulate business logic and state"
+            - "State Management: useState, useReducer for local state"
+            - "Effect Management: useEffect for side effects"
+            - "Context API: Share state without prop drilling"
+            - "Optimistic Updates: Immediate UI feedback for better UX"
+
+        main:
+          - "Composite Pattern: Combine use case slices into feature pages"
+          - "Factory Pattern: Create composites with all dependencies wired"
+          - "Provider Pattern: Context providers for feature-level state"
+          - "Higher-Order Components: Add cross-cutting concerns"
+          - "Dependency Injection: Constructor injection for composites"
+
+      testing_strategy:
+        domain:
+          approach: "Unit Tests - Pure functions and business logic"
+          coverage_target: "100%"
+          tools: ["Vitest"]
+          practices:
+            - "Use fixed test data helpers instead of faker"
+            - "Create mock factories with deterministic data"
+            - "Test domain entities and use case interfaces"
+            - "Use mockUserParams() with fixed values"
+            - "Keep test helpers in tests/domain/mocks directory"
+            - "No external dependencies or randomness in tests"
+
+        data:
+          approach: "Unit Tests with MSW (Mock Service Worker)"
+          coverage_target: "95%"
+          tools: ["Vitest", "MSW", "vi.mock"]
+          practices:
+            - "Mock HTTP clients with MSW handlers"
+            - "Use makeSut() factory for test setup"
+            - "Test API error scenarios and edge cases"
+            - "Verify request payloads and headers"
+            - "Use fixed test data from mocks directory"
+            - "Mock external API responses consistently"
+
+        validation:
+          approach: "Unit Tests - Schema and form validation"
+          coverage_target: "100%"
+          tools: ["Vitest", "Zod", "@testing-library/react"]
+          practices:
+            - "Test Zod schemas with valid and invalid data"
+            - "Test form validation integration with React Hook Form"
+            - "Use makeSut() factory for validator creation"
+            - "Test specific error types and messages"
+            - "Test validation factories return correct schemas"
+            - "Test edge cases (empty fields, malformed data)"
+
+        presentation:
+          approach: "Component and Hook Tests"
+          coverage_target: "90%"
+          tools: ["Vitest", "@testing-library/react", "@testing-library/user-event"]
+          practices:
+            - "Use render() from React Testing Library for components"
+            - "Test user interactions with userEvent.click/type/submit"
+            - "Use screen queries (getByRole, getByLabelText, getByTestId)"
+            - "Create test helpers (renderWithProviders, setupUser)"
+            - "Mock hooks and actions with vi.mock()"
+            - "Test loading states, error states, and success states"
+            - "Use MSW for integration testing with real API calls"
+            - "Test accessibility with jest-axe"
+
+        main:
+          approach: "Integration and E2E Tests"
+          coverage_target: "80%"
+          tools: ["Vitest", "Playwright", "Cypress", "@testing-library/react"]
+          practices:
+            - "Test complete user flows with Playwright/Cypress"
+            - "Test composite components with all dependencies"
+            - "Use page object model for E2E tests"
+            - "Test responsive design and mobile interactions"
+            - "Verify SEO and meta tags in E2E tests"
+            - "Test performance metrics (Core Web Vitals)"
+            - "Use fixed test data for E2E scenarios"
+
+      best_practices:
+        - "SOLID Principles: Apply to React components and hooks"
+        - "DRY: Extract common logic to custom hooks"
+        - "KISS: Keep components simple and focused"
+        - "YAGNI: Build only what's needed, when it's needed"
+        - "Component Composition: Favor composition over inheritance"
+        - "TypeScript: Use strict type checking throughout"
+        - "Accessibility: Follow WCAG guidelines for inclusive design"
+        - "Performance: Optimize with React.memo, useMemo, useCallback"
+        - "SEO: Leverage Next.js SSR/SSG for search optimization"
+        - "Security: Sanitize inputs and validate on both client and server"
+
+

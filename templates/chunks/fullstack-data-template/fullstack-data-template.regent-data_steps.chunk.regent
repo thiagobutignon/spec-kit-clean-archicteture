@@ -1,0 +1,741 @@
+# CHUNK: data_steps
+# Lines: 1493-2228
+# Estimated tokens: 8359
+# Original: fullstack-data-template.regent
+# =============================================
+
+  data_steps:
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create feature branch for __USE_CASE_NAME_PASCAL_CASE__ fullstack data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Following Git Flow pattern for feature development.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'git workflow feature branch naming conventions'
+          url: 'https://github.com/...'
+          description: 'Git Flow and feature branch best practices.'
+      run_scripts:
+        description: 'Create and checkout feature branch for data layer development'
+        scripts:
+          - name: 'Create feature branch'
+            command: 'git checkout -b feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Push feature branch'
+            command: 'git push -u origin feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+      validation_script: |
+        current_branch=$(git branch --show-current)
+        expected_branch="feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-fullstack"
+        if [ "$current_branch" != "$expected_branch" ]; then
+          echo "❌ ERROR: Expected branch $expected_branch, but current branch is $current_branch"
+          exit 1
+        fi
+        echo "✅ Feature branch created successfully: $current_branch"
+
+    # === STEP 2: CREATE DATA STRUCTURE ===
+    - id: 'create-data-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'Create data layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ fullstack use case'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FULLSTACK_ARCHITECTURE.md'
+          description: 'Following Clean Architecture data layer structure for fullstack.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+          folders:
+            - 'usecases'     # Both Db (backend) and Remote (frontend) implementations
+
+    # === STEP 3: CREATE BACKEND DATA TESTS (RED PHASE) ===
+    - id: 'create-backend-data-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create failing tests for Db__USE_CASE_NAME_PASCAL_CASE__ backend implementation (RED)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Following existing test patterns from DbAddAccount and DbAuthentication.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development vitest typescript'
+          url: 'https://github.com/...'
+          description: 'TDD patterns with Vitest for TypeScript.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db-__USE_CASE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach, vi } from 'vitest'
+        import { Db__USE_CASE_NAME_PASCAL_CASE__ } from './db-__USE_CASE_NAME_KEBAB_CASE__'
+        import type { __USE_CASE_NAME_PASCAL_CASE__ } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * Backend Data Layer Tests - Following DbAddAccount pattern
+         */
+        describe('Db__USE_CASE_NAME_PASCAL_CASE__', () => {
+          let sut: Db__USE_CASE_NAME_PASCAL_CASE__
+          let __DEPENDENCY_1_CAMEL_CASE__Stub: any
+          let __DEPENDENCY_2_CAMEL_CASE__Stub: any
+
+          beforeEach(() => {
+            __DEPENDENCY_1_CAMEL_CASE__Stub = {
+              __METHOD_1__: vi.fn()
+            }
+            __DEPENDENCY_2_CAMEL_CASE__Stub = {
+              __METHOD_2__: vi.fn()
+            }
+            sut = new Db__USE_CASE_NAME_PASCAL_CASE__(
+              __DEPENDENCY_1_CAMEL_CASE__Stub,
+              __DEPENDENCY_2_CAMEL_CASE__Stub
+            )
+          })
+
+          describe('RED Phase - These should FAIL initially', () => {
+            it('should call __DEPENDENCY_1__ with correct values', async () => {
+              const params = {
+                __INPUT_FIELD_1__: 'any_value_1',
+                __INPUT_FIELD_2__: 'any_value_2'
+              }
+
+              await sut.__USE_CASE_METHOD_NAME__(params)
+
+              expect(__DEPENDENCY_1_CAMEL_CASE__Stub.__METHOD_1__).toHaveBeenCalledWith(params)
+            })
+
+            it('should return correct result on success', async () => {
+              const expectedResult = {
+                __OUTPUT_FIELD_1__: 'any_value_1',
+                __OUTPUT_FIELD_2__: 'any_value_2'
+              }
+              __DEPENDENCY_2_CAMEL_CASE__Stub.__METHOD_2__.mockResolvedValue(expectedResult)
+
+              const result = await sut.__USE_CASE_METHOD_NAME__({
+                __INPUT_FIELD_1__: 'any_input_1',
+                __INPUT_FIELD_2__: 'any_input_2'
+              })
+
+              expect(result).toEqual(expectedResult)
+            })
+
+            it('should throw if __DEPENDENCY_1__ throws', async () => {
+              __DEPENDENCY_1_CAMEL_CASE__Stub.__METHOD_1__.mockRejectedValue(new Error())
+
+              const promise = sut.__USE_CASE_METHOD_NAME__({
+                __INPUT_FIELD_1__: 'any_input_1',
+                __INPUT_FIELD_2__: 'any_input_2'
+              })
+
+              await expect(promise).rejects.toThrow()
+            })
+          })
+        })
+
+      validation_script: |
+        echo "🔴 RED PHASE: Running failing backend tests..."
+        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db --reporter=verbose || {
+          echo "✅ Tests are failing as expected (RED phase)"
+          git add .
+          git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add failing tests for backend data layer (RED)"
+          exit 0
+        }
+        echo "❌ ERROR: Tests should be failing in RED phase!"
+        exit 1
+
+    # === STEP 4: CREATE BACKEND DATA IMPLEMENTATION (GREEN PHASE) ===
+    - id: 'create-backend-data-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create Db__USE_CASE_NAME_PASCAL_CASE__ backend implementation following real patterns (GREEN)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Following DbAddAccount and DbAuthentication patterns.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/domain/usecases'
+        import { __PROTOCOL_1__, __PROTOCOL_2__ } from '@/data/protocols'
+
+        /**
+         * Backend implementation of __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Following the exact pattern of DbAddAccount and DbAuthentication
+         */
+        export class Db__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
+          constructor (
+            private readonly __DEPENDENCY_1_CAMEL_CASE__: __PROTOCOL_1__,
+            private readonly __DEPENDENCY_2_CAMEL_CASE__: __PROTOCOL_2__
+          ) {}
+
+          async __USE_CASE_METHOD_NAME__ (params: __USE_CASE_NAME_PASCAL_CASE__.Params): Promise<__USE_CASE_NAME_PASCAL_CASE__.Result> {
+            // Simple orchestration logic like DbAddAccount
+            const __INTERMEDIATE_VALUE__ = await this.__DEPENDENCY_1_CAMEL_CASE__.__METHOD_1__(params.__INPUT_FIELD_1__)
+
+            if (!__INTERMEDIATE_VALUE__) {
+              return null
+            }
+
+            const result = await this.__DEPENDENCY_2_CAMEL_CASE__.__METHOD_2__({
+              ...params,
+              __PROCESSED_FIELD__: __INTERMEDIATE_VALUE__
+            })
+
+            return result
+          }
+        }
+
+    # === STEP 5: CREATE FRONTEND DATA TESTS (RED PHASE) ===
+    - id: 'create-frontend-data-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create failing tests for Remote__USE_CASE_NAME_PASCAL_CASE__ frontend implementation (RED)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Following existing test patterns from RemoteAuthentication and RemoteLoadSurveyList.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach, vi } from 'vitest'
+        import { HttpClient, HttpStatusCode } from '@/data/protocols/http'
+        import { Remote__USE_CASE_NAME_PASCAL_CASE__ } from './remote-__USE_CASE_NAME_KEBAB_CASE__'
+        import type { __USE_CASE_NAME_PASCAL_CASE__ } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import { UnexpectedError, InvalidCredentialsError } from '@/domain/errors'
+
+        /**
+         * Frontend Data Layer Tests - Following RemoteAuthentication pattern
+         */
+        describe('Remote__USE_CASE_NAME_PASCAL_CASE__', () => {
+          let sut: Remote__USE_CASE_NAME_PASCAL_CASE__
+          let url: string
+          let httpClientSpy: HttpClient
+
+          beforeEach(() => {
+            url = 'any_url'
+            httpClientSpy = {
+              request: vi.fn()
+            }
+            sut = new Remote__USE_CASE_NAME_PASCAL_CASE__(url, httpClientSpy)
+          })
+
+          describe('RED Phase - These should FAIL initially', () => {
+            it('should call HttpClient with correct values', async () => {
+              const params = {
+                __INPUT_FIELD_1__: 'any_value_1',
+                __INPUT_FIELD_2__: 'any_value_2'
+              }
+
+              vi.spyOn(httpClientSpy, 'request').mockResolvedValueOnce({
+                statusCode: HttpStatusCode.ok,
+                body: 'any_body'
+              })
+
+              await sut.__USE_CASE_METHOD_NAME__(params)
+
+              expect(httpClientSpy.request).toHaveBeenCalledWith({
+                url: 'any_url',
+                method: 'post',
+                body: params
+              })
+            })
+
+            it('should return correct data on HttpStatusCode.ok', async () => {
+              const httpResult = {
+                __OUTPUT_FIELD_1__: 'any_value_1',
+                __OUTPUT_FIELD_2__: 'any_value_2'
+              }
+
+              vi.spyOn(httpClientSpy, 'request').mockResolvedValueOnce({
+                statusCode: HttpStatusCode.ok,
+                body: httpResult
+              })
+
+              const result = await sut.__USE_CASE_METHOD_NAME__({
+                __INPUT_FIELD_1__: 'any_input_1',
+                __INPUT_FIELD_2__: 'any_input_2'
+              })
+
+              expect(result).toEqual(httpResult)
+            })
+
+            it('should throw UnexpectedError on default cases', async () => {
+              vi.spyOn(httpClientSpy, 'request').mockResolvedValueOnce({
+                statusCode: HttpStatusCode.serverError,
+                body: 'any_body'
+              })
+
+              const promise = sut.__USE_CASE_METHOD_NAME__({
+                __INPUT_FIELD_1__: 'any_input_1',
+                __INPUT_FIELD_2__: 'any_input_2'
+              })
+
+              await expect(promise).rejects.toThrow(new UnexpectedError())
+            })
+          })
+        })
+
+      validation_script: |
+        echo "🔴 RED PHASE: Running failing frontend tests..."
+        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote --reporter=verbose || {
+          echo "✅ Tests are failing as expected (RED phase)"
+          git add .
+          git commit -m "test(__FEATURE_NAME_KEBAB_CASE__): add failing tests for frontend data layer (RED)"
+          exit 0
+        }
+        echo "❌ ERROR: Tests should be failing in RED phase!"
+        exit 1
+
+    # === STEP 6: CREATE FRONTEND DATA IMPLEMENTATION (GREEN PHASE) ===
+    - id: 'create-frontend-data-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create Remote__USE_CASE_NAME_PASCAL_CASE__ frontend implementation following real patterns (GREEN)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Following RemoteAuthentication and RemoteLoadSurveyList patterns.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        import { HttpClient, HttpStatusCode } from '@/data/protocols/http'
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/domain/usecases'
+        import { InvalidCredentialsError, UnexpectedError } from '@/domain/errors'
+
+        /**
+         * Frontend implementation of __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Following the exact pattern of RemoteAuthentication
+         */
+        export class Remote__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
+          constructor (
+            private readonly url: string,
+            private readonly httpClient: HttpClient<Remote__USE_CASE_NAME_PASCAL_CASE__.Model>
+          ) {}
+
+          async __USE_CASE_METHOD_NAME__ (params: __USE_CASE_NAME_PASCAL_CASE__.Params): Promise<__USE_CASE_NAME_PASCAL_CASE__.Model> {
+            const httpResponse = await this.httpClient.request({
+              url: this.url,
+              method: 'post',
+              body: params
+            })
+
+            switch (httpResponse.statusCode) {
+              case HttpStatusCode.ok: return httpResponse.body
+              case HttpStatusCode.unauthorized: throw new InvalidCredentialsError()
+              case HttpStatusCode.forbidden: throw new AccessDeniedError()
+              default: throw new UnexpectedError()
+            }
+          }
+        }
+
+        export namespace Remote__USE_CASE_NAME_PASCAL_CASE__ {
+          export type Model = __USE_CASE_NAME_PASCAL_CASE__.Model
+        }
+
+    # === STEP 7: RUN ALL TESTS (GREEN PHASE) ===
+    - id: 'run-passing-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Verify all fullstack tests pass with implementations (GREEN phase)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development green phase'
+          url: 'https://github.com/...'
+          description: 'TDD Green phase - making tests pass.'
+      run_scripts:
+        description: 'Run tests to verify GREEN phase completion'
+        scripts:
+          - name: 'Run all data layer tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data --coverage'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit GREEN phase'
+            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement fullstack data layer (GREEN)"'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 8: REFACTOR BACKEND IMPLEMENTATION (REFACTOR PHASE) ===
+    - id: 'refactor-backend-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Refactor Db__USE_CASE_NAME_PASCAL_CASE__ with better error handling and logging (REFACTOR)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development refactor phase'
+          url: 'https://github.com/...'
+          description: 'TDD Refactor phase - improving code without breaking tests.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/db-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/domain/usecases'
+        import { __PROTOCOL_1__, __PROTOCOL_2__, Logger } from '@/data/protocols'
+
+        /**
+         * Backend implementation of __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Refactored version with error handling and logging
+         */
+        export class Db__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
+          constructor (
+            private readonly __DEPENDENCY_1_CAMEL_CASE__: __PROTOCOL_1__,
+            private readonly __DEPENDENCY_2_CAMEL_CASE__: __PROTOCOL_2__,
+            private readonly logger?: Logger
+          ) {}
+
+          async __USE_CASE_METHOD_NAME__ (params: __USE_CASE_NAME_PASCAL_CASE__.Params): Promise<__USE_CASE_NAME_PASCAL_CASE__.Result> {
+            try {
+              this.logger?.log('info', 'Starting __USE_CASE_NAME_PASCAL_CASE__', params)
+
+              // Check preconditions
+              const exists = await this.__DEPENDENCY_1_CAMEL_CASE__.check(params.__INPUT_FIELD_1__)
+              if (exists) {
+                this.logger?.log('warn', '__USE_CASE_NAME_PASCAL_CASE__ already exists', params)
+                return null
+              }
+
+              // Process data
+              const processed = await this.__DEPENDENCY_1_CAMEL_CASE__.process(params)
+
+              // Save to repository
+              const result = await this.__DEPENDENCY_2_CAMEL_CASE__.save({
+                ...params,
+                ...processed,
+                createdAt: new Date()
+              })
+
+              this.logger?.log('info', '__USE_CASE_NAME_PASCAL_CASE__ completed successfully', result)
+              return result
+            } catch (error) {
+              this.logger?.log('error', '__USE_CASE_NAME_PASCAL_CASE__ failed', error)
+              throw error
+            }
+          }
+        }
+
+    # === STEP 9: REFACTOR FRONTEND IMPLEMENTATION (REFACTOR PHASE) ===
+    - id: 'refactor-frontend-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Refactor Remote__USE_CASE_NAME_PASCAL_CASE__ with retry logic and caching (REFACTOR)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        import { HttpClient, HttpStatusCode } from '@/data/protocols/http'
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/domain/usecases'
+        import { InvalidCredentialsError, UnexpectedError, AccessDeniedError } from '@/domain/errors'
+
+        /**
+         * Frontend implementation of __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Refactored version with better error handling and data transformation
+         */
+        export class Remote__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
+          constructor (
+            private readonly url: string,
+            private readonly httpClient: HttpClient<Remote__USE_CASE_NAME_PASCAL_CASE__.Model>
+          ) {}
+
+          async __USE_CASE_METHOD_NAME__ (params: __USE_CASE_NAME_PASCAL_CASE__.Params): Promise<__USE_CASE_NAME_PASCAL_CASE__.Model> {
+            const httpResponse = await this.httpClient.request({
+              url: this.url,
+              method: 'post',
+              body: params,
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+
+            const remoteData = httpResponse.body || {}
+
+            switch (httpResponse.statusCode) {
+              case HttpStatusCode.ok:
+                return this.adapt(remoteData)
+              case HttpStatusCode.noContent:
+                return this.getEmptyResponse()
+              case HttpStatusCode.unauthorized:
+                throw new InvalidCredentialsError()
+              case HttpStatusCode.forbidden:
+                throw new AccessDeniedError()
+              default:
+                throw new UnexpectedError()
+            }
+          }
+
+          private adapt(remoteData: Remote__USE_CASE_NAME_PASCAL_CASE__.Model): __USE_CASE_NAME_PASCAL_CASE__.Model {
+            return {
+              __OUTPUT_FIELD_1__: remoteData.__OUTPUT_FIELD_1__,
+              __OUTPUT_FIELD_2__: remoteData.__OUTPUT_FIELD_2__,
+              __TIMESTAMP_FIELD__: new Date(remoteData.__TIMESTAMP_FIELD__)
+            }
+          }
+
+          private getEmptyResponse(): __USE_CASE_NAME_PASCAL_CASE__.Model {
+            return {
+              __OUTPUT_FIELD_1__: '',
+              __OUTPUT_FIELD_2__: '',
+              __TIMESTAMP_FIELD__: new Date()
+            }
+          }
+        }
+
+        export namespace Remote__USE_CASE_NAME_PASCAL_CASE__ {
+          export type Model = {
+            __OUTPUT_FIELD_1__: string
+            __OUTPUT_FIELD_2__: string
+            __TIMESTAMP_FIELD__: string
+          }
+        }
+
+    # === STEP 10: FINAL VALIDATION (REFACTOR PHASE) ===
+    - id: 'validate-refactored-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Run all tests and validations after refactoring (REFACTOR phase complete)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'TESTING_STRATEGY.md'
+          description: 'Complete test coverage and validation requirements.'
+      run_scripts:
+        description: 'Complete TDD cycle validation and commit refactored code'
+        scripts:
+          - name: 'Run all fullstack data tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data --coverage --reporter=verbose'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'TypeScript compilation check'
+            command: 'npx tsc --noEmit --project tsconfig.json'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'ESLint validation'
+            command: 'npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit refactored implementation'
+            command: 'git add . && git commit -m "refactor(__FEATURE_NAME_KEBAB_CASE__): improve fullstack data layer design (REFACTOR)"'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 11: INTEGRATION TESTS ===
+    - id: 'create-integration-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create integration tests for fullstack data layer communication'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'integration testing fullstack next.js'
+          url: 'https://github.com/...'
+          description: 'Integration testing patterns for fullstack applications.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/__tests__/integration/data-integration.spec.ts'
+      template: |
+        import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+        import { Db__USE_CASE_NAME_PASCAL_CASE__ } from '../../data/usecases/db-__USE_CASE_NAME_KEBAB_CASE__'
+        import { Remote__USE_CASE_NAME_PASCAL_CASE__ } from '../../data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * Integration tests for fullstack data layer
+         * Ensures backend and frontend implementations work together
+         */
+        describe('Fullstack Data Layer Integration', () => {
+          describe('Db__USE_CASE_NAME_PASCAL_CASE__ + Remote__USE_CASE_NAME_PASCAL_CASE__', () => {
+            it('should create data on backend and retrieve via frontend', async () => {
+              // Test integration between backend and frontend data layers
+              // This ensures the API contract is correctly implemented
+            })
+          })
+        })
+
+    # === STEP 12: VALIDATE COMPLETE DATA LAYER ===
+    - id: 'validate-complete-data-layer-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Final validation of complete fullstack data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'CI_CD.md'
+          description: 'Following CI/CD validation requirements.'
+      run_scripts:
+        description: 'Run comprehensive validation of fullstack data layer'
+        scripts:
+          - name: 'Complete test suite'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__ --coverage --run'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Build check'
+            command: 'npm run build'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Final commit'
+            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): complete fullstack data layer with TDD"'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 13: OPEN PULL REQUEST ===
+    - id: 'open-pull-request-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Open Pull Request for fullstack data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Pull Request process and review guidelines.'
+      run_scripts:
+        description: 'Create pull request with comprehensive description'
+        scripts:
+          - name: 'Push final changes'
+            command: 'git push origin feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Create Pull Request'
+            command: |
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement fullstack data layer for __USE_CASE_NAME_PASCAL_CASE__" \
+                --body "## Summary
+
+              Implements fullstack data layer with separate backend and frontend implementations.
+
+              ### Backend Implementation (Db__USE_CASE_NAME_PASCAL_CASE__)
+              - ✅ Following DbAddAccount pattern (20-25 lines)
+              - ✅ Simple repository orchestration
+              - ✅ Error handling and logging
+
+              ### Frontend Implementation (Remote__USE_CASE_NAME_PASCAL_CASE__)
+              - ✅ Following RemoteAuthentication pattern (25-30 lines)
+              - ✅ HTTP client with switch case error handling
+              - ✅ Namespace types pattern
+
+              ### Testing
+              - ✅ TDD methodology (RED-GREEN-REFACTOR)
+              - ✅ Unit tests for both implementations
+              - ✅ Integration tests for API contract
+
+              Follows established patterns from real codebase." \
+                --draft
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 14: AI CODE REVIEW ===
+    - id: 'ai-code-review-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'AI-powered code review focusing on pattern consistency'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'AI_CODE_REVIEW.md'
+          description: 'AI review patterns and quality gates.'
+      ai_review_prompts:
+        backend_pattern_check: |
+          Review the Db__USE_CASE_NAME_PASCAL_CASE__ implementation:
+          - Should follow DbAddAccount pattern (20-25 lines)
+          - Constructor injection of repository protocols
+          - Simple orchestration logic, no complex business rules
+          - Compare with: DbAddAccount, DbAuthentication
+
+        frontend_pattern_check: |
+          Review the Remote__USE_CASE_NAME_PASCAL_CASE__ implementation:
+          - Should follow RemoteAuthentication pattern (25-30 lines)
+          - Constructor: url + httpClient
+          - Switch case error handling
+          - Namespace types pattern
+          - Compare with: RemoteAuthentication, RemoteLoadSurveyList
+
+    # === STEP 15: CLEANUP AND MERGE ===
+    - id: 'cleanup-and-merge-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Final cleanup and merge fullstack data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Merge process and branch cleanup.'
+      run_scripts:
+        description: 'Complete PR merge and cleanup process'
+        scripts:
+          - name: 'Final validation'
+            command: 'npm run validate:all -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Merge Pull Request'
+            command: 'gh pr merge --squash --delete-branch'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Cleanup'
+            command: 'git checkout main && git pull origin main && git branch -d feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+
+  # ------------------------------------------------------------------------------
+  # BROWNFIELD REFACTORING STEPS (OPTIONAL)
+  # For existing Next.js projects that need to separate backend and frontend
+  # ------------------------------------------------------------------------------
+
+  brownfield_data_steps:
+    # === STEP 16: IDENTIFY MIXED IMPLEMENTATIONS ===
+    - id: 'identify-mixed-implementations-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'analysis'
+      description: 'Identify existing mixed backend/frontend code to refactor'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Brownfield refactoring strategies for fullstack separation.'
+      analysis_script: |
+        echo "🔍 Searching for mixed implementations..."
+        grep -r "prisma\|fetch\|axios" --include="*.ts" --include="*.tsx" src/ || true
+        echo "📋 Identifying API routes vs client code..."
+        find src/app/api -name "*.ts" || true
+        find src/components -name "*.tsx" || true
+
+    # === STEP 17: CREATE SEPARATION STRATEGY ===
+    - id: 'create-separation-strategy-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Plan separation of backend and frontend data layers'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      migration_strategy: |
+        1. Identify all database calls in components (move to API routes)
+        2. Create Db implementations for backend logic
+        3. Create Remote implementations for frontend API calls
+        4. Replace direct database access with API calls
+        5. Test both layers work together
+        6. Remove legacy mixed code
+
+    # === STEP 18: GRADUAL MIGRATION ===
+    - id: 'gradual-migration-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Implement gradual migration from mixed to separated layers'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'strangler fig pattern next.js refactoring'
+          url: 'https://github.com/...'
+          description: 'Gradual migration pattern for fullstack applications.'
+      run_scripts:
+        description: 'Execute migration with feature flags'
+        scripts:
+          - name: 'Create feature flag'
+            command: 'echo "USE_SEPARATED_LAYERS=true" >> .env.local'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Run parallel implementations'
+            command: 'npm run dev'
+            workingDirectory: '__PROJECT_NAME__'
+
+

@@ -1,0 +1,914 @@
+# CHUNK: presentation_steps
+# Lines: 1198-2106
+# Estimated tokens: 9238
+# Original: frontend-presentation-template.regent
+# =============================================
+
+  presentation_steps:
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create and checkout feature branch for __USE_CASE_NAME_PASCAL_CASE__ presentation implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Git branching strategy and naming conventions'
+      run_scripts:
+        description: 'Create feature branch with proper naming convention'
+        scripts:
+          - name: 'Create feature branch'
+            command: |
+              # Stash any uncommitted changes
+              git stash save "WIP: Before creating __FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__ presentation branch"
+
+              # Ensure we're on the main branch and up to date
+              git checkout main || git checkout master
+              git pull origin main || git pull origin master
+
+              # Create and checkout new feature branch
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__-presentation"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
+
+              echo "✅ Created and checked out branch: $BRANCH_NAME"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: CREATE TEST STRUCTURE (TDD - RED PHASE) ===
+    - id: 'create-test-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'TDD RED: Create test structure for __USE_CASE_NAME_PASCAL_CASE__ presentation layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'TDD_GUIDE.md'
+          description: 'Following Test-Driven Development: RED-GREEN-REFACTOR cycle.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/__tests__/presentation'
+          folders:
+            - 'components'      # Component tests
+            - 'hooks'           # Hook tests
+            - 'actions'         # Server action tests
+            - 'mocks'           # Test mocks
+      validation_script: |
+        # AI-NOTE: TDD starts with test structure
+        BASE_PATH="__PROJECT_NAME__/__tests__/presentation"
+        FOLDERS="$BASE_PATH/components $BASE_PATH/hooks $BASE_PATH/actions $BASE_PATH/mocks"
+        echo "🔴 TDD RED: Creating test structure..."
+        for folder in $FOLDERS; do
+          mkdir -p "$folder"
+        done
+        echo "✅ Test structure created for TDD cycle"
+
+    # === STEP 3: CREATE TEST MOCKS (TDD - RED PHASE) ===
+    - id: 'create-test-mocks-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Create test mocks for __USE_CASE_NAME_PASCAL_CASE__ components'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'TDD_GUIDE.md'
+          description: 'Test doubles and mocking patterns for React components'
+      path: '__PROJECT_NAME__/__tests__/presentation/mocks/mock-__USE_CASE_NAME_KEBAB_CASE__.tsx'
+      template: |
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * Test doubles for __USE_CASE_NAME_PASCAL_CASE__ presentation testing
+         * AI-NOTE: TDD - Create mocks BEFORE implementation
+         * These mocks define the expected behavior for Next.js components
+         */
+
+        export class __USE_CASE_NAME_PASCAL_CASE__Spy implements __USE_CASE_NAME_PASCAL_CASE__ {
+          params: any
+          result = {
+            __OUTPUT_FIELD_1__: 'test-output-1',
+            __OUTPUT_FIELD_2__: 'test-output-2',
+            __OUTPUT_FIELD_3__: 'test-output-3',
+            __TIMESTAMP_FIELD__: new Date('2024-01-01')
+          }
+          callsCount = 0
+
+          async execute(input: any): Promise<any> {
+            this.params = input
+            this.callsCount++
+            return this.result
+          }
+        }
+
+        // Context Provider mock
+        export const Mock__USE_CASE_NAME_PASCAL_CASE__Provider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+          return <>{children}</>
+        }
+
+        // Server Action mock
+        export const mock__USE_CASE_NAME_PASCAL_CASE__Action = vi.fn().mockResolvedValue({
+          success: true,
+          data: {
+            __OUTPUT_FIELD_1__: 'test-output-1',
+            __OUTPUT_FIELD_2__: 'test-output-2'
+          }
+        })
+
+    # === STEP 4: CREATE COMPONENT TEST (TDD - RED PHASE) ===
+    - id: 'create-component-test-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Write failing tests for __USE_CASE_NAME_PASCAL_CASE__ component'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'react testing library vitest nextjs components'
+          description: 'Testing patterns for Next.js components'
+      path: '__PROJECT_NAME__/__tests__/presentation/components/__USE_CASE_NAME_KEBAB_CASE__-form.spec.tsx'
+      template: |
+        import { describe, it, expect, vi, beforeEach } from 'vitest'
+        import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+        import { __USE_CASE_NAME_PASCAL_CASE__Form } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components/__USE_CASE_NAME_KEBAB_CASE__-form'
+        import { Mock__USE_CASE_NAME_PASCAL_CASE__Provider } from '../mocks/mock-__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * TDD RED Phase: Write tests BEFORE implementation
+         * AI-NOTE: These tests will FAIL initially - that's expected!
+         * Testing Next.js 15 components with Shadcn UI
+         */
+
+        describe('__USE_CASE_NAME_PASCAL_CASE__Form', () => {
+          // AI-NOTE: NEVER use faker - use fixed test data
+          const mockFormData = {
+            __INPUT_FIELD_1__: 'test-value-1',
+            __INPUT_FIELD_2__: 'test-value-2',
+            __INPUT_FIELD_3__: 'test-value-3'
+          }
+
+          beforeEach(() => {
+            vi.clearAllMocks()
+          })
+
+          describe('TDD RED - These tests will fail initially', () => {
+            it('should render form with Shadcn UI components', () => {
+              render(
+                <Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+                  <__USE_CASE_NAME_PASCAL_CASE__Form />
+                </Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+              )
+
+              // AI-NOTE: Testing Shadcn UI form components
+              expect(screen.getByLabelText('__INPUT_LABEL_1__')).toBeInTheDocument()
+              expect(screen.getByLabelText('__INPUT_LABEL_2__')).toBeInTheDocument()
+              expect(screen.getByLabelText('__INPUT_LABEL_3__')).toBeInTheDocument()
+              expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument()
+            })
+
+            it('should handle form submission with Server Action', async () => {
+              const onSubmit = vi.fn()
+              render(
+                <Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+                  <__USE_CASE_NAME_PASCAL_CASE__Form onSubmit={onSubmit} />
+                </Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+              )
+
+              // Fill form fields
+              fireEvent.change(screen.getByLabelText('__INPUT_LABEL_1__'), {
+                target: { value: mockFormData.__INPUT_FIELD_1__ }
+              })
+              fireEvent.change(screen.getByLabelText('__INPUT_LABEL_2__'), {
+                target: { value: mockFormData.__INPUT_FIELD_2__ }
+              })
+
+              // Submit form
+              fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+
+              await waitFor(() => {
+                expect(onSubmit).toHaveBeenCalledWith(mockFormData)
+              })
+            })
+
+            it('should show validation errors', async () => {
+              render(
+                <Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+                  <__USE_CASE_NAME_PASCAL_CASE__Form />
+                </Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+              )
+
+              // Submit empty form
+              fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+
+              await waitFor(() => {
+                expect(screen.getByText('__FIELD_1__ is required')).toBeInTheDocument()
+              })
+            })
+
+            it('should disable submit button while loading', async () => {
+              render(
+                <Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+                  <__USE_CASE_NAME_PASCAL_CASE__Form isLoading={true} />
+                </Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+              )
+
+              const submitButton = screen.getByRole('button', { name: 'Submit' })
+              expect(submitButton).toBeDisabled()
+            })
+          })
+        })
+
+    # === STEP 5: CREATE HOOK TEST (TDD - RED PHASE) ===
+    - id: 'create-hook-test-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Write tests for use__USE_CASE_NAME_PASCAL_CASE__ hook'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/__tests__/presentation/hooks/use-__USE_CASE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { describe, it, expect, vi } from 'vitest'
+        import { renderHook, act, waitFor } from '@testing-library/react'
+        import { use__USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/hooks/use-__USE_CASE_NAME_KEBAB_CASE__'
+        import { Mock__USE_CASE_NAME_PASCAL_CASE__Provider } from '../mocks/mock-__USE_CASE_NAME_KEBAB_CASE__'
+
+        describe('use__USE_CASE_NAME_PASCAL_CASE__ Hook', () => {
+          it('should execute use case and return data', async () => {
+            const { result } = renderHook(() => use__USE_CASE_NAME_PASCAL_CASE__(), {
+              wrapper: Mock__USE_CASE_NAME_PASCAL_CASE__Provider
+            })
+
+            await act(async () => {
+              await result.current.execute({
+                __INPUT_FIELD_1__: 'test-value-1'
+              })
+            })
+
+            expect(result.current.data).toEqual({
+              __OUTPUT_FIELD_1__: 'test-output-1',
+              __OUTPUT_FIELD_2__: 'test-output-2'
+            })
+            expect(result.current.isLoading).toBe(false)
+            expect(result.current.error).toBeNull()
+          })
+
+          it('should handle loading state', async () => {
+            const { result } = renderHook(() => use__USE_CASE_NAME_PASCAL_CASE__(), {
+              wrapper: Mock__USE_CASE_NAME_PASCAL_CASE__Provider
+            })
+
+            expect(result.current.isLoading).toBe(false)
+
+            act(() => {
+              result.current.execute({ __INPUT_FIELD_1__: 'test' })
+            })
+
+            expect(result.current.isLoading).toBe(true)
+          })
+        })
+
+    # === STEP 6: RUN TESTS - VERIFY RED (TDD - RED PHASE) ===
+    - id: 'verify-tests-fail-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD RED: Verify tests fail (components do not exist yet)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to ensure they fail (RED phase)'
+        scripts:
+          - name: 'Run failing tests'
+            command: |
+              echo "🔴 TDD RED: Running tests - they should FAIL..."
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__ || {
+                echo "✅ Good! Tests are failing as expected (RED phase)"
+                echo "   Now we'll implement the components to make them pass..."
+                exit 0
+              }
+              echo "❌ ERROR: Tests are passing but components don't exist yet!"
+              exit 1
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 7: CREATE PRESENTATION STRUCTURE (TDD - GREEN PHASE) ===
+    - id: 'create-presentation-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'TDD GREEN: Create presentation layer structure to make tests pass'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation'
+          folders:
+            - 'components'      # React components with Shadcn UI
+            - 'hooks'           # Custom React hooks
+            - 'actions'         # Next.js Server Actions
+            - 'providers'       # Context providers
+            - 'types'           # TypeScript types
+
+    # === STEP 8: CREATE SERVER ACTION (TDD - GREEN PHASE) ===
+    - id: 'create-server-action-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement Next.js 15 Server Action'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'nextjs 15 server actions use server directive'
+          description: 'Server Actions pattern for Next.js 15'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/actions/__USE_CASE_NAME_KEBAB_CASE__-action.ts'
+      template: |
+        'use server'
+
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import { __USE_CASE_NAME_PASCAL_CASE__Schema } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/validation/schemas/__USE_CASE_NAME_KEBAB_CASE__-schema'
+        import { revalidatePath } from 'next/cache'
+
+        /**
+         * Server Action for __USE_CASE_NAME_PASCAL_CASE__
+         * AI-NOTE: Server Actions run on the server only
+         * Use 'use server' directive at the top
+         * Handle validation and errors properly
+         */
+
+        export async function __USE_CASE_NAME_CAMEL_CASE__Action(
+          prevState: any,
+          formData: FormData
+        ) {
+          try {
+            // AI-NOTE: Parse and validate form data
+            const rawData = {
+              __INPUT_FIELD_1__: formData.get('__INPUT_FIELD_1__'),
+              __INPUT_FIELD_2__: formData.get('__INPUT_FIELD_2__'),
+              __INPUT_FIELD_3__: formData.get('__INPUT_FIELD_3__')
+            }
+
+            // Validate with Zod schema
+            const validatedData = __USE_CASE_NAME_PASCAL_CASE__Schema.parse(rawData)
+
+            // AI-NOTE: Get use case implementation from factory
+            const __USE_CASE_NAME_CAMEL_CASE__ = make__USE_CASE_NAME_PASCAL_CASE__()
+
+            // Execute use case
+            const result = await __USE_CASE_NAME_CAMEL_CASE__.execute(validatedData)
+
+            // Revalidate cache if needed
+            revalidatePath('/__FEATURE_NAME_KEBAB_CASE__')
+
+            return {
+              success: true,
+              data: result,
+              error: null
+            }
+          } catch (error) {
+            // AI-NOTE: Proper error handling for Server Actions
+            if (error instanceof ZodError) {
+              return {
+                success: false,
+                data: null,
+                error: {
+                  type: 'validation',
+                  errors: error.errors
+                }
+              }
+            }
+
+            return {
+              success: false,
+              data: null,
+              error: {
+                type: 'server',
+                message: 'An error occurred. Please try again.'
+              }
+            }
+          }
+        }
+
+    # === STEP 9: CREATE REACT HOOK (TDD - GREEN PHASE) ===
+    - id: 'create-hook-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement custom React hook'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/hooks/use-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        'use client'
+
+        import { useState, useCallback } from 'react'
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * Custom hook for __USE_CASE_NAME_PASCAL_CASE__
+         * AI-NOTE: Hooks must start with 'use'
+         * Use 'use client' directive for client components
+         * Manage loading, error, and data states
+         */
+
+        export function use__USE_CASE_NAME_PASCAL_CASE__() {
+          const [data, setData] = useState<any>(null)
+          const [error, setError] = useState<Error | null>(null)
+          const [isLoading, setIsLoading] = useState(false)
+
+          const execute = useCallback(async (input: any) => {
+            setIsLoading(true)
+            setError(null)
+
+            try {
+              // AI-NOTE: Get use case from context or factory
+              const __USE_CASE_NAME_CAMEL_CASE__ = use__USE_CASE_NAME_PASCAL_CASE__Context()
+              const result = await __USE_CASE_NAME_CAMEL_CASE__.execute(input)
+              setData(result)
+              return result
+            } catch (err) {
+              const error = err as Error
+              setError(error)
+              throw error
+            } finally {
+              setIsLoading(false)
+            }
+          }, [])
+
+          const reset = useCallback(() => {
+            setData(null)
+            setError(null)
+            setIsLoading(false)
+          }, [])
+
+          return {
+            data,
+            error,
+            isLoading,
+            execute,
+            reset
+          }
+        }
+
+    # === STEP 10: CREATE COMPONENT WITH SHADCN (TDD - GREEN PHASE) ===
+    - id: 'create-component-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement React component with Shadcn UI'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'shadcn ui form components nextjs tailwind'
+          description: 'Shadcn UI component patterns'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components/__USE_CASE_NAME_KEBAB_CASE__-form.tsx'
+      template: |
+        'use client'
+
+        import { useFormState } from 'react-dom'
+        import { __USE_CASE_NAME_CAMEL_CASE__Action } from '../actions/__USE_CASE_NAME_KEBAB_CASE__-action'
+        import { use__USE_CASE_NAME_PASCAL_CASE__ } from '../hooks/use-__USE_CASE_NAME_KEBAB_CASE__'
+        import { Button } from '@/shared/presentation/ui/button'
+        import { Input } from '@/shared/presentation/ui/input'
+        import { Label } from '@/shared/presentation/ui/label'
+        import { Card, CardContent, CardHeader, CardTitle } from '@/shared/presentation/ui/card'
+        import { Alert, AlertDescription } from '@/shared/presentation/ui/alert'
+        import { Loader2 } from 'lucide-react'
+
+        /**
+         * __USE_CASE_NAME_PASCAL_CASE__ Form Component
+         * AI-NOTE: Using Shadcn UI components with Tailwind CSS
+         * Integrates with Server Actions for form submission
+         * Uses React hooks for state management
+         */
+
+        interface __USE_CASE_NAME_PASCAL_CASE__FormProps {
+          onSubmit?: (data: any) => void
+          isLoading?: boolean
+        }
+
+        export function __USE_CASE_NAME_PASCAL_CASE__Form({
+          onSubmit,
+          isLoading: externalLoading
+        }: __USE_CASE_NAME_PASCAL_CASE__FormProps) {
+          const [state, formAction] = useFormState(__USE_CASE_NAME_CAMEL_CASE__Action, {
+            success: false,
+            data: null,
+            error: null
+          })
+
+          const { isLoading: hookLoading } = use__USE_CASE_NAME_PASCAL_CASE__()
+          const isLoading = externalLoading || hookLoading
+
+          return (
+            <Card className="w-full max-w-md mx-auto">
+              <CardHeader>
+                <CardTitle>__FORM_TITLE__</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form action={formAction} className="space-y-4">
+                  {/* AI-NOTE: Shadcn UI form fields with Tailwind classes */}
+                  <div className="space-y-2">
+                    <Label htmlFor="__INPUT_FIELD_1__">__INPUT_LABEL_1__</Label>
+                    <Input
+                      id="__INPUT_FIELD_1__"
+                      name="__INPUT_FIELD_1__"
+                      type="text"
+                      placeholder="Enter __INPUT_LABEL_1__"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="__INPUT_FIELD_2__">__INPUT_LABEL_2__</Label>
+                    <Input
+                      id="__INPUT_FIELD_2__"
+                      name="__INPUT_FIELD_2__"
+                      type="text"
+                      placeholder="Enter __INPUT_LABEL_2__"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="__INPUT_FIELD_3__">__INPUT_LABEL_3__</Label>
+                    <Input
+                      id="__INPUT_FIELD_3__"
+                      name="__INPUT_FIELD_3__"
+                      type="text"
+                      placeholder="Enter __INPUT_LABEL_3__"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  {/* AI-NOTE: Error display */}
+                  {state.error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>
+                        {state.error.message || 'An error occurred'}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* AI-NOTE: Success display */}
+                  {state.success && (
+                    <Alert>
+                      <AlertDescription>
+                        __SUCCESS_MESSAGE__
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* AI-NOTE: Submit button with loading state */}
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      'Submit'
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          )
+        }
+
+    # === STEP 11: CREATE CONTEXT PROVIDER (TDD - GREEN PHASE) ===
+    - id: 'create-context-provider-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create React Context Provider for state management'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/providers/__USE_CASE_NAME_KEBAB_CASE__-provider.tsx'
+      template: |
+        'use client'
+
+        import { createContext, useContext, ReactNode } from 'react'
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * Context Provider for __USE_CASE_NAME_PASCAL_CASE__
+         * AI-NOTE: Using React Context API instead of Redux/Recoil
+         * Provides use case instance to child components
+         */
+
+        interface __USE_CASE_NAME_PASCAL_CASE__ContextType {
+          __USE_CASE_NAME_CAMEL_CASE__: __USE_CASE_NAME_PASCAL_CASE__
+        }
+
+        const __USE_CASE_NAME_PASCAL_CASE__Context = createContext<__USE_CASE_NAME_PASCAL_CASE__ContextType | undefined>(undefined)
+
+        export function use__USE_CASE_NAME_PASCAL_CASE__Context() {
+          const context = useContext(__USE_CASE_NAME_PASCAL_CASE__Context)
+          if (!context) {
+            throw new Error('use__USE_CASE_NAME_PASCAL_CASE__Context must be used within __USE_CASE_NAME_PASCAL_CASE__Provider')
+          }
+          return context
+        }
+
+        interface __USE_CASE_NAME_PASCAL_CASE__ProviderProps {
+          children: ReactNode
+          __USE_CASE_NAME_CAMEL_CASE__: __USE_CASE_NAME_PASCAL_CASE__
+        }
+
+        export function __USE_CASE_NAME_PASCAL_CASE__Provider({
+          children,
+          __USE_CASE_NAME_CAMEL_CASE__
+        }: __USE_CASE_NAME_PASCAL_CASE__ProviderProps) {
+          return (
+            <__USE_CASE_NAME_PASCAL_CASE__Context.Provider value={{ __USE_CASE_NAME_CAMEL_CASE__ }}>
+              {children}
+            </__USE_CASE_NAME_PASCAL_CASE__Context.Provider>
+          )
+        }
+
+    # === STEP 12: RUN TESTS - VERIFY GREEN (TDD - GREEN PHASE) ===
+    - id: 'verify-tests-pass-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD GREEN: Verify all tests pass with implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to ensure they pass (GREEN phase)'
+        scripts:
+          - name: 'Run passing tests'
+            command: |
+              echo "🟢 TDD GREEN: Running tests - they should PASS now..."
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__ || {
+                echo "❌ ERROR: Tests are still failing after implementation!"
+                echo "   Review the component implementation and fix issues."
+                exit 1
+              }
+              echo "✅ Excellent! All tests are passing (GREEN phase)"
+              echo "   Consider refactoring if needed (REFACTOR phase)..."
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 13: REFACTOR (TDD - REFACTOR PHASE - OPTIONAL) ===
+    - id: 'refactor-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD REFACTOR: Improve code quality while keeping tests green'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      condition: '__NEEDS_REFACTORING__'
+      run_scripts:
+        description: 'Refactor code while ensuring tests remain green'
+        scripts:
+          - name: 'Refactor with safety'
+            command: |
+              echo "♻️ TDD REFACTOR: Improving code quality..."
+              echo "   Common refactorings for React/Next.js:"
+              echo "   - Extract smaller components"
+              echo "   - Optimize re-renders with memo/useMemo"
+              echo "   - Improve type safety"
+              echo "   - Extract custom hooks"
+              echo "   - Simplify Server Action logic"
+
+              # Run tests before refactoring
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__ || {
+                echo "❌ Tests must be green before refactoring!"
+                exit 1
+              }
+
+              # AI-NOTE: Apply refactorings here
+              # Examples:
+              # - Extract form fields to separate components
+              # - Create custom hooks for form validation
+              # - Optimize with React.memo
+
+              # Run tests after refactoring
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__ || {
+                echo "❌ Refactoring broke tests! Revert changes."
+                exit 1
+              }
+
+              echo "✅ Refactoring complete - tests still green!"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 14: REFACTOR FOR BROWNFIELD (CONDITIONAL) ===
+    - id: 'refactor-presentation-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor __FILE_TO_MODIFY_KEBAB_CASE__ to Clean Architecture patterns'
+      condition: 'check_if_presentation_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.tsx'
+      template: |
+        # AI-NOTE: FIND/REPLACE Pattern for Brownfield Refactoring
+        # The AI must identify SPECIFIC code blocks that violate Clean Architecture
+        # Common presentation layer violations in frontend:
+        # - Business logic in components
+        # - Direct API calls instead of use cases
+        # - Missing separation of concerns
+
+        <<<FIND>>>
+        # AI-NOTE: Match the EXACT code including imports if needed
+        # Be specific to avoid matching wrong code blocks
+        # Include enough context for unique identification
+        [ORIGINAL_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        # AI-NOTE: Apply Clean Architecture transformation
+        # Ensure the refactored code:
+        # - Delegates business logic to use cases
+        # - Uses hooks for state management
+        # - Follows separation of concerns
+        # - Has proper error handling
+        [REFACTORED_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # === STEP 15: CREATE PULL REQUEST ===
+    - id: 'create-pr-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create Pull Request for __USE_CASE_NAME_PASCAL_CASE__ presentation layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Create PR using GitHub CLI'
+        scripts:
+          - name: 'Push branch and create PR'
+            command: |
+              # Push branch to remote
+              git push -u origin "feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__-presentation"
+
+              # Create PR using GitHub CLI
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ presentation layer" \
+                --body "## Summary
+
+              Added presentation layer for __USE_CASE_NAME_PASCAL_CASE__ using Next.js 15 and Shadcn UI.
+
+              ## Changes
+              - ✅ Created Server Actions with form validation
+              - ✅ Implemented React components with Shadcn UI
+              - ✅ Added custom hooks for state management
+              - ✅ Created Context Provider for dependency injection
+              - ✅ Styled with Tailwind CSS
+              - ✅ Full test coverage with Vitest and React Testing Library
+
+              ## Testing
+              - [ ] Component tests pass
+              - [ ] Hook tests pass
+              - [ ] Server Action tests pass
+              - [ ] E2E tests pass
+
+              ## Checklist
+              - [ ] Uses 'use client' and 'use server' directives correctly
+              - [ ] No business logic in components
+              - [ ] Follows Clean Architecture principles
+              - [ ] Responsive design with Tailwind
+              - [ ] Accessibility standards met
+              " \
+                --assignee @me \
+                --label "feature,frontend,nextjs,shadcn"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 16: CODE REVIEW ===
+    - id: 'code-review-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Automated code review for frontend presentation implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run automated code review checks'
+        scripts:
+          - name: 'Frontend architecture compliance check'
+            command: |
+              echo "🔍 Running frontend presentation layer compliance checks..."
+
+              # Check for business logic in components
+              if grep -r "calculateTotal\|validateBusiness\|processData" src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components/; then
+                echo "❌ CRITICAL: Business logic found in components"
+                exit 1
+              fi
+
+              # Check for proper directive usage
+              if ! grep -r "use client\|use server" src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/; then
+                echo "⚠️ WARNING: Missing 'use client' or 'use server' directives"
+              fi
+
+              # Check for Tailwind usage
+              if grep -r "\.scss\|\.css" src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/; then
+                echo "⚠️ WARNING: Found CSS/SCSS files - should use Tailwind"
+              fi
+
+              echo "✅ Frontend presentation layer compliance passed"
+            workingDirectory: '__PROJECT_NAME__'
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION REFACTORING PATTERN
+  # Single pattern for refactoring existing code to Clean Architecture
+  # ------------------------------------------------------------------------------
+
+  presentation_refactoring_patterns:
+    - id: 'refactor-to-clean-presentation'
+      description: 'Refactor existing frontend code to follow Clean Architecture'
+      detection:
+        - 'Business logic in components'
+        - 'Direct API calls in components'
+        - 'Data manipulation in presentation layer'
+        - 'Missing use cases'
+        - 'Tight coupling between layers'
+      example:
+        original: |
+          # AI-NOTE: Extract business logic from React components to hooks or server actions
+          <<<FIND>>>
+          'use client'
+
+          export function ProductList() {
+            const [products, setProducts] = useState([])
+            const [total, setTotal] = useState(0)
+
+            useEffect(() => {
+              // Business logic in component
+              const calculateTotal = () => {
+                const sum = products.reduce((acc, p) => {
+                  if (p.discount > 0) {
+                    return acc + (p.price * (1 - p.discount))
+                  }
+                  return acc + p.price
+                }, 0)
+                const tax = sum * 0.1
+                return sum + tax
+              }
+
+              setTotal(calculateTotal())
+            }, [products])
+
+            return (
+              <div>{/* UI */}</div>
+            )
+          }
+          <<</FIND>>>
+          <<<REPLACE>>>
+          'use client'
+
+          import { useProductCalculations } from '@/presentation/hooks/useProductCalculations'
+
+          export function ProductList() {
+            const [products, setProducts] = useState([])
+            const { total } = useProductCalculations(products)
+
+            return (
+              <div>{/* UI */}</div>
+            )
+          }
+          <<</REPLACE>>>
+        category: 'presentation-refactoring'
+        severity: 'HIGH'
+        rlhf_impact: -2
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION ANTI-PATTERNS TO AVOID
+  # Common mistakes in Next.js 15 + React development
+  # ------------------------------------------------------------------------------
+
+  presentation_anti_patterns:
+    - name: 'Business Logic in Components'
+      description: 'Components contain business rules instead of just presentation'
+      example: 'const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)'
+      correct: 'Call use case or custom hook that encapsulates business logic'
+      rlhf_impact: -2
+
+    - name: 'Direct API Calls in Components'
+      description: 'Components making direct fetch/axios calls'
+      example: 'const data = await fetch("/api/users")'
+      correct: 'Use Server Actions or custom hooks with use cases'
+      rlhf_impact: -2
+
+    - name: 'Missing Directives'
+      description: 'Not using "use client" or "use server" directives'
+      example: 'function Component() { useState(...) }'
+      correct: '"use client" at top of file when using hooks/browser APIs'
+      rlhf_impact: -1
+
+    - name: 'Inline Styles Instead of Tailwind'
+      description: 'Using style prop instead of Tailwind classes'
+      example: 'style={{ margin: "10px", padding: "5px" }}'
+      correct: 'className="m-2.5 p-1.25"'
+      rlhf_impact: -1
+
+    - name: 'Not Using Shadcn Components'
+      description: 'Creating custom UI components from scratch'
+      example: 'Custom Button, Input, Card components'
+      correct: 'Import from @/shared/presentation/ui/*'
+      rlhf_impact: -1
+
+

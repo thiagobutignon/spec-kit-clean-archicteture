@@ -1,0 +1,1204 @@
+# CHUNK: domain_steps
+# Lines: 1500-2698
+# Estimated tokens: 12654
+# Original: fullstack-domain-template.regent
+# =============================================
+
+  domain_steps:
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create feature branch for __USE_CASE_NAME_PASCAL_CASE__ fullstack domain layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Following Git Flow pattern for feature development.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'git workflow feature branch naming conventions fullstack'
+          url: 'https://github.com/...'
+          description: 'Git Flow and feature branch best practices for fullstack development.'
+      run_scripts:
+        description: 'Create and checkout feature branch for fullstack domain layer development'
+        scripts:
+          - name: 'Create feature branch'
+            command: 'git checkout -b feat/__FEATURE_NAME_KEBAB_CASE__-domain-__USE_CASE_NAME_KEBAB_CASE__-fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Push feature branch'
+            command: 'git push -u origin feat/__FEATURE_NAME_KEBAB_CASE__-domain-__USE_CASE_NAME_KEBAB_CASE__-fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+      validation_script: |
+        current_branch=$(git branch --show-current)
+        expected_branch="feat/__FEATURE_NAME_KEBAB_CASE__-domain-__USE_CASE_NAME_KEBAB_CASE__-fullstack"
+        if [ "$current_branch" != "$expected_branch" ]; then
+          echo "❌ ERROR: Expected branch $expected_branch, but current branch is $current_branch"
+          exit 1
+        fi
+        echo "✅ Feature branch created successfully: $current_branch"
+
+    # === STEP 2: CREATE DOMAIN STRUCTURE ===
+    - id: 'create-domain-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'Create shared domain layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ use case slice'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FULLSTACK_ARCHITECTURE.md'
+          description: 'Following Clean Architecture shared domain layer structure for fullstack.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture domain layer next.js fullstack typescript'
+          url: 'https://github.com/...'
+          description: 'Shared domain layer patterns for fullstack development.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain'
+          folders:
+            - 'entities'      # Business entities shared by frontend/backend
+            - 'usecases'      # Use case interfaces for both client and server
+            - 'errors'        # Domain errors for business rule violations
+            - 'types'         # Domain types and DTOs for API communication
+      validation_script: |
+        # AI-NOTE: Replace placeholders but keep shell variables intact
+        BASE_PATH="__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain"
+        FOLDERS="$BASE_PATH/entities $BASE_PATH/usecases $BASE_PATH/errors $BASE_PATH/types"
+        echo "✅ Verifying fullstack domain folder structure..."
+        for folder in $FOLDERS; do
+          if [ ! -d "$folder" ]; then
+            echo "❌ ERROR: Folder $folder was not created."
+            exit 1
+          fi
+        done
+        echo "✅ All domain folders exist for __USE_CASE_NAME_PASCAL_CASE__ fullstack use case."
+
+    # === STEP 2: CREATE USE CASE INTERFACE ===
+    - id: 'create-domain-usecase-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create __USE_CASE_NAME_PASCAL_CASE__ use case interface shared between frontend and backend'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture use case interface fullstack typescript'
+          url: 'https://github.com/...'
+          description: 'Following Clean Architecture use case pattern for fullstack.'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          tool: 'find_symbol'
+          query: '*UseCase'
+          description: 'Consistent with existing fullstack use case interfaces.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        /**
+         * Input parameters for __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Following Clean Architecture principles - pure domain types for fullstack
+         * Shared between frontend and backend implementations
+         *
+         * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+         * @layer Domain Layer - Framework agnostic business interface
+         * @shared Frontend + Backend
+         * @pattern Single Responsibility - One use case, one operation
+         */
+        export type __USE_CASE_NAME_PASCAL_CASE__Input = {
+          __INPUT_FIELD_1__: string
+          __INPUT_FIELD_2__: string
+          __INPUT_FIELD_3__?: string // Optional field for flexibility
+          __METADATA_FIELD__?: {
+            userId?: string
+            sessionId?: string
+            timestamp?: Date
+          }
+        }
+
+        /**
+         * Output type for __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Represents the business outcome for both frontend display and backend response
+         *
+         * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+         * @layer Domain Layer - Pure business data structure
+         * @shared Frontend + Backend
+         * @pattern Data Transfer Object - API communication structure
+         */
+        export type __USE_CASE_NAME_PASCAL_CASE__Output = {
+          __OUTPUT_FIELD_1__: string
+          __OUTPUT_FIELD_2__: string
+          __OUTPUT_FIELD_3__: number
+          __TIMESTAMP_FIELD__: Date
+          success: boolean
+          message?: string // Optional user-friendly message
+          data?: unknown // Optional additional data
+        }
+
+        /**
+         * __USE_CASE_NAME_PASCAL_CASE__ use case interface for fullstack
+         * Shared contract between frontend and backend implementations
+         *
+         * @description __USE_CASE_DESCRIPTION__
+         * @pattern Command Pattern - Single execute method
+         * @layer Domain Layer - Framework agnostic business interface
+         * @architecture Clean Architecture - Shared Use Case Interface
+         *
+         * @example Frontend Usage:
+         * ```typescript
+         * const useCase: __USE_CASE_NAME_PASCAL_CASE__ = new Remote__USE_CASE_NAME_PASCAL_CASE__(httpClient)
+         * const result = await useCase.execute({ field1: 'value' })
+         * ```
+         *
+         * @example Backend Usage:
+         * ```typescript
+         * const useCase: __USE_CASE_NAME_PASCAL_CASE__ = new Db__USE_CASE_NAME_PASCAL_CASE__(repository)
+         * const result = await useCase.execute({ field1: 'value' })
+         * ```
+         */
+        export interface __USE_CASE_NAME_PASCAL_CASE__ {
+          /**
+           * Execute the __USE_CASE_NAME_LOWER_CASE__ business operation
+           * Works identically in both frontend and backend contexts
+           *
+           * @param input - The input parameters for the use case
+           * @returns Promise with the operation result
+           * @throws Will throw domain errors if business rules are violated
+           */
+          execute: (input: __USE_CASE_NAME_PASCAL_CASE__Input) => Promise<__USE_CASE_NAME_PASCAL_CASE__Output>
+        }
+
+    # === STEP 3: CREATE DOMAIN ENTITY ===
+    - id: 'create-domain-entity-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create domain entity for __USE_CASE_NAME_PASCAL_CASE__ shared between frontend and backend'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FULLSTACK_RULES.md'
+          description: 'Domain entities should be immutable data structures.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/entities/__USE_CASE_NAME_KEBAB_CASE__-entity.ts'
+      template: |
+        /**
+         * Domain entity for __USE_CASE_NAME_PASCAL_CASE__
+         * Immutable data structure shared between frontend and backend
+         *
+         * @domainConcept __UBIQUITOUS_LANGUAGE_TERM__
+         * @layer Domain Layer - Business entity
+         * @shared Frontend + Backend
+         * @pattern Anemic Domain Model - Data only, no behavior
+         */
+        export type __USE_CASE_NAME_PASCAL_CASE__Entity = {
+          readonly id: string
+          readonly __ENTITY_FIELD_1__: string
+          readonly __ENTITY_FIELD_2__: string
+          readonly __ENTITY_FIELD_3__: number
+          readonly status: __USE_CASE_NAME_PASCAL_CASE__Status
+          readonly metadata: __USE_CASE_NAME_PASCAL_CASE__Metadata
+          readonly createdAt: Date
+          readonly updatedAt: Date
+          readonly version: number // For optimistic locking
+        }
+
+        /**
+         * Status enum for __USE_CASE_NAME_PASCAL_CASE__
+         * Shared between frontend UI states and backend processing states
+         */
+        export enum __USE_CASE_NAME_PASCAL_CASE__Status {
+          DRAFT = 'DRAFT',
+          PENDING = 'PENDING',
+          PROCESSING = 'PROCESSING',
+          ACTIVE = 'ACTIVE',
+          COMPLETED = 'COMPLETED',
+          FAILED = 'FAILED',
+          CANCELLED = 'CANCELLED',
+          ARCHIVED = 'ARCHIVED'
+        }
+
+        /**
+         * Metadata type for additional __USE_CASE_NAME_PASCAL_CASE__ information
+         * Extensible for both frontend tracking and backend auditing
+         */
+        export type __USE_CASE_NAME_PASCAL_CASE__Metadata = {
+          readonly source: 'WEB' | 'MOBILE' | 'API' | 'SYSTEM'
+          readonly userAgent?: string
+          readonly ipAddress?: string
+          readonly location?: string
+          readonly tags: readonly string[]
+          readonly customData?: Record<string, unknown>
+        }
+
+        /**
+         * Type guard for __USE_CASE_NAME_PASCAL_CASE__Entity
+         * Validates data from API responses or database queries
+         */
+        export function is__USE_CASE_NAME_PASCAL_CASE__Entity(value: unknown): value is __USE_CASE_NAME_PASCAL_CASE__Entity {
+          return (
+            typeof value === 'object' &&
+            value !== null &&
+            'id' in value &&
+            typeof (value as any).id === 'string' &&
+            '__ENTITY_FIELD_1__' in value &&
+            'status' in value &&
+            'createdAt' in value &&
+            'version' in value &&
+            typeof (value as any).version === 'number'
+          )
+        }
+
+    # === STEP 4: CREATE DOMAIN ERRORS ===
+    - id: 'create-domain-errors-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create domain errors for __USE_CASE_NAME_PASCAL_CASE__ business rule violations'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'domain driven design error handling typescript'
+          url: 'https://github.com/...'
+          description: 'DDD error patterns for fullstack applications.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/errors/__USE_CASE_NAME_KEBAB_CASE__-errors.ts'
+      template: |
+        /**
+         * Base error for __USE_CASE_NAME_PASCAL_CASE__ domain
+         * Shared between frontend and backend for consistent error handling
+         *
+         * @domainConcept Domain Error
+         * @layer Domain Layer - Business rule violations
+         * @shared Frontend + Backend
+         */
+        export abstract class __USE_CASE_NAME_PASCAL_CASE__Error extends Error {
+          constructor(
+            message: string,
+            public readonly code: string,
+            public readonly statusCode?: number
+          ) {
+            super(message)
+            this.name = this.constructor.name
+            Object.setPrototypeOf(this, new.target.prototype)
+          }
+        }
+
+        /**
+         * Thrown when __USE_CASE_NAME_PASCAL_CASE__ validation fails
+         */
+        export class __USE_CASE_NAME_PASCAL_CASE__ValidationError extends __USE_CASE_NAME_PASCAL_CASE__Error {
+          constructor(
+            public readonly field: string,
+            public readonly value: unknown,
+            message?: string
+          ) {
+            super(
+              message || `Invalid __USE_CASE_NAME_LOWER_CASE__ input: ${field}`,
+              '__USE_CASE_NAME_UPPER_CASE___VALIDATION_ERROR',
+              400
+            )
+          }
+        }
+
+        /**
+         * Thrown when __USE_CASE_NAME_PASCAL_CASE__ is not found
+         */
+        export class __USE_CASE_NAME_PASCAL_CASE__NotFoundError extends __USE_CASE_NAME_PASCAL_CASE__Error {
+          constructor(public readonly id: string) {
+            super(
+              `__USE_CASE_NAME_PASCAL_CASE__ with id "${id}" not found`,
+              '__USE_CASE_NAME_UPPER_CASE___NOT_FOUND',
+              404
+            )
+          }
+        }
+
+        /**
+         * Thrown when __USE_CASE_NAME_PASCAL_CASE__ already exists
+         */
+        export class __USE_CASE_NAME_PASCAL_CASE__AlreadyExistsError extends __USE_CASE_NAME_PASCAL_CASE__Error {
+          constructor(public readonly identifier: string) {
+            super(
+              `__USE_CASE_NAME_PASCAL_CASE__ already exists: ${identifier}`,
+              '__USE_CASE_NAME_UPPER_CASE___ALREADY_EXISTS',
+              409
+            )
+          }
+        }
+
+        /**
+         * Thrown when business rule is violated
+         */
+        export class __USE_CASE_NAME_PASCAL_CASE__BusinessRuleError extends __USE_CASE_NAME_PASCAL_CASE__Error {
+          constructor(
+            public readonly rule: string,
+            message: string
+          ) {
+            super(
+              message,
+              '__USE_CASE_NAME_UPPER_CASE___BUSINESS_RULE_VIOLATION',
+              422
+            )
+          }
+        }
+
+        /**
+         * Type guard for domain errors
+         */
+        export function is__USE_CASE_NAME_PASCAL_CASE__Error(error: unknown): error is __USE_CASE_NAME_PASCAL_CASE__Error {
+          return error instanceof __USE_CASE_NAME_PASCAL_CASE__Error
+        }
+
+    # === STEP 5: CREATE DOMAIN TYPES/DTOs ===
+    - id: 'create-domain-types-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create domain types and DTOs for API communication in __USE_CASE_NAME_PASCAL_CASE__'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FULLSTACK_ARCHITECTURE.md'
+          description: 'DTOs for API communication between frontend and backend.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/types/__USE_CASE_NAME_KEBAB_CASE__-types.ts'
+      template: |
+        /**
+         * Domain types and DTOs for __USE_CASE_NAME_PASCAL_CASE__
+         * Data structures for API communication between frontend and backend
+         *
+         * @domainConcept Data Transfer Objects
+         * @layer Domain Layer - API communication types
+         * @shared Frontend + Backend
+         */
+
+        /**
+         * API request DTO for __USE_CASE_NAME_PASCAL_CASE__
+         * Sent from frontend to backend via API
+         */
+        export type __USE_CASE_NAME_PASCAL_CASE__RequestDTO = {
+          __REQUEST_FIELD_1__: string
+          __REQUEST_FIELD_2__: string
+          __REQUEST_FIELD_3__?: string
+        }
+
+        /**
+         * API response DTO for __USE_CASE_NAME_PASCAL_CASE__
+         * Returned from backend to frontend via API
+         */
+        export type __USE_CASE_NAME_PASCAL_CASE__ResponseDTO = {
+          success: boolean
+          data?: __USE_CASE_NAME_PASCAL_CASE__DataDTO
+          error?: __USE_CASE_NAME_PASCAL_CASE__ErrorDTO
+          meta?: __USE_CASE_NAME_PASCAL_CASE__MetaDTO
+        }
+
+        /**
+         * Data payload for successful responses
+         */
+        export type __USE_CASE_NAME_PASCAL_CASE__DataDTO = {
+          id: string
+          __DATA_FIELD_1__: string
+          __DATA_FIELD_2__: string
+          __DATA_FIELD_3__: number
+          createdAt: string // ISO 8601 string
+          updatedAt: string // ISO 8601 string
+        }
+
+        /**
+         * Error payload for failed responses
+         */
+        export type __USE_CASE_NAME_PASCAL_CASE__ErrorDTO = {
+          code: string
+          message: string
+          field?: string
+          details?: unknown
+        }
+
+        /**
+         * Metadata for pagination, filtering, etc.
+         */
+        export type __USE_CASE_NAME_PASCAL_CASE__MetaDTO = {
+          page?: number
+          limit?: number
+          total?: number
+          hasMore?: boolean
+          cursor?: string
+        }
+
+        /**
+         * Mapper functions for DTO conversions
+         */
+        export const __USE_CASE_NAME_PASCAL_CASE__Mappers = {
+          toRequestDTO: (input: __USE_CASE_NAME_PASCAL_CASE__Input): __USE_CASE_NAME_PASCAL_CASE__RequestDTO => ({
+            __REQUEST_FIELD_1__: input.__INPUT_FIELD_1__,
+            __REQUEST_FIELD_2__: input.__INPUT_FIELD_2__,
+            __REQUEST_FIELD_3__: input.__INPUT_FIELD_3__
+          }),
+
+          fromResponseDTO: (dto: __USE_CASE_NAME_PASCAL_CASE__ResponseDTO): __USE_CASE_NAME_PASCAL_CASE__Output => ({
+            __OUTPUT_FIELD_1__: dto.data?.__DATA_FIELD_1__ || '',
+            __OUTPUT_FIELD_2__: dto.data?.__DATA_FIELD_2__ || '',
+            __OUTPUT_FIELD_3__: dto.data?.__DATA_FIELD_3__ || 0,
+            __TIMESTAMP_FIELD__: new Date(dto.data?.updatedAt || Date.now()),
+            success: dto.success,
+            message: dto.error?.message,
+            data: dto.data
+          })
+        }
+
+    # === STEP 6: CREATE DOMAIN TESTS ===
+    - id: 'create-domain-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create unit tests for __USE_CASE_NAME_PASCAL_CASE__ shared domain layer'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'vitest unit testing typescript fullstack next.js'
+          url: 'https://github.com/...'
+          description: 'Testing patterns for shared domain layer.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach, vi } from 'vitest'
+        import type {
+          __USE_CASE_NAME_PASCAL_CASE__,
+          __USE_CASE_NAME_PASCAL_CASE__Input,
+          __USE_CASE_NAME_PASCAL_CASE__Output
+        } from './__USE_CASE_NAME_KEBAB_CASE__'
+        import {
+          __USE_CASE_NAME_PASCAL_CASE__Entity,
+          __USE_CASE_NAME_PASCAL_CASE__Status,
+          is__USE_CASE_NAME_PASCAL_CASE__Entity
+        } from '../entities/__USE_CASE_NAME_KEBAB_CASE__-entity'
+        import {
+          __USE_CASE_NAME_PASCAL_CASE__ValidationError,
+          __USE_CASE_NAME_PASCAL_CASE__NotFoundError,
+          is__USE_CASE_NAME_PASCAL_CASE__Error
+        } from '../errors/__USE_CASE_NAME_KEBAB_CASE__-errors'
+
+        /**
+         * Shared domain layer tests for __USE_CASE_NAME_PASCAL_CASE__
+         * Tests the interface contract for both frontend and backend implementations
+         *
+         * @testType Unit Test - Shared Domain Interface Contract
+         * @coverage Interface contract validation, entity validation, error handling
+         */
+        describe('__USE_CASE_NAME_PASCAL_CASE__ Shared Domain Layer', () => {
+          describe('Use Case Interface Contract', () => {
+            let sut: __USE_CASE_NAME_PASCAL_CASE__
+            let mockExecute: ReturnType<typeof vi.fn>
+
+            beforeEach(() => {
+              mockExecute = vi.fn()
+              sut = {
+                execute: mockExecute
+              }
+            })
+
+            it('should have an execute method', () => {
+              expect(sut.execute).toBeDefined()
+              expect(typeof sut.execute).toBe('function')
+            })
+
+            it('should accept valid input with all required fields', async () => {
+              const validInput: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'test-value-1',
+                __INPUT_FIELD_2__: 'test-value-2',
+                __INPUT_FIELD_3__: 'optional-value',
+                __METADATA_FIELD__: {
+                  userId: 'user-123',
+                  sessionId: 'session-456',
+                  timestamp: new Date()
+                }
+              }
+
+              const expectedOutput: __USE_CASE_NAME_PASCAL_CASE__Output = {
+                __OUTPUT_FIELD_1__: 'result-1',
+                __OUTPUT_FIELD_2__: 'result-2',
+                __OUTPUT_FIELD_3__: 123,
+                __TIMESTAMP_FIELD__: new Date(),
+                success: true,
+                message: 'Operation completed successfully'
+              }
+
+              mockExecute.mockResolvedValueOnce(expectedOutput)
+
+              const result = await sut.execute(validInput)
+
+              expect(mockExecute).toHaveBeenCalledWith(validInput)
+              expect(result).toEqual(expectedOutput)
+              expect(result.success).toBe(true)
+            })
+
+            it('should work without optional fields', async () => {
+              const minimalInput: __USE_CASE_NAME_PASCAL_CASE__Input = {
+                __INPUT_FIELD_1__: 'required-1',
+                __INPUT_FIELD_2__: 'required-2'
+                // __INPUT_FIELD_3__ and __METADATA_FIELD__ are optional
+              }
+
+              mockExecute.mockResolvedValueOnce({
+                __OUTPUT_FIELD_1__: 'result',
+                __OUTPUT_FIELD_2__: 'result',
+                __OUTPUT_FIELD_3__: 0,
+                __TIMESTAMP_FIELD__: new Date(),
+                success: true
+              })
+
+              const result = await sut.execute(minimalInput)
+              expect(result).toBeDefined()
+              expect(result.success).toBe(true)
+            })
+          })
+
+          describe('Domain Entity', () => {
+            it('should create valid entity with all fields', () => {
+              const entity: __USE_CASE_NAME_PASCAL_CASE__Entity = {
+                id: 'entity-123',
+                __ENTITY_FIELD_1__: 'value-1',
+                __ENTITY_FIELD_2__: 'value-2',
+                __ENTITY_FIELD_3__: 42,
+                status: __USE_CASE_NAME_PASCAL_CASE__Status.ACTIVE,
+                metadata: {
+                  source: 'WEB',
+                  tags: ['test', 'domain'],
+                  customData: { key: 'value' }
+                },
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                version: 1
+              }
+
+              expect(is__USE_CASE_NAME_PASCAL_CASE__Entity(entity)).toBe(true)
+            })
+
+            it('should validate entity with type guard', () => {
+              const validEntity = {
+                id: 'test-id',
+                __ENTITY_FIELD_1__: 'value',
+                status: __USE_CASE_NAME_PASCAL_CASE__Status.PENDING,
+                createdAt: new Date(),
+                version: 1
+              }
+
+              const invalidEntity = {
+                notAnId: 'wrong',
+                someField: 'value'
+              }
+
+              expect(is__USE_CASE_NAME_PASCAL_CASE__Entity(validEntity)).toBe(true)
+              expect(is__USE_CASE_NAME_PASCAL_CASE__Entity(invalidEntity)).toBe(false)
+              expect(is__USE_CASE_NAME_PASCAL_CASE__Entity(null)).toBe(false)
+              expect(is__USE_CASE_NAME_PASCAL_CASE__Entity(undefined)).toBe(false)
+            })
+
+            it('should have all status values', () => {
+              const statuses = Object.values(__USE_CASE_NAME_PASCAL_CASE__Status)
+
+              expect(statuses).toContain('DRAFT')
+              expect(statuses).toContain('PENDING')
+              expect(statuses).toContain('PROCESSING')
+              expect(statuses).toContain('ACTIVE')
+              expect(statuses).toContain('COMPLETED')
+              expect(statuses).toContain('FAILED')
+              expect(statuses).toContain('CANCELLED')
+              expect(statuses).toContain('ARCHIVED')
+            })
+          })
+
+          describe('Domain Errors', () => {
+            it('should create validation error with field info', () => {
+              const error = new __USE_CASE_NAME_PASCAL_CASE__ValidationError(
+                'email',
+                'invalid-email',
+                'Email format is invalid'
+              )
+
+              expect(error).toBeInstanceOf(Error)
+              expect(error).toBeInstanceOf(__USE_CASE_NAME_PASCAL_CASE__ValidationError)
+              expect(error.field).toBe('email')
+              expect(error.value).toBe('invalid-email')
+              expect(error.code).toBe('__USE_CASE_NAME_UPPER_CASE___VALIDATION_ERROR')
+              expect(error.statusCode).toBe(400)
+            })
+
+            it('should create not found error', () => {
+              const error = new __USE_CASE_NAME_PASCAL_CASE__NotFoundError('entity-123')
+
+              expect(error).toBeInstanceOf(__USE_CASE_NAME_PASCAL_CASE__NotFoundError)
+              expect(error.id).toBe('entity-123')
+              expect(error.code).toBe('__USE_CASE_NAME_UPPER_CASE___NOT_FOUND')
+              expect(error.statusCode).toBe(404)
+            })
+
+            it('should validate errors with type guard', () => {
+              const domainError = new __USE_CASE_NAME_PASCAL_CASE__ValidationError('field', 'value')
+              const regularError = new Error('Regular error')
+
+              expect(is__USE_CASE_NAME_PASCAL_CASE__Error(domainError)).toBe(true)
+              expect(is__USE_CASE_NAME_PASCAL_CASE__Error(regularError)).toBe(false)
+            })
+          })
+        })
+
+      validation_script: |
+        run_domain_unit_tests() {
+          echo "🧪 Running fullstack shared domain layer unit tests..."
+          npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain --coverage || exit 1
+          echo "✅ Fullstack domain unit tests passed with coverage"
+        }
+
+        check_test_coverage() {
+          echo "📊 Checking fullstack domain test coverage..."
+          npm run test:coverage -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain --json
+          echo "✅ Fullstack domain coverage meets requirements"
+        }
+
+        stage_and_commit_tests() {
+          local commit_message="$1"
+          git add .
+          git status
+          git commit -m "$commit_message" || exit 1
+          echo "✅ Committed: $commit_message"
+        }
+
+        run_domain_unit_tests
+        check_test_coverage
+        stage_and_commit_tests "test(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ fullstack domain tests"
+
+    # === STEP 7: VALIDATE SHARED DOMAIN LAYER ===
+    - id: 'validate-domain-layer-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Validate fullstack shared domain layer implementation for __USE_CASE_NAME_PASCAL_CASE__'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      run_scripts:
+        description: 'Run all fullstack domain layer validation checks'
+        scripts:
+          - name: 'TypeScript Compilation'
+            command: 'npx tsc --noEmit --project tsconfig.json'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'ESLint Check'
+            command: 'npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Unit Tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Clean Architecture Rules Check'
+            command: 'npm run arch:check -- --layer=domain --feature=__FEATURE_NAME_KEBAB_CASE__ --type=fullstack'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Build Check (Frontend + Backend)'
+            command: 'npm run build'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit Shared Domain Layer'
+            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ fullstack shared domain layer"'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 8: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create and checkout feature branch for __USE_CASE_NAME_PASCAL_CASE__ fullstack implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Git branching strategy and naming conventions for fullstack features'
+      run_scripts:
+        description: 'Create feature branch with proper naming convention'
+        scripts:
+          - name: 'Create feature branch'
+            command: |
+              # Stash any uncommitted changes
+              git stash save "WIP: Before creating __FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__ fullstack branch"
+
+              # Ensure we're on the main branch and up to date
+              git checkout main || git checkout master
+              git pull origin main || git pull origin master
+
+              # Create and checkout new feature branch
+              BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
+
+              echo "✅ Created and checked out branch: $BRANCH_NAME"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 9: REFACTOR FOR BROWNFIELD (CONDITIONAL MULTI-STEP) ===
+    # AI-NOTE: When brownfield refactoring is needed in fullstack, the AI should dynamically
+    # generate multiple steps based on the specific files that need refactoring across both
+    # frontend and backend. Each file should have its own step for better tracking.
+    #
+    # RULE: For each file requiring refactoring, create a separate step with:
+    # - Unique ID: refactor-{layer}-{index}-{filename}
+    # - Clear indication if it's frontend, backend, or shared
+    # - Specific validation for that file's refactoring
+    # - Cross-stack impact analysis
+    #
+    # EXAMPLE PATTERN:
+    # If 5 files need refactoring across stack, generate:
+    # Step 9a: refactor-backend-1-user-controller
+    # Step 9b: refactor-backend-2-user-service
+    # Step 9c: refactor-frontend-1-user-list-component
+    # Step 9d: refactor-frontend-2-user-form
+    # Step 9e: refactor-shared-1-user-types
+
+    - id: 'refactor-rollback-point-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create rollback point before starting fullstack brownfield refactoring'
+      condition: 'check_if_brownfield_refactor_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Best practices for safe fullstack refactoring'
+      run_scripts:
+        description: 'Create git tag for rollback before any refactoring'
+        scripts:
+          - name: 'Create rollback tag'
+            command: |
+              # Create rollback point before refactoring
+              git tag "before-refactor-__USE_CASE_NAME_KEBAB_CASE__" || {
+                echo "⚠️  Failed to create rollback tag"
+                exit 1
+              }
+              echo "✅ Created rollback point: before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
+              echo "   To rollback: git reset --hard before-refactor-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Document files that need refactoring across the stack
+              echo "📋 Files identified for refactoring:"
+              echo ""
+              echo "Backend files:"
+              # AI should list backend files here
+              echo ""
+              echo "Frontend files:"
+              # AI should list frontend files here
+              echo ""
+              echo "Shared files:"
+              # AI should list shared files here
+            workingDirectory: '__PROJECT_NAME__'
+
+    # AI-NOTE: The following are templates that should be duplicated for each file
+    # that needs refactoring. Generate separate templates for backend, frontend, and shared.
+
+    # Backend refactoring template
+    - id: 'refactor-backend-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor backend __FILE_TO_MODIFY_KEBAB_CASE__ to Clean Architecture'
+      condition: 'check_if_backend_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture patterns for backend refactoring'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Analyze backend dependencies and structure'
+      path: '__PROJECT_NAME__/src/api/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+      template: |
+        # AI-NOTE: FIND/REPLACE for Fullstack Backend Refactoring
+        # Look for backend-specific violations:
+        # - Business logic in API routes
+        # - Direct database access in controllers
+        # - Missing dependency injection
+        # - Framework coupling in domain
+
+        <<<FIND>>>
+        # AI-NOTE: Match EXACT backend code
+        # Include imports, class/function definitions
+        # The AI should identify the exact backend code that needs refactoring
+        [ORIGINAL_BACKEND_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        # AI-NOTE: Apply backend Clean Architecture:
+        # - Extract to use cases
+        # - Use repository pattern
+        # - Inject dependencies
+        # - Remove framework dependencies
+        // TODO: Refactor this backend file to comply with Clean Architecture
+        // File: __FILE_TO_MODIFY_KEBAB_CASE__.ts
+        // Layer: Backend
+        // Priority: __PRIORITY__ (high/medium/low)
+        // Estimated effort: __EFFORT__ (hours)
+
+        // BACKEND REFACTORING TASKS:
+        // 1. Extract business logic to shared domain layer
+        // 2. Move data access to infrastructure layer
+        // 3. Implement proper dependency injection
+        // 4. Add proper error handling with shared error types
+        // 5. Ensure types are shareable with frontend
+        // 6. Update route handlers to use new structure
+        // 7. Add integration tests
+
+        // FRONTEND IMPACT:
+        // - [AI should list frontend files affected]
+
+        // SHARED TYPES TO CREATE/UPDATE:
+        // - [AI should list shared types needed]
+
+        /* TEMPORARY: Original backend code preserved for reference
+        [ORIGINAL_BACKEND_CODE_TO_BE_REPLACED]
+        */
+
+        // NEW REFACTORED BACKEND CODE:
+        [REFACTORED_BACKEND_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # Frontend refactoring template
+    - id: 'refactor-frontend-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor frontend __FILE_TO_MODIFY_KEBAB_CASE__ to Clean Architecture'
+      condition: 'check_if_frontend_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture patterns for frontend refactoring'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Analyze component dependencies and structure'
+      path: '__PROJECT_NAME__/src/app/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.tsx'
+      template: |
+        # AI-NOTE: FIND/REPLACE for Fullstack Frontend Refactoring
+        # Look for frontend-specific violations:
+        # - Business logic in components
+        # - Direct API calls in components
+        # - Complex state management
+        # - Missing custom hooks
+
+        <<<FIND>>>
+        # AI-NOTE: Match EXACT frontend component code
+        # Include JSX, hooks, event handlers
+        # The AI should identify the exact frontend component that needs refactoring
+        [ORIGINAL_FRONTEND_COMPONENT_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        # AI-NOTE: Apply frontend Clean Architecture:
+        # - Extract to custom hooks
+        # - Use data layer for API
+        # - Separate presentation/container
+        # - Make components pure
+        // TODO: Refactor this frontend component to comply with Clean Architecture
+        // Component: __FILE_TO_MODIFY_KEBAB_CASE__.tsx
+        // Layer: Frontend
+        // Type: __COMPONENT_TYPE__ (Page/Component/Hook/ServerAction)
+        // Priority: __PRIORITY__ (high/medium/low)
+        // Estimated effort: __EFFORT__ (hours)
+
+        // FRONTEND REFACTORING TASKS:
+        // 1. Extract business logic to custom hooks
+        // 2. Use shared domain models from backend
+        // 3. Implement server actions for data fetching
+        // 4. Add proper error boundaries with shared error types
+        // 5. Implement proper loading states
+        // 6. Add accessibility attributes
+        // 7. Extract reusable UI components
+        // 8. Add component tests
+
+        // BACKEND DEPENDENCIES:
+        // - [AI should list API endpoints used]
+
+        // SHARED TYPES CONSUMED:
+        // - [AI should list shared types used]
+
+        /* TEMPORARY: Original frontend component preserved for reference
+        [ORIGINAL_FRONTEND_COMPONENT_TO_BE_REPLACED]
+        */
+
+        // NEW REFACTORED FRONTEND COMPONENT:
+        [REFACTORED_FRONTEND_COMPONENT_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # Shared refactoring template
+    - id: 'refactor-shared-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor shared __FILE_TO_MODIFY_KEBAB_CASE__ for both frontend and backend'
+      condition: 'check_if_shared_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Patterns for shared code between frontend and backend'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+      template: |
+        # AI-NOTE: FIND/REPLACE for Fullstack Shared Domain Refactoring
+        # Look for shared domain violations:
+        # - Framework dependencies in domain
+        # - Missing interfaces/protocols
+        # - Anemic domain models
+        # - Business logic leakage
+
+        <<<FIND>>>
+        # AI-NOTE: Match EXACT shared domain code
+        # Include type definitions, interfaces
+        # The AI should identify the exact shared code that needs refactoring
+        [ORIGINAL_SHARED_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        # AI-NOTE: Apply shared domain patterns:
+        # - Pure domain models
+        # - Framework-agnostic
+        # - Rich domain logic
+        # - Clear boundaries
+        // TODO: Refactor this shared file to comply with Clean Architecture
+        // File: __FILE_TO_MODIFY_KEBAB_CASE__.ts
+        // Layer: Shared Domain
+        // Priority: __PRIORITY__ (high/medium/low)
+        // Estimated effort: __EFFORT__ (hours)
+
+        // SHARED REFACTORING TASKS:
+        // 1. Ensure types work in both Node.js and browser
+        // 2. Add proper serialization/deserialization
+        // 3. Implement shared validation schemas
+        // 4. Add shared error types
+        // 5. Ensure no platform-specific dependencies
+        // 6. Add comprehensive type guards
+        // 7. Document usage for both frontend and backend
+
+        // BACKEND FILES USING THIS:
+        // - [AI should list backend consumers]
+
+        // FRONTEND FILES USING THIS:
+        // - [AI should list frontend consumers]
+
+        /* TEMPORARY: Original shared code preserved for reference
+        [ORIGINAL_SHARED_CODE_TO_BE_REPLACED]
+        */
+
+        // NEW REFACTORED SHARED CODE:
+        [REFACTORED_SHARED_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # === STEP 10: DELETE OBSOLETE FILES (CONDITIONAL) ===
+    - id: 'delete-file-__FILE_TO_DELETE_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Delete obsolete files when refactoring fullstack to Clean Architecture'
+      condition: 'check_if_file_deletion_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'MIGRATION_GUIDE.md'
+          description: 'Guidelines for safely removing obsolete fullstack code'
+      validation_script: |
+        FILE_TO_DELETE="__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__"
+
+        if [ -f "$FILE_TO_DELETE" ]; then
+          # Check for references in both frontend and backend code
+          echo "🔍 Checking for references to $FILE_TO_DELETE..."
+          FILE_NAME=$(basename "$FILE_TO_DELETE" | sed 's/\.[^.]*$//')
+
+          # Check frontend references
+          FRONTEND_REFS=$(grep -r "$FILE_NAME" __PROJECT_NAME__/src/app __PROJECT_NAME__/src/components 2>/dev/null | wc -l)
+
+          # Check backend references
+          BACKEND_REFS=$(grep -r "$FILE_NAME" __PROJECT_NAME__/src/api __PROJECT_NAME__/src/features 2>/dev/null | wc -l)
+
+          TOTAL_REFS=$((FRONTEND_REFS + BACKEND_REFS))
+
+          if [ "$TOTAL_REFS" -gt 0 ]; then
+            echo "⚠️  WARNING: Found $TOTAL_REFS references to this file."
+            echo "   Frontend: $FRONTEND_REFS references"
+            echo "   Backend: $BACKEND_REFS references"
+            echo "Review before deletion."
+            exit 1
+          fi
+
+          # Backup before deletion
+          cp "$FILE_TO_DELETE" "$FILE_TO_DELETE.backup"
+          rm "$FILE_TO_DELETE"
+          echo "✅ File deleted and backed up: $FILE_TO_DELETE.backup"
+        fi
+
+    # === STEP 11: CREATE PULL REQUEST ===
+    - id: 'create-pull-request-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create pull request for __USE_CASE_NAME_PASCAL_CASE__ fullstack implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'PR_TEMPLATE.md'
+          description: 'Pull request template for fullstack features'
+      run_scripts:
+        description: 'Push branch and create pull request'
+        scripts:
+          - name: 'Push and create PR'
+            command: |
+              BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Push the branch
+              git push -u origin "$BRANCH_NAME" || {
+                echo "❌ Failed to push branch to remote"
+                exit 1
+              }
+
+              # Create PR using GitHub CLI if available
+              if command -v gh &> /dev/null; then
+                gh pr create \
+                  --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ use case (Fullstack)" \
+                  --body "## Summary
+
+                Implements __USE_CASE_NAME_PASCAL_CASE__ use case as a fullstack feature following Clean Architecture principles.
+
+                ## Changes
+
+                ### Shared Domain (100% shared)
+                - ✅ Shared entities and models
+                - ✅ Shared error types
+                - ✅ Shared DTOs and types
+
+                ### Backend
+                - ✅ Data layer with repositories
+                - ✅ Infrastructure layer implementation
+                - ✅ API route handlers
+
+                ### Frontend
+                - ✅ Data layer with API clients
+                - ✅ Presentation components and hooks
+                - ✅ Server actions integration
+
+                ### Testing & Quality
+                - ✅ Comprehensive test coverage (Vitest)
+                - ✅ Zod validation schemas
+                - ✅ Type safety across stack
+
+                ## Testing
+                - [ ] Unit tests pass (frontend & backend)
+                - [ ] Integration tests pass
+                - [ ] E2E tests pass
+                - [ ] Manual testing completed
+
+                ## Metrics
+                - [ ] Code coverage: __COVERAGE__%
+                - [ ] Bundle size impact: __SIZE_IMPACT__
+                - [ ] API latency: __API_LATENCY_MS__
+                - [ ] Lighthouse score: __LIGHTHOUSE_SCORE__
+                - [ ] Performance benchmarks: __PERF_STATUS__
+
+                ## Checklist
+                - [ ] Code follows Clean Architecture principles
+                - [ ] Shared domain is truly shared (no duplicates)
+                - [ ] Tests have adequate coverage
+                - [ ] Documentation is updated
+                - [ ] No breaking changes
+                - [ ] Type safety maintained across stack
+                - [ ] Performance impact assessed" \
+                  --assignee @me \
+                  --label "enhancement,fullstack,clean-architecture,nextjs"
+
+                echo "✅ Pull request created successfully"
+              else
+                echo "📝 Push successful. Please create PR manually at:"
+                echo "   https://github.com/__GITHUB_ORG__/__PROJECT_NAME__/compare/$BRANCH_NAME"
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 12: TRIGGER AI CODE REVIEW ===
+    - id: 'trigger-ai-review-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Trigger AI-powered code review with Claude for fullstack implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'claude-cli'
+          query: 'claude code review clean architecture fullstack nextjs'
+          url: 'https://claude.ai/docs/code-review'
+          description: 'AI-powered code review using Claude for fullstack'
+      run_scripts:
+        description: 'Run Claude AI code review on the fullstack implementation'
+        scripts:
+          - name: 'Trigger Claude review'
+            command: |
+              BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Check if Claude CLI is available
+              if command -v claude &> /dev/null; then
+                echo "🤖 Starting AI code review with Claude for fullstack..."
+
+                claude /review \
+                  --branch "$BRANCH_NAME" \
+                  --focus "clean-architecture,nextjs,fullstack,typescript" \
+                  --checklist ".github/fullstack_checklist.md" \
+                  --output "review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md"
+
+                echo "✅ AI review complete. Check review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md for details."
+
+                # Add review as PR comment if gh CLI is available
+                if command -v gh &> /dev/null && [ -f "review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md" ]; then
+                  gh pr comment --body-file "review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md"
+                  echo "✅ Review posted to PR"
+                fi
+              else
+                echo "⚠️  Claude CLI not installed. Skipping AI review."
+                echo "   Install with: npm install -g @anthropic/claude-cli"
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 13: POST-MERGE CLEANUP ===
+    - id: 'post-merge-cleanup-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Cleanup after PR merge for fullstack feature'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Post-merge cleanup procedures for fullstack features'
+      run_scripts:
+        description: 'Clean up local and remote branches after merge'
+        scripts:
+          - name: 'Post-merge cleanup'
+            command: |
+              BRANCH_NAME="feat/fullstack-__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__"
+
+              # Check if PR is merged
+              if command -v gh &> /dev/null; then
+                PR_STATE=$(gh pr view "$BRANCH_NAME" --json state -q .state)
+
+                if [ "$PR_STATE" = "MERGED" ]; then
+                  echo "🧹 Starting post-merge cleanup for fullstack feature..."
+
+                  # Switch to main branch
+                  git checkout main || git checkout master
+                  git pull origin main || git pull origin master
+
+                  # Delete local branch
+                  git branch -d "$BRANCH_NAME"
+
+                  # Delete remote branch
+                  git push origin --delete "$BRANCH_NAME"
+
+                  # Clean up any review artifacts
+                  rm -f review-fullstack-__USE_CASE_NAME_KEBAB_CASE__.md
+
+                  echo "✅ Cleanup complete. Branch and artifacts deleted."
+                else
+                  echo "⏳ PR not yet merged. Skipping cleanup."
+                fi
+              else
+                echo "⚠️  GitHub CLI not available. Please clean up branches manually after merge."
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+

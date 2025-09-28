@@ -1,0 +1,13 @@
+# CHUNK: shared/steps/validation.part.regent
+# Lines: 2006-2013
+# Estimated tokens: 102
+# Original: backend-presentation-template.regent
+# =============================================
+
+# --- From: shared/steps/validation.part.regent ---
+# ------------------------------------------------------------------------------
+# SHARED VALIDATION LAYER TEMPLATE
+# Clean Architecture - Shared Validation Components
+# Supports: Backend (Node.js), Frontend (Next.js), Fullstack
+# Pattern: TDD with RED-GREEN-REFACTOR cycle
+# ------------------------------------------------------------------------------

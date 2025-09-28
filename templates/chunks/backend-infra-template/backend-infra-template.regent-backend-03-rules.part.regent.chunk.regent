@@ -1,0 +1,26 @@
+# CHUNK: backend/03-rules.part.regent
+# Lines: 690-710
+# Estimated tokens: 248
+# Original: backend-infra-template.regent
+# =============================================
+
+# --- From: backend/03-rules.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: IMMUTABLE SECTIONS AHEAD.
+  # The sections from here until 'steps' are architectural rules.
+  # You MUST copy them verbatim into the implementation file without ANY modification.
+  #
+  # AUTOMATED LEARNING SYSTEM:
+  # The RLHF system automatically:
+  # - Tracks success/failure patterns across executions
+  # - Identifies common error types and their fixes
+  # - Applies improvements when confidence > 80%
+  # - Generates learning reports with actionable insights
+  # - Prevents hallucinations with score 0 for uncertain cases
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # RULES SECTION
+  # All architectural and pattern rules consolidated
+  # ------------------------------------------------------------------------------

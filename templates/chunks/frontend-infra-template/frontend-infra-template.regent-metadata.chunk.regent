@@ -1,0 +1,31 @@
+# CHUNK: metadata
+# Lines: 34-59
+# Estimated tokens: 225
+# Original: frontend-infra-template.regent
+# =============================================
+
+metadata:
+  title: '__FEATURE_NAME_PASCAL_CASE__ Clean Architecture Implementation'
+  description: 'Clean Architecture template for __FEATURE_NAME_LOWER_CASE__ feature following master template rules.'
+  source: 'TEMPLATE.yaml'
+  # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
+  lastUpdated: '__CURRENT_DATE__'
+  # AI-NOTE: Specify which layers are being implemented
+  layers:
+    - 'domain'
+    # Future layers will be added here:
+    # - 'data'
+    # - 'infra'
+    # - 'presentation'
+    # - 'validation'
+    # - 'main'
+  # AI-NOTE: Define ubiquitous language for +2 RLHF score
+  ubiquitousLanguage:
+    - term: '__ENTITY_NAME__'
+      definition: '__ENTITY_DEFINITION_IN_BUSINESS_CONTEXT__'
+    - term: '__VALUE_OBJECT_NAME__'
+      definition: '__VALUE_OBJECT_BUSINESS_MEANING__'
+    - term: '__DOMAIN_EVENT__'
+      definition: '__EVENT_BUSINESS_SIGNIFICANCE__'
+
+

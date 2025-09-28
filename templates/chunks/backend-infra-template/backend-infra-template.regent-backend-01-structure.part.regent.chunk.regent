@@ -1,0 +1,9 @@
+# CHUNK: backend/01-structure.part.regent
+# Lines: 60-63
+# Estimated tokens: 56
+# Original: backend-infra-template.regent
+# =============================================
+
+# --- From: backend/01-structure.part.regent ---
+  # AI-NOTE: Hybrid Architecture - "Feature Module with Use Case Slices"
+  # Features are modules containing atomic use case slices for domain cohesion and generation safety

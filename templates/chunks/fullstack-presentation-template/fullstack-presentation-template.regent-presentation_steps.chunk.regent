@@ -1,0 +1,926 @@
+# CHUNK: presentation_steps
+# Lines: 1502-2422
+# Estimated tokens: 9216
+# Original: fullstack-presentation-template.regent
+# =============================================
+
+  presentation_steps:
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create and checkout feature branch for __USE_CASE_NAME_PASCAL_CASE__ fullstack presentation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Git branching strategy and naming conventions'
+      run_scripts:
+        description: 'Create feature branch with proper naming convention'
+        scripts:
+          - name: 'Create feature branch'
+            command: |
+              # Stash any uncommitted changes
+              git stash save "WIP: Before creating __FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__ presentation branch"
+
+              # Ensure we're on the main branch and up to date
+              git checkout main || git checkout master
+              git pull origin main || git pull origin master
+
+              # Create and checkout new feature branch
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__-presentation"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
+
+              echo "✅ Created and checked out branch: $BRANCH_NAME"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: CREATE TEST STRUCTURE (TDD - RED PHASE) ===
+    - id: 'create-test-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'TDD RED: Create test structure for both backend and frontend presentation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'TDD_GUIDE.md'
+          description: 'Following Test-Driven Development: RED-GREEN-REFACTOR cycle.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/__tests__/presentation'
+          folders:
+            # Frontend tests
+            - 'components'      # Component tests
+            - 'hooks'           # Hook tests
+            - 'actions'         # Server action tests
+            # Backend tests
+            - 'handlers'        # API handler tests
+            - 'middleware'      # Middleware tests
+            # Shared
+            - 'mocks'           # Test mocks for both
+      validation_script: |
+        # AI-NOTE: TDD starts with test structure for fullstack
+        BASE_PATH="__PROJECT_NAME__/__tests__/presentation"
+        FOLDERS="$BASE_PATH/components $BASE_PATH/hooks $BASE_PATH/actions $BASE_PATH/handlers $BASE_PATH/middleware $BASE_PATH/mocks"
+        echo "🔴 TDD RED: Creating fullstack test structure..."
+        for folder in $FOLDERS; do
+          mkdir -p "$folder"
+        done
+        echo "✅ Test structure created for fullstack TDD cycle"
+
+    # === STEP 3: CREATE TEST MOCKS - BACKEND (TDD - RED PHASE) ===
+    - id: 'create-backend-test-mocks-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Create test mocks for API handlers'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/__tests__/presentation/mocks/mock-__USE_CASE_NAME_KEBAB_CASE__-handler.ts'
+      template: |
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import { NextRequest, NextResponse } from 'next/server'
+
+        /**
+         * Test doubles for __USE_CASE_NAME_PASCAL_CASE__ API handler testing
+         * AI-NOTE: Mocks for both Next.js API Routes and use cases
+         */
+
+        export class __USE_CASE_NAME_PASCAL_CASE__Spy implements __USE_CASE_NAME_PASCAL_CASE__ {
+          params: any
+          result = {
+            __OUTPUT_FIELD_1__: 'test-output-1',
+            __OUTPUT_FIELD_2__: 'test-output-2',
+            __OUTPUT_FIELD_3__: 'test-output-3',
+            __TIMESTAMP_FIELD__: new Date('2024-01-01')
+          }
+          callsCount = 0
+
+          async execute(input: any): Promise<any> {
+            this.params = input
+            this.callsCount++
+            return this.result
+          }
+        }
+
+        export const mockNextRequest = (body: any = {}, headers: any = {}): NextRequest => {
+          return new NextRequest('http://localhost:3000/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...headers
+            },
+            body: JSON.stringify(body)
+          })
+        }
+
+    # === STEP 4: CREATE TEST MOCKS - FRONTEND (TDD - RED PHASE) ===
+    - id: 'create-frontend-test-mocks-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Create test mocks for components and hooks'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/__tests__/presentation/mocks/mock-__USE_CASE_NAME_KEBAB_CASE__-frontend.tsx'
+      template: |
+        import React from 'react'
+        import { vi } from 'vitest'
+
+        /**
+         * Frontend test mocks for __USE_CASE_NAME_PASCAL_CASE__
+         * AI-NOTE: Mocks for Server Actions, Context, and API calls
+         */
+
+        // Server Action mock
+        export const mock__USE_CASE_NAME_PASCAL_CASE__Action = vi.fn().mockResolvedValue({
+          success: true,
+          data: {
+            __OUTPUT_FIELD_1__: 'test-output-1',
+            __OUTPUT_FIELD_2__: 'test-output-2'
+          }
+        })
+
+        // API client mock
+        export const mock__USE_CASE_NAME_PASCAL_CASE__ApiClient = {
+          execute: vi.fn().mockResolvedValue({
+            __OUTPUT_FIELD_1__: 'test-output-1',
+            __OUTPUT_FIELD_2__: 'test-output-2'
+          })
+        }
+
+        // Context Provider mock
+        export const Mock__USE_CASE_NAME_PASCAL_CASE__Provider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+          return <>{children}</>
+        }
+
+    # === STEP 5: CREATE API HANDLER TEST (TDD - RED PHASE) ===
+    - id: 'create-api-handler-test-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Write tests for API route handler'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/__tests__/presentation/handlers/__USE_CASE_NAME_KEBAB_CASE__-handler.spec.ts'
+      template: |
+        import { describe, it, expect, vi, beforeEach } from 'vitest'
+        import { __USE_CASE_NAME_PASCAL_CASE__Handler } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/handlers/__USE_CASE_NAME_KEBAB_CASE__-handler'
+        import { __USE_CASE_NAME_PASCAL_CASE__Spy, mockNextRequest } from '../mocks/mock-__USE_CASE_NAME_KEBAB_CASE__-handler'
+
+        /**
+         * TDD RED Phase: API Handler tests
+         * AI-NOTE: Testing Next.js API Route handlers
+         */
+
+        describe('__USE_CASE_NAME_PASCAL_CASE__ API Handler', () => {
+          let __USE_CASE_NAME_CAMEL_CASE__Spy: __USE_CASE_NAME_PASCAL_CASE__Spy
+
+          beforeEach(() => {
+            __USE_CASE_NAME_CAMEL_CASE__Spy = new __USE_CASE_NAME_PASCAL_CASE__Spy()
+          })
+
+          it('should return 400 for invalid input', async () => {
+            const request = mockNextRequest({})
+            const handler = new __USE_CASE_NAME_PASCAL_CASE__Handler(__USE_CASE_NAME_CAMEL_CASE__Spy)
+
+            const response = await handler.handle(request)
+            const data = await response.json()
+
+            expect(response.status).toBe(400)
+            expect(data.error).toBeDefined()
+          })
+
+          it('should return 200 with data on success', async () => {
+            const request = mockNextRequest({
+              __INPUT_FIELD_1__: 'test-value-1',
+              __INPUT_FIELD_2__: 'test-value-2'
+            })
+            const handler = new __USE_CASE_NAME_PASCAL_CASE__Handler(__USE_CASE_NAME_CAMEL_CASE__Spy)
+
+            const response = await handler.handle(request)
+            const data = await response.json()
+
+            expect(response.status).toBe(200)
+            expect(data.data).toEqual(__USE_CASE_NAME_CAMEL_CASE__Spy.result)
+          })
+
+          it('should handle authentication', async () => {
+            const request = mockNextRequest(
+              { __INPUT_FIELD_1__: 'test' },
+              { Authorization: 'Bearer invalid-token' }
+            )
+            const handler = new __USE_CASE_NAME_PASCAL_CASE__Handler(__USE_CASE_NAME_CAMEL_CASE__Spy)
+
+            const response = await handler.handle(request)
+
+            expect(response.status).toBe(401)
+          })
+        })
+
+    # === STEP 6: CREATE COMPONENT TEST (TDD - RED PHASE) ===
+    - id: 'create-component-test-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Write tests for React component'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/__tests__/presentation/components/__USE_CASE_NAME_KEBAB_CASE__-form.spec.tsx'
+      template: |
+        import { describe, it, expect, vi, beforeEach } from 'vitest'
+        import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+        import { __USE_CASE_NAME_PASCAL_CASE__Form } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components/__USE_CASE_NAME_KEBAB_CASE__-form'
+        import { Mock__USE_CASE_NAME_PASCAL_CASE__Provider } from '../mocks/mock-__USE_CASE_NAME_KEBAB_CASE__-frontend'
+
+        describe('__USE_CASE_NAME_PASCAL_CASE__Form', () => {
+          it('should render form with Shadcn UI components', () => {
+            render(
+              <Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+                <__USE_CASE_NAME_PASCAL_CASE__Form />
+              </Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+            )
+
+            expect(screen.getByLabelText('__INPUT_LABEL_1__')).toBeInTheDocument()
+            expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument()
+          })
+
+          it('should call API on form submission', async () => {
+            const onSubmit = vi.fn()
+            render(
+              <Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+                <__USE_CASE_NAME_PASCAL_CASE__Form onSubmit={onSubmit} />
+              </Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+            )
+
+            fireEvent.change(screen.getByLabelText('__INPUT_LABEL_1__'), {
+              target: { value: 'test-value' }
+            })
+            fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+
+            await waitFor(() => {
+              expect(onSubmit).toHaveBeenCalled()
+            })
+          })
+        })
+
+    # === STEP 7: RUN TESTS - VERIFY RED (TDD - RED PHASE) ===
+    - id: 'verify-tests-fail-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD RED: Verify tests fail (code does not exist yet)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to ensure they fail (RED phase)'
+        scripts:
+          - name: 'Run failing tests'
+            command: |
+              echo "🔴 TDD RED: Running fullstack tests - they should FAIL..."
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__ || {
+                echo "✅ Good! Tests are failing as expected (RED phase)"
+                echo "   Now we'll implement the code to make them pass..."
+                exit 0
+              }
+              echo "❌ ERROR: Tests are passing but code doesn't exist yet!"
+              exit 1
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 8: CREATE PRESENTATION STRUCTURE (TDD - GREEN PHASE) ===
+    - id: 'create-presentation-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'TDD GREEN: Create presentation layer structure for fullstack'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation'
+          folders:
+            # Frontend folders
+            - 'components'      # React components
+            - 'hooks'           # React hooks
+            - 'actions'         # Server Actions
+            - 'providers'       # Context providers
+            # Backend folders
+            - 'handlers'        # API route handlers
+            - 'middleware'      # API middleware
+            # Shared
+            - 'types'           # TypeScript types
+            - 'helpers'         # Shared helpers
+
+    # === STEP 9: CREATE API HANDLER (TDD - GREEN PHASE - BACKEND) ===
+    - id: 'create-api-handler-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement Next.js API route handler'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'nextjs 15 api routes app router handler'
+          description: 'Next.js API Routes in App Router'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/handlers/__USE_CASE_NAME_KEBAB_CASE__-handler.ts'
+      template: |
+        import { NextRequest, NextResponse } from 'next/server'
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import { __USE_CASE_NAME_PASCAL_CASE__Schema } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/validation/schemas/__USE_CASE_NAME_KEBAB_CASE__-schema'
+        import { ZodError } from 'zod'
+
+        /**
+         * API Route Handler for __USE_CASE_NAME_PASCAL_CASE__
+         * AI-NOTE: Next.js 15 App Router API handler
+         * No business logic - delegates to use case
+         * Handles HTTP concerns only
+         */
+        export class __USE_CASE_NAME_PASCAL_CASE__Handler {
+          constructor(
+            private readonly __USE_CASE_NAME_CAMEL_CASE__: __USE_CASE_NAME_PASCAL_CASE__
+          ) {}
+
+          async handle(request: NextRequest): Promise<NextResponse> {
+            try {
+              // AI-NOTE: Parse and validate request body
+              const body = await request.json()
+              const validatedData = __USE_CASE_NAME_PASCAL_CASE__Schema.parse(body)
+
+              // AI-NOTE: Delegate to use case (no business logic here)
+              const result = await this.__USE_CASE_NAME_CAMEL_CASE__.execute(validatedData)
+
+              // AI-NOTE: Return success response
+              return NextResponse.json(
+                {
+                  success: true,
+                  data: result
+                },
+                { status: 200 }
+              )
+            } catch (error) {
+              // AI-NOTE: Handle different error types
+              if (error instanceof ZodError) {
+                return NextResponse.json(
+                  {
+                    success: false,
+                    error: 'Validation failed',
+                    details: error.errors
+                  },
+                  { status: 400 }
+                )
+              }
+
+              // AI-NOTE: Generic error response (don't expose internals)
+              return NextResponse.json(
+                {
+                  success: false,
+                  error: 'Internal server error'
+                },
+                { status: 500 }
+              )
+            }
+          }
+        }
+
+        /**
+         * Factory function for API route
+         * AI-NOTE: This will be used in app/api/[feature]/[usecase]/route.ts
+         */
+        export function make__USE_CASE_NAME_PASCAL_CASE__Handler(): __USE_CASE_NAME_PASCAL_CASE__Handler {
+          const __USE_CASE_NAME_CAMEL_CASE__ = make__USE_CASE_NAME_PASCAL_CASE__()
+          return new __USE_CASE_NAME_PASCAL_CASE__Handler(__USE_CASE_NAME_CAMEL_CASE__)
+        }
+
+    # === STEP 10: CREATE API ROUTE FILE (TDD - GREEN PHASE - BACKEND) ===
+    - id: 'create-api-route-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create Next.js API route file in app/api'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/app/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/route.ts'
+      template: |
+        import { make__USE_CASE_NAME_PASCAL_CASE__Handler } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/handlers/__USE_CASE_NAME_KEBAB_CASE__-handler'
+
+        /**
+         * Next.js 15 API Route
+         * AI-NOTE: App Router API endpoint
+         * Path: /api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__
+         */
+
+        const handler = make__USE_CASE_NAME_PASCAL_CASE__Handler()
+
+        export async function POST(request: Request) {
+          return handler.handle(request)
+        }
+
+        // AI-NOTE: Add other HTTP methods if needed
+        // export async function GET(request: Request) { }
+        // export async function PUT(request: Request) { }
+        // export async function DELETE(request: Request) { }
+
+    # === STEP 11: CREATE SERVER ACTION (TDD - GREEN PHASE - FRONTEND) ===
+    - id: 'create-server-action-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement Server Action for frontend'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/actions/__USE_CASE_NAME_KEBAB_CASE__-action.ts'
+      template: |
+        'use server'
+
+        import { __USE_CASE_NAME_PASCAL_CASE__Schema } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/validation/schemas/__USE_CASE_NAME_KEBAB_CASE__-schema'
+        import { revalidatePath } from 'next/cache'
+
+        /**
+         * Server Action for __USE_CASE_NAME_PASCAL_CASE__
+         * AI-NOTE: Can call API or use case directly
+         * In fullstack, we can choose based on needs
+         */
+
+        export async function __USE_CASE_NAME_CAMEL_CASE__Action(
+          prevState: any,
+          formData: FormData
+        ) {
+          try {
+            const rawData = {
+              __INPUT_FIELD_1__: formData.get('__INPUT_FIELD_1__'),
+              __INPUT_FIELD_2__: formData.get('__INPUT_FIELD_2__'),
+              __INPUT_FIELD_3__: formData.get('__INPUT_FIELD_3__')
+            }
+
+            const validatedData = __USE_CASE_NAME_PASCAL_CASE__Schema.parse(rawData)
+
+            // AI-NOTE: Option 1 - Call API endpoint
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(validatedData)
+            })
+
+            const result = await response.json()
+
+            // AI-NOTE: Option 2 - Call use case directly (if server-side only)
+            // const __USE_CASE_NAME_CAMEL_CASE__ = make__USE_CASE_NAME_PASCAL_CASE__()
+            // const result = await __USE_CASE_NAME_CAMEL_CASE__.execute(validatedData)
+
+            revalidatePath('/__FEATURE_NAME_KEBAB_CASE__')
+
+            return {
+              success: true,
+              data: result
+            }
+          } catch (error) {
+            return {
+              success: false,
+              error: 'Operation failed'
+            }
+          }
+        }
+
+    # === STEP 12: CREATE REACT COMPONENT (TDD - GREEN PHASE - FRONTEND) ===
+    - id: 'create-component-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement React component with Shadcn UI'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components/__USE_CASE_NAME_KEBAB_CASE__-form.tsx'
+      template: |
+        'use client'
+
+        import { useFormState } from 'react-dom'
+        import { __USE_CASE_NAME_CAMEL_CASE__Action } from '../actions/__USE_CASE_NAME_KEBAB_CASE__-action'
+        import { Button } from '@/shared/presentation/ui/button'
+        import { Input } from '@/shared/presentation/ui/input'
+        import { Label } from '@/shared/presentation/ui/label'
+        import { Card, CardContent, CardHeader, CardTitle } from '@/shared/presentation/ui/card'
+        import { Alert, AlertDescription } from '@/shared/presentation/ui/alert'
+        import { Loader2 } from 'lucide-react'
+        import { useState } from 'react'
+
+        /**
+         * __USE_CASE_NAME_PASCAL_CASE__ Form Component
+         * AI-NOTE: Fullstack component can use both Server Actions and API calls
+         */
+
+        interface __USE_CASE_NAME_PASCAL_CASE__FormProps {
+          onSubmit?: (data: any) => void
+          useApi?: boolean // Flag to use API instead of Server Action
+        }
+
+        export function __USE_CASE_NAME_PASCAL_CASE__Form({
+          onSubmit,
+          useApi = false
+        }: __USE_CASE_NAME_PASCAL_CASE__FormProps) {
+          const [isLoading, setIsLoading] = useState(false)
+          const [state, formAction] = useFormState(__USE_CASE_NAME_CAMEL_CASE__Action, {
+            success: false,
+            data: null,
+            error: null
+          })
+
+          // AI-NOTE: Alternative API call handler
+          const handleApiSubmit = async (e: React.FormEvent) => {
+            e.preventDefault()
+            setIsLoading(true)
+
+            const formData = new FormData(e.target as HTMLFormElement)
+            const data = Object.fromEntries(formData)
+
+            try {
+              const response = await fetch('/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+              })
+
+              const result = await response.json()
+              onSubmit?.(result)
+            } catch (error) {
+              console.error('API call failed:', error)
+            } finally {
+              setIsLoading(false)
+            }
+          }
+
+          return (
+            <Card className="w-full max-w-md mx-auto">
+              <CardHeader>
+                <CardTitle>__FORM_TITLE__</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form
+                  action={useApi ? undefined : formAction}
+                  onSubmit={useApi ? handleApiSubmit : undefined}
+                  className="space-y-4"
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="__INPUT_FIELD_1__">__INPUT_LABEL_1__</Label>
+                    <Input
+                      id="__INPUT_FIELD_1__"
+                      name="__INPUT_FIELD_1__"
+                      type="text"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="__INPUT_FIELD_2__">__INPUT_LABEL_2__</Label>
+                    <Input
+                      id="__INPUT_FIELD_2__"
+                      name="__INPUT_FIELD_2__"
+                      type="text"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  {state.error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{state.error}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {state.success && (
+                    <Alert>
+                      <AlertDescription>__SUCCESS_MESSAGE__</AlertDescription>
+                    </Alert>
+                  )}
+
+                  <Button type="submit" disabled={isLoading} className="w-full">
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      'Submit'
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          )
+        }
+
+    # === STEP 13: CREATE CUSTOM HOOK (TDD - GREEN PHASE - FRONTEND) ===
+    - id: 'create-hook-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD GREEN: Create custom hook for API integration'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/hooks/use-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        'use client'
+
+        import { useState, useCallback } from 'react'
+
+        /**
+         * Custom hook for __USE_CASE_NAME_PASCAL_CASE__
+         * AI-NOTE: Can be used for both API calls and Server Actions
+         */
+
+        export function use__USE_CASE_NAME_PASCAL_CASE__() {
+          const [data, setData] = useState<any>(null)
+          const [error, setError] = useState<Error | null>(null)
+          const [isLoading, setIsLoading] = useState(false)
+
+          const executeApi = useCallback(async (input: any) => {
+            setIsLoading(true)
+            setError(null)
+
+            try {
+              const response = await fetch('/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(input)
+              })
+
+              if (!response.ok) {
+                throw new Error(`API call failed: ${response.status}`)
+              }
+
+              const result = await response.json()
+              setData(result.data)
+              return result.data
+            } catch (err) {
+              const error = err as Error
+              setError(error)
+              throw error
+            } finally {
+              setIsLoading(false)
+            }
+          }, [])
+
+          const reset = useCallback(() => {
+            setData(null)
+            setError(null)
+            setIsLoading(false)
+          }, [])
+
+          return {
+            data,
+            error,
+            isLoading,
+            executeApi,
+            reset
+          }
+        }
+
+    # === STEP 14: RUN TESTS - VERIFY GREEN (TDD - GREEN PHASE) ===
+    - id: 'verify-tests-pass-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD GREEN: Verify all tests pass'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to ensure they pass (GREEN phase)'
+        scripts:
+          - name: 'Run passing tests'
+            command: |
+              echo "🟢 TDD GREEN: Running fullstack tests - they should PASS now..."
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__ || {
+                echo "❌ ERROR: Tests are still failing!"
+                echo "   Review implementation and fix issues."
+                exit 1
+              }
+              echo "✅ Excellent! All fullstack tests are passing"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 15: REFACTOR (TDD - REFACTOR PHASE - OPTIONAL) ===
+    - id: 'refactor-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD REFACTOR: Improve code quality while keeping tests green'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      condition: '__NEEDS_REFACTORING__'
+      run_scripts:
+        description: 'Refactor code while ensuring tests remain green'
+        scripts:
+          - name: 'Refactor with safety'
+            command: |
+              echo "♻️ TDD REFACTOR: Improving fullstack code quality..."
+              echo "   Common refactorings:"
+              echo "   - Extract shared logic between frontend/backend"
+              echo "   - Optimize API calls with caching"
+              echo "   - Improve type safety across layers"
+              echo "   - Extract common middleware"
+
+              # Run tests before refactoring
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__ || {
+                echo "❌ Tests must be green before refactoring!"
+                exit 1
+              }
+
+              # AI-NOTE: Apply refactorings here
+
+              # Run tests after refactoring
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__ || {
+                echo "❌ Refactoring broke tests! Revert changes."
+                exit 1
+              }
+
+              echo "✅ Refactoring complete - tests still green!"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 16: REFACTOR FOR BROWNFIELD (CONDITIONAL) ===
+    - id: 'refactor-presentation-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor existing code to Clean Architecture patterns'
+      condition: 'check_if_presentation_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.tsx'
+      template: |
+        # AI-NOTE: FIND/REPLACE Pattern for Brownfield Refactoring
+        # Identify violations in both frontend and backend code
+
+        <<<FIND>>>
+        # AI-NOTE: Match the EXACT code that violates Clean Architecture
+        # Look for:
+        # - Pages API routes with business logic
+        # - Components with API calls
+        # - Missing separation between frontend/backend
+        [ORIGINAL_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        # AI-NOTE: Apply Clean Architecture transformation
+        # Ensure:
+        # - API handlers delegate to use cases
+        # - Components use hooks or Server Actions
+        # - Clear separation of concerns
+        [REFACTORED_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # === STEP 17: CREATE PULL REQUEST ===
+    - id: 'create-pr-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create Pull Request for fullstack presentation layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Create PR using GitHub CLI'
+        scripts:
+          - name: 'Push branch and create PR'
+            command: |
+              # Push branch to remote
+              git push -u origin "feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__-presentation"
+
+              # Create PR
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ fullstack presentation" \
+                --body "## Summary
+
+              Added fullstack presentation layer for __USE_CASE_NAME_PASCAL_CASE__ with unified Next.js 15.
+
+              ## Changes
+
+              ### Backend (API)
+              - ✅ API Route handler in App Router
+              - ✅ Clean Architecture compliance
+              - ✅ Proper error handling
+              - ✅ Validation with Zod
+
+              ### Frontend (UI)
+              - ✅ Server Actions implementation
+              - ✅ React components with Shadcn UI
+              - ✅ Custom hooks for API integration
+              - ✅ Tailwind CSS styling
+
+              ### Shared
+              - ✅ TypeScript types
+              - ✅ Validation schemas
+              - ✅ Test coverage
+
+              ## Testing
+              - [ ] API handler tests pass
+              - [ ] Component tests pass
+              - [ ] Hook tests pass
+              - [ ] E2E tests pass
+
+              ## Checklist
+              - [ ] Clean Architecture principles followed
+              - [ ] No business logic in presentation
+              - [ ] Proper separation frontend/backend
+              - [ ] Type safety across layers
+              " \
+                --assignee @me \
+                --label "fullstack,nextjs,presentation"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 18: CODE REVIEW ===
+    - id: 'code-review-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Automated code review for fullstack presentation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run automated code review checks'
+        scripts:
+          - name: 'Fullstack compliance check'
+            command: |
+              echo "🔍 Running fullstack presentation layer compliance checks..."
+
+              # Check API handlers
+              if grep -r "prisma\.\|db\." src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/handlers/; then
+                echo "❌ CRITICAL: Direct database access in API handlers"
+                exit 1
+              fi
+
+              # Check components
+              if grep -r "process\.env\.\|require\(" src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components/; then
+                echo "❌ ERROR: Server-only code in client components"
+                exit 1
+              fi
+
+              # Check for proper directives
+              if ! grep -r "use client\|use server" src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/; then
+                echo "⚠️ WARNING: Missing directives"
+              fi
+
+              echo "✅ Fullstack presentation layer compliance passed"
+            workingDirectory: '__PROJECT_NAME__'
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION REFACTORING PATTERN
+  # Single pattern for refactoring existing fullstack code
+  # ------------------------------------------------------------------------------
+
+  presentation_refactoring_patterns:
+    - id: 'refactor-to-clean-fullstack'
+      description: 'Refactor existing fullstack code to Clean Architecture'
+      detection:
+        - 'Pages API with business logic'
+        - 'getServerSideProps with database queries'
+        - 'Components with direct API calls'
+        - 'Mixed frontend/backend concerns'
+        - 'Missing use cases'
+      example:
+        original: |
+          <<<FIND>>>
+          # AI-NOTE: Identify fullstack violations
+          # Common patterns:
+          # 1. Pages API routes with business logic
+          # 2. getServerSideProps with database access
+          # 3. Components calling external APIs directly
+          # 4. Server and client code mixed
+          [ORIGINAL_VIOLATING_CODE]
+          <<</FIND>>>
+          <<<REPLACE>>>
+          # AI-NOTE: Apply Clean Architecture
+          # The refactored code should:
+          # 1. Separate API handlers from business logic
+          # 2. Use Server Actions or API routes properly
+          # 3. Components use hooks for data
+          # 4. Clear client/server boundaries
+          [REFACTORED_CLEAN_CODE]
+          <<</REPLACE>>>
+        category: 'fullstack-refactoring'
+        severity: 'HIGH'
+        rlhf_impact: -2
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION ANTI-PATTERNS TO AVOID
+  # Common mistakes in fullstack Next.js development
+  # ------------------------------------------------------------------------------
+
+  presentation_anti_patterns:
+    - name: 'Business Logic in API Routes'
+      description: 'API handlers contain business rules instead of delegating'
+      example: 'Complex calculations in route.ts files'
+      correct: 'API handlers should only handle HTTP, delegate to use cases'
+      rlhf_impact: -2
+
+    - name: 'Database Access in Components'
+      description: 'React components making direct database queries'
+      example: 'await prisma.user.findMany() in component'
+      correct: 'Components should use Server Actions or API calls'
+      rlhf_impact: -2
+
+    - name: 'Mixed Client/Server Code'
+      description: 'Server-only code in client components'
+      example: 'process.env.DATABASE_URL in "use client" component'
+      correct: 'Separate client and server code properly'
+      rlhf_impact: -2
+
+    - name: 'Missing Directives'
+      description: 'Not using "use client" or "use server" directives'
+      example: 'Components without proper directives'
+      correct: 'Always specify component type explicitly'
+      rlhf_impact: -1
+
+    - name: 'Duplicate Logic'
+      description: 'Same business logic in frontend and backend'
+      example: 'Validation in both API and component'
+      correct: 'Share validation schemas, single source of truth'
+      rlhf_impact: -1
+
+

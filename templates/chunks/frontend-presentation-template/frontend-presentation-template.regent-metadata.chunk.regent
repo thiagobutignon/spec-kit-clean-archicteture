@@ -1,0 +1,24 @@
+# CHUNK: metadata
+# Lines: 2115-2133
+# Estimated tokens: 165
+# Original: frontend-presentation-template.regent
+# =============================================
+
+metadata:
+  layer: 'validation'
+  project_type: 'backend' # backend | frontend | fullstack - AI-NOTE: Replace with actual project type
+  architecture_style: 'clean'
+  test_framework: 'jest' # jest | vitest - AI-NOTE: Replace with actual test framework
+  language: 'typescript'
+  patterns:
+    - 'validation-composite'
+    - 'field-validators'
+    - 'error-handling'
+  references:
+    - 'Clean Architecture principles'
+    - 'SOLID principles'
+    - 'TDD methodology'
+
+# ------------------------------------------------------------------------------
+# VALIDATION STRUCTURE SETUP
+# ------------------------------------------------------------------------------
