@@ -85,7 +85,10 @@ async function createProjectStructure(projectPath: string, options: InitOptions)
     '.claude',
     '.claude/commands',
     '.claude/agents',
+    '.vscode',
     'src',
+    'core',
+    'scripts',
     'templates'
   ];
 
@@ -113,6 +116,39 @@ async function createProjectStructure(projectPath: string, options: InitOptions)
     await fs.copy(sourceTemplatesDir, targetTemplatesDir);
   } else {
     console.log(chalk.yellow('⚠️  Warning: Templates not found in package'));
+  }
+
+  // Copy core files if they exist
+  const sourceCoreDir = path.join(packageRoot, 'core');
+  const targetCoreDir = path.join(projectPath, 'core');
+
+  if (await fs.pathExists(sourceCoreDir)) {
+    console.log(chalk.cyan('🎯 Copying core system files...'));
+    await fs.copy(sourceCoreDir, targetCoreDir);
+  } else {
+    console.log(chalk.yellow('⚠️  Warning: Core files not found in package'));
+  }
+
+  // Copy scripts if they exist
+  const sourceScriptsDir = path.join(packageRoot, 'scripts');
+  const targetScriptsDir = path.join(projectPath, 'scripts');
+
+  if (await fs.pathExists(sourceScriptsDir)) {
+    console.log(chalk.cyan('📜 Copying utility scripts...'));
+    await fs.copy(sourceScriptsDir, targetScriptsDir);
+  } else {
+    console.log(chalk.yellow('⚠️  Warning: Scripts not found in package'));
+  }
+
+  // Copy .vscode settings if they exist
+  const sourceVscodeDir = path.join(packageRoot, '.vscode');
+  const targetVscodeDir = path.join(projectPath, '.vscode');
+
+  if (await fs.pathExists(sourceVscodeDir)) {
+    console.log(chalk.cyan('⚙️  Copying VS Code configuration...'));
+    await fs.copy(sourceVscodeDir, targetVscodeDir);
+  } else {
+    console.log(chalk.yellow('⚠️  Warning: VS Code configuration not found in package'));
   }
 
   // Create initial files
