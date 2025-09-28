@@ -24,7 +24,7 @@ const program = new Command();
 program
   .name('regent')
   .description('The Regent - AI-powered Clean Architecture CLI with guaranteed architectural quality')
-  .version(packageJson.version);
+  .version(packageJson.version, '-v, --version', 'output the version number');
 
 // Custom help display
 const originalHelp = program.help.bind(program);
