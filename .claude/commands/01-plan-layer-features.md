@@ -72,7 +72,7 @@ tools:
       purpose: "Research patterns and best practices for the selected layer"
   internal:
     - name: "serena"
-      purpose: "Analyze existing code structure and conventions"
+      purpose: "Read .regent templates and analyze existing code structure"
 next_command: "/02-validate-layer-plan --layer=__LAYER__ from json: <your-generated-json>"
 ---
 
@@ -204,6 +204,32 @@ First, determine which layer you're working with:
 - Define dependency injection setup
 - Document environment configuration
 - Design health check strategy
+
+### Step 1.5: Read Architecture Template (MANDATORY)
+
+**Before generating ANY JSON, you MUST read the appropriate .regent template:**
+
+1. **Determine target type**: backend, frontend, or fullstack (ask user if unclear)
+2. **Read the template**: Use serena to read `templates/[target]-[layer]-template.regent`
+   - Example: `templates/backend-domain-template.regent` for backend domain
+   - Example: `templates/frontend-presentation-template.regent` for frontend presentation
+3. **Extract structure**: Look for the `use_case_slice` section in the template
+4. **Follow template patterns**: Your JSON MUST match the folder structure defined in the template
+
+**Template Structure Example (from backend-domain-template.regent):**
+```yaml
+use_case_slice:
+  basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+  layers:
+    domain:
+      folders: ['usecases', 'errors']
+    data:
+      folders: ['usecases']
+    presentation:
+      folders: ['controllers', 'errors']
+```
+
+**CRITICAL**: Your generated paths MUST follow this exact structure from the template.
 
 ### Step 2: External Research - Layer Specific
 
@@ -385,7 +411,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-register-user-use-case",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/use-cases/register-user.ts",
+      "path": "// Path MUST follow structure from .regent template - see Step 1.5",
       "template": "export interface RegisterUser {\n  execute(input: RegisterUserInput): Promise<RegisterUserOutput>;\n}"
     }
   ]
@@ -406,7 +432,7 @@ Your final JSON must follow this structure:
     {
       "id": "implement-user-repository",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/data/repositories/user-repository.ts",
+      "path": "// Path MUST follow structure from .regent template - see Step 1.5",
       "template": "export class UserRepositoryImpl implements UserRepository {\n  // Implementation\n}"
     }
   ]
@@ -426,7 +452,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-email-service",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/infra/services/email-service.ts",
+      "path": "// Path MUST follow structure from .regent template - see Step 1.5",
       "template": "export class SendGridEmailService implements EmailService {\n  // SendGrid implementation\n}"
     }
   ]
@@ -447,7 +473,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-user-controller",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/controllers/user-controller.ts",
+      "path": "// Path MUST follow structure from .regent template - see Step 1.5",
       "template": "export class UserController {\n  // REST endpoints\n}"
     }
   ]
@@ -467,7 +493,7 @@ Your final JSON must follow this structure:
     {
       "id": "setup-dependency-injection",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/main/container.ts",
+      "path": "// Path MUST follow structure from .regent template - see Step 1.5",
       "template": "export const container = new Container();\n// Bindings"
     }
   ]
@@ -475,6 +501,12 @@ Your final JSON must follow this structure:
 ```
 
 ## 7. Final Validation Checklist
+
+### Template Compliance ✅
+- [ ] Read appropriate .regent template file
+- [ ] Extracted folder structure from template
+- [ ] Generated paths follow template pattern
+- [ ] No hardcoded structures used
 
 ### Per Layer Validation:
 
@@ -526,30 +558,12 @@ Your final JSON must follow this structure:
 4. **Follow conventions** - Consistent with existing code
 5. **Consider testing** - How will this be tested?
 
-## 📤 Output for YAML Generation
+## 📤 Template Compliance
 
-The JSON plan generated here should be structured to work with SpecToYamlTransformer:
-
-```json
-{
-  "tasks": [
-    {
-      "id": "T001",
-      "title": "Create Project Entity",
-      "description": "...",
-      "layer": "domain",
-      "story_points": 3,
-      "priority": "Primary",
-      "dependencies": [],
-      "acceptance_criteria": [...]
-    }
-  ]
-}
-```
-
-This format is compatible with:
-- SpecToYamlTransformer.transformTask()
-- execute-steps.ts workflow execution
+Your JSON output MUST comply with the .regent template structure:
+- Paths follow template's `use_case_slice` pattern
+- Folder names match template's `folders` arrays
+- No deviation from template-defined architecture
 
 ## 📍 Next Step
 
