@@ -59,6 +59,24 @@ previous_command: "/02-validate-layer-plan from json: <json>"
 next_command: "/04-reflect-layer-lessons from yaml: <generated-yaml>"
 ---
 
+## 🔄 Integration with SpecToYamlTransformer
+
+When generating YAML for tasks, use the following approach:
+
+```typescript
+import { SpecToYamlTransformer } from '../../packages/cli/src/core/SpecToYamlTransformer.js';
+
+// For each task in the JSON plan:
+const transformer = new SpecToYamlTransformer();
+const workflow = await transformer.transformTask(taskId, taskListPath);
+await transformer.saveWorkflowAsYaml(workflow, `.regent/templates/${taskId}.yaml`);
+```
+
+This ensures:
+- GitFlow steps (branch, commit, PR) are included
+- Proper validation scripts are generated
+- YAML is compatible with execute-steps.ts
+
 # Task: Generate Selected Layer Code
 
 ## 🤖 RLHF Scoring System
