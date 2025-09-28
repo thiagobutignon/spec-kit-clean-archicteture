@@ -53,7 +53,7 @@ scoring:
   catastrophic:
     score: -2
     causes: ["Architecture violations", "Wrong REPLACE/WITH format"]
-source_template: ".regent/templates/[TARGET]-[LAYER]-template.regent"
+source_template: ".regent/templates/__TARGET__-__LAYER__-template.regent"
 validation_script: "npx tsx validate-implementation.ts"
 previous_command: "/02-validate-layer-plan from json: <json>"
 next_command: "/04-reflect-layer-lessons from yaml: <generated-yaml>"
@@ -128,7 +128,7 @@ Your **only** output is a complete and valid YAML file content.
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| **Template** | `.regent/templates/[TARGET]-[LAYER]-template.regent` | Master template (e.g., backend-domain-template.regent) |
+| **Template** | `.regent/templates/__TARGET__-__LAYER__-template.regent` | Master template (e.g., backend-domain-template.regent) |
 | **Directives** | `# AI-NOTE:` comments | Must follow all |
 | **Placeholders** | `__PLACEHOLDER__` variables | Must replace all |
 | **Validation** | `.regent/config/validate-template.ts` | Must pass validation |
@@ -262,7 +262,7 @@ Different templates have different capabilities based on their target:
 <details>
 <summary>Expand for Create Mode Steps</summary>
 
-1. **Initialize**: Copy `.regent/templates/[TARGET]-[LAYER]-template.regent` verbatim (e.g., backend-domain-template.regent)
+1. **Initialize**: Copy `.regent/templates/__TARGET__-__LAYER__-template.regent` verbatim (e.g., backend-domain-template.regent)
 2. **Generate Steps**:
    - Keep `create-feature-branch` as FIRST step
    - Keep `create-structure` as SECOND step
@@ -339,7 +339,7 @@ Different templates have different capabilities based on their target:
 ### Mandatory Validation Steps:
 
 ```bash
-npx tsx .regent/config/validate-template.ts .regent/templates/[TARGET]-[LAYER]-template.regent <generated-yaml-path>
+npx tsx .regent/config/validate-template.ts .regent/templates/__TARGET__-__LAYER__-template.regent <generated-yaml-path>
 ```
 
 ### Self-Correction Loop:

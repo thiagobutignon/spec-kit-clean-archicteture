@@ -73,7 +73,7 @@ tools:
   internal:
     - name: "serena"
       purpose: "Analyze existing code structure and conventions"
-next_command: "/02-validate-layer-plan --layer=[LAYER] from json: <your-generated-json>"
+next_command: "/02-validate-layer-plan --layer=__LAYER__ from json: <your-generated-json>"
 ---
 
 # Task: Pre-Task Layer Planning
@@ -360,7 +360,7 @@ Your final JSON must follow this structure:
       "id": "step-identifier",
       "type": "[create_file|refactor_file]",
       "description": "Step description",
-      "path": "src/features/__FEATURE_NAME__/[USE_CASE_NAME]/[layer]/path/to/file.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__LAYER__/path/to/file.ts",
       "template": "// Code template with placeholders",
       "references": []
     }
@@ -385,7 +385,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-register-user-use-case",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/[USE_CASE_NAME]/__LAYER__/use-cases/register-user.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__LAYER__/use-cases/register-user.ts",
       "template": "export interface RegisterUser {\n  execute(input: RegisterUserInput): Promise<RegisterUserOutput>;\n}"
     }
   ]
@@ -406,7 +406,7 @@ Your final JSON must follow this structure:
     {
       "id": "implement-user-repository",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/[USE_CASE_NAME]/data/repositories/user-repository.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/data/repositories/user-repository.ts",
       "template": "export class UserRepositoryImpl implements UserRepository {\n  // Implementation\n}"
     }
   ]
@@ -426,7 +426,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-email-service",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/[USE_CASE_NAME]/infra/services/email-service.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/infra/services/email-service.ts",
       "template": "export class SendGridEmailService implements EmailService {\n  // SendGrid implementation\n}"
     }
   ]
@@ -447,7 +447,7 @@ Your final JSON must follow this structure:
     {
       "id": "create-user-controller",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/[USE_CASE_NAME]/presentation/controllers/user-controller.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/controllers/user-controller.ts",
       "template": "export class UserController {\n  // REST endpoints\n}"
     }
   ]
@@ -467,7 +467,7 @@ Your final JSON must follow this structure:
     {
       "id": "setup-dependency-injection",
       "type": "create_file",
-      "path": "src/features/__FEATURE_NAME__/[USE_CASE_NAME]/main/container.ts",
+      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/main/container.ts",
       "template": "export const container = new Container();\n// Bindings"
     }
   ]
