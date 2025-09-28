@@ -7,10 +7,156 @@
 [![Templates](https://img.shields.io/badge/Templates-Backend%20|%20Frontend%20|%20Fullstack-purple)](./templates)
 [![AI-NOTEs](https://img.shields.io/badge/AI--NOTEs-Guided%20Generation-orange)](./templates)
 [![Claude AI](https://img.shields.io/badge/Claude%20AI-6%20Agents-cyan)](./.claude/agents)
+[![CLI Tool](https://img.shields.io/badge/CLI-spec--ca-blue)](./bin/spec-ca)
 
 ## 📋 Overview
 
 Spec-Kit Clean Architecture addresses common problems in AI code generation: monolithic files (>200 lines) and absence of architectural structure. The system combines modular scaffolding with template-based generation, following Clean Architecture, DDD, TDD, and SOLID principles to produce maintainable code.
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/thiagobutignon/spec-kit-clean-archicteture.git
+cd spec-kit-clean-archicteture
+
+# Install dependencies
+npm install
+
+# Make CLI available globally (optional)
+npm link
+```
+
+### Create Your First Project
+
+```bash
+# Initialize a new Clean Architecture project
+spec-ca init my-project --ai claude
+
+# Or initialize in current directory
+spec-ca init . --ai claude --here
+
+# Check system requirements
+spec-ca check
+```
+
+### Start Development Workflow
+
+```bash
+cd my-project
+
+# 1. Establish project principles
+/constitution
+
+# 2. Create feature specification
+/specify "User authentication with JWT tokens"
+
+# 3. Clarify any ambiguities (optional)
+/clarify
+
+# 4. Create implementation plan
+/plan from spec: SPEC-001
+
+# 5. Generate actionable tasks
+/tasks from plan: PLAN-001
+
+# 6. Execute implementation
+/implement from tasks: TASK-LIST
+```
+
+## 🎯 CLI Tool
+
+The **`spec-ca`** CLI provides a complete toolkit for spec-driven Clean Architecture development:
+
+### Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `spec-ca init [project]` | Initialize new Clean Architecture project | `spec-ca init my-app --ai claude` |
+| `spec-ca check` | Validate system requirements | `spec-ca check` |
+| `spec-ca --help` | Show usage information | `spec-ca --help` |
+
+### Workflow Commands (within projects)
+
+| Command | Purpose | Stage |
+|---------|---------|-------|
+| `/constitution` | Establish project principles | Foundation |
+| `/specify` | Create feature specifications | Analysis |
+| `/clarify` | Resolve ambiguities | Clarification |
+| `/plan` | Map features to layers | Design |
+| `/tasks` | Generate implementation tasks | Planning |
+| `/analyze` | Validate consistency | Quality Assurance |
+| `/implement` | Execute with templates | Implementation |
+
+### Advanced Layer Commands
+
+| Command | Purpose | Integration |
+|---------|---------|-------------|
+| `/01-plan-layer-features` | Detailed layer planning | Template generation |
+| `/02-validate-layer-plan` | Validate layer plans | RLHF scoring |
+| `/03-generate-layer-code` | Generate code from plans | .regent templates |
+| `/04-reflect-layer-lessons` | Learn from implementation | Continuous improvement |
+| `/05-evaluate-layer-results` | Architecture validation | Quality gates |
+| `/06-execute-layer-steps` | Execute validated plans | Code generation |
+| `/07-fix-layer-errors` | Fix architectural violations | Error correction |
+| `/08-apply-layer-improvements` | Apply learning feedback | Template evolution |
+| `/09-e2e-performance-testing` | End-to-end validation | Quality assurance |
+
+## 🏗️ Hybrid Architecture: Spec-Driven + Layer-Driven
+
+### The Innovation
+
+Spec-Kit Clean Architecture uniquely combines **GitHub's spec-kit workflow** with **Clean Architecture layer templates** to create a deterministic AI development process:
+
+```mermaid
+graph LR
+    A[User Intent] --> B[/constitution]
+    B --> C[/specify]
+    C --> D[/clarify]
+    D --> E[/plan]
+    E --> F[/tasks]
+
+    F --> G[/01-plan-layer-features]
+    G --> H[/02-validate-layer-plan]
+    H --> I[/03-generate-layer-code]
+    I --> J[/implement]
+
+    J --> K[.regent Templates]
+    K --> L[RLHF Validation]
+    L --> M[Clean Architecture Code]
+```
+
+### Workflow Integration
+
+| Phase | Spec-Driven | Layer-Driven | Output |
+|-------|-------------|--------------|--------|
+| **Foundation** | `/constitution` | Project principles | Constitution with CA rules |
+| **Analysis** | `/specify` → `/clarify` | Requirements analysis | Clear specifications |
+| **Design** | `/plan` | `/01-plan-layer-features` | Layer-mapped implementation plan |
+| **Planning** | `/tasks` | `/02-validate-layer-plan` | Validated, layer-specific tasks |
+| **Implementation** | `/implement` | `/03-generate-layer-code` | .regent template execution |
+| **Validation** | `/analyze` | `/09-e2e-performance-testing` | Quality assurance |
+
+### Always Greenfield Architecture
+
+Every feature becomes a **self-contained vertical slice**:
+
+```
+features/[domain]/[use-case]/
+├── domain/           # 🎯 Pure business logic (zero dependencies)
+├── data/            # 💾 Repository implementations
+├── infra/           # 🔌 External integrations
+├── presentation/    # 🌐 Controllers/Components
+└── main/           # 🚀 Dependency injection
+```
+
+**Benefits:**
+- ✅ **Legacy becomes greenfield** - Each feature is clean and modern
+- ✅ **Parallel development** - Teams work on independent slices
+- ✅ **Zero architectural debt** - Clean Architecture enforced always
+- ✅ **Incremental adoption** - Add features without affecting existing code
 
 ## 🔧 Technical Approach
 
@@ -122,15 +268,25 @@ features/user/
 | **Context**      | Limited                    | AI knowledge only     | Multiple context sources        |
 | **Workflow**     | Manual adaptation          | Ad-hoc                | Structured development process  |
 
-## 📦 Prerequisites
+## 🚀 What's New - v7.0 - COMPLETE CLI INTEGRATION
+
+### 🎯 Spec-Kit CLI Integration (NEW!)
+
+- **Complete CLI Tool**: `spec-ca` command-line interface for project initialization
+- **Hybrid Workflow**: Seamless integration between spec-driven and layer-driven development
+- **7 Spec-Driven Commands**: Full workflow from `/constitution` to `/implement`
+- **Project Structure**: Automatic `.specify/` directory setup with constitution template
+- **Multi-AI Support**: Compatible with Claude, Gemini, Copilot, and Cursor
+
+### 📦 Prerequisites
 
 - **Node.js**: >= 18.0.0
 - **TypeScript**: >= 5.0.0
-- **Claude Code CLI**: Latest version installed
+- **Claude Code CLI**: Latest version installed (for best experience)
 - **Git**: Configured with GitHub credentials
 - **npm/yarn**: Package manager installed
 
-## 🚀 What's New - v6.1 - E2E TESTING & PERFORMANCE VALIDATION
+## 🚀 Previous Release - v6.1 - E2E TESTING & PERFORMANCE VALIDATION
 
 ### 🎯 Chrome DevTools MCP Integration (NEW!)
 

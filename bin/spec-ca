@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+
+/**
+ * Spec-Kit Clean Architecture CLI
+ *
+ * A TypeScript/Node.js implementation of the spec-kit CLI
+ * specifically designed for Clean Architecture projects.
+ *
+ * Based on the original spec-kit Python CLI but enhanced for:
+ * - Clean Architecture layer management
+ * - Integration with .regent templates
+ * - RLHF scoring system
+ * - Layer-specific workflow commands
+ */
+
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Run the main CLI script
+try {
+  execSync(`npx tsx ${join(__dirname, '..', 'src', 'cli', 'main.ts')} ${process.argv.slice(2).join(' ')}`, {
+    stdio: 'inherit',
+    cwd: process.cwd()
+  });
+} catch (error) {
+  process.exit(error.status || 1);
+}
