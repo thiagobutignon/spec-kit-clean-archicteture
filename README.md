@@ -1,6 +1,6 @@
 # 🏗️ Spec-Kit Clean Architecture
 
-> **AI-Powered Clean Architecture Template System with Intelligent Code Generation**
+> **Scaffolding + AI Generation for Deterministic Code Quality**
 
 [![RLHF Score](https://img.shields.io/badge/RLHF%20Score-+2%20PERFECT-brightgreen)](https://github.com/thiagobutignon/spec-kit-clean-archicteture)
 [![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-✓-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
@@ -10,71 +10,75 @@
 
 ## 📋 Overview
 
-Spec-Kit Clean Architecture is a comprehensive template system that generates production-ready code following Clean Architecture, DDD, TDD, and SOLID principles. With intelligent AI-NOTEs guidance, RLHF scoring, and Claude AI agent integration, it ensures consistent, high-quality code generation for backend, frontend, and fullstack applications.
+Spec-Kit Clean Architecture addresses common problems in AI code generation: monolithic files (>200 lines) and absence of architectural structure. Our approach combines modular scaffolding with intelligent template editing, following Clean Architecture, DDD, TDD, and SOLID principles, simulating senior developer workflow to produce deterministic, maintainable code.
 
-## 🔬 Technical Evolution: From Scaffolding to Deterministic AI Development
+## 🔧 Technical Approach
 
-### The Development Approach Progression
+### Problem Statement
 
-#### 1. **Traditional Scaffolding Era**
-- **CRUD Generators**: Rigid project scaffolding requiring extensive manual adaptation
-- **Problem**: Never quite right out of the box, significant rework always needed
-- **Outcome**: Some automation but poor fit for specific requirements
+Current AI code generation typically produces:
 
-#### 2. **Pure Generative AI Era**
-- **Tools**: Lovable, Claude Code, Gemini CLI, traditional coding assistants
-- **Approach**: 100% AI-generated code with minimal architectural constraints
-- **Problem**: Zero architectural governance, 200+ line files, inconsistent patterns
-- **Outcome**: Fast generation but unpredictable quality and maintenance nightmare
+- **Monolithic files**: 200+ line files with mixed responsibilities
+- **Architectural inconsistency**: No structural enforcement or patterns
+- **Unpredictable quality**: Same input generates different output quality
 
-#### 3. **Spec-Kit Standard**
-- **Approach**: 100% generative with specification-driven development
-- **Achievement**: Nearly solved architecture through specs
-- **Limitation**: Still produced large files without structural constraints
+### Solution: Scaffolding + AI Generation Hybrid
 
-#### 4. **Spec-Kit Clean Architecture: The Missing Element**
+#### 1. **Scaffolding as Starting Point**
 
-We identified the critical missing component: **Template Guardrails + Professional Workflow Simulation**
+- Initialize projects with modular scaffolding for CRUDs and recurring functionalities
+- AI adapts templates creatively, inserting only necessary code
+- `.regent` templates provide base architectural structure
 
-### 🏗️ The Technical Solution: Deterministic AI Development
+#### 2. **Architecture Compliance**
 
-#### **Template Guardrails System**
+- **Feature Slice Architecture**: Separation of responsibilities and scalability
+- **Clean Architecture**: Application of SOLID principles and design patterns
+- **Modular structure**: Prevents monolithic files
+
 ```yaml
-# .regent templates provide architectural skeleton
-structure:
-  - domain/     # Business logic interfaces only
-  - data/       # Implementation of domain contracts
-  - infra/      # External service adapters
-  - presentation/ # HTTP/UI layer
-  - main/       # Dependency injection
+# Feature slice structure
+features/user/
+├── create-user/          # Atomic use case
+│   ├── domain/          # Interfaces and business rules
+│   ├── data/            # Implementations
+│   ├── presentation/    # Controllers/Components
+│   └── main/            # Dependency injection
 ```
 
-#### **AI Intelligence Within Constraints**
-- AI creativity focused on implementation details, not architecture
-- Templates contain AI-NOTEs that guide generation logic
-- Architectural violations impossible due to structural constraints
+#### 3. **Supporting Tools**
 
-#### **Senior Developer Workflow Simulation**
+- **Serena MCP**: Codebase search and indexing
+- **Context7 MCP**: Updates with current programming practices
+- **Chrome DevTools MCP**: Real-time bug inspection and corrections
+
+#### 4. **Deterministic Development Cycle**
+
 ```bash
-# Automated TDD cycle per use case
+# Automated TDD flow
 git checkout -b feat/user/create-user
-# 1. RED: Create failing tests
-yarn test:unit  # Expected failure
+# 1. RED: Initial failing unit test
+npm test -- create-user.spec.ts  # Expected failure
 git commit -m "test(domain): add failing tests for CreateUser"
-# 2. GREEN: Implement minimal solution
-yarn test:unit  # Tests pass
-git commit -m "feat(domain): add CreateUser interface"
-# 3. REFACTOR: Improve implementation
+# 2. GREEN: Minimal implementation
+npm test -- create-user.spec.ts  # Passes
+git commit -m "feat(domain): implement CreateUser"
+# 3. REFACTOR: Improvements and optimization
 git commit -m "refactor(domain): optimize CreateUser validation"
+# 4. PR and automated review
+claude /review  # Review via Claude Code
 ```
 
-#### **Continuous Learning Through RLHF**
-- **Real-time Feedback**: Code execution failures automatically improve templates
-- **Pattern Recognition**: System learns from successful and failed patterns
-- **Template Evolution**: Templates adapt based on production feedback
-- **Score-based Quality**: -2 (violations) to +2 (perfect architecture) scoring
+#### 5. **Continuous Learning**
 
-#### **Rich Context Integration**
+- **Feedback cycle**: Based on failure logs and automated RLHF
+- **Template versioning**: Iterative improvements reduce error repetition
+- **Adaptive patterns**: System learns from successful and failed executions
+
+### Outcome
+
+This process enables nearly deterministic deliveries in both **Greenfield** and **Brownfield** projects, maintaining quality, predictability, and clean architecture.
+
 - **Serena MCP**: Semantic codebase analysis and intelligent search
 - **Context7 MCP**: Always current programming knowledge and best practices
 - **Chrome DevTools MCP**: Runtime debugging and performance insights
@@ -83,6 +87,7 @@ git commit -m "refactor(domain): optimize CreateUser validation"
 ### 🎯 Why This Achieves Deterministic Results
 
 #### **Feature Slice Architecture**
+
 Every use case is self-contained, enabling "always greenfield" development even in legacy systems:
 
 ```
@@ -100,6 +105,7 @@ features/user/
 ```
 
 #### **Predictable Quality Outcomes**
+
 - **Input Consistency**: Same specification + same templates = same output
 - **Architectural Compliance**: Clean Architecture violations mathematically impossible
 - **Professional Patterns**: TDD, atomic commits, proper PR workflow built-in
@@ -107,14 +113,14 @@ features/user/
 
 ### 🚀 Technical Differentiation
 
-| Aspect | Traditional Scaffolding | Pure AI Generation | Spec-Kit Clean Architecture |
-|--------|------------------------|-------------------|---------------------------|
-| **Structure** | Rigid, requires adaptation | None, variable output | Flexible within constraints |
-| **Quality** | Consistent but basic | Unpredictable | Deterministic, professional |
-| **Architecture** | Basic patterns | No enforcement | Clean Architecture guaranteed |
-| **Learning** | Static | None | Continuous improvement via RLHF |
-| **Context** | Limited | AI knowledge only | Rich, verified, real-time |
-| **Workflow** | Manual adaptation | Ad-hoc | Senior developer simulation |
+| Aspect           | Traditional Scaffolding    | Pure AI Generation    | Spec-Kit Clean Architecture     |
+| ---------------- | -------------------------- | --------------------- | ------------------------------- |
+| **Structure**    | Rigid, requires adaptation | None, variable output | Flexible within constraints     |
+| **Quality**      | Consistent but basic       | Unpredictable         | Deterministic, professional     |
+| **Architecture** | Basic patterns             | No enforcement        | Clean Architecture guaranteed   |
+| **Learning**     | Static                     | None                  | Continuous improvement via RLHF |
+| **Context**      | Limited                    | AI knowledge only     | Rich, verified, real-time       |
+| **Workflow**     | Manual adaptation          | Ad-hoc                | Senior developer simulation     |
 
 ## 📦 Prerequisites
 
