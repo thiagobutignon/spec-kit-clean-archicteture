@@ -1,0 +1,150 @@
+{
+  // 1. Associate .regent extension with YAML language
+  "files.associations": {
+    "*.regent": "yaml"
+  },
+
+  // 2. Apply validation schemas to all .regent files
+  "yaml.schemas": {
+    // Schema for shared header part
+    "./templates/parts/shared/00-header.part.schema.json": [
+      "templates/parts/shared/00-header.part.regent"
+    ],
+    // Schema for backend structure part
+    "./templates/parts/backend/01-structure.part.schema.json": [
+      "templates/parts/backend/01-structure.part.regent"
+    ],
+    // Schema for frontend structure part
+    "./templates/parts/frontend/01-structure.part.schema.json": [
+      "templates/parts/frontend/01-structure.part.regent"
+    ],
+    // Schema for fullstack structure part
+    "./templates/parts/fullstack/01-structure.part.schema.json": [
+      "templates/parts/fullstack/01-structure.part.regent"
+    ],
+    // Schema for backend architecture part
+    "./templates/parts/backend/02-architecture.part.schema.json": [
+      "templates/parts/backend/02-architecture.part.regent"
+    ],
+    // Schema for frontend architecture part
+    "./templates/parts/frontend/02-architecture.part.schema.json": [
+      "templates/parts/frontend/02-architecture.part.regent"
+    ],
+    // Schema for fullstack architecture part
+    "./templates/parts/fullstack/02-architecture.part.schema.json": [
+      "templates/parts/fullstack/02-architecture.part.regent"
+    ],
+    // Schema for backend rules part
+    "./templates/parts/backend/03-rules.part.schema.json": [
+      "templates/parts/backend/03-rules.part.regent"
+    ],
+    // Schema for frontend rules part
+    "./templates/parts/frontend/03-rules.part.schema.json": [
+      "templates/parts/frontend/03-rules.part.regent"
+    ],
+    // Schema for fullstack rules part
+    "./templates/parts/fullstack/03-rules.part.schema.json": [
+      "templates/parts/fullstack/03-rules.part.regent"
+    ],
+    // Schema for backend domain steps part
+    "./templates/parts/backend/steps/01-domain.part.schema.json": [
+      "templates/parts/backend/steps/01-domain.part.regent"
+    ],
+    // Schema for backend data steps part
+    "./templates/parts/backend/steps/02-data.part.schema.json": [
+      "templates/parts/backend/steps/02-data.part.regent"
+    ],
+    // Schema for backend infra steps part
+    "./templates/parts/backend/steps/03-infra.part.schema.json": [
+      "templates/parts/backend/steps/03-infra.part.regent"
+    ],
+    // Schema for backend presentation steps part
+    "./templates/parts/backend/steps/04-presentation.part.schema.json": [
+      "templates/parts/backend/steps/04-presentation.part.regent"
+    ],
+    // Schema for backend main steps part
+    "./templates/parts/backend/steps/05-main.part.schema.json": [
+      "templates/parts/backend/steps/05-main.part.regent"
+    ],
+    // Schema for frontend domain steps part
+    "./templates/parts/frontend/steps/01-domain.part.schema.json": [
+      "templates/parts/frontend/steps/01-domain.part.regent"
+    ],
+    // Schema for frontend data steps part
+    "./templates/parts/frontend/steps/02-data.part.schema.json": [
+      "templates/parts/frontend/steps/02-data.part.regent"
+    ],
+    // Schema for frontend infra steps part
+    "./templates/parts/frontend/steps/03-infra.part.schema.json": [
+      "templates/parts/frontend/steps/03-infra.part.regent"
+    ],
+    // Schema for frontend presentation steps part
+    "./templates/parts/frontend/steps/04-presentation.part.schema.json": [
+      "templates/parts/frontend/steps/04-presentation.part.regent"
+    ],
+    // Schema for frontend main steps part
+    "./templates/parts/frontend/steps/05-main.part.schema.json": [
+      "templates/parts/frontend/steps/05-main.part.regent"
+    ],
+    // Schema for fullstack domain steps part
+    "./templates/parts/fullstack/steps/01-domain.part.schema.json": [
+      "templates/parts/fullstack/steps/01-domain.part.regent"
+    ],
+    // Schema for fullstack data steps part
+    "./templates/parts/fullstack/steps/02-data.part.schema.json": [
+      "templates/parts/fullstack/steps/02-data.part.regent"
+    ],
+    // Schema for fullstack infra steps part
+    "./templates/parts/fullstack/steps/03-infra.part.schema.json": [
+      "templates/parts/fullstack/steps/03-infra.part.regent"
+    ],
+    // Schema for fullstack presentation steps part
+    "./templates/parts/fullstack/steps/04-presentation.part.schema.json": [
+      "templates/parts/fullstack/steps/04-presentation.part.regent"
+    ],
+    // Schema for fullstack main steps part
+    "./templates/parts/fullstack/steps/05-main.part.schema.json": [
+      "templates/parts/fullstack/steps/05-main.part.regent"
+    ],
+    // Schema for shared validation layer
+    "./templates/parts/shared/steps/validation.part.schema.json": [
+      "templates/parts/shared/steps/validation.part.regent"
+    ],
+    // Schema for shared footer part
+    "./templates/parts/shared/01-footer.part.schema.json": [
+      "templates/parts/shared/01-footer.part.regent"
+    ],
+    // Schema for complete .regent files (excluding .part.regent)
+    "./regent.schema.json": [
+      "templates/template.regent",
+      "*.regent",
+      "!*.part.regent"
+    ]
+},
+"cSpell.words": [
+    "RLHF",
+    "axios",
+    "Vitest",
+    "Shadcn",
+    "pgvector",
+    "usecases",
+    "usecase",
+    "kebab",
+    "pascal",
+    "anemic",
+    "Fastify",
+    "nextjs",
+    "NEXTJS",
+    "lucide",
+    "supertest"
+],
+"files.watcherExclude": {
+  "**/.git/objects/**": true,
+  "**/.git/subtree-cache/**": true,
+  "**/.hg/store/**": true,
+  "**/.dart_tool": true,
+  "**/.git/**": true,
+  "**/node_modules/**": true,
+  "**/.vscode/**": true
+}
+}
