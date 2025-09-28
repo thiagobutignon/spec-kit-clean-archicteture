@@ -1,15 +1,47 @@
 {
-  "name": "spec-kit-clean-archicteture",
+  "name": "@thiagobutignon/spec-kit-clean-architecture",
   "version": "1.0.0",
+  "description": "CLI tool for spec-driven Clean Architecture development with AI-assisted code generation",
   "type": "module",
-  "main": "index.js",
+  "main": "src/cli/main.js",
   "bin": {
     "spec-ca": "./bin/spec-ca"
   },
-  "repository": "git@github.com:thiagobutignon/spec-kit-clean-archicteture.git",
+  "files": [
+    "bin/**/*",
+    "src/**/*",
+    "templates/**/*",
+    ".claude/**/*",
+    "*.md",
+    "package.json"
+  ],
+  "keywords": [
+    "clean-architecture",
+    "cli",
+    "ai-assisted",
+    "spec-driven",
+    "typescript",
+    "code-generation",
+    "tdd",
+    "ddd"
+  ],
+  "homepage": "https://github.com/thiagobutignon/spec-kit-clean-archicteture#readme",
+  "bugs": {
+    "url": "https://github.com/thiagobutignon/spec-kit-clean-archicteture/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thiagobutignon/spec-kit-clean-archicteture.git"
+  },
   "author": "Thiago Butignon <thiagobutignon@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
+    "prepare": "npm run templates:build",
+    "prepublishOnly": "npm run test",
+    "postinstall": "chmod +x bin/spec-ca",
     "lint": "eslint .",
     "test": "vitest --passWithNoTests",
     "templates:validate": "tsx validate-template.ts",
