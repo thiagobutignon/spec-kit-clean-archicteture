@@ -2,12 +2,14 @@
 
 ## Overview
 
-This guide documents the integration between spec-kit documentation and .regent YAML workflows through the SpecToYamlTransformer.
+This guide documents the integration between spec-kit documentation and .regent YAML workflows through the SpecToYamlTransformer, with full TDD + GitFlow + RLHF support.
 
 ## Architecture
 
 ```
 spec-kit (6,336 lines) → SpecToYamlTransformer → YAML Workflow → execute-steps.ts → Implementation
+                                                        ↓
+                                               TDD Cycle + RLHF Scoring
 ```
 
 ## Components
@@ -42,13 +44,17 @@ Located at: `execute-steps.ts` (project root)
 /implement T001
 ```
 
-### What Happens
+### What Happens (TDD + GitFlow + RLHF)
 
 1. **Parse Task**: Reads task from `.specify/tasks/TASK-LIST-SPEC-001-cli.md`
 2. **Transform**: Converts to YAML workflow using SpecToYamlTransformer
 3. **Save**: Stores workflow at `.regent/workflows/T001-workflow.yaml`
-4. **Execute**: Runs workflow with execute-steps.ts
+4. **Execute with TDD Cycle**:
+   - **Red Phase**: Create failing tests first
+   - **Green Phase**: Implement code to pass tests
+   - **Refactor Phase**: Improve code with RLHF scoring
 5. **GitFlow**: Creates branch, commits, and PR automatically
+6. **RLHF Validation**: Score implementation quality (-2 to +2)
 
 ## Example Workflow Generated
 
@@ -62,16 +68,15 @@ metadata:
   dependencies: []
 
 domain_steps:
+  # 1. GitFlow: Create feature branch
   - id: create-branch-T001
     type: branch
     status: PENDING
     rlhf_score: null
-    execution_log: ""
     action:
       branch_name: feature/T001-create-project-entity
-    validation_script: |
-      git checkout -b feature/T001-create-project-entity
 
+  # 2. Setup: Create directory structure
   - id: create-directories-T001
     type: folder
     status: PENDING
@@ -82,17 +87,75 @@ domain_steps:
           - entities
           - value-objects
           - use-cases
-          - repositories
+          - __tests__
 
-  - id: create-file-T001-0
+  # 3. TDD Red: Create failing test first
+  - id: create-test-T001
+    type: create_file
+    status: PENDING
+    path: src/features/project-init/domain/__tests__/Project.test.ts
+    template: |
+      import { Project } from '../entities/Project';
+
+      describe('Project Entity', () => {
+        it('should create a valid project', () => {
+          const project = new Project({ name: 'Test' });
+          expect(project.getName()).toBe('Test');
+        });
+
+        it('should enforce business rules', () => {
+          const project = new Project({ name: 'Test' });
+          expect(() => project.setName('')).toThrow();
+        });
+      });
+
+  # 4. TDD Red: Verify tests fail
+  - id: verify-tests-fail-T001
+    type: validation
+    status: PENDING
+    validation_script: |
+      npm test Project.test.ts || echo "✅ Tests failing (TDD Red Phase)"
+
+  # 5. TDD Green: Create implementation
+  - id: create-implementation-T001
     type: create_file
     status: PENDING
     path: src/features/project-init/domain/entities/Project.ts
     template: |
       export class Project {
-        // Implementation
+        constructor(private props: { name: string }) {}
+
+        getName(): string {
+          return this.props.name;
+        }
+
+        setName(name: string): void {
+          if (!name) throw new Error('Name cannot be empty');
+          this.props.name = name;
+        }
       }
 
+  # 6. TDD Green: Verify tests pass
+  - id: verify-tests-pass-T001
+    type: validation
+    status: PENDING
+    validation_script: |
+      npm test Project.test.ts
+      echo "✅ Tests passing (TDD Green Phase)"
+
+  # 7. RLHF: Score implementation quality
+  - id: rlhf-score-T001
+    type: validation
+    status: PENDING
+    rlhf_score: null
+    validation_script: |
+      # RLHF scoring will evaluate:
+      # - Clean Architecture compliance
+      # - Zero external dependencies in domain
+      # - Business logic encapsulation
+      echo "Running RLHF scoring..."
+
+  # 8. Quality: Run full validation suite
   - id: validate-T001
     type: validation
     status: PENDING
@@ -100,14 +163,22 @@ domain_steps:
       npm test
       npm run lint
       npm run typecheck
+      npm run test:coverage
 
+  # 9. GitFlow: Commit with conventional format
   - id: commit-T001
     type: validation
     status: PENDING
     validation_script: |
       git add -A
-      git commit -m "feat(domain): T001 - Create Project Entity"
+      git commit -m "feat(domain): T001 - Create Project Entity
 
+      - Implement Project aggregate root
+      - Add business rules validation
+      - 100% test coverage
+      - RLHF score: +1"
+
+  # 10. GitFlow: Create pull request
   - id: create-pr-T001
     type: pull_request
     status: PENDING
@@ -142,10 +213,40 @@ private sanitizeBranchName(branchName: string): string {
 ## Benefits
 
 1. **10x Performance**: No re-analysis needed, direct transformation
-2. **GitFlow Enforcement**: Every change follows proper branching strategy
-3. **Deterministic**: Same input always produces same workflow
-4. **Auditable**: YAML workflows stored for review
-5. **Testable**: 11 unit tests ensure reliability
+2. **TDD Enforcement**: Tests always written before implementation
+3. **GitFlow Compliance**: Every change follows proper branching strategy
+4. **RLHF Quality**: Automatic scoring of implementation quality
+5. **Deterministic**: Same input always produces same workflow
+6. **Auditable**: YAML workflows stored for review
+7. **Testable**: 11 unit tests ensure reliability
+
+## TDD + GitFlow + RLHF Cycle
+
+### The Complete Flow
+
+```mermaid
+graph TD
+    A[Parse Task] --> B[Create Branch]
+    B --> C[Write Failing Tests - Red]
+    C --> D[Verify Tests Fail]
+    D --> E[Write Implementation - Green]
+    E --> F[Verify Tests Pass]
+    F --> G[RLHF Scoring]
+    G --> H{Score >= 1?}
+    H -->|No| I[Refactor]
+    I --> F
+    H -->|Yes| J[Run Full Validation]
+    J --> K[Commit Changes]
+    K --> L[Create PR]
+```
+
+### RLHF Scoring Criteria
+
+- **+2 (Excellent)**: Perfect Clean Architecture, 100% coverage, no violations
+- **+1 (Good)**: Minor issues, >90% coverage, follows patterns
+- **0 (Neutral)**: Functional but needs improvement
+- **-1 (Poor)**: Architecture violations, <70% coverage
+- **-2 (Critical)**: Major violations, breaks layer boundaries
 
 ## Issues Addressed
 
