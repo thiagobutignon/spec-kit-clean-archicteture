@@ -175,5 +175,5 @@ The discovery transforms The Regent from:
 - Issues #75-#78: Detailed analysis and plans
 
 ---
-*Generated: 2025-01-28*
+*Generated: 2025-09-28*
 *Status: Action plan defined, implementation pending*

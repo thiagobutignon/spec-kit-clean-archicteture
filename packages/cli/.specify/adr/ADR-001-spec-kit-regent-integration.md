@@ -1,7 +1,7 @@
 # ADR-001: Integration of spec-kit and .regent Systems
 
 **Status**: Proposed
-**Date**: 2025-01-28
+**Date**: 2025-09-28
 **Authors**: Dogfooding Team
 
 ## Context
@@ -194,4 +194,4 @@ This discovery reveals the **"Parallel Evolution"** anti-pattern:
 
 ## Review History
 
-- 2025-01-28: Initial proposal from dogfooding discovery
+- 2025-09-28: Initial proposal from dogfooding discovery
