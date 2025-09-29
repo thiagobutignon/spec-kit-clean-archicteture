@@ -60,6 +60,9 @@ jobs:
           fi
           echo "✅ NPM_TOKEN is configured"
 
+      - name: Update npm
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: npm ci
 
