@@ -5,15 +5,15 @@
 ### 🎯 **What Was Accomplished**
 
 #### **1. Complete CLI Tool** ✅
-- **`bin/spec-ca`** - Executable CLI command
+- **`bin/regent`** - Executable CLI command
 - **TypeScript implementation** for consistency with project
 - **Commander.js** based interface
 - **Cross-platform compatibility**
 
 #### **2. Core Commands** ✅
-- **`spec-ca init [project]`** - Initialize Clean Architecture projects
-- **`spec-ca check`** - Validate system requirements
-- **`spec-ca --help`** - Documentation and usage
+- **`regent init [project]`** - Initialize Clean Architecture projects
+- **`regent check`** - Validate system requirements
+- **`regent --help`** - Documentation and usage
 
 #### **3. Complete Spec-Driven Workflow** ✅
 All 7 core spec-kit commands adapted for Clean Architecture:
@@ -78,10 +78,10 @@ Quality Assurance → /analyze → /09-e2e-performance-testing
 #### **Initialize New Project**
 ```bash
 # Create new Clean Architecture project
-spec-ca init my-project --ai claude
+regent init my-project --ai claude
 
 # Initialize in current directory
-spec-ca init . --ai claude --here
+regent init . --ai claude --here
 ```
 
 #### **Complete Development Workflow**
@@ -130,12 +130,12 @@ The **spec-kit-clean-architecture** CLI is now **complete and functional**!
 #### **1. Install CLI Globally (Optional)**
 ```bash
 npm link
-# Now 'spec-ca' available globally
+# Now 'regent' available globally
 ```
 
 #### **2. Create First Project**
 ```bash
-spec-ca init my-clean-project --ai claude
+regent init my-clean-project --ai claude
 cd my-clean-project
 ```
 
