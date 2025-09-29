@@ -31,13 +31,13 @@
     "tdd",
     "ddd"
   ],
-  "homepage": "https://github.com/thiagobutignon/the-regent#readme",
+  "homepage": "https://github.com/thiagobutignon/spec-kit-clean-archicteture#readme",
   "bugs": {
-    "url": "https://github.com/thiagobutignon/the-regent/issues"
+    "url": "https://github.com/thiagobutignon/spec-kit-clean-archicteture/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thiagobutignon/the-regent.git"
+    "url": "git+https://github.com/thiagobutignon/spec-kit-clean-archicteture.git"
   },
   "author": "Thiago Butignon <thiagobutignon@gmail.com>",
   "license": "MIT",
