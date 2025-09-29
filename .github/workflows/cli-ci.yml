@@ -2,17 +2,20 @@ name: CLI Package CI
 
 on:
   push:
+    branches: [main]
     paths:
-      - 'packages/cli/**'
+      - 'src/**'
+      - 'core/**'
+      - 'bin/**'
+      - 'package.json'
       - '.github/workflows/cli-ci.yml'
   pull_request:
     paths:
-      - 'packages/cli/**'
+      - 'src/**'
+      - 'core/**'
+      - 'bin/**'
+      - 'package.json'
       - '.github/workflows/cli-ci.yml'
-
-defaults:
-  run:
-    working-directory: packages/cli
 
 jobs:
   test:
@@ -31,22 +34,20 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-          cache-dependency-path: packages/cli/package-lock.json
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install --include=optional
 
-      - name: Run TypeScript check
-        run: npm run typecheck
+      - name: Build templates
+        run: npm run templates:build
 
       - name: Run linter
-        run: npm run lint || echo "Linting will be enabled after code generation"
+        run: npm run lint
 
       - name: Run tests
-        run: npm test || echo "Tests will be enabled after code generation"
-
-      - name: Build package
-        run: npm run build || echo "Build will be enabled after code generation"
+        run: npm test
 
   quality:
     name: Code Quality & Architecture
