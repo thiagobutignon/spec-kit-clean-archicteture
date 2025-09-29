@@ -442,11 +442,11 @@ features/user/
 | **Context**      | Limited                    | AI knowledge only     | Multiple context sources        |
 | **Workflow**     | Manual adaptation          | Ad-hoc                | Structured development process  |
 
-## 🚀 What's New - v1.0.1 - MCP AUTO-INSTALLATION & DETECTION!
+## 🚀 What's New - v2.1.8
 
-### 🔧 **MCP Server Auto-Installation** (NEW!)
+### 🔧 **MCP Server Auto-Installation**
 
-The Regent now offers seamless MCP (Model Context Protocol) server integration during project initialization:
+The Regent offers seamless MCP (Model Context Protocol) server integration during project initialization:
 
 ```bash
 # Initialize with interactive MCP installation
@@ -463,7 +463,7 @@ regent init my-project --skip-mcp
 - ✅ **Path Safety**: Handles project paths with spaces and special characters
 - ✅ **Better Error Messages**: Detailed stderr capture for troubleshooting
 
-### 🔍 **MCP Detection in System Check** (NEW!)
+### 🔍 **MCP Detection in System Check**
 
 ```bash
 # Check installed MCP servers
@@ -477,101 +477,36 @@ MCP Tools:
   playwright      ✅ available    E2E testing framework
 ```
 
-### 🎯 CLI Improvements (v1.0.1)
+### 🎯 **Core Features**
 
-- **✅ Version Flag**: Changed from `-V` to `-v` (follows CLI conventions)
-- **✅ Branding Update**: All references updated from `spec-ca` to `regent`
-- **✅ MCP Integration**: Auto-install MCP servers during `regent init`
-- **✅ System Validation**: `regent check` now detects all 4 MCP servers
-- **✅ Error Handling**: Robust error capturing with stderr for better debugging
-- **✅ Path Escaping**: Safe handling of paths with spaces/special characters
+- **Global CLI Tool**: `regent` command available globally
+- **Hybrid Workflow**: Seamless integration between spec-driven and layer-driven development
+- **Multi-AI Support**: Compatible with Claude, Gemini, Copilot, and Cursor
+- **15 Templates**: Backend, Frontend, and Fullstack .regent templates
+- **6 Specialized AI Agents**: Domain, Backend, Frontend, Fullstack, Validator, Generator
+- **9-Phase Workflow**: Complete feature generation with RLHF validation
+- **E2E Testing**: Chrome DevTools MCP integration for performance testing
+- **MCP Auto-Install**: Optional automatic MCP server installation during init
 
-### 📦 **NPM Package Available**
+### 📦 **Installation**
 
 ```bash
 # Install globally from NPM
 npm install -g @the-regent/cli
 
-# Use anywhere
-regent init my-project --ai claude
+# Verify installation
+regent --version  # Should show 2.1.8
+regent check      # Validate system requirements
 ```
 
 **🌍 Official NPM Package**: https://www.npmjs.com/package/@the-regent/cli
 
-### 🎯 Complete CLI Integration
-
-- **Global CLI Tool**: `regent` available after NPM install
-- **Hybrid Workflow**: Seamless integration between spec-driven and layer-driven development
-- **7 Spec-Driven Commands**: Full workflow from `/constitution` to `/implement`
-- **Project Structure**: Automatic `.specify/` directory setup with constitution template
-- **Multi-AI Support**: Compatible with Claude, Gemini, Copilot, and Cursor
-- **15 Templates**: Backend, Frontend, and Fullstack .regent templates included
-- **MCP Auto-Install**: Optional automatic MCP server installation
-
-### 📦 Prerequisites
+### 📦 **Prerequisites**
 
 - **Node.js**: >= 18.0.0 (required for NPM install)
-- **Claude Code CLI**: Latest version installed (for MCP and best experience)
+- **Claude Code CLI**: Latest version (recommended for MCP and best experience)
 - **Git**: Configured with GitHub credentials (for project initialization)
 - **NPM**: For global installation and updates
-
-## 🚀 Previous Release - v6.1 - E2E TESTING & PERFORMANCE VALIDATION
-
-### 🎯 Chrome DevTools MCP Integration (NEW!)
-
-- **E2E Testing Command**: New `/09-e2e-performance-testing` for comprehensive validation
-- **Performance Monitoring**: Real-time Core Web Vitals and performance insights
-- **Runtime Validation**: Verify Clean Architecture compliance during execution
-- **Visual Testing**: Screenshot-based regression testing
-- **Network Analysis**: API contract validation and monitoring
-
-### 🤖 Claude AI Agents (v6.0)
-
-- **6 Specialized Agents**: Each with deep expertise in specific domains
-- **Automated Workflows**: 9-phase generation process (now includes E2E testing)
-- **Stack-Specific Experts**: Backend, Frontend, and Fullstack specialists
-- **Architecture Validation**: Layer-validator with runtime checks via Chrome DevTools
-- **Domain Planning**: DDD expert for feature architecture
-- **Integrated with Core Tools**: Full integration with execute-steps.ts, validate-template.ts, core/rlhf-system.ts, and Chrome DevTools MCP
-
-### 📁 Project Reorganization (NEW!)
-
-- **Core System**: Centralized in `core/` directory (rlhf-system.ts, logger.ts)
-- **Scripts**: Automation tools in `scripts/` directory
-- **Agent System**: Claude agents in `.claude/agents/`
-- **Command System**: Workflow commands in `.claude/commands/`
-
-## 📚 Previous Release - v5.0 - ENHANCED ARCHITECTURE
-
-### 🎯 Layer-Specific Template Generation
-
-- **✅ 15 Focused Templates**: Generated on-demand from modular parts
-- **✅ Build System**: `./templates/build-template.sh` generates all layer combinations
-- **✅ Target × Layer Matrix**: backend/frontend/fullstack × domain/data/infra/presentation/main
-- **✅ Modular Architecture**: 46 template parts for maximum flexibility
-- **✅ JSON Schema Validation**: 16 schemas for layer-specific validation
-
-### 🤖 Enhanced RLHF Integration
-
-- **Layer-Aware Scoring**: Context-specific architectural validation
-- **Centralized Logic**: All scoring rules in `EnhancedRLHFSystem`
-- **Template Pattern Loading**: Automatic pattern extraction from templates
-- **Score Impact System**: Template-defined penalties and bonuses
-- **Performance Caching**: Pattern caching with 5-minute expiry
-
-### 📊 Advanced Validation & Execution
-
-- **Pre-execution Validation**: Templates validated before running
-- **Layer Detection**: Automatic layer identification from filenames
-- **Batch Execution**: `--all`, `--layer=domain`, `--target=backend`
-- **Contextual Error Messages**: Layer-specific guidance on failures
-- **Progress Tracking**: Real-time execution monitoring
-
-### 🔄 Brownfield & Greenfield Support
-
-- **Greenfield**: Generate complete features from scratch
-- **Brownfield**: Intelligent refactoring with `<<<FIND>>>/<<<REPLACE>>>` patterns
-- **Migration Paths**: Gradual adoption in existing codebases
 
 ## 🤖 AI Agent System
 
