@@ -442,35 +442,85 @@ features/user/
 | **Context**      | Limited                    | AI knowledge only     | Multiple context sources        |
 | **Workflow**     | Manual adaptation          | Ad-hoc                | Structured development process  |
 
-## 🚀 What's New - v1.0.0 - NPM PUBLISHED!
+## 🚀 What's New - v1.0.1 - MCP AUTO-INSTALLATION & DETECTION!
 
-### 📦 **NPM Package Available** (NEW!)
+### 🔧 **MCP Server Auto-Installation** (NEW!)
+
+The Regent now offers seamless MCP (Model Context Protocol) server integration during project initialization:
+
+```bash
+# Initialize with interactive MCP installation
+regent init my-project
+
+# Or skip MCP installation
+regent init my-project --skip-mcp
+```
+
+**Features**:
+- ✅ **Interactive Prompts**: Choose which MCP servers to install
+- ✅ **4 Supported Servers**: Serena, Context7, Chrome DevTools, Playwright
+- ✅ **Graceful Failures**: Project initialization continues even if MCP installation fails
+- ✅ **Path Safety**: Handles project paths with spaces and special characters
+- ✅ **Better Error Messages**: Detailed stderr capture for troubleshooting
+
+### 🔍 **MCP Detection in System Check** (NEW!)
+
+```bash
+# Check installed MCP servers
+regent check
+
+# Output shows:
+MCP Tools:
+  serena          ✅ available    Symbolic code analysis
+  context7        ⚠️  not found    Documentation retrieval
+  chrome-devtools ✅ available    Browser automation
+  playwright      ✅ available    E2E testing framework
+```
+
+### 🎯 CLI Improvements (v1.0.1)
+
+- **✅ Version Flag**: Changed from `-V` to `-v` (follows CLI conventions)
+- **✅ Branding Update**: All references updated from `spec-ca` to `regent`
+- **✅ MCP Integration**: Auto-install MCP servers during `regent init`
+- **✅ System Validation**: `regent check` now detects all 4 MCP servers
+- **✅ Error Handling**: Robust error capturing with stderr for better debugging
+- **✅ Path Escaping**: Safe handling of paths with spaces/special characters
+
+### 📦 **NPM Package Available**
 
 ```bash
 # Install globally from NPM
-npm install -g spec-kit-clean-architecture
+npm install -g @the-regent/cli
 
 # Use anywhere
-spec-ca init my-project --ai claude
+regent init my-project --ai claude
 ```
 
-**🌍 Official NPM Package**: https://www.npmjs.com/package/spec-kit-clean-architecture
+**🌍 Official NPM Package**: https://www.npmjs.com/package/@the-regent/cli
 
 ### 🎯 Complete CLI Integration
 
-- **Global CLI Tool**: `spec-ca` available after NPM install
+- **Global CLI Tool**: `regent` available after NPM install
 - **Hybrid Workflow**: Seamless integration between spec-driven and layer-driven development
 - **7 Spec-Driven Commands**: Full workflow from `/constitution` to `/implement`
 - **Project Structure**: Automatic `.specify/` directory setup with constitution template
 - **Multi-AI Support**: Compatible with Claude, Gemini, Copilot, and Cursor
 - **15 Templates**: Backend, Frontend, and Fullstack .regent templates included
+- **MCP Auto-Install**: Optional automatic MCP server installation
 
 ### 📦 Prerequisites
 
 - **Node.js**: >= 18.0.0 (required for NPM install)
-- **Claude Code CLI**: Latest version installed (for best experience)
+- **Claude Code CLI**: Latest version installed (for MCP and best experience)
 - **Git**: Configured with GitHub credentials (for project initialization)
 - **NPM**: For global installation and updates
+
+### 🔗 Related Issues
+
+- **Issue #105**: ✅ Auto-install MCP servers during `regent init`
+- **Issue #91**: ✅ Add MCP tools detection to `regent check`
+- **Issue #90**: ✅ Fix branding from 'spec-ca' to 'regent'
+- **Issue #88**: ✅ Change version flag from -V to -v
 
 ## 🚀 Previous Release - v6.1 - E2E TESTING & PERFORMANCE VALIDATION
 
