@@ -50,7 +50,7 @@
   "scripts": {
     "prepare": "npm run templates:build",
     "prepublishOnly": "npm run test",
-    "postinstall": "chmod +x bin/spec-ca",
+    "postinstall": "chmod +x bin/regent",
     "lint": "eslint .",
     "test": "vitest --passWithNoTests",
     "templates:validate": "tsx validate-template.ts",
