@@ -150,7 +150,7 @@ export async function checkCommand(): Promise<void> {
   }
 
   console.log();
-  console.log(chalk.cyan('🚀 Ready to create Clean Architecture projects with spec-ca!'));
+  console.log(chalk.cyan('🚀 Ready to create Clean Architecture projects with regent!'));
 }
 
 function checkTool(command: string): boolean {

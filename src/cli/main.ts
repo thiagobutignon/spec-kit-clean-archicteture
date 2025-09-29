@@ -24,7 +24,7 @@ const program = new Command();
 program
   .name('regent')
   .description('The Regent - AI-powered Clean Architecture CLI with guaranteed architectural quality')
-  .version(packageJson.version);
+  .version(packageJson.version, '-v, --version', 'output the current version');
 
 // Custom help display
 const originalHelp = program.help.bind(program);
@@ -53,7 +53,7 @@ program
 // Handle case where no command is provided
 program.action(() => {
   showBanner();
-  console.log(chalk.dim('Run \'spec-ca --help\' for usage information\n'));
+  console.log(chalk.dim('Run \'regent --help\' for usage information\n'));
 });
 
 // Parse arguments
