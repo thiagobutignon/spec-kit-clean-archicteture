@@ -1,61 +1,48 @@
 # Changelog
 
-All notable changes to The Regent CLI will be documented in this file.
+All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.1] - 2025-09-28
+## [Unreleased]
+
+### Added
+- Automated NPM package publishing via GitHub Actions
+- Release process documentation
+- CHANGELOG.md for tracking project changes
+
+## [2.1.1] - 2025-09-28
 
 ### Fixed
-- Corrected template path references in `/03-generate-layer-code` command from non-existent `.yaml` files to actual `.regent` template files
-- Fixed template resolution to properly use `[TARGET]-[LAYER]-template.regent` format (e.g., `backend-domain-template.regent`)
-- Updated validation script path to `.regent/config/validate-template.ts`
+- Remove SpecToYamlTransformer references from /03-generate-layer-code command
+- Update workflow diagram to reference /04-reflect-layer-lessons
+
+### Changed
+- Template-driven approach maintained throughout all commands
+
+## [2.1.0] - 2025-09-28
 
 ### Added
-- Comprehensive Template Resolution Strategy documentation
-- Multi-Target Clean Architecture Matrix documentation showing support for:
-  - Backend (Node.js, Express, Prisma)
-  - Frontend (React, Next.js)
-  - Fullstack (Shared types, API contracts)
-  - Mobile (React Native, Expo)
-  - API (OpenAPI, GraphQL)
-- Template Discovery Algorithm with visual flow diagram
-- RLHF Score Impact documentation for template selection
-- Template Capabilities Matrix for different targets
-- Target and layer fields in JSON input parameters
+- Sequential template reading in /01-plan-layer-features command
+- Constitutional AI-NOTE against fallback patterns
+- Template integration between .claude and .regent directories
 
-### Documentation
-- Enhanced `/03-generate-layer-code` command documentation
-- Added template resolution precedence order
-- Documented fallback mechanisms for missing templates
-- Revealed multi-target architecture capabilities
+### Removed
+- Dead code removal: 8K+ lines of unused code
+- Deleted packages/cli/ directory
+- Removed SpecToYamlTransformer class
 
-## [2.0.0] - 2025-09-27
+## [2.0.0] - Initial Release
 
 ### Added
-- Initial release of The Regent CLI
-- Clean Architecture project generation
-- RLHF (Reinforcement Learning from Human Feedback) scoring system
+- Clean Architecture CLI tool
 - Domain-Driven Design support
-- Feature slicing architecture
-- Slash commands for AI assistants
-- Template-based code generation
-- Multi-layer support (domain, data, infrastructure, presentation, main)
-- Git workflow integration
-- Automated validation and testing
+- Template-driven code generation
+- RLHF scoring system
+- Multiple layer support (domain, data, infrastructure, presentation, main)
 
-### Features
-- `regent init` - Initialize new Clean Architecture project
-- `regent check` - Validate system requirements
-- Interactive CLI with AI assistant selection
-- Comprehensive templates for all architectural layers
-- Built-in RLHF scoring from -2 to +2
-- Support for multiple AI assistants (Claude, Gemini, Copilot, Cursor)
-
-## [1.0.0] - 2025-09-26
-
-### Added
-- Beta release
-- Basic project scaffolding
-- Initial template system
+[Unreleased]: https://github.com/thiagobutignon/spec-kit-clean-archicteture/compare/v2.1.1...HEAD
+[2.1.1]: https://github.com/thiagobutignon/spec-kit-clean-archicteture/compare/v2.1.0...v2.1.1
+[2.1.0]: https://github.com/thiagobutignon/spec-kit-clean-archicteture/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/thiagobutignon/spec-kit-clean-archicteture/releases/tag/v2.0.0

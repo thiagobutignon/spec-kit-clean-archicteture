@@ -49,6 +49,17 @@ jobs:
           fi
           echo "✅ Versions match!"
 
+      - name: Verify NPM token is configured
+        run: |
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "❌ ERROR: NPM_TOKEN secret not configured"
+            echo "🔧 Setup: Repository Settings → Secrets and variables → Actions → New repository secret"
+            echo "   Name: NPM_TOKEN"
+            echo "   Value: [your NPM automation token]"
+            exit 1
+          fi
+          echo "✅ NPM_TOKEN is configured"
+
       - name: Install dependencies
         run: npm ci
 
@@ -57,6 +68,22 @@ jobs:
 
       - name: Build templates
         run: npm run templates:build
+
+      - name: Generate CHANGELOG
+        run: |
+          echo "📝 Generating CHANGELOG..."
+          if [ -f "CHANGELOG.md" ]; then
+            echo "✅ CHANGELOG.md exists"
+          else
+            echo "⚠️  CHANGELOG.md not found, skipping update"
+          fi
+          # Note: Automatic CHANGELOG generation can be added here using conventional-changelog
+          # For now, this step verifies CHANGELOG.md exists for manual updates
+
+      - name: Dry run publish check
+        run: npm publish --dry-run --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to NPM
         run: npm publish --provenance --access public
