@@ -73,6 +73,30 @@ const AI_TOOLS: ToolCheck[] = [
   }
 ];
 
+const MCP_TOOLS: ToolCheck[] = [
+  {
+    name: 'serena',
+    command: 'serena-mcp-server',
+    description: 'Symbolic code analysis',
+    installUrl: 'claude mcp add serena',
+    required: false
+  },
+  {
+    name: 'context7',
+    command: 'context7',
+    description: 'Documentation retrieval',
+    installUrl: 'See SETUP_MCP.md',
+    required: false
+  },
+  {
+    name: 'chrome-devtools',
+    command: 'chrome-devtools-mcp',
+    description: 'Browser automation',
+    installUrl: 'claude mcp add chrome-devtools npx chrome-devtools-mcp@latest',
+    required: false
+  }
+];
+
 export async function checkCommand(): Promise<void> {
   console.log(chalk.cyan.bold('🔍 Checking system requirements...\n'));
 
@@ -117,6 +141,27 @@ export async function checkCommand(): Promise<void> {
 
   console.log();
 
+  // Check MCP tools
+  console.log(chalk.blue.bold('MCP Tools:'));
+  let mcpToolsAvailable = 0;
+
+  for (const tool of MCP_TOOLS) {
+    const isAvailable = checkMCPServer(tool.name);
+    const status = isAvailable ?
+      chalk.green('✅ available') :
+      chalk.yellow('⚠️  not found');
+
+    console.log(`  ${tool.name.padEnd(15)} ${status.padEnd(20)} ${chalk.dim(tool.description)}`);
+
+    if (isAvailable) {
+      mcpToolsAvailable++;
+    } else {
+      console.log(chalk.dim(`     💡 Install: ${tool.installUrl}`));
+    }
+  }
+
+  console.log();
+
   // Check project-specific files
   console.log(chalk.blue.bold('Project Configuration:'));
   const projectChecks = [
@@ -149,6 +194,12 @@ export async function checkCommand(): Promise<void> {
     console.log(chalk.green(`✅ ${aiToolsAvailable} AI assistant(s) available.`));
   }
 
+  if (mcpToolsAvailable > 0) {
+    console.log(chalk.green(`✅ ${mcpToolsAvailable} MCP tool(s) available.`));
+  } else {
+    console.log(chalk.yellow.bold('💡 Install MCP tools for enhanced code intelligence (see SETUP_MCP.md)'));
+  }
+
   console.log();
   console.log(chalk.cyan('🚀 Ready to create Clean Architecture projects with regent!'));
 }
@@ -164,6 +215,17 @@ function checkTool(command: string): boolean {
     execSync(`${command} --version`, { stdio: 'pipe' });
     return true;
   } catch {
+    return false;
+  }
+}
+
+function checkMCPServer(serverName: string): boolean {
+  try {
+    // Check if claude mcp list shows the server
+    const result = execSync('claude mcp list', { encoding: 'utf-8', stdio: 'pipe' });
+    return result.toLowerCase().includes(serverName.toLowerCase());
+  } catch {
+    // If claude CLI is not available or command fails, return false
     return false;
   }
 }
