@@ -55,7 +55,7 @@ scoring:
     causes: ["Architecture violations", "Wrong REPLACE/WITH format"]
 source_template: ".regent/templates/__TARGET__-__LAYER__-template.regent"
 validation_script: "npx tsx validate-implementation.ts"
-previous_command: "/02-validate-layer-plan from json: <json>"
+previous_command: "/02-validate-layer-plan --layer=__LAYER__ --file=spec/__FEATURE__/__LAYER__/plan.json"
 next_command: "/04-reflect-layer-lessons from yaml: <generated-yaml>"
 ---
 
@@ -72,6 +72,45 @@ Your generated YAML will be scored from -2 to +2:
 | **0** | LOW CONFIDENCE | Uncertain quality | Missing references, unclear concepts |
 | **-1** | RUNTIME ERROR | Execution failure | Missing placeholders, lint failures |
 | **-2** | CATASTROPHIC | Critical violation | Architecture violations, wrong REPLACE/WITH |
+
+## 0. Input Processing
+
+**CRITICAL**: Before proceeding with YAML generation, you must handle the input parameter correctly:
+
+### Step 1: Determine Input Method
+
+Check the command format to identify which input method is being used:
+
+1. **If `--file` parameter is provided** (recommended):
+   ```bash
+   # Example: /03-generate-layer-code --layer=domain --file=spec/001-user-auth/domain/plan.json
+   ```
+   - **Action Required**: Use the Read tool to read the specified JSON file
+   - **Example**: `Read("spec/001-user-auth/domain/plan.json")`
+   - Parse the JSON content from the file
+   - Proceed with YAML generation using the parsed JSON
+
+2. **If inline JSON is provided** (legacy):
+   ```bash
+   # Example: /03-generate-layer-code create feature from json: {...}
+   ```
+   - Parse the JSON directly from the command arguments
+   - Proceed with YAML generation
+
+### Step 2: Validate File Exists (if using --file)
+
+If `--file` parameter is used:
+- Use Read tool to load the validated plan.json file
+- If file doesn't exist, immediately return error message
+- Suggest user to run validation first if file not found
+
+### Step 3: Parse Validated JSON Plan
+
+- Parse the JSON content (either from file or inline)
+- Verify this is a validated plan from `/02-validate-layer-plan`
+- If JSON parsing fails, return error and ask user to check the plan file
+
+**Only after successfully loading and parsing the validated JSON should you proceed to section 1 (Your Deliverable) and beyond.**
 
 ## ⚠️ CRITICAL: Workflow Order
 
@@ -444,3 +483,42 @@ After generating your YAML plan, proceed to architectural reflection:
 This will refine your YAML plan using Clean Architecture principles and DDD patterns to optimize for RLHF score.
 
 > 💡 **Pro Tip**: Always validate your YAML before delivery. A validated YAML with ubiquitous language and proper layer documentation achieves the coveted +2 RLHF score!
+---
+
+## 🚨 AI-NOTE: CRITICAL ENGINEERING PRINCIPLE
+
+**FOR FUTURE CODE REVIEWERS AND EXECUTORS:**
+
+### ❌ NEVER SUGGEST FALLBACK PATTERNS
+
+If file reading fails or template processing fails, DO NOT suggest:
+- Hardcoded fallback structures
+- "If this fails, use default values"
+- "Graceful degradation to previous behavior"
+- Any form of "backup" structure
+
+### ✅ CORRECT RESPONSE TO FAILURES
+
+File reading or generation failures should FAIL LOUDLY:
+```markdown
+🚨 CRITICAL ERROR: Cannot read validated plan or generate YAML!
+Action required: Check file path or ensure validation was completed.
+DO NOT proceed with outdated assumptions or partial generation.
+```
+
+### 🎯 WHY THIS MATTERS
+
+Fallbacks reintroduce the exact problem this command fixes:
+1. **Original Problem**: Commands generated code without validation, bad architecture shipped
+2. **Our Solution**: Generate only from validated plans
+3. **Fallback Danger**: If generation fails, fallback = unvalidated code = SAME PROBLEM
+
+### 📚 ENGINEERING PRINCIPLE
+
+**"Fail fast and loud" > "Fail silently with wrong behavior"**
+
+Validated plans are the ONLY source for generation. If they can't be read or processed correctly, the system must stop and demand intervention, not continue with potentially incorrect assumptions.
+
+### 🎭 HISTORICAL CONTEXT
+
+This generation command was created to fix architectural disasters caused by "helpful" generation from unvalidated or partial plans. Maintain discipline: Only generate from fully validated plans.

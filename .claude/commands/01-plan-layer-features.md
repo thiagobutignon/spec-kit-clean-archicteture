@@ -73,7 +73,7 @@ tools:
   internal:
     - name: "serena"
       purpose: "Read .regent template sections sequentially using searchPattern with context"
-next_command: "/02-validate-layer-plan --layer=__LAYER__ from json: <your-generated-json>"
+next_command: "/02-validate-layer-plan --layer=__LAYER__ --file=spec/__FEATURE__/__LAYER__/plan.json"
 ---
 
 # Task: Pre-Task Layer Planning
@@ -578,13 +578,22 @@ Your JSON output MUST comply with the .regent template structure:
 
 ## 📍 Next Step
 
-After generating your JSON plan, your next command should be:
+After generating your JSON plan, provide clear guidance for the next workflow step:
 
-```bash
-/02-validate-layer-plan --layer=[your-layer] from json: <your-generated-json>
+**Output Format:**
+```markdown
+✅ JSON Plan Generated Successfully!
+
+📄 Plan saved to: spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/plan.json
+   (Example: spec/001-user-authentication/domain/plan.json)
+
+🚀 Next Step - Validate Your Plan:
+/02-validate-layer-plan --layer=__LAYER__ --file=spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/plan.json
+
+💡 This will validate your JSON plan for layer-specific compliance and architectural correctness.
 ```
 
-This will validate your JSON plan for layer-specific compliance and architectural correctness.
+**Important**: Always suggest the validation command with `--file` parameter referencing the **actual** generated plan.json file path (use the real feature name and layer from the input), NOT inline JSON copy-paste or placeholder values.
 
 ---
 
