@@ -42,6 +42,7 @@ program
   .option('--here', 'Initialize in current directory')
   .option('--force', 'Force overwrite existing files')
   .option('--no-git', 'Skip git repository initialization')
+  .option('--skip-mcp', 'Skip MCP server installation')
   .option('--debug', 'Show debug information')
   .action(initCommand);
 
