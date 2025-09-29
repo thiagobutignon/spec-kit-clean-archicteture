@@ -55,7 +55,7 @@ scoring:
     causes: ["Architecture violations", "Wrong REPLACE/WITH format"]
 source_template: ".regent/templates/__TARGET__-__LAYER__-template.regent"
 validation_script: "npx tsx validate-implementation.ts"
-previous_command: "/02-validate-layer-plan from json: <json>"
+previous_command: "/02-validate-layer-plan --layer=__LAYER__ --file=spec/__FEATURE__/__LAYER__/plan.json"
 next_command: "/04-reflect-layer-lessons from yaml: <generated-yaml>"
 ---
 
