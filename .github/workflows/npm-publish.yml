@@ -1,0 +1,128 @@
+name: Publish to NPM
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$TAG_VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Version to publish: $TAG_VERSION"
+
+      - name: Verify package.json version matches tag
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION=${{ steps.version.outputs.version }}
+          echo "📄 package.json version: $PACKAGE_VERSION"
+          echo "🏷️  Git tag version: $TAG_VERSION"
+
+          if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
+            echo "❌ ERROR: Version mismatch!"
+            echo "   package.json: $PACKAGE_VERSION"
+            echo "   git tag: $TAG_VERSION"
+            echo ""
+            echo "💡 Fix: Update package.json version to match the tag or create a new tag matching package.json"
+            exit 1
+          fi
+          echo "✅ Versions match!"
+
+      - name: Verify NPM token is configured
+        run: |
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "❌ ERROR: NPM_TOKEN secret not configured"
+            echo "🔧 Setup: Repository Settings → Secrets and variables → Actions → New repository secret"
+            echo "   Name: NPM_TOKEN"
+            echo "   Value: [your NPM automation token]"
+            exit 1
+          fi
+          echo "✅ NPM_TOKEN is configured"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build templates
+        run: npm run templates:build
+
+      - name: Generate CHANGELOG
+        run: |
+          echo "📝 Generating CHANGELOG..."
+          if [ -f "CHANGELOG.md" ]; then
+            echo "✅ CHANGELOG.md exists"
+          else
+            echo "⚠️  CHANGELOG.md not found, skipping update"
+          fi
+          # Note: Automatic CHANGELOG generation can be added here using conventional-changelog
+          # For now, this step verifies CHANGELOG.md exists for manual updates
+
+      - name: Dry run publish check
+        run: npm publish --dry-run --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to NPM
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ steps.version.outputs.version }}
+          body: |
+            ## 🚀 Release ${{ steps.version.outputs.version }}
+
+            ### Installation
+            ```bash
+            npm install -g the-regent-cli@${{ steps.version.outputs.version }}
+            ```
+
+            ### What's Changed
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md) for details.
+
+            ### NPM Package
+            📦 [the-regent-cli@${{ steps.version.outputs.version }}](https://www.npmjs.com/package/the-regent-cli/v/${{ steps.version.outputs.version }})
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify success
+        if: success()
+        run: |
+          echo "✅ Successfully published the-regent-cli@${{ steps.version.outputs.version }} to NPM"
+          echo "🏷️  GitHub Release created: ${{ github.ref_name }}"
+          echo "📦 NPM: https://www.npmjs.com/package/the-regent-cli/v/${{ steps.version.outputs.version }}"
+
+      - name: Notify failure
+        if: failure()
+        run: |
+          echo "❌ Failed to publish package"
+          echo "🔍 Check the logs above for details"
+          exit 1
