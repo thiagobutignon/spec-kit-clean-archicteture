@@ -63,11 +63,9 @@ jobs:
       - name: Update npm
         run: npm install -g npm@latest
 
-      - name: Install dependencies
+      - name: Clean and install dependencies (Rollup fix)
         run: |
-          # Workaround for npm optional dependencies bug with Rollup
-          # See: https://github.com/npm/cli/issues/4828
-          rm -f package-lock.json
+          rm -rf node_modules package-lock.json
           npm install --include=optional
 
       - name: Run tests
