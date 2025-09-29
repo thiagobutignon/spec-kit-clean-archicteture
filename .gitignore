@@ -10,3 +10,6 @@ templates/*-data-template.regent
 templates/*-infra-template.regent
 templates/*-presentation-template.regent
 templates/*-main-template.regent
+
+# Dogfooding test projects
+dogfooding/
