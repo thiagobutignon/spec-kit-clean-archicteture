@@ -1,9 +1,106 @@
 # Experimento #001: Sequential Template Reading
 
 **Data**: 2025-09-28
-**Versão**: 1.0
-**Status**: 🧪 EXPERIMENTAL
+**Versão**: 1.1
+**Status**: 🟢 EM EXECUÇÃO
 **Tipo**: Dogfooding Arquitetural
+
+## 📊 **ATUALIZAÇÃO DE PROGRESSO**
+
+### ✅ **Marcos Alcançados (2025-09-28)**
+
+#### **🏗️ Correções Arquiteturais Implementadas**
+- ✅ **PR #96 MERGED**: Sequential Template Reading implementado
+- ✅ **Constitutional AI-NOTE**: Emenda constitucional contra fallbacks
+- ✅ **Template Integration**: Conexão .claude ↔ .regent corrigida
+- ✅ **Dead Code Removal**: 8K+ linhas de código morto removidas
+
+#### **📦 NPM Deploy Realizado**
+- ✅ **Package Published**: `the-regent-cli@2.1.1`
+- ✅ **Global Installation**: `npm install -g the-regent-cli`
+- ✅ **Binary Available**: `regent` comando funcionando
+- ✅ **Deployment Issues Fixed**: Scope, postinstall, binary conflicts resolvidos
+
+#### **🧪 Experimento Iniciado**
+- ✅ **Baseline Verification**: `regent init` executado com sucesso
+- ✅ **Project Created**: `user-authentication` projeto inicializado
+- ✅ **Templates Installed**: `.regent/templates/` disponíveis
+- ✅ **Claude Integration**: `.claude/commands/` instalados
+
+### 📋 **Log de Execução do `regent init`**
+
+```bash
+➜  dogfooding git:(experiment/dogfooding-sequential-template-reading) regent init
+🏗️ Initializing The Regent Clean Architecture project...
+
+✔ What is the name of your project? user-authentication
+✔ Which AI assistant will you be using? Claude Code (Anthropic)
+
+Setup Configuration:
+  Project: user-authentication
+  Path: /Users/thiagobutignon/dev/spec-kit-clean-archicteture/dogfooding/user-authentication
+  Mode: New Project
+  AI Assistant: claude
+
+📁 Setting up The Regent structure...
+📋 Setting up Claude AI configuration...
+📄 Installing Clean Architecture templates...
+🎯 Installing core system files...
+📜 Installing utility scripts...
+⚙️ Installing configuration files...
+⚙️ Adding VS Code configuration...
+✅ Created initial project files
+🔧 Initializing git repository...
+✅ Git repository initialized
+✅ Project initialized successfully!
+
+📋 Next Steps:
+1. cd user-authentication
+2. Start the Clean Architecture workflow:
+   /constitution - Review and customize project principles
+   /specify - Create your first feature specification
+   /plan - Generate Clean Architecture implementation plan
+   /tasks - Break down into layer-specific tasks
+   /implement - Execute with .regent templates
+
+💡 Pro Tips:
+• Templates are in .regent/templates/ directory
+• Core files are in .regent/core/ directory
+• Use npm run regent:build to generate layer templates
+• Check .specify/memory/constitution.md for project principles
+```
+
+### 🎯 **Status Atual: FASE 1 COMPLETA**
+
+**Baseline Verification**: ✅ **SUCESSO TOTAL**
+- **Package Installation**: the-regent-cli@2.1.1 funcionando
+- **Project Initialization**: user-authentication criado sem erros
+- **Template System**: 15 templates .regent disponíveis
+- **Claude Integration**: Slash commands instalados e prontos
+
+### 🚀 **PRONTO PARA FASE 2: Sequential Template Reading Test**
+
+#### **Próximo Comando a Executar:**
+```bash
+cd user-authentication
+```
+
+Então executar o comando principal do experimento:
+```markdown
+/01-plan-layer-features --layer=domain --input="Implement user authentication system with email/password login, registration, and JWT token management"
+```
+
+#### **Objetivos da Fase 2:**
+1. ✅ **Validar Sequential Reading**: Steps 1.5.1 → 1.5.2 → 1.5.3 → 1.5.4 → 1.5.5
+2. ✅ **Verificar Template Compliance**: Paths gerados seguem `backend-domain-template.regent`
+3. ✅ **Confirmar Anti-Fallback**: Constitutional AI-NOTE impede fallbacks
+4. ✅ **Medir Performance**: Token usage e tempo de execução
+
+#### **Critérios de Sucesso (Lembretes):**
+- 🔄 Todos os 5 sub-steps executam sem erro
+- 🛡️ Nenhum padrão de fallback ativado
+- 📐 100% dos paths seguem estrutura do template
+- ⚡ Execução < 2 minutos
 
 ## 🎯 Objetivo
 
@@ -27,10 +124,10 @@ Validar que o sistema The Regent consegue se **auto-gerar** usando seus próprio
 ## 🛠️ Setup
 
 ### Pré-requisitos
-- [ ] Sistema The Regent instalado e funcional
-- [ ] Comando `/01-plan-layer-features` com correções da PR #96
-- [ ] Templates .regent disponíveis em `templates/`
-- [ ] Claude Code configurado com slash commands
+- [x] Sistema The Regent instalado e funcional (`the-regent-cli@2.1.1`)
+- [x] Comando `/01-plan-layer-features` com correções da PR #96
+- [x] Templates .regent disponíveis em `templates/` (15 templates)
+- [x] Claude Code configurado com slash commands
 
 ### Verificação do Ambiente
 ```bash
