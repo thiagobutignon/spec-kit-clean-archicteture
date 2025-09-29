@@ -107,7 +107,7 @@ export async function initCommand(projectName: string | undefined, options: Init
       } catch (error) {
         console.log(chalk.yellow('⚠️ MCP installation encountered an issue - continuing without MCP servers'));
         console.log(chalk.dim(`   Error: ${(error as Error).message}`));
-        console.log(chalk.dim('   💡 You can install MCP servers later with: regent setup-mcp\n'));
+        console.log(chalk.dim('   💡 You can install MCP servers manually (see SETUP_MCP.md)\n'));
       }
     } else {
       console.log(chalk.yellow('⏭️  Skipping MCP installation (--skip-mcp flag)\n'));

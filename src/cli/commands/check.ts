@@ -94,6 +94,13 @@ const MCP_TOOLS: ToolCheck[] = [
     description: 'Browser automation',
     installUrl: 'claude mcp add chrome-devtools npx chrome-devtools-mcp@latest',
     required: false
+  },
+  {
+    name: 'playwright',
+    command: 'playwright-mcp',
+    description: 'E2E testing framework',
+    installUrl: 'claude mcp add playwright npx @playwright/mcp@latest',
+    required: false
   }
 ];
 

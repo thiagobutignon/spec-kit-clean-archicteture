@@ -106,8 +106,13 @@ export class MCPInstaller {
    * Install Serena MCP server for code intelligence
    */
   async installSerena(): Promise<void> {
-    const command = `claude mcp add serena -- serena-mcp-server --context ide-assistant --project ${this.projectPath}`;
-    execSync(command, { stdio: 'pipe' });
+    const quotedPath = this.projectPath.includes(' ') ? `"${this.projectPath}"` : this.projectPath;
+    const command = `claude mcp add serena -- serena-mcp-server --context ide-assistant --project ${quotedPath}`;
+    try {
+      execSync(command, { stdio: 'pipe' });
+    } catch (error: any) {
+      throw new Error(error.stderr?.toString() || error.message);
+    }
   }
 
   /**
@@ -115,7 +120,11 @@ export class MCPInstaller {
    */
   async installContext7(apiKey: string): Promise<void> {
     const command = `claude mcp add --transport http context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY: ${apiKey}"`;
-    execSync(command, { stdio: 'pipe' });
+    try {
+      execSync(command, { stdio: 'pipe' });
+    } catch (error: any) {
+      throw new Error(error.stderr?.toString() || error.message);
+    }
   }
 
   /**
@@ -123,7 +132,11 @@ export class MCPInstaller {
    */
   async installChromeDevTools(): Promise<void> {
     const command = 'claude mcp add chrome-devtools npx chrome-devtools-mcp@latest';
-    execSync(command, { stdio: 'pipe' });
+    try {
+      execSync(command, { stdio: 'pipe' });
+    } catch (error: any) {
+      throw new Error(error.stderr?.toString() || error.message);
+    }
   }
 
   /**
@@ -131,7 +144,11 @@ export class MCPInstaller {
    */
   async installPlaywright(): Promise<void> {
     const command = 'claude mcp add playwright npx @playwright/mcp@latest';
-    execSync(command, { stdio: 'pipe' });
+    try {
+      execSync(command, { stdio: 'pipe' });
+    } catch (error: any) {
+      throw new Error(error.stderr?.toString() || error.message);
+    }
   }
 
   /**
