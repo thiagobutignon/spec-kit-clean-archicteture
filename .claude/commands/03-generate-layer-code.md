@@ -73,6 +73,45 @@ Your generated YAML will be scored from -2 to +2:
 | **-1** | RUNTIME ERROR | Execution failure | Missing placeholders, lint failures |
 | **-2** | CATASTROPHIC | Critical violation | Architecture violations, wrong REPLACE/WITH |
 
+## 0. Input Processing
+
+**CRITICAL**: Before proceeding with YAML generation, you must handle the input parameter correctly:
+
+### Step 1: Determine Input Method
+
+Check the command format to identify which input method is being used:
+
+1. **If `--file` parameter is provided** (recommended):
+   ```bash
+   # Example: /03-generate-layer-code --layer=domain --file=spec/001-user-auth/domain/plan.json
+   ```
+   - **Action Required**: Use the Read tool to read the specified JSON file
+   - **Example**: `Read("spec/001-user-auth/domain/plan.json")`
+   - Parse the JSON content from the file
+   - Proceed with YAML generation using the parsed JSON
+
+2. **If inline JSON is provided** (legacy):
+   ```bash
+   # Example: /03-generate-layer-code create feature from json: {...}
+   ```
+   - Parse the JSON directly from the command arguments
+   - Proceed with YAML generation
+
+### Step 2: Validate File Exists (if using --file)
+
+If `--file` parameter is used:
+- Use Read tool to load the validated plan.json file
+- If file doesn't exist, immediately return error message
+- Suggest user to run validation first if file not found
+
+### Step 3: Parse Validated JSON Plan
+
+- Parse the JSON content (either from file or inline)
+- Verify this is a validated plan from `/02-validate-layer-plan`
+- If JSON parsing fails, return error and ask user to check the plan file
+
+**Only after successfully loading and parsing the validated JSON should you proceed to section 1 (Your Deliverable) and beyond.**
+
 ## ⚠️ CRITICAL: Workflow Order
 
 The generated YAML **MUST** follow this exact step order:

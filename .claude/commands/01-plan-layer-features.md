@@ -584,15 +584,16 @@ After generating your JSON plan, provide clear guidance for the next workflow st
 ```markdown
 ✅ JSON Plan Generated Successfully!
 
-📄 Plan saved to: spec/001-user-authentication/domain/plan.json
+📄 Plan saved to: spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/plan.json
+   (Example: spec/001-user-authentication/domain/plan.json)
 
 🚀 Next Step - Validate Your Plan:
-/02-validate-layer-plan --layer=domain --file=spec/001-user-authentication/domain/plan.json
+/02-validate-layer-plan --layer=__LAYER__ --file=spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/plan.json
 
 💡 This will validate your JSON plan for layer-specific compliance and architectural correctness.
 ```
 
-**Important**: Always suggest the validation command with `--file` parameter referencing the generated plan.json file path, NOT inline JSON copy-paste.
+**Important**: Always suggest the validation command with `--file` parameter referencing the **actual** generated plan.json file path (use the real feature name and layer from the input), NOT inline JSON copy-paste or placeholder values.
 
 ---
 

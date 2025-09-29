@@ -61,6 +61,57 @@ This validation directly affects your RLHF score:
 | **+1** | GOOD | Working solution | Valid but missing ubiquitous language |
 | **+2** | PERFECT | Excellence | Complete DDD concepts and ubiquitous language |
 
+## 0. Input Processing
+
+**CRITICAL**: Before proceeding with validation, you must handle the input parameter correctly:
+
+### Step 1: Determine Input Method
+
+Check the command format to identify which input method is being used:
+
+1. **If `--file` parameter is provided**:
+   ```bash
+   # Example: /02-validate-layer-plan --layer=domain --file=spec/001-user-auth/domain/plan.json
+   ```
+   - **Action Required**: Use the Read tool to read the specified JSON file
+   - **Example**: `Read("spec/001-user-auth/domain/plan.json")`
+   - Parse the JSON content from the file
+   - Proceed with validation using the parsed JSON
+
+2. **If inline JSON is provided** (legacy):
+   ```bash
+   # Example: /02-validate-layer-plan --layer=domain from json: {...}
+   ```
+   - Parse the JSON directly from the command arguments
+   - Proceed with validation
+
+### Step 2: Validate File Exists (if using --file)
+
+If `--file` parameter is used:
+- Use Read tool to load the file
+- If file doesn't exist, immediately return error:
+  ```json
+  {
+    "status": "FAILED",
+    "errors": ["File not found: <file-path>"],
+    "severity": "RUNTIME"
+  }
+  ```
+
+### Step 3: Parse JSON
+
+- Parse the JSON content (either from file or inline)
+- If JSON parsing fails, immediately return error:
+  ```json
+  {
+    "status": "FAILED",
+    "errors": ["Invalid JSON format"],
+    "severity": "RUNTIME"
+  }
+  ```
+
+**Only after successfully loading and parsing the JSON should you proceed to section 1 (Your Deliverable) and beyond.**
+
 ## 1. Your Deliverable
 
 Your **only** output for this task is a validation report in JSON format.
@@ -97,6 +148,11 @@ You can provide the JSON plan in two ways:
 ```
 
 ### Option 2: File Reference (recommended)
+```bash
+/02-validate-layer-plan --layer=domain --file=spec/__FEATURE_NUMBER__-__FEATURE_NAME__/domain/plan.json
+```
+
+**Example with actual values:**
 ```bash
 /02-validate-layer-plan --layer=domain --file=spec/001-user-authentication/domain/plan.json
 ```
@@ -326,7 +382,7 @@ After validation completes, provide clear guidance on the next workflow step:
 💡 This will transform your validated JSON plan into executable YAML implementation files.
 ```
 
-**Important**: Always suggest the next command with `--file` parameter referencing the validated plan.json file.
+**Important**: Always suggest the next command with `--file` parameter referencing the **actual** validated plan.json file path from the input (replace the example path with the real one).
 
 ### ❌ If validation FAILED:
 
@@ -342,5 +398,7 @@ Please address the issues above and re-run validation:
 
 💡 Tip: Address CATASTROPHIC errors first, then RUNTIME errors, and finally optimize for PERFECT score.
 ```
+
+**Note**: Replace the example file path with the **actual** path from the input command.
 
 > 💡 **Pro Tip**: Address CATASTROPHIC errors first, then RUNTIME errors, and finally optimize for PERFECT score by adding quality indicators.
