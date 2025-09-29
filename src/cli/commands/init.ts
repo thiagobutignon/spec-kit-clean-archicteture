@@ -5,6 +5,7 @@ import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import inquirer from 'inquirer';
+import { MCPInstaller, promptMCPInstallation } from '../utils/mcp-installer.js';
 
 // Get the directory where this package is installed
 const __filename = fileURLToPath(import.meta.url);
@@ -17,6 +18,7 @@ interface InitOptions {
   force?: boolean;
   git?: boolean;
   debug?: boolean;
+  skipMcp?: boolean;
 }
 
 // AI assistant options
@@ -92,6 +94,24 @@ export async function initCommand(projectName: string | undefined, options: Init
 
     // Show success message
     console.log(chalk.green.bold('✅ Project initialized successfully!\n'));
+
+    // Install MCP servers if not skipped
+    if (!options.skipMcp) {
+      try {
+        const mcpConfig = await promptMCPInstallation();
+
+        if (Object.keys(mcpConfig).length > 0) {
+          const installer = new MCPInstaller(projectPath);
+          await installer.installAll(mcpConfig);
+        }
+      } catch (error) {
+        console.log(chalk.yellow('⚠️ MCP installation encountered an issue - continuing without MCP servers'));
+        console.log(chalk.dim(`   Error: ${(error as Error).message}`));
+        console.log(chalk.dim('   💡 You can install MCP servers manually (see SETUP_MCP.md)\n'));
+      }
+    } else {
+      console.log(chalk.yellow('⏭️  Skipping MCP installation (--skip-mcp flag)\n'));
+    }
 
     // Show next steps
     showNextSteps(displayName, options.here ?? false, isExistingProject);
