@@ -515,13 +515,6 @@ regent init my-project --ai claude
 - **Git**: Configured with GitHub credentials (for project initialization)
 - **NPM**: For global installation and updates
 
-### 🔗 Related Issues
-
-- **Issue #105**: ✅ Auto-install MCP servers during `regent init`
-- **Issue #91**: ✅ Add MCP tools detection to `regent check`
-- **Issue #90**: ✅ Fix branding from 'spec-ca' to 'regent'
-- **Issue #88**: ✅ Change version flag from -V to -v
-
 ## 🚀 Previous Release - v6.1 - E2E TESTING & PERFORMANCE VALIDATION
 
 ### 🎯 Chrome DevTools MCP Integration (NEW!)
