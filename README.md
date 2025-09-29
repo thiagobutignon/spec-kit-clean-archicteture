@@ -442,7 +442,7 @@ features/user/
 | **Context**      | Limited                    | AI knowledge only     | Multiple context sources        |
 | **Workflow**     | Manual adaptation          | Ad-hoc                | Structured development process  |
 
-## 🚀 What's New - v2.1.8
+## 🚀 What's New - v2.1.9
 
 ### 🔧 **MCP Server Auto-Installation**
 
@@ -495,7 +495,7 @@ MCP Tools:
 npm install -g @the-regent/cli
 
 # Verify installation
-regent --version  # Should show 2.1.8
+regent --version  # Should show 2.1.9
 regent check      # Validate system requirements
 ```
 
