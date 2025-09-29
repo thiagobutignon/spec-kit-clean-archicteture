@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/cli/main.js",
   "bin": {
-    "regent": "./bin/regent"
+    "regent": "bin/regent"
   },
   "files": [
     "bin/**/*",
