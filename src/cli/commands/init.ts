@@ -281,18 +281,39 @@ async function detectExistingConfigFiles(projectPath: string): Promise<ExistingC
   return existingFiles;
 }
 
-async function createBackup(filePath: string, backupDir?: string): Promise<string> {
+async function createBackup(filePath: string, projectPath: string, backupDir?: string): Promise<string> {
   const timestamp = Date.now();
-  const fileName = path.basename(filePath);
-  const fileDir = path.dirname(filePath);
+  const ext = path.extname(filePath);
+  const base = path.basename(filePath, ext);
 
-  // If backupDir is provided, use it, otherwise use .regent-backups in project root
-  const projectRoot = path.resolve(fileDir, '..');
-  const targetBackupDir = backupDir || path.join(projectRoot, '.regent-backups');
+  // Determine backup directory
+  const targetBackupDir = backupDir || path.join(projectPath, '.regent-backups');
 
-  await fs.ensureDir(targetBackupDir);
+  // Validate and create backup directory
+  if (backupDir) {
+    // Prevent path traversal attacks
+    const resolvedBackupDir = path.resolve(backupDir);
+    const resolvedProjectPath = path.resolve(projectPath);
 
-  const backupPath = path.join(targetBackupDir, `${fileName}.regent-backup-${timestamp}`);
+    // Check if backupDir is trying to escape project directory (when relative)
+    if (!path.isAbsolute(backupDir) && !resolvedBackupDir.startsWith(resolvedProjectPath)) {
+      throw new Error(`Backup directory must be inside project: ${backupDir}`);
+    }
+
+    try {
+      await fs.ensureDir(resolvedBackupDir);
+    } catch (error) {
+      throw new Error(`Cannot create backup directory: ${backupDir} - ${(error as Error).message}`);
+    }
+  } else {
+    await fs.ensureDir(targetBackupDir);
+  }
+
+  // Create backup with better naming: filename.regent-backup-timestamp.ext
+  // This preserves the extension, making it easier to open with appropriate tools
+  const backupName = `${base}.regent-backup-${timestamp}${ext}`;
+  const backupPath = path.join(targetBackupDir, backupName);
+
   await fs.copy(filePath, backupPath);
 
   return backupPath;
@@ -335,7 +356,7 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
     const answer = await inquirer.prompt([{
       type: 'confirm',
       name: 'backup',
-      message: 'Create backups and continue with Regent configuration?',
+      message: 'Create backups and REPLACE existing files with Regent configuration?',
       default: true
     }]);
 
@@ -350,11 +371,12 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
     console.log(chalk.cyan('\n📦 Creating backups...'));
     for (const file of existingFiles) {
       try {
-        const backupPath = await createBackup(file.path, options.backupDir);
+        const backupPath = await createBackup(file.path, projectPath, options.backupDir);
         const displayPath = options.backupDir ? backupPath : path.relative(projectPath, backupPath);
         console.log(chalk.green(`   ✅ Backed up: ${file.relativePath} → ${displayPath}`));
       } catch (error) {
         console.log(chalk.red(`   ❌ Failed to backup ${file.relativePath}: ${(error as Error).message}`));
+        throw new Error(`Backup failed for ${file.relativePath}. Aborting to prevent data loss.`);
       }
     }
     console.log();
@@ -418,9 +440,29 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
     }
   }
 
-  // .gitignore - merge if exists
+  // .gitignore - merge if exists, create if not
   const gitignorePath = path.join(projectPath, '.gitignore');
-  if (!await fs.pathExists(gitignorePath)) {
+  const regentGitignoreEntries = [
+    '# Spec-kit clean architecture',
+    '.rlhf/',
+    '.logs/',
+    '.regent/templates/*-template.regent',
+    '!.regent/templates/parts/',
+    '.regent-backups/'
+  ];
+
+  if (await fs.pathExists(gitignorePath)) {
+    // Merge Regent entries into existing .gitignore
+    const existingContent = await fs.readFile(gitignorePath, 'utf-8');
+
+    // Check if Regent entries are already present
+    if (!existingContent.includes('.regent-backups/')) {
+      const mergedContent = existingContent.trim() + '\n\n' + regentGitignoreEntries.join('\n') + '\n';
+      await fs.writeFile(gitignorePath, mergedContent);
+      console.log(chalk.cyan('📝 Updated .gitignore with Regent-specific entries'));
+    }
+  } else {
+    // Create new .gitignore with full content
     const gitignore = `# Dependencies
 node_modules/
 .pnp
@@ -464,12 +506,7 @@ yarn-error.log*
 ehthumbs.db
 Thumbs.db
 
-# Spec-kit clean architecture
-.rlhf/
-.logs/
-.regent/templates/*-template.regent
-!.regent/templates/parts/
-.regent-backups/
+${regentGitignoreEntries.join('\n')}
 `;
     await fs.writeFile(gitignorePath, gitignore);
   }

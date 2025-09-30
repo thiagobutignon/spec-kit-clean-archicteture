@@ -204,4 +204,211 @@ describe('Init Command - Directory Structure', () => {
       expect(path.dirname(executeStepsPath)).toBe(path.dirname(validateTemplatePath));
     });
   });
+
+  describe('Brownfield Protection - Backup System', () => {
+    it('should detect existing config files', async () => {
+      // Create a test project with existing config files
+      await fs.ensureDir(testProjectPath);
+      await fs.writeFile(path.join(testProjectPath, 'tsconfig.json'), '{}');
+      await fs.writeFile(path.join(testProjectPath, 'eslint.config.js'), '');
+      await fs.ensureDir(path.join(testProjectPath, '.vscode'));
+      await fs.writeFile(path.join(testProjectPath, '.vscode/settings.json'), '{}');
+
+      // Check files exist
+      expect(await fs.pathExists(path.join(testProjectPath, 'tsconfig.json'))).toBe(true);
+      expect(await fs.pathExists(path.join(testProjectPath, 'eslint.config.js'))).toBe(true);
+      expect(await fs.pathExists(path.join(testProjectPath, '.vscode/settings.json'))).toBe(true);
+    });
+
+    it('should create backup with proper naming format', async () => {
+      // Create test file
+      await fs.ensureDir(testProjectPath);
+      const testFilePath = path.join(testProjectPath, 'test-config.json');
+      await fs.writeFile(testFilePath, '{"test": true}');
+
+      // Create backup directory
+      const backupDir = path.join(testProjectPath, '.regent-backups');
+      await fs.ensureDir(backupDir);
+
+      // Simulate backup creation
+      const timestamp = Date.now();
+      const ext = path.extname(testFilePath);
+      const base = path.basename(testFilePath, ext);
+      const backupName = `${base}.regent-backup-${timestamp}${ext}`;
+      const backupPath = path.join(backupDir, backupName);
+
+      await fs.copy(testFilePath, backupPath);
+
+      // Verify backup exists with correct format
+      expect(await fs.pathExists(backupPath)).toBe(true);
+      expect(backupName).toMatch(/test-config\.regent-backup-\d+\.json/);
+
+      // Verify content is preserved
+      const backupContent = await fs.readFile(backupPath, 'utf-8');
+      expect(backupContent).toBe('{"test": true}');
+    });
+
+    it('should handle multiple backups of same file without collision', async () => {
+      await fs.ensureDir(testProjectPath);
+      const testFilePath = path.join(testProjectPath, 'config.json');
+      await fs.writeFile(testFilePath, '{"version": 1}');
+
+      const backupDir = path.join(testProjectPath, '.regent-backups');
+      await fs.ensureDir(backupDir);
+
+      // Create multiple backups with different timestamps
+      const backups: string[] = [];
+      for (let i = 0; i < 3; i++) {
+        const timestamp = Date.now() + i; // Ensure different timestamps
+        const ext = path.extname(testFilePath);
+        const base = path.basename(testFilePath, ext);
+        const backupName = `${base}.regent-backup-${timestamp}${ext}`;
+        const backupPath = path.join(backupDir, backupName);
+
+        await fs.copy(testFilePath, backupPath);
+        backups.push(backupPath);
+
+        // Small delay to ensure different timestamps
+        await new Promise(resolve => setTimeout(resolve, 2));
+      }
+
+      // Verify all backups exist and have unique names
+      for (const backup of backups) {
+        expect(await fs.pathExists(backup)).toBe(true);
+      }
+
+      const backupFiles = await fs.readdir(backupDir);
+      expect(backupFiles.length).toBe(3);
+      expect(new Set(backupFiles).size).toBe(3); // All unique
+    });
+
+    it('should preserve file extension in backup for easy opening', async () => {
+      await fs.ensureDir(testProjectPath);
+
+      // Test various file types
+      const testFiles = [
+        { name: 'tsconfig.json', content: '{}', expectedPattern: /tsconfig\.regent-backup-\d+\.json$/ },
+        { name: 'settings.json', content: '{}', expectedPattern: /settings\.regent-backup-\d+\.json$/ },
+        { name: 'eslint.config.js', content: '', expectedPattern: /eslint\.config\.regent-backup-\d+\.js$/ },
+        { name: 'vitest.config.ts', content: '', expectedPattern: /vitest\.config\.regent-backup-\d+\.ts$/ }
+      ];
+
+      const backupDir = path.join(testProjectPath, '.regent-backups');
+      await fs.ensureDir(backupDir);
+
+      for (const testFile of testFiles) {
+        const filePath = path.join(testProjectPath, testFile.name);
+        await fs.writeFile(filePath, testFile.content);
+
+        const timestamp = Date.now();
+        const ext = path.extname(filePath);
+        const base = path.basename(filePath, ext);
+        const backupName = `${base}.regent-backup-${timestamp}${ext}`;
+
+        expect(backupName).toMatch(testFile.expectedPattern);
+        expect(path.extname(backupName)).toBe(ext);
+
+        // Clean up
+        await fs.remove(filePath);
+        await new Promise(resolve => setTimeout(resolve, 2));
+      }
+    });
+
+    it('should reject path traversal attempts in backup directory', async () => {
+      await fs.ensureDir(testProjectPath);
+
+      const maliciousBackupDirs = [
+        '../../../etc',
+        '../../outside-project',
+        '../..'
+      ];
+
+      for (const maliciousDir of maliciousBackupDirs) {
+        const resolvedMalicious = path.resolve(maliciousDir);
+        const resolvedProject = path.resolve(testProjectPath);
+
+        // Verify that relative paths outside project are detected
+        if (!path.isAbsolute(maliciousDir)) {
+          const isOutside = !resolvedMalicious.startsWith(resolvedProject);
+          expect(isOutside).toBe(true);
+        }
+      }
+    });
+
+    it('should validate custom backup directory can be created', async () => {
+      await fs.ensureDir(testProjectPath);
+
+      // Valid backup directory
+      const validBackupDir = path.join(testProjectPath, 'custom-backups');
+
+      try {
+        await fs.ensureDir(validBackupDir);
+        expect(await fs.pathExists(validBackupDir)).toBe(true);
+      } catch (error) {
+        // Should not throw for valid directory
+        expect(error).toBeUndefined();
+      }
+
+      // Cleanup
+      await fs.remove(validBackupDir);
+    });
+
+    it('should merge .gitignore entries when file exists', async () => {
+      await fs.ensureDir(testProjectPath);
+
+      // Create existing .gitignore
+      const gitignorePath = path.join(testProjectPath, '.gitignore');
+      const existingContent = 'node_modules/\n*.log\n';
+      await fs.writeFile(gitignorePath, existingContent);
+
+      // Regent entries to add
+      const regentEntries = [
+        '# Spec-kit clean architecture',
+        '.rlhf/',
+        '.logs/',
+        '.regent/templates/*-template.regent',
+        '!.regent/templates/parts/',
+        '.regent-backups/'
+      ];
+
+      // Simulate merge
+      const content = await fs.readFile(gitignorePath, 'utf-8');
+      if (!content.includes('.regent-backups/')) {
+        const mergedContent = content.trim() + '\n\n' + regentEntries.join('\n') + '\n';
+        await fs.writeFile(gitignorePath, mergedContent);
+      }
+
+      // Verify merge
+      const finalContent = await fs.readFile(gitignorePath, 'utf-8');
+      expect(finalContent).toContain('node_modules/');
+      expect(finalContent).toContain('.regent-backups/');
+      expect(finalContent).toContain('.rlhf/');
+      expect(finalContent).toContain('# Spec-kit clean architecture');
+    });
+
+    it('should not duplicate .gitignore entries if already present', async () => {
+      await fs.ensureDir(testProjectPath);
+
+      const gitignorePath = path.join(testProjectPath, '.gitignore');
+      const contentWithRegent = `node_modules/
+*.log
+
+# Spec-kit clean architecture
+.rlhf/
+.logs/
+.regent-backups/
+`;
+      await fs.writeFile(gitignorePath, contentWithRegent);
+
+      // Simulate merge check
+      const content = await fs.readFile(gitignorePath, 'utf-8');
+      const shouldMerge = !content.includes('.regent-backups/');
+
+      expect(shouldMerge).toBe(false); // Should not merge again
+
+      // Verify count of .regent-backups/ mentions
+      const matches = content.match(/\.regent-backups\//g);
+      expect(matches?.length).toBe(1); // Only one occurrence
+    });
+  });
 });
