@@ -1,0 +1,51 @@
+# Execute Command Configuration
+# This file configures the behavior of the /06-execute command
+
+# Commit configuration
+commit:
+  # Enable/disable automatic commits after each step
+  enabled: true
+
+  # Quality checks to run before committing
+  quality_checks:
+    # Run lint before commit
+    lint: true
+    # Custom lint command (optional, defaults to 'lint')
+    lint_command: 'lint'
+
+    # Run tests before commit
+    test: true
+    # Custom test command (optional, defaults to 'test --run')
+    # Useful for different test runners or specific test flags
+    test_command: 'test --run'
+
+  # Conventional commits configuration
+  conventional_commits:
+    # Enable conventional commit format
+    enabled: true
+
+    # Map step types to commit types
+    type_mapping:
+      create_file: 'feat'        # New functionality
+      refactor_file: 'refactor'  # Code improvements
+      delete_file: 'chore'       # Maintenance
+      folder: 'chore'            # Infrastructure (no commit by default)
+      branch: null               # No commit (just branch creation)
+      pull_request: null         # No commit (just PR creation)
+      test: 'test'               # Test additions
+      conditional_file: 'feat'   # Conditional file creation
+
+  # Co-author for commits (must be in format: "Name <email@example.com>")
+  co_author: 'Claude <noreply@anthropic.com>'
+
+  # Emoji configuration for commit messages
+  emoji:
+    # Enable emoji in commit messages
+    enabled: true
+    # Robot emoji to use (default: 🤖)
+    robot: '🤖'
+
+  # Interactive safety prompts
+  # When enabled, asks for confirmation before risky operations
+  # Set to false for CI/CD environments
+  interactive_safety: true
