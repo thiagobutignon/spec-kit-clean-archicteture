@@ -169,8 +169,12 @@ graph TD
 
 ▶️  Processing Step 2/2: create-use-case-create-user
    📄 Creating file: src/features/user/__LAYER__/use-cases/create-user.ts
+   ℹ️  Using package manager: npm
    🔍 Running lint check...
    ✅ Lint check passed
+   🧪 Running tests...
+   ✅ Tests passed
+   💾 Committing: feat(domain): create user use case
    🏆 Step 'create-use-case-create-user' completed successfully. RLHF Score: 2
 
 🎉 All steps completed successfully!
@@ -202,19 +206,28 @@ graph TD
 
 ▶️  Processing Step 2/2: create-use-case-with-axios
    📄 Creating file: src/features/user/__LAYER__/use-cases/fetch-user.ts
-   🔍 Running architecture check...
+   ℹ️  Using package manager: npm
+   🔍 Running lint check...
+   ❌ Lint check failed
+   📋 Lint errors:
+      error: 'axios' should be listed in dependencies (import/no-extraneous-dependencies)
+      error: Direct HTTP imports violate Clean Architecture
+   🔄 Rolling back changes...
+   ↩️  Removed newly created src/features/user/__LAYER__/use-cases/fetch-user.ts
+   ✅ Rollback complete
 
-💥 ERROR: Step 'create-use-case-with-axios' failed. RLHF Score: -2
-🚨 CATASTROPHIC ERROR: Architecture violation detected
-💡 Check: Clean Architecture violations, external dependencies in selected layer
+💥 ERROR: Step 'create-use-case-with-axios' failed. RLHF Score: -1
+🚨 RUNTIME ERROR: Quality checks failed
+💡 Check: Lint failures - external dependencies in domain layer
 
 Aborting execution. The YAML file has been updated with the failure details.
 
 {
   "status": "FAILED",
   "failed_step_id": "create-use-case-with-axios",
-  "error_log": "Architecture violation: axios import found in selected layer",
-  "failed_step_rlhf_score": -2
+  "error_log": "Quality checks failed: Lint errors detected. External dependencies in domain layer violate Clean Architecture.",
+  "commit_hashes": ["e7e4cb9"],
+  "failed_step_rlhf_score": -1
 }
 ```
 </details>
@@ -235,14 +248,74 @@ The `.regent/config/execute-steps.ts` script provides:
 
 | Feature | Description |
 |---------|-------------|
-| **Atomic Commits** | Each step = one Git commit |
-| **Lint Checks** | Automatic TypeScript validation |
-| **Architecture Validation** | Detects selected layer violations |
+| **Smart Commits** | Conventional commits with automatic scope detection |
+| **Quality Gates** | Parallel lint + test checks before each commit |
+| **Interactive Safety** | Prompts for confirmation on risky operations |
+| **Safe Rollback** | Restores pre-existing files, removes only new ones |
+| **Error Boundaries** | Graceful failure handling without crashes |
+| **Git Retry Logic** | Exponential backoff for transient git errors |
+| **Package Manager Detection** | Auto-detects npm/yarn/pnpm with secure execution |
+| **Path Validation** | Prevents path traversal and injection attacks |
 | **RLHF Scoring** | Real-time score calculation |
 | **Progress Tracking** | Visual step-by-step progress |
 | **Error Recovery** | Updates YAML with failure state |
 
-## 9. Common Execution Scenarios
+## 9. Configuration
+
+The execution behavior can be customized via `.regent/config/execute.yml`:
+
+```yaml
+commit:
+  enabled: true                    # Enable/disable automatic commits
+
+  quality_checks:
+    lint: true                     # Run lint before commit
+    test: true                     # Run tests before commit
+
+  conventional_commits:
+    enabled: true                  # Use conventional commit format
+    type_mapping:
+      create_file: 'feat'          # Map step types to commit types
+      refactor_file: 'refactor'
+
+  co_author: 'Claude <noreply@anthropic.com>'  # Commit co-author
+
+  emoji:
+    enabled: true                  # Include emoji in commits
+    robot: '🤖'                    # Robot emoji to use
+
+  interactive_safety: true         # Prompt before risky operations (disable for CI/CD)
+```
+
+### Configuration Options:
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `commit.enabled` | `true` | Enable automatic commits after each step |
+| `quality_checks.lint` | `true` | Run lint checks before committing |
+| `quality_checks.test` | `true` | Run test suite before committing |
+| `conventional_commits.enabled` | `true` | Use conventional commit format (feat/fix/refactor) |
+| `emoji.enabled` | `true` | Include emoji in commit messages |
+| `emoji.robot` | `🤖` | Robot emoji for automated commits |
+| `interactive_safety` | `true` | Ask for confirmation on uncommitted changes (set false for CI/CD) |
+| `co_author` | `Claude <...>` | Co-author line in commits (must be "Name <email@example.com>") |
+
+### Quality Gates:
+
+When quality checks are enabled, each commit is protected by:
+1. **Parallel Execution**: Lint and test run simultaneously for speed
+2. **Automatic Rollback**: Failed checks restore working directory
+3. **Error Reporting**: Detailed output with first 10 errors
+4. **Safe Failures**: Quality check crashes are caught and treated as failures
+
+### Git Safety:
+
+Before execution, the script checks for uncommitted changes:
+- **Interactive Mode** (default): Prompts user to continue or abort
+- **Non-Interactive Mode** (CI/CD): 5-second warning before continuing
+- **Clean State**: Recommended to commit/stash before execution
+
+## 10. Common Execution Scenarios
 
 ### Scenario 1: Partial Execution
 If execution fails at step 5 of 10:
@@ -264,6 +337,21 @@ If all steps succeed with +2:
 - Final score = 2.0
 - Ready for production
 - Action: Consider improvements
+
+### Scenario 4: Quality Check Failures
+If lint or tests fail:
+- **Automatic Rollback**: Changes are reverted safely
+- **Pre-existing Files**: Restored from git history
+- **New Files**: Removed completely
+- **Detailed Errors**: First 10 errors shown for debugging
+- Action: Fix code issues, update YAML, re-run
+
+### Scenario 5: Git Safety Warning
+If uncommitted changes exist:
+- **Interactive Prompt**: "Do you want to continue anyway?"
+- **User Choice**: Continue or abort execution
+- **Non-Interactive**: Automatic 5-second delay (CI/CD mode)
+- Recommendation: Commit or stash before running
 
 ## 📍 Next Steps
 
