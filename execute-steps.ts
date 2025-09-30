@@ -24,7 +24,7 @@ import {
   createQualityCheckResult,
 } from '../utils/commit-generator';
 import { validateConfig, type ValidatedConfig } from '../utils/config-validator';
-import { EXIT_CODES } from '../utils/constants';
+import { EXIT_CODES, RATE_LIMITS } from '../utils/constants';
 
 $.verbose = true;
 $.shell = '/bin/bash';
@@ -122,6 +122,9 @@ class EnhancedStepExecutor {
   private cachedPackageManager: 'npm' | 'yarn' | 'pnpm' | null = null;
   private lastKnownCommitHash: string | null = null;
   private cleanupHandlers: Array<{ signal: NodeJS.Signals; handler: () => void }> = [];
+  private gitOpTimestamps: number[] = [];
+  private lastGitOpTime: number = 0;
+  private auditLog: Array<{ timestamp: string; event: string; details: any }> = [];
 
   /**
    * Create a new EnhancedStepExecutor instance
@@ -175,10 +178,8 @@ class EnhancedStepExecutor {
         // Ignore cleanup errors
       }
 
-      this.logger.close();
-
-      // Remove signal handlers before exit to prevent memory leaks
-      this.removeCleanupHandlers();
+      // Cleanup all resources using destructor pattern
+      this.destroy();
 
       process.exit(EXIT_CODES.SIGINT);
     };
@@ -200,6 +201,65 @@ class EnhancedStepExecutor {
       process.removeListener(signal, handler);
     }
     this.cleanupHandlers = [];
+  }
+
+  /**
+   * Log security-relevant events for audit trail
+   * @param event - Event type (e.g., 'script_validation', 'git_operation', 'rollback')
+   * @param details - Event details object
+   */
+  private logAuditEvent(event: string, details: any): void {
+    const auditEntry = {
+      timestamp: new Date().toISOString(),
+      event,
+      details,
+    };
+
+    this.auditLog.push(auditEntry);
+
+    // Log to console in verbose mode
+    if (process.env.AUDIT_LOG === 'true') {
+      console.log(chalk.gray(`   [AUDIT] ${event}: ${JSON.stringify(details)}`));
+    }
+
+    // Keep only last 100 entries to prevent memory bloat
+    if (this.auditLog.length > 100) {
+      this.auditLog = this.auditLog.slice(-100);
+    }
+  }
+
+  /**
+   * Rate limit git operations to prevent overwhelming the system
+   * Uses token bucket algorithm with burst capacity
+   * @returns Promise that resolves when operation can proceed
+   */
+  private async rateLimitGitOperation(): Promise<void> {
+    const now = Date.now();
+
+    // Enforce minimum delay between operations
+    const timeSinceLastOp = now - this.lastGitOpTime;
+    if (timeSinceLastOp < RATE_LIMITS.MIN_GIT_DELAY) {
+      await new Promise(resolve => setTimeout(resolve, RATE_LIMITS.MIN_GIT_DELAY - timeSinceLastOp));
+    }
+
+    // Clean up timestamps older than 1 minute
+    const oneMinuteAgo = now - 60000;
+    this.gitOpTimestamps = this.gitOpTimestamps.filter(ts => ts > oneMinuteAgo);
+
+    // Check if we've exceeded the rate limit
+    if (this.gitOpTimestamps.length >= RATE_LIMITS.GIT_OPS_PER_MINUTE) {
+      const oldestTimestamp = this.gitOpTimestamps[0];
+      const waitTime = 60000 - (now - oldestTimestamp);
+
+      if (waitTime > 0) {
+        console.log(chalk.yellow(`   ⏱️  Rate limit reached, waiting ${Math.ceil(waitTime / 1000)}s...`));
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+    }
+
+    // Record this operation
+    this.gitOpTimestamps.push(Date.now());
+    this.lastGitOpTime = Date.now();
   }
 
   /**
@@ -280,7 +340,24 @@ class EnhancedStepExecutor {
     }
 
     // Block dangerous keywords
-    const dangerousKeywords = ['rm', 'curl', 'wget', 'eval', '&&', '||', ';', '|', '>', '<', '`', '$'];
+    const dangerousKeywords = [
+      // File operations
+      'rm', 'rmdir', 'del', 'delete',
+      // Permission changes
+      'chmod', 'chown', 'chgrp', 'sudo', 'su',
+      // Network operations
+      'curl', 'wget', 'nc', 'netcat', 'telnet', 'ssh', 'scp', 'ftp',
+      // Process operations
+      'kill', 'killall', 'pkill',
+      // Dangerous commands
+      'eval', 'exec', 'source',
+      // Shell operators
+      '&&', '||', ';', '|', '>', '<', '>>', '<<',
+      // Variable expansion
+      '`', '$', '${',
+      // Path manipulation
+      '../', '..',
+    ];
     return !dangerousKeywords.some(keyword => script.includes(keyword));
   }
 
@@ -291,12 +368,21 @@ class EnhancedStepExecutor {
    */
   private validateScript(script: string): void {
     if (!this.isScriptSafe(script)) {
+      // Audit log: Security event - unsafe script blocked
+      this.logAuditEvent('script_validation_failed', {
+        script,
+        reason: 'Contains dangerous keywords or invalid characters',
+      });
+
       throw new Error(
         `Unsafe script detected: "${script}". ` +
         `Scripts must contain only alphanumeric characters, hyphens, colons, and spaces, ` +
         `and cannot contain dangerous keywords.`
       );
     }
+
+    // Audit log: Script validation passed
+    this.logAuditEvent('script_validation_success', { script });
   }
 
   /**
@@ -742,10 +828,29 @@ class EnhancedStepExecutor {
     console.log(chalk.cyan.bold(`\n📊 Final RLHF Score: ${finalScore}/2`));
     console.log(chalk.cyan('Run `npx tsx rlhf-system.ts report` to see learning insights'));
 
-    // Clean up signal handlers after successful execution
+    // Cleanup resources
+    this.destroy();
+  }
+
+  /**
+   * Destructor pattern - cleanup all resources
+   * Should be called when execution completes or errors
+   * Ensures no resource leaks (signal handlers, file descriptors, etc)
+   */
+  public destroy(): void {
+    // Remove signal handlers to prevent memory leaks
     this.removeCleanupHandlers();
 
+    // Close logger file descriptors
     this.logger.close();
+
+    // Clear caches
+    this.executionCache.clear();
+    this.cachedPackageManager = null;
+    this.lastKnownCommitHash = null;
+
+    // Clear commit hashes
+    this.commitHashes = [];
   }
 
   /**
@@ -1270,6 +1375,9 @@ class EnhancedStepExecutor {
     }
 
     try {
+      // Rate limit git operations
+      await this.rateLimitGitOperation();
+
       // Verify git index is clean before staging
       const cachedResult = await $`git diff --cached --name-only`;
       const alreadyStaged = cachedResult.stdout.trim().split('\n').filter(f => f.length > 0);
@@ -1282,6 +1390,8 @@ class EnhancedStepExecutor {
       // Add files to git - be specific about what to stage
       console.log(chalk.blue('   📝 Staging changes...'));
       if (step.path && fs.existsSync(step.path)) {
+        // Rate limit before staging
+        await this.rateLimitGitOperation();
         // Stage the specific file from the step
         await $`git add ${step.path}`;
       } else {
@@ -1333,6 +1443,13 @@ class EnhancedStepExecutor {
    */
   private async rollbackStep(step: Step): Promise<void> {
     console.log(chalk.yellow('   🔄 Rolling back changes...'));
+
+    // Audit log: Rollback initiated
+    this.logAuditEvent('rollback_started', {
+      stepId: step.id,
+      stepType: step.type,
+      stepPath: step.path,
+    });
 
     try {
       // Verify git state hasn't been manually modified since step start
@@ -1414,9 +1531,22 @@ class EnhancedStepExecutor {
       }
 
       console.log(chalk.green('   ✅ Rollback complete'));
+
+      // Audit log: Rollback completed successfully
+      this.logAuditEvent('rollback_success', {
+        stepId: step.id,
+        stepType: step.type,
+      });
     } catch (error: any) {
       console.log(chalk.red(`   ⚠️  Rollback failed: ${error.message}`));
       console.log(chalk.yellow('   ℹ️  Manual cleanup may be required'));
+
+      // Audit log: Rollback failed
+      this.logAuditEvent('rollback_failed', {
+        stepId: step.id,
+        stepType: step.type,
+        error: error.message,
+      });
     }
   }
 

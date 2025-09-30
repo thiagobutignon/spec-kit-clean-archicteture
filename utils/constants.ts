@@ -29,6 +29,20 @@ export const RETRY = {
 } as const;
 
 /**
+ * Rate limiting configuration
+ */
+export const RATE_LIMITS = {
+  /** Maximum git operations per minute */
+  GIT_OPS_PER_MINUTE: 60,
+
+  /** Maximum git operations burst (tokens in bucket) */
+  GIT_OPS_BURST: 10,
+
+  /** Minimum delay between git operations (ms) */
+  MIN_GIT_DELAY: 100,
+} as const;
+
+/**
  * Output limits
  */
 export const OUTPUT_LIMITS = {
