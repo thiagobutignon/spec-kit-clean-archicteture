@@ -159,6 +159,8 @@ The **`regent`** CLI provides a complete toolkit for spec-driven Clean Architect
 
 ### Layer-Driven Workflow Commands
 
+The Regent system uses **9 numbered commands** (`/01` through `/09`) that follow the complete Clean Architecture development lifecycle. Each command is validated and proven to work with `.regent/` templates.
+
 | Command | Purpose | Integration |
 |---------|---------|-------------|
 | `/01-plan-layer-features` | Detailed layer planning | Template generation |
@@ -170,6 +172,8 @@ The **`regent`** CLI provides a complete toolkit for spec-driven Clean Architect
 | `/07-fix-layer-errors` | Fix architectural violations | Error correction |
 | `/08-apply-layer-improvements` | Apply learning feedback | Template evolution |
 | `/09-e2e-performance-testing` | End-to-end validation | Quality assurance |
+
+> **Migration Note**: If you were using legacy commands (`/constitution`, `/specify`, `/plan`, `/tasks`, `/implement`, `/clarify`, `/analyze`), they have been removed as of v2.2.0. Use the numbered workflow above instead - start with `/01-plan-layer-features` to begin your implementation.
 
 ## 🏗️ Layer-Driven Clean Architecture
 
