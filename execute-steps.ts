@@ -124,7 +124,6 @@ class EnhancedStepExecutor {
   private cleanupHandlers: Array<{ signal: NodeJS.Signals; handler: () => void }> = [];
   private gitOpTimestamps: number[] = [];
   private lastGitOpTime: number = 0;
-  private rateLimitLock: Promise<void> = Promise.resolve();
   private auditLog: Array<{ timestamp: string; event: string; details: any }> = [];
 
   /**
@@ -232,54 +231,35 @@ class EnhancedStepExecutor {
   /**
    * Rate limit git operations to prevent overwhelming the system
    * Uses token bucket algorithm with burst capacity
-   * Thread-safe using promise-based lock to prevent race conditions
    * @returns Promise that resolves when operation can proceed
    */
   private async rateLimitGitOperation(): Promise<void> {
-    // Wait for any in-progress rate limit check to complete (prevents race condition)
-    await this.rateLimitLock;
+    const now = Date.now();
 
-    // Create new lock for this operation
-    let releaseLock: () => void;
-    this.rateLimitLock = new Promise(resolve => {
-      releaseLock = resolve;
-    });
-
-    try {
-      const now = Date.now();
-
-      // Enforce minimum delay between operations
-      const timeSinceLastOp = now - this.lastGitOpTime;
-      if (timeSinceLastOp < RATE_LIMITS.MIN_GIT_DELAY) {
-        await new Promise(resolve => setTimeout(resolve, RATE_LIMITS.MIN_GIT_DELAY - timeSinceLastOp));
-      }
-
-      // Clean up timestamps older than 1 minute (safe now that we have lock)
-      const oneMinuteAgo = Date.now() - 60000;
-      this.gitOpTimestamps = this.gitOpTimestamps.filter(ts => ts > oneMinuteAgo);
-
-      // Check if we've exceeded the rate limit
-      if (this.gitOpTimestamps.length >= RATE_LIMITS.GIT_OPS_PER_MINUTE) {
-        const oldestTimestamp = this.gitOpTimestamps[0];
-        const waitTime = 60000 - (Date.now() - oldestTimestamp);
-
-        if (waitTime > 0) {
-          console.log(chalk.yellow(`   ⏱️  Rate limit reached, waiting ${Math.ceil(waitTime / 1000)}s...`));
-          await new Promise(resolve => setTimeout(resolve, waitTime));
-
-          // Clean up again after waiting
-          const updatedOneMinuteAgo = Date.now() - 60000;
-          this.gitOpTimestamps = this.gitOpTimestamps.filter(ts => ts > updatedOneMinuteAgo);
-        }
-      }
-
-      // Record this operation (safe with lock)
-      this.gitOpTimestamps.push(Date.now());
-      this.lastGitOpTime = Date.now();
-    } finally {
-      // Always release lock
-      releaseLock!();
+    // Enforce minimum delay between operations
+    const timeSinceLastOp = now - this.lastGitOpTime;
+    if (timeSinceLastOp < RATE_LIMITS.MIN_GIT_DELAY) {
+      await new Promise(resolve => setTimeout(resolve, RATE_LIMITS.MIN_GIT_DELAY - timeSinceLastOp));
     }
+
+    // Clean up timestamps older than 1 minute
+    const oneMinuteAgo = now - 60000;
+    this.gitOpTimestamps = this.gitOpTimestamps.filter(ts => ts > oneMinuteAgo);
+
+    // Check if we've exceeded the rate limit
+    if (this.gitOpTimestamps.length >= RATE_LIMITS.GIT_OPS_PER_MINUTE) {
+      const oldestTimestamp = this.gitOpTimestamps[0];
+      const waitTime = 60000 - (now - oldestTimestamp);
+
+      if (waitTime > 0) {
+        console.log(chalk.yellow(`   ⏱️  Rate limit reached, waiting ${Math.ceil(waitTime / 1000)}s...`));
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+    }
+
+    // Record this operation
+    this.gitOpTimestamps.push(Date.now());
+    this.lastGitOpTime = Date.now();
   }
 
   /**
@@ -1457,57 +1437,9 @@ class EnhancedStepExecutor {
   }
 
   /**
-   * Retry a git operation with exponential backoff
-   * @param operation The git operation to retry
-   * @param operationName Human-readable name for logging
-   * @param maxRetries Maximum number of retries
-   * @returns Result of the operation
-   */
-  private async retryGitOperation<T>(
-    operation: () => Promise<T>,
-    operationName: string,
-    maxRetries: number = RETRY.MAX_GIT_RETRIES
-  ): Promise<T> {
-    let lastError: Error | undefined;
-
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        return await operation();
-      } catch (error: any) {
-        lastError = error;
-        const errorMsg = extractErrorMessage(error, 'Unknown error');
-
-        // Don't retry on certain permanent errors
-        if (
-          errorMsg.includes('not a git repository') ||
-          errorMsg.includes('does not exist') ||
-          errorMsg.includes('permission denied')
-        ) {
-          throw error;
-        }
-
-        if (attempt < maxRetries) {
-          const delayMs = TIMING.GIT_RETRY_DELAY * Math.pow(2, attempt - 1);
-          console.log(
-            chalk.yellow(
-              `   ⏳ ${operationName} failed (attempt ${attempt}/${maxRetries}), retrying in ${delayMs}ms...`
-            )
-          );
-          await new Promise(resolve => setTimeout(resolve, delayMs));
-        }
-      }
-    }
-
-    throw new Error(
-      `${operationName} failed after ${maxRetries} attempts: ${extractErrorMessage(lastError, 'Unknown error')}`
-    );
-  }
-
-  /**
    * Rollback changes made by a failed step
    * Only rolls back files modified by this step, preserving user's uncommitted changes
    * Verifies git state hasn't changed to prevent unsafe rollbacks
-   * Uses retry logic with exponential backoff for transient git failures
    */
   private async rollbackStep(step: Step): Promise<void> {
     console.log(chalk.yellow('   🔄 Rolling back changes...'));
@@ -1522,13 +1454,8 @@ class EnhancedStepExecutor {
     try {
       // Verify git state hasn't been manually modified since step start
       if (this.lastKnownCommitHash) {
-        const currentHash = await this.retryGitOperation(
-          async () => {
-            const result = await $`git rev-parse HEAD`;
-            return result.stdout.trim();
-          },
-          'Git state verification'
-        );
+        const currentHashResult = await $`git rev-parse HEAD`;
+        const currentHash = currentHashResult.stdout.trim();
 
         if (currentHash !== this.lastKnownCommitHash) {
           throw new Error(
@@ -1539,19 +1466,11 @@ class EnhancedStepExecutor {
         }
       }
       // Get list of files staged for commit (files modified by this step)
-      const stagedFiles = await this.retryGitOperation(
-        async () => {
-          const result = await $`git diff --cached --name-only`;
-          return result.stdout.trim().split('\n').filter(f => f.length > 0);
-        },
-        'Get staged files'
-      );
+      const stagedResult = await $`git diff --cached --name-only`;
+      const stagedFiles = stagedResult.stdout.trim().split('\n').filter(f => f.length > 0);
 
       // Reset staged changes first
-      await this.retryGitOperation(
-        async () => await $`git reset HEAD`,
-        'Reset staged changes'
-      );
+      await $`git reset HEAD`;
 
       // Handle the specific step path
       if (step.path) {
@@ -1560,16 +1479,10 @@ class EnhancedStepExecutor {
         if (fileExists) {
           // Check if this file existed in the last commit
           try {
-            await this.retryGitOperation(
-              async () => await $`git cat-file -e HEAD:${step.path}`,
-              'Check file existence in HEAD'
-            );
+            await $`git cat-file -e HEAD:${step.path}`;
             // File existed before - restore it from git (only if it was staged)
             if (stagedFiles.includes(step.path)) {
-              await this.retryGitOperation(
-                async () => await $`git checkout HEAD -- ${step.path}`,
-                'Restore file from HEAD'
-              );
+              await $`git checkout HEAD -- ${step.path}`;
               console.log(chalk.yellow(`   ↩️  Restored ${step.path} from last commit`));
             }
           } catch {
@@ -1592,10 +1505,7 @@ class EnhancedStepExecutor {
         for (const file of filesToRestore) {
           try {
             // Check if file exists in HEAD
-            await this.retryGitOperation(
-              async () => await $`git cat-file -e HEAD:${file}`,
-              `Check file ${file} in HEAD`
-            );
+            await $`git cat-file -e HEAD:${file}`;
             filesToCheckout.push(file);
           } catch {
             filesToRemove.push(file);
@@ -1604,10 +1514,7 @@ class EnhancedStepExecutor {
 
         // Batch restore files that exist in HEAD
         if (filesToCheckout.length > 0) {
-          await this.retryGitOperation(
-            async () => await $`git checkout HEAD -- ${filesToCheckout}`,
-            'Restore files from HEAD'
-          );
+          await $`git checkout HEAD -- ${filesToCheckout}`;
           console.log(chalk.gray(`   ↩️  Restored ${filesToCheckout.length} file(s) from HEAD`));
         }
 
