@@ -33,17 +33,17 @@ describe('MCPInstaller', () => {
         .mockReturnValueOnce(Buffer.from('')) // which claude
         .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
-      const result = await installer.verifyInstallation();
+      const result = await installer.verifyInstallation(0); // No retries for faster tests
 
       expect(result).toEqual(['serena', 'context7', 'chrome-devtools']);
       expect(childProcess.execSync).toHaveBeenCalledWith('which claude', {
         stdio: 'pipe',
-        timeout: 2000
+        timeout: expect.any(Number)
       });
       expect(childProcess.execSync).toHaveBeenCalledWith('claude mcp list', {
         encoding: 'utf-8',
         stdio: 'pipe',
-        timeout: 5000
+        timeout: expect.any(Number)
       });
     });
 
@@ -54,7 +54,7 @@ describe('MCPInstaller', () => {
         .mockReturnValueOnce(Buffer.from('')) // which claude
         .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
-      const result = await installer.verifyInstallation();
+      const result = await installer.verifyInstallation(0); // No retries for faster tests
 
       expect(result).toEqual([]);
     });
@@ -71,7 +71,7 @@ describe('MCPInstaller', () => {
         .mockReturnValueOnce(Buffer.from('')) // which claude
         .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
-      const result = await installer.verifyInstallation();
+      const result = await installer.verifyInstallation(0); // No retries for faster tests
 
       expect(result).toEqual(['serena', 'context7']);
       expect(result).not.toContain('unknown-server');
@@ -85,7 +85,7 @@ describe('MCPInstaller', () => {
         throw new Error('which: no claude in PATH');
       });
 
-      const result = await installer.verifyInstallation();
+      const result = await installer.verifyInstallation(0); // No retries for faster tests
 
       expect(result).toEqual([]);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -102,7 +102,7 @@ describe('MCPInstaller', () => {
           throw new Error('Command failed');
         });
 
-      const result = await installer.verifyInstallation();
+      const result = await installer.verifyInstallation(0); // No retries for faster tests
 
       expect(result).toEqual([]);
     });
@@ -116,7 +116,7 @@ describe('MCPInstaller', () => {
           throw error;
         });
 
-      const result = await installer.verifyInstallation();
+      const result = await installer.verifyInstallation(0); // No retries for faster tests
 
       expect(result).toEqual([]);
     });
@@ -132,7 +132,7 @@ chrome-devtools installation failed
         .mockReturnValueOnce(Buffer.from('')) // which claude
         .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
-      const result = await installer.verifyInstallation();
+      const result = await installer.verifyInstallation(0); // No retries for faster tests
 
       // Should not detect any servers since they're in error messages
       expect(result).toEqual([]);
@@ -149,7 +149,7 @@ chrome-devtools installation failed
         .mockReturnValueOnce(Buffer.from('')) // which claude
         .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
-      const result = await installer.verifyInstallation();
+      const result = await installer.verifyInstallation(0); // No retries for faster tests
 
       expect(result).toEqual(['serena', 'context7']);
       expect(result.filter(s => s === 'serena')).toHaveLength(1);
@@ -167,7 +167,7 @@ chrome-devtools installation failed
         .mockReturnValueOnce(Buffer.from('')) // which claude
         .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
-      const result = await installer.verifyInstallation();
+      const result = await installer.verifyInstallation(0); // No retries for faster tests
 
       expect(result).toEqual(['serena', 'context7', 'chrome-devtools', 'playwright']);
     });
@@ -183,7 +183,7 @@ chrome-devtools installation failed
         .mockReturnValueOnce(Buffer.from('')) // which claude
         .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
-      const result = await installer.verifyInstallation();
+      const result = await installer.verifyInstallation(0); // No retries for faster tests
 
       expect(result).toEqual(['serena', 'context7', 'chrome-devtools']);
     });

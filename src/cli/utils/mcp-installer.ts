@@ -11,9 +11,10 @@ import inquirer from 'inquirer';
 export const SUPPORTED_MCP_SERVERS = ['serena', 'context7', 'chrome-devtools', 'playwright'] as const;
 
 // Verification timeouts (in milliseconds)
+// Higher timeouts in CI environments to account for slower execution
 export const VERIFICATION_TIMEOUT = {
-  CLI_CHECK: 2000,    // 2 seconds to check if claude CLI exists
-  MCP_LIST: 5000      // 5 seconds to list MCP servers
+  CLI_CHECK: process.env.CI ? 5000 : 2000,    // 2s local, 5s CI
+  MCP_LIST: process.env.CI ? 10000 : 5000     // 5s local, 10s CI
 } as const;
 
 export interface MCPConfig {
@@ -121,7 +122,9 @@ export class MCPInstaller {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
       const errorMsg = error.stderr?.toString() || error.message || 'Unknown error';
-      throw new Error(`Failed to install Serena MCP server: ${errorMsg}`);
+      const enhancedError = new Error(`Failed to install Serena MCP server: ${errorMsg}`) as Error & { cause?: any };
+      enhancedError.cause = error; // Preserve original error for debugging
+      throw enhancedError;
     }
   }
 
@@ -134,7 +137,9 @@ export class MCPInstaller {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
       const errorMsg = error.stderr?.toString() || error.message || 'Unknown error';
-      throw new Error(`Failed to install Context7 MCP server: ${errorMsg}`);
+      const enhancedError = new Error(`Failed to install Context7 MCP server: ${errorMsg}`) as Error & { cause?: any };
+      enhancedError.cause = error;
+      throw enhancedError;
     }
   }
 
@@ -147,7 +152,9 @@ export class MCPInstaller {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
       const errorMsg = error.stderr?.toString() || error.message || 'Unknown error';
-      throw new Error(`Failed to install Chrome DevTools MCP server: ${errorMsg}`);
+      const enhancedError = new Error(`Failed to install Chrome DevTools MCP server: ${errorMsg}`) as Error & { cause?: any };
+      enhancedError.cause = error;
+      throw enhancedError;
     }
   }
 
@@ -160,48 +167,77 @@ export class MCPInstaller {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
       const errorMsg = error.stderr?.toString() || error.message || 'Unknown error';
-      throw new Error(`Failed to install Playwright MCP server: ${errorMsg}`);
+      const enhancedError = new Error(`Failed to install Playwright MCP server: ${errorMsg}`) as Error & { cause?: any };
+      enhancedError.cause = error;
+      throw enhancedError;
     }
   }
 
   /**
    * Verify MCP servers are properly installed
+   * @param retries Number of retry attempts (default: 2)
+   * @returns Array of detected server names
    */
-  async verifyInstallation(): Promise<string[]> {
-    try {
-      // Check if claude CLI is available
+  async verifyInstallation(retries = 2): Promise<string[]> {
+    for (let attempt = 0; attempt <= retries; attempt++) {
       try {
-        execSync('which claude', { stdio: 'pipe', timeout: VERIFICATION_TIMEOUT.CLI_CHECK });
-      } catch {
-        console.log(chalk.yellow('⚠️ Claude CLI not found - skipping MCP verification'));
-        return [];
-      }
-
-      const output = execSync('claude mcp list', {
-        encoding: 'utf-8',
-        stdio: 'pipe',
-        timeout: VERIFICATION_TIMEOUT.MCP_LIST
-      });
-
-      // Parse only lines that look like server entries
-      // Typical format: "  server-name    Connected" or "  server-name    Available"
-      const serverRegex = /^\s+([\w-]+)\s+(?:Connected|Available|configured)/gm;
-      const servers = new Set<string>();
-
-      // Use matchAll for safer regex iteration (no stateful global flag issues)
-      const matches = output.matchAll(serverRegex);
-      for (const match of matches) {
-        const serverName = match[1];
-        // Only add known MCP servers to avoid false positives
-        if (SUPPORTED_MCP_SERVERS.includes(serverName as typeof SUPPORTED_MCP_SERVERS[number])) {
-          servers.add(serverName);
+        // Check if claude CLI is available
+        try {
+          execSync('which claude', { stdio: 'pipe', timeout: VERIFICATION_TIMEOUT.CLI_CHECK });
+        } catch {
+          if (attempt === 0) {
+            console.log(chalk.yellow('⚠️ Claude CLI not found - skipping MCP verification'));
+          }
+          return [];
         }
-      }
 
-      return Array.from(servers);
-    } catch {
-      return [];
+        const output = execSync('claude mcp list', {
+          encoding: 'utf-8',
+          stdio: 'pipe',
+          timeout: VERIFICATION_TIMEOUT.MCP_LIST
+        });
+
+        // Parse only lines that look like server entries
+        // Typical format: "  server-name    Connected" or "  server-name    Available"
+        const serverRegex = /^\s+([\w-]+)\s+(?:Connected|Available|configured)$/gm;
+        const servers = new Set<string>();
+
+        // Use matchAll for safer regex iteration (no stateful global flag issues)
+        const matches = output.matchAll(serverRegex);
+        for (const match of matches) {
+          const serverName = match[1];
+          // Only add known MCP servers to avoid false positives
+          if (SUPPORTED_MCP_SERVERS.includes(serverName as typeof SUPPORTED_MCP_SERVERS[number])) {
+            servers.add(serverName);
+          }
+        }
+
+        // If we found servers or this is the last attempt, return results
+        if (servers.size > 0 || attempt === retries) {
+          return Array.from(servers);
+        }
+
+        // Wait before retry to allow MCP servers to initialize
+        if (attempt < retries) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      } catch (error) {
+        // Log error for debugging in verbose mode
+        if (process.env.DEBUG || process.env.VERBOSE) {
+          console.error(`Verification attempt ${attempt + 1} failed:`, error);
+        }
+
+        // If this is the last attempt, return empty array
+        if (attempt === retries) {
+          return [];
+        }
+
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
     }
+
+    return [];
   }
 
   /**
