@@ -67,7 +67,7 @@ Setup Configuration:
 • Templates are in .regent/templates/ directory
 • Core files are in .regent/core/ directory
 • Use npm run regent:build to generate layer templates
-• Check .specify/memory/constitution.md for project principles
+• Check .regent/docs/constitution.md for project principles
 ```
 
 ### 🎯 **Current Status: PHASE 1 COMPLETE**

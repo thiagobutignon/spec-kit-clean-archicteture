@@ -108,7 +108,8 @@ describe('Init Command - Directory Structure', () => {
         '.regent/scripts',
         '.regent/templates',
         '.regent/config',
-        '.regent/utils'  // This is the new one we added
+        '.regent/utils',
+        '.regent/docs'  // New: for documentation like constitution.md
       ];
 
       // Simulate directory creation
@@ -132,6 +133,51 @@ describe('Init Command - Directory Structure', () => {
       // Verify it's a directory
       const stats = await fs.stat(utilsDir);
       expect(stats.isDirectory()).toBe(true);
+    });
+
+    it('should not create legacy .specify directories', async () => {
+      // These directories should NOT be created anymore
+      const legacyDirs = [
+        '.specify',
+        '.specify/memory',
+        '.specify/specs',
+        '.specify/plans',
+        '.specify/tasks',
+        '.specify/scripts'
+      ];
+
+      // Verify they don't exist (they were never created)
+      for (const dir of legacyDirs) {
+        const dirPath = path.join(testProjectPath, dir);
+        expect(await fs.pathExists(dirPath)).toBe(false);
+      }
+    });
+
+    it('should create .regent/docs for documentation', async () => {
+      const docsDir = path.join(testProjectPath, '.regent/docs');
+      await fs.ensureDir(docsDir);
+
+      expect(await fs.pathExists(docsDir)).toBe(true);
+
+      // Verify it's a directory
+      const stats = await fs.stat(docsDir);
+      expect(stats.isDirectory()).toBe(true);
+    });
+
+    it('should create constitution.md in .regent/docs (not .specify/memory)', async () => {
+      await fs.ensureDir(path.join(testProjectPath, '.regent/docs'));
+
+      const constitutionPath = path.join(testProjectPath, '.regent/docs/constitution.md');
+      const constitution = '# Test Constitution\n\nTest content';
+
+      await fs.writeFile(constitutionPath, constitution);
+
+      // Verify file exists in correct location
+      expect(await fs.pathExists(constitutionPath)).toBe(true);
+
+      // Verify it's NOT in old location
+      const oldPath = path.join(testProjectPath, '.specify/memory/constitution.md');
+      expect(await fs.pathExists(oldPath)).toBe(false);
     });
   });
 
