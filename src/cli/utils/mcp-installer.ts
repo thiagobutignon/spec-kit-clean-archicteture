@@ -20,6 +20,9 @@ export const VERIFICATION_TIMEOUT = {
 // Retry configuration
 export const RETRY_DELAY_MS = 1000; // 1 second delay between retry attempts
 
+// Error message patterns
+const ALREADY_EXISTS_PATTERN = 'already exists';
+
 /**
  * Custom error class for MCP installation failures
  * Preserves original error as cause for debugging
@@ -66,11 +69,19 @@ export class MCPInstaller {
   }
 
   /**
+   * Type guard to check if error is MCPAlreadyExistsError
+   * Provides type-safe error checking
+   */
+  private isAlreadyExistsError(error: unknown): error is MCPAlreadyExistsError {
+    return error instanceof MCPAlreadyExistsError;
+  }
+
+  /**
    * Handle installation errors and update report accordingly
    * Reduces code duplication across all install methods
    */
   private handleInstallError(error: Error, serverName: string, displayName: string, report: InstallReport): void {
-    if (error instanceof MCPAlreadyExistsError) {
+    if (this.isAlreadyExistsError(error)) {
       report.skipped.push(`${serverName} (already installed)`);
       console.log(chalk.yellow(`⏭️  ${displayName} - Already installed (skipped)\n`));
     } else {
@@ -161,7 +172,7 @@ export class MCPInstaller {
       const stderr = error.stderr?.toString() || error.message || '';
 
       // Check if it's "already exists" error
-      if (stderr.includes('already exists')) {
+      if (stderr.includes(ALREADY_EXISTS_PATTERN)) {
         throw new MCPAlreadyExistsError('serena');
       }
 
@@ -180,7 +191,7 @@ export class MCPInstaller {
       const stderr = error.stderr?.toString() || error.message || '';
 
       // Check if it's "already exists" error
-      if (stderr.includes('already exists')) {
+      if (stderr.includes(ALREADY_EXISTS_PATTERN)) {
         throw new MCPAlreadyExistsError('context7');
       }
 
@@ -199,7 +210,7 @@ export class MCPInstaller {
       const stderr = error.stderr?.toString() || error.message || '';
 
       // Check if it's "already exists" error
-      if (stderr.includes('already exists')) {
+      if (stderr.includes(ALREADY_EXISTS_PATTERN)) {
         throw new MCPAlreadyExistsError('chrome-devtools');
       }
 
@@ -218,7 +229,7 @@ export class MCPInstaller {
       const stderr = error.stderr?.toString() || error.message || '';
 
       // Check if it's "already exists" error
-      if (stderr.includes('already exists')) {
+      if (stderr.includes(ALREADY_EXISTS_PATTERN)) {
         throw new MCPAlreadyExistsError('playwright');
       }
 
