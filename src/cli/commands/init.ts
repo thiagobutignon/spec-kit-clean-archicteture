@@ -146,26 +146,21 @@ export async function initCommand(projectName: string | undefined, options: Init
 async function createProjectStructure(projectPath: string, options: InitOptions, isExistingProject: boolean): Promise<void> {
   console.log(chalk.cyan('📁 Setting up The Regent structure...'));
 
-  // Create spec-kit specific directories
-  const specKitDirs = [
+  // Create The Regent specific directories
+  const regentDirs = [
     '.regent',
     '.regent/core',
     '.regent/scripts',
     '.regent/templates',
     '.regent/config',
     '.regent/utils',
-    '.specify',
-    '.specify/memory',
-    '.specify/specs',
-    '.specify/plans',
-    '.specify/tasks',
-    '.specify/scripts',
+    '.regent/docs',
     '.claude',
     '.claude/commands',
     '.claude/agents'
   ];
 
-  for (const dir of specKitDirs) {
+  for (const dir of regentDirs) {
     await fs.ensureDir(path.join(projectPath, dir));
   }
 
@@ -379,7 +374,7 @@ async function createInitialFiles(projectPath: string, _options: InitOptions): P
 - API contract compliance
 `;
 
-  await fs.writeFile(path.join(projectPath, '.specify/memory/constitution.md'), constitution);
+  await fs.writeFile(path.join(projectPath, '.regent/docs/constitution.md'), constitution);
 
   // Create .gitignore
   const gitignorePath = path.join(projectPath, '.gitignore');
@@ -470,7 +465,7 @@ async function updateExistingProject(projectPath: string): Promise<void> {
   }
 
   // Create constitution if doesn't exist
-  const constitutionPath = path.join(projectPath, '.specify/memory/constitution.md');
+  const constitutionPath = path.join(projectPath, '.regent/docs/constitution.md');
   if (!await fs.pathExists(constitutionPath)) {
     const constitution = `# Project Constitution
 
@@ -528,7 +523,7 @@ function showNextSteps(projectName: string, isHere: boolean, isExistingProject: 
   console.log(`• Templates are in ${chalk.blue('.regent/templates/')} directory`);
   console.log(`• Core files are in ${chalk.blue('.regent/core/')} directory`);
   console.log(`• Use ${chalk.green('npm run regent:build')} to generate layer templates`);
-  console.log(`• Check ${chalk.blue('.specify/memory/constitution.md')} for project principles`);
+  console.log(`• Check ${chalk.blue('.regent/docs/constitution.md')} for project principles`);
   console.log(`• If MCP servers installed: restart Claude Code session for detection`);
 
   if (isExistingProject) {
