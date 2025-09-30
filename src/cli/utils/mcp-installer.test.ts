@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { MCPInstaller } from './mcp-installer';
+import { MCPInstaller, MCPAlreadyExistsError } from './mcp-installer';
 import * as childProcess from 'child_process';
 
 // Mock child_process
@@ -226,6 +226,137 @@ chrome-devtools installation failed
       });
 
       await expect(installer.installSerena()).rejects.toThrow('Error: package not found');
+    });
+
+    it('should throw MCPAlreadyExistsError when server already exists', async () => {
+      const error: any = new Error('Installation failed');
+      error.stderr = Buffer.from('MCP server serena already exists in local config');
+
+      vi.spyOn(childProcess, 'execSync').mockImplementation(() => {
+        throw error;
+      });
+
+      await expect(installer.installSerena()).rejects.toThrow(MCPAlreadyExistsError);
+      await expect(installer.installSerena()).rejects.toThrow('MCP server serena already exists');
+    });
+  });
+
+  describe('installContext7', () => {
+    it('should throw MCPAlreadyExistsError when server already exists', async () => {
+      const error: any = new Error('Installation failed');
+      error.stderr = Buffer.from('MCP server context7 already exists in local config');
+
+      vi.spyOn(childProcess, 'execSync').mockImplementation(() => {
+        throw error;
+      });
+
+      await expect(installer.installContext7('test-api-key')).rejects.toThrow(MCPAlreadyExistsError);
+      await expect(installer.installContext7('test-api-key')).rejects.toThrow('MCP server context7 already exists');
+    });
+  });
+
+  describe('installChromeDevTools', () => {
+    it('should throw MCPAlreadyExistsError when server already exists', async () => {
+      const error: any = new Error('Installation failed');
+      error.stderr = Buffer.from('MCP server chrome-devtools already exists in local config');
+
+      vi.spyOn(childProcess, 'execSync').mockImplementation(() => {
+        throw error;
+      });
+
+      await expect(installer.installChromeDevTools()).rejects.toThrow(MCPAlreadyExistsError);
+      await expect(installer.installChromeDevTools()).rejects.toThrow('MCP server chrome-devtools already exists');
+    });
+  });
+
+  describe('installPlaywright', () => {
+    it('should throw MCPAlreadyExistsError when server already exists', async () => {
+      const error: any = new Error('Installation failed');
+      error.stderr = Buffer.from('MCP server playwright already exists in local config');
+
+      vi.spyOn(childProcess, 'execSync').mockImplementation(() => {
+        throw error;
+      });
+
+      await expect(installer.installPlaywright()).rejects.toThrow(MCPAlreadyExistsError);
+      await expect(installer.installPlaywright()).rejects.toThrow('MCP server playwright already exists');
+    });
+  });
+
+  describe('installAll', () => {
+    it('should handle already exists errors as skipped', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const error: any = new Error('Installation failed');
+      error.stderr = Buffer.from('MCP server serena already exists in local config');
+
+      vi.spyOn(childProcess, 'execSync').mockImplementationOnce(() => {
+        throw error;
+      });
+
+      const report = await installer.installAll({ installSerena: true });
+
+      expect(report.skipped).toContain('serena (already installed)');
+      expect(report.failed).not.toContain('serena');
+      expect(report.successful).not.toContain('serena');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('⏭️  Serena - Already installed (skipped)')
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should handle multiple already exists errors correctly', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const serenaError: any = new Error('Installation failed');
+      serenaError.stderr = Buffer.from('MCP server serena already exists in local config');
+
+      const chromeError: any = new Error('Installation failed');
+      chromeError.stderr = Buffer.from('MCP server chrome-devtools already exists in local config');
+
+      vi.spyOn(childProcess, 'execSync')
+        .mockImplementationOnce(() => { throw serenaError; })
+        .mockImplementationOnce(() => { throw chromeError; });
+
+      const report = await installer.installAll({
+        installSerena: true,
+        installChromeDevTools: true
+      });
+
+      expect(report.skipped).toContain('serena (already installed)');
+      expect(report.skipped).toContain('chrome-devtools (already installed)');
+      expect(report.failed).toHaveLength(0);
+      expect(report.successful).toHaveLength(0);
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should differentiate between genuine failures and already exists', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const alreadyExistsError: any = new Error('Installation failed');
+      alreadyExistsError.stderr = Buffer.from('MCP server serena already exists in local config');
+
+      const realError: any = new Error('Installation failed');
+      realError.stderr = Buffer.from('Error: network timeout');
+
+      vi.spyOn(childProcess, 'execSync')
+        .mockImplementationOnce(() => { throw alreadyExistsError; })
+        .mockImplementationOnce(() => { throw realError; });
+
+      const report = await installer.installAll({
+        installSerena: true,
+        installChromeDevTools: true
+      });
+
+      expect(report.skipped).toContain('serena (already installed)');
+      expect(report.failed).toContain('chrome-devtools');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('⏭️  Serena - Already installed (skipped)')
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('❌ Chrome DevTools installation failed')
+      );
+
+      consoleSpy.mockRestore();
     });
   });
 });
