@@ -15,6 +15,14 @@ import { EnhancedRLHFSystem, LayerInfo } from '../core/rlhf-system';
 import { resolveLogDirectory } from '../utils/log-path-resolver';
 import { EnhancedTemplateValidator } from './validate-template';
 import type { ValidationResult } from './validate-template';
+import {
+  generateCommitMessage,
+  shouldCommitStep,
+  type CommitConfig,
+  DEFAULT_COMMIT_CONFIG,
+  type QualityCheckResult,
+  createQualityCheckResult,
+} from '../utils/commit-generator';
 
 $.verbose = true;
 $.shell = '/bin/bash';
@@ -64,6 +72,8 @@ class EnhancedStepExecutor {
   private layerInfo: LayerInfo | null = null;
   private validationResult: ValidationResult | null = null;
   private executionCache: Map<string, any> = new Map();
+  private commitConfig: CommitConfig;
+  private commitHashes: string[] = [];
 
   constructor(private implementationPath: string) {
     this.plan = { steps: [] };
@@ -73,9 +83,19 @@ class EnhancedStepExecutor {
     this.logger = new Logger(logDir);
     this.rlhf = new EnhancedRLHFSystem(implementationPath);
     this.validator = new EnhancedTemplateValidator();
+    this.commitConfig = this.loadCommitConfig();
 
     // Detect layer from filename
     this.layerInfo = this.detectLayerInfo(implementationPath);
+  }
+
+  /**
+   * Load commit configuration from file or use defaults
+   */
+  private loadCommitConfig(): CommitConfig {
+    // TODO: In future, load from .regent/config/execute.yml
+    // For now, use defaults
+    return { ...DEFAULT_COMMIT_CONFIG };
   }
 
   /**
@@ -265,6 +285,26 @@ class EnhancedStepExecutor {
           await this.savePlan();
         }
 
+        // Run quality checks before committing
+        const qualityCheckResult = await this.runQualityChecks();
+
+        if (!qualityCheckResult.overallPassed) {
+          // Quality checks failed - update status
+          step.status = 'FAILED';
+          step.rlhf_score = -1; // Runtime error
+          step.execution_log += `\n\n--- QUALITY CHECKS FAILED ---\nLint: ${qualityCheckResult.lint.passed ? 'PASSED' : 'FAILED'}\nTest: ${qualityCheckResult.test.passed ? 'PASSED' : 'FAILED'}`;
+          await this.savePlan();
+
+          throw new Error(
+            `Quality checks failed.\n` +
+            `Lint: ${qualityCheckResult.lint.passed ? '✅' : '❌'}\n` +
+            `Test: ${qualityCheckResult.test.passed ? '✅' : '❌'}`
+          );
+        }
+
+        // Commit the step if quality checks passed
+        await this.commitStep(step, stepId);
+
         // Visual feedback with layer context
         const scoreEmoji = this.getScoreEmoji(step.rlhf_score || 0);
         const scoreColor = this.getScoreColor(step.rlhf_score || 0);
@@ -302,6 +342,14 @@ class EnhancedStepExecutor {
 
     console.log(chalk.green.bold('\n🎉 All steps completed successfully!'));
 
+    // Display commit summary
+    if (this.commitHashes.length > 0) {
+      console.log(chalk.cyan.bold(`\n💾 Commits created: ${this.commitHashes.length}`));
+      this.commitHashes.forEach((hash, index) => {
+        console.log(chalk.gray(`   ${index + 1}. ${hash}`));
+      });
+    }
+
     // Display layer-specific summary
     if (this.layerInfo) {
       console.log(chalk.cyan(`\n📊 ${this.layerInfo.target} / ${this.layerInfo.layer} layer execution complete!`));
@@ -316,6 +364,7 @@ class EnhancedStepExecutor {
     this.plan.evaluation = this.plan.evaluation || {};
     this.plan.evaluation.final_rlhf_score = finalScore;
     this.plan.evaluation.final_status = 'SUCCESS';
+    this.plan.evaluation.commit_hashes = this.commitHashes;
     await this.savePlan();
 
     console.log(chalk.cyan.bold(`\n📊 Final RLHF Score: ${finalScore}/2`));
@@ -670,6 +719,111 @@ class EnhancedStepExecutor {
     }
 
     return baseError;
+  }
+
+  /**
+   * Run quality checks (lint and test) based on configuration
+   */
+  private async runQualityChecks(): Promise<QualityCheckResult> {
+    let lintPassed = true;
+    let lintOutput = '';
+    let testPassed = true;
+    let testOutput = '';
+
+    // Run lint if enabled
+    if (this.commitConfig.qualityChecks.lint) {
+      console.log(chalk.blue('   🔍 Running lint check...'));
+      try {
+        $.verbose = false;
+        const lintResult = await $`yarn lint`;
+        $.verbose = true;
+        lintOutput = lintResult.stdout + lintResult.stderr;
+        lintPassed = true;
+        console.log(chalk.green('   ✅ Lint check passed'));
+      } catch (error: any) {
+        $.verbose = true;
+        lintOutput = error.stdout + error.stderr;
+        lintPassed = false;
+        console.log(chalk.red('   ❌ Lint check failed'));
+        console.log(chalk.red(`   ${lintOutput.substring(0, 200)}...`));
+      }
+    }
+
+    // Run tests if enabled and lint passed
+    if (this.commitConfig.qualityChecks.test && lintPassed) {
+      console.log(chalk.blue('   🧪 Running tests...'));
+      try {
+        $.verbose = false;
+        const testResult = await $`yarn test --run`;
+        $.verbose = true;
+        testOutput = testResult.stdout + testResult.stderr;
+        testPassed = true;
+        console.log(chalk.green('   ✅ Tests passed'));
+      } catch (error: any) {
+        $.verbose = true;
+        testOutput = error.stdout + error.stderr;
+        testPassed = false;
+        console.log(chalk.red('   ❌ Tests failed'));
+        console.log(chalk.red(`   ${testOutput.substring(0, 200)}...`));
+      }
+    }
+
+    return createQualityCheckResult(lintPassed, testPassed, lintOutput, testOutput);
+  }
+
+  /**
+   * Commit the step changes if applicable
+   */
+  private async commitStep(step: Step, stepId: string): Promise<void> {
+    // Check if this step type should be committed
+    if (!shouldCommitStep(step.type, this.commitConfig)) {
+      console.log(chalk.gray(`   ⏭️  Step type '${step.type}' does not require commit`));
+      return;
+    }
+
+    // Generate commit message
+    const commitMessage = generateCommitMessage(
+      step.type,
+      step.id || stepId,
+      step.path,
+      this.commitConfig
+    );
+
+    if (!commitMessage) {
+      console.log(chalk.gray(`   ⏭️  No commit message generated for step`));
+      return;
+    }
+
+    try {
+      // Add files to git
+      console.log(chalk.blue('   📝 Staging changes...'));
+      if (step.path) {
+        await $`git add ${step.path}`;
+      } else {
+        await $`git add .`;
+      }
+
+      // Commit with generated message
+      console.log(chalk.blue('   💾 Creating commit...'));
+      const commitResult = await $`git commit -m ${commitMessage}`;
+
+      // Get the commit hash
+      const hashResult = await $`git rev-parse --short HEAD`;
+      const commitHash = hashResult.stdout.trim();
+      this.commitHashes.push(commitHash);
+
+      console.log(chalk.green(`   ✅ Committed: ${commitHash}`));
+      console.log(chalk.gray(`   📋 ${commitMessage.split('\n')[0]}`));
+    } catch (error: any) {
+      // If commit fails, it might be because there are no changes or other git issues
+      const errorMsg = error.stderr || error.message || 'Unknown git error';
+
+      if (errorMsg.includes('nothing to commit')) {
+        console.log(chalk.yellow('   ⚠️  No changes to commit'));
+      } else {
+        throw new Error(`Git commit failed: ${errorMsg}`);
+      }
+    }
   }
 
   private async runValidationScript(scriptContent: string, stepId: string): Promise<string> {
