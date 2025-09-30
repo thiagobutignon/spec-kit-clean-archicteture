@@ -148,13 +148,16 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
 
   // Create The Regent specific directories
   const regentDirs = [
+    // Core regent structure
     '.regent',
     '.regent/core',
-    '.regent/scripts',
     '.regent/templates',
+    '.regent/scripts',
     '.regent/config',
     '.regent/utils',
     '.regent/docs',
+
+    // Claude integration
     '.claude',
     '.claude/commands',
     '.claude/agents'
