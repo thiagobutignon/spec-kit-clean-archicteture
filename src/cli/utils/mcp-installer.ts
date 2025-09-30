@@ -17,6 +17,22 @@ export const VERIFICATION_TIMEOUT = {
   MCP_LIST: process.env.CI ? 10000 : 5000     // 5s local, 10s CI
 } as const;
 
+// Retry configuration
+export const RETRY_DELAY_MS = 1000; // 1 second delay between retry attempts
+
+/**
+ * Custom error class for MCP installation failures
+ * Preserves original error as cause for debugging
+ */
+export class MCPInstallationError extends Error {
+  constructor(serverName: string, originalError: any) {
+    const errorMsg = originalError?.stderr?.toString() || originalError?.message || 'Unknown error';
+    super(`Failed to install ${serverName} MCP server: ${errorMsg}`);
+    this.name = 'MCPInstallationError';
+    this.cause = originalError;
+  }
+}
+
 export interface MCPConfig {
   installSerena?: boolean;
   installContext7?: boolean;
@@ -121,10 +137,7 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
-      const errorMsg = error.stderr?.toString() || error.message || 'Unknown error';
-      const enhancedError = new Error(`Failed to install Serena MCP server: ${errorMsg}`) as Error & { cause?: any };
-      enhancedError.cause = error; // Preserve original error for debugging
-      throw enhancedError;
+      throw new MCPInstallationError('Serena', error);
     }
   }
 
@@ -136,10 +149,7 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
-      const errorMsg = error.stderr?.toString() || error.message || 'Unknown error';
-      const enhancedError = new Error(`Failed to install Context7 MCP server: ${errorMsg}`) as Error & { cause?: any };
-      enhancedError.cause = error;
-      throw enhancedError;
+      throw new MCPInstallationError('Context7', error);
     }
   }
 
@@ -151,10 +161,7 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
-      const errorMsg = error.stderr?.toString() || error.message || 'Unknown error';
-      const enhancedError = new Error(`Failed to install Chrome DevTools MCP server: ${errorMsg}`) as Error & { cause?: any };
-      enhancedError.cause = error;
-      throw enhancedError;
+      throw new MCPInstallationError('Chrome DevTools', error);
     }
   }
 
@@ -166,10 +173,7 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
-      const errorMsg = error.stderr?.toString() || error.message || 'Unknown error';
-      const enhancedError = new Error(`Failed to install Playwright MCP server: ${errorMsg}`) as Error & { cause?: any };
-      enhancedError.cause = error;
-      throw enhancedError;
+      throw new MCPInstallationError('Playwright', error);
     }
   }
 
@@ -219,7 +223,7 @@ export class MCPInstaller {
 
         // Wait before retry to allow MCP servers to initialize
         if (attempt < retries) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
         }
       } catch (error) {
         // Log error for debugging in verbose mode
@@ -233,7 +237,7 @@ export class MCPInstaller {
         }
 
         // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
       }
     }
 

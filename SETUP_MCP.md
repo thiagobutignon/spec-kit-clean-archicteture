@@ -42,7 +42,19 @@ Verify MCP servers are installed:
 claude mcp list
 ```
 
-Expected response should list configured servers like `serena`, `context7`, `chrome-devtools`, and `playwright`.
+**Expected Output Format:**
+```
+  serena           Connected
+  context7         Available
+  chrome-devtools  Connected
+  playwright       configured
+```
+
+Each line shows:
+- **Server name** (left-aligned with spacing)
+- **Status** (Connected, Available, or configured)
+
+If you see "No MCP servers configured" instead, the installation may need a retry or Claude Code session restart.
 
 **Important:** If servers don't appear, restart your Claude Code session to detect newly installed MCP servers.
 
