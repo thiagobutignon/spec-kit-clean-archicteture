@@ -59,6 +59,38 @@ next_command_rejected: "/04-reflect-layer-lessons from yaml: <yaml> OR /01-plan-
 
 # Task: Evaluate Domain YAML Plan
 
+## 🚨 AI-NOTE: MANDATORY OBJECTIVE VALIDATION
+
+**CRITICAL**: You MUST run objective validation FIRST, before any subjective analysis.
+
+**Command** (use Bash tool):
+```bash
+tsx .regent/config/validate-template.ts --file=<yaml-path> --json
+```
+
+**If validation fails (valid: false):**
+- ✋ **IMMEDIATELY return REJECTED**
+- 🚫 **DO NOT proceed with subjective analysis**
+- 📋 **Include all validation errors in the violations array**
+
+**Why This Matters:**
+- ✅ Objective validation catches concrete errors (syntax, schema, dependencies)
+- ⚠️ LLM analysis is subjective and can miss technical violations
+- 🔄 "LLM validating LLM" creates circular validation
+- 🎯 Objective checks provide ground truth
+
+**Example Flow:**
+```bash
+# 1. Run validation
+tsx .regent/config/validate-template.ts --file=spec/001-feature/domain/implementation.yaml --json
+
+# 2. Parse JSON output
+# If valid: false → REJECT immediately with errors
+# If valid: true → Continue with subjective review
+```
+
+---
+
 ## 🤖 RLHF Score Correlation
 
 The evaluation score directly correlates with expected RLHF execution scores:

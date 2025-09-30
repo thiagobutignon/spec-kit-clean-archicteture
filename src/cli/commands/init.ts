@@ -191,6 +191,13 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
   if (await fs.pathExists(sourceUtilsDir)) {
     console.log(chalk.cyan('🔧 Installing utility modules...'));
     await fs.copy(sourceUtilsDir, targetUtilsDir, { overwrite: true });
+
+    // Verify critical files exist
+    const logResolverPath = path.join(targetUtilsDir, 'log-path-resolver.ts');
+    if (!await fs.pathExists(logResolverPath)) {
+      throw new Error('Failed to copy utils/ directory - log-path-resolver.ts missing');
+    }
+    console.log(chalk.green('   ✅ Utility modules installed'));
   }
 
   // Copy config files to .regent/config
