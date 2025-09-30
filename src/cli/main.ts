@@ -36,7 +36,7 @@ program.help = function(options?: any) {
 // Commands
 program
   .command('init')
-  .description('Initialize a new Clean Architecture project')
+  .description('Initialize a new Clean Architecture project (use "regent init --help" for all options)')
   .argument('[project-name]', 'Name for your new project directory')
   .option('--ai <assistant>', 'AI assistant to use (claude, gemini, copilot, cursor)')
   .option('--here', 'Initialize in current directory')
