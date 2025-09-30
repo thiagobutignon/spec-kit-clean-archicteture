@@ -301,6 +301,47 @@ Business Rules:
 
 ---
 
+### Bug #109: CLI Help Missing Options Documentation
+**Discovered**: 2025-09-30 00:03 (during `regent init` with flags)
+**Version**: 2.1.9
+**Severity**: Low (Documentation/Discoverability Issue)
+**Phase**: Environment Setup
+
+**Description**: The `regent --help` output doesn't inform users about command-specific help (`regent init --help`), making it hard to discover useful options like `--skip-mcp`, `--here`, `--force`, etc.
+
+**Current Behavior**:
+```bash
+regent --help
+# Shows: init [options] [project-name]
+# But no hint that "regent init --help" exists
+```
+
+**Expected Behavior**:
+```bash
+regent --help
+# Should hint: "Use 'regent init --help' for command options"
+```
+
+**Impact**:
+- Low discoverability of useful flags
+- Users don't know `--skip-mcp`, `--here`, `--force` exist
+- Poor CLI UX (options work but are hidden)
+
+**Note**: All options actually **work perfectly** when used! This is just a discoverability issue.
+
+**Reproduction**:
+1. Run: `regent --help`
+2. See `init [options]` without details
+3. Most users won't try `regent init --help`
+
+**Location**: `src/cli/main.ts` - command descriptions
+**Status**: 🔴 Open
+**Issue**: #109
+**Fix Priority**: Low
+**Workaround**: Run `regent init --help` to see all options
+
+---
+
 **Started**: 2025-09-29 23:55
 **Last Update**: 2025-09-30 00:01
 **Status**: 🔄 IN PROGRESS - Bug mapping active
