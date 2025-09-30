@@ -185,6 +185,28 @@ export function generateCommitMessage(
   filePath?: string,
   config: CommitConfig = DEFAULT_COMMIT_CONFIG
 ): string | null {
+  // Input validation
+  if (!stepType || typeof stepType !== 'string') {
+    throw new Error('Invalid stepType: must be a non-empty string');
+  }
+
+  if (!description || typeof description !== 'string' || description.trim().length === 0) {
+    throw new Error('Invalid description: must be a non-empty string');
+  }
+
+  if (!config || typeof config !== 'object') {
+    throw new Error('Invalid config: must be an object');
+  }
+
+  // Validate config structure
+  if (typeof config.enabled !== 'boolean') {
+    throw new Error('Invalid config.enabled: must be a boolean');
+  }
+
+  if (!config.conventionalCommits || typeof config.conventionalCommits !== 'object') {
+    throw new Error('Invalid config.conventionalCommits: must be an object');
+  }
+
   if (!config.enabled || !config.conventionalCommits.enabled) {
     return null;
   }

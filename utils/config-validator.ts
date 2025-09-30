@@ -4,6 +4,8 @@
  */
 
 import { z } from 'zod';
+import * as path from 'path';
+import { OUTPUT_LIMITS } from './constants';
 import type { CommitConfig } from './commit-generator';
 
 /**
@@ -98,7 +100,10 @@ export function validateConfig(config: unknown): {
  * @param maxLength - Maximum allowed length
  * @returns Validation result
  */
-export function validateCommitMessage(message: string, maxLength = 500): {
+export function validateCommitMessage(
+  message: string,
+  maxLength: number = OUTPUT_LIMITS.MAX_COMMIT_MESSAGE_LENGTH
+): {
   valid: boolean;
   error?: string;
   truncated?: string;
@@ -122,7 +127,7 @@ export function validateCommitMessage(message: string, maxLength = 500): {
     };
   }
 
-  if (firstLine.length > 72) {
+  if (firstLine.length > OUTPUT_LIMITS.MAX_COMMIT_SUBJECT_LENGTH) {
     return {
       valid: false,
       error: 'Commit subject line should be 72 characters or less',
@@ -183,11 +188,22 @@ export function validateFilePath(filePath: string): {
     }
   }
 
+  // Normalize path to resolve . and .. segments
+  let normalized = path.normalize(filePath);
+
   // Remove any null bytes
-  const sanitized = filePath.replace(/\0/g, '');
+  normalized = normalized.replace(/\0/g, '');
+
+  // After normalization, check if path tries to escape (starts with ..)
+  if (normalized.startsWith('..')) {
+    return {
+      valid: false,
+      error: 'Path attempts to traverse outside allowed directory',
+    };
+  }
 
   // Check for absolute paths (should be relative)
-  if (filePath.startsWith('/') || /^[A-Za-z]:/.test(filePath)) {
+  if (path.isAbsolute(normalized)) {
     return {
       valid: false,
       error: 'Absolute paths are not allowed. Use relative paths only.',
@@ -196,6 +212,6 @@ export function validateFilePath(filePath: string): {
 
   return {
     valid: true,
-    sanitized,
+    sanitized: normalized,
   };
 }

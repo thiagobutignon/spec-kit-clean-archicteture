@@ -24,6 +24,7 @@ import {
   createQualityCheckResult,
 } from '../utils/commit-generator';
 import { validateConfig, type ValidatedConfig } from '../utils/config-validator';
+import { EXIT_CODES } from '../utils/constants';
 
 $.verbose = true;
 $.shell = '/bin/bash';
@@ -120,6 +121,7 @@ class EnhancedStepExecutor {
   private commitHashes: string[] = [];
   private cachedPackageManager: 'npm' | 'yarn' | 'pnpm' | null = null;
   private lastKnownCommitHash: string | null = null;
+  private cleanupHandlers: Array<{ signal: NodeJS.Signals; handler: () => void }> = [];
 
   /**
    * Create a new EnhancedStepExecutor instance
@@ -159,6 +161,7 @@ class EnhancedStepExecutor {
 
   /**
    * Setup signal handlers for graceful cleanup on interrupt
+   * Stores handler references for cleanup to prevent memory leaks
    */
   private setupCleanupHandlers(): void {
     const cleanup = async () => {
@@ -173,13 +176,30 @@ class EnhancedStepExecutor {
       }
 
       this.logger.close();
-      process.exit(130); // Standard exit code for SIGINT
+
+      // Remove signal handlers before exit to prevent memory leaks
+      this.removeCleanupHandlers();
+
+      process.exit(EXIT_CODES.SIGINT);
     };
 
     // Handle Ctrl+C
     process.on('SIGINT', cleanup);
+    this.cleanupHandlers.push({ signal: 'SIGINT', handler: cleanup });
+
     // Handle kill signals
     process.on('SIGTERM', cleanup);
+    this.cleanupHandlers.push({ signal: 'SIGTERM', handler: cleanup });
+  }
+
+  /**
+   * Remove signal handlers to prevent memory leaks
+   */
+  private removeCleanupHandlers(): void {
+    for (const { signal, handler } of this.cleanupHandlers) {
+      process.removeListener(signal, handler);
+    }
+    this.cleanupHandlers = [];
   }
 
   /**
@@ -281,25 +301,28 @@ class EnhancedStepExecutor {
 
   /**
    * Get the package manager command for running scripts
-   * Validates script names against allowlist to prevent command injection
+   * Validates script names and returns command + args array for safe execution
    * @param script - Script name (e.g., 'lint', 'test')
-   * @returns Command string to execute
+   * @returns Object with command and arguments array
    */
-  private async getPackageManagerCommand(script: string): Promise<string> {
+  private async getPackageManagerCommand(script: string): Promise<{ command: string; args: string[] }> {
     // Validate script against allowlist
     this.validateScript(script);
 
     const pm = await this.detectPackageManager();
 
+    // Split script into parts for safe execution
+    const scriptParts = script.split(/\s+/);
+
     switch (pm) {
       case 'pnpm':
-        return `pnpm ${script}`;
+        return { command: 'pnpm', args: scriptParts };
       case 'yarn':
-        return `yarn ${script}`;
+        return { command: 'yarn', args: scriptParts };
       case 'npm':
-        return `npm run ${script}`;
+        return { command: 'npm', args: ['run', ...scriptParts] };
       default:
-        return `npm run ${script}`;
+        return { command: 'npm', args: ['run', ...scriptParts] };
     }
   }
 
@@ -719,6 +742,9 @@ class EnhancedStepExecutor {
     console.log(chalk.cyan.bold(`\n📊 Final RLHF Score: ${finalScore}/2`));
     console.log(chalk.cyan('Run `npx tsx rlhf-system.ts report` to see learning insights'));
 
+    // Clean up signal handlers after successful execution
+    this.removeCleanupHandlers();
+
     this.logger.close();
   }
 
@@ -1130,8 +1156,8 @@ class EnhancedStepExecutor {
           try {
             $.verbose = false;
             const scriptName = this.commitConfig.qualityChecks.lintCommand || 'lint';
-            const lintCommand = await this.getPackageManagerCommand(scriptName);
-            const lintResult = await $`sh -c ${lintCommand}`;
+            const { command, args } = await this.getPackageManagerCommand(scriptName);
+            const lintResult = await $`${[command, ...args]}`;
             $.verbose = true;
             console.log(chalk.green('   ✅ Lint check passed'));
             return { type: 'lint' as const, passed: true, output: lintResult.stdout + lintResult.stderr };
@@ -1161,8 +1187,8 @@ class EnhancedStepExecutor {
           try {
             $.verbose = false;
             const scriptName = this.commitConfig.qualityChecks.testCommand || 'test --run';
-            const testCommand = await this.getPackageManagerCommand(scriptName);
-            const testResult = await $`sh -c ${testCommand}`;
+            const { command, args } = await this.getPackageManagerCommand(scriptName);
+            const testResult = await $`${[command, ...args]}`;
             $.verbose = true;
             console.log(chalk.green('   ✅ Tests passed'));
             return { type: 'test' as const, passed: true, output: testResult.stdout + testResult.stderr };

@@ -38,6 +38,9 @@ export const OUTPUT_LIMITS = {
   /** Maximum length of commit message body */
   MAX_COMMIT_MESSAGE_LENGTH: 500,
 
+  /** Maximum length for commit subject line (conventional commits) */
+  MAX_COMMIT_SUBJECT_LENGTH: 72,
+
   /** Maximum output to store in memory before streaming to file */
   MAX_OUTPUT_BUFFER_SIZE: 10000,
 } as const;
