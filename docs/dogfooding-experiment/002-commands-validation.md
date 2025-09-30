@@ -793,6 +793,33 @@ ls -la .claude/           # No MCP config file
 
 ---
 
+## 💡 **IMPROVEMENT IDENTIFIED**
+
+### Issue #116: Add Functional Clean Architecture Guidance to /01 Command
+
+**Discovered During**: Phase 1 & 2 analysis
+**Priority**: P0 (Critical)
+
+**Problem**: The `/01-plan-layer-features` command provides generic DDD instructions that don't clarify our **Functional Clean Architecture** approach:
+- AI searches for classic OOP DDD (rich entities, classes)
+- Generated plans might not align with functional philosophy
+- Missing context about anemic models, factory functions, type-driven design
+
+**Solution**: Add dedicated section explaining:
+1. Anemic Domain Models (data structures, no behavior)
+2. Factory Functions for Value Objects (NOT classes)
+3. Use Case Interfaces in Domain, Logic in Data Layer
+4. Correct research queries for functional patterns
+
+**Impact**:
+- ✅ Better quality domain plans
+- ✅ Consistent with template philosophy
+- ✅ Clearer guidance for AI generation
+
+**Status**: Issue created, pending implementation
+
+---
+
 **Started**: 2025-09-29 23:55
-**Last Update**: 2025-09-30 09:45
-**Status**: 🔄 IN PROGRESS - Phase 2 complete, analyzing results
+**Last Update**: 2025-09-30 09:50
+**Status**: 🔄 IN PROGRESS - Phase 2 complete, improvement identified
