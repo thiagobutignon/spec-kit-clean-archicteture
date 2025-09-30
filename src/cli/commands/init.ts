@@ -132,6 +132,7 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
     '.regent/scripts',
     '.regent/templates',
     '.regent/config',
+    '.regent/utils',
     '.specify',
     '.specify/memory',
     '.specify/specs',
@@ -181,6 +182,15 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
   if (await fs.pathExists(sourceScriptsDir)) {
     console.log(chalk.cyan('📜 Installing utility scripts...'));
     await fs.copy(sourceScriptsDir, targetScriptsDir, { overwrite: true });
+  }
+
+  // Copy utils to .regent/utils
+  const sourceUtilsDir = path.join(packageRoot, 'utils');
+  const targetUtilsDir = path.join(projectPath, '.regent/utils');
+
+  if (await fs.pathExists(sourceUtilsDir)) {
+    console.log(chalk.cyan('🔧 Installing utility modules...'));
+    await fs.copy(sourceUtilsDir, targetUtilsDir, { overwrite: true });
   }
 
   // Copy config files to .regent/config
