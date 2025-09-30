@@ -87,6 +87,148 @@ class EnhancedStepExecutor {
 
     // Detect layer from filename
     this.layerInfo = this.detectLayerInfo(implementationPath);
+
+    // Setup cleanup handlers
+    this.setupCleanupHandlers();
+  }
+
+  /**
+   * Setup signal handlers for graceful cleanup on interrupt
+   */
+  private setupCleanupHandlers(): void {
+    const cleanup = async () => {
+      console.log(chalk.yellow('\n\n⚠️  Execution interrupted. Cleaning up...'));
+
+      try {
+        // Reset any staged changes
+        await $`git reset HEAD`.catch(() => {});
+        console.log(chalk.green('   ✅ Staged changes reset'));
+      } catch (error) {
+        // Ignore cleanup errors
+      }
+
+      this.logger.close();
+      process.exit(130); // Standard exit code for SIGINT
+    };
+
+    // Handle Ctrl+C
+    process.on('SIGINT', cleanup);
+    // Handle kill signals
+    process.on('SIGTERM', cleanup);
+  }
+
+  /**
+   * Detect package manager being used in the project
+   */
+  private detectPackageManager(): 'npm' | 'yarn' | 'pnpm' {
+    // Check for lock files
+    if (fs.existsSync('pnpm-lock.yaml')) return 'pnpm';
+    if (fs.existsSync('yarn.lock')) return 'yarn';
+    return 'npm'; // Default to npm
+  }
+
+  /**
+   * Get the package manager command for running scripts
+   */
+  private getPackageManagerCommand(script: string): string {
+    const pm = this.detectPackageManager();
+
+    switch (pm) {
+      case 'pnpm':
+        return `pnpm ${script}`;
+      case 'yarn':
+        return `yarn ${script}`;
+      case 'npm':
+        return `npm run ${script}`;
+      default:
+        return `npm run ${script}`;
+    }
+  }
+
+  /**
+   * Check for uncommitted changes before starting execution
+   */
+  private async checkGitSafety(): Promise<boolean> {
+    try {
+      // Check if we're in a git repository
+      await $`git rev-parse --git-dir`;
+
+      // Check for uncommitted changes
+      const statusResult = await $`git status --porcelain`;
+      const hasUncommittedChanges = statusResult.stdout.trim().length > 0;
+
+      if (hasUncommittedChanges) {
+        console.log(chalk.yellow('⚠️  Warning: You have uncommitted changes in your working directory.'));
+        console.log(chalk.yellow('   The execute command will create commits. Please commit or stash your changes first.'));
+        console.log(chalk.gray('   Run: git status to see your changes'));
+
+        // Give user 5 seconds to abort
+        console.log(chalk.yellow('\n   Continuing in 5 seconds... (Press Ctrl+C to abort)'));
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+
+      return true;
+    } catch (error) {
+      console.log(chalk.red('❌ Not in a git repository or git is not available'));
+      return false;
+    }
+  }
+
+  /**
+   * Validate configuration structure
+   */
+  private validateConfig(config: any): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    if (!config || typeof config !== 'object') {
+      errors.push('Config must be an object');
+      return { valid: false, errors };
+    }
+
+    if (!config.commit) {
+      errors.push('Missing required field: commit');
+      return { valid: false, errors };
+    }
+
+    // Validate boolean fields
+    if (config.commit.enabled !== undefined && typeof config.commit.enabled !== 'boolean') {
+      errors.push('commit.enabled must be a boolean');
+    }
+
+    // Validate quality_checks
+    if (config.commit.quality_checks) {
+      if (config.commit.quality_checks.lint !== undefined && typeof config.commit.quality_checks.lint !== 'boolean') {
+        errors.push('commit.quality_checks.lint must be a boolean');
+      }
+      if (config.commit.quality_checks.test !== undefined && typeof config.commit.quality_checks.test !== 'boolean') {
+        errors.push('commit.quality_checks.test must be a boolean');
+      }
+    }
+
+    // Validate conventional_commits
+    if (config.commit.conventional_commits) {
+      if (config.commit.conventional_commits.enabled !== undefined && typeof config.commit.conventional_commits.enabled !== 'boolean') {
+        errors.push('commit.conventional_commits.enabled must be a boolean');
+      }
+
+      if (config.commit.conventional_commits.type_mapping) {
+        const mapping = config.commit.conventional_commits.type_mapping;
+        const validTypes = ['feat', 'fix', 'chore', 'refactor', 'test', 'docs', null];
+
+        for (const [key, value] of Object.entries(mapping)) {
+          if (!validTypes.includes(value as any)) {
+            errors.push(`Invalid commit type '${value}' for step type '${key}'`);
+          }
+        }
+      }
+    }
+
+    // Validate co_author
+    if (config.commit.co_author !== undefined && typeof config.commit.co_author !== 'string') {
+      errors.push('commit.co_author must be a string');
+    }
+
+    return { valid: errors.length === 0, errors };
   }
 
   /**
@@ -105,6 +247,15 @@ class EnhancedStepExecutor {
       // Load and parse YAML config
       const fileContent = fs.readFileSync(configPath, 'utf-8');
       const loadedConfig = yaml.parse(fileContent);
+
+      // Validate configuration
+      const validation = this.validateConfig(loadedConfig);
+      if (!validation.valid) {
+        console.log(chalk.yellow('   ⚠️  Configuration validation errors:'));
+        validation.errors.forEach(err => console.log(chalk.yellow(`      • ${err}`)));
+        console.log(chalk.yellow('   Using default configuration'));
+        return { ...DEFAULT_COMMIT_CONFIG };
+      }
 
       if (!loadedConfig || !loadedConfig.commit) {
         console.log(chalk.yellow('   ⚠️  Invalid config format, using defaults'));
@@ -261,6 +412,13 @@ class EnhancedStepExecutor {
 
   public async run(): Promise<void> {
     await this.loadPlan();
+
+    // Check git safety before starting
+    const gitSafe = await this.checkGitSafety();
+    if (!gitSafe) {
+      console.error(chalk.red('❌ Git safety check failed. Aborting execution.'));
+      process.exit(1);
+    }
 
     // Pre-validate template
     const validationPassed = await this.preValidate();
@@ -763,11 +921,54 @@ class EnhancedStepExecutor {
   }
 
   /**
+   * Parse and extract specific errors from lint/test output
+   */
+  private parseQualityCheckErrors(output: string, type: 'lint' | 'test'): string[] {
+    const errors: string[] = [];
+    const lines = output.split('\n');
+
+    if (type === 'lint') {
+      // Parse ESLint/TSLint errors
+      for (const line of lines) {
+        // Match pattern: file:line:col error message
+        if (line.match(/^\s*\d+:\d+\s+(error|warning)/)) {
+          errors.push(line.trim());
+        }
+        // Match pattern: /path/file.ts
+        if (line.match(/^\/.*\.(ts|js|tsx|jsx)$/)) {
+          errors.push(line.trim());
+        }
+      }
+    } else if (type === 'test') {
+      // Parse test failures
+      let inFailure = false;
+      for (const line of lines) {
+        // Vitest/Jest failure patterns
+        if (line.match(/FAIL|✕|×|failed/i)) {
+          inFailure = true;
+          errors.push(line.trim());
+        } else if (inFailure && line.trim()) {
+          errors.push(line.trim());
+          if (errors.length >= 10) break; // Limit to 10 lines
+        } else if (line.match(/Tests:.*failed/i)) {
+          errors.push(line.trim());
+        }
+      }
+    }
+
+    return errors.slice(0, 10); // Limit to 10 most relevant errors
+  }
+
+  /**
    * Run quality checks (lint and test) based on configuration
    * Runs checks in parallel for better performance
    */
   private async runQualityChecks(): Promise<QualityCheckResult> {
     const checks: Promise<{ type: 'lint' | 'test'; passed: boolean; output: string }>[] = [];
+
+    // Detect package manager for commands
+    const pm = this.detectPackageManager();
+    console.log(chalk.gray(`   ℹ️  Using package manager: ${pm}`));
 
     // Run lint if enabled
     if (this.commitConfig.qualityChecks.lint) {
@@ -776,7 +977,8 @@ class EnhancedStepExecutor {
         (async () => {
           try {
             $.verbose = false;
-            const lintResult = await $`yarn lint`;
+            const lintCommand = this.getPackageManagerCommand('lint');
+            const lintResult = await $`sh -c ${lintCommand}`;
             $.verbose = true;
             console.log(chalk.green('   ✅ Lint check passed'));
             return { type: 'lint' as const, passed: true, output: lintResult.stdout + lintResult.stderr };
@@ -784,7 +986,14 @@ class EnhancedStepExecutor {
             $.verbose = true;
             const output = error.stdout + error.stderr;
             console.log(chalk.red('   ❌ Lint check failed'));
-            console.log(chalk.red(`   ${output.substring(0, 200)}...`));
+
+            // Parse and display specific errors
+            const errors = this.parseQualityCheckErrors(output, 'lint');
+            if (errors.length > 0) {
+              console.log(chalk.red('   📋 Lint errors:'));
+              errors.forEach(err => console.log(chalk.red(`      ${err}`)));
+            }
+
             return { type: 'lint' as const, passed: false, output };
           }
         })()
@@ -798,7 +1007,8 @@ class EnhancedStepExecutor {
         (async () => {
           try {
             $.verbose = false;
-            const testResult = await $`yarn test --run`;
+            const testCommand = this.getPackageManagerCommand('test --run');
+            const testResult = await $`sh -c ${testCommand}`;
             $.verbose = true;
             console.log(chalk.green('   ✅ Tests passed'));
             return { type: 'test' as const, passed: true, output: testResult.stdout + testResult.stderr };
@@ -806,7 +1016,14 @@ class EnhancedStepExecutor {
             $.verbose = true;
             const output = error.stdout + error.stderr;
             console.log(chalk.red('   ❌ Tests failed'));
-            console.log(chalk.red(`   ${output.substring(0, 200)}...`));
+
+            // Parse and display specific failures
+            const errors = this.parseQualityCheckErrors(output, 'test');
+            if (errors.length > 0) {
+              console.log(chalk.red('   📋 Test failures:'));
+              errors.forEach(err => console.log(chalk.red(`      ${err}`)));
+            }
+
             return { type: 'test' as const, passed: false, output };
           }
         })()
