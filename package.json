@@ -14,6 +14,7 @@
     ".claude/**/*",
     "core/**/*",
     "scripts/**/*",
+    "utils/**/*",
     ".vscode/**/*",
     "*.md",
     "*.ts",

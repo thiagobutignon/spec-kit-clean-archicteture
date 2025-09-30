@@ -10,9 +10,9 @@ import * as crypto from 'crypto';
 import * as os from 'os';
 import * as yaml from 'yaml';
 import 'zx/globals';
-import Logger from './core/logger';
-import { EnhancedRLHFSystem, LayerInfo } from './core/rlhf-system';
-import { resolveLogDirectory } from './utils/log-path-resolver';
+import Logger from '../core/logger';
+import { EnhancedRLHFSystem, LayerInfo } from '../core/rlhf-system';
+import { resolveLogDirectory } from '../utils/log-path-resolver';
 import { EnhancedTemplateValidator } from './validate-template';
 import type { ValidationResult } from './validate-template';
 
