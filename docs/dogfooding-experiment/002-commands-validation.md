@@ -544,6 +544,72 @@ templates/
 
 ---
 
+### Bug #114: Remove 7 Legacy Command Files from .claude/commands/
+**Discovered**: 2025-09-30 00:17 (inspecting .claude/commands/ directory)
+**Version**: 2.1.9
+**Severity**: High (User Confusion)
+**Phase**: Environment Setup
+
+**Description**: The `.claude/commands/` directory contains **7 legacy command files** from the old spec-driven architecture that don't work with `.regent/` templates.
+
+**Commands Breakdown**:
+```
+✅ Working (9 files - keep):
+   /01-plan-layer-features.md
+   /02-validate-layer-plan.md
+   /03-generate-layer-code.md
+   /04-reflect-layer-lessons.md
+   /05-evaluate-layer-results.md
+   /06-execute-layer-steps.md
+   /07-fix-layer-errors.md
+   /08-apply-layer-improvements.md
+   /09-e2e-performance-testing.md
+
+❌ Legacy (7 files - remove):
+   constitution.md     # Writes to .specify/
+   specify.md          # Creates specs in .specify/
+   plan.md             # Different from /01, uses .specify/
+   tasks.md            # Writes to .specify/tasks/
+   implement.md        # Doesn't align with .regent/
+   clarify.md          # Reads from .specify/specs/
+   analyze.md          # Analyzes .specify/ artifacts
+```
+
+**Expected State**:
+- Only keep 9 working commands (`/01` through `/09`)
+- Remove all 7 legacy spec-driven commands
+
+**Impact**:
+- **High**: Users try legacy commands and fail
+- Clutters command list (16 vs 9 commands)
+- Wastes time debugging non-functional workflows
+- Makes system look unmaintained
+
+**Evidence**:
+- ✅ Experiment #001 used `/01`, `/02`, `/03` successfully
+- ✅ Experiment #002 using `/01`, `/02`, `/03` workflow
+- ❌ Legacy commands never used in any experiment
+- ❌ Templates don't reference these workflows
+
+**Reproduction**:
+1. Check: `ls .claude/commands/`
+2. See 16 files (9 working + 7 legacy)
+3. Try legacy commands, they fail
+4. Realize they write to `.specify/` which is being removed
+
+**Location**: `.claude/commands/{constitution,specify,plan,tasks,implement,clarify,analyze}.md`
+**Status**: 🔴 Open
+**Issue**: #114
+**Fix Priority**: High (user experience)
+**Recommendation**: Delete 7 legacy files, keep only `/01` through `/09`
+
+**Related**:
+- Bug #113 (remove .specify/) - these commands write there
+- Bug #110 (wrong commands suggested) - these are suggested
+- Part of spec-driven → layer-driven cleanup
+
+---
+
 **Started**: 2025-09-29 23:55
 **Last Update**: 2025-09-30 00:01
 **Status**: 🔄 IN PROGRESS - Bug mapping active
