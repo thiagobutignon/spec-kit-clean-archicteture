@@ -805,6 +805,130 @@ class EnhancedTemplateValidator {
 
 ---
 
+### Bug #122: /06-execute-layer-steps Fails - execute-steps.ts Has Missing Dependencies
+
+**Discovered**: 2025-09-30 10:25
+**Version**: 2.1.9
+**Severity**: Critical (Command Completely Broken)
+
+**ROOT CAUSE** ❌:
+The `execute-steps.ts` file has **incorrect import paths** and the `regent init` command **didn't copy all required dependencies**.
+
+**Error from Phase 6 Execution**:
+```bash
+# User executed:
+/06-execute-layer-steps --file=spec/001-product-catalog-management/domain/implementation.yaml
+
+# Error:
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module
+'/Users/.../dogfooding/product-catalog/.regent/config/core/logger'
+imported from
+'/Users/.../dogfooding/product-catalog/.regent/config/execute-steps.ts'
+```
+
+**Problems Identified**:
+
+#### 1. Incorrect Import Paths ❌
+**File**: `.regent/config/execute-steps.ts` (lines 13-16)
+```typescript
+import Logger from './core/logger';                    // ❌ Wrong path
+import { EnhancedRLHFSystem, LayerInfo } from './core/rlhf-system'; // ❌ Wrong path
+import { resolveLogDirectory } from './utils/log-path-resolver';    // ❌ Wrong path
+import { EnhancedTemplateValidator } from './validate-template';    // ✅ Correct
+```
+
+**Actual Project Structure**:
+```
+.regent/
+  config/
+    execute-steps.ts  <-- imports from ./core/ (WRONG)
+  core/
+    logger.ts         <-- should be ../core/logger (one level up)
+    rlhf-system.ts
+  utils/              <-- DOESN'T EXIST!
+```
+
+**Correct Imports Should Be**:
+```typescript
+import Logger from '../core/logger';                    // ✅ Correct
+import { EnhancedRLHFSystem, LayerInfo } from '../core/rlhf-system'; // ✅ Correct
+import { resolveLogDirectory } from '../utils/log-path-resolver';    // ✅ Correct path (but file missing)
+import { EnhancedTemplateValidator } from './validate-template';     // ✅ Already correct
+```
+
+#### 2. Missing utils/ Directory ❌
+**Main Project** (has it):
+```
+spec-kit-clean-architecture/
+  utils/
+    log-path-resolver.ts      ✅ EXISTS
+    log-path-resolver.test.ts
+```
+
+**Initialized Project** (missing):
+```
+dogfooding/product-catalog/
+  .regent/
+    utils/  ❌ DOESN'T EXIST (not copied by regent init)
+```
+
+**Impact**:
+- ❌ `/06-execute-layer-steps` command completely broken
+- ❌ Cannot execute any YAML implementation plans
+- ❌ Entire workflow from /01 → /06 is blocked at final step
+- ❌ All dogfooding experiments cannot proceed past planning
+
+**Status**: 🔴 Open
+**Issue**: #122
+**Fix Priority**: P0 (Critical - blocks entire workflow)
+
+**Recommended Fix**:
+
+#### Option A: Fix regent init (Recommended)
+1. Update `regent init` command to copy `utils/` directory:
+   ```typescript
+   // src/cli/commands/init.ts
+   await copyDirectories([
+     'templates',
+     'scripts',
+     'core',
+     'utils'  // ← ADD THIS
+   ]);
+   ```
+
+2. Fix import paths in `execute-steps.ts` template:
+   ```typescript
+   // Change all imports from ./core/ to ../core/
+   // Change ./utils/ to ../utils/
+   ```
+
+3. Test with new project initialization
+
+#### Option B: Quick Fix for Existing Projects
+1. Manually copy utils/ directory:
+   ```bash
+   mkdir -p .regent/utils
+   cp ../../utils/log-path-resolver.ts .regent/utils/
+   ```
+
+2. Fix imports in `.regent/config/execute-steps.ts`:
+   ```bash
+   sed -i '' "s|from './core/|from '../core/|g" .regent/config/execute-steps.ts
+   sed -i '' "s|from './utils/|from '../utils/|g" .regent/config/execute-steps.ts
+   ```
+
+**Files to Fix**:
+1. `src/cli/commands/init.ts` - Add utils/ to copied directories
+2. `execute-steps.ts` template - Fix import paths (or move to .regent/ root)
+3. Add validation test to ensure all dependencies are copied
+
+**Related**:
+- Blocks: All /06 executions
+- Blocks: Complete dogfooding workflow
+- **Critical Impact**: /06 command unusable, workflow cannot be validated
+
+---
+
 ---
 
 ## 📊 **PHASE 2 EXECUTION RESULTS**
@@ -1186,5 +1310,5 @@ CI/CD (final validation + graph generation) ← Phase 4
 ---
 
 **Started**: 2025-09-29 23:55
-**Last Update**: 2025-09-30 10:20
-**Status**: 🔄 IN PROGRESS - Phase 5 executed, Bug #121 discovered (/05 doesn't call validate-template.ts)
+**Last Update**: 2025-09-30 10:25
+**Status**: 🔄 IN PROGRESS - Phase 6 attempted, Bug #122 discovered (/06 completely broken - missing dependencies)
