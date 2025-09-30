@@ -19,6 +19,7 @@ interface InitOptions {
   git?: boolean;
   debug?: boolean;
   skipMcp?: boolean;
+  backupDir?: string;
 }
 
 // AI assistant options
@@ -237,7 +238,7 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
   }
 
   // Only copy project config files if they don't exist
-  await copyProjectConfigFiles(projectPath, isExistingProject);
+  await copyProjectConfigFiles(projectPath, isExistingProject, options);
 
   // Create initial files if new project
   if (!isExistingProject) {
@@ -247,7 +248,120 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
   }
 }
 
-async function copyProjectConfigFiles(projectPath: string, isExistingProject: boolean): Promise<void> {
+interface ExistingConfigFile {
+  path: string;
+  relativePath: string;
+  exists: boolean;
+}
+
+async function detectExistingConfigFiles(projectPath: string): Promise<ExistingConfigFile[]> {
+  const configFiles = [
+    '.vscode/settings.json',
+    'eslint.config.js',
+    'tsconfig.json',
+    'vitest.config.ts',
+    '.gitignore'
+  ];
+
+  const existingFiles: ExistingConfigFile[] = [];
+
+  for (const file of configFiles) {
+    const filePath = path.join(projectPath, file);
+    const exists = await fs.pathExists(filePath);
+
+    if (exists) {
+      existingFiles.push({
+        path: filePath,
+        relativePath: file,
+        exists: true
+      });
+    }
+  }
+
+  return existingFiles;
+}
+
+async function createBackup(filePath: string, backupDir?: string): Promise<string> {
+  const timestamp = Date.now();
+  const fileName = path.basename(filePath);
+  const fileDir = path.dirname(filePath);
+
+  // If backupDir is provided, use it, otherwise use .regent-backups in project root
+  const projectRoot = path.resolve(fileDir, '..');
+  const targetBackupDir = backupDir || path.join(projectRoot, '.regent-backups');
+
+  await fs.ensureDir(targetBackupDir);
+
+  const backupPath = path.join(targetBackupDir, `${fileName}.regent-backup-${timestamp}`);
+  await fs.copy(filePath, backupPath);
+
+  return backupPath;
+}
+
+async function mergePackageJsonScripts(projectPath: string): Promise<void> {
+  const packageJsonPath = path.join(projectPath, 'package.json');
+
+  if (await fs.pathExists(packageJsonPath)) {
+    const packageJson = await fs.readJson(packageJsonPath);
+
+    // Add regent scripts without overwriting existing ones
+    packageJson.scripts = packageJson.scripts || {};
+
+    // Only add if they don't exist
+    if (!packageJson.scripts['regent:build']) {
+      packageJson.scripts['regent:build'] = 'cd .regent && ./templates/build-template.sh';
+    }
+    if (!packageJson.scripts['regent:validate']) {
+      packageJson.scripts['regent:validate'] = 'tsx .regent/config/validate-template.ts';
+    }
+    if (!packageJson.scripts['regent:execute']) {
+      packageJson.scripts['regent:execute'] = 'tsx .regent/config/execute-steps.ts';
+    }
+
+    await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
+  }
+}
+
+async function copyProjectConfigFiles(projectPath: string, isExistingProject: boolean, options: InitOptions = {}): Promise<void> {
+  // Detect existing config files
+  const existingFiles = await detectExistingConfigFiles(projectPath);
+
+  // If there are existing files and --force flag is not set, prompt user
+  if (existingFiles.length > 0 && !options.force && isExistingProject) {
+    console.log(chalk.yellow('\n⚠️  Existing configuration files detected:'));
+    existingFiles.forEach(f => console.log(chalk.yellow(`   • ${f.relativePath}`)));
+    console.log();
+
+    const answer = await inquirer.prompt([{
+      type: 'confirm',
+      name: 'backup',
+      message: 'Create backups and continue with Regent configuration?',
+      default: true
+    }]);
+
+    if (!answer.backup) {
+      console.log(chalk.cyan('\n✅ Keeping your existing configuration files'));
+      console.log(chalk.dim('   💡 To use Regent configs, manually merge from:'));
+      console.log(chalk.dim('      .regent/templates/config-examples/\n'));
+      return;
+    }
+
+    // Create backups
+    console.log(chalk.cyan('\n📦 Creating backups...'));
+    for (const file of existingFiles) {
+      try {
+        const backupPath = await createBackup(file.path, options.backupDir);
+        const displayPath = options.backupDir ? backupPath : path.relative(projectPath, backupPath);
+        console.log(chalk.green(`   ✅ Backed up: ${file.relativePath} → ${displayPath}`));
+      } catch (error) {
+        console.log(chalk.red(`   ❌ Failed to backup ${file.relativePath}: ${(error as Error).message}`));
+      }
+    }
+    console.log();
+  } else if (existingFiles.length > 0 && options.force) {
+    console.log(chalk.yellow('\n⚠️  Force flag detected - overwriting existing files without backup'));
+  }
+
   // VS Code settings - merge if exists
   const vscodeSettingsPath = path.join(projectPath, '.vscode/settings.json');
   const sourceVscodeSettings = path.join(packageRoot, '.vscode/settings.json');
@@ -287,15 +401,77 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
   // ESLint config - only if doesn't exist
   const eslintPath = path.join(projectPath, 'eslint.config.js');
   if (!await fs.pathExists(eslintPath)) {
-    const eslintConfig = await fs.readFile(path.join(packageRoot, 'eslint.config.js'), 'utf-8');
-    await fs.writeFile(eslintPath, eslintConfig);
+    const sourceEslintPath = path.join(packageRoot, 'eslint.config.js');
+    if (await fs.pathExists(sourceEslintPath)) {
+      const eslintConfig = await fs.readFile(sourceEslintPath, 'utf-8');
+      await fs.writeFile(eslintPath, eslintConfig);
+    }
   }
 
   // Vitest config - only if doesn't exist
   const vitestPath = path.join(projectPath, 'vitest.config.ts');
   if (!await fs.pathExists(vitestPath)) {
-    const vitestConfig = await fs.readFile(path.join(packageRoot, 'vitest.config.ts'), 'utf-8');
-    await fs.writeFile(vitestPath, vitestConfig);
+    const sourceVitestPath = path.join(packageRoot, 'vitest.config.ts');
+    if (await fs.pathExists(sourceVitestPath)) {
+      const vitestConfig = await fs.readFile(sourceVitestPath, 'utf-8');
+      await fs.writeFile(vitestPath, vitestConfig);
+    }
+  }
+
+  // .gitignore - merge if exists
+  const gitignorePath = path.join(projectPath, '.gitignore');
+  if (!await fs.pathExists(gitignorePath)) {
+    const gitignore = `# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production
+/build
+/dist
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Spec-kit clean architecture
+.rlhf/
+.logs/
+.regent/templates/*-template.regent
+!.regent/templates/parts/
+.regent-backups/
+`;
+    await fs.writeFile(gitignorePath, gitignore);
   }
 }
 
@@ -450,21 +626,12 @@ console.log('🚀 Clean Architecture Project');
 }
 
 async function updateExistingProject(projectPath: string): Promise<void> {
-  // Update package.json scripts if it exists
+  // Merge package.json scripts if it exists (smart merge, not overwrite)
   const packageJsonPath = path.join(projectPath, 'package.json');
 
   if (await fs.pathExists(packageJsonPath)) {
-    console.log(chalk.cyan('📦 Updating package.json scripts...'));
-
-    const packageJson = await fs.readJson(packageJsonPath);
-
-    // Add spec-kit specific scripts
-    packageJson.scripts = packageJson.scripts || {};
-    packageJson.scripts['regent:build'] = 'cd .regent && ./templates/build-template.sh';
-    packageJson.scripts['regent:validate'] = 'tsx .regent/config/validate-template.ts';
-    packageJson.scripts['regent:execute'] = 'tsx .regent/config/execute-steps.ts';
-
-    await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
+    console.log(chalk.cyan('📦 Merging package.json scripts...'));
+    await mergePackageJsonScripts(projectPath);
   }
 
   // Create constitution if doesn't exist
