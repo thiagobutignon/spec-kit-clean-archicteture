@@ -425,24 +425,67 @@ async function main() {
   const args = process.argv.slice(2)
   const validator = new EnhancedTemplateValidator()
 
+  // Check for --json flag
+  const jsonOutputIndex = args.indexOf('--json')
+  const jsonOutput = jsonOutputIndex !== -1
+  if (jsonOutput) {
+    args.splice(jsonOutputIndex, 1)
+  }
+
+  // Check for --file flag (supports both --file=path and --file path)
+  let templatePath: string | null = null
+  const fileIndex = args.findIndex(arg => arg.startsWith('--file'))
+  if (fileIndex !== -1) {
+    const fileArg = args[fileIndex]
+    if (fileArg.includes('=')) {
+      // --file=path format
+      templatePath = fileArg.split('=')[1]
+    } else if (args[fileIndex + 1]) {
+      // --file path format
+      templatePath = args[fileIndex + 1]
+    }
+  } else if (args.length > 0 && !args[0].startsWith('--')) {
+    // Direct path argument
+    templatePath = args[0]
+  }
+
   if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
     console.log(chalk.cyan.bold('\n📖 Template Validator'))
     console.log(chalk.gray('\nUsage:'))
     console.log('  npx tsx validate-template.ts <template-file>')
+    console.log('  npx tsx validate-template.ts --file=<template-file>')
+    console.log('  npx tsx validate-template.ts --file=<template-file> --json')
     console.log('  npx tsx validate-template.ts --all')
+    console.log('\nOptions:')
+    console.log('  --file=<path>  Path to template file to validate')
+    console.log('  --json         Output results as JSON (for programmatic use)')
+    console.log('  --all          Validate all templates in templates/ directory')
     console.log('\nExamples:')
     console.log('  npx tsx validate-template.ts templates/backend-domain-template.regent')
+    console.log('  npx tsx validate-template.ts --file=spec/001-feature/domain/implementation.yaml')
+    console.log('  npx tsx validate-template.ts --file=spec/001-feature/domain/implementation.yaml --json')
     console.log('  npx tsx validate-template.ts --all')
     process.exit(0)
   }
 
   if (args[0] === '--all') {
     await validator.validateAll()
-  } else {
-    const templatePath = args[0]
+  } else if (templatePath) {
     const result = await validator.validateTemplate(templatePath)
-    validator.printResults(result)
+
+    if (jsonOutput) {
+      // Output JSON for programmatic use
+      console.log(JSON.stringify(result, null, 2))
+    } else {
+      // Output formatted human-readable results
+      validator.printResults(result)
+    }
+
     process.exit(result.valid ? 0 : 1)
+  } else {
+    console.error(chalk.red('Error: No template file specified'))
+    console.log('Run with --help for usage information')
+    process.exit(1)
   }
 }
 

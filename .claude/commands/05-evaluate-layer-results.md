@@ -183,41 +183,108 @@ Evaluate the **entire plan** against these core principles. Each violation impac
 
 ```mermaid
 graph TD
-    A[Parse YAML Input] --> B[Verify Step Order]
-    B --> C[Check Git Workflow]
-    C --> D[Evaluate Architecture]
-    D --> E[Assess SOLID]
-    E --> F[Review Simplicity]
-    F --> G[Validate TDD]
-    G --> H[Check Atomicity]
-    H --> I[Verify Language]
-    I --> J[Validate Syntax]
-    J --> K{Violations?}
-    K -->|No| L[Generate APPROVED]
-    K -->|Yes| M[Generate REJECTED]
-    L --> N[Score = 5]
-    M --> O[Score = 1-4]
-    style L fill:#90EE90
-    style M fill:#FFB6C1
+    A[Parse YAML Input] --> B[Run Objective Validation]
+    B --> C{Schema Valid?}
+    C -->|No| Z[REJECTED - Validation Errors]
+    C -->|Yes| D[Verify Step Order]
+    D --> E[Check Git Workflow]
+    E --> F[Evaluate Architecture]
+    F --> G[Assess SOLID]
+    G --> H[Review Simplicity]
+    H --> I[Validate TDD]
+    I --> J[Check Atomicity]
+    J --> K[Verify Language]
+    K --> L[Validate Syntax]
+    L --> M{Violations?}
+    M -->|No| N[Generate APPROVED]
+    M -->|Yes| O[Generate REJECTED]
+    N --> P[Score = 5]
+    O --> Q[Score = 1-4]
+    Z --> R[Score = 1]
+    style N fill:#90EE90
+    style O fill:#FFB6C1
+    style Z fill:#FF6B6B
 ```
 
 ### Execution Steps:
 
 1. **Parse Input**: Receive and load YAML plan
-2. **Verify Step Order**:
+2. **Run Objective Validation** (NEW - Critical Step):
+   - Execute `tsx validate-template.ts --file=<yaml-file> --json` via Bash tool
+   - Parse the JSON output to extract validation results
+   - Check for schema errors, syntax issues, and layer violations
+   - If `valid: false`, IMMEDIATELY return REJECTED with validation errors
+3. **Verify Step Order** (only if objective validation passes):
    - First step = `branch`
    - Second step = `folder`
    - Last step = `pull_request`
-3. **Evaluate Against Principles**: Systematic review of entire `steps` array
-4. **Document Violations**: Clear messages with specific step `id` references
-5. **Calculate Score and RLHF Prediction**:
+4. **Evaluate Against Principles**: Systematic review of entire `steps` array
+5. **Document Violations**: Clear messages with specific step `id` references (combine objective + subjective)
+6. **Calculate Score and RLHF Prediction**:
    - Apply scoring correlation table
    - Predict RLHF outcome
-6. **Generate Report**:
-   - APPROVED if score = 5
-   - REJECTED if score < 5
+   - Account for objective validation results
+7. **Generate Report**:
+   - APPROVED if score = 5 AND objective validation passed
+   - REJECTED if score < 5 OR objective validation failed
 
 ## 6. Example Evaluations
+
+### Example 0: 🚨 Objective Validation Failure (Score: 1)
+
+<details>
+<summary>Validation Process with Objective Checker</summary>
+
+**Step 1: Run Objective Validation**
+```bash
+tsx validate-template.ts --file=spec/001-product-catalog/domain/implementation.yaml --json
+```
+
+**Validator Output (JSON):**
+```json
+{
+  "valid": false,
+  "errors": [
+    "Domain layer violation in step 'create-product-repository': External dependencies not allowed",
+    "Unreplaced placeholders found: __FEATURE_NAME__, __USE_CASE__",
+    "Malformed FIND/REPLACE block: missing closing tag"
+  ],
+  "warnings": [
+    "Step 'create-product-use-case': RLHF score 0 out of range (-2 to 2)"
+  ],
+  "schemaUsed": "templates/parts/backend/steps/01-domain.part.schema.json",
+  "layerValidated": "domain",
+  "targetValidated": "backend"
+}
+```
+
+**Step 2: Parse Results and Block Execution**
+
+Since `valid: false`, the evaluation MUST immediately return REJECTED without proceeding to subjective analysis.
+
+</details>
+
+**Output:**
+```json
+{
+  "status": "REJECTED",
+  "score": 1,
+  "report": "CRITICAL: The plan failed objective validation with the schema validator. These are concrete technical errors that must be fixed before subjective architectural review.",
+  "violations": [
+    "Schema Validation Error: Domain layer violation in step 'create-product-repository': External dependencies not allowed",
+    "Schema Validation Error: Unreplaced placeholders found: __FEATURE_NAME__, __USE_CASE__",
+    "Schema Validation Error: Malformed FIND/REPLACE block: missing closing tag"
+  ],
+  "expected_rlhf_score": -2,
+  "objective_validation": {
+    "passed": false,
+    "errors": 3,
+    "warnings": 1
+  }
+}
+```
+
+---
 
 ### Example 1: ❌ Missing Branch Step (Score: 2)
 
@@ -301,16 +368,36 @@ steps:
 ```
 </details>
 
+**Objective Validation Output:**
+```json
+{
+  "valid": false,
+  "errors": [
+    "Domain layer violation in step 'create-use-case-with-axios': External dependencies not allowed"
+  ],
+  "warnings": [],
+  "schemaUsed": "templates/parts/backend/steps/01-domain.part.schema.json",
+  "layerValidated": "domain",
+  "targetValidated": "backend"
+}
+```
+
 **Output:**
 ```json
 {
   "status": "REJECTED",
   "score": 1,
-  "report": "CRITICAL: The plan contains catastrophic architecture violations that will cause RLHF -2 scoring.",
+  "report": "CRITICAL: The plan failed objective schema validation. External dependencies detected in domain layer - this is a catastrophic architecture violation that will cause RLHF -2 scoring.",
   "violations": [
-    "Clean Architecture Violation: The step 'create-use-case-with-axios' imports 'axios' in the selected layer. External dependencies are strictly prohibited in selected layer (RLHF -2)."
+    "Schema Validation Error: Domain layer violation in step 'create-use-case-with-axios': External dependencies not allowed",
+    "Clean Architecture Violation: The step 'create-use-case-with-axios' imports 'axios' in the domain layer. External dependencies are strictly prohibited (RLHF -2)."
   ],
-  "expected_rlhf_score": -2
+  "expected_rlhf_score": -2,
+  "objective_validation": {
+    "passed": false,
+    "errors": 1,
+    "warnings": 0
+  }
 }
 ```
 
