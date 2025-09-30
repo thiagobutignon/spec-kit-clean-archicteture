@@ -73,8 +73,14 @@ export class MCPInstaller {
         report.successful.push('serena');
         console.log(chalk.green('✅ Serena (Code Intelligence) installed\n'));
       } catch (error) {
-        report.failed.push('serena');
-        console.log(chalk.red(`❌ Serena installation failed: ${(error as Error).message}\n`));
+        const message = (error as Error).message;
+        if (message.startsWith('SKIP:')) {
+          report.skipped.push('serena (already installed)');
+          console.log(chalk.yellow('⏭️  Serena - Already installed (skipped)\n'));
+        } else {
+          report.failed.push('serena');
+          console.log(chalk.red(`❌ Serena installation failed: ${message}\n`));
+        }
       }
     } else {
       report.skipped.push('serena');
@@ -87,8 +93,14 @@ export class MCPInstaller {
         report.successful.push('context7');
         console.log(chalk.green('✅ Context7 (Documentation) installed\n'));
       } catch (error) {
-        report.failed.push('context7');
-        console.log(chalk.red(`❌ Context7 installation failed: ${(error as Error).message}\n`));
+        const message = (error as Error).message;
+        if (message.startsWith('SKIP:')) {
+          report.skipped.push('context7 (already installed)');
+          console.log(chalk.yellow('⏭️  Context7 - Already installed (skipped)\n'));
+        } else {
+          report.failed.push('context7');
+          console.log(chalk.red(`❌ Context7 installation failed: ${message}\n`));
+        }
       }
     } else if (config.installContext7 && !config.context7ApiKey) {
       report.skipped.push('context7 (no API key provided)');
@@ -103,8 +115,14 @@ export class MCPInstaller {
         report.successful.push('chrome-devtools');
         console.log(chalk.green('✅ Chrome DevTools (Browser Automation) installed\n'));
       } catch (error) {
-        report.failed.push('chrome-devtools');
-        console.log(chalk.red(`❌ Chrome DevTools installation failed: ${(error as Error).message}\n`));
+        const message = (error as Error).message;
+        if (message.startsWith('SKIP:')) {
+          report.skipped.push('chrome-devtools (already installed)');
+          console.log(chalk.yellow('⏭️  Chrome DevTools - Already installed (skipped)\n'));
+        } else {
+          report.failed.push('chrome-devtools');
+          console.log(chalk.red(`❌ Chrome DevTools installation failed: ${message}\n`));
+        }
       }
     } else {
       report.skipped.push('chrome-devtools');
@@ -117,8 +135,14 @@ export class MCPInstaller {
         report.successful.push('playwright');
         console.log(chalk.green('✅ Playwright (E2E Testing) installed\n'));
       } catch (error) {
-        report.failed.push('playwright');
-        console.log(chalk.red(`❌ Playwright installation failed: ${(error as Error).message}\n`));
+        const message = (error as Error).message;
+        if (message.startsWith('SKIP:')) {
+          report.skipped.push('playwright (already installed)');
+          console.log(chalk.yellow('⏭️  Playwright - Already installed (skipped)\n'));
+        } else {
+          report.failed.push('playwright');
+          console.log(chalk.red(`❌ Playwright installation failed: ${message}\n`));
+        }
       }
     } else {
       report.skipped.push('playwright');
@@ -137,6 +161,13 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
+      const stderr = error.stderr?.toString() || error.message || '';
+
+      // Check if it's "already exists" error
+      if (stderr.includes('already exists')) {
+        throw new Error('SKIP: already installed');
+      }
+
       throw new MCPInstallationError('Serena', error);
     }
   }
@@ -149,6 +180,13 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
+      const stderr = error.stderr?.toString() || error.message || '';
+
+      // Check if it's "already exists" error
+      if (stderr.includes('already exists')) {
+        throw new Error('SKIP: already installed');
+      }
+
       throw new MCPInstallationError('Context7', error);
     }
   }
@@ -161,6 +199,13 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
+      const stderr = error.stderr?.toString() || error.message || '';
+
+      // Check if it's "already exists" error
+      if (stderr.includes('already exists')) {
+        throw new Error('SKIP: already installed');
+      }
+
       throw new MCPInstallationError('Chrome DevTools', error);
     }
   }
@@ -173,6 +218,13 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
+      const stderr = error.stderr?.toString() || error.message || '';
+
+      // Check if it's "already exists" error
+      if (stderr.includes('already exists')) {
+        throw new Error('SKIP: already installed');
+      }
+
       throw new MCPInstallationError('Playwright', error);
     }
   }
