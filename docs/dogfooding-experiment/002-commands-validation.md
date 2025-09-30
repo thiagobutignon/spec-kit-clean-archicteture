@@ -610,6 +610,92 @@ templates/
 
 ---
 
+### Bug #115: MCP Servers Not Detected After Installation
+**Discovered**: 2025-09-30 09:33 (executing `/01-plan-layer-features`)
+**Version**: 2.1.9
+**Severity**: High (Core Functionality Issue)
+**Phase**: Command Execution (Phase 1)
+
+**Description**: After installing MCP servers via `regent init`, Claude Code reports "No MCP servers configured" when running `/mcp` command, even though servers are installed and should be working.
+
+**Current Behavior**:
+```bash
+# After regent init with MCP installation
+> /mcp
+No MCP servers configured. Please run /doctor if this is unexpected.
+Otherwise, run `claude mcp` or visit https://docs.claude.com/en/docs/claude-code/mcp to learn more.
+
+# But /01-plan-layer-features runs successfully!
+> /01-plan-layer-features
+# Command executes, reads templates, generates plan
+# But doesn't use MCP tools like serena or context7
+```
+
+**Expected Behavior**:
+```bash
+> /mcp
+✅ serena - Connected (IDE assistant context)
+✅ context7 - Connected
+✅ chrome-devtools - Connected
+✅ playwright - Connected
+```
+
+**Impact**:
+- **High**: Core MCP features not available to user
+- Commands work but don't leverage MCP tools
+- User confused about MCP installation success
+- Potential performance/capability degradation
+
+**Mystery**:
+- `regent init` shows MCP installation (even with "failed" Bug #108 messages)
+- User explicitly mentioned: "interessante que eu instalei os mcp's e o claude nao encontrou os mcps instalados"
+- `/01-plan-layer-features` command ran successfully without using MCP tools
+- Command used WebSearch but no `mcp__serena__*` or `mcp__context7__*` tools
+
+**Possible Causes**:
+1. MCP servers installed but Claude Code session not restarted
+2. MCP config written to wrong location
+3. Project-specific MCP config not loaded
+4. MCP servers installed globally but not in project context
+
+**Verification Needed**:
+```bash
+# Check MCP config location
+claude mcp list
+
+# Check project-specific config
+cat ~/Library/Application\ Support/Claude/claude_desktop_config.json
+
+# Check if servers installed
+ls -la ~/.config/claude/mcp_servers/
+```
+
+**Reproduction**:
+1. Run: `regent init product-catalog --ai claude`
+2. Select MCP servers to install
+3. Complete initialization
+4. In Claude Code, run: `/mcp`
+5. See: "No MCP servers configured"
+6. Run: `/01-plan-layer-features [input]`
+7. Command works but doesn't use MCP tools
+
+**Location**:
+- MCP installation: `src/cli/utils/mcp-installer.ts`
+- Config writing: Check where MCP config is written
+- Session detection: Claude Code MCP session initialization
+
+**Status**: 🔴 Open
+**Issue**: #115 (to be created)
+**Fix Priority**: High (core feature)
+**Investigation Needed**: Why MCP servers not detected despite installation
+
+**Related**:
+- Bug #108 (MCP installation "failed" messages) - might be related
+- May need to document MCP installation verification steps
+- May require session restart or explicit config verification
+
+---
+
 **Started**: 2025-09-29 23:55
-**Last Update**: 2025-09-30 00:01
-**Status**: 🔄 IN PROGRESS - Bug mapping active
+**Last Update**: 2025-09-30 09:35
+**Status**: 🔄 IN PROGRESS - Bug mapping active (5 bugs so far)
