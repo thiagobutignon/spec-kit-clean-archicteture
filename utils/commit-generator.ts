@@ -49,7 +49,9 @@ export const DEFAULT_COMMIT_CONFIG: CommitConfig = {
   enabled: true,
   qualityChecks: {
     lint: true,
+    lintCommand: 'lint',
     test: true,
+    testCommand: 'test --run',
   },
   conventionalCommits: {
     enabled: true,
