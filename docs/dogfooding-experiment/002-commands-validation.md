@@ -652,23 +652,38 @@ Otherwise, run `claude mcp` or visit https://docs.claude.com/en/docs/claude-code
 - `/01-plan-layer-features` command ran successfully without using MCP tools
 - Command used WebSearch but no `mcp__serena__*` or `mcp__context7__*` tools
 
-**Possible Causes**:
-1. MCP servers installed but Claude Code session not restarted
-2. MCP config written to wrong location
-3. Project-specific MCP config not loaded
-4. MCP servers installed globally but not in project context
+**ROOT CAUSE IDENTIFIED** ✅:
 
-**Verification Needed**:
-```bash
-# Check MCP config location
-claude mcp list
+The `mcp-installer.ts` uses `claude mcp add` which installs MCP servers **GLOBALLY** in user config, but **Claude Code requires LOCAL project-specific config**.
 
-# Check project-specific config
-cat ~/Library/Application\ Support/Claude/claude_desktop_config.json
+**Evidence**:
+```typescript
+// src/cli/utils/mcp-installer.ts:110
+const command = `claude mcp add serena -- serena-mcp-server --context ide-assistant --project ${quotedPath}`;
 
-# Check if servers installed
-ls -la ~/.config/claude/mcp_servers/
+// This installs to GLOBAL config (~/.config/claude/ or similar)
+// But Claude Code needs LOCAL config in the project directory
 ```
+
+**Verification**:
+```bash
+# After regent init
+claude mcp list
+# Output: "No MCP servers configured"
+
+# Project has no local MCP config
+ls -la .clauderc          # Not found
+ls -la .claude/           # No MCP config file
+```
+
+**What Should Happen**:
+- Create **LOCAL** MCP config file in project (`.clauderc`, `.claude/mcp.json`, or similar)
+- OR use `--local` flag if available
+- OR document that user must manually configure MCP for Claude Code
+
+**Architecture Issue**:
+- `claude mcp add` = CLI tool config (global)
+- Claude Code = VS Code extension config (needs local or workspace settings)
 
 **Reproduction**:
 1. Run: `regent init product-catalog --ai claude`
@@ -680,19 +695,25 @@ ls -la ~/.config/claude/mcp_servers/
 7. Command works but doesn't use MCP tools
 
 **Location**:
-- MCP installation: `src/cli/utils/mcp-installer.ts`
-- Config writing: Check where MCP config is written
-- Session detection: Claude Code MCP session initialization
+- MCP installation: `src/cli/utils/mcp-installer.ts` (lines 108-152)
+- Issue: Uses `claude mcp add` (global) instead of creating local config
+- Need: Local MCP config format for Claude Code
 
 **Status**: 🔴 Open
-**Issue**: #115 (to be created)
-**Fix Priority**: High (core feature)
-**Investigation Needed**: Why MCP servers not detected despite installation
+**Issue**: #115
+**Fix Priority**: Critical (core feature completely broken)
+
+**Recommended Fix**:
+1. Research Claude Code's local MCP config format
+2. Create config file in project root or `.claude/` directory
+3. Remove dependency on `claude mcp add` CLI command
+4. Add verification step after installation
+5. Document manual MCP setup if auto-install not possible
 
 **Related**:
-- Bug #108 (MCP installation "failed" messages) - might be related
-- May need to document MCP installation verification steps
-- May require session restart or explicit config verification
+- Bug #108 (MCP installation "failed" messages) - same installer code
+- Blocks: Serena (code intelligence), Context7 (documentation)
+- **Critical Impact**: All MCP-dependent features unavailable
 
 ---
 
