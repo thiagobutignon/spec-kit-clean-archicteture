@@ -26,6 +26,10 @@ interface InitOptions {
   dryRun?: boolean;
 }
 
+// Configuration constants
+const MAX_BACKUP_FILE_SIZE = 100 * 1024 * 1024; // 100MB - Maximum size for backup files
+const BACKUP_RETENTION_COUNT = 10; // Number of backups to keep when cleaning up old backups
+
 // AI assistant options
 const AI_ASSISTANTS = [
   { name: 'Claude Code (Anthropic)', value: 'claude' },
@@ -272,22 +276,22 @@ async function detectExistingConfigFiles(projectPath: string): Promise<ExistingC
     '.gitignore'
   ];
 
-  const existingFiles: ExistingConfigFile[] = [];
+  // Use parallel Promise.all for better performance
+  const results = await Promise.all(
+    configFiles.map(async (file) => {
+      const filePath = path.join(projectPath, file);
+      const exists = await fs.pathExists(filePath);
 
-  for (const file of configFiles) {
-    const filePath = path.join(projectPath, file);
-    const exists = await fs.pathExists(filePath);
-
-    if (exists) {
-      existingFiles.push({
+      return {
         path: filePath,
         relativePath: file,
-        exists: true
-      });
-    }
-  }
+        exists
+      };
+    })
+  );
 
-  return existingFiles;
+  // Filter only existing files
+  return results.filter(f => f.exists);
 }
 
 /**
@@ -311,13 +315,12 @@ async function detectExistingConfigFiles(projectPath: string): Promise<ExistingC
  */
 async function createBackup(filePath: string, projectPath: string, backupDir?: string): Promise<string> {
   // Validate file size (prevent disk exhaustion attacks)
-  const MAX_BACKUP_SIZE = 100 * 1024 * 1024; // 100MB limit
   try {
     const stats = await fs.stat(filePath);
-    if (stats.size > MAX_BACKUP_SIZE) {
+    if (stats.size > MAX_BACKUP_FILE_SIZE) {
       throw new Error(
         `File too large to backup: ${path.basename(filePath)} (${(stats.size / 1024 / 1024).toFixed(2)}MB)\n` +
-        `Maximum backup size is ${MAX_BACKUP_SIZE / 1024 / 1024}MB`
+        `Maximum backup size is ${MAX_BACKUP_FILE_SIZE / 1024 / 1024}MB`
       );
     }
   } catch (error) {
@@ -424,9 +427,9 @@ async function cleanupBackups(backupPaths: string[]): Promise<void> {
  * Optimized to only run when backup count exceeds threshold.
  *
  * @param backupDir - Directory containing backup files
- * @param keepCount - Number of most recent backups to keep (default: 10)
+ * @param keepCount - Number of most recent backups to keep (default from BACKUP_RETENTION_COUNT)
  */
-async function cleanupOldBackups(backupDir: string, keepCount: number = 10): Promise<void> {
+async function cleanupOldBackups(backupDir: string, keepCount: number = BACKUP_RETENTION_COUNT): Promise<void> {
   if (!await fs.pathExists(backupDir)) {
     return;
   }

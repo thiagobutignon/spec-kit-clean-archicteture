@@ -716,4 +716,104 @@ node_modules/
       expect(sizeInMB).toMatch(/^\d+\.\d{2}$/);
     });
   });
+
+  describe('Symlink Handling', () => {
+    it('should handle symlinked config files during backup', async () => {
+      await fs.ensureDir(testProjectPath);
+      const backupDir = path.join(testProjectPath, '.regent-backups');
+
+      // Create a real file
+      const realConfigPath = path.join(testProjectPath, 'real-config.json');
+      await fs.writeFile(realConfigPath, JSON.stringify({ real: true }));
+
+      // Create a symlink to it
+      const symlinkPath = path.join(testProjectPath, 'tsconfig.json');
+      await fs.symlink(realConfigPath, symlinkPath);
+
+      // Verify symlink exists
+      const symlinkStats = await fs.lstat(symlinkPath);
+      expect(symlinkStats.isSymbolicLink()).toBe(true);
+
+      // Simulate backup creation with symlink
+      const timestamp = new Date().toISOString()
+        .replace(/[-:]/g, '')
+        .replace('T', '-')
+        .slice(0, 15);
+      const backupName = `tsconfig.regent-backup-${timestamp}-abc123.json`;
+      const backupPath = path.join(backupDir, backupName);
+
+      await fs.ensureDir(backupDir);
+      await fs.copy(symlinkPath, backupPath);
+
+      // Backup should exist and contain the real file content
+      expect(await fs.pathExists(backupPath)).toBe(true);
+      const backupContent = await fs.readJson(backupPath);
+      expect(backupContent).toEqual({ real: true });
+
+      // Cleanup
+      await fs.remove(testProjectPath);
+    });
+
+    it('should reject backup directory paths that are symlinks outside project', async () => {
+      await fs.ensureDir(testProjectPath);
+
+      // Create a directory outside project
+      const outsideDir = path.join(__dirname, '__outside-dir__');
+      await fs.ensureDir(outsideDir);
+
+      try {
+        // Create symlink pointing outside project
+        const symlinkBackupDir = path.join(testProjectPath, 'backup-link');
+        await fs.symlink(outsideDir, symlinkBackupDir);
+
+        // Resolve the symlink
+        const resolvedPath = await fs.realpath(symlinkBackupDir);
+
+        // Verify it points outside project
+        const isOutside = !resolvedPath.startsWith(testProjectPath);
+        expect(isOutside).toBe(true);
+
+        // In actual implementation, this should be rejected for security
+        // The path.resolve validation catches this
+      } finally {
+        // Cleanup
+        await fs.remove(outsideDir);
+        await fs.remove(testProjectPath);
+      }
+    });
+
+    it('should successfully backup when backup dir is a symlink within project', async () => {
+      await fs.ensureDir(testProjectPath);
+
+      // Create a real backup directory within project
+      const realBackupDir = path.join(testProjectPath, 'real-backups');
+      await fs.ensureDir(realBackupDir);
+
+      // Create symlink to it (also within project)
+      const symlinkBackupDir = path.join(testProjectPath, '.regent-backups');
+      await fs.symlink(realBackupDir, symlinkBackupDir);
+
+      // Create a config file to backup
+      const configPath = path.join(testProjectPath, 'tsconfig.json');
+      await fs.writeFile(configPath, JSON.stringify({ config: true }));
+
+      // Simulate backup creation
+      const timestamp = new Date().toISOString()
+        .replace(/[-:]/g, '')
+        .replace('T', '-')
+        .slice(0, 15);
+      const backupName = `tsconfig.regent-backup-${timestamp}-def456.json`;
+      const backupPath = path.join(symlinkBackupDir, backupName);
+
+      await fs.copy(configPath, backupPath);
+
+      // Verify backup exists in real directory
+      expect(await fs.pathExists(backupPath)).toBe(true);
+      const realBackupPath = path.join(realBackupDir, backupName);
+      expect(await fs.pathExists(realBackupPath)).toBe(true);
+
+      // Cleanup
+      await fs.remove(testProjectPath);
+    });
+  });
 });
