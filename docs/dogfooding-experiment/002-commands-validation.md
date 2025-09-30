@@ -252,12 +252,55 @@ Business Rules:
 
 ## 🎯 **Experiment Status**
 
-**Current Phase**: Pre-Execution
-**Next Action**: Initialize test environment
+**Current Phase**: Environment Setup
+**Next Action**: Document bugs and continue testing
 **Estimated Duration**: 30-45 minutes total
 
 ---
 
+## 🐛 **BUGS DISCOVERED**
+
+### Bug #108: MCP Installation "Already Exists" Treated as Failure
+**Discovered**: 2025-09-29 23:58 (during `regent init`)
+**Version**: 2.1.9
+**Severity**: Medium (UX Issue)
+**Phase**: Environment Setup
+
+**Description**: When MCP servers already exist in local config, `regent init` marks them as "failed" instead of "skipped", causing user confusion.
+
+**Current Behavior**:
+```
+❌ Serena installation failed: MCP server serena already exists in local config
+❌ Context7 installation failed: MCP server context7 already exists in local config
+❌ Chrome DevTools installation failed: MCP server chrome-devtools already exists in local config
+```
+
+**Expected Behavior**:
+```
+⏭️  Serena - Already installed (skipped)
+⏭️  Context7 - Already installed (skipped)
+⏭️  Chrome DevTools - Already installed (skipped)
+```
+
+**Impact**:
+- User confusion (thinks installation failed)
+- Inaccurate reporting (shows failures when none exist)
+- Poor UX with red ❌ indicators
+
+**Reproduction**:
+1. Have MCP servers already installed: `claude mcp list`
+2. Run: `regent init test-project`
+3. Select servers to install (that already exist)
+4. Observe "failed" message instead of "skipped"
+
+**Location**: `src/cli/utils/mcp-installer.ts` - all installation methods
+**Status**: 🔴 Open
+**Issue**: #108
+**Fix Priority**: Medium
+**Workaround**: Ignore "failed" messages for servers that are actually working
+
+---
+
 **Started**: 2025-09-29 23:55
-**Last Update**: 2025-09-29 23:55
-**Status**: 🔄 READY TO START
+**Last Update**: 2025-09-30 00:01
+**Status**: 🔄 IN PROGRESS - Bug mapping active
