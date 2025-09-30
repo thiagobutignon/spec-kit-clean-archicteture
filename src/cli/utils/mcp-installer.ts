@@ -107,7 +107,7 @@ export class MCPInstaller {
    */
   async installSerena(): Promise<void> {
     const quotedPath = this.projectPath.includes(' ') ? `"${this.projectPath}"` : this.projectPath;
-    const command = `claude mcp add serena -- serena-mcp-server --context ide-assistant --project ${quotedPath}`;
+    const command = `claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project ${quotedPath}`;
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
@@ -148,6 +148,30 @@ export class MCPInstaller {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
       throw new Error(error.stderr?.toString() || error.message);
+    }
+  }
+
+  /**
+   * Verify MCP servers are properly installed
+   */
+  async verifyInstallation(): Promise<string[]> {
+    try {
+      const output = execSync('claude mcp list', { stdio: 'pipe' }).toString();
+      const lines = output.split('\n').filter(line => line.trim());
+
+      // Parse server names from output
+      const servers: string[] = [];
+      for (const line of lines) {
+        // Look for lines that contain server names
+        if (line.includes('serena')) servers.push('serena');
+        if (line.includes('context7')) servers.push('context7');
+        if (line.includes('chrome-devtools')) servers.push('chrome-devtools');
+        if (line.includes('playwright')) servers.push('playwright');
+      }
+
+      return [...new Set(servers)]; // Remove duplicates
+    } catch {
+      return [];
     }
   }
 

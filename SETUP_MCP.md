@@ -37,12 +37,14 @@ claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena 
 
 ### Step 3: Verify Installation
 
-Ask Claude to verify the MCP servers:
-```
-Can you list available MCP servers?
+Verify MCP servers are installed:
+```bash
+claude mcp list
 ```
 
-Expected response should include both `context7` and `serena`.
+Expected response should list configured servers like `serena`, `context7`, `chrome-devtools`, and `playwright`.
+
+**Important:** If servers don't appear, restart your Claude Code session to detect newly installed MCP servers.
 
 ## 🎯 What Each Server Does
 
@@ -139,6 +141,24 @@ const symbols = await serena.findSymbol('UserRepository');
 - **Result**: Domain generation that fits perfectly with both external libraries and internal patterns
 
 ## 🚨 Troubleshooting
+
+### MCP Servers Not Detected
+
+**Problem:** After running `regent init` with MCP installation, Claude Code reports "No MCP servers configured"
+
+**Solutions:**
+1. **Restart Claude Code session** - New MCP servers require a session restart to be detected
+2. **Verify installation manually:**
+   ```bash
+   claude mcp list
+   ```
+3. **Check Claude Code version** - Ensure you're running Claude Code v1.0.52 or higher
+4. **Re-run installation:**
+   ```bash
+   cd your-project
+   # Install specific server
+   claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project $(pwd)
+   ```
 
 ### Context7 Issues
 

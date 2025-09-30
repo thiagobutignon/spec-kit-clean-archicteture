@@ -103,6 +103,21 @@ export async function initCommand(projectName: string | undefined, options: Init
         if (Object.keys(mcpConfig).length > 0) {
           const installer = new MCPInstaller(projectPath);
           await installer.installAll(mcpConfig);
+
+          // Verify installation
+          console.log(chalk.cyan.bold('\n🔍 Verifying MCP installation...\n'));
+          const installedServers = await installer.verifyInstallation();
+
+          if (installedServers.length > 0) {
+            console.log(chalk.green.bold('✅ MCP Servers Verified:\n'));
+            installedServers.forEach(server => console.log(chalk.green(`   • ${server}`)));
+            console.log();
+            console.log(chalk.cyan('💡 Run /mcp in Claude Code to see available servers\n'));
+          } else {
+            console.log(chalk.yellow('⚠️ No MCP servers detected after installation'));
+            console.log(chalk.dim('   This might be normal - MCP servers may require a Claude Code restart'));
+            console.log(chalk.dim('   Try running: claude mcp list\n'));
+          }
         }
       } catch (error) {
         console.log(chalk.yellow('⚠️ MCP installation encountered an issue - continuing without MCP servers'));
@@ -491,6 +506,7 @@ function showNextSteps(projectName: string, isHere: boolean, isExistingProject: 
   console.log(`• Core files are in ${chalk.blue('.regent/core/')} directory`);
   console.log(`• Use ${chalk.green('npm run regent:build')} to generate layer templates`);
   console.log(`• Check ${chalk.blue('.specify/memory/constitution.md')} for project principles`);
+  console.log(`• If MCP servers installed: restart Claude Code session for detection`);
 
   if (isExistingProject) {
     console.log();
