@@ -484,6 +484,66 @@ templates/
 
 ---
 
+### Bug #113: Legacy .specify Directory Should Be Removed
+**Discovered**: 2025-09-30 00:13 (analyzing project structure)
+**Version**: 2.1.9
+**Severity**: High (Architectural Confusion)
+**Phase**: Environment Setup
+
+**Description**: The `.specify/` directory is a remnant of an old **spec-driven architecture** that conflicts with the current **layer-driven `.regent/` architecture**. Creates two competing structures.
+
+**Two Architectures Conflict**:
+```
+✅ .regent/              # Working layer-driven (used by /01, /02, /03)
+   ├── templates/        # Read by commands
+   ├── core/             # RLHF system
+   └── config/           # Validation
+
+❌ .specify/             # Legacy spec-driven (not used)
+   ├── memory/           # Orphaned constitution.md
+   ├── specs/            # Not used by any command
+   ├── plans/            # Not used by any command
+   └── tasks/            # Not used by any command
+```
+
+**Expected Behavior**:
+- Only create `.regent/` directory
+- Move `constitution.md` to `.regent/docs/` if needed
+- Remove all `.specify/` references
+
+**Impact**:
+- **High**: Architectural confusion
+- Users see two competing structures
+- Wastes disk space
+- Suggests features that don't exist
+- Same root cause as Bug #110
+
+**Evidence of Non-Usage**:
+- No `/01`, `/02`, `/03` commands write to `.specify/`
+- Templates don't reference `.specify/` paths
+- Directory stays empty after workflow
+- Only `constitution.md` created, nothing else
+
+**Reproduction**:
+1. Run: `regent init test-project`
+2. Check: `ls -la test-project/`
+3. See both `.regent/` and `.specify/`
+4. Run workflow with `/01`, `/02`, `/03`
+5. `.specify/` remains unused
+
+**Location**: `src/cli/commands/init.ts` - `createProjectStructure()` (lines ~135-140, ~294-344, ~434-449)
+**Status**: 🔴 Open
+**Issue**: #113
+**Fix Priority**: High (architectural cleanup)
+**Recommendation**: Remove `.specify/` entirely, move `constitution.md` to `.regent/docs/` if needed
+
+**Related**:
+- Bug #110 (misaligned commands) - same root cause
+- Bug #112 (TEMPLATE.regent) - architectural cleanup
+- Part of larger spec-driven → layer-driven migration cleanup
+
+---
+
 **Started**: 2025-09-29 23:55
 **Last Update**: 2025-09-30 00:01
 **Status**: 🔄 IN PROGRESS - Bug mapping active
