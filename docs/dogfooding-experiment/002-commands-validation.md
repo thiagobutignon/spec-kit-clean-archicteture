@@ -397,6 +397,93 @@ regent --help
 
 ---
 
+### Bug #111: Config Files Overwritten in Brownfield Projects
+**Discovered**: 2025-09-30 00:09 (inspecting project structure)
+**Version**: 2.1.9
+**Severity**: Critical (Data Loss Risk)
+**Phase**: Environment Setup
+
+**Description**: When running `regent init --here` in existing projects, configuration files are **overwritten without backup or warning**, causing potential data loss.
+
+**Files at Risk**:
+```
+.vscode/settings.json    # VS Code settings
+.gitignore               # Git ignore rules
+eslint.config.js         # ESLint configuration
+package.json             # NPM scripts (merged, but risky)
+tsconfig.json            # TypeScript configuration
+vitest.config.ts         # Test configuration
+```
+
+**Expected Behavior**:
+- Detect existing files
+- Create timestamped backups
+- Prompt user for confirmation
+- Smart merge (especially for package.json)
+- Or skip if `--force` not provided
+
+**Impact**:
+- **Critical**: User loses custom configurations
+- No recovery without git
+- Breaks existing CI/CD
+- Blocks brownfield adoption
+
+**Reproduction**:
+1. Create project with custom configs
+2. Run: `regent init --here`
+3. Custom configs are overwritten
+
+**Location**: `src/cli/commands/init.ts` - `copyProjectConfigFiles()` (lines ~214-264)
+**Status**: 🔴 Open
+**Issue**: #111
+**Fix Priority**: Critical (data loss risk)
+**Recommendation**: Implement backup + merge strategy before any overwrite
+
+---
+
+### Bug #112: Example TEMPLATE.regent File Should Be Removed
+**Discovered**: 2025-09-30 00:10 (exploring templates directory)
+**Version**: 2.1.9
+**Severity**: Low (Dead Code / Clarity)
+**Phase**: Environment Setup
+
+**Description**: The `templates/TEMPLATE.regent` file exists as a development example but serves no functional purpose and should be removed to avoid confusion.
+
+**Current State**:
+```
+templates/
+├── TEMPLATE.regent              # ⚠️ Not functional, just example
+├── backend-domain-template.regent
+├── backend-data-template.regent
+└── ... (working templates)
+```
+
+**Expected State**:
+```
+templates/
+├── backend-domain-template.regent
+├── backend-data-template.regent
+└── ... (only working templates)
+```
+
+**Impact**:
+- Low: Causes confusion
+- Not functional but clutters directory
+- Could cause naming conflicts
+
+**Reproduction**:
+1. Check: `ls templates/`
+2. See: `TEMPLATE.regent` file
+3. Realize it's not used anywhere
+
+**Location**: `templates/TEMPLATE.regent`
+**Status**: 🔴 Open
+**Issue**: #112
+**Fix Priority**: Low (cleanup task)
+**Recommendation**: Delete file and verify no references in code
+
+---
+
 **Started**: 2025-09-29 23:55
 **Last Update**: 2025-09-30 00:01
 **Status**: 🔄 IN PROGRESS - Bug mapping active
