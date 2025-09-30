@@ -11,6 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automated NPM package publishing via GitHub Actions
 - Release process documentation
 - CHANGELOG.md for tracking project changes
+- Migration note in README.md for users of legacy commands
+- Documentation of numbered command pattern (/01-/09)
+
+### Removed
+- **BREAKING**: 7 legacy slash command files that don't work with `.regent/` templates:
+  - `/constitution` - Use `/01-plan-layer-features` instead
+  - `/specify` - Use `/01-plan-layer-features` instead
+  - `/plan` - Use `/01-plan-layer-features` instead
+  - `/tasks` - Use `/02-validate-layer-plan` instead
+  - `/implement` - Use `/03-generate-layer-code` → `/06-execute-layer-steps` instead
+  - `/clarify` - Functionality integrated into planning commands
+  - `/analyze` - Use `/05-evaluate-layer-results` instead
+
+### Changed
+- Updated `regent init` command to suggest only validated commands (/01-/05)
+- Updated README.md workflow documentation to use layer-driven commands only
 
 ## [2.1.1] - 2025-09-28
 

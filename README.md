@@ -129,23 +129,20 @@ regent check
 ```bash
 cd my-project
 
-# 1. Establish project principles
-/constitution
+# 1. Plan layer features
+/01-plan-layer-features
 
-# 2. Create feature specification
-/specify "User authentication with JWT tokens"
+# 2. Validate the plan
+/02-validate-layer-plan
 
-# 3. Clarify any ambiguities (optional)
-/clarify
+# 3. Generate code from plan
+/03-generate-layer-code
 
-# 4. Create implementation plan
-/plan from spec: SPEC-001
+# 4. Reflect and learn from implementation
+/04-reflect-layer-lessons
 
-# 5. Generate actionable tasks
-/tasks from plan: PLAN-001
-
-# 6. Execute implementation
-/implement from tasks: TASK-LIST
+# 5. Evaluate architecture compliance
+/05-evaluate-layer-results
 ```
 
 ## 🎯 CLI Tool
@@ -180,19 +177,9 @@ regent init --help
 #   --debug             Show debug information
 ```
 
-### Workflow Commands (within projects)
+### Layer-Driven Workflow Commands
 
-| Command | Purpose | Stage |
-|---------|---------|-------|
-| `/constitution` | Establish project principles | Foundation |
-| `/specify` | Create feature specifications | Analysis |
-| `/clarify` | Resolve ambiguities | Clarification |
-| `/plan` | Map features to layers | Design |
-| `/tasks` | Generate implementation tasks | Planning |
-| `/analyze` | Validate consistency | Quality Assurance |
-| `/implement` | Execute with templates | Implementation |
-
-### Advanced Layer Commands
+The Regent system uses **9 numbered commands** (`/01` through `/09`) that follow the complete Clean Architecture development lifecycle. Each command is validated and proven to work with `.regent/` templates.
 
 | Command | Purpose | Integration |
 |---------|---------|-------------|
@@ -206,40 +193,39 @@ regent init --help
 | `/08-apply-layer-improvements` | Apply learning feedback | Template evolution |
 | `/09-e2e-performance-testing` | End-to-end validation | Quality assurance |
 
-## 🏗️ Hybrid Architecture: Spec-Driven + Layer-Driven
+> **Migration Note**: If you were using legacy commands (`/constitution`, `/specify`, `/plan`, `/tasks`, `/implement`, `/clarify`, `/analyze`), they have been removed as of v2.2.0. Use the numbered workflow above instead - start with `/01-plan-layer-features` to begin your implementation.
+
+## 🏗️ Layer-Driven Clean Architecture
 
 ### The Innovation
 
-Spec-Kit Clean Architecture uniquely combines **GitHub's spec-kit workflow** with **Clean Architecture layer templates** to create a deterministic AI development process:
+Spec-Kit Clean Architecture uses **Clean Architecture layer templates** with **RLHF validation** to create a deterministic AI development process:
 
 ```mermaid
 graph LR
-    A[User Intent] --> B[constitution]
-    B --> C[specify]
-    C --> D[clarify]
-    D --> E[plan]
-    E --> F[tasks]
-
-    F --> G[01-plan-layer-features]
-    G --> H[02-validate-layer-plan]
-    H --> I[03-generate-layer-code]
-    I --> J[implement]
-
-    J --> K[.regent Templates]
-    K --> L[RLHF Validation]
-    L --> M[Clean Architecture Code]
+    A[User Intent] --> B[01-plan-layer-features]
+    B --> C[02-validate-layer-plan]
+    C --> D[03-generate-layer-code]
+    D --> E[04-reflect-layer-lessons]
+    E --> F[05-evaluate-layer-results]
+    F --> G[.regent Templates]
+    G --> H[RLHF Validation]
+    H --> I[Clean Architecture Code]
 ```
 
-### Workflow Integration
+### Workflow Phases
 
-| Phase | Spec-Driven | Layer-Driven | Output |
-|-------|-------------|--------------|--------|
-| **Foundation** | `/constitution` | Project principles | Constitution with CA rules |
-| **Analysis** | `/specify` → `/clarify` | Requirements analysis | Clear specifications |
-| **Design** | `/plan` | `/01-plan-layer-features` | Layer-mapped implementation plan |
-| **Planning** | `/tasks` | `/02-validate-layer-plan` | Validated, layer-specific tasks |
-| **Implementation** | `/implement` | `/03-generate-layer-code` | .regent template execution |
-| **Validation** | `/analyze` | `/09-e2e-performance-testing` | Quality assurance |
+| Phase | Command | Output |
+|-------|---------|--------|
+| **Planning** | `/01-plan-layer-features` | Layer-mapped implementation plan |
+| **Validation** | `/02-validate-layer-plan` | Validated, layer-specific plan |
+| **Implementation** | `/03-generate-layer-code` | .regent template execution |
+| **Reflection** | `/04-reflect-layer-lessons` | Learning feedback |
+| **Evaluation** | `/05-evaluate-layer-results` | Architecture compliance validation |
+| **Execution** | `/06-execute-layer-steps` | Automated code generation |
+| **Error Fixing** | `/07-fix-layer-errors` | Error correction |
+| **Improvement** | `/08-apply-layer-improvements` | Template evolution |
+| **Testing** | `/09-e2e-performance-testing` | Quality assurance |
 
 ### Always Greenfield Architecture
 
