@@ -7,6 +7,32 @@ import { execSync } from 'child_process';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 
+// Supported MCP servers - single source of truth
+export const SUPPORTED_MCP_SERVERS = ['serena', 'context7', 'chrome-devtools', 'playwright'] as const;
+
+// Verification timeouts (in milliseconds)
+// Higher timeouts in CI environments to account for slower execution
+export const VERIFICATION_TIMEOUT = {
+  CLI_CHECK: process.env.CI ? 5000 : 2000,    // 2s local, 5s CI
+  MCP_LIST: process.env.CI ? 10000 : 5000     // 5s local, 10s CI
+} as const;
+
+// Retry configuration
+export const RETRY_DELAY_MS = 1000; // 1 second delay between retry attempts
+
+/**
+ * Custom error class for MCP installation failures
+ * Preserves original error as cause for debugging
+ */
+export class MCPInstallationError extends Error {
+  constructor(serverName: string, originalError: any) {
+    const errorMsg = originalError?.stderr?.toString() || originalError?.message || 'Unknown error';
+    super(`Failed to install ${serverName} MCP server: ${errorMsg}`);
+    this.name = 'MCPInstallationError';
+    this.cause = originalError;
+  }
+}
+
 export interface MCPConfig {
   installSerena?: boolean;
   installContext7?: boolean;
@@ -107,11 +133,11 @@ export class MCPInstaller {
    */
   async installSerena(): Promise<void> {
     const quotedPath = this.projectPath.includes(' ') ? `"${this.projectPath}"` : this.projectPath;
-    const command = `claude mcp add serena -- serena-mcp-server --context ide-assistant --project ${quotedPath}`;
+    const command = `claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project ${quotedPath}`;
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
-      throw new Error(error.stderr?.toString() || error.message);
+      throw new MCPInstallationError('Serena', error);
     }
   }
 
@@ -123,7 +149,7 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
-      throw new Error(error.stderr?.toString() || error.message);
+      throw new MCPInstallationError('Context7', error);
     }
   }
 
@@ -135,7 +161,7 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
-      throw new Error(error.stderr?.toString() || error.message);
+      throw new MCPInstallationError('Chrome DevTools', error);
     }
   }
 
@@ -147,8 +173,75 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
-      throw new Error(error.stderr?.toString() || error.message);
+      throw new MCPInstallationError('Playwright', error);
     }
+  }
+
+  /**
+   * Verify MCP servers are properly installed
+   * @param retries Number of retry attempts (default: 2)
+   * @returns Array of detected server names
+   */
+  async verifyInstallation(retries = 2): Promise<string[]> {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        // Check if claude CLI is available
+        try {
+          execSync('which claude', { stdio: 'pipe', timeout: VERIFICATION_TIMEOUT.CLI_CHECK });
+        } catch {
+          if (attempt === 0) {
+            console.log(chalk.yellow('⚠️ Claude CLI not found - skipping MCP verification'));
+          }
+          return [];
+        }
+
+        const output = execSync('claude mcp list', {
+          encoding: 'utf-8',
+          stdio: 'pipe',
+          timeout: VERIFICATION_TIMEOUT.MCP_LIST
+        });
+
+        // Parse only lines that look like server entries
+        // Typical format: "  server-name    Connected" or "  server-name    Available"
+        const serverRegex = /^\s+([\w-]+)\s+(?:Connected|Available|configured)$/gm;
+        const servers = new Set<string>();
+
+        // Use matchAll for safer regex iteration (no stateful global flag issues)
+        const matches = output.matchAll(serverRegex);
+        for (const match of matches) {
+          const serverName = match[1];
+          // Only add known MCP servers to avoid false positives
+          if (SUPPORTED_MCP_SERVERS.includes(serverName as typeof SUPPORTED_MCP_SERVERS[number])) {
+            servers.add(serverName);
+          }
+        }
+
+        // If we found servers or this is the last attempt, return results
+        if (servers.size > 0 || attempt === retries) {
+          return Array.from(servers);
+        }
+
+        // Wait before retry to allow MCP servers to initialize
+        if (attempt < retries) {
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+        }
+      } catch (error) {
+        // Log error for debugging in verbose mode
+        if (process.env.DEBUG || process.env.VERBOSE) {
+          console.error(`Verification attempt ${attempt + 1} failed:`, error);
+        }
+
+        // If this is the last attempt, return empty array
+        if (attempt === retries) {
+          return [];
+        }
+
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+      }
+    }
+
+    return [];
   }
 
   /**
