@@ -20,6 +20,9 @@ export const VERIFICATION_TIMEOUT = {
 // Retry configuration
 export const RETRY_DELAY_MS = 1000; // 1 second delay between retry attempts
 
+// Error message patterns
+const ALREADY_EXISTS_PATTERN = 'already exists';
+
 /**
  * Custom error class for MCP installation failures
  * Preserves original error as cause for debugging
@@ -30,6 +33,17 @@ export class MCPInstallationError extends Error {
     super(`Failed to install ${serverName} MCP server: ${errorMsg}`);
     this.name = 'MCPInstallationError';
     this.cause = originalError;
+  }
+}
+
+/**
+ * Custom error class for MCP servers that already exist
+ * Allows for type-safe handling of "already installed" scenarios
+ */
+export class MCPAlreadyExistsError extends Error {
+  constructor(serverName: string) {
+    super(`MCP server ${serverName} already exists`);
+    this.name = 'MCPAlreadyExistsError';
   }
 }
 
@@ -55,6 +69,28 @@ export class MCPInstaller {
   }
 
   /**
+   * Type guard to check if error is MCPAlreadyExistsError
+   * Provides type-safe error checking
+   */
+  private isAlreadyExistsError(error: unknown): error is MCPAlreadyExistsError {
+    return error instanceof MCPAlreadyExistsError;
+  }
+
+  /**
+   * Handle installation errors and update report accordingly
+   * Reduces code duplication across all install methods
+   */
+  private handleInstallError(error: Error, serverName: string, displayName: string, report: InstallReport): void {
+    if (this.isAlreadyExistsError(error)) {
+      report.skipped.push(`${serverName} (already installed)`);
+      console.log(chalk.yellow(`⏭️  ${displayName} - Already installed (skipped)\n`));
+    } else {
+      report.failed.push(serverName);
+      console.log(chalk.red(`❌ ${displayName} installation failed: ${error.message}\n`));
+    }
+  }
+
+  /**
    * Install all MCP servers based on configuration
    */
   async installAll(config: MCPConfig): Promise<InstallReport> {
@@ -73,8 +109,7 @@ export class MCPInstaller {
         report.successful.push('serena');
         console.log(chalk.green('✅ Serena (Code Intelligence) installed\n'));
       } catch (error) {
-        report.failed.push('serena');
-        console.log(chalk.red(`❌ Serena installation failed: ${(error as Error).message}\n`));
+        this.handleInstallError(error as Error, 'serena', 'Serena', report);
       }
     } else {
       report.skipped.push('serena');
@@ -87,8 +122,7 @@ export class MCPInstaller {
         report.successful.push('context7');
         console.log(chalk.green('✅ Context7 (Documentation) installed\n'));
       } catch (error) {
-        report.failed.push('context7');
-        console.log(chalk.red(`❌ Context7 installation failed: ${(error as Error).message}\n`));
+        this.handleInstallError(error as Error, 'context7', 'Context7', report);
       }
     } else if (config.installContext7 && !config.context7ApiKey) {
       report.skipped.push('context7 (no API key provided)');
@@ -103,8 +137,7 @@ export class MCPInstaller {
         report.successful.push('chrome-devtools');
         console.log(chalk.green('✅ Chrome DevTools (Browser Automation) installed\n'));
       } catch (error) {
-        report.failed.push('chrome-devtools');
-        console.log(chalk.red(`❌ Chrome DevTools installation failed: ${(error as Error).message}\n`));
+        this.handleInstallError(error as Error, 'chrome-devtools', 'Chrome DevTools', report);
       }
     } else {
       report.skipped.push('chrome-devtools');
@@ -117,8 +150,7 @@ export class MCPInstaller {
         report.successful.push('playwright');
         console.log(chalk.green('✅ Playwright (E2E Testing) installed\n'));
       } catch (error) {
-        report.failed.push('playwright');
-        console.log(chalk.red(`❌ Playwright installation failed: ${(error as Error).message}\n`));
+        this.handleInstallError(error as Error, 'playwright', 'Playwright', report);
       }
     } else {
       report.skipped.push('playwright');
@@ -137,6 +169,13 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
+      const stderr = error.stderr?.toString() || error.message || '';
+
+      // Check if it's "already exists" error
+      if (stderr.includes(ALREADY_EXISTS_PATTERN)) {
+        throw new MCPAlreadyExistsError('serena');
+      }
+
       throw new MCPInstallationError('Serena', error);
     }
   }
@@ -149,6 +188,13 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
+      const stderr = error.stderr?.toString() || error.message || '';
+
+      // Check if it's "already exists" error
+      if (stderr.includes(ALREADY_EXISTS_PATTERN)) {
+        throw new MCPAlreadyExistsError('context7');
+      }
+
       throw new MCPInstallationError('Context7', error);
     }
   }
@@ -161,6 +207,13 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
+      const stderr = error.stderr?.toString() || error.message || '';
+
+      // Check if it's "already exists" error
+      if (stderr.includes(ALREADY_EXISTS_PATTERN)) {
+        throw new MCPAlreadyExistsError('chrome-devtools');
+      }
+
       throw new MCPInstallationError('Chrome DevTools', error);
     }
   }
@@ -173,6 +226,13 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
+      const stderr = error.stderr?.toString() || error.message || '';
+
+      // Check if it's "already exists" error
+      if (stderr.includes(ALREADY_EXISTS_PATTERN)) {
+        throw new MCPAlreadyExistsError('playwright');
+      }
+
       throw new MCPInstallationError('Playwright', error);
     }
   }
