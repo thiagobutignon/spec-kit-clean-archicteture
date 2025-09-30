@@ -157,6 +157,26 @@ The **`regent`** CLI provides a complete toolkit for spec-driven Clean Architect
 | `regent check` | Validate system requirements | `regent check` |
 | `regent --help` | Show usage information | `regent --help` |
 
+### Getting Help
+
+Get detailed information about any command using the `--help` flag:
+
+```bash
+# Show all commands
+regent --help
+
+# Show options for specific command
+regent init --help
+
+# Output shows all available options:
+#   --ai <assistant>    AI assistant to use (claude, gemini, copilot, cursor)
+#   --here              Initialize in current directory
+#   --force             Force overwrite existing files
+#   --no-git            Skip git repository initialization
+#   --skip-mcp          Skip MCP server installation
+#   --debug             Show debug information
+```
+
 ### Layer-Driven Workflow Commands
 
 The Regent system uses **9 numbered commands** (`/01` through `/09`) that follow the complete Clean Architecture development lifecycle. Each command is validated and proven to work with `.regent/` templates.
