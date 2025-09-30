@@ -5,6 +5,9 @@ import * as childProcess from 'child_process';
 // Mock child_process
 vi.mock('child_process');
 
+// Helper to mock execSync properly for string encoding
+const mockExecSyncWithString = (output: string) => output as any;
+
 describe('MCPInstaller', () => {
   let installer: MCPInstaller;
   const testProjectPath = '/test/project';
@@ -28,7 +31,7 @@ describe('MCPInstaller', () => {
 
       vi.spyOn(childProcess, 'execSync')
         .mockReturnValueOnce(Buffer.from('')) // which claude
-        .mockReturnValueOnce(Buffer.from(mockOutput)); // claude mcp list
+        .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
       const result = await installer.verifyInstallation();
 
@@ -49,7 +52,7 @@ describe('MCPInstaller', () => {
 
       vi.spyOn(childProcess, 'execSync')
         .mockReturnValueOnce(Buffer.from('')) // which claude
-        .mockReturnValueOnce(Buffer.from(mockOutput)); // claude mcp list
+        .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
       const result = await installer.verifyInstallation();
 
@@ -66,7 +69,7 @@ describe('MCPInstaller', () => {
 
       vi.spyOn(childProcess, 'execSync')
         .mockReturnValueOnce(Buffer.from('')) // which claude
-        .mockReturnValueOnce(Buffer.from(mockOutput)); // claude mcp list
+        .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
       const result = await installer.verifyInstallation();
 
@@ -127,7 +130,7 @@ chrome-devtools installation failed
 
       vi.spyOn(childProcess, 'execSync')
         .mockReturnValueOnce(Buffer.from('')) // which claude
-        .mockReturnValueOnce(Buffer.from(mockOutput)); // claude mcp list
+        .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
       const result = await installer.verifyInstallation();
 
@@ -144,7 +147,7 @@ chrome-devtools installation failed
 
       vi.spyOn(childProcess, 'execSync')
         .mockReturnValueOnce(Buffer.from('')) // which claude
-        .mockReturnValueOnce(Buffer.from(mockOutput)); // claude mcp list
+        .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
       const result = await installer.verifyInstallation();
 
@@ -162,7 +165,7 @@ chrome-devtools installation failed
 
       vi.spyOn(childProcess, 'execSync')
         .mockReturnValueOnce(Buffer.from('')) // which claude
-        .mockReturnValueOnce(Buffer.from(mockOutput)); // claude mcp list
+        .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
       const result = await installer.verifyInstallation();
 
@@ -178,7 +181,7 @@ chrome-devtools installation failed
 
       vi.spyOn(childProcess, 'execSync')
         .mockReturnValueOnce(Buffer.from('')) // which claude
-        .mockReturnValueOnce(Buffer.from(mockOutput)); // claude mcp list
+        .mockReturnValueOnce(mockExecSyncWithString(mockOutput)); // claude mcp list
 
       const result = await installer.verifyInstallation();
 

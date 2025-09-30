@@ -115,8 +115,14 @@ export async function initCommand(projectName: string | undefined, options: Init
             console.log(chalk.cyan('💡 Run /mcp in Claude Code to see available servers\n'));
           } else {
             console.log(chalk.yellow('⚠️ No MCP servers detected after installation'));
-            console.log(chalk.dim('   This might be normal - MCP servers may require a Claude Code restart'));
-            console.log(chalk.dim('   Try running: claude mcp list\n'));
+            console.log(chalk.dim('   Possible causes:'));
+            console.log(chalk.dim('   • MCP servers may require a Claude Code restart'));
+            console.log(chalk.dim('   • Installation may have failed silently'));
+            console.log(chalk.dim('   • Claude CLI may not be properly configured'));
+            console.log(chalk.dim('\n   Next steps:'));
+            console.log(chalk.dim('   1. Run: claude mcp list'));
+            console.log(chalk.dim('   2. Restart your Claude Code session'));
+            console.log(chalk.dim('   3. Check SETUP_MCP.md for troubleshooting\n'));
           }
         }
       } catch (error) {

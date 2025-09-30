@@ -7,6 +7,15 @@ import { execSync } from 'child_process';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 
+// Supported MCP servers - single source of truth
+export const SUPPORTED_MCP_SERVERS = ['serena', 'context7', 'chrome-devtools', 'playwright'] as const;
+
+// Verification timeouts (in milliseconds)
+export const VERIFICATION_TIMEOUT = {
+  CLI_CHECK: 2000,    // 2 seconds to check if claude CLI exists
+  MCP_LIST: 5000      // 5 seconds to list MCP servers
+} as const;
+
 export interface MCPConfig {
   installSerena?: boolean;
   installContext7?: boolean;
@@ -111,7 +120,8 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
-      throw new Error(error.stderr?.toString() || error.message);
+      const errorMsg = error.stderr?.toString() || error.message || 'Unknown error';
+      throw new Error(`Failed to install Serena MCP server: ${errorMsg}`);
     }
   }
 
@@ -123,7 +133,8 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
-      throw new Error(error.stderr?.toString() || error.message);
+      const errorMsg = error.stderr?.toString() || error.message || 'Unknown error';
+      throw new Error(`Failed to install Context7 MCP server: ${errorMsg}`);
     }
   }
 
@@ -135,7 +146,8 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
-      throw new Error(error.stderr?.toString() || error.message);
+      const errorMsg = error.stderr?.toString() || error.message || 'Unknown error';
+      throw new Error(`Failed to install Chrome DevTools MCP server: ${errorMsg}`);
     }
   }
 
@@ -147,7 +159,8 @@ export class MCPInstaller {
     try {
       execSync(command, { stdio: 'pipe' });
     } catch (error: any) {
-      throw new Error(error.stderr?.toString() || error.message);
+      const errorMsg = error.stderr?.toString() || error.message || 'Unknown error';
+      throw new Error(`Failed to install Playwright MCP server: ${errorMsg}`);
     }
   }
 
@@ -158,7 +171,7 @@ export class MCPInstaller {
     try {
       // Check if claude CLI is available
       try {
-        execSync('which claude', { stdio: 'pipe', timeout: 2000 });
+        execSync('which claude', { stdio: 'pipe', timeout: VERIFICATION_TIMEOUT.CLI_CHECK });
       } catch {
         console.log(chalk.yellow('⚠️ Claude CLI not found - skipping MCP verification'));
         return [];
@@ -167,7 +180,7 @@ export class MCPInstaller {
       const output = execSync('claude mcp list', {
         encoding: 'utf-8',
         stdio: 'pipe',
-        timeout: 5000
+        timeout: VERIFICATION_TIMEOUT.MCP_LIST
       });
 
       // Parse only lines that look like server entries
@@ -175,11 +188,12 @@ export class MCPInstaller {
       const serverRegex = /^\s+([\w-]+)\s+(?:Connected|Available|configured)/gm;
       const servers = new Set<string>();
 
-      let match;
-      while ((match = serverRegex.exec(output)) !== null) {
+      // Use matchAll for safer regex iteration (no stateful global flag issues)
+      const matches = output.matchAll(serverRegex);
+      for (const match of matches) {
         const serverName = match[1];
         // Only add known MCP servers to avoid false positives
-        if (['serena', 'context7', 'chrome-devtools', 'playwright'].includes(serverName)) {
+        if (SUPPORTED_MCP_SERVERS.includes(serverName as typeof SUPPORTED_MCP_SERVERS[number])) {
           servers.add(serverName);
         }
       }
