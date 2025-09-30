@@ -342,6 +342,61 @@ regent --help
 
 ---
 
+### Bug #110: Outdated Slash Commands in Init Output
+**Discovered**: 2025-09-30 00:06 (reviewing `regent init` success message)
+**Version**: 2.1.9
+**Severity**: High (Architecture Misalignment)
+**Phase**: Environment Setup
+
+**Description**: The `regent init` success message suggests slash commands (`/constitution`, `/specify`, `/plan`, `/tasks`, `/implement`) that are **completely misaligned** with the actual `.regent` template structure and working `/01`, `/02`, `/03` workflow.
+
+**Current Behavior**:
+```bash
+📋 Next Steps:
+2. Start the Clean Architecture workflow:
+   /constitution - Review and customize project principles
+   /specify - Create your first feature specification
+   /plan - Generate Clean Architecture implementation plan
+   /tasks - Break down into layer-specific tasks
+   /implement - Execute with .regent templates
+```
+
+**Expected Behavior**:
+```bash
+📋 Next Steps:
+2. Start with Clean Architecture layer generation:
+   /01-plan-layer-features --layer=domain --input="Feature description"
+   /02-validate-layer-plan from json: [path-to-plan.json]
+   /03-generate-layer-code from json: [path-to-validated-plan.json]
+```
+
+**Impact**:
+- **High**: New users follow wrong workflow
+- Commands don't exist or don't work with `.regent` templates
+- Wastes time and creates confusion
+- Prevents discovery of actual `/01`, `/02`, `/03` commands
+- Architectural mismatch (spec-driven vs layer-driven)
+
+**Evidence**:
+- ✅ Experiment #001 used `/01-plan-layer-features` successfully
+- ✅ Experiment #002 uses `/01`, `/02`, `/03` workflow
+- ❌ `/constitution`, `/specify` don't exist in `.claude/commands/`
+- ❌ Template structure expects layer-driven, not spec-driven
+
+**Reproduction**:
+1. Run: `regent init test-project`
+2. Read "Next Steps" output
+3. Try following suggested commands
+4. Realize they don't align with `.regent` templates
+
+**Location**: `src/cli/commands/init.ts` - `showNextSteps()` function (lines ~471-504)
+**Status**: 🔴 Open
+**Issue**: #110
+**Fix Priority**: High (architectural alignment)
+**Recommendation**: Remove immediately and replace with `/01`, `/02`, `/03` workflow
+
+---
+
 **Started**: 2025-09-29 23:55
 **Last Update**: 2025-09-30 00:01
 **Status**: 🔄 IN PROGRESS - Bug mapping active
