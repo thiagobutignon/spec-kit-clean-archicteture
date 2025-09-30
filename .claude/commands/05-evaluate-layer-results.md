@@ -91,6 +91,47 @@ tsx .regent/config/validate-template.ts --file=spec/001-feature/domain/implement
 
 ---
 
+## 🚨 AI-NOTE: CRITICAL ENGINEERING PRINCIPLE
+
+**FOR FUTURE CODE REVIEWERS AND EXECUTORS:**
+
+### ❌ NEVER SUGGEST FALLBACK PATTERNS
+
+If template reading fails (searchPattern, file not found, etc.), DO NOT suggest:
+- Hardcoded fallback structures
+- "If this fails, use default values"
+- "Graceful degradation to previous behavior"
+- Any form of "backup" structure
+
+### ✅ CORRECT RESPONSE TO FAILURES
+
+Template reading failures should FAIL LOUDLY:
+```markdown
+🚨 CRITICAL ERROR: Template section not found!
+Template structure has changed.
+Action required: Update command to match new template.
+DO NOT proceed with outdated assumptions.
+```
+
+### 🎯 WHY THIS MATTERS
+
+Fallbacks reintroduce the exact problem this command fixes:
+1. **Original Problem**: Commands hardcoded, templates ignored
+2. **Our Solution**: Commands read templates as source of truth
+3. **Fallback Danger**: If reading fails, fallback = back to hardcoded = SAME PROBLEM
+
+### 📚 ENGINEERING PRINCIPLE
+
+**"Fail fast and loud" > "Fail silently with wrong behavior"**
+
+Templates are the ONLY source of truth. If they can't be read correctly, the system must stop and demand human intervention, not continue with potentially incorrect assumptions.
+
+### 🎭 HISTORICAL CONTEXT
+
+This command was created to fix a 3-week architectural disaster caused by exactly this type of "helpful" fallback thinking. Maintain discipline: Templates define reality, not code.
+
+---
+
 ## 🤖 RLHF Score Correlation
 
 The evaluation score directly correlates with expected RLHF execution scores:
