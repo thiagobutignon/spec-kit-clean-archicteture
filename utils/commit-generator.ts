@@ -94,14 +94,6 @@ function extractEntityName(filePath: string): string | null {
   // Guard against null, undefined, or empty string
   if (!filePath || typeof filePath !== 'string') return null;
 
-  // Normalize path to resolve . and .. segments for path traversal detection
-  const normalizedPath = filePath.replace(/\\/g, '/').replace(/\/+/g, '/');
-
-  // Check for path traversal attempts
-  if (normalizedPath.includes('..') || normalizedPath.startsWith('/')) {
-    return null;
-  }
-
   // Extract filename without extension (safely handle Windows and Unix paths)
   const fileName = filePath.split('/').pop()?.split('\\').pop();
   if (!fileName) return null;
@@ -237,46 +229,12 @@ export function generateCommitMessage(
   // Normalize description: lowercase first letter for conventional commits
   const normalizedDescription = enhancedDescription.charAt(0).toLowerCase() + enhancedDescription.slice(1);
 
-  // Build subject line and validate length
-  const subjectLine = `${commitType}(${scope}): ${normalizedDescription}`;
-
-  // Validate subject line length against conventional commit standard (72 chars)
-  const MAX_SUBJECT_LENGTH = 72;
-  if (subjectLine.length > MAX_SUBJECT_LENGTH) {
-    // Truncate description to fit within limit
-    const prefixLength = `${commitType}(${scope}): `.length;
-    const availableLength = MAX_SUBJECT_LENGTH - prefixLength - 3; // -3 for '...'
-
-    if (availableLength > 0) {
-      const truncatedDescription = normalizedDescription.slice(0, availableLength) + '...';
-      const truncatedSubject = `${commitType}(${scope}): ${truncatedDescription}`;
-
-      // Build commit message with truncated subject
-      const emojiPrefix = config.emoji?.enabled !== false
-        ? `${config.emoji?.robot || '🤖'} `
-        : '';
-
-      const message = `${truncatedSubject}
-
-${emojiPrefix}Generated with Claude Code
-
-Co-Authored-By: ${config.coAuthor}`;
-
-      return message;
-    } else {
-      throw new Error(
-        `Commit subject line too long (${subjectLine.length} > ${MAX_SUBJECT_LENGTH} chars). ` +
-        `Even after truncation, prefix "${commitType}(${scope}): " is too long.`
-      );
-    }
-  }
-
   // Build commit message with configurable emoji
   const emojiPrefix = config.emoji?.enabled !== false
     ? `${config.emoji?.robot || '🤖'} `
     : '';
 
-  const message = `${subjectLine}
+  const message = `${commitType}(${scope}): ${normalizedDescription}
 
 ${emojiPrefix}Generated with Claude Code
 
@@ -305,11 +263,6 @@ export function shouldCommitStep(
  * Ensures proper escaping for shell execution
  */
 export function formatCommitMessageForShell(message: string): string {
-  // Guard against null, undefined, or non-string input
-  if (!message || typeof message !== 'string') {
-    return '';
-  }
-
   // Escape single quotes and newlines for heredoc
   return message.replace(/'/g, "'\\''");
 }
