@@ -156,20 +156,35 @@ export class MCPInstaller {
    */
   async verifyInstallation(): Promise<string[]> {
     try {
-      const output = execSync('claude mcp list', { stdio: 'pipe' }).toString();
-      const lines = output.split('\n').filter(line => line.trim());
-
-      // Parse server names from output
-      const servers: string[] = [];
-      for (const line of lines) {
-        // Look for lines that contain server names
-        if (line.includes('serena')) servers.push('serena');
-        if (line.includes('context7')) servers.push('context7');
-        if (line.includes('chrome-devtools')) servers.push('chrome-devtools');
-        if (line.includes('playwright')) servers.push('playwright');
+      // Check if claude CLI is available
+      try {
+        execSync('which claude', { stdio: 'pipe', timeout: 2000 });
+      } catch {
+        console.log(chalk.yellow('⚠️ Claude CLI not found - skipping MCP verification'));
+        return [];
       }
 
-      return [...new Set(servers)]; // Remove duplicates
+      const output = execSync('claude mcp list', {
+        encoding: 'utf-8',
+        stdio: 'pipe',
+        timeout: 5000
+      });
+
+      // Parse only lines that look like server entries
+      // Typical format: "  server-name    Connected" or "  server-name    Available"
+      const serverRegex = /^\s+([\w-]+)\s+(?:Connected|Available|configured)/gm;
+      const servers = new Set<string>();
+
+      let match;
+      while ((match = serverRegex.exec(output)) !== null) {
+        const serverName = match[1];
+        // Only add known MCP servers to avoid false positives
+        if (['serena', 'context7', 'chrome-devtools', 'playwright'].includes(serverName)) {
+          servers.add(serverName);
+        }
+      }
+
+      return Array.from(servers);
     } catch {
       return [];
     }
