@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import inquirer from 'inquirer';
 import { MCPInstaller, promptMCPInstallation } from '../utils/mcp-installer.js';
+import { DEFAULT_GITIGNORE_TEMPLATE, REGENT_GITIGNORE_ENTRIES } from '../templates/default-gitignore.js';
 
 // Get the directory where this package is installed
 const __filename = fileURLToPath(import.meta.url);
@@ -281,8 +282,13 @@ async function detectExistingConfigFiles(projectPath: string): Promise<ExistingC
   return existingFiles;
 }
 
+// Counter for ensuring unique backup names even with rapid successive calls
+let backupCounter = 0;
+
 async function createBackup(filePath: string, projectPath: string, backupDir?: string): Promise<string> {
+  // Use high-precision timestamp with counter to prevent collisions
   const timestamp = Date.now();
+  const counter = backupCounter++;
   const ext = path.extname(filePath);
   const base = path.basename(filePath, ext);
 
@@ -309,14 +315,29 @@ async function createBackup(filePath: string, projectPath: string, backupDir?: s
     await fs.ensureDir(targetBackupDir);
   }
 
-  // Create backup with better naming: filename.regent-backup-timestamp.ext
+  // Create backup with better naming: filename.regent-backup-timestamp-counter.ext
   // This preserves the extension, making it easier to open with appropriate tools
-  const backupName = `${base}.regent-backup-${timestamp}${ext}`;
+  const backupName = `${base}.regent-backup-${timestamp}-${counter}${ext}`;
   const backupPath = path.join(targetBackupDir, backupName);
 
   await fs.copy(filePath, backupPath);
 
   return backupPath;
+}
+
+/**
+ * Cleans up backup files created during a failed backup operation
+ */
+async function cleanupBackups(backupPaths: string[]): Promise<void> {
+  console.log(chalk.yellow('\n🔄 Rolling back backups due to failure...'));
+  for (const backupPath of backupPaths) {
+    try {
+      await fs.remove(backupPath);
+      console.log(chalk.dim(`   ✓ Removed: ${path.basename(backupPath)}`));
+    } catch (error) {
+      console.log(chalk.dim(`   ⚠ Could not remove: ${path.basename(backupPath)}`));
+    }
+  }
 }
 
 async function mergePackageJsonScripts(projectPath: string): Promise<void> {
@@ -367,21 +388,44 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
       return;
     }
 
-    // Create backups
+    // Create backups with rollback on failure
     console.log(chalk.cyan('\n📦 Creating backups...'));
-    for (const file of existingFiles) {
-      try {
+    const successfulBackups: string[] = [];
+
+    try {
+      for (const file of existingFiles) {
         const backupPath = await createBackup(file.path, projectPath, options.backupDir);
+        successfulBackups.push(backupPath);
         const displayPath = options.backupDir ? backupPath : path.relative(projectPath, backupPath);
         console.log(chalk.green(`   ✅ Backed up: ${file.relativePath} → ${displayPath}`));
-      } catch (error) {
-        console.log(chalk.red(`   ❌ Failed to backup ${file.relativePath}: ${(error as Error).message}`));
-        throw new Error(`Backup failed for ${file.relativePath}. Aborting to prevent data loss.`);
       }
+      console.log();
+    } catch (error) {
+      console.log(chalk.red(`\n   ❌ Failed to create backup: ${(error as Error).message}`));
+
+      // Rollback: clean up any successful backups to maintain consistency
+      if (successfulBackups.length > 0) {
+        await cleanupBackups(successfulBackups);
+      }
+
+      throw new Error('Backup process failed. No files were modified. Please check permissions and try again.');
     }
-    console.log();
   } else if (existingFiles.length > 0 && options.force) {
-    console.log(chalk.yellow('\n⚠️  Force flag detected - overwriting existing files without backup'));
+    console.log(chalk.yellow('\n⚠️  DANGER: Force flag detected - overwriting existing files WITHOUT backup'));
+    console.log(chalk.yellow('   This action cannot be undone!\n'));
+
+    // Double confirmation for --force flag to prevent accidents
+    const forceConfirm = await inquirer.prompt([{
+      type: 'confirm',
+      name: 'reallyForce',
+      message: 'Are you ABSOLUTELY SURE you want to proceed without backups?',
+      default: false
+    }]);
+
+    if (!forceConfirm.reallyForce) {
+      console.log(chalk.cyan('\n✅ Operation cancelled. Your files are safe.'));
+      throw new Error('User cancelled force operation');
+    }
   }
 
   // VS Code settings - merge if exists
@@ -442,14 +486,6 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
 
   // .gitignore - merge if exists, create if not
   const gitignorePath = path.join(projectPath, '.gitignore');
-  const regentGitignoreEntries = [
-    '# Spec-kit clean architecture',
-    '.rlhf/',
-    '.logs/',
-    '.regent/templates/*-template.regent',
-    '!.regent/templates/parts/',
-    '.regent-backups/'
-  ];
 
   if (await fs.pathExists(gitignorePath)) {
     // Merge Regent entries into existing .gitignore
@@ -457,57 +493,13 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
 
     // Check if Regent entries are already present
     if (!existingContent.includes('.regent-backups/')) {
-      const mergedContent = existingContent.trim() + '\n\n' + regentGitignoreEntries.join('\n') + '\n';
+      const mergedContent = existingContent.trim() + '\n\n' + REGENT_GITIGNORE_ENTRIES.join('\n') + '\n';
       await fs.writeFile(gitignorePath, mergedContent);
       console.log(chalk.cyan('📝 Updated .gitignore with Regent-specific entries'));
     }
   } else {
-    // Create new .gitignore with full content
-    const gitignore = `# Dependencies
-node_modules/
-.pnp
-.pnp.js
-
-# Production
-/build
-/dist
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Environment
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# IDE
-.idea/
-*.swp
-*.swo
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-${regentGitignoreEntries.join('\n')}
-`;
+    // Create new .gitignore with full content from template
+    const gitignore = DEFAULT_GITIGNORE_TEMPLATE + '\n' + REGENT_GITIGNORE_ENTRIES.join('\n') + '\n';
     await fs.writeFile(gitignorePath, gitignore);
   }
 }

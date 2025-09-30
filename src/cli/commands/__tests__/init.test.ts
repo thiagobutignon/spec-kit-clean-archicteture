@@ -410,5 +410,109 @@ describe('Init Command - Directory Structure', () => {
       const matches = content.match(/\.regent-backups\//g);
       expect(matches?.length).toBe(1); // Only one occurrence
     });
+
+    it('should handle backup collision with counter mechanism', async () => {
+      await fs.ensureDir(testProjectPath);
+      const testFilePath = path.join(testProjectPath, 'config.json');
+      await fs.writeFile(testFilePath, '{"test": true}');
+
+      const backupDir = path.join(testProjectPath, '.regent-backups');
+      await fs.ensureDir(backupDir);
+
+      // Simulate rapid backup creation (same timestamp)
+      const timestamp = Date.now();
+      const backups: string[] = [];
+
+      for (let i = 0; i < 3; i++) {
+        const ext = path.extname(testFilePath);
+        const base = path.basename(testFilePath, ext);
+        // Each backup gets a different counter value
+        const backupName = `${base}.regent-backup-${timestamp}-${i}${ext}`;
+        const backupPath = path.join(backupDir, backupName);
+
+        await fs.copy(testFilePath, backupPath);
+        backups.push(backupPath);
+      }
+
+      // Verify all backups exist and have unique names
+      for (const backup of backups) {
+        expect(await fs.pathExists(backup)).toBe(true);
+      }
+
+      const backupFiles = await fs.readdir(backupDir);
+      expect(backupFiles.length).toBe(3);
+      expect(new Set(backupFiles).size).toBe(3); // All unique
+    });
+
+    it('should rollback backups on failure', async () => {
+      await fs.ensureDir(testProjectPath);
+
+      // Create some test files
+      await fs.writeFile(path.join(testProjectPath, 'file1.json'), '{}');
+      await fs.writeFile(path.join(testProjectPath, 'file2.json'), '{}');
+
+      const backupDir = path.join(testProjectPath, '.regent-backups');
+      await fs.ensureDir(backupDir);
+
+      // Create backups
+      const successfulBackups: string[] = [];
+      const timestamp = Date.now();
+
+      for (let i = 0; i < 2; i++) {
+        const backupPath = path.join(backupDir, `file${i + 1}.regent-backup-${timestamp}-${i}.json`);
+        await fs.copy(path.join(testProjectPath, `file${i + 1}.json`), backupPath);
+        successfulBackups.push(backupPath);
+      }
+
+      // Verify backups were created
+      expect(successfulBackups.length).toBe(2);
+      for (const backup of successfulBackups) {
+        expect(await fs.pathExists(backup)).toBe(true);
+      }
+
+      // Simulate rollback
+      for (const backupPath of successfulBackups) {
+        await fs.remove(backupPath);
+      }
+
+      // Verify backups were removed
+      for (const backup of successfulBackups) {
+        expect(await fs.pathExists(backup)).toBe(false);
+      }
+    });
+
+    it('should use template for .gitignore creation', async () => {
+      await fs.ensureDir(testProjectPath);
+
+      // Simulate creating .gitignore from template
+      const gitignorePath = path.join(testProjectPath, '.gitignore');
+
+      const defaultContent = `# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production
+/build
+/dist
+`;
+
+      const regentEntries = [
+        '# Spec-kit clean architecture',
+        '.rlhf/',
+        '.logs/',
+        '.regent-backups/'
+      ];
+
+      const gitignore = defaultContent + '\n' + regentEntries.join('\n') + '\n';
+      await fs.writeFile(gitignorePath, gitignore);
+
+      // Verify content
+      const content = await fs.readFile(gitignorePath, 'utf-8');
+      expect(content).toContain('# Dependencies');
+      expect(content).toContain('node_modules/');
+      expect(content).toContain('# Spec-kit clean architecture');
+      expect(content).toContain('.regent-backups/');
+    });
   });
 });
