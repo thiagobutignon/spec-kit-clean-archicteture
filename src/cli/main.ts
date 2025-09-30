@@ -42,6 +42,7 @@ program
   .option('--here', 'Initialize in current directory')
   .option('--force', 'Force overwrite existing files without backup')
   .option('--backup-dir <path>', 'Custom directory for config file backups')
+  .option('--cleanup-old-backups', 'Clean up old backups, keeping only the 10 most recent')
   .option('--no-git', 'Skip git repository initialization')
   .option('--skip-mcp', 'Skip MCP server installation')
   .option('--debug', 'Show debug information')

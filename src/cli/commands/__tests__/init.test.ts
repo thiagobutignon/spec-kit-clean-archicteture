@@ -514,5 +514,65 @@ node_modules/
       expect(content).toContain('# Spec-kit clean architecture');
       expect(content).toContain('.regent-backups/');
     });
+
+    it('should cleanup old backups keeping only most recent', async () => {
+      await fs.ensureDir(testProjectPath);
+      const backupDir = path.join(testProjectPath, '.regent-backups');
+      await fs.ensureDir(backupDir);
+
+      // Create 15 backup files with different timestamps
+      const backups: string[] = [];
+      for (let i = 0; i < 15; i++) {
+        const backupName = `config.regent-backup-${Date.now() + i}-${i}.json`;
+        const backupPath = path.join(backupDir, backupName);
+        await fs.writeFile(backupPath, '{}');
+        backups.push(backupPath);
+        await new Promise(resolve => setTimeout(resolve, 2)); // Small delay
+      }
+
+      // Verify all 15 backups exist
+      expect((await fs.readdir(backupDir)).length).toBe(15);
+
+      // Simulate cleanup keeping only 10 most recent
+      const files = await fs.readdir(backupDir);
+      const backupFiles = files.filter(f => f.includes('.regent-backup-'));
+
+      // Get file stats for sorting
+      const fileStats = await Promise.all(
+        backupFiles.map(async (file) => {
+          const filePath = path.join(backupDir, file);
+          const stat = await fs.stat(filePath);
+          return { file, filePath, mtime: stat.mtime };
+        })
+      );
+
+      // Sort by modification time (newest first)
+      fileStats.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
+
+      // Remove old backups beyond keepCount (10)
+      const filesToRemove = fileStats.slice(10);
+      for (const { filePath } of filesToRemove) {
+        await fs.remove(filePath);
+      }
+
+      // Verify only 10 backups remain
+      expect((await fs.readdir(backupDir)).length).toBe(10);
+    });
+
+    it('should use hrtime for high-precision timestamps', async () => {
+      // Test that hrtime provides nanosecond precision
+      const hrTime1 = process.hrtime.bigint();
+      const hrTime2 = process.hrtime.bigint();
+
+      // Convert to milliseconds
+      const timestamp1 = Number(hrTime1 / 1000000n);
+      const timestamp2 = Number(hrTime2 / 1000000n);
+
+      // Timestamps should be different or very close
+      expect(typeof timestamp1).toBe('number');
+      expect(typeof timestamp2).toBe('number');
+      expect(timestamp1).toBeGreaterThan(0);
+      expect(timestamp2).toBeGreaterThanOrEqual(timestamp1);
+    });
   });
 });

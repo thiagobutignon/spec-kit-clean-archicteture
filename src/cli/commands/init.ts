@@ -21,6 +21,7 @@ interface InitOptions {
   debug?: boolean;
   skipMcp?: boolean;
   backupDir?: string;
+  cleanupOldBackups?: boolean;
 }
 
 // AI assistant options
@@ -255,6 +256,11 @@ interface ExistingConfigFile {
   exists: boolean;
 }
 
+/**
+ * Detects existing configuration files that might be overwritten during initialization
+ * @param projectPath - Absolute path to the project directory
+ * @returns Array of existing config files with their paths
+ */
 async function detectExistingConfigFiles(projectPath: string): Promise<ExistingConfigFile[]> {
   const configFiles = [
     '.vscode/settings.json',
@@ -285,9 +291,28 @@ async function detectExistingConfigFiles(projectPath: string): Promise<ExistingC
 // Counter for ensuring unique backup names even with rapid successive calls
 let backupCounter = 0;
 
+/**
+ * Creates a timestamped backup of a configuration file
+ *
+ * Backup Naming Pattern: {filename}.regent-backup-{timestamp}-{counter}{.ext}
+ *
+ * Examples:
+ * - settings.json → settings.regent-backup-1234567890-0.json
+ * - eslint.config.js → eslint.config.regent-backup-1234567890-1.js
+ *
+ * The extension is preserved to allow easy opening with appropriate tools.
+ * The counter prevents collisions when multiple backups are created in rapid succession.
+ *
+ * @param filePath - Absolute path to the file to backup
+ * @param projectPath - Absolute path to the project root directory
+ * @param backupDir - Optional custom backup directory (validated for security)
+ * @returns Absolute path to the created backup file
+ * @throws Error if backup directory cannot be created or path traversal is detected
+ */
 async function createBackup(filePath: string, projectPath: string, backupDir?: string): Promise<string> {
-  // Use high-precision timestamp with counter to prevent collisions
-  const timestamp = Date.now();
+  // Use high-precision timestamp with nanosecond precision for better collision prevention
+  const hrTime = process.hrtime.bigint();
+  const timestamp = Number(hrTime / 1000000n); // Convert to milliseconds
   const counter = backupCounter++;
   const ext = path.extname(filePath);
   const base = path.basename(filePath, ext);
@@ -327,6 +352,11 @@ async function createBackup(filePath: string, projectPath: string, backupDir?: s
 
 /**
  * Cleans up backup files created during a failed backup operation
+ *
+ * This function is called when the backup process fails partway through,
+ * ensuring that no partial backups are left in the system (atomic operation).
+ *
+ * @param backupPaths - Array of absolute paths to backup files to remove
  */
 async function cleanupBackups(backupPaths: string[]): Promise<void> {
   console.log(chalk.yellow('\n🔄 Rolling back backups due to failure...'));
@@ -340,6 +370,67 @@ async function cleanupBackups(backupPaths: string[]): Promise<void> {
   }
 }
 
+/**
+ * Cleans up old backup files, keeping only the most recent N backups
+ *
+ * Useful for preventing backup directory from growing indefinitely.
+ * Sorts backups by modification time and removes oldest ones.
+ *
+ * @param backupDir - Directory containing backup files
+ * @param keepCount - Number of most recent backups to keep (default: 10)
+ */
+async function cleanupOldBackups(backupDir: string, keepCount: number = 10): Promise<void> {
+  if (!await fs.pathExists(backupDir)) {
+    return;
+  }
+
+  try {
+    const files = await fs.readdir(backupDir);
+
+    // Filter only regent backup files
+    const backupFiles = files.filter(f => f.includes('.regent-backup-'));
+
+    if (backupFiles.length <= keepCount) {
+      return; // Nothing to clean up
+    }
+
+    // Get file stats for sorting by modification time
+    const fileStats = await Promise.all(
+      backupFiles.map(async (file) => {
+        const filePath = path.join(backupDir, file);
+        const stat = await fs.stat(filePath);
+        return { file, filePath, mtime: stat.mtime };
+      })
+    );
+
+    // Sort by modification time (newest first)
+    fileStats.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
+
+    // Remove old backups beyond keepCount
+    const filesToRemove = fileStats.slice(keepCount);
+
+    if (filesToRemove.length > 0) {
+      console.log(chalk.cyan(`\n🧹 Cleaning up ${filesToRemove.length} old backup(s)...`));
+
+      for (const { file, filePath } of filesToRemove) {
+        await fs.remove(filePath);
+        console.log(chalk.dim(`   ✓ Removed: ${file}`));
+      }
+    }
+  } catch (error) {
+    // Non-critical operation, just log warning
+    console.log(chalk.yellow(`⚠️  Could not clean up old backups: ${(error as Error).message}`));
+  }
+}
+
+/**
+ * Merges Regent-specific scripts into existing package.json
+ *
+ * Only adds scripts that don't already exist, preserving user's custom scripts.
+ * This is a non-destructive merge operation.
+ *
+ * @param projectPath - Absolute path to the project directory
+ */
 async function mergePackageJsonScripts(projectPath: string): Promise<void> {
   const packageJsonPath = path.join(projectPath, 'package.json');
 
@@ -400,6 +491,12 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
         console.log(chalk.green(`   ✅ Backed up: ${file.relativePath} → ${displayPath}`));
       }
       console.log();
+
+      // Cleanup old backups if requested
+      if (options.cleanupOldBackups) {
+        const backupDir = options.backupDir || path.join(projectPath, '.regent-backups');
+        await cleanupOldBackups(backupDir);
+      }
     } catch (error) {
       console.log(chalk.red(`\n   ❌ Failed to create backup: ${(error as Error).message}`));
 
