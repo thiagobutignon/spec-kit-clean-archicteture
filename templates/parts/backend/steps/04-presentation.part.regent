@@ -64,15 +64,6 @@
             - 'controllers'   # Controller tests
             - 'mocks'         # Test mocks and spies
             - 'middlewares'   # Middleware tests
-      validation_script: |
-        # AI-NOTE: TDD starts with test structure
-        BASE_PATH="__PROJECT_NAME__/tests/presentation"
-        FOLDERS="$BASE_PATH/controllers $BASE_PATH/mocks $BASE_PATH/middlewares"
-        echo "🔴 TDD RED: Creating test structure..."
-        for folder in $FOLDERS; do
-          mkdir -p "$folder"
-        done
-        echo "✅ Test structure created for TDD cycle"
 
     # === STEP 3: CREATE TEST MOCKS (TDD - RED PHASE) ===
     - id: 'create-test-mocks-__USE_CASE_NAME_KEBAB_CASE__'
@@ -355,32 +346,6 @@
             role?: string
           }
         }
-      validation_script: |
-        # AI-NOTE: Shell functions - DO NOT replace $ variables
-        run_lint_check() {
-          echo "🔍 Running lint check for presentation layer..."
-          npm run lint || { npm run lint --fix && npm run lint; } || exit 1
-          echo "✅ Lint passed for presentation layer"
-        }
-
-        run_presentation_test_check() {
-          echo "🧪 Running presentation layer tests..."
-          npm run test -- --testPathPattern=presentation || exit 1
-          echo "✅ Presentation tests passed"
-        }
-
-        stage_and_commit() {
-          echo "📦 Staging presentation layer changes..."
-          git add .
-          echo "💾 Creating presentation layer commit..."
-          git commit -m "$1" || exit 1
-          echo "✅ Successfully committed presentation layer"
-        }
-
-        # Execute validation sequence for presentation layer
-        run_lint_check
-        run_presentation_test_check
-        stage_and_commit "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ controller"
 
     # === STEP 8: RUN TESTS - VERIFY GREEN (TDD - GREEN PHASE) ===
     - id: 'verify-tests-pass-__USE_CASE_NAME_KEBAB_CASE__'

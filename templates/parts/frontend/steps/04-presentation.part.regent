@@ -66,15 +66,6 @@
             - 'hooks'           # Hook tests
             - 'actions'         # Server action tests
             - 'mocks'           # Test mocks
-      validation_script: |
-        # AI-NOTE: TDD starts with test structure
-        BASE_PATH="__PROJECT_NAME__/__tests__/presentation"
-        FOLDERS="$BASE_PATH/components $BASE_PATH/hooks $BASE_PATH/actions $BASE_PATH/mocks"
-        echo "🔴 TDD RED: Creating test structure..."
-        for folder in $FOLDERS; do
-          mkdir -p "$folder"
-        done
-        echo "✅ Test structure created for TDD cycle"
 
     # === STEP 3: CREATE TEST MOCKS (TDD - RED PHASE) ===
     - id: 'create-test-mocks-__USE_CASE_NAME_KEBAB_CASE__'

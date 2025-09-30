@@ -35,18 +35,6 @@
           folders:
             - 'usecases'      # Use case interface for this specific use case
             - 'errors'        # Domain errors specific to this use case
-      validation_script: |
-        # AI-NOTE: Replace placeholders but keep shell variables intact
-        BASE_PATH="__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain"
-        FOLDERS="$BASE_PATH/usecases $BASE_PATH/errors"
-        echo "✅ Verifying domain folder structure..."
-        for folder in $FOLDERS; do
-          if [ ! -d "$folder" ]; then
-            echo "❌ ERROR: Folder $folder was not created."
-            exit 1
-          fi
-        done
-        echo "✅ All domain folders exist for __USE_CASE_NAME_PASCAL_CASE__ use case."
 
     # === STEP 2: CREATE USE CASE INTERFACE ===
     - id: 'create-domain-usecase-__USE_CASE_NAME_KEBAB_CASE__'
@@ -109,32 +97,6 @@
           */
           execute: (input: __USE_CASE_NAME_PASCAL_CASE__Input) => Promise<__USE_CASE_NAME_PASCAL_CASE__Output>
         }
-      validation_script: |
-        # AI-NOTE: Shell functions - DO NOT replace $ variables
-        run_lint_check() {
-          echo "🔍 Running lint check for domain layer..."
-          npm run lint || { npm run lint --fix && npm run lint; } || exit 1
-          echo "✅ Lint passed for domain layer"
-        }
-
-        run_domain_test_check() {
-          echo "🧪 Running domain layer tests..."
-          npm run test -- --testPathPattern=domain || exit 1
-          echo "✅ Domain tests passed"
-        }
-
-        stage_and_commit() {
-          echo "📦 Staging domain layer changes..."
-          git add .
-          echo "💾 Creating domain layer commit..."
-          git commit -m "$1" || exit 1
-          echo "✅ Successfully committed domain layer"
-        }
-
-        # Execute validation sequence for domain layer
-        run_lint_check
-        run_domain_test_check
-        stage_and_commit "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ domain interface"
 
     # === STEP 3: CREATE DOMAIN ERRORS ===
     - id: 'create-domain-errors-__USE_CASE_NAME_KEBAB_CASE__'
@@ -189,31 +151,6 @@
             this.name = '__USE_CASE_NAME_PASCAL_CASE__BusinessRuleError'
           }
         }
-      validation_script: |
-        run_error_lint_check() {
-          echo "🔍 Running lint check for domain errors..."
-          npm run lint -- --fix || exit 1
-          echo "✅ Error lint passed"
-        }
-
-        run_error_test_check() {
-          echo "🧪 Running domain error tests..."
-          npm run test -- --testPathPattern=domain.*error || exit 1
-          echo "✅ Domain error tests passed"
-        }
-
-        stage_and_commit_errors() {
-          echo "📦 Staging domain error changes..."
-          git add .
-          echo "💾 Creating domain error commit..."
-          git commit -m "$1" || exit 1
-          echo "✅ Successfully committed domain errors"
-        }
-
-        # Execute validation for domain errors
-        run_error_lint_check
-        run_error_test_check
-        stage_and_commit_errors "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ domain errors"
 
     # === STEP 4: CREATE DOMAIN TESTS ===
     - id: 'create-domain-tests-__USE_CASE_NAME_KEBAB_CASE__'
@@ -359,31 +296,6 @@
             })
           })
         })
-      validation_script: |
-        run_domain_unit_tests() {
-          echo "🧪 Running domain layer unit tests..."
-          npm run test -- --testPathPattern=domain.*spec.ts --coverage || exit 1
-          echo "✅ Domain unit tests passed with coverage"
-        }
-
-        check_test_coverage() {
-          echo "📊 Checking domain test coverage..."
-          npm run test -- --testPathPattern=domain --coverage --coverageThreshold='{"global":{"branches":80,"functions":80,"lines":80,"statements":80}}' || exit 1
-          echo "✅ Domain test coverage meets requirements"
-        }
-
-        stage_and_commit_tests() {
-          echo "📦 Staging domain test changes..."
-          git add .
-          echo "💾 Creating domain test commit..."
-          git commit -m "$1" || exit 1
-          echo "✅ Successfully committed domain tests"
-        }
-
-        # Execute test validation
-        run_domain_unit_tests
-        check_test_coverage
-        stage_and_commit_tests "test(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ domain tests"
 
     # === STEP 5: UPDATE FEATURE SHARED DOMAIN (IF NEEDED) ===
     - id: 'update-feature-shared-domain-__USE_CASE_NAME_KEBAB_CASE__'
@@ -430,38 +342,6 @@
           update(id: string, model: Partial<__FEATURE_NAME_PASCAL_CASE__Model>): Promise<__FEATURE_NAME_PASCAL_CASE__Model>
           delete(id: string): Promise<void>
         }
-      validation_script: |
-        check_if_shared_model_needed() {
-          # Check if this use case needs shared domain models
-          if grep -q "__FEATURE_NAME_PASCAL_CASE__Model" "__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__.ts"; then
-            echo "✅ Shared model needed for __USE_CASE_NAME_PASCAL_CASE__"
-            return 0
-          else
-            echo "ℹ️ No shared model needed for __USE_CASE_NAME_PASCAL_CASE__"
-            return 1
-          fi
-        }
-
-        validate_shared_model() {
-          echo "🔍 Validating feature shared domain model..."
-          npm run lint -- --fix || exit 1
-          npm run test -- --testPathPattern=shared.*domain || exit 1
-          echo "✅ Feature shared domain model validated"
-        }
-
-        stage_and_commit_shared() {
-          echo "📦 Staging shared domain changes..."
-          git add .
-          echo "💾 Creating shared domain commit..."
-          git commit -m "$1" || exit 1
-          echo "✅ Successfully committed shared domain"
-        }
-
-        # Execute conditional shared model update
-        if check_if_shared_model_needed; then
-          validate_shared_model
-          stage_and_commit_shared "feat(__FEATURE_NAME_KEBAB_CASE__): update shared domain for __USE_CASE_NAME_KEBAB_CASE__"
-        fi
 
     # === STEP 7: CREATE FEATURE BRANCH ===
     - id: 'create-feature-branch-__USE_CASE_NAME_KEBAB_CASE__'
@@ -625,27 +505,6 @@
         - type: 'internal_guideline'
           source: 'MIGRATION_GUIDE.md'
           description: 'Guidelines for safely removing obsolete code'
-      validation_script: |
-        FILE_TO_DELETE="__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__"
-
-        if [ -f "$FILE_TO_DELETE" ]; then
-          # Extract filename without extension consistently
-          FILE_NAME=$(basename "$FILE_TO_DELETE" | sed 's/\.[^.]*$//')
-
-          # Check for references to this file
-          echo "🔍 Checking for references to $FILE_NAME..."
-          REFERENCES=$(grep -r "$FILE_NAME" __PROJECT_NAME__/src --exclude-dir=node_modules | wc -l)
-
-          if [ "$REFERENCES" -gt 0 ]; then
-            echo "⚠️  WARNING: Found $REFERENCES references to this file. Review before deletion."
-            exit 1
-          fi
-
-          # Backup before deletion
-          cp "$FILE_TO_DELETE" "$FILE_TO_DELETE.backup"
-          rm "$FILE_TO_DELETE"
-          echo "✅ File deleted and backed up: $FILE_TO_DELETE.backup"
-        fi
 
     # === STEP 10: CREATE PULL REQUEST ===
     - id: 'create-pull-request-__USE_CASE_NAME_KEBAB_CASE__'

@@ -39,14 +39,6 @@
           - name: 'Push feature branch'
             command: 'git push -u origin feat/__FEATURE_NAME_KEBAB_CASE__-domain-__USE_CASE_NAME_KEBAB_CASE__-fullstack'
             workingDirectory: '__PROJECT_NAME__'
-      validation_script: |
-        current_branch=$(git branch --show-current)
-        expected_branch="feat/__FEATURE_NAME_KEBAB_CASE__-domain-__USE_CASE_NAME_KEBAB_CASE__-fullstack"
-        if [ "$current_branch" != "$expected_branch" ]; then
-          echo "❌ ERROR: Expected branch $expected_branch, but current branch is $current_branch"
-          exit 1
-        fi
-        echo "✅ Feature branch created successfully: $current_branch"
 
     # === STEP 2: CREATE DOMAIN STRUCTURE ===
     - id: 'create-domain-structure-__USE_CASE_NAME_KEBAB_CASE__'
@@ -72,18 +64,6 @@
             - 'usecases'      # Use case interfaces for both client and server
             - 'errors'        # Domain errors for business rule violations
             - 'types'         # Domain types and DTOs for API communication
-      validation_script: |
-        # AI-NOTE: Replace placeholders but keep shell variables intact
-        BASE_PATH="__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain"
-        FOLDERS="$BASE_PATH/entities $BASE_PATH/usecases $BASE_PATH/errors $BASE_PATH/types"
-        echo "✅ Verifying fullstack domain folder structure..."
-        for folder in $FOLDERS; do
-          if [ ! -d "$folder" ]; then
-            echo "❌ ERROR: Folder $folder was not created."
-            exit 1
-          fi
-        done
-        echo "✅ All domain folders exist for __USE_CASE_NAME_PASCAL_CASE__ fullstack use case."
 
     # === STEP 2: CREATE USE CASE INTERFACE ===
     - id: 'create-domain-usecase-__USE_CASE_NAME_KEBAB_CASE__'
@@ -653,30 +633,6 @@
           })
         })
 
-      validation_script: |
-        run_domain_unit_tests() {
-          echo "🧪 Running fullstack shared domain layer unit tests..."
-          npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain --coverage || exit 1
-          echo "✅ Fullstack domain unit tests passed with coverage"
-        }
-
-        check_test_coverage() {
-          echo "📊 Checking fullstack domain test coverage..."
-          npm run test:coverage -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain --json
-          echo "✅ Fullstack domain coverage meets requirements"
-        }
-
-        stage_and_commit_tests() {
-          local commit_message="$1"
-          git add .
-          git status
-          git commit -m "$commit_message" || exit 1
-          echo "✅ Committed: $commit_message"
-        }
-
-        run_domain_unit_tests
-        check_test_coverage
-        stage_and_commit_tests "test(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ fullstack domain tests"
 
     # === STEP 7: VALIDATE SHARED DOMAIN LAYER ===
     - id: 'validate-domain-layer-__USE_CASE_NAME_KEBAB_CASE__'
@@ -1005,35 +961,6 @@
         - type: 'internal_guideline'
           source: 'MIGRATION_GUIDE.md'
           description: 'Guidelines for safely removing obsolete fullstack code'
-      validation_script: |
-        FILE_TO_DELETE="__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__"
-
-        if [ -f "$FILE_TO_DELETE" ]; then
-          # Check for references in both frontend and backend code
-          echo "🔍 Checking for references to $FILE_TO_DELETE..."
-          FILE_NAME=$(basename "$FILE_TO_DELETE" | sed 's/\.[^.]*$//')
-
-          # Check frontend references
-          FRONTEND_REFS=$(grep -r "$FILE_NAME" __PROJECT_NAME__/src/app __PROJECT_NAME__/src/components 2>/dev/null | wc -l)
-
-          # Check backend references
-          BACKEND_REFS=$(grep -r "$FILE_NAME" __PROJECT_NAME__/src/api __PROJECT_NAME__/src/features 2>/dev/null | wc -l)
-
-          TOTAL_REFS=$((FRONTEND_REFS + BACKEND_REFS))
-
-          if [ "$TOTAL_REFS" -gt 0 ]; then
-            echo "⚠️  WARNING: Found $TOTAL_REFS references to this file."
-            echo "   Frontend: $FRONTEND_REFS references"
-            echo "   Backend: $BACKEND_REFS references"
-            echo "Review before deletion."
-            exit 1
-          fi
-
-          # Backup before deletion
-          cp "$FILE_TO_DELETE" "$FILE_TO_DELETE.backup"
-          rm "$FILE_TO_DELETE"
-          echo "✅ File deleted and backed up: $FILE_TO_DELETE.backup"
-        fi
 
     # === STEP 11: CREATE PULL REQUEST ===
     - id: 'create-pull-request-__USE_CASE_NAME_KEBAB_CASE__'

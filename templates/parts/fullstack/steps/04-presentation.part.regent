@@ -73,15 +73,6 @@
             - 'middleware'      # Middleware tests
             # Shared
             - 'mocks'           # Test mocks for both
-      validation_script: |
-        # AI-NOTE: TDD starts with test structure for fullstack
-        BASE_PATH="__PROJECT_NAME__/__tests__/presentation"
-        FOLDERS="$BASE_PATH/components $BASE_PATH/hooks $BASE_PATH/actions $BASE_PATH/handlers $BASE_PATH/middleware $BASE_PATH/mocks"
-        echo "🔴 TDD RED: Creating fullstack test structure..."
-        for folder in $FOLDERS; do
-          mkdir -p "$folder"
-        done
-        echo "✅ Test structure created for fullstack TDD cycle"
 
     # === STEP 3: CREATE TEST MOCKS - BACKEND (TDD - RED PHASE) ===
     - id: 'create-backend-test-mocks-__USE_CASE_NAME_KEBAB_CASE__'

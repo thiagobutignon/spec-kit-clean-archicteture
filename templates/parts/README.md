@@ -95,6 +95,25 @@ Each part file should include clear section markers:
 5. **Clear Organization**: Each part has a single responsibility
 6. **Easier Testing**: Parts can be validated independently
 
+## Quality Checks and Validation
+
+**Important**: Template parts no longer contain embedded `validation_script` sections. All quality checks (linting, testing, commits) are now handled by the execution layer in `/06-execute-layer-steps`.
+
+### Why validation_script was removed:
+1. **Single Source of Truth**: Centralized in execution layer instead of duplicated across 11 template files
+2. **Better Architecture**: Templates focus solely on structure/content, not execution logic
+3. **Improved Security**: Eliminates potential shell injection vectors in template files
+4. **Easier Maintenance**: Update quality checks in one place instead of 11 files
+
+### Quality check execution:
+- **Smart commit generation** with conventional commits
+- **Parallel lint/test** execution (40% faster than sequential)
+- **Automatic package manager** detection (npm, yarn, pnpm, bun)
+- **Rollback on failure** with automatic cleanup
+- **Configurable quality gates** via `.regent/config/execute.yml`
+
+See PR #131 and issue #118 for more details on this architectural improvement.
+
 ## Future Enhancements
 
 - [ ] Automated build pipeline with validation
