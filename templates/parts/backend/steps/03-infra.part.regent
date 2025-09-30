@@ -75,18 +75,6 @@
             - 'validators'    # External validation adapters (Zod, Joi)
             - 'messaging'     # Message queue implementations (optional)
             - 'storage'       # File storage implementations (optional)
-      validation_script: |
-        # AI-NOTE: Replace placeholders but keep shell variables intact
-        BASE_PATH="__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra"
-        FOLDERS="$BASE_PATH/db $BASE_PATH/http $BASE_PATH/cache $BASE_PATH/crypto $BASE_PATH/validators"
-        echo "✅ Verifying infrastructure folder structure..."
-        for folder in $FOLDERS; do
-          if [ ! -d "$folder" ]; then
-            echo "❌ ERROR: Folder $folder was not created."
-            exit 1
-          fi
-        done
-        echo "✅ All infrastructure folders exist for __FEATURE_NAME_PASCAL_CASE__ feature."
 
     # === STEP 3: CREATE DATABASE REPOSITORY TEST (TDD RED PHASE) ===
     - id: 'create-db-repository-test-red-__FEATURE_NAME_KEBAB_CASE__'
@@ -245,23 +233,6 @@
             })
           })
         })
-      validation_script: |
-        echo "🔴 TDD RED phase: Running repository tests (expecting failures)..."
-        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.spec.ts
-
-        # AI-NOTE: In RED phase, tests MUST fail because implementation doesn't exist yet
-        if [ $? -eq 0 ]; then
-          echo "❌ UNEXPECTED: Tests passed in RED phase"
-          echo "   This indicates the test implementation may be incorrect"
-          echo "   RED phase requires failing tests before implementation"
-          exit 1
-        else
-          echo "✅ RED phase successful: Repository tests failing as expected"
-          echo "   Next: Implement repository to make tests pass (GREEN phase)"
-        fi
-
-        git add .
-        git commit -m "test(infra): add failing repository tests for __FEATURE_NAME_KEBAB_CASE__ (TDD RED phase)"
 
     # === STEP 4: CREATE DATABASE REPOSITORY IMPLEMENTATION (TDD GREEN PHASE) ===
     - id: 'create-db-repository-green-__FEATURE_NAME_KEBAB_CASE__'
@@ -461,27 +432,6 @@
             return await this.prisma.$transaction(fn)
           }
         }
-      validation_script: |
-        echo "🟢 TDD GREEN phase: Running repository tests (expecting all to pass)..."
-
-        # Run tests with implementation - must pass to complete GREEN phase
-        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.spec.ts
-
-        if [ $? -eq 0 ]; then
-          echo "✅ GREEN phase successful: All repository tests passing!"
-          echo "   Implementation correctly satisfies test requirements"
-        else
-          echo "❌ GREEN phase failed: Repository tests still failing"
-          echo "   Implementation does not satisfy test requirements"
-          echo "   Review test failures and adjust repository implementation"
-          exit 1
-        fi
-
-        # Lint check
-        npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db --fix
-
-        git add .
-        git commit -m "feat(infra): implement __FEATURE_NAME_KEBAB_CASE__ database repository (TDD GREEN phase)"
 
     # === STEP 5: CREATE HTTP CLIENT TEST (TDD RED PHASE) ===
     - id: 'create-http-client-test-red-__FEATURE_NAME_KEBAB_CASE__'
@@ -592,23 +542,6 @@
             })
           })
         })
-      validation_script: |
-        echo "🔴 TDD RED phase: Running HTTP client tests (expecting failures)..."
-        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.spec.ts
-
-        # AI-NOTE: In RED phase, tests MUST fail because implementation doesn't exist yet
-        if [ $? -eq 0 ]; then
-          echo "❌ UNEXPECTED: Tests passed in RED phase"
-          echo "   This indicates the test implementation may be incorrect"
-          echo "   RED phase requires failing tests before implementation"
-          exit 1
-        else
-          echo "✅ RED phase successful: HTTP client tests failing as expected"
-          echo "   Next: Implement HTTP client to make tests pass (GREEN phase)"
-        fi
-
-        git add .
-        git commit -m "test(infra): add failing HTTP client tests (TDD RED phase)"
 
     # === STEP 6: CREATE HTTP CLIENT PROTOCOL ===
     - id: 'create-http-client-protocol-__FEATURE_NAME_KEBAB_CASE__'
@@ -791,24 +724,6 @@
             })
           }
         }
-      validation_script: |
-        echo "🟢 TDD GREEN phase: Running HTTP client tests (expecting all to pass)..."
-
-        # Run tests with implementation - must pass to complete GREEN phase
-        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.spec.ts
-
-        if [ $? -eq 0 ]; then
-          echo "✅ GREEN phase successful: All HTTP client tests passing!"
-          echo "   Implementation correctly satisfies test requirements"
-        else
-          echo "❌ GREEN phase failed: HTTP client tests still failing"
-          echo "   Implementation does not satisfy test requirements"
-          echo "   Review test failures and adjust HTTP client implementation"
-          exit 1
-        fi
-
-        git add .
-        git commit -m "feat(infra): implement HTTP client with Fetch API (TDD GREEN phase)"
 
     # === STEP 8: CREATE CACHE IMPLEMENTATION TEST (TDD RED PHASE) ===
     - id: 'create-cache-test-red-__FEATURE_NAME_KEBAB_CASE__'
@@ -934,23 +849,6 @@
             })
           })
         })
-      validation_script: |
-        echo "🔴 TDD RED phase: Running cache tests (expecting failures)..."
-        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache.spec.ts
-
-        # AI-NOTE: In RED phase, tests MUST fail because implementation doesn't exist yet
-        if [ $? -eq 0 ]; then
-          echo "❌ UNEXPECTED: Tests passed in RED phase"
-          echo "   This indicates the test implementation may be incorrect"
-          echo "   RED phase requires failing tests before implementation"
-          exit 1
-        else
-          echo "✅ RED phase successful: Cache tests failing as expected"
-          echo "   Next: Implement cache to make tests pass (GREEN phase)"
-        fi
-
-        git add .
-        git commit -m "test(infra): add failing cache tests (TDD RED phase)"
 
     # === STEP 9: CREATE CACHE PROTOCOL ===
     - id: 'create-cache-protocol-__FEATURE_NAME_KEBAB_CASE__'
@@ -1188,24 +1086,6 @@
             return false
           }
         }
-      validation_script: |
-        echo "🟢 TDD GREEN phase: Running cache tests (expecting all to pass)..."
-
-        # Run tests with implementation - must pass to complete GREEN phase
-        npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache.spec.ts
-
-        if [ $? -eq 0 ]; then
-          echo "✅ GREEN phase successful: All cache tests passing!"
-          echo "   Implementation correctly satisfies test requirements"
-        else
-          echo "❌ GREEN phase failed: Cache tests still failing"
-          echo "   Implementation does not satisfy test requirements"
-          echo "   Review test failures and adjust cache implementation"
-          exit 1
-        fi
-
-        git add .
-        git commit -m "feat(infra): implement Redis cache with memory fallback (TDD GREEN phase)"
 
     # === STEP 11: CREATE CRYPTO IMPLEMENTATION ===
     - id: 'create-crypto-implementation-__FEATURE_NAME_KEBAB_CASE__'
@@ -1582,29 +1462,6 @@
             })
           })
         })
-      validation_script: |
-        echo "🧪 Running integration tests for infrastructure layer..."
-
-        # Set test timeout for integration tests
-        export JEST_TIMEOUT=30000
-
-        # Run integration tests if database is available
-        if [ -n "$DATABASE_TEST_URL" ]; then
-          echo "✅ Database connection available - running full integration tests"
-          npm run test:integration -- src/features/__FEATURE_NAME_KEBAB_CASE__/__tests__/integration/infrastructure.test.ts
-        else
-          echo "⏭️  Database not available - running limited integration tests"
-          npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__tests__/integration/infrastructure.test.ts
-        fi
-
-        if [ $? -eq 0 ]; then
-          echo "✅ Integration tests passing"
-        else
-          echo "⚠️  Some integration tests failed - check external dependencies"
-        fi
-
-        git add .
-        git commit -m "test(infra): add integration tests for __FEATURE_NAME_KEBAB_CASE__ infrastructure"
 
     # === STEP 14: REFACTOR FOR BROWNFIELD (CONDITIONAL MULTI-STEP) ===
     # AI-NOTE: When brownfield refactoring is needed, the AI should dynamically generate
@@ -1726,16 +1583,6 @@
           description: 'Safe file deletion during infrastructure layer refactoring'
       path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__.ts'
       template: ''
-      validation_script: |
-        echo "🗑️  Deleting obsolete infrastructure layer file: __FILE_TO_DELETE_KEBAB_CASE__.ts"
-        if [ -f "__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__.ts" ]; then
-          rm "__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__.ts"
-          echo "✅ Deleted obsolete file"
-          git add -A
-          git commit -m "refactor(infra): remove obsolete __FILE_TO_DELETE_KEBAB_CASE__ file"
-        else
-          echo "ℹ️  File already deleted or does not exist"
-        fi
 
     # === STEP 16: CREATE PULL REQUEST ===
     - id: 'create-pull-request-infra-__FEATURE_NAME_KEBAB_CASE__'

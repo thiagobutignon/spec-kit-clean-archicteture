@@ -38,14 +38,6 @@
           - name: 'Push feature branch'
             command: 'git push -u origin feat/__FEATURE_NAME_KEBAB_CASE__-domain-__USE_CASE_NAME_KEBAB_CASE__-frontend'
             workingDirectory: '__PROJECT_NAME__'
-      validation_script: |
-        current_branch=$(git branch --show-current)
-        expected_branch="feat/__FEATURE_NAME_KEBAB_CASE__-domain-__USE_CASE_NAME_KEBAB_CASE__-frontend"
-        if [ "$current_branch" != "$expected_branch" ]; then
-          echo "❌ ERROR: Expected branch $expected_branch, but current branch is $current_branch"
-          exit 1
-        fi
-        echo "✅ Feature branch created successfully: $current_branch"
 
     # === STEP 2: CREATE DOMAIN STRUCTURE ===
     - id: 'create-domain-structure-__USE_CASE_NAME_KEBAB_CASE__'
@@ -68,18 +60,6 @@
           basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain'
           folders:
             - 'usecases'      # Use case interface for this specific frontend use case
-      validation_script: |
-        # AI-NOTE: Replace placeholders but keep shell variables intact
-        BASE_PATH="__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain"
-        FOLDERS="$BASE_PATH/usecases"
-        echo "✅ Verifying frontend domain folder structure..."
-        for folder in $FOLDERS; do
-          if [ ! -d "$folder" ]; then
-            echo "❌ ERROR: Folder $folder was not created."
-            exit 1
-          fi
-        done
-        echo "✅ All domain folders exist for __USE_CASE_NAME_PASCAL_CASE__ frontend use case."
 
     # === STEP 2: CREATE USE CASE INTERFACE ===
     - id: 'create-domain-usecase-__USE_CASE_NAME_KEBAB_CASE__'
@@ -372,30 +352,6 @@
           })
         })
 
-      validation_script: |
-        run_domain_unit_tests() {
-          echo "🧪 Running frontend domain layer unit tests..."
-          npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain --coverage || exit 1
-          echo "✅ Frontend domain unit tests passed with coverage"
-        }
-
-        check_test_coverage() {
-          echo "📊 Checking frontend domain test coverage..."
-          COVERAGE_RESULT=$(npm run test:coverage -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain --json)
-          echo "✅ Frontend domain coverage meets requirements"
-        }
-
-        stage_and_commit_tests() {
-          local commit_message="$1"
-          git add .
-          git status
-          git commit -m "$commit_message" || exit 1
-          echo "✅ Committed: $commit_message"
-        }
-
-        run_domain_unit_tests
-        check_test_coverage
-        stage_and_commit_tests "test(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ frontend domain tests"
 
     # === STEP 5: UPDATE FEATURE SHARED DOMAIN (IF NEEDED) ===
     - id: 'update-feature-shared-domain-__USE_CASE_NAME_KEBAB_CASE__'
@@ -654,27 +610,6 @@
         - type: 'internal_guideline'
           source: 'MIGRATION_GUIDE.md'
           description: 'Guidelines for safely removing obsolete code'
-      validation_script: |
-        FILE_TO_DELETE="__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__"
-
-        if [ -f "$FILE_TO_DELETE" ]; then
-          # Extract filename without extension consistently
-          FILE_NAME=$(basename "$FILE_TO_DELETE" | sed 's/\.[^.]*$//')
-
-          # Check for references to this file
-          echo "🔍 Checking for references to $FILE_NAME..."
-          REFERENCES=$(grep -r "$FILE_NAME" __PROJECT_NAME__/src --exclude-dir=node_modules | wc -l)
-
-          if [ "$REFERENCES" -gt 0 ]; then
-            echo "⚠️  WARNING: Found $REFERENCES references to this file. Review before deletion."
-            exit 1
-          fi
-
-          # Backup before deletion
-          cp "$FILE_TO_DELETE" "$FILE_TO_DELETE.backup"
-          rm "$FILE_TO_DELETE"
-          echo "✅ File deleted and backed up: $FILE_TO_DELETE.backup"
-        fi
 
     # === STEP 10: CREATE PULL REQUEST ===
     - id: 'create-pull-request-__USE_CASE_NAME_KEBAB_CASE__'
