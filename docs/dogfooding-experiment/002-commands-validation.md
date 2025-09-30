@@ -717,6 +717,94 @@ ls -la .claude/           # No MCP config file
 
 ---
 
+### Bug #121: /05-evaluate-layer-results Uses LLM Validating LLM (Not Objective Validation)
+
+**Discovered**: 2025-09-30 10:20
+**Version**: 2.1.9
+**Severity**: Critical (Same Issue as #120)
+
+**ROOT CAUSE** ❌:
+The `/05-evaluate-layer-results` command performs **subjective LLM analysis** instead of calling the existing **objective validation tool** `validate-template.ts`.
+
+**Evidence from Phase 5 Execution**:
+```bash
+# User executed:
+/05-evaluate-layer-results --file=spec/001-product-catalog-management/domain/implementation.yaml
+
+# Output was narrative AI analysis:
+"✅ Phase 1: YAML Structure Validation"
+"✅ Phase 2: Git Workflow Compliance"
+"✅ Phase 3: Clean Architecture Evaluation"
+# ... etc (all subjective analysis by Claude)
+
+# Expected behavior:
+Should call: tsx validate-template.ts spec/.../implementation.yaml
+```
+
+**Existing Validation Tool** (`validate-template.ts`):
+```typescript
+class EnhancedTemplateValidator {
+  // ✅ Has JSON schemas for each layer
+  initializeLayerSchemas()
+
+  // ✅ Has layer-specific validation rules
+  performLayerSpecificValidations()
+
+  // ✅ Has generic validation
+  validateGeneric()
+
+  // ✅ Has common issue detection
+  checkCommonIssues()
+
+  // ✅ Can validate single file or all templates
+  validateTemplate()
+  validateAll()
+}
+```
+
+**Problem**: Command does NOT call this tool!
+- LLM analyzes LLM-generated content (circular validation)
+- No schema validation
+- No TypeScript syntax checking
+- No import validation
+- No layer-specific rule enforcement
+
+**Impact**:
+- ❌ False positives (Claude says "PERFECT" without real validation)
+- ❌ No compilation checks
+- ❌ No import resolution
+- ❌ No architectural violation detection
+- ❌ Same "LLM validating LLM" problem as Bug #120
+
+**Status**: 🔴 Open
+**Issue**: #121
+**Fix Priority**: P0 (Critical - validation is ineffective)
+
+**Recommended Fix**:
+1. Modify `/05-evaluate-layer-results.md` to call `validate-template.ts`
+2. Use bash tool: `tsx validate-template.ts --file=<yaml-file>`
+3. Parse JSON output from validator
+4. Combine objective validation + LLM analysis
+5. Block execution if validator reports errors
+
+**Related**:
+- Bug #120 (/04 also uses LLM validating LLM)
+- Blocks: Reliable RLHF scoring
+- **Critical Impact**: No objective quality gates before /06 execution
+
+**Comparison**:
+
+| Aspect | Current /05 | With validate-template.ts |
+|--------|-------------|---------------------------|
+| Schema validation | ❌ None | ✅ JSON schemas |
+| Syntax validation | ❌ None | ✅ TypeScript AST |
+| Import checking | ❌ None | ✅ Resolved |
+| Layer rules | ❌ Subjective | ✅ Objective |
+| False positives | ❌ High | ✅ Low |
+| Reliable | ❌ No | ✅ Yes |
+
+---
+
 ---
 
 ## 📊 **PHASE 2 EXECUTION RESULTS**
@@ -1098,5 +1186,5 @@ CI/CD (final validation + graph generation) ← Phase 4
 ---
 
 **Started**: 2025-09-29 23:55
-**Last Update**: 2025-09-30 10:15
-**Status**: 🔄 IN PROGRESS - Phase 4 complete, architectural validation solution identified
+**Last Update**: 2025-09-30 10:20
+**Status**: 🔄 IN PROGRESS - Phase 5 executed, Bug #121 discovered (/05 doesn't call validate-template.ts)
