@@ -15,7 +15,9 @@ export interface CommitConfig {
   enabled: boolean;
   qualityChecks: {
     lint: boolean;
+    lintCommand?: string;
     test: boolean;
+    testCommand?: string;
   };
   conventionalCommits: {
     enabled: boolean;
@@ -87,9 +89,10 @@ export function mapStepTypeToCommitType(
  * @returns Entity name or null if not found
  */
 function extractEntityName(filePath: string): string | null {
-  if (!filePath) return null;
+  // Guard against null, undefined, or empty string
+  if (!filePath || typeof filePath !== 'string') return null;
 
-  // Extract filename without extension
+  // Extract filename without extension (safely handle Windows and Unix paths)
   const fileName = filePath.split('/').pop()?.split('\\').pop();
   if (!fileName) return null;
 

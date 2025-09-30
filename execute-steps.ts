@@ -23,6 +23,7 @@ import {
   type QualityCheckResult,
   createQualityCheckResult,
 } from '../utils/commit-generator';
+import { validateConfig, type ValidatedConfig } from '../utils/config-validator';
 
 $.verbose = true;
 $.shell = '/bin/bash';
@@ -117,6 +118,8 @@ class EnhancedStepExecutor {
   private executionCache: Map<string, any> = new Map();
   private commitConfig: CommitConfig;
   private commitHashes: string[] = [];
+  private cachedPackageManager: 'npm' | 'yarn' | 'pnpm' | null = null;
+  private lastKnownCommitHash: string | null = null;
 
   /**
    * Create a new EnhancedStepExecutor instance
@@ -198,12 +201,18 @@ class EnhancedStepExecutor {
 
   /**
    * Detect package manager being used in the project
-   * Verifies installation before returning
+   * Verifies installation before returning and caches result
    */
   private async detectPackageManager(): Promise<'npm' | 'yarn' | 'pnpm'> {
+    // Return cached result if available
+    if (this.cachedPackageManager) {
+      return this.cachedPackageManager;
+    }
+
     // Check for lock files and verify installation
     if (fs.existsSync('pnpm-lock.yaml')) {
       if (await this.isPackageManagerInstalled('pnpm')) {
+        this.cachedPackageManager = 'pnpm';
         return 'pnpm';
       }
       console.log(chalk.yellow('   ⚠️  pnpm-lock.yaml found but pnpm is not installed'));
@@ -211,6 +220,7 @@ class EnhancedStepExecutor {
 
     if (fs.existsSync('yarn.lock')) {
       if (await this.isPackageManagerInstalled('yarn')) {
+        this.cachedPackageManager = 'yarn';
         return 'yarn';
       }
       console.log(chalk.yellow('   ⚠️  yarn.lock found but yarn is not installed'));
@@ -218,6 +228,7 @@ class EnhancedStepExecutor {
 
     // Default to npm (should always be available with Node.js)
     if (await this.isPackageManagerInstalled('npm')) {
+      this.cachedPackageManager = 'npm';
       return 'npm';
     }
 
@@ -226,10 +237,59 @@ class EnhancedStepExecutor {
   }
 
   /**
-   * Get the package manager command for running scripts
+   * Check if a script name is safe to execute
+   * Allows configured scripts or common safe scripts
+   * @param script - Script name to validate
+   * @returns true if script is safe
    */
-  private getPackageManagerCommand(script: string): string {
-    const pm = this.detectPackageManager();
+  private isScriptSafe(script: string): boolean {
+    // Allow exact matches from config
+    const configuredScripts = [
+      this.commitConfig.qualityChecks.lintCommand || 'lint',
+      this.commitConfig.qualityChecks.testCommand || 'test --run',
+    ];
+
+    if (configuredScripts.includes(script)) {
+      return true;
+    }
+
+    // Common safe patterns (only alphanumeric, hyphens, colons, and spaces)
+    const safePattern = /^[a-zA-Z0-9:\-\s]+$/;
+    if (!safePattern.test(script)) {
+      return false;
+    }
+
+    // Block dangerous keywords
+    const dangerousKeywords = ['rm', 'curl', 'wget', 'eval', '&&', '||', ';', '|', '>', '<', '`', '$'];
+    return !dangerousKeywords.some(keyword => script.includes(keyword));
+  }
+
+  /**
+   * Validate script name for safety
+   * @param script - Script name to validate
+   * @throws {Error} If script is not safe to execute
+   */
+  private validateScript(script: string): void {
+    if (!this.isScriptSafe(script)) {
+      throw new Error(
+        `Unsafe script detected: "${script}". ` +
+        `Scripts must contain only alphanumeric characters, hyphens, colons, and spaces, ` +
+        `and cannot contain dangerous keywords.`
+      );
+    }
+  }
+
+  /**
+   * Get the package manager command for running scripts
+   * Validates script names against allowlist to prevent command injection
+   * @param script - Script name (e.g., 'lint', 'test')
+   * @returns Command string to execute
+   */
+  private async getPackageManagerCommand(script: string): Promise<string> {
+    // Validate script against allowlist
+    this.validateScript(script);
+
+    const pm = await this.detectPackageManager();
 
     switch (pm) {
       case 'pnpm':
@@ -289,63 +349,6 @@ class EnhancedStepExecutor {
   }
 
   /**
-   * Validate configuration structure
-   */
-  private validateConfig(config: any): { valid: boolean; errors: string[] } {
-    const errors: string[] = [];
-
-    if (!config || typeof config !== 'object') {
-      errors.push('Config must be an object');
-      return { valid: false, errors };
-    }
-
-    if (!config.commit) {
-      errors.push('Missing required field: commit');
-      return { valid: false, errors };
-    }
-
-    // Validate boolean fields
-    if (config.commit.enabled !== undefined && typeof config.commit.enabled !== 'boolean') {
-      errors.push('commit.enabled must be a boolean');
-    }
-
-    // Validate quality_checks
-    if (config.commit.quality_checks) {
-      if (config.commit.quality_checks.lint !== undefined && typeof config.commit.quality_checks.lint !== 'boolean') {
-        errors.push('commit.quality_checks.lint must be a boolean');
-      }
-      if (config.commit.quality_checks.test !== undefined && typeof config.commit.quality_checks.test !== 'boolean') {
-        errors.push('commit.quality_checks.test must be a boolean');
-      }
-    }
-
-    // Validate conventional_commits
-    if (config.commit.conventional_commits) {
-      if (config.commit.conventional_commits.enabled !== undefined && typeof config.commit.conventional_commits.enabled !== 'boolean') {
-        errors.push('commit.conventional_commits.enabled must be a boolean');
-      }
-
-      if (config.commit.conventional_commits.type_mapping) {
-        const mapping = config.commit.conventional_commits.type_mapping;
-        const validTypes = ['feat', 'fix', 'chore', 'refactor', 'test', 'docs', null];
-
-        for (const [key, value] of Object.entries(mapping)) {
-          if (!validTypes.includes(value as any)) {
-            errors.push(`Invalid commit type '${value}' for step type '${key}'`);
-          }
-        }
-      }
-    }
-
-    // Validate co_author
-    if (config.commit.co_author !== undefined && typeof config.commit.co_author !== 'string') {
-      errors.push('commit.co_author must be a string');
-    }
-
-    return { valid: errors.length === 0, errors };
-  }
-
-  /**
    * Load commit configuration from file or use defaults
    */
   private loadCommitConfig(): CommitConfig {
@@ -362,35 +365,38 @@ class EnhancedStepExecutor {
       const fileContent = fs.readFileSync(configPath, 'utf-8');
       const loadedConfig = yaml.parse(fileContent);
 
-      // Validate configuration
-      const validation = this.validateConfig(loadedConfig);
-      if (!validation.valid) {
+      // Validate configuration using Zod schema
+      const validation = validateConfig(loadedConfig);
+
+      if (!validation.success) {
         console.log(chalk.yellow('   ⚠️  Configuration validation errors:'));
-        validation.errors.forEach(err => console.log(chalk.yellow(`      • ${err}`)));
+        validation.errors?.forEach(err => console.log(chalk.yellow(`      • ${err}`)));
         console.log(chalk.yellow('   Using default configuration'));
         return { ...DEFAULT_COMMIT_CONFIG };
       }
 
-      if (!loadedConfig || !loadedConfig.commit) {
-        console.log(chalk.yellow('   ⚠️  Invalid config format, using defaults'));
-        return { ...DEFAULT_COMMIT_CONFIG };
-      }
+      // Use validated config data
+      const validatedData = validation.data!;
 
       // Merge with defaults to ensure all properties exist
       const mergedConfig: CommitConfig = {
-        enabled: loadedConfig.commit.enabled ?? DEFAULT_COMMIT_CONFIG.enabled,
+        enabled: validatedData.commit.enabled,
         qualityChecks: {
-          lint: loadedConfig.commit.quality_checks?.lint ?? DEFAULT_COMMIT_CONFIG.qualityChecks.lint,
-          test: loadedConfig.commit.quality_checks?.test ?? DEFAULT_COMMIT_CONFIG.qualityChecks.test,
+          lint: validatedData.commit.quality_checks.lint,
+          lintCommand: validatedData.commit.quality_checks.lint_command || 'lint',
+          test: validatedData.commit.quality_checks.test,
+          testCommand: validatedData.commit.quality_checks.test_command || 'test --run',
         },
         conventionalCommits: {
-          enabled: loadedConfig.commit.conventional_commits?.enabled ?? DEFAULT_COMMIT_CONFIG.conventionalCommits.enabled,
+          enabled: validatedData.commit.conventional_commits.enabled,
           typeMapping: {
             ...DEFAULT_COMMIT_CONFIG.conventionalCommits.typeMapping,
-            ...(loadedConfig.commit.conventional_commits?.type_mapping || {}),
+            ...(validatedData.commit.conventional_commits.type_mapping || {}),
           },
         },
-        coAuthor: loadedConfig.commit.co_author ?? DEFAULT_COMMIT_CONFIG.coAuthor,
+        coAuthor: validatedData.commit.co_author,
+        emoji: validatedData.commit.emoji,
+        interactiveSafety: validatedData.commit.interactive_safety ?? true,
       };
 
       console.log(chalk.cyan('   ✅ Loaded commit configuration from .regent/config/execute.yml'));
@@ -579,6 +585,15 @@ class EnhancedStepExecutor {
     for (const [index, step] of steps.entries()) {
       const stepId = step.id || `Unnamed Step ${index + 1}`;
       console.log(chalk.blue.bold(`\n▶️  Processing Step ${index + 1}/${steps.length}: ${stepId}`));
+
+      // Save current git state before executing step (for safe rollback)
+      try {
+        const hashResult = await $`git rev-parse HEAD`;
+        this.lastKnownCommitHash = hashResult.stdout.trim();
+      } catch {
+        // If git not available, set to null
+        this.lastKnownCommitHash = null;
+      }
 
       // Skip completed steps
       if (step.status === 'SUCCESS' || step.status === 'SKIPPED') {
@@ -1114,7 +1129,8 @@ class EnhancedStepExecutor {
         (async () => {
           try {
             $.verbose = false;
-            const lintCommand = this.getPackageManagerCommand('lint');
+            const scriptName = this.commitConfig.qualityChecks.lintCommand || 'lint';
+            const lintCommand = await this.getPackageManagerCommand(scriptName);
             const lintResult = await $`sh -c ${lintCommand}`;
             $.verbose = true;
             console.log(chalk.green('   ✅ Lint check passed'));
@@ -1144,7 +1160,8 @@ class EnhancedStepExecutor {
         (async () => {
           try {
             $.verbose = false;
-            const testCommand = this.getPackageManagerCommand('test --run');
+            const scriptName = this.commitConfig.qualityChecks.testCommand || 'test --run';
+            const testCommand = await this.getPackageManagerCommand(scriptName);
             const testResult = await $`sh -c ${testCommand}`;
             $.verbose = true;
             console.log(chalk.green('   ✅ Tests passed'));
@@ -1286,11 +1303,25 @@ class EnhancedStepExecutor {
   /**
    * Rollback changes made by a failed step
    * Only rolls back files modified by this step, preserving user's uncommitted changes
+   * Verifies git state hasn't changed to prevent unsafe rollbacks
    */
   private async rollbackStep(step: Step): Promise<void> {
     console.log(chalk.yellow('   🔄 Rolling back changes...'));
 
     try {
+      // Verify git state hasn't been manually modified since step start
+      if (this.lastKnownCommitHash) {
+        const currentHashResult = await $`git rev-parse HEAD`;
+        const currentHash = currentHashResult.stdout.trim();
+
+        if (currentHash !== this.lastKnownCommitHash) {
+          throw new Error(
+            `Git state has changed unexpectedly (expected ${this.lastKnownCommitHash.slice(0, 7)}, ` +
+            `found ${currentHash.slice(0, 7)}). Cannot safely rollback. ` +
+            `Please manually review and revert changes.`
+          );
+        }
+      }
       // Get list of files staged for commit (files modified by this step)
       const stagedResult = await $`git diff --cached --name-only`;
       const stagedFiles = stagedResult.stdout.trim().split('\n').filter(f => f.length > 0);

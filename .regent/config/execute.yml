@@ -10,8 +10,14 @@ commit:
   quality_checks:
     # Run lint before commit
     lint: true
+    # Custom lint command (optional, defaults to 'lint')
+    lint_command: 'lint'
+
     # Run tests before commit
     test: true
+    # Custom test command (optional, defaults to 'test --run')
+    # Useful for different test runners or specific test flags
+    test_command: 'test --run'
 
   # Conventional commits configuration
   conventional_commits:

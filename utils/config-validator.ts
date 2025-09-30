@@ -34,7 +34,9 @@ const CommitConfigSchema = z.object({
     enabled: z.boolean().default(true),
     quality_checks: z.object({
       lint: z.boolean().default(true),
+      lint_command: z.string().default('lint').optional(),
       test: z.boolean().default(true),
+      test_command: z.string().default('test --run').optional(),
     }).default({ lint: true, test: true }),
     conventional_commits: z.object({
       enabled: z.boolean().default(true),
