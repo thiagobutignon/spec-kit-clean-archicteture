@@ -5,6 +5,7 @@ import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import inquirer from 'inquirer';
+import crypto from 'crypto';
 import { MCPInstaller, promptMCPInstallation } from '../utils/mcp-installer.js';
 import { DEFAULT_GITIGNORE_TEMPLATE, REGENT_GITIGNORE_ENTRIES } from '../templates/default-gitignore.js';
 
@@ -22,6 +23,7 @@ interface InitOptions {
   skipMcp?: boolean;
   backupDir?: string;
   cleanupOldBackups?: boolean;
+  dryRun?: boolean;
 }
 
 // AI assistant options
@@ -288,20 +290,17 @@ async function detectExistingConfigFiles(projectPath: string): Promise<ExistingC
   return existingFiles;
 }
 
-// Counter for ensuring unique backup names even with rapid successive calls
-let backupCounter = 0;
-
 /**
  * Creates a timestamped backup of a configuration file
  *
- * Backup Naming Pattern: {filename}.regent-backup-{timestamp}-{counter}{.ext}
+ * Backup Naming Pattern: {filename}.regent-backup-{timestamp}-{uniqueId}{.ext}
  *
  * Examples:
- * - settings.json → settings.regent-backup-1234567890-0.json
- * - eslint.config.js → eslint.config.regent-backup-1234567890-1.js
+ * - settings.json → settings.regent-backup-1234567890-a3f2b1.json
+ * - eslint.config.js → eslint.config.regent-backup-1234567890-c9d4e2.js
  *
  * The extension is preserved to allow easy opening with appropriate tools.
- * The counter prevents collisions when multiple backups are created in rapid succession.
+ * A cryptographically random uniqueId prevents collisions even in concurrent operations.
  *
  * @param filePath - Absolute path to the file to backup
  * @param projectPath - Absolute path to the project root directory
@@ -313,7 +312,11 @@ async function createBackup(filePath: string, projectPath: string, backupDir?: s
   // Use high-precision timestamp with nanosecond precision for better collision prevention
   const hrTime = process.hrtime.bigint();
   const timestamp = Number(hrTime / 1000000n); // Convert to milliseconds
-  const counter = backupCounter++;
+
+  // Generate cryptographically random unique ID (6 chars) - prevents counter overflow
+  // and handles concurrent operations safely
+  const uniqueId = crypto.randomBytes(3).toString('hex');
+
   const ext = path.extname(filePath);
   const base = path.basename(filePath, ext);
 
@@ -340,12 +343,36 @@ async function createBackup(filePath: string, projectPath: string, backupDir?: s
     await fs.ensureDir(targetBackupDir);
   }
 
-  // Create backup with better naming: filename.regent-backup-timestamp-counter.ext
+  // Validate backup directory is writable
+  try {
+    await fs.access(targetBackupDir, fs.constants.W_OK).catch(async () => {
+      // Directory doesn't exist or not writable, try to create it
+      await fs.ensureDir(targetBackupDir);
+      // Test write permission by creating and removing a temp file
+      const testFile = path.join(targetBackupDir, '.regent-write-test');
+      await fs.writeFile(testFile, '');
+      await fs.remove(testFile);
+    });
+  } catch (error) {
+    throw new Error(
+      `Backup directory is not writable: ${targetBackupDir}\n` +
+      `Please check directory permissions or specify a different directory with --backup-dir`
+    );
+  }
+
+  // Create backup with better naming: filename.regent-backup-timestamp-uniqueId.ext
   // This preserves the extension, making it easier to open with appropriate tools
-  const backupName = `${base}.regent-backup-${timestamp}-${counter}${ext}`;
+  const backupName = `${base}.regent-backup-${timestamp}-${uniqueId}${ext}`;
   const backupPath = path.join(targetBackupDir, backupName);
 
-  await fs.copy(filePath, backupPath);
+  try {
+    await fs.copy(filePath, backupPath);
+  } catch (error) {
+    throw new Error(
+      `Failed to create backup of ${path.basename(filePath)}: ${(error as Error).message}\n` +
+      `Please check file permissions and available disk space`
+    );
+  }
 
   return backupPath;
 }
@@ -374,7 +401,7 @@ async function cleanupBackups(backupPaths: string[]): Promise<void> {
  * Cleans up old backup files, keeping only the most recent N backups
  *
  * Useful for preventing backup directory from growing indefinitely.
- * Sorts backups by modification time and removes oldest ones.
+ * Optimized to only run when backup count exceeds threshold.
  *
  * @param backupDir - Directory containing backup files
  * @param keepCount - Number of most recent backups to keep (default: 10)
@@ -390,6 +417,7 @@ async function cleanupOldBackups(backupDir: string, keepCount: number = 10): Pro
     // Filter only regent backup files
     const backupFiles = files.filter(f => f.includes('.regent-backup-'));
 
+    // Performance optimization: only proceed if count exceeds threshold
     if (backupFiles.length <= keepCount) {
       return; // Nothing to clean up
     }
@@ -458,6 +486,16 @@ async function mergePackageJsonScripts(projectPath: string): Promise<void> {
 async function copyProjectConfigFiles(projectPath: string, isExistingProject: boolean, options: InitOptions = {}): Promise<void> {
   // Detect existing config files
   const existingFiles = await detectExistingConfigFiles(projectPath);
+
+  // Dry-run mode: show what would be backed up without making changes
+  if (options.dryRun && existingFiles.length > 0) {
+    console.log(chalk.cyan('\n🔍 DRY-RUN MODE - No files will be modified\n'));
+    console.log(chalk.yellow('The following files would be backed up and replaced:'));
+    existingFiles.forEach(f => console.log(chalk.yellow(`   • ${f.relativePath}`)));
+    console.log();
+    console.log(chalk.dim('Run without --dry-run to proceed with backup and replacement'));
+    return;
+  }
 
   // If there are existing files and --force flag is not set, prompt user
   if (existingFiles.length > 0 && !options.force && isExistingProject) {
@@ -566,8 +604,16 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
   if (!await fs.pathExists(eslintPath)) {
     const sourceEslintPath = path.join(packageRoot, 'eslint.config.js');
     if (await fs.pathExists(sourceEslintPath)) {
-      const eslintConfig = await fs.readFile(sourceEslintPath, 'utf-8');
-      await fs.writeFile(eslintPath, eslintConfig);
+      try {
+        const eslintConfig = await fs.readFile(sourceEslintPath, 'utf-8');
+        await fs.writeFile(eslintPath, eslintConfig);
+      } catch (error) {
+        console.log(chalk.yellow(`⚠️  Could not copy eslint.config.js: ${(error as Error).message}`));
+        console.log(chalk.dim('   You can manually copy it from the regent package later if needed'));
+      }
+    } else {
+      console.log(chalk.yellow('⚠️  Source eslint.config.js not found in regent package'));
+      console.log(chalk.dim('   You may need to create your own ESLint configuration'));
     }
   }
 
@@ -576,8 +622,16 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
   if (!await fs.pathExists(vitestPath)) {
     const sourceVitestPath = path.join(packageRoot, 'vitest.config.ts');
     if (await fs.pathExists(sourceVitestPath)) {
-      const vitestConfig = await fs.readFile(sourceVitestPath, 'utf-8');
-      await fs.writeFile(vitestPath, vitestConfig);
+      try {
+        const vitestConfig = await fs.readFile(sourceVitestPath, 'utf-8');
+        await fs.writeFile(vitestPath, vitestConfig);
+      } catch (error) {
+        console.log(chalk.yellow(`⚠️  Could not copy vitest.config.ts: ${(error as Error).message}`));
+        console.log(chalk.dim('   You can manually copy it from the regent package later if needed'));
+      }
+    } else {
+      console.log(chalk.yellow('⚠️  Source vitest.config.ts not found in regent package'));
+      console.log(chalk.dim('   You may need to create your own Vitest configuration'));
     }
   }
 
@@ -588,11 +642,28 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
     // Merge Regent entries into existing .gitignore
     const existingContent = await fs.readFile(gitignorePath, 'utf-8');
 
-    // Check if Regent entries are already present
-    if (!existingContent.includes('.regent-backups/')) {
-      const mergedContent = existingContent.trim() + '\n\n' + REGENT_GITIGNORE_ENTRIES.join('\n') + '\n';
+    // Normalize entries for comparison (remove trailing slashes, trim whitespace)
+    const normalizeEntry = (entry: string) => entry.trim().replace(/\/+$/, '');
+
+    const existingLines = existingContent.split('\n').map(normalizeEntry);
+
+    // Filter out entries that already exist (avoid duplicates)
+    const entriesToAdd = REGENT_GITIGNORE_ENTRIES.filter(entry => {
+      const normalized = normalizeEntry(entry);
+      // Skip comments and empty lines from duplicate check
+      if (normalized.startsWith('#') || normalized === '') {
+        return true;
+      }
+      // Check if this entry already exists (with or without trailing slash)
+      return !existingLines.some(line => normalizeEntry(line) === normalized);
+    });
+
+    if (entriesToAdd.length > 0) {
+      const mergedContent = existingContent.trim() + '\n\n' + entriesToAdd.join('\n') + '\n';
       await fs.writeFile(gitignorePath, mergedContent);
-      console.log(chalk.cyan('📝 Updated .gitignore with Regent-specific entries'));
+      console.log(chalk.cyan(`📝 Updated .gitignore with ${entriesToAdd.filter(e => !e.startsWith('#') && e.trim()).length} Regent-specific entries`));
+    } else {
+      console.log(chalk.dim('✓ .gitignore already contains Regent entries'));
     }
   } else {
     // Create new .gitignore with full content from template

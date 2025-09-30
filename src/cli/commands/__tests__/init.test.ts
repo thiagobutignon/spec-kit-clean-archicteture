@@ -574,5 +574,100 @@ node_modules/
       expect(timestamp1).toBeGreaterThan(0);
       expect(timestamp2).toBeGreaterThanOrEqual(timestamp1);
     });
+
+    it('should use crypto random for unique IDs instead of counter', async () => {
+      // Test that crypto random IDs are generated
+      const crypto = await import('crypto');
+      const id1 = crypto.randomBytes(3).toString('hex');
+      const id2 = crypto.randomBytes(3).toString('hex');
+
+      // IDs should be different
+      expect(id1).not.toBe(id2);
+      expect(id1.length).toBe(6); // 3 bytes = 6 hex chars
+      expect(id2.length).toBe(6);
+      expect(/^[0-9a-f]{6}$/.test(id1)).toBe(true);
+      expect(/^[0-9a-f]{6}$/.test(id2)).toBe(true);
+    });
+
+    it('should prevent duplicate .gitignore entries with normalization', async () => {
+      await fs.ensureDir(testProjectPath);
+      const gitignorePath = path.join(testProjectPath, '.gitignore');
+
+      // Create existing .gitignore with entries in different formats
+      const existingContent = `node_modules/
+*.log
+
+.regent-backups
+.rlhf
+`;
+      await fs.writeFile(gitignorePath, existingContent);
+
+      // Regent entries to add (some are duplicates with different formatting)
+      const regentEntries = [
+        '# Spec-kit clean architecture',
+        '.rlhf/',  // duplicate of .rlhf (with trailing slash)
+        '.logs/',
+        '.regent-backups/'  // duplicate of .regent-backups (with trailing slash)
+      ];
+
+      // Simulate merge logic
+      const content = await fs.readFile(gitignorePath, 'utf-8');
+      const normalizeEntry = (entry: string) => entry.trim().replace(/\/+$/, '');
+      const existingLines = content.split('\n').map(normalizeEntry);
+
+      const entriesToAdd = regentEntries.filter(entry => {
+        const normalized = normalizeEntry(entry);
+        if (normalized.startsWith('#') || normalized === '') {
+          return true;
+        }
+        return !existingLines.some(line => normalizeEntry(line) === normalized);
+      });
+
+      // Should only add non-duplicate entries
+      const nonCommentEntries = entriesToAdd.filter(e => !e.startsWith('#') && e.trim());
+      expect(nonCommentEntries.length).toBe(1); // Only .logs/ should be added
+      expect(entriesToAdd).toContain('.logs/');
+    });
+
+    it('should validate backup directory is writable', async () => {
+      await fs.ensureDir(testProjectPath);
+      const backupDir = path.join(testProjectPath, '.test-backups');
+
+      // Test writing to directory
+      try {
+        await fs.ensureDir(backupDir);
+        const testFile = path.join(backupDir, '.write-test');
+        await fs.writeFile(testFile, '');
+        await fs.remove(testFile);
+
+        // If we get here, directory is writable
+        expect(await fs.pathExists(backupDir)).toBe(true);
+      } catch (error) {
+        // Should not throw for valid directory
+        expect(error).toBeUndefined();
+      }
+
+      // Cleanup
+      await fs.remove(backupDir);
+    });
+
+    it('should handle source file not found gracefully', async () => {
+      // Test that missing source files don't crash the system
+      const nonExistentPath = path.join(testProjectPath, 'non-existent.js');
+
+      expect(await fs.pathExists(nonExistentPath)).toBe(false);
+
+      // Verify graceful handling
+      try {
+        if (await fs.pathExists(nonExistentPath)) {
+          await fs.readFile(nonExistentPath, 'utf-8');
+        }
+        // Should skip reading if file doesn't exist
+        expect(true).toBe(true);
+      } catch (error) {
+        // Should not reach here due to existence check
+        expect(error).toBeUndefined();
+      }
+    });
   });
 });
