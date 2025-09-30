@@ -293,28 +293,48 @@ async function detectExistingConfigFiles(projectPath: string): Promise<ExistingC
 /**
  * Creates a timestamped backup of a configuration file
  *
- * Backup Naming Pattern: {filename}.regent-backup-{timestamp}-{uniqueId}{.ext}
+ * Backup Naming Pattern: {filename}.regent-backup-{date}-{time}-{uniqueId}{.ext}
  *
  * Examples:
- * - settings.json → settings.regent-backup-1234567890-a3f2b1.json
- * - eslint.config.js → eslint.config.regent-backup-1234567890-c9d4e2.js
+ * - settings.json → settings.regent-backup-20240315-143022-a3f2b1.json
+ * - eslint.config.js → eslint.config.regent-backup-20240315-143022-c9d4e2.js
  *
  * The extension is preserved to allow easy opening with appropriate tools.
  * A cryptographically random uniqueId prevents collisions even in concurrent operations.
+ * Human-readable timestamp makes it easy to find backups by date.
  *
  * @param filePath - Absolute path to the file to backup
  * @param projectPath - Absolute path to the project root directory
  * @param backupDir - Optional custom backup directory (validated for security)
  * @returns Absolute path to the created backup file
- * @throws Error if backup directory cannot be created or path traversal is detected
+ * @throws Error if backup directory cannot be created, path traversal detected, or file too large
  */
 async function createBackup(filePath: string, projectPath: string, backupDir?: string): Promise<string> {
-  // Use high-precision timestamp with nanosecond precision for better collision prevention
-  const hrTime = process.hrtime.bigint();
-  const timestamp = Number(hrTime / 1000000n); // Convert to milliseconds
+  // Validate file size (prevent disk exhaustion attacks)
+  const MAX_BACKUP_SIZE = 100 * 1024 * 1024; // 100MB limit
+  try {
+    const stats = await fs.stat(filePath);
+    if (stats.size > MAX_BACKUP_SIZE) {
+      throw new Error(
+        `File too large to backup: ${path.basename(filePath)} (${(stats.size / 1024 / 1024).toFixed(2)}MB)\n` +
+        `Maximum backup size is ${MAX_BACKUP_SIZE / 1024 / 1024}MB`
+      );
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw error;
+    }
+    // File doesn't exist - will be handled by fs.copy later
+  }
 
-  // Generate cryptographically random unique ID (6 chars) - prevents counter overflow
-  // and handles concurrent operations safely
+  // Create human-readable timestamp: YYYYMMDD-HHMMSS
+  const now = new Date();
+  const timestamp = now.toISOString()
+    .replace(/[-:]/g, '')
+    .replace('T', '-')
+    .slice(0, 15); // YYYYMMDD-HHMMSS
+
+  // Generate cryptographically random unique ID (6 chars) - prevents collisions
   const uniqueId = crypto.randomBytes(3).toString('hex');
 
   const ext = path.extname(filePath);

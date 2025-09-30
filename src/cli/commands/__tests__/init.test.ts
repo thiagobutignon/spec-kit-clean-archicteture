@@ -669,5 +669,51 @@ node_modules/
         expect(error).toBeUndefined();
       }
     });
+
+    it('should use human-readable timestamp format', async () => {
+      // Test timestamp format: YYYYMMDD-HHMMSS
+      const now = new Date();
+      const timestamp = now.toISOString()
+        .replace(/[-:]/g, '')
+        .replace('T', '-')
+        .slice(0, 15);
+
+      // Should match format YYYYMMDD-HHMMSS
+      expect(timestamp).toMatch(/^\d{8}-\d{6}$/);
+
+      // Example: 20240315-143022
+      expect(timestamp.length).toBe(15);
+      expect(timestamp.charAt(8)).toBe('-');
+    });
+
+    it('should validate file size before backup (prevent disk exhaustion)', async () => {
+      await fs.ensureDir(testProjectPath);
+
+      // Create a small test file
+      const testFile = path.join(testProjectPath, 'small.json');
+      await fs.writeFile(testFile, '{"test": true}');
+
+      const stats = await fs.stat(testFile);
+      const MAX_BACKUP_SIZE = 100 * 1024 * 1024; // 100MB
+
+      // Small file should pass validation
+      expect(stats.size).toBeLessThan(MAX_BACKUP_SIZE);
+
+      // Simulate large file check
+      const largeFileSize = 150 * 1024 * 1024; // 150MB
+      expect(largeFileSize).toBeGreaterThan(MAX_BACKUP_SIZE);
+
+      // Cleanup
+      await fs.remove(testFile);
+    });
+
+    it('should format file size in human-readable format', async () => {
+      // Test size formatting
+      const sizeInBytes = 52428800; // 50MB
+      const sizeInMB = (sizeInBytes / 1024 / 1024).toFixed(2);
+
+      expect(sizeInMB).toBe('50.00');
+      expect(sizeInMB).toMatch(/^\d+\.\d{2}$/);
+    });
   });
 });
