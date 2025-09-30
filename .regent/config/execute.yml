@@ -1,0 +1,33 @@
+# Execute Command Configuration
+# This file configures the behavior of the /06-execute command
+
+# Commit configuration
+commit:
+  # Enable/disable automatic commits after each step
+  enabled: true
+
+  # Quality checks to run before committing
+  quality_checks:
+    # Run lint before commit
+    lint: true
+    # Run tests before commit
+    test: true
+
+  # Conventional commits configuration
+  conventional_commits:
+    # Enable conventional commit format
+    enabled: true
+
+    # Map step types to commit types
+    type_mapping:
+      create_file: 'feat'        # New functionality
+      refactor_file: 'refactor'  # Code improvements
+      delete_file: 'chore'       # Maintenance
+      folder: 'chore'            # Infrastructure (no commit by default)
+      branch: null               # No commit (just branch creation)
+      pull_request: null         # No commit (just PR creation)
+      test: 'test'               # Test additions
+      conditional_file: 'feat'   # Conditional file creation
+
+  # Co-author for commits
+  co_author: 'Claude <noreply@anthropic.com>'
