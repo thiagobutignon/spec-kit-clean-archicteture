@@ -27,6 +27,49 @@ import {
 $.verbose = true;
 $.shell = '/bin/bash';
 
+/**
+ * Extract error message from various error types consistently
+ * @param error - Error object from git, shell commands, or JS errors
+ * @param fallback - Fallback message if extraction fails
+ * @returns Formatted error message
+ */
+function extractErrorMessage(error: any, fallback = 'Unknown error'): string {
+  if (!error) return fallback;
+
+  // For shell command errors (zx ProcessOutput), prioritize stderr
+  if (error.stderr && typeof error.stderr === 'string' && error.stderr.trim()) {
+    return error.stderr.trim();
+  }
+
+  // Fallback to stdout for commands that output errors to stdout
+  if (error.stdout && typeof error.stdout === 'string' && error.stdout.trim()) {
+    return error.stdout.trim();
+  }
+
+  // Standard Error object
+  if (error.message) {
+    return error.message;
+  }
+
+  // If error is a string
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  return fallback;
+}
+
+/**
+ * Extract combined output from shell command errors
+ * @param error - Error object from shell command
+ * @returns Combined stdout + stderr
+ */
+function extractCommandOutput(error: any): string {
+  const stdout = error.stdout || '';
+  const stderr = error.stderr || '';
+  return (stdout + stderr).trim();
+}
+
 interface Step {
   id: string;
   type: 'create_file' | 'refactor_file' | 'delete_file' | 'folder' | 'branch' | 'pull_request' | 'validation' | 'test' | 'conditional_file';
@@ -75,6 +118,25 @@ class EnhancedStepExecutor {
   private commitConfig: CommitConfig;
   private commitHashes: string[] = [];
 
+  /**
+   * Create a new EnhancedStepExecutor instance
+   *
+   * Initializes all subsystems required for executing implementation plans:
+   * - Logger for detailed execution logs
+   * - RLHF system for scoring and learning
+   * - Template validator for pre-execution checks
+   * - Commit configuration from .regent/config/execute.yml
+   * - Signal handlers for graceful cleanup on interrupts
+   *
+   * @param {string} implementationPath - Path to the YAML implementation file
+   *                                      (e.g., './spec/001-feature/domain/implementation.yaml')
+   *
+   * @example
+   * ```typescript
+   * const executor = new EnhancedStepExecutor('./spec/001-auth/domain/implementation.yaml');
+   * await executor.run();
+   * ```
+   */
   constructor(private implementationPath: string) {
     this.plan = { steps: [] };
 
@@ -118,13 +180,49 @@ class EnhancedStepExecutor {
   }
 
   /**
-   * Detect package manager being used in the project
+   * Verify if a package manager is installed
+   * @param pm - Package manager to verify
+   * @returns true if installed, false otherwise
    */
-  private detectPackageManager(): 'npm' | 'yarn' | 'pnpm' {
-    // Check for lock files
-    if (fs.existsSync('pnpm-lock.yaml')) return 'pnpm';
-    if (fs.existsSync('yarn.lock')) return 'yarn';
-    return 'npm'; // Default to npm
+  private async isPackageManagerInstalled(pm: 'npm' | 'yarn' | 'pnpm'): Promise<boolean> {
+    try {
+      $.verbose = false;
+      await $`which ${pm}`;
+      $.verbose = true;
+      return true;
+    } catch {
+      $.verbose = true;
+      return false;
+    }
+  }
+
+  /**
+   * Detect package manager being used in the project
+   * Verifies installation before returning
+   */
+  private async detectPackageManager(): Promise<'npm' | 'yarn' | 'pnpm'> {
+    // Check for lock files and verify installation
+    if (fs.existsSync('pnpm-lock.yaml')) {
+      if (await this.isPackageManagerInstalled('pnpm')) {
+        return 'pnpm';
+      }
+      console.log(chalk.yellow('   ⚠️  pnpm-lock.yaml found but pnpm is not installed'));
+    }
+
+    if (fs.existsSync('yarn.lock')) {
+      if (await this.isPackageManagerInstalled('yarn')) {
+        return 'yarn';
+      }
+      console.log(chalk.yellow('   ⚠️  yarn.lock found but yarn is not installed'));
+    }
+
+    // Default to npm (should always be available with Node.js)
+    if (await this.isPackageManagerInstalled('npm')) {
+      return 'npm';
+    }
+
+    // If npm is also not available, throw error
+    throw new Error('No package manager found. Please install npm, yarn, or pnpm.');
   }
 
   /**
@@ -163,7 +261,7 @@ class EnhancedStepExecutor {
         console.log(chalk.gray('   Run: git status to see your changes'));
 
         // Check if interactive safety is enabled (default: true)
-        const interactiveSafety = this.config.commit?.interactive_safety !== false;
+        const interactiveSafety = this.commitConfig.interactiveSafety !== false;
 
         if (interactiveSafety) {
           const { confirmAction } = await import('./utils/prompt-utils.js');
@@ -426,6 +524,27 @@ class EnhancedStepExecutor {
     return this.plan.steps || [];
   }
 
+  /**
+   * Execute all steps in the implementation plan
+   *
+   * This is the main entry point that orchestrates the entire execution flow:
+   * 1. Loads the YAML implementation plan
+   * 2. Performs git safety checks (warns about uncommitted changes)
+   * 3. Pre-validates the template structure
+   * 4. Executes each step sequentially
+   * 5. Runs quality checks (lint/test) before each commit
+   * 6. Creates conventional commits with automatic scope detection
+   * 7. Calculates RLHF scores for learning
+   *
+   * @throws {Error} If git safety check fails or critical errors occur
+   * @returns {Promise<void>} Resolves when all steps complete successfully
+   *
+   * @example
+   * ```typescript
+   * const executor = new EnhancedStepExecutor('./spec/001-feature/implementation.yaml');
+   * await executor.run();
+   * ```
+   */
   public async run(): Promise<void> {
     await this.loadPlan();
 
@@ -691,7 +810,7 @@ class EnhancedStepExecutor {
    * Enhanced error message with layer context
    */
   private enhanceErrorMessageWithLayerContext(error: any, step: Step): string {
-    const baseError = error.stderr || error.stdout || error.message || 'Unknown error';
+    const baseError = extractErrorMessage(error);
 
     if (!this.layerInfo) {
       return this.enhanceErrorMessage(error, step);
@@ -921,7 +1040,7 @@ class EnhancedStepExecutor {
   }
 
   private enhanceErrorMessage(error: any, step: Step): string {
-    const baseError = error.stderr || error.stdout || error.message || 'Unknown error';
+    const baseError = extractErrorMessage(error);
 
     if (step.type === 'refactor_file' && step.template) {
       if (!step.template.includes('<<<REPLACE>>>') || !step.template.includes('<<<WITH>>>')) {
@@ -985,7 +1104,7 @@ class EnhancedStepExecutor {
       const checks: Promise<{ type: 'lint' | 'test'; passed: boolean; output: string }>[] = [];
 
       // Detect package manager for commands
-      const pm = this.detectPackageManager();
+      const pm = await this.detectPackageManager();
       console.log(chalk.gray(`   ℹ️  Using package manager: ${pm}`));
 
     // Run lint if enabled
@@ -1002,7 +1121,7 @@ class EnhancedStepExecutor {
             return { type: 'lint' as const, passed: true, output: lintResult.stdout + lintResult.stderr };
           } catch (error: any) {
             $.verbose = true;
-            const output = error.stdout + error.stderr;
+            const output = extractCommandOutput(error);
             console.log(chalk.red('   ❌ Lint check failed'));
 
             // Parse and display specific errors
@@ -1032,7 +1151,7 @@ class EnhancedStepExecutor {
             return { type: 'test' as const, passed: true, output: testResult.stdout + testResult.stderr };
           } catch (error: any) {
             $.verbose = true;
-            const output = error.stdout + error.stderr;
+            const output = extractCommandOutput(error);
             console.log(chalk.red('   ❌ Tests failed'));
 
             // Parse and display specific failures
@@ -1108,6 +1227,15 @@ class EnhancedStepExecutor {
     }
 
     try {
+      // Verify git index is clean before staging
+      const cachedResult = await $`git diff --cached --name-only`;
+      const alreadyStaged = cachedResult.stdout.trim().split('\n').filter(f => f.length > 0);
+
+      if (alreadyStaged.length > 0) {
+        console.log(chalk.yellow('   ⚠️  Warning: Git index has staged changes from previous operations'));
+        console.log(chalk.gray(`   📋 Staged files: ${alreadyStaged.join(', ')}`));
+      }
+
       // Add files to git - be specific about what to stage
       console.log(chalk.blue('   📝 Staging changes...'));
       if (step.path && fs.existsSync(step.path)) {
@@ -1122,11 +1250,12 @@ class EnhancedStepExecutor {
           .map(line => line.substring(3).trim());
 
         if (changedFiles.length > 0) {
-          // Stage only the changed files, not untracked files
-          for (const file of changedFiles) {
-            if (fs.existsSync(file)) {
-              await $`git add ${file}`;
-            }
+          // Batch check file existence for performance
+          const existingFiles = changedFiles.filter(file => fs.existsSync(file));
+
+          if (existingFiles.length > 0) {
+            // Stage all existing files in one command
+            await $`git add ${existingFiles}`;
           }
         }
       }
@@ -1144,7 +1273,7 @@ class EnhancedStepExecutor {
       console.log(chalk.gray(`   📋 ${commitMessage.split('\n')[0]}`));
     } catch (error: any) {
       // If commit fails, it might be because there are no changes or other git issues
-      const errorMsg = error.stderr || error.message || 'Unknown git error';
+      const errorMsg = extractErrorMessage(error, 'Unknown git error');
 
       if (errorMsg.includes('nothing to commit')) {
         console.log(chalk.yellow('   ⚠️  No changes to commit'));
@@ -1156,13 +1285,20 @@ class EnhancedStepExecutor {
 
   /**
    * Rollback changes made by a failed step
-   * Restores the working directory to the last commit
+   * Only rolls back files modified by this step, preserving user's uncommitted changes
    */
   private async rollbackStep(step: Step): Promise<void> {
     console.log(chalk.yellow('   🔄 Rolling back changes...'));
 
     try {
-      // If step has a specific path, check if it was newly created
+      // Get list of files staged for commit (files modified by this step)
+      const stagedResult = await $`git diff --cached --name-only`;
+      const stagedFiles = stagedResult.stdout.trim().split('\n').filter(f => f.length > 0);
+
+      // Reset staged changes first
+      await $`git reset HEAD`;
+
+      // Handle the specific step path
       if (step.path) {
         const fileExists = fs.existsSync(step.path);
 
@@ -1170,9 +1306,11 @@ class EnhancedStepExecutor {
           // Check if this file existed in the last commit
           try {
             await $`git cat-file -e HEAD:${step.path}`;
-            // File existed before - restore it from git
-            await $`git checkout HEAD -- ${step.path}`;
-            console.log(chalk.yellow(`   ↩️  Restored ${step.path} from last commit`));
+            // File existed before - restore it from git (only if it was staged)
+            if (stagedFiles.includes(step.path)) {
+              await $`git checkout HEAD -- ${step.path}`;
+              console.log(chalk.yellow(`   ↩️  Restored ${step.path} from last commit`));
+            }
           } catch {
             // File did not exist before - it's new, remove it
             await fs.remove(step.path);
@@ -1181,11 +1319,42 @@ class EnhancedStepExecutor {
         }
       }
 
-      // Reset any staged changes
-      await $`git reset HEAD`;
+      // Restore only files that were staged (modified by this step)
+      // Exclude the step.path since we already handled it
+      const filesToRestore = stagedFiles.filter(f => f !== step.path);
 
-      // Restore working directory to last commit for all modified files
-      await $`git checkout -- .`;
+      if (filesToRestore.length > 0) {
+        // Separate files into: existing in HEAD vs new files
+        const filesToCheckout: string[] = [];
+        const filesToRemove: string[] = [];
+
+        for (const file of filesToRestore) {
+          try {
+            // Check if file exists in HEAD
+            await $`git cat-file -e HEAD:${file}`;
+            filesToCheckout.push(file);
+          } catch {
+            filesToRemove.push(file);
+          }
+        }
+
+        // Batch restore files that exist in HEAD
+        if (filesToCheckout.length > 0) {
+          await $`git checkout HEAD -- ${filesToCheckout}`;
+          console.log(chalk.gray(`   ↩️  Restored ${filesToCheckout.length} file(s) from HEAD`));
+        }
+
+        // Remove new files (batch check existence first)
+        if (filesToRemove.length > 0) {
+          const existingFilesToRemove = filesToRemove.filter(f => fs.existsSync(f));
+          for (const file of existingFilesToRemove) {
+            await fs.remove(file);
+          }
+          if (existingFilesToRemove.length > 0) {
+            console.log(chalk.gray(`   ↩️  Removed ${existingFilesToRemove.length} new file(s)`));
+          }
+        }
+      }
 
       console.log(chalk.green('   ✅ Rollback complete'));
     } catch (error: any) {
