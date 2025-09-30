@@ -162,9 +162,25 @@ class EnhancedStepExecutor {
         console.log(chalk.yellow('   The execute command will create commits. Please commit or stash your changes first.'));
         console.log(chalk.gray('   Run: git status to see your changes'));
 
-        // Give user 5 seconds to abort
-        console.log(chalk.yellow('\n   Continuing in 5 seconds... (Press Ctrl+C to abort)'));
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        // Check if interactive safety is enabled (default: true)
+        const interactiveSafety = this.config.commit?.interactive_safety !== false;
+
+        if (interactiveSafety) {
+          const { confirmAction } = await import('./utils/prompt-utils.js');
+          const shouldContinue = await confirmAction(
+            'Do you want to continue anyway? This may result in mixed commits.',
+            false
+          );
+
+          if (!shouldContinue) {
+            console.log(chalk.yellow('⏸️  Execution aborted by user. Please commit or stash your changes first.'));
+            return false;
+          }
+        } else {
+          // Non-interactive mode: give user 5 seconds to abort
+          console.log(chalk.yellow('\n   Continuing in 5 seconds... (Press Ctrl+C to abort)'));
+          await new Promise(resolve => setTimeout(resolve, 5000));
+        }
       }
 
       return true;
@@ -962,13 +978,15 @@ class EnhancedStepExecutor {
   /**
    * Run quality checks (lint and test) based on configuration
    * Runs checks in parallel for better performance
+   * Includes error boundary to prevent execution crashes
    */
   private async runQualityChecks(): Promise<QualityCheckResult> {
-    const checks: Promise<{ type: 'lint' | 'test'; passed: boolean; output: string }>[] = [];
+    try {
+      const checks: Promise<{ type: 'lint' | 'test'; passed: boolean; output: string }>[] = [];
 
-    // Detect package manager for commands
-    const pm = this.detectPackageManager();
-    console.log(chalk.gray(`   ℹ️  Using package manager: ${pm}`));
+      // Detect package manager for commands
+      const pm = this.detectPackageManager();
+      console.log(chalk.gray(`   ℹ️  Using package manager: ${pm}`));
 
     // Run lint if enabled
     if (this.commitConfig.qualityChecks.lint) {
@@ -1039,19 +1057,31 @@ class EnhancedStepExecutor {
     let testPassed = true;
     let testOutput = '';
 
-    for (const result of results) {
-      if (result.status === 'fulfilled') {
-        if (result.value.type === 'lint') {
-          lintPassed = result.value.passed;
-          lintOutput = result.value.output;
-        } else if (result.value.type === 'test') {
-          testPassed = result.value.passed;
-          testOutput = result.value.output;
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          if (result.value.type === 'lint') {
+            lintPassed = result.value.passed;
+            lintOutput = result.value.output;
+          } else if (result.value.type === 'test') {
+            testPassed = result.value.passed;
+            testOutput = result.value.output;
+          }
         }
       }
-    }
 
-    return createQualityCheckResult(lintPassed, testPassed, lintOutput, testOutput);
+      return createQualityCheckResult(lintPassed, testPassed, lintOutput, testOutput);
+    } catch (error: any) {
+      // Error boundary: If quality checks crash, treat as failed
+      console.log(chalk.red(`   ❌ Quality checks crashed: ${error.message}`));
+      console.log(chalk.yellow('   ℹ️  Treating as failed quality check'));
+
+      return createQualityCheckResult(
+        false,
+        false,
+        `Quality check system error: ${error.message}`,
+        `Quality check system error: ${error.message}`
+      );
+    }
   }
 
   /**
@@ -1132,17 +1162,29 @@ class EnhancedStepExecutor {
     console.log(chalk.yellow('   🔄 Rolling back changes...'));
 
     try {
-      // If step has a specific path, restore only that file
-      if (step.path && fs.existsSync(step.path)) {
-        // Remove the created/modified file
-        await fs.remove(step.path);
-        console.log(chalk.yellow(`   ↩️  Removed ${step.path}`));
+      // If step has a specific path, check if it was newly created
+      if (step.path) {
+        const fileExists = fs.existsSync(step.path);
+
+        if (fileExists) {
+          // Check if this file existed in the last commit
+          try {
+            await $`git cat-file -e HEAD:${step.path}`;
+            // File existed before - restore it from git
+            await $`git checkout HEAD -- ${step.path}`;
+            console.log(chalk.yellow(`   ↩️  Restored ${step.path} from last commit`));
+          } catch {
+            // File did not exist before - it's new, remove it
+            await fs.remove(step.path);
+            console.log(chalk.yellow(`   ↩️  Removed newly created ${step.path}`));
+          }
+        }
       }
 
       // Reset any staged changes
       await $`git reset HEAD`;
 
-      // Restore working directory to last commit
+      // Restore working directory to last commit for all modified files
       await $`git checkout -- .`;
 
       console.log(chalk.green('   ✅ Rollback complete'));

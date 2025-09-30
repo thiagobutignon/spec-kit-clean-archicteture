@@ -23,6 +23,12 @@ const TypeMappingSchema = z.object({
   conditional_file: z.union([CommitTypeEnum, z.null()]).optional(),
 });
 
+/**
+ * Email regex pattern for co-author validation
+ * Format: "Name <email@example.com>"
+ */
+const EMAIL_PATTERN = /^.+\s+<[^@\s]+@[^@\s]+\.[^@\s]+>$/;
+
 const CommitConfigSchema = z.object({
   commit: z.object({
     enabled: z.boolean().default(true),
@@ -34,7 +40,14 @@ const CommitConfigSchema = z.object({
       enabled: z.boolean().default(true),
       type_mapping: TypeMappingSchema.optional(),
     }).default({ enabled: true }),
-    co_author: z.string().default('Claude <noreply@anthropic.com>'),
+    co_author: z.string()
+      .regex(EMAIL_PATTERN, 'Co-author must be in format "Name <email@example.com>"')
+      .default('Claude <noreply@anthropic.com>'),
+    emoji: z.object({
+      enabled: z.boolean().default(true),
+      robot: z.string().default('🤖'),
+    }).optional(),
+    interactive_safety: z.boolean().default(true).optional(),
   }),
 });
 
@@ -78,7 +91,7 @@ export function validateConfig(config: unknown): {
 }
 
 /**
- * Validates commit message length
+ * Validates commit message length and format
  * @param message - Commit message to validate
  * @param maxLength - Maximum allowed length
  * @returns Validation result
@@ -98,6 +111,15 @@ export function validateCommitMessage(message: string, maxLength = 500): {
   // Extract first line (subject)
   const firstLine = message.split('\n')[0];
 
+  // Check for conventional commit format
+  const conventionalPattern = /^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+/;
+  if (!conventionalPattern.test(firstLine)) {
+    return {
+      valid: false,
+      error: 'Commit message must follow conventional commit format: type(scope): description',
+    };
+  }
+
   if (firstLine.length > 72) {
     return {
       valid: false,
@@ -115,4 +137,63 @@ export function validateCommitMessage(message: string, maxLength = 500): {
   }
 
   return { valid: true };
+}
+
+/**
+ * Validates file path for safety
+ * Prevents path traversal attacks
+ * @param filePath - File path to validate
+ * @returns Validation result
+ */
+export function validateFilePath(filePath: string): {
+  valid: boolean;
+  error?: string;
+  sanitized?: string;
+} {
+  if (!filePath || filePath.trim().length === 0) {
+    return {
+      valid: false,
+      error: 'File path cannot be empty',
+    };
+  }
+
+  // Check for path traversal patterns
+  const dangerousPatterns = [
+    '../',
+    '..\\',
+    '%2e%2e',
+    '%252e%252e',
+    '~/',
+    '/etc/',
+    '/proc/',
+    '/sys/',
+    'C:\\Windows',
+    'C:\\Program Files',
+  ];
+
+  const lowerPath = filePath.toLowerCase();
+  for (const pattern of dangerousPatterns) {
+    if (lowerPath.includes(pattern.toLowerCase())) {
+      return {
+        valid: false,
+        error: `Path contains dangerous pattern: ${pattern}`,
+      };
+    }
+  }
+
+  // Remove any null bytes
+  const sanitized = filePath.replace(/\0/g, '');
+
+  // Check for absolute paths (should be relative)
+  if (filePath.startsWith('/') || /^[A-Za-z]:/.test(filePath)) {
+    return {
+      valid: false,
+      error: 'Absolute paths are not allowed. Use relative paths only.',
+    };
+  }
+
+  return {
+    valid: true,
+    sanitized,
+  };
 }

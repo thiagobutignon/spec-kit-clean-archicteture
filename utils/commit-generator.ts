@@ -22,6 +22,22 @@ export interface CommitConfig {
     typeMapping: Record<string, ConventionalCommitType>;
   };
   coAuthor: string;
+  emoji?: {
+    enabled: boolean;
+    robot: string;
+  };
+  interactiveSafety?: boolean;
+}
+
+/**
+ * Commit hash tracking with metadata
+ */
+export interface CommitHashInfo {
+  hash: string;
+  stepId: string;
+  timestamp: string;
+  description: string;
+  scope: string;
 }
 
 /**
@@ -48,6 +64,11 @@ export const DEFAULT_COMMIT_CONFIG: CommitConfig = {
     },
   },
   coAuthor: 'Claude <noreply@anthropic.com>',
+  emoji: {
+    enabled: true,
+    robot: '🤖',
+  },
+  interactiveSafety: true,
 };
 
 /**
@@ -181,10 +202,14 @@ export function generateCommitMessage(
   // Normalize description: lowercase first letter for conventional commits
   const normalizedDescription = enhancedDescription.charAt(0).toLowerCase() + enhancedDescription.slice(1);
 
-  // Build commit message
+  // Build commit message with configurable emoji
+  const emojiPrefix = config.emoji?.enabled !== false
+    ? `${config.emoji?.robot || '🤖'} `
+    : '';
+
   const message = `${commitType}(${scope}): ${normalizedDescription}
 
-🤖 Generated with Claude Code
+${emojiPrefix}Generated with Claude Code
 
 Co-Authored-By: ${config.coAuthor}`;
 

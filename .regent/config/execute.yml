@@ -29,5 +29,17 @@ commit:
       test: 'test'               # Test additions
       conditional_file: 'feat'   # Conditional file creation
 
-  # Co-author for commits
+  # Co-author for commits (must be in format: "Name <email@example.com>")
   co_author: 'Claude <noreply@anthropic.com>'
+
+  # Emoji configuration for commit messages
+  emoji:
+    # Enable emoji in commit messages
+    enabled: true
+    # Robot emoji to use (default: 🤖)
+    robot: '🤖'
+
+  # Interactive safety prompts
+  # When enabled, asks for confirmation before risky operations
+  # Set to false for CI/CD environments
+  interactive_safety: true
