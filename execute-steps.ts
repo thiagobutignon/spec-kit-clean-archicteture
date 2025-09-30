@@ -93,9 +93,47 @@ class EnhancedStepExecutor {
    * Load commit configuration from file or use defaults
    */
   private loadCommitConfig(): CommitConfig {
-    // TODO: In future, load from .regent/config/execute.yml
-    // For now, use defaults
-    return { ...DEFAULT_COMMIT_CONFIG };
+    const configPath = '.regent/config/execute.yml';
+
+    try {
+      // Check if config file exists
+      if (!fs.existsSync(configPath)) {
+        console.log(chalk.gray('   ℹ️  No execute config found, using defaults'));
+        return { ...DEFAULT_COMMIT_CONFIG };
+      }
+
+      // Load and parse YAML config
+      const fileContent = fs.readFileSync(configPath, 'utf-8');
+      const loadedConfig = yaml.parse(fileContent);
+
+      if (!loadedConfig || !loadedConfig.commit) {
+        console.log(chalk.yellow('   ⚠️  Invalid config format, using defaults'));
+        return { ...DEFAULT_COMMIT_CONFIG };
+      }
+
+      // Merge with defaults to ensure all properties exist
+      const mergedConfig: CommitConfig = {
+        enabled: loadedConfig.commit.enabled ?? DEFAULT_COMMIT_CONFIG.enabled,
+        qualityChecks: {
+          lint: loadedConfig.commit.quality_checks?.lint ?? DEFAULT_COMMIT_CONFIG.qualityChecks.lint,
+          test: loadedConfig.commit.quality_checks?.test ?? DEFAULT_COMMIT_CONFIG.qualityChecks.test,
+        },
+        conventionalCommits: {
+          enabled: loadedConfig.commit.conventional_commits?.enabled ?? DEFAULT_COMMIT_CONFIG.conventionalCommits.enabled,
+          typeMapping: {
+            ...DEFAULT_COMMIT_CONFIG.conventionalCommits.typeMapping,
+            ...(loadedConfig.commit.conventional_commits?.type_mapping || {}),
+          },
+        },
+        coAuthor: loadedConfig.commit.co_author ?? DEFAULT_COMMIT_CONFIG.coAuthor,
+      };
+
+      console.log(chalk.cyan('   ✅ Loaded commit configuration from .regent/config/execute.yml'));
+      return mergedConfig;
+    } catch (error: any) {
+      console.log(chalk.yellow(`   ⚠️  Failed to load config: ${error.message}, using defaults`));
+      return { ...DEFAULT_COMMIT_CONFIG };
+    }
   }
 
   /**
@@ -289,14 +327,17 @@ class EnhancedStepExecutor {
         const qualityCheckResult = await this.runQualityChecks();
 
         if (!qualityCheckResult.overallPassed) {
-          // Quality checks failed - update status
+          // Quality checks failed - rollback changes
+          await this.rollbackStep(step);
+
+          // Update status
           step.status = 'FAILED';
           step.rlhf_score = -1; // Runtime error
           step.execution_log += `\n\n--- QUALITY CHECKS FAILED ---\nLint: ${qualityCheckResult.lint.passed ? 'PASSED' : 'FAILED'}\nTest: ${qualityCheckResult.test.passed ? 'PASSED' : 'FAILED'}`;
           await this.savePlan();
 
           throw new Error(
-            `Quality checks failed.\n` +
+            `Quality checks failed. Changes have been rolled back.\n` +
             `Lint: ${qualityCheckResult.lint.passed ? '✅' : '❌'}\n` +
             `Test: ${qualityCheckResult.test.passed ? '✅' : '❌'}`
           );
@@ -723,48 +764,73 @@ class EnhancedStepExecutor {
 
   /**
    * Run quality checks (lint and test) based on configuration
+   * Runs checks in parallel for better performance
    */
   private async runQualityChecks(): Promise<QualityCheckResult> {
+    const checks: Promise<{ type: 'lint' | 'test'; passed: boolean; output: string }>[] = [];
+
+    // Run lint if enabled
+    if (this.commitConfig.qualityChecks.lint) {
+      console.log(chalk.blue('   🔍 Running lint check...'));
+      checks.push(
+        (async () => {
+          try {
+            $.verbose = false;
+            const lintResult = await $`yarn lint`;
+            $.verbose = true;
+            console.log(chalk.green('   ✅ Lint check passed'));
+            return { type: 'lint' as const, passed: true, output: lintResult.stdout + lintResult.stderr };
+          } catch (error: any) {
+            $.verbose = true;
+            const output = error.stdout + error.stderr;
+            console.log(chalk.red('   ❌ Lint check failed'));
+            console.log(chalk.red(`   ${output.substring(0, 200)}...`));
+            return { type: 'lint' as const, passed: false, output };
+          }
+        })()
+      );
+    }
+
+    // Run tests if enabled
+    if (this.commitConfig.qualityChecks.test) {
+      console.log(chalk.blue('   🧪 Running tests...'));
+      checks.push(
+        (async () => {
+          try {
+            $.verbose = false;
+            const testResult = await $`yarn test --run`;
+            $.verbose = true;
+            console.log(chalk.green('   ✅ Tests passed'));
+            return { type: 'test' as const, passed: true, output: testResult.stdout + testResult.stderr };
+          } catch (error: any) {
+            $.verbose = true;
+            const output = error.stdout + error.stderr;
+            console.log(chalk.red('   ❌ Tests failed'));
+            console.log(chalk.red(`   ${output.substring(0, 200)}...`));
+            return { type: 'test' as const, passed: false, output };
+          }
+        })()
+      );
+    }
+
+    // Wait for all checks to complete
+    const results = await Promise.allSettled(checks);
+
+    // Process results
     let lintPassed = true;
     let lintOutput = '';
     let testPassed = true;
     let testOutput = '';
 
-    // Run lint if enabled
-    if (this.commitConfig.qualityChecks.lint) {
-      console.log(chalk.blue('   🔍 Running lint check...'));
-      try {
-        $.verbose = false;
-        const lintResult = await $`yarn lint`;
-        $.verbose = true;
-        lintOutput = lintResult.stdout + lintResult.stderr;
-        lintPassed = true;
-        console.log(chalk.green('   ✅ Lint check passed'));
-      } catch (error: any) {
-        $.verbose = true;
-        lintOutput = error.stdout + error.stderr;
-        lintPassed = false;
-        console.log(chalk.red('   ❌ Lint check failed'));
-        console.log(chalk.red(`   ${lintOutput.substring(0, 200)}...`));
-      }
-    }
-
-    // Run tests if enabled and lint passed
-    if (this.commitConfig.qualityChecks.test && lintPassed) {
-      console.log(chalk.blue('   🧪 Running tests...'));
-      try {
-        $.verbose = false;
-        const testResult = await $`yarn test --run`;
-        $.verbose = true;
-        testOutput = testResult.stdout + testResult.stderr;
-        testPassed = true;
-        console.log(chalk.green('   ✅ Tests passed'));
-      } catch (error: any) {
-        $.verbose = true;
-        testOutput = error.stdout + error.stderr;
-        testPassed = false;
-        console.log(chalk.red('   ❌ Tests failed'));
-        console.log(chalk.red(`   ${testOutput.substring(0, 200)}...`));
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        if (result.value.type === 'lint') {
+          lintPassed = result.value.passed;
+          lintOutput = result.value.output;
+        } else if (result.value.type === 'test') {
+          testPassed = result.value.passed;
+          testOutput = result.value.output;
+        }
       }
     }
 
@@ -795,17 +861,32 @@ class EnhancedStepExecutor {
     }
 
     try {
-      // Add files to git
+      // Add files to git - be specific about what to stage
       console.log(chalk.blue('   📝 Staging changes...'));
-      if (step.path) {
+      if (step.path && fs.existsSync(step.path)) {
+        // Stage the specific file from the step
         await $`git add ${step.path}`;
       } else {
-        await $`git add .`;
+        // For non-file steps (like folder), check git status and stage tracked files
+        const statusResult = await $`git status --porcelain`;
+        const changedFiles = statusResult.stdout
+          .split('\n')
+          .filter(line => line.trim())
+          .map(line => line.substring(3).trim());
+
+        if (changedFiles.length > 0) {
+          // Stage only the changed files, not untracked files
+          for (const file of changedFiles) {
+            if (fs.existsSync(file)) {
+              await $`git add ${file}`;
+            }
+          }
+        }
       }
 
       // Commit with generated message
       console.log(chalk.blue('   💾 Creating commit...'));
-      const commitResult = await $`git commit -m ${commitMessage}`;
+      await $`git commit -m ${commitMessage}`;
 
       // Get the commit hash
       const hashResult = await $`git rev-parse --short HEAD`;
@@ -823,6 +904,34 @@ class EnhancedStepExecutor {
       } else {
         throw new Error(`Git commit failed: ${errorMsg}`);
       }
+    }
+  }
+
+  /**
+   * Rollback changes made by a failed step
+   * Restores the working directory to the last commit
+   */
+  private async rollbackStep(step: Step): Promise<void> {
+    console.log(chalk.yellow('   🔄 Rolling back changes...'));
+
+    try {
+      // If step has a specific path, restore only that file
+      if (step.path && fs.existsSync(step.path)) {
+        // Remove the created/modified file
+        await fs.remove(step.path);
+        console.log(chalk.yellow(`   ↩️  Removed ${step.path}`));
+      }
+
+      // Reset any staged changes
+      await $`git reset HEAD`;
+
+      // Restore working directory to last commit
+      await $`git checkout -- .`;
+
+      console.log(chalk.green('   ✅ Rollback complete'));
+    } catch (error: any) {
+      console.log(chalk.red(`   ⚠️  Rollback failed: ${error.message}`));
+      console.log(chalk.yellow('   ℹ️  Manual cleanup may be required'));
     }
   }
 
