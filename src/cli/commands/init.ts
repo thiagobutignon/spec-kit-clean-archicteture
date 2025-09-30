@@ -517,11 +517,11 @@ function showNextSteps(projectName: string, isHere: boolean, isExistingProject: 
     console.log('1. Start the Clean Architecture workflow:');
   }
 
-  console.log(`   ${chalk.green('/constitution')} - Review and customize project principles`);
-  console.log(`   ${chalk.green('/specify')} - Create your first feature specification`);
-  console.log(`   ${chalk.green('/plan')} - Generate Clean Architecture implementation plan`);
-  console.log(`   ${chalk.green('/tasks')} - Break down into layer-specific tasks`);
-  console.log(`   ${chalk.green('/implement')} - Execute with .regent templates`);
+  console.log(`   ${chalk.green('/01-plan-layer-features')} - Plan layer implementation`);
+  console.log(`   ${chalk.green('/02-validate-layer-plan')} - Validate your plan`);
+  console.log(`   ${chalk.green('/03-generate-layer-code')} - Generate code from plan`);
+  console.log(`   ${chalk.green('/04-reflect-layer-lessons')} - Reflect and learn`);
+  console.log(`   ${chalk.green('/05-evaluate-layer-results')} - Validate architecture`);
   console.log();
 
   console.log(chalk.cyan.bold('💡 Pro Tips:'));
