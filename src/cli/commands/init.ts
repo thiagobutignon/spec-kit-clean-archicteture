@@ -131,13 +131,13 @@ export async function initCommand(projectName: string | undefined, options: Init
             console.log(chalk.dim('\n   Next steps:'));
             console.log(chalk.dim('   1. Run: claude mcp list'));
             console.log(chalk.dim('   2. Restart your Claude Code session'));
-            console.log(chalk.dim('   3. Check SETUP_MCP.md for troubleshooting\n'));
+            console.log(chalk.dim('   3. Check docs/setup/SETUP_MCP.md for troubleshooting\n'));
           }
         }
       } catch (error) {
         console.log(chalk.yellow('⚠️ MCP installation encountered an issue - continuing without MCP servers'));
         console.log(chalk.dim(`   Error: ${(error as Error).message}`));
-        console.log(chalk.dim('   💡 You can install MCP servers manually (see SETUP_MCP.md)\n'));
+        console.log(chalk.dim('   💡 You can install MCP servers manually (see docs/setup/SETUP_MCP.md)\n'));
       }
     } else {
       console.log(chalk.yellow('⏭️  Skipping MCP installation (--skip-mcp flag)\n'));
