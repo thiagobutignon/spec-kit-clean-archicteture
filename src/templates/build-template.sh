@@ -15,9 +15,12 @@ CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
 NC='\033[0m' # No Color
 
-# Paths
-PARTS_DIR="templates/parts"
-OUTPUT_DIR="templates"
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Paths (relative to script location)
+PARTS_DIR="$SCRIPT_DIR/parts"
+OUTPUT_DIR="$SCRIPT_DIR"
 
 # Target types and layers
 TARGETS=("backend" "frontend" "fullstack")
