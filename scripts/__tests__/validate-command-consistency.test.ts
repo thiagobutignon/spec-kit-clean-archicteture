@@ -6,7 +6,7 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import * as path from 'path'
-import { ValidationResult, CONSISTENCY_RULES } from '../validate-command-consistency'
+import { CONSISTENCY_RULES } from '../validate-command-consistency'
 
 // Mock fs/promises before importing validator
 vi.mock('fs/promises', () => ({
@@ -38,7 +38,7 @@ describe('CommandConsistencyValidator', () => {
   describe('Detection of Missing Required Terms', () => {
     it('should detect when a required term is missing from a command file', async () => {
       // Mock file reads - one file missing a specific critical term
-      vi.mocked(fs.readFile).mockImplementation(async (filePath: any) => {
+      vi.mocked(fs.readFile).mockImplementation(async (filePath) => {
         const fileName = path.basename(filePath as string)
         // Make 02-validate-layer-plan.md explicitly missing "sharedComponents"
         // Use unique separator to ensure the term is truly missing
@@ -78,11 +78,6 @@ describe('CommandConsistencyValidator', () => {
 
       await validator.validate()
 
-      // Get unique file names from all rules
-      const uniqueFiles = new Set(
-        CONSISTENCY_RULES.flatMap(rule => rule.required_in)
-      )
-
       // Verify each file was read at least once
       expect(readFileSpy).toHaveBeenCalledTimes(
         CONSISTENCY_RULES.reduce((sum, rule) => sum + rule.required_in.length, 0)
@@ -97,7 +92,7 @@ describe('CommandConsistencyValidator', () => {
       expect(errorRule).toBeDefined()
 
       // Mock file to be missing the error-level term
-      vi.mocked(fs.readFile).mockImplementation(async (filePath: any) => {
+      vi.mocked(fs.readFile).mockImplementation(async (filePath) => {
         const fileName = path.basename(filePath as string)
         if (errorRule && errorRule.required_in.includes(fileName)) {
           return 'Content without the required term'
@@ -117,7 +112,7 @@ describe('CommandConsistencyValidator', () => {
 
       if (warningRule) {
         // Mock file to be missing the warning-level term
-        vi.mocked(fs.readFile).mockImplementation(async (filePath: any) => {
+        vi.mocked(fs.readFile).mockImplementation(async (filePath) => {
           const fileName = path.basename(filePath as string)
           if (warningRule.required_in.includes(fileName)) {
             // Missing warning term but has all error terms
@@ -140,7 +135,7 @@ describe('CommandConsistencyValidator', () => {
       const errorRule = CONSISTENCY_RULES.find(r => r.severity === 'error')
       const warningRule = CONSISTENCY_RULES.find(r => r.severity === 'warning')
 
-      vi.mocked(fs.readFile).mockImplementation(async (filePath: any) => {
+      vi.mocked(fs.readFile).mockImplementation(async (filePath) => {
         const fileName = path.basename(filePath as string)
 
         // Missing both error and warning terms in specific files
@@ -178,7 +173,7 @@ describe('CommandConsistencyValidator', () => {
     it('should report which file failed to read', async () => {
       const failingFile = '01-plan-layer-features.md'
 
-      vi.mocked(fs.readFile).mockImplementation(async (filePath: any) => {
+      vi.mocked(fs.readFile).mockImplementation(async (filePath) => {
         const fileName = path.basename(filePath as string)
         if (fileName === failingFile) {
           throw new Error('File not found')
