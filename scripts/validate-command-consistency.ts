@@ -7,7 +7,13 @@
 
 import * as fs from 'fs/promises'
 import * as path from 'path'
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
 import chalk from 'chalk'
+
+// Get script directory for path resolution
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 interface ConsistencyRule {
   term: string
@@ -79,11 +85,18 @@ const CONSISTENCY_RULES: ConsistencyRule[] = [
 ]
 
 class CommandConsistencyValidator {
-  private commandsDir = '.claude/commands'
+  private commandsDir: string
   private result: ValidationResult = {
     passed: true,
     errors: [],
     warnings: []
+  }
+
+  constructor(projectRoot?: string) {
+    // Resolve commands directory relative to project root
+    // Default to script's parent directory (project root)
+    const root = projectRoot || path.join(__dirname, '..')
+    this.commandsDir = path.join(root, '.claude', 'commands')
   }
 
   async validate(): Promise<ValidationResult> {
@@ -203,11 +216,15 @@ async function main() {
 }
 
 // Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(error => {
-    console.error(chalk.red('Fatal error:'), error)
-    process.exit(1)
-  })
+// More robust check that works across different environments
+if (import.meta.url.startsWith('file:')) {
+  const modulePath = fileURLToPath(import.meta.url)
+  if (process.argv[1] === modulePath || process.argv[1].endsWith('validate-command-consistency.ts')) {
+    main().catch(error => {
+      console.error(chalk.red('Fatal error:'), error)
+      process.exit(1)
+    })
+  }
 }
 
 export { CommandConsistencyValidator, ValidationResult, CONSISTENCY_RULES }

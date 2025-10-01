@@ -6,6 +6,17 @@
 
 The modular YAML generation system (introduced in #117 and PR #136) uses a structure with `sharedComponents` and individual use case YAMLs. This document defines how to handle edge cases that may arise during feature implementation.
 
+## Quick Reference
+
+| Edge Case | Generate shared.yaml? | Generate use-case YAMLs? | Notes |
+|-----------|----------------------|--------------------------|-------|
+| **Single use case** | ✅ Yes | ✅ Yes (1 file) | Always maintain consistency |
+| **No shared components** | ❌ No | ✅ Yes (N files) | Rare - verify first |
+| **Modify shared later** | ✅ Keep original | ✅ Add update-shared.yaml | Preserves history |
+| **Use case dependencies** | ✅ Yes | ✅ Yes with `dependencies` | Explicit execution order |
+
+**Jump to details**: [Edge Case 1](#edge-case-1-single-use-case-feature) • [Edge Case 2](#edge-case-2-no-shared-components) • [Edge Case 3](#edge-case-3-modifying-shared-component-after-use-cases) • [Edge Case 4](#edge-case-4-use-case-dependencies)
+
 ---
 
 ## Edge Case 1: Single Use Case Feature

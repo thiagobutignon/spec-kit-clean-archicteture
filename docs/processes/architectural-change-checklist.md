@@ -403,12 +403,81 @@ Use this checklist when making changes to:
 
 ---
 
+## Maintaining Consistency Rules
+
+### How to Add New Consistency Rules
+
+When adding a new architectural concept that needs validation:
+
+1. **Edit the validator script**:
+   ```bash
+   # Open the validator
+   scripts/validate-command-consistency.ts
+   ```
+
+2. **Add a new rule to CONSISTENCY_RULES array**:
+   ```typescript
+   {
+     term: 'YourNewConcept',           // The term to search for
+     required_in: [                     // Commands that must include it
+       '01-plan-layer-features.md',
+       '03-generate-layer-code.md'
+     ],
+     description: 'Brief description',  // What this validates
+     severity: 'error' | 'warning'      // Impact level
+   }
+   ```
+
+3. **Run the validator**:
+   ```bash
+   npm run validate:commands
+   ```
+
+4. **Fix any failures** by updating the affected commands
+
+5. **Document the rule** in this checklist for future reference
+
+### Severity Levels
+
+- **`error`**: Critical concepts that MUST be consistent (e.g., `sharedComponents`, `RLHF`)
+  - Validation fails if missing
+  - Blocks PR merge in CI/CD
+  - Examples: Core data structures, architectural principles
+
+- **`warning`**: Important concepts that SHOULD be consistent (e.g., `Edge Case`)
+  - Validation passes with warnings
+  - Should be addressed but not blocking
+  - Examples: Documentation patterns, optional features
+
+### Example: Adding a New Rule
+
+**Scenario**: You added a new `testStrategy` field to JSON plans and want to ensure it's documented in all relevant commands.
+
+```typescript
+// Add to scripts/validate-command-consistency.ts
+{
+  term: 'testStrategy',
+  required_in: [
+    '01-plan-layer-features.md',    // Where it's generated
+    '02-validate-layer-plan.md',    // Where it's validated
+    '03-generate-layer-code.md'     // Where it's consumed
+  ],
+  description: 'Testing strategy field (Issue #XXX)',
+  severity: 'error'  // Critical field
+}
+```
+
+Then run `npm run validate:commands` to verify all commands mention `testStrategy`.
+
+---
+
 ## Related Issues
 
 - **#117** - Modular YAML generation (the architectural change that triggered this)
 - **#151** - Update /02 validator (symptom of missing this process)
 - **#143** - Complete test plan (dogfooding that discovered the gap)
 - **#145** - Edge case documentation (complementary to this checklist)
+- **#152** - This process definition
 
 ---
 
