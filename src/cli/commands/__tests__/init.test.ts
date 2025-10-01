@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { createProjectStructure, InitOptions } from '../init.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -137,6 +138,34 @@ describe('Init Command - Directory Structure', () => {
       // Verify it's a directory
       const stats = await fs.stat(utilsDir);
       expect(stats.isDirectory()).toBe(true);
+    });
+
+    it('should copy .regent/tsconfig.json during initialization', async () => {
+      // Call actual init logic that includes the tsconfig copy
+      const options: InitOptions = {
+        skipMcp: true,
+        git: false
+      };
+
+      await createProjectStructure(testProjectPath, options, false);
+
+      // Verify target exists
+      const targetTsconfigPath = path.join(testProjectPath, '.regent/tsconfig.json');
+      expect(await fs.pathExists(targetTsconfigPath)).toBe(true);
+
+      // Verify content is valid JSON with expected configuration
+      const content = await fs.readJson(targetTsconfigPath);
+      expect(content.compilerOptions).toBeDefined();
+      expect(content.compilerOptions.module).toBe('ESNext');
+      expect(content.compilerOptions.target).toBe('ESNext');
+      expect(content.compilerOptions.esModuleInterop).toBe(true);
+      expect(content.compilerOptions.forceConsistentCasingInFileNames).toBe(true);
+
+      // Verify include paths are set correctly
+      expect(content.include).toContain('config/**/*.ts');
+      expect(content.include).toContain('core/**/*.ts');
+      expect(content.include).toContain('utils/**/*.ts');
+      expect(content.include).toContain('scripts/**/*.ts');
     });
 
     it('should not create legacy .specify directories', async () => {

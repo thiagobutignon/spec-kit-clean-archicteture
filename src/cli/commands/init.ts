@@ -6,15 +6,15 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import inquirer from 'inquirer';
 import crypto from 'crypto';
-import { MCPInstaller, promptMCPInstallation } from '../../utils/mcp-installer.js';
-import { DEFAULT_GITIGNORE_TEMPLATE, REGENT_GITIGNORE_ENTRIES } from '../../templates/default-gitignore.js';
+import { MCPInstaller, promptMCPInstallation } from '../utils/mcp-installer.js';
+import { DEFAULT_GITIGNORE_TEMPLATE, REGENT_GITIGNORE_ENTRIES } from '../templates/default-gitignore.js';
 
 // Get the directory where this package is installed
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const packageRoot = path.resolve(__dirname, '..', '..', '..');
 
-interface InitOptions {
+export interface InitOptions {
   ai?: string;
   here?: boolean;
   force?: boolean;
@@ -152,7 +152,7 @@ export async function initCommand(projectName: string | undefined, options: Init
   }
 }
 
-async function createProjectStructure(projectPath: string, options: InitOptions, isExistingProject: boolean): Promise<void> {
+export async function createProjectStructure(projectPath: string, options: InitOptions, isExistingProject: boolean): Promise<void> {
   console.log(chalk.cyan('📁 Setting up The Regent structure...'));
 
   // Create The Regent specific directories
@@ -252,6 +252,20 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
       } else {
         await fs.copy(sourcePath, targetPath);
       }
+    }
+  }
+
+  // Copy .regent/tsconfig.json for proper TypeScript/ESM configuration
+  const sourceTsconfigPath = path.join(packageRoot, '.regent/tsconfig.json');
+  const targetTsconfigPath = path.join(projectPath, '.regent/tsconfig.json');
+
+  if (await fs.pathExists(sourceTsconfigPath)) {
+    try {
+      await fs.copy(sourceTsconfigPath, targetTsconfigPath);
+      console.log(chalk.green('   ✅ TypeScript configuration installed'));
+    } catch (error) {
+      console.log(chalk.yellow('   ⚠️  Warning: Could not copy TypeScript configuration'));
+      if (options.debug) console.error(error);
     }
   }
 
