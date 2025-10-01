@@ -376,7 +376,7 @@ async function createBackup(filePath: string, projectPath: string, backupDir?: s
       await fs.writeFile(testFile, '');
       await fs.remove(testFile);
     });
-  } catch (error) {
+  } catch {
     throw new Error(
       `Backup directory is not writable: ${targetBackupDir}\n` +
       `Please check directory permissions or specify a different directory with --backup-dir`
@@ -414,7 +414,7 @@ async function cleanupBackups(backupPaths: string[]): Promise<void> {
     try {
       await fs.remove(backupPath);
       console.log(chalk.dim(`   ✓ Removed: ${path.basename(backupPath)}`));
-    } catch (error) {
+    } catch {
       console.log(chalk.dim(`   ⚠ Could not remove: ${path.basename(backupPath)}`));
     }
   }
@@ -695,7 +695,7 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
   }
 }
 
-async function createInitialFiles(projectPath: string, _options: InitOptions): Promise<void> {
+async function createInitialFiles(projectPath: string): Promise<void> {
   // Create a minimal package.json if it doesn't exist
   const packageJsonPath = path.join(projectPath, 'package.json');
   if (!await fs.pathExists(packageJsonPath)) {
@@ -886,7 +886,7 @@ async function initializeGit(projectPath: string): Promise<void> {
     });
 
     console.log(chalk.green('✅ Git repository initialized'));
-  } catch (error) {
+  } catch {
     console.log(chalk.yellow('⚠️ Git initialization failed - continuing without git'));
   }
 }

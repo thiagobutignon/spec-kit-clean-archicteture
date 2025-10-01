@@ -27,9 +27,31 @@ interface LayerSchema {
   schemaPath: string
 }
 
+interface CompiledSchema {
+  schema: unknown;
+  validate: (data: unknown) => boolean;
+}
+
+interface TemplateStep {
+  id?: string;
+  type?: string;
+  template?: string;
+}
+
+interface TemplateData {
+  metadata?: unknown;
+  steps?: TemplateStep[];
+  domain_steps?: TemplateStep[];
+  data_steps?: TemplateStep[];
+  infra_steps?: TemplateStep[];
+  presentation_steps?: TemplateStep[];
+  main_steps?: TemplateStep[];
+  [key: string]: unknown;
+}
+
 class EnhancedTemplateValidator {
   private ajv: Ajv
-  private schemas: Map<string, any> = new Map()
+  private schemas: Map<string, CompiledSchema> = new Map()
   private layerSchemas: LayerSchema[] = []
 
   constructor() {
@@ -65,8 +87,8 @@ class EnhancedTemplateValidator {
     targets.forEach(target => {
       layers.forEach(layer => {
         this.layerSchemas.push({
-          target: target as any,
-          layer: layer.name as any,
+          target: target as LayerSchema['target'],
+          layer: layer.name as LayerSchema['layer'],
           schemaPath: `templates/parts/${target}/steps/${layer.file}.part.schema.json`
         })
       })
@@ -83,7 +105,7 @@ class EnhancedTemplateValidator {
   /**
    * Load and compile a schema
    */
-  private loadSchema(schemaPath: string): any {
+  private loadSchema(schemaPath: string): CompiledSchema | null {
     try {
       const absolutePath = path.resolve(schemaPath)
       if (!fs.existsSync(absolutePath)) {
@@ -92,15 +114,17 @@ class EnhancedTemplateValidator {
       }
 
       const schemaContent = fs.readFileSync(absolutePath, 'utf-8')
-      const schema = JSON.parse(schemaContent)
+      const schema = JSON.parse(schemaContent) as unknown
 
       // Compile and cache schema
       const validate = this.ajv.compile(schema)
-      this.schemas.set(schemaPath, { schema, validate })
+      const compiledSchema: CompiledSchema = { schema, validate }
+      this.schemas.set(schemaPath, compiledSchema)
 
-      return { schema, validate }
-    } catch (error: any) {
-      console.error(chalk.red(`❌ Failed to load schema ${schemaPath}: ${error.message}`))
+      return compiledSchema
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      console.error(chalk.red(`❌ Failed to load schema ${schemaPath}: ${message}`))
       return null
     }
   }
@@ -141,7 +165,7 @@ class EnhancedTemplateValidator {
       // Read template file
       const absolutePath = path.resolve(templatePath)
       const content = fs.readFileSync(absolutePath, 'utf-8')
-      const data = yaml.load(content) as any
+      const data = yaml.load(content) as TemplateData
 
       // Detect appropriate schema
       const layerSchema = this.detectSchema(templatePath)
@@ -195,9 +219,10 @@ class EnhancedTemplateValidator {
 
       return result
 
-    } catch (error: any) {
+    } catch (error) {
       result.valid = false
-      result.errors.push(`Failed to validate template: ${error.message}`)
+      const message = error instanceof Error ? error.message : String(error)
+      result.errors.push(`Failed to validate template: ${message}`)
       return result
     }
   }
@@ -206,7 +231,7 @@ class EnhancedTemplateValidator {
    * Perform layer-specific validations
    */
   private performLayerSpecificValidations(
-    data: any,
+    data: TemplateData,
     layerSchema: LayerSchema,
     result: ValidationResult
   ): void {
@@ -215,7 +240,7 @@ class EnhancedTemplateValidator {
     if (layerSchema.layer === 'domain') {
       // Check for no external dependencies
       const steps = data.domain_steps || data.steps || []
-      steps.forEach((step: any) => {
+      steps.forEach((step) => {
         if (step.template && typeof step.template === 'string') {
           if (step.template.includes('import axios') ||
               step.template.includes('import fetch') ||
@@ -231,7 +256,7 @@ class EnhancedTemplateValidator {
     // Data layer validations
     if (layerSchema.layer === 'data') {
       const steps = data.data_steps || data.steps || []
-      steps.forEach((step: any) => {
+      steps.forEach((step) => {
         if (step.type === 'create_file' && !step.template?.includes('implements')) {
           result.warnings.push(
             `Step '${step.id}': Data layer should implement domain interfaces`
@@ -243,7 +268,7 @@ class EnhancedTemplateValidator {
     // Infrastructure layer validations
     if (layerSchema.layer === 'infra') {
       const steps = data.infra_steps || data.steps || []
-      const hasErrorHandling = steps.some((step: any) =>
+      const hasErrorHandling = steps.some((step) =>
         step.template?.includes('try') && step.template?.includes('catch')
       )
 
@@ -255,7 +280,7 @@ class EnhancedTemplateValidator {
     // Presentation layer validations
     if (layerSchema.layer === 'presentation') {
       const steps = data.presentation_steps || data.steps || []
-      steps.forEach((step: any) => {
+      steps.forEach((step) => {
         if (step.template?.includes('business logic')) {
           result.warnings.push(
             `Step '${step.id}': Presentation layer should not contain business logic`
@@ -267,7 +292,7 @@ class EnhancedTemplateValidator {
     // Main layer validations
     if (layerSchema.layer === 'main') {
       const steps = data.main_steps || data.steps || []
-      const hasFactory = steps.some((step: any) =>
+      const hasFactory = steps.some((step) =>
         step.template?.includes('factory') || step.template?.includes('Factory')
       )
 
@@ -280,7 +305,7 @@ class EnhancedTemplateValidator {
   /**
    * Generic validation when no schema is available
    */
-  private validateGeneric(data: any, result: ValidationResult): ValidationResult {
+  private validateGeneric(data: TemplateData, result: ValidationResult): ValidationResult {
     // Check for required top-level sections
     const requiredSections = ['metadata', 'steps']
 
@@ -300,7 +325,7 @@ class EnhancedTemplateValidator {
   /**
    * Check for common issues across all templates
    */
-  private checkCommonIssues(data: any, result: ValidationResult): void {
+  private checkCommonIssues(data: TemplateData, result: ValidationResult): void {
     const jsonString = JSON.stringify(data)
 
     // Check for unreplaced placeholders
@@ -328,7 +353,7 @@ class EnhancedTemplateValidator {
     const steps = data.steps || data.domain_steps || data.data_steps ||
                   data.infra_steps || data.presentation_steps || data.main_steps || []
 
-    steps.forEach((step: any) => {
+    steps.forEach((step: TemplateStep & { rlhf_score?: number }) => {
       if (step.rlhf_score !== null && step.rlhf_score !== undefined) {
         if (step.rlhf_score < -2 || step.rlhf_score > 2) {
           result.warnings.push(

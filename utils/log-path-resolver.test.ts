@@ -37,11 +37,11 @@ describe('Log Path Resolver', () => {
     });
 
     it('should throw error for null context path', () => {
-      expect(() => resolveLogDirectory(null as any)).toThrow('Context path is required for resolveLogDirectory');
+      expect(() => resolveLogDirectory(null as unknown as string)).toThrow('Context path is required for resolveLogDirectory');
     });
 
     it('should throw error for non-string context path', () => {
-      expect(() => resolveLogDirectory(123 as any)).toThrow('Context path must be a string, received: number');
+      expect(() => resolveLogDirectory(123 as unknown as string)).toThrow('Context path must be a string, received: number');
     });
 
     it('should handle spec paths with hyphens and underscores in feature name', () => {
@@ -71,11 +71,11 @@ describe('Log Path Resolver', () => {
     });
 
     it('should throw error for null context path', () => {
-      expect(() => resolveDebugDirectory(null as any)).toThrow('Context path is required for resolveDebugDirectory');
+      expect(() => resolveDebugDirectory(null as unknown as string)).toThrow('Context path is required for resolveDebugDirectory');
     });
 
     it('should throw error for non-string context path', () => {
-      expect(() => resolveDebugDirectory({} as any)).toThrow('Context path must be a string, received: object');
+      expect(() => resolveDebugDirectory({} as unknown as string)).toThrow('Context path must be a string, received: object');
     });
   });
 
@@ -101,7 +101,7 @@ describe('Log Path Resolver', () => {
     });
 
     it('should throw error for non-string context path', () => {
-      expect(() => resolveRLHFDirectory([] as any)).toThrow('Context path must be a string, received: object');
+      expect(() => resolveRLHFDirectory([] as unknown as string)).toThrow('Context path must be a string, received: object');
     });
   });
 

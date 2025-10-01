@@ -11,11 +11,24 @@ import { execSync } from 'child_process';
  * Automatically fixes common issues based on RLHF scoring
  */
 
+interface StepWithTemplate {
+  id: string;
+  type?: string;
+  template?: string;
+  validation_script?: string;
+  action?: {
+    branch_name?: string;
+  };
+  needsManualFix?: boolean;
+  mockInput?: unknown;
+  mockOutput?: unknown;
+}
+
 interface AutoFix {
   pattern: RegExp;
   errorType: string;
   rlhfScore: number;
-  fix: (step: any, error: string) => any;
+  fix: (step: StepWithTemplate, error: string) => StepWithTemplate;
   description: string;
 }
 
@@ -26,7 +39,7 @@ class RLHFAutoFix {
       errorType: 'lint',
       rlhfScore: -1,
       description: 'Add missing semicolons',
-      fix: (step, error) => {
+      fix: (step) => {
         if (step.template) {
           // Add semicolons to interface methods
           step.template = step.template.replace(
@@ -42,7 +55,7 @@ class RLHFAutoFix {
       errorType: 'architecture',
       rlhfScore: -2,
       description: 'Remove external dependencies from domain layer',
-      fix: (step, error) => {
+      fix: (step) => {
         if (step.template) {
           // Remove external dependency imports
           step.template = step.template
@@ -69,7 +82,7 @@ ${step.template}`;
       errorType: 'template',
       rlhfScore: -2,
       description: 'Fix REPLACE/WITH syntax',
-      fix: (step, error) => {
+      fix: (step) => {
         if (step.template && step.type === 'refactor_file') {
           // Check if REPLACE/WITH blocks are malformed
           const hasReplace = step.template.includes('<<<REPLACE>>>');
@@ -88,7 +101,7 @@ ${step.template}`;
       errorType: 'git',
       rlhfScore: -1,
       description: 'Handle existing branch',
-      fix: (step, error) => {
+      fix: (step) => {
         if (step.validation_script) {
           // Update validation script to check and checkout existing branch
           step.validation_script = `
@@ -111,7 +124,7 @@ fi
       errorType: 'git',
       rlhfScore: -1,
       description: 'Stash uncommitted changes',
-      fix: (step, error) => {
+      fix: (step) => {
         if (step.validation_script) {
           // Add git stash before operations
           step.validation_script = `
@@ -138,7 +151,7 @@ fi
       errorType: 'test',
       rlhfScore: 0,
       description: 'Add default mock data',
-      fix: (step, error) => {
+      fix: (step) => {
         if (step.mockInput === undefined) {
           step.mockInput = {
             id: 'test-id',
@@ -160,7 +173,7 @@ fi
       errorType: 'documentation',
       rlhfScore: 0,
       description: 'Add domain documentation',
-      fix: (step, error) => {
+      fix: (step) => {
         if (step.template && !step.template.includes('@domainConcept')) {
           const conceptName = step.id
             .replace(/create-/, '')
@@ -205,7 +218,7 @@ ${step.template}`;
             fixLog.push(`MANUAL: ${step.id} - ${fix.description}`);
           } else {
             // Update the step in the plan
-            const stepIndex = plan.steps.findIndex((s: any) => s.id === step.id);
+            const stepIndex = plan.steps.findIndex((s: StepWithTemplate) => s.id === step.id);
             plan.steps[stepIndex] = fixedStep;
 
             // Reset status for retry
@@ -262,7 +275,7 @@ ${step.template}`;
 
       console.log(chalk.green('✅ Validation passed'));
       return true;
-    } catch (error) {
+    } catch {
       console.log(chalk.red('❌ Validation failed'));
       return false;
     }

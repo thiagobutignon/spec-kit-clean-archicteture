@@ -6,7 +6,6 @@
 import { z } from 'zod';
 import * as path from 'path';
 import { OUTPUT_LIMITS } from './constants';
-import type { CommitConfig } from './commit-generator';
 
 /**
  * Zod schema for commit configuration
@@ -86,10 +85,11 @@ export function validateConfig(config: unknown): {
         errors,
       };
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as Error;
     return {
       success: false,
-      errors: [`Validation error: ${error.message}`],
+      errors: [`Validation error: ${err.message}`],
     };
   }
 }

@@ -28,7 +28,7 @@ program
 
 // Custom help display
 const originalHelp = program.help.bind(program);
-program.help = function(options?: any) {
+program.help = function(options?: unknown) {
   showBanner();
   return originalHelp(options);
 };

@@ -10,6 +10,44 @@ import chalk from 'chalk';
  * Score Range: -2 (Catastrophic) to +2 (Perfect)
  */
 
+interface Metric {
+  success: boolean;
+  duration: number;
+  rlhfScore?: number;
+  errorType?: string;
+}
+
+interface Pattern {
+  pattern: string;
+  successRate: number;
+  occurrences: number;
+  suggestedFix?: string;
+}
+
+interface Improvement {
+  appliedAt?: Date;
+  problemPattern: string;
+  solution: string;
+  confidence: number;
+}
+
+interface Report {
+  summary: {
+    avgRLHFScore?: number;
+    successRate: number;
+    avgDuration: number;
+    commonErrors?: Record<string, number>;
+  };
+}
+
+type ChalkColorFn = typeof chalk.red;
+
+type Recommendation = {
+  priority: 'high' | 'medium' | 'low';
+  message: string;
+  action?: string;
+};
+
 class RLHFDashboard {
   private dataDir = '.rlhf';
 
@@ -36,22 +74,22 @@ class RLHFDashboard {
       return;
     }
 
-    const metrics = await fs.readJson(metricsFile);
+    const metrics = await fs.readJson(metricsFile) as Metric[];
 
     const totalRuns = metrics.length;
-    const successCount = metrics.filter((m: any) => m.success).length;
+    const successCount = metrics.filter((m) => m.success).length;
     const successRate = totalRuns > 0 ? (successCount / totalRuns * 100).toFixed(1) : 0;
 
     // Calculate average duration
-    const avgDuration = metrics.reduce((acc: number, m: any) => acc + m.duration, 0) / totalRuns;
+    const avgDuration = metrics.reduce((acc: number, m) => acc + m.duration, 0) / totalRuns;
 
     // Calculate average RLHF score
-    const avgRLHFScore = metrics.reduce((acc: number, m: any) =>
+    const avgRLHFScore = metrics.reduce((acc: number, m) =>
       acc + (m.rlhfScore || 0), 0) / totalRuns;
 
     // Group errors by type
     const errorTypes: Record<string, number> = {};
-    metrics.filter((m: any) => !m.success).forEach((m: any) => {
+    metrics.filter((m) => !m.success).forEach((m) => {
       errorTypes[m.errorType || 'unknown'] = (errorTypes[m.errorType || 'unknown'] || 0) + 1;
     });
 
@@ -83,7 +121,7 @@ class RLHFDashboard {
       return;
     }
 
-    const metrics = await fs.readJson(metricsFile);
+    const metrics = await fs.readJson(metricsFile) as Metric[];
 
     // Count score distribution
     const scoreDistribution: Record<string, number> = {
@@ -94,7 +132,7 @@ class RLHFDashboard {
       'perfect (+2)': 0
     };
 
-    metrics.forEach((m: any) => {
+    metrics.forEach((m) => {
       const score = m.rlhfScore || 0;
       if (score <= -2) scoreDistribution['catastrophic (-2)']++;
       else if (score <= -1) scoreDistribution['runtime error (-1)']++;
@@ -115,10 +153,10 @@ class RLHFDashboard {
 
     // Show score trend
     if (metrics.length > 5) {
-      const recentScores = metrics.slice(-5).map((m: any) => m.rlhfScore || 0);
-      const avgRecent = recentScores.reduce((a: number, b: number) => a + b, 0) / recentScores.length;
-      const oldScores = metrics.slice(0, 5).map((m: any) => m.rlhfScore || 0);
-      const avgOld = oldScores.reduce((a: number, b: number) => a + b, 0) / oldScores.length;
+      const recentScores = metrics.slice(-5).map((m) => m.rlhfScore || 0);
+      const avgRecent = recentScores.reduce((a, b) => a + b, 0) / recentScores.length;
+      const oldScores = metrics.slice(0, 5).map((m) => m.rlhfScore || 0);
+      const avgOld = oldScores.reduce((a, b) => a + b, 0) / oldScores.length;
       const trend = avgRecent - avgOld;
 
       if (trend > 0.1) {
@@ -149,7 +187,7 @@ class RLHFDashboard {
     return 'blue';
   }
 
-  private getRLHFScoreColor(score: number): any {
+  private getRLHFScoreColor(score: number): ChalkColorFn {
     if (score >= 1.5) return chalk.green.bold;
     if (score >= 0.5) return chalk.green;
     if (score >= -0.5) return chalk.yellow;
@@ -164,19 +202,19 @@ class RLHFDashboard {
       return;
     }
 
-    const patterns = await fs.readJson(patternsFile);
+    const patterns = await fs.readJson(patternsFile) as Record<string, Pattern>;
 
     console.log(chalk.white.bold('\n🔍 Pattern Analysis:'));
     console.log(chalk.white('─'.repeat(40)));
 
     // Find problematic patterns
     const problematicPatterns = Object.values(patterns)
-      .filter((p: any) => p.successRate < 0.5 && p.occurrences > 2)
-      .sort((a: any, b: any) => a.successRate - b.successRate);
+      .filter((p) => p.successRate < 0.5 && p.occurrences > 2)
+      .sort((a, b) => a.successRate - b.successRate);
 
     if (problematicPatterns.length > 0) {
       console.log(chalk.yellow('  ⚠️  Problematic Patterns:'));
-      problematicPatterns.slice(0, 5).forEach((p: any) => {
+      problematicPatterns.slice(0, 5).forEach((p) => {
         const successPercent = (p.successRate * 100).toFixed(1);
         const bar = this.createBar(p.successRate * 100, 20, 'red');
         console.log(chalk.yellow(`     ${p.pattern.padEnd(30)} ${bar} ${successPercent}% success`));
@@ -189,12 +227,12 @@ class RLHFDashboard {
 
     // Find successful patterns
     const successfulPatterns = Object.values(patterns)
-      .filter((p: any) => p.successRate > 0.8 && p.occurrences > 2)
-      .sort((a: any, b: any) => b.occurrences - a.occurrences);
+      .filter((p) => p.successRate > 0.8 && p.occurrences > 2)
+      .sort((a, b) => b.occurrences - a.occurrences);
 
     if (successfulPatterns.length > 0) {
       console.log(chalk.green('\n  ✨ Successful Patterns:'));
-      successfulPatterns.slice(0, 3).forEach((p: any) => {
+      successfulPatterns.slice(0, 3).forEach((p) => {
         const successPercent = (p.successRate * 100).toFixed(1);
         const bar = this.createBar(p.successRate * 100, 20, 'green');
         console.log(chalk.green(`     ${p.pattern.padEnd(30)} ${bar} ${successPercent}% success`));
@@ -204,27 +242,25 @@ class RLHFDashboard {
 
   private async displayImprovementStatus(): Promise<void> {
     const improvementsFile = path.join(this.dataDir, 'improvements.json');
-    const appliedFile = path.join(this.dataDir, 'applied-improvements.json');
 
     if (!await fs.pathExists(improvementsFile)) {
       return;
     }
 
-    const improvements = await fs.readJson(improvementsFile);
-    const applied = await fs.pathExists(appliedFile) ? await fs.readJson(appliedFile) : [];
+    const improvements = await fs.readJson(improvementsFile) as Improvement[];
 
     console.log(chalk.white.bold('\n🚀 Improvement Status:'));
     console.log(chalk.white('─'.repeat(40)));
 
-    const pendingImprovements = improvements.filter((i: any) => !i.appliedAt);
-    const appliedImprovements = improvements.filter((i: any) => i.appliedAt);
+    const pendingImprovements = improvements.filter((i) => !i.appliedAt);
+    const appliedImprovements = improvements.filter((i) => i.appliedAt);
 
     console.log(chalk.blue(`  📋 Pending Improvements: ${pendingImprovements.length}`));
     console.log(chalk.green(`  ✅ Applied Improvements: ${appliedImprovements.length}`));
 
     if (pendingImprovements.length > 0) {
       console.log(chalk.yellow('\n  🔧 Ready to Apply:'));
-      pendingImprovements.slice(0, 3).forEach((imp: any) => {
+      pendingImprovements.slice(0, 3).forEach((imp) => {
         const confidence = (imp.confidence * 100).toFixed(0);
         console.log(chalk.yellow(`     • ${imp.problemPattern}`));
         console.log(chalk.gray(`       Solution: ${imp.solution} (${confidence}% confidence)`));
@@ -239,12 +275,12 @@ class RLHFDashboard {
       return;
     }
 
-    const report = await fs.readJson(reportFile);
+    const report = await fs.readJson(reportFile) as Report;
 
     console.log(chalk.white.bold('\n💡 Recommendations:'));
     console.log(chalk.white('─'.repeat(40)));
 
-    const recommendations = [];
+    const recommendations: Recommendation[] = [];
 
     // Check RLHF score
     if (report.summary.avgRLHFScore && report.summary.avgRLHFScore < 0) {
@@ -272,7 +308,7 @@ class RLHFDashboard {
 
     // Check for recurring errors
     const topError = Object.entries(report.summary.commonErrors || {})
-      .sort(([, a]: any, [, b]: any) => b - a)[0];
+      .sort(([, a], [, b]) => b - a)[0];
 
     if (topError && Number(topError[1]) > 3) {
       recommendations.push({
@@ -309,7 +345,7 @@ class RLHFDashboard {
     const filled = Math.round((percentage / 100) * width);
     const empty = width - filled;
 
-    const colors: Record<string, any> = {
+    const colors: Record<string, ChalkColorFn> = {
       'red': chalk.red,
       'green': chalk.green,
       'blue': chalk.blue,
@@ -330,8 +366,8 @@ class RLHFDashboard {
       return;
     }
 
-    const metrics = await fs.readJson(metricsFile);
-    const patterns = await fs.pathExists(patternsFile) ? await fs.readJson(patternsFile) : {};
+    const metrics = await fs.readJson(metricsFile) as Metric[];
+    const patterns = await fs.pathExists(patternsFile) ? await fs.readJson(patternsFile) as Record<string, Pattern> : {};
 
     const html = `
 <!DOCTYPE html>

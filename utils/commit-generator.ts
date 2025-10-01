@@ -124,10 +124,9 @@ function extractEntityName(filePath: string): string | null {
  * Enhances description with entity information from path
  * @param description - Original description
  * @param filePath - File path to extract entity from
- * @param stepType - Type of step for context
  * @returns Enhanced description
  */
-function enhanceDescription(description: string, filePath: string | undefined, stepType: StepType): string {
+function enhanceDescription(description: string, filePath: string | undefined): string {
   if (!filePath) return description;
 
   const entityName = extractEntityName(filePath);
@@ -232,7 +231,7 @@ export function generateCommitMessage(
   const scope = filePath ? extractScope(filePath) : 'core';
 
   // Enhance description with entity information
-  const enhancedDescription = enhanceDescription(description, filePath, stepType);
+  const enhancedDescription = enhanceDescription(description, filePath);
 
   // Normalize description: lowercase first letter for conventional commits
   const normalizedDescription = enhancedDescription.charAt(0).toLowerCase() + enhancedDescription.slice(1);

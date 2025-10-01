@@ -70,13 +70,39 @@ interface TemplateImprovement {
   layer?: string;
 }
 
+interface PlanStep {
+  id: string;
+  type: string;
+  status?: string;
+  execution_log?: string;
+  template?: string;
+}
+
+interface ExecutionPlan {
+  steps?: PlanStep[];
+  domain_steps?: PlanStep[];
+  data_steps?: PlanStep[];
+  infra_steps?: PlanStep[];
+  presentation_steps?: PlanStep[];
+  main_steps?: PlanStep[];
+}
+
+interface StepData {
+  template?: string;
+}
+
+interface CachedResult {
+  result: ExecutionMetrics;
+  timestamp: number;
+}
+
 class EnhancedRLHFSystem {
   private dataDir: string;
   private metricsFile: string;
   private patternsFile: string;
   private improvementsFile: string;
   private logger: Logger;
-  private patternCache = new Map<string, { result: any; timestamp: number }>();
+  private patternCache = new Map<string, CachedResult>();
   private layerPatterns = new Map<string, TemplatePattern[]>();
   private cacheExpiry: number;
   private maxCacheSize = 100;
@@ -205,15 +231,16 @@ class EnhancedRLHFSystem {
   /**
    * Extract steps based on layer
    */
-  private extractSteps(plan: any, layerInfo?: LayerInfo): any[] {
+  private extractSteps(plan: ExecutionPlan, layerInfo?: LayerInfo): PlanStep[] {
     if (!layerInfo) {
       return plan.steps || [];
     }
 
     // Try layer-specific steps first
     const layerStepsKey = `${layerInfo.layer}_steps`;
-    if (plan[layerStepsKey]) {
-      return plan[layerStepsKey];
+    const layerSteps = plan[layerStepsKey];
+    if (Array.isArray(layerSteps)) {
+      return layerSteps;
     }
 
     // Fallback to general steps
@@ -229,7 +256,7 @@ class EnhancedRLHFSystem {
     success: boolean,
     layerInfo?: LayerInfo,
     errorMessage?: string,
-    stepData?: any
+    stepData?: StepData
   ): Promise<number> {
     this.logger.log(`🧮 Calculating layer-aware RLHF score`);
     if (layerInfo) {
@@ -276,7 +303,7 @@ class EnhancedRLHFSystem {
   /**
    * Apply template-defined score impacts
    */
-  private applyTemplateScoreImpacts(score: number, stepData: any, layerInfo: LayerInfo): number {
+  private applyTemplateScoreImpacts(score: number, stepData: StepData, layerInfo: LayerInfo): number {
     if (!stepData?.template) return score;
 
     const template = stepData.template.toLowerCase();
@@ -366,7 +393,7 @@ class EnhancedRLHFSystem {
   /**
    * Extract code pattern
    */
-  private extractCodePattern(step: any): string {
+  private extractCodePattern(step: PlanStep): string {
     if (step.template) {
       return createHash('md5')
         .update(step.template.substring(0, 200))
@@ -587,13 +614,13 @@ class EnhancedRLHFSystem {
   async generateLayerReport(layerInfo?: LayerInfo): Promise<void> {
     this.logger.log('📊 Generating layer-aware RLHF report...');
 
-    const metrics = await fs.readJson(this.metricsFile);
-    const patterns = await fs.readJson(this.patternsFile);
-    const improvements = await fs.readJson(this.improvementsFile);
+    const metrics = await fs.readJson(this.metricsFile) as ExecutionMetrics[];
+    const patterns = await fs.readJson(this.patternsFile) as Record<string, LearningPattern>;
+    const improvements = await fs.readJson(this.improvementsFile) as TemplateImprovement[];
 
     // Filter by layer if provided
     const filteredMetrics = layerInfo
-      ? metrics.filter((m: any) => m.layer === layerInfo.layer)
+      ? metrics.filter((m) => m.layer === layerInfo.layer)
       : metrics;
 
     const report = {
@@ -601,9 +628,9 @@ class EnhancedRLHFSystem {
       target: layerInfo?.target || 'all',
       summary: {
         totalExecutions: filteredMetrics.length,
-        successRate: filteredMetrics.filter((m: any) => m.success).length / filteredMetrics.length,
+        successRate: filteredMetrics.filter((m) => m.success).length / filteredMetrics.length,
         commonErrors: this.getTopErrors(filteredMetrics),
-        avgDuration: filteredMetrics.reduce((acc: number, m: any) => acc + m.duration, 0) / filteredMetrics.length
+        avgDuration: filteredMetrics.reduce((acc: number, m) => acc + m.duration, 0) / filteredMetrics.length
       },
       layerPatterns: Array.from(this.layerPatterns.entries()).map(([layer, patterns]) => ({
         layer,
@@ -611,11 +638,11 @@ class EnhancedRLHFSystem {
         patterns: patterns.slice(0, 5)
       })),
       patterns: Object.values(patterns)
-        .filter((p: any) => !layerInfo || p.layer === layerInfo.layer)
-        .sort((a: any, b: any) => b.occurrences - a.occurrences)
+        .filter((p) => !layerInfo || p.layer === layerInfo.layer)
+        .sort((a, b) => b.occurrences - a.occurrences)
         .slice(0, 10),
-      suggestedImprovements: improvements.filter((i: any) => !i.appliedAt && (!layerInfo || i.layer === layerInfo.layer)),
-      appliedImprovements: improvements.filter((i: any) => i.appliedAt && (!layerInfo || i.layer === layerInfo.layer))
+      suggestedImprovements: improvements.filter((i) => !i.appliedAt && (!layerInfo || i.layer === layerInfo.layer)),
+      appliedImprovements: improvements.filter((i) => i.appliedAt && (!layerInfo || i.layer === layerInfo.layer))
     };
 
     console.log('\n📊 Layer-Aware RLHF Report');
@@ -645,7 +672,7 @@ class EnhancedRLHFSystem {
   /**
    * Original calculateScore method (kept for compatibility)
    */
-  async calculateScore(stepType: string, success: boolean, errorMessage?: string, stepData?: any): Promise<number> {
+  async calculateScore(stepType: string, success: boolean, errorMessage?: string, stepData?: StepData): Promise<number> {
     this.logger.log(`🧮 Calculating base RLHF score for ${stepType} (${success ? 'success' : 'failure'})`);
 
     if (!success && errorMessage) {
@@ -667,7 +694,7 @@ class EnhancedRLHFSystem {
   /**
    * Analyze failure severity
    */
-  private analyzeFailureSeverity(errorMessage: string, stepType: string, stepData?: any): number {
+  private analyzeFailureSeverity(errorMessage: string, stepType: string, stepData?: StepData): number {
     // -2: Catastrophic errors
     const catastrophicPatterns = [
       /replace.*with.*format/i,
@@ -710,7 +737,7 @@ class EnhancedRLHFSystem {
   /**
    * Analyze success quality
    */
-  private analyzeSuccessQuality(stepType: string, stepData?: any): number {
+  private analyzeSuccessQuality(stepType: string, stepData?: StepData): number {
     let score = 1;
     let qualityIndicators = 0;
 
@@ -745,10 +772,10 @@ class EnhancedRLHFSystem {
   /**
    * Get top errors
    */
-  private getTopErrors(metrics: any[]): Record<string, number> {
+  private getTopErrors(metrics: ExecutionMetrics[]): Record<string, number> {
     const errors: Record<string, number> = {};
 
-    metrics.filter((m: any) => !m.success).forEach((m: any) => {
+    metrics.filter((m) => !m.success).forEach((m) => {
       errors[m.errorType || 'unknown'] = (errors[m.errorType || 'unknown'] || 0) + 1;
     });
 
@@ -786,7 +813,7 @@ class EnhancedRLHFSystem {
         timestamp: Date.now(),
         cacheStats: this.cacheStats
       });
-    } catch (error) {
+    } catch {
       // Silently fail
     }
   }
@@ -794,13 +821,13 @@ class EnhancedRLHFSystem {
   /**
    * Cache utilities
    */
-  private getCacheKey(step: any): string {
+  private getCacheKey(step: PlanStep): string {
     return createHash('md5')
       .update(JSON.stringify({ id: step.id, type: step.type, template: step.template || '' }))
       .digest('hex');
   }
 
-  private getCachedResult(key: string): any | null {
+  private getCachedResult(key: string): ExecutionMetrics | null {
     const cached = this.patternCache.get(key);
     if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
       this.cacheStats.hits++;
@@ -813,7 +840,7 @@ class EnhancedRLHFSystem {
     return null;
   }
 
-  private setCachedResult(key: string, result: any): void {
+  private setCachedResult(key: string, result: ExecutionMetrics): void {
     if (this.patternCache.size >= this.maxCacheSize) {
       const firstKey = this.patternCache.keys().next().value;
       if (firstKey !== undefined) {
@@ -894,8 +921,8 @@ async function main() {
       if (args[0]) {
         // Parse layer info from arguments
         const layerInfo = args[1] && args[2] ? {
-          layer: args[1] as any,
-          target: args[2] as any
+          layer: args[1] as LayerInfo['layer'],
+          target: args[2] as LayerInfo['target']
         } : undefined;
 
         await rlhf.analyzeExecution(args[0], layerInfo);
@@ -907,8 +934,8 @@ async function main() {
 
     case 'report':
       const layerInfo = args[0] && args[1] ? {
-        layer: args[0] as any,
-        target: args[1] as any
+        layer: args[0] as LayerInfo['layer'],
+        target: args[1] as LayerInfo['target']
       } : undefined;
 
       await rlhf.generateLayerReport(layerInfo);
@@ -917,8 +944,8 @@ async function main() {
     case 'score':
       if (args[0] && args[1]) {
         const layerInfo = args[3] && args[4] ? {
-          layer: args[3] as any,
-          target: args[4] as any
+          layer: args[3] as LayerInfo['layer'],
+          target: args[4] as LayerInfo['target']
         } : undefined;
 
         const score = await rlhf.calculateLayerScore(
