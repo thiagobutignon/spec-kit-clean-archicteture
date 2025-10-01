@@ -452,4 +452,83 @@ After reflection and optimization:
 
 This will evaluate your refined YAML plan and determine if it's ready for execution or needs further refinement.
 
-> 💡 **Pro Tip**: Focus on fixing violations first (-2 prevention), then optimize for excellence (+2 achievement). A well-reflected plan with proper documentation and architecture compliance achieves the maximum RLHF score!
+> 💡 **Pro Tip**: Focus on fixing violations first (-2 prevention), then optimize for excellence (+2 achievement). A well-reflected plan with proper documentation and architecture compliance achieves the maximum RLHF score!## 6. YAML Quality Indicators (Reflective Analysis)
+
+**IMPORTANT**: This section performs YAML-level reflection, NOT code validation.
+
+### 6.1 Why Not Run Validation Tools Here?
+
+**Timing Mismatch**:
+- `/04` runs during YAML reflection phase (after `/03` generates YAML)
+- Validation tools (ESLint, dependency-cruiser) validate **code**, not YAML
+- Code doesn't exist yet (code gets generated in `/06`)
+- **Cannot validate code before it exists**
+
+**Context Mismatch**:
+- `/04` may run in dogfooding/test directories
+- Validation scripts (`npm run lint`, `arch:validate`) may not be configured
+- Tools expect source code in `src/`, not YAML files in `spec/`
+
+### 6.2 What We DO Here: Reflective Analysis
+
+Instead of executing tools, perform **YAML structure analysis**:
+
+```typescript
+// Pseudo-code for YAML reflection
+function analyzeYAML(yaml: YAML): QualityScore {
+  let score = 0;
+
+  // Check YAML structure quality
+  if (hasUbiquitousLanguage(yaml)) score += 1;
+  if (hasProperWorkflowOrder(yaml)) score += 1;
+  if (usesCleanArchitecturePrinciples(yaml)) score += 1;
+  if (hasComprehensiveReferences(yaml)) score += 0.5;
+  if (avoidsCatastrophicPatterns(yaml)) score += 0.5;
+
+  return score; // Estimated RLHF score
+}
+```
+
+### 6.3 Quality Indicators to Check
+
+| Indicator | Check | Score Impact |
+|-----------|-------|--------------|
+| **Workflow Order** | branch → folder → files → PR | +1 if correct |
+| **Layer Purity** | No external libs in templates | +1 if pure |
+| **Ubiquitous Language** | Domain terms documented | +1 if comprehensive |
+| **References** | Pattern documentation present | +0.5 if present |
+| **Step Efficiency** | No redundant steps | +0.5 if optimized |
+
+### 6.4 Estimated vs Actual RLHF Score
+
+**Estimated Score** (from `/04`):
+- Based on YAML structure analysis
+- Predicts likely score after code generation
+- Range: -2 to +2
+
+**Actual Score** (from `/06` execution):
+- Based on generated code
+- Measured by validation tools
+- Confirmed by TypeScript compilation
+
+**Note**: Create `/07-validate-generated-code` command for actual validation after code generation.
+
+### 6.5 Report Format (Reflective)
+
+```json
+{
+  "status": "NO_CHANGES_NEEDED",
+  "reflection": "YAML structure analysis shows high quality. Proper workflow order, ubiquitous language present, Clean Architecture principles followed. No catastrophic patterns detected.",
+  "revised_yaml": null,
+  "estimated_rlhf_score": 2,
+  "quality_indicators": {
+    "workflow_order": "correct",
+    "layer_purity": "clean",
+    "ubiquitous_language": "comprehensive",
+    "references": "documented",
+    "efficiency": "optimized"
+  },
+  "notes": "Actual RLHF score will be confirmed after code generation and validation (Phase 6)"
+}
+```
+
