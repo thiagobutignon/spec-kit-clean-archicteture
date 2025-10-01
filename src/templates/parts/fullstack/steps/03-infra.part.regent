@@ -79,7 +79,7 @@
         import { PrismaClient, Prisma } from '@prisma/client'
         import type { __FEATURE_NAME_PASCAL_CASE__Repository } from '../../domain/repositories/__FEATURE_NAME_KEBAB_CASE__-repository'
         import type { __FEATURE_NAME_PASCAL_CASE__Entity } from '../../../__USE_CASE_NAME_KEBAB_CASE__/domain/entities/__USE_CASE_NAME_KEBAB_CASE__-entity'
-        import { __FEATURE_NAME_PASCAL_CASE__NotFoundError } from '../../../__USE_CASE_NAME_KEBAB_CASE__/domain/errors/__USE_CASE_NAME_KEBAB_CASE__-errors'
+        import { __FEATURE_NAME_PASCAL_CASE__NotFoundError } from '../../../__USE_CASE_NAME_KEBAB_CASE__/domain/errors'
 
         /**
          * Prisma implementation of __FEATURE_NAME_PASCAL_CASE__Repository
@@ -701,7 +701,7 @@
         import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
         import { PrismaClient } from '@prisma/client'
         import { Prisma__FEATURE_NAME_PASCAL_CASE__Repository } from './prisma-__FEATURE_NAME_KEBAB_CASE__-repository'
-        import { __FEATURE_NAME_PASCAL_CASE__NotFoundError } from '../../../__USE_CASE_NAME_KEBAB_CASE__/domain/errors/__USE_CASE_NAME_KEBAB_CASE__-errors'
+        import { __FEATURE_NAME_PASCAL_CASE__NotFoundError } from '../../../__USE_CASE_NAME_KEBAB_CASE__/domain/errors'
 
         // Mock Prisma Client
         vi.mock('@prisma/client', () => ({
