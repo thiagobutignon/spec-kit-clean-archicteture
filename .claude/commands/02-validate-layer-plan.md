@@ -773,3 +773,97 @@ Validation is the ONLY quality gate. If it fails, the system must stop and deman
 ### 🎭 HISTORICAL CONTEXT
 
 This validation command was created to prevent architectural disasters caused by "helpful" validation bypasses. Maintain discipline: Validation protects quality, never bypass it.
+
+---
+
+## 🔄 Structure Detection (Issue #117 Support)
+
+### Automatic Structure Detection
+
+The validator MUST detect which structure is being used:
+
+```typescript
+function detectStructure(json: any): 'legacy' | 'modular' | 'invalid' {
+  const hasSteps = Array.isArray(json.steps);
+  const hasShared = json.sharedComponents !== undefined;
+  const hasUseCases = Array.isArray(json.useCases);
+
+  // Legacy structure (pre-Issue #117)
+  if (hasSteps && !hasShared && !hasUseCases) {
+    return 'legacy';
+  }
+
+  // Modular structure (Issue #117)
+  if (!hasSteps && hasShared && hasUseCases) {
+    return 'modular';
+  }
+
+  // Invalid - neither structure
+  return 'invalid';
+}
+```
+
+### Validation Rules by Structure
+
+#### If LEGACY structure detected:
+- ✅ Validate `steps[]` array
+- ✅ Each step must have: `id`, `type`, `description`, `path`, `template`
+- ⚠️ Show deprecation notice (suggest migrating to modular)
+
+#### If MODULAR structure detected:
+- ✅ Validate `sharedComponents` object
+- ✅ Validate `useCases` array
+- ✅ Each component must have: `name`, `type`, `path`
+- ✅ Each use case must have: `name`, `description`, `input`, `output`, `path`
+- ❌ DO NOT warn about missing `steps` array (this is correct!)
+
+#### If INVALID structure detected:
+- ❌ FAIL with RUNTIME ERROR (-1)
+- Show error: "JSON must have EITHER steps[] OR (sharedComponents + useCases)"
+
+### Output Examples
+
+**For Modular Structure (NEW)**:
+```markdown
+✅ Validation Complete - RLHF Score: +2 (PERFECT)
+
+📋 Structure Analysis:
+- Type: MODULAR ✅ (Issue #117 - Vertical Slice Architecture)
+- Shared Components:
+  • Models: 1 (Product)
+  • Value Objects: 3 (SKU, Price, InventoryLevel)
+  • Repositories: 1 (ProductRepository)
+  • Shared Errors: 4
+- Use Cases: 3 (CreateProduct, UpdateProduct, ArchiveProduct)
+
+✨ Quality Indicators:
+- Ubiquitous Language: 6 terms defined (+1)
+- Layer Context: Comprehensive (+1)
+- Business Rules: 7 rules documented (+1)
+
+🚀 Next Step:
+/03-generate-layer-code --layer=domain --file=spec/001-product-catalog/domain/plan.json
+
+💡 Will generate 4 YAML files (1 shared + 3 use cases)
+```
+
+**For Legacy Structure (OLD)**:
+```markdown
+✅ Validation Complete - RLHF Score: +1 (GOOD)
+
+📋 Structure Analysis:
+- Type: LEGACY ⚠️ (pre-Issue #117)
+- Steps: 19 in flat array
+
+⚠️ Migration Recommended:
+Consider migrating to modular structure for:
+- Atomic commits (one per use case)
+- Better code reviews (smaller PRs)
+- Parallel execution support
+
+🚀 Next Step:
+/03-generate-layer-code --layer=domain --file=spec/001-user-auth/domain/plan.json
+
+💡 Will generate single implementation.yaml file
+```
+
