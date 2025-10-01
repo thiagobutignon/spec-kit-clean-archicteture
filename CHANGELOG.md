@@ -51,6 +51,13 @@ This release focuses on three key areas:
   - Color-coded output with actionable error messages
   - Exit codes for CI/CD integration
 
+- **MCP Subdirectory Workaround Documentation** (#150)
+  - Troubleshooting guide for MCP server configuration in subdirectories
+  - Documents root cause: MCP config is project-scoped, no inheritance
+  - Two workaround options: work from parent directory (recommended) or reconfigure per subdirectory
+  - Includes verification steps and future solution proposals
+  - File: `docs/troubleshooting/mcp-subdirectory-workaround.md`
+
 - Automated NPM package publishing via GitHub Actions
 - Release process documentation
 - CHANGELOG.md for tracking project changes
@@ -82,6 +89,13 @@ This release focuses on three key areas:
   - Updated `/03-generate-layer-code.md` with edge case handling section
   - Both commands now reference comprehensive edge case documentation
   - Helps AI make correct decisions during planning and generation
+
+- **Multiple YAML Support Documentation** (#144)
+  - Updated `/04-reflect-layer-lessons.md` with multi-YAML execution patterns
+  - Updated `/06-execute-layer-steps.md` with critical execution order guidance
+  - Documents proper sequence: shared components → use cases → updates
+  - Includes batch processing examples and dependency tracking patterns
+  - Prevents TypeScript compilation errors from incorrect execution order
 
 - Reorganized documentation into thematic directories under `docs/` (#137)
   - Moved 10 markdown files from root to organized structure:
@@ -130,11 +144,15 @@ This release focuses on three key areas:
 - ✅ Systematic process for architectural changes
 - ✅ Automated detection of inconsistencies
 - ✅ Better error messages and guidance
+- ✅ MCP configuration troubleshooting with workarounds
+- ✅ Multi-YAML execution guidance prevents compilation errors
 
 **Issues Resolved:**
 - Fixes #154 (P0 BLOCKER - import path mismatch)
 - Fixes #145 (edge case documentation)
 - Fixes #152 (prompt consistency process)
+- Fixes #150 (MCP subdirectory configuration)
+- Fixes #144 (multi-YAML execution documentation)
 - Improves #117 (modular YAML structure quality)
 
 ## [2.1.1] - 2025-09-28
