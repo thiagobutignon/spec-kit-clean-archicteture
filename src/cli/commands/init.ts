@@ -260,8 +260,13 @@ export async function createProjectStructure(projectPath: string, options: InitO
   const targetTsconfigPath = path.join(projectPath, '.regent/tsconfig.json');
 
   if (await fs.pathExists(sourceTsconfigPath)) {
-    await fs.copy(sourceTsconfigPath, targetTsconfigPath);
-    console.log(chalk.green('   ✅ TypeScript configuration installed'));
+    try {
+      await fs.copy(sourceTsconfigPath, targetTsconfigPath);
+      console.log(chalk.green('   ✅ TypeScript configuration installed'));
+    } catch (error) {
+      console.log(chalk.yellow('   ⚠️  Warning: Could not copy TypeScript configuration'));
+      if (options.debug) console.error(error);
+    }
   }
 
   // Only copy project config files if they don't exist
