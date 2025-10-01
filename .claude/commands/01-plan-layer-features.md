@@ -90,6 +90,104 @@ Each layer has specific responsibilities and constraints:
 - **Without** ANY business logic implementation
 - Defines WHAT, not HOW
 
+### 🎯 Domain Layer - Functional Approach
+
+**CRITICAL**: This project uses **Functional Clean Architecture**, NOT classic OOP DDD.
+
+#### Core Principles:
+
+1. **Anemic Domain Models** (data structures, no behavior)
+   ```typescript
+   // ✅ CORRECT - Simple data structure
+   export type Product = {
+     id: string;
+     sku: string;
+     price: number;
+     isArchived: boolean;
+   };
+   ```
+
+2. **Factory Functions for Value Objects** (NOT classes)
+   ```typescript
+   // ✅ CORRECT - Type + factory function
+   export type SKU = { value: string };
+
+   export const createSKU = (value: string): SKU => {
+     if (!value) throw new Error('SKU cannot be empty');
+     return { value: value.trim().toUpperCase() };
+   };
+
+   // ❌ WRONG - Don't use classes
+   export class SKU {
+     private constructor(private readonly _value: string) {}
+     static create(value: string): SKU { /* ... */ }
+   }
+   ```
+
+3. **Use Case Interfaces in Domain, Logic in Data Layer**
+   ```typescript
+   // domain/usecases/archive-product.ts (interface only - WHAT)
+   export interface ArchiveProduct {
+     execute(input: ArchiveProductInput): Promise<ArchiveProductOutput>;
+   }
+
+   // data/usecases/db-archive-product.ts (implementation with logic - HOW)
+   export class DbArchiveProduct implements ArchiveProduct {
+     async execute(input: ArchiveProductInput) {
+       const product = await this.repository.findById(input.productId);
+
+       // ✅ Business logic HERE (data layer), NOT in Product entity
+       if (product.isArchived) {
+         throw new ProductAlreadyArchivedError(product.id);
+       }
+
+       const updated = { ...product, isArchived: true };
+       await this.repository.update(updated);
+
+       return { product: updated };
+     }
+   }
+   ```
+
+4. **Repository Interfaces (Port Pattern)**
+   ```typescript
+   // domain/repositories/product-repository.ts
+   export interface ProductRepository {
+     findById(id: string): Promise<Product | null>;
+     save(product: Product): Promise<void>;
+     // ❌ DON'T: archive(productId: string) - this is business logic
+   }
+   ```
+
+#### Why This Approach?
+
+- **Simpler**: Less boilerplate than OOP
+- **TypeScript Idiomatic**: Leverages structural typing
+- **Testable**: Pure functions are easier to test
+- **Maintainable**: Less abstraction, more clarity
+- **80/20 Rule**: Most projects don't need rich domain models
+
+#### Research Queries (Domain Layer)
+
+When researching domain patterns, use:
+- ✅ `"functional domain design TypeScript"`
+- ✅ `"anemic domain model patterns"`
+- ✅ `"type-driven architecture"`
+- ✅ `"clean architecture interfaces TypeScript"`
+- ❌ **DON'T**: `"DDD rich entities"`, `"aggregate root class"`
+
+---
+
+### When to Use Classic DDD Instead
+
+Consider classic rich domain models ONLY if:
+- Domain is extremely complex (insurance, finance, legal)
+- Many interdependent invariants
+- Team is experienced in OOP DDD
+- Compile-time guarantees are critical
+
+For most CRUD/SaaS/E-commerce apps: **Use our Functional approach** ✅
+
 ### 💾 Data Layer
 - Implements repository interfaces from selected layer
 - Handles data persistence and retrieval
@@ -245,9 +343,10 @@ Before generating JSON, create a summary:
 **Use `context7` to search for layer-specific patterns:**
 
 #### Selected Layer Searches:
-- `"DDD [feature]"`
-- `"domain modeling [concept]"`
-- `"type design [entity]"`
+- `"functional domain design TypeScript [feature]"`
+- `"anemic domain model patterns [concept]"`
+- `"type-driven architecture [entity]"`
+- `"clean architecture interfaces TypeScript"`
 - `"ubiquitous language [business domain]"`
 
 #### Data Layer Searches:
@@ -526,6 +625,10 @@ Your final JSON must follow this structure:
 - [ ] No implementation code
 - [ ] Only types and interfaces
 - [ ] Ubiquitous Language documented
+- [ ] Uses type definitions, NOT classes for entities
+- [ ] Value objects use factory functions, NOT class constructors
+- [ ] Use case interfaces defined (WHAT), no logic (HOW)
+- [ ] Repository interfaces use simple data operations only
 
 #### Data ✅
 - [ ] Implements domain interfaces
