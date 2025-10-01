@@ -33,7 +33,7 @@ Recover from Experiment #002 failures and validate the modular YAML generation f
 |-----|----------|-------------|--------|
 | #122 | P0 | /06 broken - missing dependencies | ✅ **FIXED** (v2.2.0) |
 | #117 | P0 | Monolithic YAML instead of modular | ⚠️ To Be Tested |
-| #115 | P2 | MCP servers not detected in subdirs | 🔍 **Root Cause Found** (workaround available) |
+| #115 → #150 | P2 | MCP servers not detected in subdirs | 🔍 **Root Cause Found** ([#150](https://github.com/thiagobutignon/spec-kit-clean-archicteture/issues/150)) |
 
 ## 🔬 **Test Scope (Issue #143)**
 
@@ -383,7 +383,9 @@ import { EnhancedTemplateValidator } from './validate-template';      ← ✅ CO
 
 ---
 
-**⚠️ Bug #115 STILL PRESENT: MCP Detection Issue**
+**⚠️ Bug #115 → Issue #150: MCP Detection in Subdirectories**
+
+**GitHub Issue**: [#150](https://github.com/thiagobutignon/spec-kit-clean-archicteture/issues/150)
 
 **Initial Observation**:
 ```
