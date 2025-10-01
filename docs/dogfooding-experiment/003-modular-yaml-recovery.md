@@ -771,8 +771,8 @@ product-catalog/spec/001-product-catalog-management/
 **Checks**:
 - [x] Bug #122 fixed: `utils/` directory exists in `.regent/` ✅
 - [x] Bug #122 fixed: Import paths use `../core/` not `./core/` ✅
-- [ ] Bug #117 implemented: `/03` command supports modular generation (TO BE TESTED)
-- [ ] Templates updated: Support `sharedComponents` and `useCases` (TO BE TESTED)
+- [x] Templates updated: Support `sharedComponents` and `useCases` ✅ (Phase 1 verified)
+- [ ] Bug #117 implemented: `/03` command generates modular YAMLs (TO BE TESTED Phase 3)
 
 **Decision Point**:
 - ✅ Critical Bug #122 is FIXED → **PROCEED TO PHASE 1**
@@ -847,6 +847,284 @@ Business Rules:
 - Number of shared components
 - Number of use cases
 - JSON structure validity
+
+---
+
+### Phase 1: Generate Modular JSON Plan - ✅ EXECUTION RESULTS
+
+**Executed**: 2025-10-01 01:25 AM
+**Location**: `dogfooding/product-catalog/` (working directory)
+**Command**: `/01-plan-layer-features`
+**Duration**: ~3 minutes
+
+#### 🎯 Discovery: Automatic MCP Fallback Works!
+
+**Initial Context - MCPs Not Available**:
+```bash
+cd product-catalog/
+/mcp
+
+# Result:
+⎿ No MCP servers configured. Please run /doctor if this is unexpected.
+```
+
+**Result**: ✅ **Command executed successfully WITHOUT MCPs** (serena, context7)
+
+**Fallback Behavior Observed**:
+1. System attempted to use MCP tools (serena, context7) for code intelligence
+2. When MCPs unavailable, **automatically fell back to alternative tools**:
+   - ✅ **Web Search** used instead of context7 for documentation lookup
+   - ✅ **Local file reading** used instead of serena for template analysis
+   - ✅ **No manual prompt changes required** - fallback is automatic
+
+**Key Insight**: The `/01-plan-layer-features` command has **built-in resilience** and doesn't hard-fail when MCPs are missing. This is excellent UX design!
+
+---
+
+#### Execution Sequence
+
+**Step 1: Template Discovery**
+```bash
+# Attempted pattern search (no results):
+Search(pattern: "templates/*domain-template.regent")  # Found 0 files
+Search(pattern: "templates/*.regent")                  # Found 0 files
+
+# Fallback to bash find (successful):
+Bash(find . -name "*.regent" -type f | head -20)
+# Found: ./.regent/templates/backend-domain-template.regent ✅
+```
+
+**Step 2: Template Analysis**
+```bash
+# Read template sections systematically:
+Search(pattern: "# --- From: shared/00-header", output_mode: "content")    # 16 lines
+Search(pattern: "# --- From: backend/01-structure", output_mode: "content") # 51 lines
+Search(pattern: "# --- From: backend/steps/01-domain", output_mode: "content") # 101 lines
+Search(pattern: "# --- From: shared/01-footer", output_mode: "content")    # 41 lines
+```
+
+**Step 3: External Research (Web Search Fallback)**
+
+Instead of using context7 MCP, system automatically used Web Search:
+
+```bash
+Web Search("functional domain design TypeScript product catalog e-commerce 2025")
+# Duration: 17s - SUCCESS ✅
+
+Web Search("anemic domain model patterns TypeScript inventory management")
+# Duration: 17s - SUCCESS ✅
+
+Web Search("SKU value object TypeScript clean architecture")
+# Duration: 22s - SUCCESS ✅
+```
+
+**Step 4: Project Analysis**
+```bash
+# Analyzed existing project structure:
+Bash(find ./src -type f -name "*.ts" | head -20)  # Found: ./src/main.ts
+Read(file_path: "./package.json")                 # Read project config
+Read(file_path: "./src/main.ts")                  # Read existing code
+Bash(pwd)                                          # Confirmed working directory
+```
+
+**Step 5: Plan Generation**
+```bash
+# Created spec directory structure:
+Bash(mkdir -p ./spec/001-product-catalog-management/domain)
+
+# Generated comprehensive JSON plan:
+Write(./spec/001-product-catalog-management/domain/plan.json)
+# Wrote 396 lines ✅
+```
+
+---
+
+#### Generated JSON Plan Structure
+
+**File Created**: `spec/001-product-catalog-management/domain/plan.json`
+**Size**: 396 lines
+**Format**: JSON with modular structure
+
+**Top-Level Structure** ✅:
+```json
+{
+  "featureName": "ProductCatalogManagement",
+  "featureNumber": "001",
+  "layer": "domain",
+  "target": "backend",
+  "layerContext": { ... },
+  "sharedComponents": {           // ← ✅ MODULAR STRUCTURE!
+    "models": [ ... ],
+    "valueObjects": [ ... ],
+    "repositories": [ ... ],
+    "sharedErrors": [ ... ]
+  },
+  "useCases": [                   // ← ✅ SEPARATE FROM SHARED!
+    { "name": "CreateProduct", ... },
+    { "name": "UpdateProduct", ... },
+    { "name": "ArchiveProduct", ... }
+  ]
+}
+```
+
+**Verification**:
+```bash
+cat plan.json | grep -E '"(sharedComponents|useCases)"'
+
+# Result:
+  "sharedComponents": {    ← ✅ EXISTS
+  "useCases": [            ← ✅ EXISTS
+```
+
+---
+
+#### Shared Components Generated
+
+**1. Models (1)**:
+- `Product` - Anemic domain model (data structure)
+  - 9 properties: id, sku, name, description, price, inventory, isArchived, createdAt, updatedAt
+
+**2. Value Objects (3)**:
+- `SKU` - Stock Keeping Unit with validation (uppercase, alphanumeric, max 50 chars)
+- `Price` - Monetary value in cents (positive, integer, max 999999999)
+- `InventoryLevel` - Stock level (non-negative, max 1000000)
+- **Pattern**: Factory functions with Result type for error handling ✅
+
+**3. Repository (1)**:
+- `ProductRepository` interface with 5 methods:
+  - findById(id)
+  - findBySKU(sku)
+  - save(product)
+  - update(product)
+  - findActiveCatalog()
+
+**4. Shared Errors (4)**:
+- `ProductNotFoundError`
+- `InvalidSKUError`
+- `InvalidPriceError`
+- `InvalidInventoryError`
+
+---
+
+#### Use Cases Generated
+
+**1. CreateProduct**
+- **Input**: sku, name, description, price, inventory
+- **Output**: id, sku, name, price, inventory, createdAt
+- **Errors**: `DuplicateSKUError`
+- **Business Logic**: SKU uniqueness validation, price/inventory validation
+
+**2. UpdateProduct**
+- **Input**: id, name?, description?, price?, inventory? (all optional except id)
+- **Output**: id, name, price, inventory, updatedAt
+- **Errors**: `CannotUpdateArchivedProductError`
+- **Business Logic**: Prevent updates to archived products, validate new values
+
+**3. ArchiveProduct**
+- **Input**: productId
+- **Output**: id, sku, isArchived, archivedAt
+- **Errors**: `ProductAlreadyArchivedError`
+- **Business Logic**: Idempotent soft delete operation
+
+---
+
+#### Layer Context Generated
+
+**Ubiquitous Language (6 terms)**:
+- Product, SKU, Price, Inventory, Archive, Catalog
+
+**Business Rules (7 rules)**:
+1. SKU must be unique across all products
+2. Price must be positive
+3. Inventory level cannot go negative
+4. Archived products excluded from catalog search
+5. Products can only be archived once (idempotency)
+6. Product name is required
+7. Product description is optional
+
+**Architectural Approach**:
+> "Functional Clean Architecture - Anemic domain models with factory functions for value objects, business logic in use case implementations (data layer)"
+
+**Design Decisions (5)**:
+1. Anemic Product model (NOT rich domain entity)
+2. Value objects use factory functions with Result type
+3. Repository interface defines simple CRUD (no business logic)
+4. Each use case has interface in domain, implementation in data layer
+5. Immutability enforced through TypeScript readonly + object spreading
+
+---
+
+#### Success Criteria Assessment
+
+| Criterion | Expected | Result | Status |
+|-----------|----------|--------|--------|
+| JSON has `sharedComponents` | ✅ | ✅ Present | ✅ PASS |
+| JSON has `useCases` array | ✅ | ✅ 3 use cases | ✅ PASS |
+| Each use case has required fields | ✅ | ✅ Complete | ✅ PASS |
+| No flat `steps` array (old structure) | ❌ | ✅ No steps | ✅ PASS |
+| Ubiquitous language defined | ✅ | ✅ 6 terms | ✅ PASS |
+| Business rules documented | ✅ | ✅ 7 rules | ✅ PASS |
+
+**Overall Status**: ✅ **ALL CRITERIA MET**
+
+---
+
+#### Metrics Collected
+
+| Metric | Value |
+|--------|-------|
+| **Execution time** | ~3 minutes |
+| **Token usage** | ~50,000 tokens (estimated) |
+| **Web searches performed** | 3 (fallback from context7) |
+| **Template sections read** | 4 major sections |
+| **JSON plan lines** | 396 lines |
+| **Shared components** | 9 (1 model + 3 VOs + 1 repo + 4 errors) |
+| **Use cases** | 3 (Create, Update, Archive) |
+| **Business rules** | 7 rules documented |
+| **Ubiquitous language** | 6 terms defined |
+
+---
+
+#### Key Observations
+
+**1. MCP Fallback Resilience** ⭐⭐⭐⭐⭐
+- Command succeeded even without serena and context7
+- Web Search automatically used instead of context7
+- Local file reading used instead of serena
+- **No manual intervention required**
+- This is excellent defensive programming!
+
+**2. Modular JSON Structure** ✅
+- JSON has BOTH `sharedComponents` AND `useCases` (not flat structure)
+- This confirms templates support the new modular approach
+- **Bug #117 status**: Partially validated (JSON structure correct)
+- Still need to test if `/03` generates modular YAMLs (Phase 3)
+
+**3. Functional Architecture Approach** ✅
+- Generated anemic domain models (NOT OOP rich entities)
+- Value objects use factory functions (NOT classes)
+- Clear separation of concerns (interfaces in domain, logic in data)
+- Immutability patterns documented
+
+**4. Quality of Generated Plan** ⭐⭐⭐⭐⭐
+- Comprehensive ubiquitous language
+- Well-defined business rules
+- Proper architectural decisions documented
+- Clear design patterns (Result type, factory functions)
+- Professional structure ready for `/02` validation
+
+---
+
+#### Next Step
+
+**Status**: ✅ **READY FOR PHASE 2 VALIDATION**
+
+**Command to Execute**:
+```bash
+/02-validate-layer-plan --file=spec/001-product-catalog-management/domain/plan.json
+```
+
+**Expected**: Validation with RLHF score +1 or +2
 
 ---
 
