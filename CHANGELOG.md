@@ -14,6 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migration note in README.md for users of legacy commands
 - Documentation of numbered command pattern (/01-/09)
 
+### Changed
+- Reorganized documentation into thematic directories under `docs/` (#137)
+  - Moved 10 markdown files from root to organized structure:
+    - `docs/setup/` - Setup and configuration guides
+    - `docs/reports/` - Audit and validation reports
+    - `docs/architecture/` - Architecture analysis and proposals
+    - `docs/features/` - Feature implementation documentation
+  - Updated all internal references to new locations in CLI commands
+  - Root now contains only essential files (README.md, CHANGELOG.md, CONTRIBUTING.md)
+
 ### Removed
 - **BREAKING**: 7 legacy slash command files that don't work with `.regent/` templates:
   - `/constitution` - Use `/01-plan-layer-features` instead
