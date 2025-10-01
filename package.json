@@ -61,7 +61,11 @@
     "rlhf:analyze": "tsx core/rlhf-system.ts analyze",
     "rlhf:report": "tsx core/rlhf-system.ts report",
     "rlhf:dashboard": "tsx scripts/rlhf-dashboard.ts",
-    "rollback": "tsx scripts/rollback-manager.ts"
+    "rollback": "tsx scripts/rollback-manager.ts",
+    "arch:validate": "depcruise src --config .dependency-cruiser.cjs",
+    "arch:graph": "depcruise src --include-only '^src' --output-type dot | dot -T svg > docs/architecture-graph.svg",
+    "arch:report": "depcruise src --output-type err-html > docs/architecture-report.html",
+    "arch:check": "npm run arch:validate && npm run arch:graph"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
@@ -69,7 +73,9 @@
     "@vitest/coverage-v8": "^3.2.4",
     "ajv-cli": "^5.0.0",
     "ajv-formats": "^3.0.1",
+    "dependency-cruiser": "^17.0.1",
     "eslint": "^9.35.0",
+    "eslint-plugin-boundaries": "^5.0.1",
     "globals": "^16.4.0",
     "js-yaml": "^4.1.0",
     "tsx": "^4.20.5",

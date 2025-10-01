@@ -61,34 +61,43 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
+          cache: 'npm'
 
-      - name: Check Clean Architecture compliance
+      - name: Install dependencies
+        run: npm install
+
+      - name: Validate Architecture with ESLint Boundaries
         run: |
-          echo "📋 Clean Architecture Validation"
+          echo "📋 ESLint Boundaries Validation"
           echo "================================"
+          npm run lint
+        continue-on-error: false
 
-          # Check if src directory exists
-          if [ -d "src" ]; then
-            echo "✅ Checking domain layer isolation..."
-            # Verify domain layer has no external dependencies
-            if ! grep -r "import.*from.*'ink\|react\|commander'" src/features/*/domain/ 2>/dev/null; then
-              echo "✅ Domain layer is clean"
-            else
-              echo "❌ Domain layer has external dependencies"
-              exit 1
-            fi
+      - name: Validate Architecture with Dependency Cruiser
+        run: |
+          echo "📋 Dependency Cruiser Validation"
+          echo "================================="
+          npm run arch:validate
+        continue-on-error: false
 
-            echo "✅ Checking layer separation..."
-            # Verify proper layer separation
-            if ! grep -r "import.*from.*'/infra'" src/features/*/domain/ 2>/dev/null; then
-              echo "✅ No infrastructure imports in domain"
-            else
-              echo "❌ Domain importing from infrastructure"
-              exit 1
-            fi
-          else
-            echo "⏳ Source directory not yet created - will validate after generation"
-          fi
+      - name: Install Graphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+        continue-on-error: true
+
+      - name: Generate Architecture Graph
+        run: |
+          echo "📊 Generating Architecture Graph"
+          echo "================================="
+          npm run arch:graph
+        continue-on-error: true
+
+      - name: Upload Architecture Graph
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-graph
+          path: docs/architecture-graph.svg
+          if-no-files-found: ignore
 
       - name: RLHF Score Check
         run: |

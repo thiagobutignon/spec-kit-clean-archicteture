@@ -260,9 +260,92 @@ graph TD
 2. **Iterate Checklist:** Validate against all rules systematically
 3. **Calculate RLHF Impact:** Assess severity based on violations
 4. **Collect Errors:** Build detailed error list with impact scores
-5. **Generate Report:** Produce appropriate JSON output
+5. **Run Architectural Validation:** Execute automated tools (see section 6)
+6. **Generate Report:** Produce appropriate JSON output
 
-## 6. Example Validations
+## 6. Architectural Validation (Objective Quality Gate)
+
+After JSON schema validation, run objective architectural validation tools to detect violations:
+
+### Step 6.1: ESLint Boundaries Validation
+
+Run ESLint with boundaries plugin to check architectural constraints:
+
+```bash
+npm run lint
+```
+
+**What it checks:**
+- Domain layer purity (no imports from outer layers)
+- Proper layer dependencies (data/infra/presentation → domain only)
+- Main layer can use all layers
+- Real-time IDE feedback for developers
+
+**If violations detected:**
+- Add to errors array with CATASTROPHIC severity (-2)
+- Include specific file paths and violation descriptions
+- Suggest fixes based on Clean Architecture principles
+
+### Step 6.2: Dependency Cruiser Validation
+
+Run dependency-cruiser for holistic architecture analysis:
+
+```bash
+npm run arch:validate
+```
+
+**What it checks:**
+- Circular dependencies (warns)
+- Cross-layer violations (errors)
+- Orphaned modules (info)
+- Complete dependency graph validation
+
+**If violations detected:**
+- CATASTROPHIC (-2): Any layer dependency violations
+- WARNING (0): Circular dependencies
+- Include violation count and details in error report
+
+### Step 6.3: Success Criteria
+
+Architectural validation passes if:
+- ✅ `npm run lint` produces no boundary violations
+- ✅ `npm run arch:validate` reports 0 errors
+- ⚠️ Warnings are acceptable but should be noted
+
+### Step 6.4: Failure Handling
+
+If architectural validation fails:
+
+**Example 1: Layer Violation (CATASTROPHIC)**
+```json
+{
+  "status": "FAILED",
+  "errors": [
+    "ESLint boundaries violation: domain/models/user.ts imports from data layer (RLHF: -2)"
+  ],
+  "severity": "CATASTROPHIC"
+}
+```
+
+**Example 2: Circular Dependency (WARNING)**
+```json
+{
+  "status": "FAILED",
+  "errors": [
+    "Dependency cruiser warning: circular dependency detected in use-cases (RLHF: 0)"
+  ],
+  "severity": "WARNING"
+}
+```
+
+**Severity Classification:**
+- **CATASTROPHIC (-2)**: Layer violations, domain importing from outer layers
+- **WARNING (0)**: Circular dependencies (should fix but not blocking)
+- Circular dependencies are warnings, not errors, as they don't violate Clean Architecture but should be addressed
+
+**Important:** These are **objective, tool-based validations**, not LLM opinions. They provide deterministic, repeatable quality gates.
+
+## 7. Example Validations
 
 ### Example 1: ✅ Valid JSON (PERFECT Score)
 
@@ -351,7 +434,7 @@ graph TD
 }
 ```
 
-## 7. Severity Classification
+## 8. Severity Classification
 
 | Severity | RLHF Score | When Applied | Recovery Action |
 |----------|------------|--------------|-----------------|
