@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { createProjectStructure, InitOptions } from '../init.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -140,18 +141,16 @@ describe('Init Command - Directory Structure', () => {
     });
 
     it('should copy .regent/tsconfig.json during initialization', async () => {
-      await fs.ensureDir(path.join(testProjectPath, '.regent'));
+      // Call actual init logic that includes the tsconfig copy
+      const options: InitOptions = {
+        skipMcp: true,
+        git: false
+      };
 
-      const sourceTsconfigPath = path.join(packageRoot, '.regent/tsconfig.json');
-      const targetTsconfigPath = path.join(testProjectPath, '.regent/tsconfig.json');
-
-      // Verify source exists
-      expect(await fs.pathExists(sourceTsconfigPath)).toBe(true);
-
-      // Simulate init command copy
-      await fs.copy(sourceTsconfigPath, targetTsconfigPath);
+      await createProjectStructure(testProjectPath, options, false);
 
       // Verify target exists
+      const targetTsconfigPath = path.join(testProjectPath, '.regent/tsconfig.json');
       expect(await fs.pathExists(targetTsconfigPath)).toBe(true);
 
       // Verify content is valid JSON with expected configuration
