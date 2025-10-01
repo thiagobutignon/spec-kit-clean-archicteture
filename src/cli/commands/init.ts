@@ -6,8 +6,8 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import inquirer from 'inquirer';
 import crypto from 'crypto';
-import { MCPInstaller, promptMCPInstallation } from '../utils/mcp-installer.js';
-import { DEFAULT_GITIGNORE_TEMPLATE, REGENT_GITIGNORE_ENTRIES } from '../templates/default-gitignore.js';
+import { MCPInstaller, promptMCPInstallation } from '../../utils/mcp-installer.js';
+import { DEFAULT_GITIGNORE_TEMPLATE, REGENT_GITIGNORE_ENTRIES } from '../../templates/default-gitignore.js';
 
 // Get the directory where this package is installed
 const __filename = fileURLToPath(import.meta.url);

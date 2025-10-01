@@ -10,9 +10,9 @@ import * as crypto from 'crypto';
 import * as os from 'os';
 import * as yaml from 'yaml';
 import 'zx/globals';
-import Logger from '../core/logger';
-import { EnhancedRLHFSystem, LayerInfo } from '../core/rlhf-system';
-import { resolveLogDirectory } from '../utils/log-path-resolver';
+import Logger from './core/logger';
+import { EnhancedRLHFSystem, LayerInfo } from './core/rlhf-system';
+import { resolveLogDirectory } from './utils/log-path-resolver';
 import { EnhancedTemplateValidator } from './validate-template';
 import type { ValidationResult } from './validate-template';
 import {
@@ -22,9 +22,9 @@ import {
   DEFAULT_COMMIT_CONFIG,
   type QualityCheckResult,
   createQualityCheckResult,
-} from '../utils/commit-generator';
-import { validateConfig, type ValidatedConfig } from '../utils/config-validator';
-import { EXIT_CODES, RATE_LIMITS } from '../utils/constants';
+} from './utils/commit-generator';
+import { validateConfig, type ValidatedConfig } from './utils/config-validator';
+import { EXIT_CODES, RATE_LIMITS } from './utils/constants';
 
 $.verbose = true;
 $.shell = '/bin/bash';
