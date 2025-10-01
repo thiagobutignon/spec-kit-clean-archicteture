@@ -90,6 +90,131 @@ Each layer has specific responsibilities and constraints:
 - **Without** ANY business logic implementation
 - Defines WHAT, not HOW
 
+### 🎯 Domain Layer - Functional Approach
+
+**CRITICAL**: This project uses **Functional Clean Architecture**, NOT classic OOP DDD.
+
+#### Core Principles:
+
+1. **Anemic Domain Models** (data structures, no behavior)
+   ```typescript
+   // ✅ CORRECT - Simple data structure
+   export type Product = {
+     id: string;
+     sku: string;
+     price: number;
+     isArchived: boolean;
+   };
+   ```
+
+2. **Factory Functions for Value Objects** (NOT classes)
+   ```typescript
+   // ✅ CORRECT - Type + factory function with error handling
+   export type SKU = { value: string };
+   export type ValidationError = { message: string };
+
+   // Option 1: Throw errors (simpler, but less functional)
+   export const createSKU = (value: string): SKU => {
+     if (!value?.trim()) throw new Error('SKU cannot be empty');
+     return { value: value.trim().toUpperCase() };
+   };
+
+   // Option 2: Result type (more functional, better composability)
+   export type Result<T, E> = { success: true; value: T } | { success: false; error: E };
+
+   export const createSKUSafe = (value: string): Result<SKU, ValidationError> => {
+     if (!value?.trim()) {
+       return { success: false, error: { message: 'SKU cannot be empty' } };
+     }
+     return { success: true, value: { value: value.trim().toUpperCase() } };
+   };
+
+   // ❌ WRONG - Don't use classes
+   export class SKU {
+     private constructor(private readonly _value: string) {}
+     static create(value: string): SKU { /* ... */ }
+   }
+   ```
+
+3. **Use Case Interfaces in Domain, Logic in Data Layer**
+   ```typescript
+   // domain/usecases/archive-product.ts (interface only - WHAT)
+   export type ArchiveProductInput = { productId: string };
+   export type ArchiveProductOutput = { product: Product };
+
+   export interface ArchiveProduct {
+     execute(input: ArchiveProductInput): Promise<ArchiveProductOutput>;
+   }
+
+   // data/usecases/db-archive-product.ts (implementation with logic - HOW)
+   export class DbArchiveProduct implements ArchiveProduct {
+     async execute(input: ArchiveProductInput): Promise<ArchiveProductOutput> {
+       const product = await this.repository.findById(input.productId);
+
+       // ✅ Business logic HERE (data layer), NOT in Product entity
+       if (product.isArchived) {
+         throw new ProductAlreadyArchivedError(product.id);
+       }
+
+       // ✅ Immutability: Always create new objects, never mutate
+       const archivedProduct: Product = {
+         ...product,
+         isArchived: true
+       };
+
+       await this.repository.update(archivedProduct);
+
+       return { product: archivedProduct };
+     }
+   }
+   ```
+
+4. **Repository Interfaces (Port Pattern)**
+   ```typescript
+   // domain/repositories/product-repository.ts
+   export interface ProductRepository {
+     findById(id: string): Promise<Product | null>;
+     save(product: Product): Promise<void>;
+     update(product: Product): Promise<void>;
+
+     // ❌ DON'T: archive(productId: string)
+     // Why: Business logic (knowing HOW to archive) belongs in use cases
+     // Repositories should only handle data persistence operations (CRUD)
+   }
+   ```
+
+#### Why This Approach?
+
+- **Simpler**: Less boilerplate than OOP
+- **TypeScript Idiomatic**: Leverages structural typing
+- **Testable**: Pure functions are easier to test
+- **Maintainable**: Less abstraction, more clarity
+- **80/20 Rule**: Most projects don't need rich domain models
+
+#### Research Queries (Domain Layer)
+
+When researching domain patterns, prefer functional approaches but keep valuable DDD concepts:
+- ✅ `"functional domain design TypeScript"`
+- ✅ `"anemic domain model patterns"`
+- ✅ `"type-driven architecture"`
+- ✅ `"clean architecture interfaces TypeScript"`
+- ✅ `"functional domain modeling [concept]"`
+- ✅ `"DDD without classes [feature]"`
+- ✅ `"bounded contexts"`, `"ubiquitous language"`, `"domain events"` (these are valid in functional approach)
+- ❌ **AVOID**: `"DDD rich entities"`, `"aggregate root class"`, `"entity encapsulation"`
+
+---
+
+### When to Use Classic DDD Instead
+
+Consider classic rich domain models ONLY if:
+- Domain is extremely complex (insurance, finance, legal)
+- Many interdependent invariants
+- Team is experienced in OOP DDD
+- Compile-time guarantees are critical
+
+For most CRUD/SaaS/E-commerce apps: **Use our Functional approach** ✅
+
 ### 💾 Data Layer
 - Implements repository interfaces from selected layer
 - Handles data persistence and retrieval
@@ -245,9 +370,10 @@ Before generating JSON, create a summary:
 **Use `context7` to search for layer-specific patterns:**
 
 #### Selected Layer Searches:
-- `"DDD [feature]"`
-- `"domain modeling [concept]"`
-- `"type design [entity]"`
+- `"functional domain design TypeScript [feature]"`
+- `"anemic domain model patterns [concept]"`
+- `"type-driven architecture [entity]"`
+- `"clean architecture interfaces TypeScript"`
 - `"ubiquitous language [business domain]"`
 
 #### Data Layer Searches:
@@ -526,6 +652,10 @@ Your final JSON must follow this structure:
 - [ ] No implementation code
 - [ ] Only types and interfaces
 - [ ] Ubiquitous Language documented
+- [ ] Uses type definitions, NOT classes for entities
+- [ ] Value objects use factory functions, NOT class constructors
+- [ ] Use case interfaces defined (WHAT), no logic (HOW)
+- [ ] Repository interfaces use simple data operations only
 
 #### Data ✅
 - [ ] Implements domain interfaces
