@@ -44,7 +44,7 @@ jobs:
         run: npm run templates:build
 
       - name: Run linter
-        run: npm run lint || echo "⚠️ Linter warnings found (not blocking)"
+        run: npm run lint
 
       - name: Run tests
         run: npm test
