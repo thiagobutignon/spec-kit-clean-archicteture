@@ -5,7 +5,9 @@ import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import inquirer from 'inquirer';
+import crypto from 'crypto';
 import { MCPInstaller, promptMCPInstallation } from '../utils/mcp-installer.js';
+import { DEFAULT_GITIGNORE_TEMPLATE, REGENT_GITIGNORE_ENTRIES } from '../templates/default-gitignore.js';
 
 // Get the directory where this package is installed
 const __filename = fileURLToPath(import.meta.url);
@@ -19,7 +21,14 @@ interface InitOptions {
   git?: boolean;
   debug?: boolean;
   skipMcp?: boolean;
+  backupDir?: string;
+  cleanupOldBackups?: boolean;
+  dryRun?: boolean;
 }
+
+// Configuration constants
+const MAX_BACKUP_FILE_SIZE = 100 * 1024 * 1024; // 100MB - Maximum size for backup files
+const BACKUP_RETENTION_COUNT = 10; // Number of backups to keep when cleaning up old backups
 
 // AI assistant options
 const AI_ASSISTANTS = [
@@ -237,7 +246,7 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
   }
 
   // Only copy project config files if they don't exist
-  await copyProjectConfigFiles(projectPath, isExistingProject);
+  await copyProjectConfigFiles(projectPath, isExistingProject, options);
 
   // Create initial files if new project
   if (!isExistingProject) {
@@ -247,7 +256,336 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
   }
 }
 
-async function copyProjectConfigFiles(projectPath: string, isExistingProject: boolean): Promise<void> {
+interface ExistingConfigFile {
+  path: string;
+  relativePath: string;
+  exists: boolean;
+}
+
+/**
+ * Detects existing configuration files that might be overwritten during initialization
+ * @param projectPath - Absolute path to the project directory
+ * @returns Array of existing config files with their paths
+ */
+async function detectExistingConfigFiles(projectPath: string): Promise<ExistingConfigFile[]> {
+  const configFiles = [
+    '.vscode/settings.json',
+    'eslint.config.js',
+    'tsconfig.json',
+    'vitest.config.ts',
+    '.gitignore'
+  ];
+
+  // Use parallel Promise.all for better performance
+  const results = await Promise.all(
+    configFiles.map(async (file) => {
+      const filePath = path.join(projectPath, file);
+      const exists = await fs.pathExists(filePath);
+
+      return {
+        path: filePath,
+        relativePath: file,
+        exists
+      };
+    })
+  );
+
+  // Filter only existing files
+  return results.filter(f => f.exists);
+}
+
+/**
+ * Creates a timestamped backup of a configuration file
+ *
+ * Backup Naming Pattern: {filename}.regent-backup-{date}-{time}-{uniqueId}{.ext}
+ *
+ * Examples:
+ * - settings.json → settings.regent-backup-20240315-143022-a3f2b1.json
+ * - eslint.config.js → eslint.config.regent-backup-20240315-143022-c9d4e2.js
+ *
+ * The extension is preserved to allow easy opening with appropriate tools.
+ * A cryptographically random uniqueId prevents collisions even in concurrent operations.
+ * Human-readable timestamp makes it easy to find backups by date.
+ *
+ * @param filePath - Absolute path to the file to backup
+ * @param projectPath - Absolute path to the project root directory
+ * @param backupDir - Optional custom backup directory (validated for security)
+ * @returns Absolute path to the created backup file
+ * @throws Error if backup directory cannot be created, path traversal detected, or file too large
+ */
+async function createBackup(filePath: string, projectPath: string, backupDir?: string): Promise<string> {
+  // Validate file size (prevent disk exhaustion attacks)
+  try {
+    const stats = await fs.stat(filePath);
+    if (stats.size > MAX_BACKUP_FILE_SIZE) {
+      throw new Error(
+        `File too large to backup: ${path.basename(filePath)} (${(stats.size / 1024 / 1024).toFixed(2)}MB)\n` +
+        `Maximum backup size is ${MAX_BACKUP_FILE_SIZE / 1024 / 1024}MB`
+      );
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw error;
+    }
+    // File doesn't exist - will be handled by fs.copy later
+  }
+
+  // Create human-readable timestamp: YYYYMMDD-HHMMSS
+  const now = new Date();
+  const timestamp = now.toISOString()
+    .replace(/[-:]/g, '')
+    .replace('T', '-')
+    .slice(0, 15); // YYYYMMDD-HHMMSS
+
+  // Generate cryptographically random unique ID (6 chars) - prevents collisions
+  const uniqueId = crypto.randomBytes(3).toString('hex');
+
+  const ext = path.extname(filePath);
+  const base = path.basename(filePath, ext);
+
+  // Determine backup directory
+  const targetBackupDir = backupDir || path.join(projectPath, '.regent-backups');
+
+  // Validate and create backup directory
+  if (backupDir) {
+    // Prevent path traversal attacks
+    const resolvedBackupDir = path.resolve(backupDir);
+    const resolvedProjectPath = path.resolve(projectPath);
+
+    // Check if backupDir is trying to escape project directory (when relative)
+    if (!path.isAbsolute(backupDir) && !resolvedBackupDir.startsWith(resolvedProjectPath)) {
+      throw new Error(`Backup directory must be inside project: ${backupDir}`);
+    }
+
+    try {
+      await fs.ensureDir(resolvedBackupDir);
+    } catch (error) {
+      throw new Error(`Cannot create backup directory: ${backupDir} - ${(error as Error).message}`);
+    }
+  } else {
+    await fs.ensureDir(targetBackupDir);
+  }
+
+  // Validate backup directory is writable
+  try {
+    await fs.access(targetBackupDir, fs.constants.W_OK).catch(async () => {
+      // Directory doesn't exist or not writable, try to create it
+      await fs.ensureDir(targetBackupDir);
+      // Test write permission by creating and removing a temp file
+      const testFile = path.join(targetBackupDir, '.regent-write-test');
+      await fs.writeFile(testFile, '');
+      await fs.remove(testFile);
+    });
+  } catch (error) {
+    throw new Error(
+      `Backup directory is not writable: ${targetBackupDir}\n` +
+      `Please check directory permissions or specify a different directory with --backup-dir`
+    );
+  }
+
+  // Create backup with better naming: filename.regent-backup-timestamp-uniqueId.ext
+  // This preserves the extension, making it easier to open with appropriate tools
+  const backupName = `${base}.regent-backup-${timestamp}-${uniqueId}${ext}`;
+  const backupPath = path.join(targetBackupDir, backupName);
+
+  try {
+    await fs.copy(filePath, backupPath);
+  } catch (error) {
+    throw new Error(
+      `Failed to create backup of ${path.basename(filePath)}: ${(error as Error).message}\n` +
+      `Please check file permissions and available disk space`
+    );
+  }
+
+  return backupPath;
+}
+
+/**
+ * Cleans up backup files created during a failed backup operation
+ *
+ * This function is called when the backup process fails partway through,
+ * ensuring that no partial backups are left in the system (atomic operation).
+ *
+ * @param backupPaths - Array of absolute paths to backup files to remove
+ */
+async function cleanupBackups(backupPaths: string[]): Promise<void> {
+  console.log(chalk.yellow('\n🔄 Rolling back backups due to failure...'));
+  for (const backupPath of backupPaths) {
+    try {
+      await fs.remove(backupPath);
+      console.log(chalk.dim(`   ✓ Removed: ${path.basename(backupPath)}`));
+    } catch (error) {
+      console.log(chalk.dim(`   ⚠ Could not remove: ${path.basename(backupPath)}`));
+    }
+  }
+}
+
+/**
+ * Cleans up old backup files, keeping only the most recent N backups
+ *
+ * Useful for preventing backup directory from growing indefinitely.
+ * Optimized to only run when backup count exceeds threshold.
+ *
+ * @param backupDir - Directory containing backup files
+ * @param keepCount - Number of most recent backups to keep (default from BACKUP_RETENTION_COUNT)
+ */
+async function cleanupOldBackups(backupDir: string, keepCount: number = BACKUP_RETENTION_COUNT): Promise<void> {
+  if (!await fs.pathExists(backupDir)) {
+    return;
+  }
+
+  try {
+    const files = await fs.readdir(backupDir);
+
+    // Filter only regent backup files
+    const backupFiles = files.filter(f => f.includes('.regent-backup-'));
+
+    // Performance optimization: only proceed if count exceeds threshold
+    if (backupFiles.length <= keepCount) {
+      return; // Nothing to clean up
+    }
+
+    // Get file stats for sorting by modification time
+    const fileStats = await Promise.all(
+      backupFiles.map(async (file) => {
+        const filePath = path.join(backupDir, file);
+        const stat = await fs.stat(filePath);
+        return { file, filePath, mtime: stat.mtime };
+      })
+    );
+
+    // Sort by modification time (newest first)
+    fileStats.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
+
+    // Remove old backups beyond keepCount
+    const filesToRemove = fileStats.slice(keepCount);
+
+    if (filesToRemove.length > 0) {
+      console.log(chalk.cyan(`\n🧹 Cleaning up ${filesToRemove.length} old backup(s)...`));
+
+      for (const { file, filePath } of filesToRemove) {
+        await fs.remove(filePath);
+        console.log(chalk.dim(`   ✓ Removed: ${file}`));
+      }
+    }
+  } catch (error) {
+    // Non-critical operation, just log warning
+    console.log(chalk.yellow(`⚠️  Could not clean up old backups: ${(error as Error).message}`));
+  }
+}
+
+/**
+ * Merges Regent-specific scripts into existing package.json
+ *
+ * Only adds scripts that don't already exist, preserving user's custom scripts.
+ * This is a non-destructive merge operation.
+ *
+ * @param projectPath - Absolute path to the project directory
+ */
+async function mergePackageJsonScripts(projectPath: string): Promise<void> {
+  const packageJsonPath = path.join(projectPath, 'package.json');
+
+  if (await fs.pathExists(packageJsonPath)) {
+    const packageJson = await fs.readJson(packageJsonPath);
+
+    // Add regent scripts without overwriting existing ones
+    packageJson.scripts = packageJson.scripts || {};
+
+    // Only add if they don't exist
+    if (!packageJson.scripts['regent:build']) {
+      packageJson.scripts['regent:build'] = 'cd .regent && ./templates/build-template.sh';
+    }
+    if (!packageJson.scripts['regent:validate']) {
+      packageJson.scripts['regent:validate'] = 'tsx .regent/config/validate-template.ts';
+    }
+    if (!packageJson.scripts['regent:execute']) {
+      packageJson.scripts['regent:execute'] = 'tsx .regent/config/execute-steps.ts';
+    }
+
+    await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
+  }
+}
+
+async function copyProjectConfigFiles(projectPath: string, isExistingProject: boolean, options: InitOptions = {}): Promise<void> {
+  // Detect existing config files
+  const existingFiles = await detectExistingConfigFiles(projectPath);
+
+  // Dry-run mode: show what would be backed up without making changes
+  if (options.dryRun && existingFiles.length > 0) {
+    console.log(chalk.cyan('\n🔍 DRY-RUN MODE - No files will be modified\n'));
+    console.log(chalk.yellow('The following files would be backed up and replaced:'));
+    existingFiles.forEach(f => console.log(chalk.yellow(`   • ${f.relativePath}`)));
+    console.log();
+    console.log(chalk.dim('Run without --dry-run to proceed with backup and replacement'));
+    return;
+  }
+
+  // If there are existing files and --force flag is not set, prompt user
+  if (existingFiles.length > 0 && !options.force && isExistingProject) {
+    console.log(chalk.yellow('\n⚠️  Existing configuration files detected:'));
+    existingFiles.forEach(f => console.log(chalk.yellow(`   • ${f.relativePath}`)));
+    console.log();
+
+    const answer = await inquirer.prompt([{
+      type: 'confirm',
+      name: 'backup',
+      message: 'Create backups and REPLACE existing files with Regent configuration?',
+      default: true
+    }]);
+
+    if (!answer.backup) {
+      console.log(chalk.cyan('\n✅ Keeping your existing configuration files'));
+      console.log(chalk.dim('   💡 To use Regent configs, manually merge from:'));
+      console.log(chalk.dim('      .regent/templates/config-examples/\n'));
+      return;
+    }
+
+    // Create backups with rollback on failure
+    console.log(chalk.cyan('\n📦 Creating backups...'));
+    const successfulBackups: string[] = [];
+
+    try {
+      for (const file of existingFiles) {
+        const backupPath = await createBackup(file.path, projectPath, options.backupDir);
+        successfulBackups.push(backupPath);
+        const displayPath = options.backupDir ? backupPath : path.relative(projectPath, backupPath);
+        console.log(chalk.green(`   ✅ Backed up: ${file.relativePath} → ${displayPath}`));
+      }
+      console.log();
+
+      // Cleanup old backups if requested
+      if (options.cleanupOldBackups) {
+        const backupDir = options.backupDir || path.join(projectPath, '.regent-backups');
+        await cleanupOldBackups(backupDir);
+      }
+    } catch (error) {
+      console.log(chalk.red(`\n   ❌ Failed to create backup: ${(error as Error).message}`));
+
+      // Rollback: clean up any successful backups to maintain consistency
+      if (successfulBackups.length > 0) {
+        await cleanupBackups(successfulBackups);
+      }
+
+      throw new Error('Backup process failed. No files were modified. Please check permissions and try again.');
+    }
+  } else if (existingFiles.length > 0 && options.force) {
+    console.log(chalk.yellow('\n⚠️  DANGER: Force flag detected - overwriting existing files WITHOUT backup'));
+    console.log(chalk.yellow('   This action cannot be undone!\n'));
+
+    // Double confirmation for --force flag to prevent accidents
+    const forceConfirm = await inquirer.prompt([{
+      type: 'confirm',
+      name: 'reallyForce',
+      message: 'Are you ABSOLUTELY SURE you want to proceed without backups?',
+      default: false
+    }]);
+
+    if (!forceConfirm.reallyForce) {
+      console.log(chalk.cyan('\n✅ Operation cancelled. Your files are safe.'));
+      throw new Error('User cancelled force operation');
+    }
+  }
+
   // VS Code settings - merge if exists
   const vscodeSettingsPath = path.join(projectPath, '.vscode/settings.json');
   const sourceVscodeSettings = path.join(packageRoot, '.vscode/settings.json');
@@ -287,15 +625,73 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
   // ESLint config - only if doesn't exist
   const eslintPath = path.join(projectPath, 'eslint.config.js');
   if (!await fs.pathExists(eslintPath)) {
-    const eslintConfig = await fs.readFile(path.join(packageRoot, 'eslint.config.js'), 'utf-8');
-    await fs.writeFile(eslintPath, eslintConfig);
+    const sourceEslintPath = path.join(packageRoot, 'eslint.config.js');
+    if (await fs.pathExists(sourceEslintPath)) {
+      try {
+        const eslintConfig = await fs.readFile(sourceEslintPath, 'utf-8');
+        await fs.writeFile(eslintPath, eslintConfig);
+      } catch (error) {
+        console.log(chalk.yellow(`⚠️  Could not copy eslint.config.js: ${(error as Error).message}`));
+        console.log(chalk.dim('   You can manually copy it from the regent package later if needed'));
+      }
+    } else {
+      console.log(chalk.yellow('⚠️  Source eslint.config.js not found in regent package'));
+      console.log(chalk.dim('   You may need to create your own ESLint configuration'));
+    }
   }
 
   // Vitest config - only if doesn't exist
   const vitestPath = path.join(projectPath, 'vitest.config.ts');
   if (!await fs.pathExists(vitestPath)) {
-    const vitestConfig = await fs.readFile(path.join(packageRoot, 'vitest.config.ts'), 'utf-8');
-    await fs.writeFile(vitestPath, vitestConfig);
+    const sourceVitestPath = path.join(packageRoot, 'vitest.config.ts');
+    if (await fs.pathExists(sourceVitestPath)) {
+      try {
+        const vitestConfig = await fs.readFile(sourceVitestPath, 'utf-8');
+        await fs.writeFile(vitestPath, vitestConfig);
+      } catch (error) {
+        console.log(chalk.yellow(`⚠️  Could not copy vitest.config.ts: ${(error as Error).message}`));
+        console.log(chalk.dim('   You can manually copy it from the regent package later if needed'));
+      }
+    } else {
+      console.log(chalk.yellow('⚠️  Source vitest.config.ts not found in regent package'));
+      console.log(chalk.dim('   You may need to create your own Vitest configuration'));
+    }
+  }
+
+  // .gitignore - merge if exists, create if not
+  const gitignorePath = path.join(projectPath, '.gitignore');
+
+  if (await fs.pathExists(gitignorePath)) {
+    // Merge Regent entries into existing .gitignore
+    const existingContent = await fs.readFile(gitignorePath, 'utf-8');
+
+    // Normalize entries for comparison (remove trailing slashes, trim whitespace)
+    const normalizeEntry = (entry: string) => entry.trim().replace(/\/+$/, '');
+
+    const existingLines = existingContent.split('\n').map(normalizeEntry);
+
+    // Filter out entries that already exist (avoid duplicates)
+    const entriesToAdd = REGENT_GITIGNORE_ENTRIES.filter(entry => {
+      const normalized = normalizeEntry(entry);
+      // Skip comments and empty lines from duplicate check
+      if (normalized.startsWith('#') || normalized === '') {
+        return true;
+      }
+      // Check if this entry already exists (with or without trailing slash)
+      return !existingLines.some(line => normalizeEntry(line) === normalized);
+    });
+
+    if (entriesToAdd.length > 0) {
+      const mergedContent = existingContent.trim() + '\n\n' + entriesToAdd.join('\n') + '\n';
+      await fs.writeFile(gitignorePath, mergedContent);
+      console.log(chalk.cyan(`📝 Updated .gitignore with ${entriesToAdd.filter(e => !e.startsWith('#') && e.trim()).length} Regent-specific entries`));
+    } else {
+      console.log(chalk.dim('✓ .gitignore already contains Regent entries'));
+    }
+  } else {
+    // Create new .gitignore with full content from template
+    const gitignore = DEFAULT_GITIGNORE_TEMPLATE + '\n' + REGENT_GITIGNORE_ENTRIES.join('\n') + '\n';
+    await fs.writeFile(gitignorePath, gitignore);
   }
 }
 
@@ -450,21 +846,12 @@ console.log('🚀 Clean Architecture Project');
 }
 
 async function updateExistingProject(projectPath: string): Promise<void> {
-  // Update package.json scripts if it exists
+  // Merge package.json scripts if it exists (smart merge, not overwrite)
   const packageJsonPath = path.join(projectPath, 'package.json');
 
   if (await fs.pathExists(packageJsonPath)) {
-    console.log(chalk.cyan('📦 Updating package.json scripts...'));
-
-    const packageJson = await fs.readJson(packageJsonPath);
-
-    // Add spec-kit specific scripts
-    packageJson.scripts = packageJson.scripts || {};
-    packageJson.scripts['regent:build'] = 'cd .regent && ./templates/build-template.sh';
-    packageJson.scripts['regent:validate'] = 'tsx .regent/config/validate-template.ts';
-    packageJson.scripts['regent:execute'] = 'tsx .regent/config/execute-steps.ts';
-
-    await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
+    console.log(chalk.cyan('📦 Merging package.json scripts...'));
+    await mergePackageJsonScripts(projectPath);
   }
 
   // Create constitution if doesn't exist
