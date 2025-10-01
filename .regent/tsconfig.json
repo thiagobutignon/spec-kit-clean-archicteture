@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "node",
     "esModuleInterop": true,
@@ -9,8 +9,7 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "strict": true,
-    "lib": ["ES2020"],
-    "types": ["node"]
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "config/**/*.ts",
