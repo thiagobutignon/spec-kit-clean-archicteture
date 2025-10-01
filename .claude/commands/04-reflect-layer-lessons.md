@@ -221,33 +221,53 @@ npm run arch:graph
 
 **Dependency Cruiser Output:**
 - ✅ "no dependency violations found" = +2 potential
-- ❌ Errors detected = CATASTROPHIC (-2)
-- ⚠️ Warnings (circular deps) = Note but acceptable (0)
+- ❌ Layer violations = CATASTROPHIC (-2)
+- ⚠️ Circular dependencies = WARNING (0) - should fix but not blocking
+- ℹ️ Orphaned modules = INFO (0) - optional cleanup
 
 ### 6.3 Calculate Objective RLHF Score
 
 **Deterministic scoring based on violations:**
 
-| Violations | RLHF Score | Status |
-|------------|------------|--------|
-| 0 errors, 0 warnings | **+2** | PERFECT |
-| 0 errors, 1-3 warnings | **+1** | GOOD |
-| 0 errors, 4+ warnings | **0** | ACCEPTABLE |
-| 1+ errors | **-1 to -2** | FAILED |
+| Violations | RLHF Score | Status | Notes |
+|------------|------------|--------|-------|
+| 0 errors, 0 warnings | **+2** | PERFECT | Clean Architecture fully compliant |
+| 0 errors, 1-3 warnings | **+1** | GOOD | Minor issues (circular deps, etc.) |
+| 0 errors, 4+ warnings | **0** | ACCEPTABLE | Needs cleanup but functional |
+| RUNTIME errors | **-1** | FAILED | Missing fields, syntax errors |
+| CATASTROPHIC errors | **-2** | FAILED | Layer violations, external deps |
 
-**Scoring Logic:**
+**Scoring Logic with Severity Awareness:**
 ```javascript
-// Pseudocode for objective scoring
-if (eslintErrors > 0 || depCruiserErrors > 0) {
-  score = -2; // CATASTROPHIC
+// Pseudocode for objective scoring aligned with severity table
+if (eslintLayerViolations > 0 || depCruiserLayerErrors > 0) {
+  score = -2; // CATASTROPHIC - breaks Clean Architecture
+} else if (runtimeErrors > 0) {
+  score = -1; // RUNTIME - execution will fail
 } else if (warnings === 0) {
-  score = 2;  // PERFECT
+  score = 2;  // PERFECT - no issues at all
 } else if (warnings <= 3) {
-  score = 1;  // GOOD
+  score = 1;  // GOOD - minor warnings (circular deps, orphaned modules)
 } else {
-  score = 0;  // ACCEPTABLE (needs improvement)
+  score = 0;  // ACCEPTABLE - many warnings, needs cleanup
 }
 ```
+
+**Severity-Based Classification:**
+
+| Severity Type | Examples | RLHF Impact | Blocking? |
+|--------------|----------|-------------|-----------|
+| **CATASTROPHIC** | Layer violations, external deps in domain | -2 | ✅ YES |
+| **RUNTIME** | Missing placeholders, invalid syntax | -1 | ✅ YES |
+| **WARNING** | Circular deps, empty references, unclear concepts | 0 | ⚠️ NO |
+| **INFO** | Orphaned modules, refactoring opportunities | 0 | ❌ NO |
+
+**Key Insight on Circular Dependencies:**
+- Circular dependencies are **WARNING (0)**, not errors
+- They don't violate Clean Architecture layer rules
+- They indicate design smell but don't block execution
+- Should be fixed during refactoring but not critical
+- Tools report them as warnings, not catastrophic errors
 
 ### 6.4 Include Architecture Graph
 

@@ -330,18 +330,58 @@ If architectural validation fails:
 **Example 2: Circular Dependency (WARNING)**
 ```json
 {
-  "status": "FAILED",
+  "status": "WARNING",
   "errors": [
     "Dependency cruiser warning: circular dependency detected in use-cases (RLHF: 0)"
   ],
-  "severity": "WARNING"
+  "severity": "WARNING",
+  "recommendation": "Refactor to break the cycle - consider introducing an interface or splitting responsibilities"
 }
 ```
 
-**Severity Classification:**
-- **CATASTROPHIC (-2)**: Layer violations, domain importing from outer layers
-- **WARNING (0)**: Circular dependencies (should fix but not blocking)
-- Circular dependencies are warnings, not errors, as they don't violate Clean Architecture but should be addressed
+**Example 3: Multiple Violations (CATASTROPHIC)**
+```json
+{
+  "status": "FAILED",
+  "errors": [
+    "ESLint boundaries violation: domain/models/user.ts imports from data layer (RLHF: -2)",
+    "External dependency detected: 'express' import in domain layer (RLHF: -2)",
+    "Circular dependency warning: CreateUser ↔ UserValidator (RLHF: 0)"
+  ],
+  "severity": "CATASTROPHIC",
+  "criticalCount": 2,
+  "warningCount": 1
+}
+```
+
+**Severity Classification Table:**
+
+| Violation Type | Severity | RLHF Score | When Applied | Example |
+|----------------|----------|------------|--------------|---------|
+| **Domain imports from outer layer** | CATASTROPHIC | -2 | Domain layer imports from data/infra/presentation | `domain/user.ts` imports from `data/repositories` |
+| **Layer violates dependency rules** | CATASTROPHIC | -2 | Any layer imports from forbidden layer | `presentation` imports directly from `data` |
+| **External dependencies in domain** | CATASTROPHIC | -2 | Domain uses external libraries | `import axios from 'axios'` in domain |
+| **Wrong REPLACE/WITH format** | CATASTROPHIC | -2 | Invalid refactor template syntax | Missing `<<<WITH>>>` block |
+| **Missing required placeholders** | RUNTIME | -1 | Template lacks required fields | No `__USE_CASE_INPUT_FIELDS__` in use case |
+| **Invalid template syntax** | RUNTIME | -1 | Malformed code structure | TypeScript compilation errors |
+| **Path inconsistencies** | RUNTIME | -1 | File path doesn't match feature | `featureName: "User"` but path has `products/` |
+| **Circular dependency** | WARNING | 0 | Module A → B → A | Use case imports create a cycle |
+| **Orphaned module** | INFO | 0 | File not imported anywhere | Unused helper file |
+| **Missing references** | WARNING | 0 | Empty references array | No pattern documentation |
+| **Unclear concepts** | WARNING | 0 | Vague descriptions | Generic naming without context |
+
+**Key Insights:**
+- **CATASTROPHIC (-2)**: Violations that break Clean Architecture principles - require complete redesign
+- **RUNTIME (-1)**: Errors that will cause execution failures - need immediate fixes
+- **WARNING (0)**: Issues that should be addressed but don't violate core principles
+- **INFO (0)**: Informational notices for code quality improvement
+
+**Note on Circular Dependencies:**
+Circular dependencies are classified as **WARNING (0)**, not errors, because:
+- They don't violate Clean Architecture layer rules
+- They indicate design smell but are not blocking
+- Should be fixed during refactoring but don't prevent execution
+- Tools report them as warnings, not errors
 
 **Important:** These are **objective, tool-based validations**, not LLM opinions. They provide deterministic, repeatable quality gates.
 
@@ -434,13 +474,107 @@ If architectural validation fails:
 }
 ```
 
-## 8. Severity Classification
+## 8. Comprehensive Severity Classification
 
-| Severity | RLHF Score | When Applied | Recovery Action |
-|----------|------------|--------------|-----------------|
-| **CATASTROPHIC** | -2 | Architecture violations, external dependencies | Complete redesign required |
-| **RUNTIME** | -1 | Missing required fields, invalid syntax | Fix specific issues |
-| **WARNING** | 0 | Missing quality indicators | Enhance for better score |
+### Severity Levels and Recovery Actions
+
+| Severity | RLHF Score | When Applied | Recovery Action | Blocking? |
+|----------|------------|--------------|-----------------|-----------|
+| **CATASTROPHIC** | -2 | Architecture violations, external dependencies, wrong layer imports | Complete redesign required | ✅ YES - CI fails |
+| **RUNTIME** | -1 | Missing required fields, invalid syntax, path inconsistencies | Fix specific issues immediately | ✅ YES - Build fails |
+| **WARNING** | 0 | Circular dependencies, missing quality indicators, unclear concepts | Enhance during refactoring | ⚠️ NO - Should fix but not blocking |
+| **INFO** | 0 | Orphaned modules, minor quality improvements | Optional cleanup | ❌ NO - Informational only |
+
+### Detailed Violation Examples
+
+#### CATASTROPHIC (-2) Examples:
+```typescript
+// ❌ Domain importing from outer layer
+// File: src/features/user/domain/models/user.ts
+import { UserRepository } from '../../data/repositories/user-repository'; // CATASTROPHIC!
+
+// ❌ External dependency in domain
+import axios from 'axios'; // CATASTROPHIC!
+import { PrismaClient } from '@prisma/client'; // CATASTROPHIC!
+
+// ❌ Layer violation
+// File: src/features/user/presentation/controllers/user-controller.ts
+import { UserRepositoryImpl } from '../../data/repositories/user-repository-impl'; // CATASTROPHIC!
+// Should only import from domain layer
+```
+
+#### RUNTIME (-1) Examples:
+```typescript
+// ❌ Missing required placeholder
+export interface CreateUser {
+  execute(input: CreateUserInput): Promise<CreateUserOutput>;
+}
+// Missing: __USE_CASE_INPUT_FIELDS__ and __USE_CASE_OUTPUT_FIELDS__
+
+// ❌ Invalid template syntax
+<<<REPLACE>>> // Missing closing tag
+content here
+// Missing <<<WITH>>> block
+
+// ❌ Path inconsistency
+// featureName: "UserAccount" but path is:
+// src/features/product/domain/user.ts // Wrong feature folder!
+```
+
+#### WARNING (0) Examples:
+```typescript
+// ⚠️ Circular dependency
+// File: create-user-use-case.ts
+import { UserValidator } from './user-validator';
+
+// File: user-validator.ts
+import { CreateUserUseCase } from './create-user-use-case'; // Cycle!
+
+// ⚠️ Empty references
+{
+  "references": [] // Should document patterns and context
+}
+
+// ⚠️ Unclear concept
+{
+  "description": "Process data" // Too vague, needs domain language
+}
+```
+
+#### INFO (0) Examples:
+```typescript
+// ℹ️ Orphaned module - unused but valid
+// File: helpers/old-formatter.ts (no imports anywhere)
+
+// ℹ️ Potential refactoring opportunity
+// Multiple small similar functions could be consolidated
+```
+
+### Decision Matrix for Severity Assignment
+
+```
+Is it breaking Clean Architecture rules?
+├─ YES → Is it domain importing from outer layers?
+│   ├─ YES → CATASTROPHIC (-2)
+│   └─ NO → Is it wrong layer dependency?
+│       ├─ YES → CATASTROPHIC (-2)
+│       └─ NO → Continue checks...
+│
+├─ NO → Will it cause execution failure?
+│   ├─ YES → RUNTIME (-1)
+│   └─ NO → Is it a code quality issue?
+│       ├─ YES → WARNING (0)
+│       └─ NO → INFO (0)
+```
+
+### Common Misconceptions
+
+| Misconception | Reality | Severity |
+|---------------|---------|----------|
+| "Circular deps break Clean Architecture" | They don't violate layer rules, just indicate poor design | WARNING (0) |
+| "All dependency-cruiser errors are CATASTROPHIC" | Only layer violations are CATASTROPHIC, cycles are WARNING | Mixed |
+| "Warnings can be ignored" | Should be fixed but don't block deployment | WARNING (0) |
+| "INFO items are useless" | Provide valuable refactoring insights | INFO (0) |
 
 ## 📍 Next Steps
 
