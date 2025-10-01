@@ -48,8 +48,8 @@ rlhf_scoring:
     causes: ["Clean Architecture + DDD + ubiquitous language"]
 execution_script: "npx tsx .regent/config/execute-steps.ts"
 previous_command: "/05-evaluate-layer-results from yaml: <yaml>"
-next_command_success: "/08-apply-layer-improvements"
-next_command_failure: "/07-fix-layer-errors from yaml: <yaml-with-failed-step>"
+next_command_success: "/07-validate-generated-code"
+next_command_failure: "/08-fix-layer-errors from yaml: <yaml-with-failed-step>"
 ---
 
 # Task: Execute Domain YAML Plan
@@ -358,9 +358,14 @@ If uncommitted changes exist:
 Based on execution results:
 
 ### ✅ If SUCCESS:
-Your selected layer is complete! Consider running RLHF improvements:
+Your selected layer is complete! Validate the generated code:
 ```bash
-/08-apply-layer-improvements
+/07-validate-generated-code
+```
+
+Then consider running RLHF improvements:
+```bash
+/09-apply-layer-improvements
 ```
 
 Or generate a learning report:
@@ -372,7 +377,7 @@ npx tsx rlhf-system.ts report
 
 #### For error fixes:
 ```bash
-/07-fix-layer-errors from yaml: <your-yaml-with-failed-step>
+/08-fix-layer-errors from yaml: <your-yaml-with-failed-step>
 ```
 
 #### After fixing, re-run:
