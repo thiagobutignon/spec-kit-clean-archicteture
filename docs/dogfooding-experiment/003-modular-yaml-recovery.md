@@ -33,7 +33,7 @@ Recover from Experiment #002 failures and validate the modular YAML generation f
 |-----|----------|-------------|--------|
 | #122 | P0 | /06 broken - missing dependencies | ✅ **FIXED** (v2.2.0) |
 | #117 | P0 | Monolithic YAML instead of modular | ⚠️ To Be Tested |
-| #115 | P0 | MCP servers not detected | 🔴 Still Present (non-blocking) |
+| #115 | P2 | MCP servers not detected in subdirs | 🔍 **Root Cause Found** (workaround available) |
 
 ## 🔬 **Test Scope (Issue #143)**
 
@@ -385,14 +385,107 @@ import { EnhancedTemplateValidator } from './validate-template';      ← ✅ CO
 
 **⚠️ Bug #115 STILL PRESENT: MCP Detection Issue**
 
-**Observed Behavior**:
+**Initial Observation**:
 ```
 ⚠️ No MCP servers detected after installation
 ```
 
-**Impact**: MCP tools may not be available to AI commands
+**🔍 ROOT CAUSE DISCOVERED: MCP Configuration Scope**
 
-**Status**: ⚠️ **Known issue** - Does not block experiment (can proceed without MCP)
+**Test 1: MCP Detection in Parent Directory (`dogfooding/`)**
+```bash
+cd /Users/thiagobutignon/dev/spec-kit-clean-archicteture/dogfooding
+/mcp
+
+# Result:
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ Manage MCP servers                                                           │
+│                                                                              │
+│ ❯ 1. chrome-devtools            ✔ connected · Enter to view details          │
+│   2. context7                   ✔ connected · Enter to view details          │
+│   3. playwright                 ✔ connected · Enter to view details          │
+│   4. serena                     ✔ connected · Enter to view details          │
+│                                                                              │
+│ MCP Config locations (by scope):                                             │
+│  • User config (available in all your projects):                             │
+│    • /Users/thiagobutignon/.claude.json                                      │
+│  • Project config (shared via .mcp.json):                                    │
+│    • /Users/thiagobutignon/dev/spec-kit-clean-archicteture/dogfooding/.mcp.j │
+│    son (file does not exist)                                                 │
+│  • Local config (private to you in this project):                            │
+│    • /Users/thiagobutignon/.claude.json [project:                            │
+│    /Users/thiagobutignon/dev/spec-kit-clean-archicteture/dogfooding]         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+```
+
+**Status**: ✅ **MCPs WORK in `dogfooding/` directory** (4 servers connected)
+
+**Test 2: MCP Detection in Child Directory (`dogfooding/ecommerce/`)**
+```bash
+cd /Users/thiagobutignon/dev/spec-kit-clean-archicteture/dogfooding/ecommerce
+/mcp
+
+# Result:
+⎿ No MCP servers configured. Please run /doctor if this is unexpected.
+  Otherwise, run `claude mcp` or visit
+  https://docs.claude.com/en/docs/claude-code/mcp to learn more.
+```
+
+**Status**: ❌ **MCPs DON'T WORK in `dogfooding/ecommerce/` directory**
+
+---
+
+**🎯 Analysis: Why MCPs Don't Work in Subdirectories**
+
+**Claude Code MCP Scope Resolution**:
+1. Claude Code looks for MCP config at **project root level**
+2. Config is scoped to specific directory: `[project: /Users/.../dogfooding]`
+3. When in subdirectory (`dogfooding/ecommerce/`), Claude Code treats it as **different project**
+4. No MCP config exists for `dogfooding/ecommerce/` specifically
+
+**MCP Config Hierarchy**:
+```
+User config:    ~/.claude.json                          ← Global, all projects
+Project config: <project-root>/.mcp.json                ← Shared via git
+Local config:   ~/.claude.json [project: <path>]        ← Project-specific
+```
+
+**Problem**:
+- `regent init` runs in `dogfooding/ecommerce/`
+- MCPs are configured for `dogfooding/` (parent directory)
+- Claude Code in `ecommerce/` subdirectory can't find MCPs
+
+**Solutions**:
+
+**Option A: Use Parent Directory Workflow**
+```bash
+# Work from parent directory
+cd dogfooding
+/01-plan-layer-features  # MCPs available here
+```
+
+**Option B: Configure MCPs for Subdirectory**
+```bash
+# Configure MCPs specifically for ecommerce project
+cd dogfooding/ecommerce
+claude mcp add serena -- serena-mcp-server --context ide-assistant
+claude mcp add context7 -- context7-mcp-server
+# ... etc
+```
+
+**Option C: Create Project-Level Config**
+```bash
+# Create .mcp.json in ecommerce directory
+cd dogfooding/ecommerce
+# Create and commit .mcp.json (shared with team)
+```
+
+**For This Experiment**:
+- ✅ **Using Option A**: Work from `dogfooding/` directory
+- ✅ MCPs available for all slash commands
+- ✅ Generated files go into `ecommerce/` subdirectory
+
+**Impact**: ⚠️ **Known issue** - Workaround available (work from parent directory)
 
 ---
 
@@ -404,9 +497,11 @@ import { EnhancedTemplateValidator } from './validate-template';      ← ✅ CO
 | Bug #122: Import paths | `../core/`, `../utils/` | ✅ Correct | ✅ PASS |
 | Project structure created | ✅ | ✅ All directories | ✅ PASS |
 | Git initialized | ✅ | ✅ Repository created | ✅ PASS |
-| MCP servers (optional) | ✅ | ⚠️ Not detected | ⚠️ MINOR |
+| MCP servers (optional) | ✅ | ✅ Available in parent dir | ✅ PASS |
 
-**Decision**: ✅ **PROCEED TO PHASE 1** - Critical Bug #122 is fixed, MCP issues are non-blocking
+**Decision**: ✅ **PROCEED TO PHASE 1** - Critical Bug #122 is fixed, MCPs available from parent directory
+
+**Workflow**: Execute commands from `dogfooding/` directory to ensure MCP availability
 
 ---
 
