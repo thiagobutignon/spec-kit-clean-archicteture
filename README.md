@@ -2,14 +2,14 @@
 
 > **Multi-Target Clean Architecture Platform with AI-Powered Generation and Guaranteed Quality**
 
-[![NPM Version](https://img.shields.io/npm/v/@the-regent/cli)](https://www.npmjs.com/package/@the-regent/cli)
-[![NPM Downloads](https://img.shields.io/npm/dm/@the-regent/cli)](https://www.npmjs.com/package/@the-regent/cli)
+[![NPM Version](https://img.shields.io/npm/v/the-regent-cli)](https://www.npmjs.com/package/the-regent-cli)
+[![NPM Downloads](https://img.shields.io/npm/dm/the-regent-cli)](https://www.npmjs.com/package/the-regent-cli)
 [![RLHF Score](https://img.shields.io/badge/RLHF%20Score-Validation%20System-brightgreen)](https://github.com/thiagobutignon/the-regent)
 [![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-✓-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 [![Multi-Target](https://img.shields.io/badge/Multi--Target-25%2B%20Template%20Combinations-purple)](./templates)
 [![AI-NOTEs](https://img.shields.io/badge/AI--NOTEs-Guided%20Generation-orange)](./templates)
 [![Claude AI](https://img.shields.io/badge/Claude%20AI-6%20Agents-cyan)](./.claude/agents)
-[![CLI Tool](https://img.shields.io/badge/CLI-regent-blue)](https://www.npmjs.com/package/@the-regent/cli)
+[![CLI Tool](https://img.shields.io/badge/CLI-regent-blue)](https://www.npmjs.com/package/the-regent-cli)
 
 ## 📋 Overview
 
@@ -87,7 +87,7 @@ The true "secret sauce" isn't just generating code - it's generating **contextua
 
 ```bash
 # Install globally from NPM
-npm install -g @the-regent/cli
+npm install -g the-regent-cli
 
 # Verify installation
 regent --version
@@ -550,14 +550,14 @@ MCP Tools:
 
 ```bash
 # Install globally from NPM
-npm install -g @the-regent/cli
+npm install -g the-regent-cli
 
 # Verify installation
 regent --version  # Should show 2.1.9
 regent check      # Validate system requirements
 ```
 
-**🌍 Official NPM Package**: https://www.npmjs.com/package/@the-regent/cli
+**🌍 Official NPM Package**: https://www.npmjs.com/package/the-regent-cli
 
 ### 📦 **Prerequisites**
 
