@@ -23,7 +23,7 @@ import {
   type QualityCheckResult,
   createQualityCheckResult,
 } from './utils/commit-generator';
-import { validateConfig, type ValidatedConfig } from './utils/config-validator';
+import { validateConfig } from './utils/config-validator';
 import { EXIT_CODES, RATE_LIMITS } from './utils/constants';
 
 $.verbose = true;
@@ -35,7 +35,7 @@ $.shell = '/bin/bash';
  * @param fallback - Fallback message if extraction fails
  * @returns Formatted error message
  */
-function extractErrorMessage(error: any, fallback = 'Unknown error'): string {
+function extractErrorMessage(error: unknown, fallback = 'Unknown error'): string {
   if (!error) return fallback;
 
   // For shell command errors (zx ProcessOutput), prioritize stderr
@@ -66,7 +66,7 @@ function extractErrorMessage(error: any, fallback = 'Unknown error'): string {
  * @param error - Error object from shell command
  * @returns Combined stdout + stderr
  */
-function extractCommandOutput(error: any): string {
+function extractCommandOutput(error: unknown): string {
   const stdout = error.stdout || '';
   const stderr = error.stderr || '';
   return (stdout + stderr).trim();
@@ -105,7 +105,12 @@ interface ImplementationPlan {
     project_type?: string;
     architecture_style?: string;
   };
-  [key: string]: any;
+  evaluation?: {
+    final_rlhf_score?: number;
+    final_status?: string;
+    commit_hashes?: string[];
+  };
+  [key: string]: unknown;
 }
 
 class EnhancedStepExecutor {
@@ -116,7 +121,7 @@ class EnhancedStepExecutor {
   private startTime: number = 0;
   private layerInfo: LayerInfo | null = null;
   private validationResult: ValidationResult | null = null;
-  private executionCache: Map<string, any> = new Map();
+  private executionCache: Map<string, unknown> = new Map();
   private commitConfig: CommitConfig;
   private commitHashes: string[] = [];
   private cachedPackageManager: 'npm' | 'yarn' | 'pnpm' | null = null;
@@ -125,7 +130,7 @@ class EnhancedStepExecutor {
   private gitOpTimestamps: number[] = [];
   private lastGitOpTime: number = 0;
   private rateLimitLock: Promise<void> = Promise.resolve();
-  private auditLog: Array<{ timestamp: string; event: string; details: any }> = [];
+  private auditLog: Array<{ timestamp: string; event: string; details: Record<string, unknown> }> = [];
 
   /**
    * Create a new EnhancedStepExecutor instance
@@ -175,7 +180,7 @@ class EnhancedStepExecutor {
         // Reset any staged changes
         await $`git reset HEAD`.catch(() => {});
         console.log(chalk.green('   ✅ Staged changes reset'));
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
 
@@ -209,7 +214,7 @@ class EnhancedStepExecutor {
    * @param event - Event type (e.g., 'script_validation', 'git_operation', 'rollback')
    * @param details - Event details object
    */
-  private logAuditEvent(event: string, details: any): void {
+  private logAuditEvent(event: string, details: Record<string, unknown>): void {
     const auditEntry = {
       timestamp: new Date().toISOString(),
       event,
@@ -471,7 +476,7 @@ class EnhancedStepExecutor {
       }
 
       return true;
-    } catch (error) {
+    } catch {
       console.log(chalk.red('❌ Not in a git repository or git is not available'));
       return false;
     }
@@ -530,8 +535,9 @@ class EnhancedStepExecutor {
 
       console.log(chalk.cyan('   ✅ Loaded commit configuration from .regent/config/execute.yml'));
       return mergedConfig;
-    } catch (error: any) {
-      console.log(chalk.yellow(`   ⚠️  Failed to load config: ${error.message}, using defaults`));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(chalk.yellow(`   ⚠️  Failed to load config: ${message}, using defaults`));
       return { ...DEFAULT_COMMIT_CONFIG };
     }
   }
@@ -546,8 +552,8 @@ class EnhancedStepExecutor {
     if (match) {
       const [, target, layer] = match;
       return {
-        target: target as any,
-        layer: layer as any
+        target: target as 'backend' | 'frontend' | 'fullstack',
+        layer: layer as 'domain' | 'data' | 'infra' | 'presentation' | 'main'
       };
     }
 
@@ -599,16 +605,17 @@ class EnhancedStepExecutor {
       // Update layer info from validation result if available
       if (this.validationResult.targetValidated && this.validationResult.layerValidated) {
         this.layerInfo = {
-          target: this.validationResult.targetValidated as any,
-          layer: this.validationResult.layerValidated as any
+          target: this.validationResult.targetValidated as 'backend' | 'frontend' | 'fullstack',
+          layer: this.validationResult.layerValidated as 'domain' | 'data' | 'infra' | 'presentation' | 'main'
         };
 
         console.log(chalk.cyan(`📊 Detected: ${this.layerInfo.target} / ${this.layerInfo.layer} layer`));
       }
 
       return true;
-    } catch (error: any) {
-      console.error(chalk.red(`❌ Validation error: ${error.message}`));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(chalk.red(`❌ Validation error: ${message}`));
       return false;
     }
   }
@@ -624,15 +631,16 @@ class EnhancedStepExecutor {
         const metadata = this.plan.metadata;
         if (metadata.layer && metadata.project_type) {
           this.layerInfo = {
-            target: metadata.project_type as any,
-            layer: metadata.layer as any
+            target: metadata.project_type as 'backend' | 'frontend' | 'fullstack',
+            layer: metadata.layer as 'domain' | 'data' | 'infra' | 'presentation' | 'main'
           };
         }
       }
 
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       console.error(chalk.red.bold(`❌ Error: Could not read or parse the YAML file.`));
-      console.error(chalk.red(`   Reason: ${error.message}`));
+      console.error(chalk.red(`   Reason: ${message}`));
       process.exit(1);
     }
   }
@@ -788,7 +796,7 @@ class EnhancedStepExecutor {
         const scoreColor = this.getScoreColor(step.rlhf_score || 0);
         console.log(scoreColor(`${scoreEmoji} Step '${stepId}' completed successfully. RLHF Score: ${step.rlhf_score}`));
 
-      } catch (error: any) {
+      } catch (error) {
         const duration = Date.now() - this.startTime;
 
         step.status = 'FAILED';
@@ -807,7 +815,7 @@ class EnhancedStepExecutor {
         console.error(chalk.red(errorMessage));
 
         // Layer-specific guidance
-        this.provideLayerSpecificGuidance(step);
+        this.provideLayerSpecificGuidance();
 
         console.error(chalk.red.bold('Aborting execution. The YAML file has been updated with the failure details.'));
 
@@ -975,7 +983,7 @@ class EnhancedStepExecutor {
   /**
    * Enhanced error message with layer context
    */
-  private enhanceErrorMessageWithLayerContext(error: any, step: Step): string {
+  private enhanceErrorMessageWithLayerContext(error: unknown, step: Step): string {
     const baseError = extractErrorMessage(error);
 
     if (!this.layerInfo) {
@@ -1028,7 +1036,7 @@ class EnhancedStepExecutor {
   /**
    * Provide layer-specific guidance on errors
    */
-  private provideLayerSpecificGuidance(step: Step): void {
+  private provideLayerSpecificGuidance(): void {
     if (!this.layerInfo) return;
 
     console.error(chalk.yellow.bold(`\n💡 ${this.layerInfo.layer.toUpperCase()} Layer Guidance:`));
@@ -1093,7 +1101,7 @@ class EnhancedStepExecutor {
         await this.handlePullRequestStep(step);
         break;
       default:
-        throw new Error(`Unknown step type: '${(step as any).type}'`);
+        throw new Error(`Unknown step type: '${step.type}'`);
     }
   }
 
@@ -1120,7 +1128,7 @@ class EnhancedStepExecutor {
     await fs.writeFile(path, template);
   }
 
-  private async handleFolderStep(step: any): Promise<void> {
+  private async handleFolderStep(step: Step): Promise<void> {
     const basePath = step.action?.create_folders?.basePath;
     const folders = step.action?.create_folders?.folders || [];
     if (!basePath) throw new Error("Folder step is missing 'basePath'.");
@@ -1197,7 +1205,7 @@ class EnhancedStepExecutor {
     return '💥'; // Catastrophic error
   }
 
-  private getScoreColor(score: number): any {
+  private getScoreColor(score: number): typeof chalk.green.bold {
     if (score >= 2) return chalk.green.bold;
     if (score >= 1) return chalk.green;
     if (score >= 0) return chalk.yellow;
@@ -1205,7 +1213,7 @@ class EnhancedStepExecutor {
     return chalk.red.bold;
   }
 
-  private enhanceErrorMessage(error: any, step: Step): string {
+  private enhanceErrorMessage(error: unknown, step: Step): string {
     const baseError = extractErrorMessage(error);
 
     if (step.type === 'refactor_file' && step.template) {
@@ -1286,7 +1294,7 @@ class EnhancedStepExecutor {
             $.verbose = true;
             console.log(chalk.green('   ✅ Lint check passed'));
             return { type: 'lint' as const, passed: true, output: lintResult.stdout + lintResult.stderr };
-          } catch (error: any) {
+          } catch (error) {
             $.verbose = true;
             const output = extractCommandOutput(error);
             console.log(chalk.red('   ❌ Lint check failed'));
@@ -1317,7 +1325,7 @@ class EnhancedStepExecutor {
             $.verbose = true;
             console.log(chalk.green('   ✅ Tests passed'));
             return { type: 'test' as const, passed: true, output: testResult.stdout + testResult.stderr };
-          } catch (error: any) {
+          } catch (error) {
             $.verbose = true;
             const output = extractCommandOutput(error);
             console.log(chalk.red('   ❌ Tests failed'));
@@ -1357,16 +1365,18 @@ class EnhancedStepExecutor {
       }
 
       return createQualityCheckResult(lintPassed, testPassed, lintOutput, testOutput);
-    } catch (error: any) {
+    } catch (error) {
       // Error boundary: If quality checks crash, treat as failed
-      console.log(chalk.red(`   ❌ Quality checks crashed: ${error.message}`));
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(chalk.red(`   ❌ Quality checks crashed: ${message}`));
       console.log(chalk.yellow('   ℹ️  Treating as failed quality check'));
 
+      const errMsg = error instanceof Error ? error.message : String(error);
       return createQualityCheckResult(
         false,
         false,
-        `Quality check system error: ${error.message}`,
-        `Quality check system error: ${error.message}`
+        `Quality check system error: ${errMsg}`,
+        `Quality check system error: ${errMsg}`
       );
     }
   }
@@ -1444,7 +1454,7 @@ class EnhancedStepExecutor {
 
       console.log(chalk.green(`   ✅ Committed: ${commitHash}`));
       console.log(chalk.gray(`   📋 ${commitMessage.split('\n')[0]}`));
-    } catch (error: any) {
+    } catch (error) {
       // If commit fails, it might be because there are no changes or other git issues
       const errorMsg = extractErrorMessage(error, 'Unknown git error');
 
@@ -1473,8 +1483,8 @@ class EnhancedStepExecutor {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         return await operation();
-      } catch (error: any) {
-        lastError = error;
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
         const errorMsg = extractErrorMessage(error, 'Unknown error');
 
         // Don't retry on certain permanent errors
@@ -1630,15 +1640,16 @@ class EnhancedStepExecutor {
         stepId: step.id,
         stepType: step.type,
       });
-    } catch (error: any) {
-      console.log(chalk.red(`   ⚠️  Rollback failed: ${error.message}`));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(chalk.red(`   ⚠️  Rollback failed: ${message}`));
       console.log(chalk.yellow('   ℹ️  Manual cleanup may be required'));
 
       // Audit log: Rollback failed
       this.logAuditEvent('rollback_failed', {
         stepId: step.id,
         stepType: step.type,
-        error: error.message,
+        error: message,
       });
     }
   }
@@ -1674,7 +1685,7 @@ class EnhancedStepExecutor {
       this.logger.log(`--- Script finished successfully ---`);
       return fullOutput;
 
-    } catch (error: any) {
+    } catch (error) {
       $.verbose = true;
       throw error;
     } finally {
@@ -1729,10 +1740,11 @@ async function executeBatch(pattern: string): Promise<void> {
       await executor.run();
       succeeded++;
       console.log(chalk.green(`✅ Success: ${path.basename(template)}`));
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       failed++;
       console.error(chalk.red(`❌ Failed: ${path.basename(template)}`));
-      console.error(chalk.red(`   Error: ${error.message}`));
+      console.error(chalk.red(`   Error: ${message}`));
     }
   }
 
