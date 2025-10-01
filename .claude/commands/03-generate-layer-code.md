@@ -1,6 +1,6 @@
 ---
-title: "Generate Selected Layer Code"
-description: "Transform validated JSON plans into YAML implementation files for multi-target Clean Architecture layer generation with RLHF optimization"
+title: "Generate Selected Layer Code (Modular YAMLs)"
+description: "Transform validated JSON plans into multiple modular YAML implementation files following Vertical Slice Architecture - one for shared components, one per use case"
 category: "layer"
 stage: "generation"
 priority: 3
@@ -22,9 +22,12 @@ parameters:
     description: "Optional existing YAML for update mode"
     required: false
   output:
-    type: "yaml"
-    location: "./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/implementation.yaml"
-    example: "./spec/001-user-registration/__LAYER__/implementation.yaml"
+    type: "yaml (multiple files)"
+    location: "./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/"
+    files:
+      - "shared-implementation.yaml"
+      - "__USE_CASE__-implementation.yaml (one per use case)"
+    example: "./spec/001-product-catalog/domain/shared-implementation.yaml, ./spec/001-product-catalog/domain/create-product-implementation.yaml"
 modes:
   create:
     description: "Generate new YAML from JSON plan"
@@ -138,19 +141,105 @@ graph LR
 
 ## 1. Your Deliverable
 
-Your **only** output is a complete and valid YAML file content.
+Your output is **multiple modular YAML files** following Vertical Slice Architecture principles.
 
-**Output Location:**
+**Output Structure:**
 ```
-./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/implementation.yaml
+./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/
+├── shared-implementation.yaml              # Shared components (models, value objects, interfaces)
+├── __USE_CASE_1__-implementation.yaml      # First use case slice
+├── __USE_CASE_2__-implementation.yaml      # Second use case slice
+└── ...                                     # One YAML per use case
 ```
 
 **Naming Convention:**
 | Component | Format | Example |
 |-----------|--------|---------|
 | FEATURE_NUMBER | Sequential 3-digit | 001, 002, 003 |
-| FEATURE_NAME | kebab-case | user-registration |
-| Full Path | Combined | ./spec/001-user-registration/__LAYER__/implementation.yaml |
+| FEATURE_NAME | kebab-case | product-catalog-management |
+| USE_CASE_NAME | kebab-case | create-product, update-product |
+| Shared Path | Combined | ./spec/001-product-catalog/__LAYER__/shared-implementation.yaml |
+| Use Case Path | Combined | ./spec/001-product-catalog/__LAYER__/create-product-implementation.yaml |
+
+## 1.1. YAML Separation Strategy 🎯
+
+### Shared Components (`shared-implementation.yaml`)
+
+Include in the shared YAML:
+- **Domain Models**: Entities, Aggregates, Value Objects
+- **Repository Interfaces**: Abstract data access contracts
+- **Shared Domain Errors**: Base error classes, common domain errors
+- **Domain Services**: Shared business logic (if any)
+
+**Example shared-implementation.yaml structure:**
+```yaml
+steps:
+  - type: branch
+    name: create-feature-branch
+    # ... branch configuration
+
+  - type: folder
+    name: create-shared-structure
+    # ... folder configuration for shared components
+
+  - type: create_file
+    name: create-product-model
+    # Product aggregate root
+
+  - type: create_file
+    name: create-sku-value-object
+    # SKU value object
+
+  - type: create_file
+    name: create-product-repository-interface
+    # Repository interface
+
+  - type: create_file
+    name: create-shared-domain-errors
+    # Shared error classes
+
+  - type: pull_request
+    name: create-shared-components-pr
+    # PR for shared components
+```
+
+### Use Case Slices (`__USE_CASE__-implementation.yaml`)
+
+Include in each use case YAML:
+- **Use Case Implementation**: The specific use case file
+- **Use Case Errors**: Errors specific to this use case (if any)
+- **Use Case Types**: Input/Output types specific to this use case
+
+**Example create-product-implementation.yaml structure:**
+```yaml
+steps:
+  - type: branch
+    name: create-create-product-branch
+    # ... branch configuration
+
+  - type: folder
+    name: create-create-product-structure
+    # ... folder configuration for this use case
+
+  - type: create_file
+    name: create-create-product-use-case
+    # CreateProduct use case implementation
+
+  - type: create_file
+    name: create-create-product-errors
+    # CreateProduct-specific errors (if any)
+
+  - type: pull_request
+    name: create-create-product-pr
+    # PR for CreateProduct use case
+```
+
+### Why This Matters
+
+1. **Atomic Commits**: Each YAML generates one focused commit
+2. **Parallel Execution**: Use cases can be implemented concurrently
+3. **Better Reviews**: Small, focused PRs (50 lines vs 500 lines)
+4. **Vertical Slices**: Each use case is self-contained and independently deployable
 
 ## 2. Prohibited Actions ❌
 
@@ -273,20 +362,39 @@ Different templates have different capabilities based on their target:
 
 ## 4. Input Parameters
 
-### Required Input:
+### Required Input (Updated for Modular Generation):
 ```json
 {
   "featureName": "string",
+  "featureNumber": "string",  // e.g., "001", "002"
   "layer": "domain | data | infrastructure | presentation | main",  // Required
   "target": "backend | frontend | fullstack | mobile | api",  // Optional, defaults to backend
   "ubiquitousLanguage": {  // Optional but needed for +2 score
     "term": "definition"
   },
-  "useCases": [...],
-  "errors": [...],
-  "testHelpers": [...]
+  "sharedComponents": {  // NEW: Identifies shared vs use-case-specific components
+    "models": [...],           // Domain models, entities, aggregates
+    "valueObjects": [...],     // Value objects
+    "repositories": [...],     // Repository interfaces
+    "sharedErrors": [...],     // Base error classes, common domain errors
+    "services": [...]          // Domain services (optional)
+  },
+  "useCases": [...],  // Each use case gets its own YAML
+  "errors": [...],    // Use case-specific errors
+  "testHelpers": [...] // Optional test helpers
 }
 ```
+
+### Why `sharedComponents` is Critical
+
+The `sharedComponents` object enables the command to separate:
+- **Shared foundation** (models, value objects, interfaces) → `shared-implementation.yaml`
+- **Use case implementations** (one per use case) → `__use-case__-implementation.yaml`
+
+This separation is essential for:
+1. **Atomic commits**: One commit per use case, not one massive commit
+2. **Vertical slices**: Each use case is independently reviewable and deployable
+3. **Parallel execution**: Multiple use cases can be implemented concurrently
 
 ### Optional Parameters:
 | Parameter | Type | Purpose | When Used |
@@ -296,20 +404,56 @@ Different templates have different capabilities based on their target:
 
 ## 5. Generation Modes
 
-### 📝 Create Mode (New Feature)
+### 📝 Create Mode (New Feature) - Multiple YAML Generation
 
 <details>
 <summary>Expand for Create Mode Steps</summary>
 
-1. **Initialize**: Copy `.regent/templates/__TARGET__-__LAYER__-template.regent` verbatim (e.g., backend-domain-template.regent)
-2. **Generate Steps**:
-   - Keep `create-feature-branch` as FIRST step
-   - Keep `create-structure` as SECOND step
-   - For each Use Case/Error in JSON, replicate template blocks
-   - Keep `create-pull-request` as LAST step
-3. **Populate Placeholders**: Replace all `__PLACEHOLDER__` with JSON data
-4. **Add Ubiquitous Language** (if provided) for +2 score
-5. **Add Layer Documentation**: JSDoc with `@layerConcept` tags
+**CRITICAL: You MUST generate multiple YAML files, not a single monolithic file.**
+
+#### Step 1: Analyze the Plan
+
+Parse the validated `plan.json` to identify:
+- **Shared Components**: Models, Value Objects, Repository Interfaces, Shared Errors
+- **Use Cases**: Each use case with its specific implementation
+- **Use Case Errors**: Errors specific to individual use cases
+
+#### Step 2: Generate `shared-implementation.yaml`
+
+1. **Initialize**: Use `.regent/templates/__TARGET__-__LAYER__-template.regent` as base
+2. **Structure**:
+   - Add `branch` step for shared components (e.g., `feat/001-product-catalog-shared`)
+   - Add `folder` step for shared structure
+   - Add `create_file` steps for each shared component:
+     - Domain models (Entities, Aggregates)
+     - Value Objects
+     - Repository interfaces
+     - Shared domain errors
+   - Add `pull_request` step for shared components PR
+3. **Populate Placeholders**: Replace all `__PLACEHOLDER__` with shared component data
+4. **Add Ubiquitous Language**: Include domain vocabulary for +2 score
+
+#### Step 3: Generate Per-Use-Case YAMLs
+
+For each use case in the plan, generate `__use-case-name__-implementation.yaml`:
+
+1. **Initialize**: Use the same template as base
+2. **Structure**:
+   - Add `branch` step for this use case (e.g., `feat/001-product-catalog-create-product`)
+   - Add `folder` step for use case structure (if needed)
+   - Add `create_file` step for the use case implementation
+   - Add `create_file` steps for use-case-specific errors (if any)
+   - Add `pull_request` step for this use case PR
+3. **Populate Placeholders**: Replace all `__PLACEHOLDER__` with use case data
+4. **Add Use Case Documentation**: JSDoc with `@layerConcept` tags
+
+#### Step 4: Output All YAMLs
+
+Output each YAML file using the Write tool:
+- `./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/shared-implementation.yaml`
+- `./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/__use-case-1__-implementation.yaml`
+- `./spec/__FEATURE_NUMBER__-__FEATURE_NAME__/__LAYER__/__use-case-2__-implementation.yaml`
+- ... (one per use case)
 
 </details>
 
@@ -407,41 +551,117 @@ graph TD
 
 ## 9. Example Invocations
 
-### Example 1: Create Mode (New Feature)
+### Example 1: Create Mode (Multiple Use Cases)
 
 <details>
-<summary>📝 Create Mode Example</summary>
+<summary>📝 Create Mode Example - Product Catalog</summary>
 
 **Command:**
 ```bash
-/03-generate-layer-code create feature from json:
+/03-generate-layer-code --layer=domain --file=spec/001-product-catalog/domain/plan.json
 ```
 
-**Input JSON:**
+**Input JSON (plan.json):**
 ```json
 {
-  "featureName": "UserRegistration",
+  "featureName": "ProductCatalogManagement",
+  "featureNumber": "001",
+  "layer": "domain",
+  "target": "backend",
   "ubiquitousLanguage": {
-    "Registration": "The process of creating a new user account",
-    "WelcomeEmail": "Initial email sent after successful registration"
+    "Product": "An item available for sale in the catalog",
+    "SKU": "Stock Keeping Unit - unique identifier for products",
+    "Inventory": "Stock levels for each product"
+  },
+  "sharedComponents": {
+    "models": [
+      { "name": "Product", "type": "AggregateRoot" }
+    ],
+    "valueObjects": [
+      { "name": "SKU" },
+      { "name": "Price" },
+      { "name": "InventoryLevel" }
+    ],
+    "repositories": [
+      { "name": "ProductRepository" }
+    ],
+    "sharedErrors": [
+      "ProductNotFoundError",
+      "InvalidSKUError",
+      "InvalidPriceError"
+    ]
   },
   "useCases": [
     {
-      "name": "RegisterUser",
+      "name": "CreateProduct",
       "input": [
-        { "name": "email", "type": "string" },
-        { "name": "password", "type": "string" }
+        { "name": "sku", "type": "string" },
+        { "name": "name", "type": "string" },
+        { "name": "price", "type": "number" }
       ],
       "output": [
         { "name": "id", "type": "string" },
-        { "name": "email", "type": "string" }
+        { "name": "sku", "type": "string" }
+      ]
+    },
+    {
+      "name": "UpdateProduct",
+      "input": [
+        { "name": "id", "type": "string" },
+        { "name": "price", "type": "number" }
+      ],
+      "output": [
+        { "name": "id", "type": "string" },
+        { "name": "updated", "type": "boolean" }
+      ]
+    },
+    {
+      "name": "ArchiveProduct",
+      "input": [
+        { "name": "id", "type": "string" }
+      ],
+      "output": [
+        { "name": "archived", "type": "boolean" }
+      ]
+    },
+    {
+      "name": "SearchProducts",
+      "input": [
+        { "name": "query", "type": "string" }
+      ],
+      "output": [
+        { "name": "products", "type": "Product[]" }
+      ]
+    },
+    {
+      "name": "ManageInventory",
+      "input": [
+        { "name": "sku", "type": "string" },
+        { "name": "quantity", "type": "number" }
+      ],
+      "output": [
+        { "name": "inventoryLevel", "type": "number" }
       ]
     }
   ]
 }
 ```
 
-**Expected Output:** Complete YAML with all placeholders replaced
+**Expected Output - 6 YAML Files:**
+
+1. `spec/001-product-catalog/domain/shared-implementation.yaml` (shared components)
+2. `spec/001-product-catalog/domain/create-product-implementation.yaml`
+3. `spec/001-product-catalog/domain/update-product-implementation.yaml`
+4. `spec/001-product-catalog/domain/archive-product-implementation.yaml`
+5. `spec/001-product-catalog/domain/search-products-implementation.yaml`
+6. `spec/001-product-catalog/domain/manage-inventory-implementation.yaml`
+
+**Benefits:**
+- ✅ Each use case can be reviewed independently (small PRs)
+- ✅ Shared components are established first
+- ✅ Use cases can be executed in parallel by /06-execute
+- ✅ Atomic, focused commits per use case
+
 </details>
 
 ### Example 2: Update Mode (Existing YAML)
@@ -460,27 +680,50 @@ graph TD
 
 ## 10. User Workflow
 
-After you generate the YAML:
+After you generate the multiple YAMLs:
 
 ```mermaid
 graph LR
-    A[AI Generates YAML] --> B[User Reviews]
-    B --> C{Correct?}
-    C -->|Yes| D[User Proceeds to /04-reflect-layer-lessons]
+    A[AI Generates Multiple YAMLs] --> B[User Reviews All Files]
+    B --> C{All Correct?}
+    C -->|Yes| D[User Proceeds to /04 for Each YAML]
     C -->|No| E[User Requests Changes]
     E --> A
     style D fill:#90EE90
 ```
 
+### Execution Order Recommendation
+
+1. **First**: Execute `shared-implementation.yaml` to establish foundation
+2. **Then**: Execute use case YAMLs in parallel or sequentially as needed
+
 ## 📍 Next Step
 
-After generating your YAML plan, proceed to architectural reflection:
+After generating your multiple YAML files, you have two options:
+
+### Option 1: Reflect on Each YAML (Recommended for Quality)
 
 ```bash
-/04-reflect-layer-lessons from yaml: <your-generated-yaml>
+/04-reflect-layer-lessons from yaml: spec/001-product-catalog/domain/shared-implementation.yaml
+/04-reflect-layer-lessons from yaml: spec/001-product-catalog/domain/create-product-implementation.yaml
+# ... repeat for each use case YAML
 ```
 
-This will refine your YAML plan using Clean Architecture principles and DDD patterns to optimize for RLHF score.
+### Option 2: Proceed Directly to Execution
+
+```bash
+/06-execute-layer-steps spec/001-product-catalog/domain/shared-implementation.yaml
+# After shared components are created, execute use cases (in parallel if desired)
+/06-execute-layer-steps spec/001-product-catalog/domain/create-product-implementation.yaml
+/06-execute-layer-steps spec/001-product-catalog/domain/update-product-implementation.yaml
+# ... etc
+```
+
+This modular approach enables:
+- ✅ **Parallel execution** of independent use cases
+- ✅ **Atomic commits** with clear, focused changes
+- ✅ **Better code reviews** with small, manageable PRs
+- ✅ **Vertical slice architecture** where each use case is self-contained
 
 > 💡 **Pro Tip**: Always validate your YAML before delivery. A validated YAML with ubiquitous language and proper layer documentation achieves the coveted +2 RLHF score!
 ---
@@ -522,3 +765,53 @@ Validated plans are the ONLY source for generation. If they can't be read or pro
 ### 🎭 HISTORICAL CONTEXT
 
 This generation command was created to fix architectural disasters caused by "helpful" generation from unvalidated or partial plans. Maintain discipline: Only generate from fully validated plans.
+
+---
+
+## 🔨 CRITICAL ARCHITECTURAL CHANGE (Issue #117)
+
+### From Monolithic to Modular YAML Generation
+
+**Previous Behavior (WRONG):**
+- Generated **1 monolithic YAML** with all use cases mixed together
+- 19 steps in a single file for 5 use cases
+- Resulted in massive commits, difficult reviews, sequential execution
+
+**Current Behavior (CORRECT):**
+- Generates **N+1 modular YAMLs** (1 shared + 1 per use case)
+- Each YAML is focused and atomic
+- Enables vertical slice architecture, parallel execution, and better reviews
+
+### Example from Issue #117
+
+For a CRUD feature with 5 use cases:
+
+**❌ Old Output:**
+```
+spec/001-product-catalog/domain/implementation.yaml (19 steps - all mixed)
+```
+
+**✅ New Output:**
+```
+spec/001-product-catalog/domain/
+├── shared-implementation.yaml          # Shared domain foundation
+├── create-product-implementation.yaml  # CreateProduct use case
+├── update-product-implementation.yaml  # UpdateProduct use case
+├── archive-product-implementation.yaml # ArchiveProduct use case
+├── search-products-implementation.yaml # SearchProducts use case
+└── manage-inventory-implementation.yaml # ManageInventory use case
+```
+
+### Why This Change is P0 (Critical)
+
+1. **Atomic Commits**: Each use case → one focused commit
+2. **Vertical Slice Architecture**: Each use case is self-contained
+3. **Parallel Execution**: `/06-execute` can run use cases concurrently
+4. **Review Quality**: Small PRs (50 lines) vs massive PRs (500+ lines)
+5. **Team Velocity**: Multiple developers can work on different use cases simultaneously
+
+### Migration Note
+
+This change is **BREAKING** for any scripts or workflows that expect a single `implementation.yaml` file. Update downstream commands (`/04`, `/06`, etc.) to handle multiple YAML files.
+
+**Reference**: [Issue #117 - Separate implementation.yml per use case](https://github.com/your-repo/issues/117)
