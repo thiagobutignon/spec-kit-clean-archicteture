@@ -505,49 +505,159 @@ import { Server } from './server'; // ✅ Application setup
 
 ## 6. JSON Output Structure
 
-Your final JSON must follow this structure:
+**CRITICAL UPDATE (Issue #117)**: The output structure now supports modular YAML generation - one for shared components, one per use case.
 
 ### Generic Structure for All Layers:
 
 ```json
 {
-  "layer": "[domain|data|infra|presentation|main]",
   "featureName": "FeatureName",
+  "featureNumber": "001",
+  "layer": "[domain|data|infra|presentation|main]",
+  "target": "[backend|frontend|fullstack|mobile|api]",
   "layerContext": {
     // Layer-specific context
   },
-  "steps": [
+  "sharedComponents": {
+    "models": [
+      {
+        "name": "ModelName",
+        "type": "Entity | AggregateRoot | ValueObject",
+        "path": "src/features/__FEATURE_NAME__/domain/models/__model-name__.ts"
+      }
+    ],
+    "valueObjects": [
+      {
+        "name": "ValueObjectName",
+        "path": "src/features/__FEATURE_NAME__/domain/value-objects/__value-object-name__.ts"
+      }
+    ],
+    "repositories": [
+      {
+        "name": "RepositoryName",
+        "path": "src/features/__FEATURE_NAME__/domain/repositories/__repository-name__.interface.ts"
+      }
+    ],
+    "sharedErrors": [
+      {
+        "name": "ErrorName",
+        "path": "src/features/__FEATURE_NAME__/domain/errors/__error-name__.ts"
+      }
+    ]
+  },
+  "useCases": [
     {
-      "id": "step-identifier",
-      "type": "[create_file|refactor_file]",
-      "description": "Step description",
-      "path": "src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/path/to/file.ts",
-      "template": "// Code template with placeholders",
-      "references": []
+      "name": "UseCaseName",
+      "description": "What this use case does",
+      "input": [
+        { "name": "fieldName", "type": "string" }
+      ],
+      "output": [
+        { "name": "resultField", "type": "string" }
+      ],
+      "path": "src/features/__FEATURE_NAME__/__use-case-name__/domain/usecases/__use-case-name__.ts",
+      "errors": [
+        {
+          "name": "UseCaseSpecificError",
+          "path": "src/features/__FEATURE_NAME__/__use-case-name__/domain/errors/__error-name__.ts"
+        }
+      ]
     }
   ]
 }
 ```
 
+### Why This Structure?
+
+The `sharedComponents` and `useCases` separation enables `/03-generate-layer-code` to:
+1. Generate `shared-implementation.yaml` for foundation components
+2. Generate one YAML per use case for vertical slices
+3. Enable parallel execution and atomic commits
+
 ### Layer-Specific Examples:
 
-#### Selected Layer Example:
+#### Domain Layer Example (NEW - Issue #117):
 ```json
 {
-  "layer": "layer",
-  "featureName": "UserRegistration",
+  "featureName": "ProductCatalogManagement",
+  "featureNumber": "001",
+  "layer": "domain",
+  "target": "backend",
   "layerContext": {
     "ubiquitousLanguage": {
-      "Registration": "The process of creating a new user account",
-      "User": "An authenticated system participant"
+      "Product": "An item available for sale in the catalog",
+      "SKU": "Stock Keeping Unit - unique identifier for products",
+      "Inventory": "Stock levels for each product"
     }
   },
-  "steps": [
+  "sharedComponents": {
+    "models": [
+      {
+        "name": "Product",
+        "type": "AggregateRoot",
+        "path": "src/features/product-catalog/domain/models/product.ts"
+      }
+    ],
+    "valueObjects": [
+      {
+        "name": "SKU",
+        "path": "src/features/product-catalog/domain/value-objects/sku.ts"
+      },
+      {
+        "name": "Price",
+        "path": "src/features/product-catalog/domain/value-objects/price.ts"
+      },
+      {
+        "name": "InventoryLevel",
+        "path": "src/features/product-catalog/domain/value-objects/inventory-level.ts"
+      }
+    ],
+    "repositories": [
+      {
+        "name": "ProductRepository",
+        "path": "src/features/product-catalog/domain/repositories/product-repository.interface.ts"
+      }
+    ],
+    "sharedErrors": [
+      {
+        "name": "ProductNotFoundError",
+        "path": "src/features/product-catalog/domain/errors/product-not-found-error.ts"
+      },
+      {
+        "name": "InvalidSKUError",
+        "path": "src/features/product-catalog/domain/errors/invalid-sku-error.ts"
+      }
+    ]
+  },
+  "useCases": [
     {
-      "id": "create-register-user-use-case",
-      "type": "create_file",
-      "path": "// Use exact path from Step 1.5.2 structure + Step 1.5.3 patterns",
-      "template": "export interface RegisterUser {\n  execute(input: RegisterUserInput): Promise<RegisterUserOutput>;\n}"
+      "name": "CreateProduct",
+      "description": "Creates a new product in the catalog",
+      "input": [
+        { "name": "sku", "type": "string" },
+        { "name": "name", "type": "string" },
+        { "name": "price", "type": "number" }
+      ],
+      "output": [
+        { "name": "id", "type": "string" },
+        { "name": "sku", "type": "string" }
+      ],
+      "path": "src/features/product-catalog/create-product/domain/usecases/create-product.ts",
+      "errors": []
+    },
+    {
+      "name": "UpdateProduct",
+      "description": "Updates product information",
+      "input": [
+        { "name": "id", "type": "string" },
+        { "name": "price", "type": "number" }
+      ],
+      "output": [
+        { "name": "id", "type": "string" },
+        { "name": "updated", "type": "boolean" }
+      ],
+      "path": "src/features/product-catalog/update-product/domain/usecases/update-product.ts",
+      "errors": []
     }
   ]
 }
