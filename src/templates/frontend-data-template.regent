@@ -1,0 +1,2006 @@
+# =============================================
+# GENERATED FILE - DO NOT EDIT DIRECTLY
+# Target: frontend
+# Layer: data
+# Built from parts in templates/parts
+# Generated at: 2025-09-30 23:13:55
+# To modify, edit the part files and rebuild
+# =============================================
+
+
+# --- From: shared/00-header.part.regent ---
+
+# AI-NOTE: This YAML file is the single source of truth for generating clean architecture layers.
+# This is the MASTER TEMPLATE that will evolve to support all architectural layers.
+#
+# INTELLIGENT RLHF SCORING SYSTEM:
+# The system uses Reinforcement Learning from Human Feedback to score execution quality:
+# -2: CATASTROPHIC - Architecture violations, incorrect REPLACE/WITH format in refactor steps
+# -1: RUNTIME ERROR - Lint failures, test failures, git operation problems
+#  0: LOW CONFIDENCE - System is uncertain, avoids hallucinations
+# +1: GOOD - Task complete but missing architectural elements
+# +2: PERFECT - Exceptional quality with Clean Architecture, DDD principles, ubiquitous language
+#
+# QUALITY INDICATORS FOR +2 SCORE:
+# - Uses ubiquitous language terminology
+# - Follows Domain-Driven Design principles
+# - Applies Clean Architecture concepts
+# - Implements patterns: Aggregate Root, Value Objects, Domain Events
+# - Perfect branch naming convention
+# - Comprehensive PR descriptions
+#
+version: '3.0.0'
+# AI-NOTE: Update these fields to describe the specific feature and layers.
+metadata:
+  title: '__FEATURE_NAME_PASCAL_CASE__ Clean Architecture Implementation'
+  description: 'Clean Architecture template for __FEATURE_NAME_LOWER_CASE__ feature following master template rules.'
+  source: 'TEMPLATE.yaml'
+  # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
+  lastUpdated: '__CURRENT_DATE__'
+  # AI-NOTE: Specify which layers are being implemented
+  layers:
+    - 'domain'
+    # Future layers will be added here:
+    # - 'data'
+    # - 'infra'
+    # - 'presentation'
+    # - 'validation'
+    # - 'main'
+  # AI-NOTE: Define ubiquitous language for +2 RLHF score
+  ubiquitousLanguage:
+    - term: '__ENTITY_NAME__'
+      definition: '__ENTITY_DEFINITION_IN_BUSINESS_CONTEXT__'
+    - term: '__VALUE_OBJECT_NAME__'
+      definition: '__VALUE_OBJECT_BUSINESS_MEANING__'
+    - term: '__DOMAIN_EVENT__'
+      definition: '__EVENT_BUSINESS_SIGNIFICANCE__'
+
+
+
+# --- From: frontend/01-structure.part.regent ---
+# ============= BEGIN STRUCTURE NEXT.JS 15 + CLEAN ARCHITECTURE =============
+  # AI-NOTE: Hybrid Architecture - "Feature Module with Use Case Slices"
+  # Features are modules containing atomic use case slices for domain cohesion and generation safety
+
+structure:
+  # App Router centralized (MUST be in src/app)
+  app:
+    basePath: '__PROJECT_NAME__/src/app'
+    folders:
+      - '(features)'              # Route group for features
+      - '__FEATURE_NAME__'        # Feature routes
+      - 'api/__FEATURE_NAME__'   # Feature API routes
+      - '_components'             # Private app components
+    files:
+      - 'layout.tsx'
+      - 'page.tsx'
+      - 'loading.tsx'             # File, not folder
+      - 'error.tsx'               # File, not folder
+      - 'not-found.tsx'           # File, not folder
+
+  # Feature Module: Container for a business domain (e.g., user, product)
+  # __FEATURE_NAME_KEBAB_CASE__ = user, product, etc.
+  feature_module:
+    basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__'
+
+    # 1. Use Case Slices: Each folder is self-contained, atomic use case
+    # __USE_CASE_NAME_KEBAB_CASE__ = create-user, get-users, etc.
+    use_case_slice:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+      layers:
+        domain:
+          folders:
+            - 'usecases'      # Interface for this specific use case
+          # Unit tests: create-user.ts + create-user.spec.ts (side by side)
+        data:
+          folders:
+            - 'usecases'      # Implementation for this specific use case
+          # Unit tests: remote-create-user.ts + remote-create-user.spec.ts (side by side)
+        presentation:
+          folders:
+            - 'actions'       # Server Action for this use case
+            - 'components'    # Components for this use case
+            - 'hooks'         # Hooks for this use case
+          # Unit tests: create-user-action.spec.ts, create-user-form.spec.tsx, use-create-user.spec.ts
+        validation:
+          folders:
+            - 'schemas'       # Schema for this specific use case
+            - 'validators'    # Validator for this specific use case
+          # Unit tests: create-user-schema.spec.ts, create-user-validator.spec.ts
+        main:
+          folders:
+            - 'composites'    # Composite component for this use case
+          # Unit tests: create-user-composite.spec.tsx
+        # Integration and E2E tests only (not unit tests)
+        __tests__:
+          folders:
+            - 'integration'   # Tests that cross layers
+            - 'e2e'          # End-to-end tests (Playwright, Cypress)
+
+    # 2. Feature-Specific Shared: Code shared ONLY within this feature
+    feature_shared:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+      layers:
+        domain:
+          folders:
+            - 'entities'      # e.g., user-entity.ts (shared by all user use cases)
+            - 'models'        # e.g., user-model.ts
+            - 'repositories'  # e.g., user-repository.ts (interface)
+            - 'errors'        # e.g., user-not-found-error.ts
+            - 'value-objects' # e.g., email-value-object.ts
+        infra:
+          folders:
+            - 'api'           # e.g., user-api-client.ts (implementation)
+            - 'services'      # e.g., user-external-service.ts
+        presentation:
+          folders:
+            - 'ui'            # Feature-specific UI components
+            - 'styles'        # Feature-specific styles
+            - 'providers'     # Feature-specific context providers
+
+    # 3. Feature Main/Integration: Connects all slices to App Router
+    feature_main:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+      folders:
+        - 'pages'         # e.g., user-page-composer.tsx (aggregates use case composites)
+        - 'config'        # Feature-level configuration
+        - 'docs'          # Feature documentation
+
+  # Shared code with Clean Architecture layers
+  shared:
+    basePath: '__PROJECT_NAME__/src/shared'
+    layers:
+      domain:
+        folders:
+          - 'errors'          # Base error classes
+          - 'protocols'       # Domain contracts/interfaces
+          - 'types'           # Shared domain types
+          - 'value-objects'   # Shared value objects
+
+      data:
+        folders:
+          - 'protocols'       # Data layer protocols
+          - 'helpers'         # Data transformation helpers
+          - 'models'          # Shared DTOs
+
+      infra:
+        folders:
+          - 'cache'           # Next.js cache utilities
+          - 'http'            # Fetch wrappers and interceptors
+          - 'storage'         # LocalStorage/SessionStorage adapters
+          - 'cookies'         # Cookie management utilities
+          - 'telemetry'       # Analytics and monitoring
+
+      presentation:
+        folders:
+          - 'components'      # Shared UI components
+          - 'hooks'           # Shared React hooks
+          - 'providers'       # Shared context providers
+          - 'ui'              # Shared shadcn/ui components
+          - 'styles'          # Global styles and utilities
+          - 'helpers'         # Presentation helpers
+
+      validation:
+        folders:
+          - 'schemas'         # Shared Zod/Yup schemas
+          - 'validators'      # Shared validation functions
+          - 'protocols'       # Validation interfaces
+
+      main:
+        folders:
+          - 'adapters'        # Shared adapters
+          - 'builders'        # Shared builders
+          - 'composites'      # Shared composites
+          - 'decorators'      # Shared decorators
+          - 'factories'       # Shared factories
+          - 'lib'             # Utility functions
+
+# Example of Hybrid Architecture workflow for Next.js
+integration:
+  use_case_example:
+    # Task: "Generate create-user use case for user feature"
+    # __FEATURE_NAME_KEBAB_CASE__ = user
+    # __USE_CASE_NAME_KEBAB_CASE__ = create-user
+
+    # STEP 1: Create Feature directories (if not exist)
+    create_feature_structure:
+      - 'src/features/user/'
+      - 'src/features/user/shared/'     # Feature-specific shared code
+      - 'src/features/user/main/'       # Feature integration
+
+    # STEP 2: Create Use Case Slice directory (isolated)
+    create_slice_directory:
+      - 'src/features/user/create-user/' # Self-contained use case
+
+    # STEP 3: Create NEW files (totally isolated within slice) WITH TESTS
+    create_slice_files:
+      # Domain layer with unit tests
+      - 'src/features/user/create-user/domain/usecases/create-user.ts'
+      - 'src/features/user/create-user/domain/usecases/create-user.spec.ts'
+
+      # Data layer with unit tests
+      - 'src/features/user/create-user/data/usecases/remote-create-user.ts'
+      - 'src/features/user/create-user/data/usecases/remote-create-user.spec.ts'
+
+      # Presentation layer with unit tests
+      - 'src/features/user/create-user/presentation/actions/create-user-action.ts'
+      - 'src/features/user/create-user/presentation/actions/create-user-action.spec.ts'
+      - 'src/features/user/create-user/presentation/components/create-user-form.tsx'
+      - 'src/features/user/create-user/presentation/components/create-user-form.spec.tsx'
+      - 'src/features/user/create-user/presentation/hooks/use-create-user.ts'
+      - 'src/features/user/create-user/presentation/hooks/use-create-user.spec.ts'
+
+      # Validation layer with unit tests
+      - 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+      - 'src/features/user/create-user/validation/schemas/create-user-schema.spec.ts'
+      - 'src/features/user/create-user/validation/validators/create-user-validator.ts'
+      - 'src/features/user/create-user/validation/validators/create-user-validator.spec.ts'
+
+      # Main layer with unit tests
+      - 'src/features/user/create-user/main/composites/create-user-composite.tsx'
+      - 'src/features/user/create-user/main/composites/create-user-composite.spec.tsx'
+
+      # Integration tests (cross-layer)
+      - 'src/features/user/create-user/__tests__/integration/create-user.integration.spec.ts'
+      - 'src/features/user/create-user/__tests__/e2e/create-user.e2e.spec.ts'
+
+    # STEP 4: Check/Modify FEATURE-SPECIFIC shared code
+    feature_shared_files:
+      - create_if_not_exists: 'src/features/user/shared/domain/models/user-model.ts'
+      - create_if_not_exists: 'src/features/user/shared/domain/repositories/user-repository.ts'
+      - modify: 'src/features/user/shared/domain/repositories/user-repository.ts'
+        action: 'Add create() method to interface'
+      - create_if_not_exists: 'src/features/user/shared/infra/api/user-api-client.ts'
+      - modify: 'src/features/user/shared/infra/api/user-api-client.ts'
+        action: 'Implement create() method for API calls'
+
+    # STEP 5: Integrate with App Router
+    integrate_app_router:
+      - create_if_not_exists: 'src/features/user/main/pages/user-page-composer.tsx'
+      - modify: 'src/features/user/main/pages/user-page-composer.tsx'
+        action: 'Import and compose CreateUserComposite'
+      - modify: 'src/app/(features)/user/page.tsx'
+        action: 'Import and render UserPageComposer from feature/main'
+
+    # RESULT: Perfect isolation for Next.js
+    # - Use case slice is completely isolated in its own directory
+    # - Feature-specific shared code stays within the feature
+    # - App Router imports only from feature/main
+    # - Zero risk of affecting other use cases
+
+  example_integration:
+    # How features connect to the App Router
+    app_route: 'src/app/(features)/user/page.tsx'
+    imports_from: 'src/features/user/main/pages/user-page-composer.tsx'
+
+    use_case_composite: 'src/features/user/create-user/main/composites/create-user-composite.tsx'
+    used_in: 'src/features/user/main/pages/user-page-composer.tsx'
+
+    feature_shared_model: 'src/features/user/shared/domain/models/user-model.ts'
+    used_by_slices: 'src/features/user/*/domain/usecases/*.ts'
+
+    global_shared_ui: 'src/shared/presentation/components'
+    global_shared_hooks: 'src/shared/presentation/hooks'
+
+# ============= END STRUCTURE NEXT.JS 15 + CLEAN ARCHITECTURE =============
+
+# --- From: frontend/02-architecture.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # FRONTEND ARCHITECTURAL RULES SECTION - NEXT.JS 15 + CLEAN ARCHITECTURE
+  # These rules define the Clean Architecture boundaries for React/Next.js frontend
+  # AI-NOTE: Frontend follows same Clean Architecture principles adapted for React/Next.js
+  # AI-NOTE: Server components and client components have different dependency rules
+  # ------------------------------------------------------------------------------
+
+  architecture:
+    folder_structure:
+      use_case_slice: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+      feature_shared: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+      feature_main: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+      global_shared: '__PROJECT_NAME__/src/shared'
+      app_router: '__PROJECT_NAME__/src/app'
+
+    execution_order:
+      # AI-NOTE: Frontend vertical slicing includes UI components
+      # Server Actions should be created before client hooks
+      # Components should be tested in isolation before integration
+      description: 'Frontend use cases are implemented vertically, from domain to UI components'
+      approach: 'Vertical Slice Architecture - One feature at a time, through all frontend layers'
+      sequence_per_use_case:
+        1: 'domain'      # Use case interface and entities
+        2: 'data'        # HTTP clients and remote implementations
+        3: 'validation'  # Zod schemas and form validation
+        4: 'presentation'# Actions, components, and hooks
+        5: 'main'        # Composite components
+        6: 'integration' # Connect to App Router
+
+      workflow_diagram: |
+        ```mermaid
+        graph TD
+          Start([Start Frontend Use Case])
+
+          %% Branch Creation
+          B1[Create Branch: feat/__FEATURE_NAME__/__USE_CASE_NAME__]
+
+          %% Use Case Slice Directory
+          UC1[Create Use Case Directory Structure]
+
+          %% Domain Slice
+          D1[Create Domain Interface]
+          D2[Write Domain Tests - TDD Red]
+          D3[Run: npm test - Expect Failure]
+          D4[Git Commit: 'test(domain): add __USE_CASE__ tests']
+
+          %% Data Slice
+          DT1[Create Remote Implementation]
+          DT2[Write HTTP Client Tests]
+          DT3[Run: npm test - Green]
+          DT4[Git Commit: 'feat(data): implement remote __USE_CASE__']
+
+          %% Validation Slice
+          V1[Create Zod Schema]
+          V2[Create Form Validators]
+          V3[Write Validation Tests]
+          V4[Run: npm test - Green]
+          V5[Git Commit: 'feat(validation): add __USE_CASE__ schema']
+
+          %% Presentation Slice - Actions
+          %% AI-NOTE: Server Actions use 'use server' directive
+          %% Must handle form validation and error states
+          PA1[Create Server Actions]
+          PA2[Write Action Tests]
+          PA3[Run: npm test - Green]
+          PA4[Git Commit: 'feat(actions): add __USE_CASE__ server action']
+
+          %% Presentation Slice - Hooks
+          PH1[Create Custom Hooks]
+          PH2[Write Hook Tests]
+          PH3[Run: npm test - Green]
+          PH4[Git Commit: 'feat(hooks): add use-__USE_CASE__ hook']
+
+          %% Presentation Slice - Components
+          PC1[Create UI Components]
+          PC2[Write Component Tests]
+          PC3[Run: npm test - Green]
+          PC4[Git Commit: 'feat(components): add __USE_CASE__ form/ui']
+
+          %% Main Slice - Composite
+          M1[Create Composite Component]
+          M2[Wire Dependencies]
+          M3[Write Composite Tests]
+          M4[Run: npm test - Green]
+          M5[Git Commit: 'feat(main): add __USE_CASE__ composite']
+
+          %% Feature Integration
+          FI1[Update Feature Page Composer]
+          FI2[Integrate Composite in Feature Main]
+          FI3[Test Feature Integration]
+          FI4[Git Commit: 'feat(pages): integrate __USE_CASE__ in page']
+
+          %% App Router Integration
+          AR1[Update App Router Page]
+          AR2[Import Feature Page Composer]
+          AR3[Test App Router Integration]
+          AR4[Git Commit: 'feat(app): integrate __USE_CASE__ in app router']
+
+          %% Testing
+          IT1[Write Integration Tests]
+          IT2[Run: npm run test:integration]
+          IT3[Write E2E Tests with Playwright/Cypress]
+          IT4[Run: npm run test:e2e]
+          IT5[Git Commit: 'test(e2e): add __USE_CASE__ e2e tests']
+
+          %% Final Steps
+          F1[Run All Tests]
+          F2[Run: npm run lint]
+          F3[Run: npm run build]
+          F4[Run: npm run type-check]
+          F5[Git Push: Push Branch]
+          F6[Create PR: '__FEATURE__/__USE_CASE__ Frontend Implementation']
+
+          End([Frontend Use Case Complete])
+
+          %% Flow - Vertical Development Through Frontend Layers
+          Start --> B1
+          B1 --> UC1
+
+          %% Domain Flow
+          UC1 --> D1 --> D2 --> D3 --> D4
+
+          %% Data Flow
+          D4 --> DT1 --> DT2 --> DT3 --> DT4
+
+          %% Validation Flow
+          DT4 --> V1 --> V2 --> V3 --> V4 --> V5
+
+          %% Presentation Flow - Actions
+          V5 --> PA1 --> PA2 --> PA3 --> PA4
+
+          %% Presentation Flow - Hooks
+          PA4 --> PH1 --> PH2 --> PH3 --> PH4
+
+          %% Presentation Flow - Components
+          PH4 --> PC1 --> PC2 --> PC3 --> PC4
+
+          %% Main Flow
+          PC4 --> M1 --> M2 --> M3 --> M4 --> M5
+
+          %% Feature Integration Flow
+          M5 --> FI1 --> FI2 --> FI3 --> FI4
+
+          %% App Router Integration Flow
+          FI4 --> AR1 --> AR2 --> AR3 --> AR4
+
+          %% Testing Flow
+          AR4 --> IT1 --> IT2 --> IT3 --> IT4 --> IT5
+
+          %% Final Flow
+          IT5 --> F1 --> F2 --> F3 --> F4 --> F5 --> F6 --> End
+
+          classDef branch fill:#FFF9C4,stroke:#F57C00,stroke-width:2px
+          classDef domain fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px
+          classDef data fill:#E3F2FD,stroke:#2196F3,stroke-width:2px
+          classDef validation fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
+          classDef presentation fill:#FCE4EC,stroke:#E91E63,stroke-width:2px
+          classDef main fill:#E0F2F1,stroke:#009688,stroke-width:2px
+          classDef integration fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
+          classDef testing fill:#FFEBEE,stroke:#F44336,stroke-width:2px
+          classDef final fill:#E8EAF6,stroke:#3F51B5,stroke-width:2px
+
+          class B1,UC1 branch
+          class D1,D2,D3,D4 domain
+          class DT1,DT2,DT3,DT4 data
+          class V1,V2,V3,V4,V5 validation
+          class PA1,PA2,PA3,PA4,PH1,PH2,PH3,PH4,PC1,PC2,PC3,PC4 presentation
+          class M1,M2,M3,M4,M5 main
+          class FI1,FI2,FI3,FI4,AR1,AR2,AR3,AR4 integration
+          class IT1,IT2,IT3,IT4,IT5 testing
+          class F1,F2,F3,F4,F5,F6 final
+        ```
+
+      git_workflow_per_use_case:
+        description: 'Vertical slice development for Next.js - one complete feature at a time'
+        example_use_case: 'create-user form in user feature'
+
+        workflow_steps:
+          - 'git checkout -b feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'Create use case slice directory: src/features/__FEATURE_NAME__/__USE_CASE_NAME__'
+
+        domain_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/usecases/__USE_CASE__.ts'
+          - 'Write domain tests (TDD - RED) → npm test (expect failure)'
+          - 'git add → git commit -m "test(domain): add failing tests for __USE_CASE__"'
+          - 'Create domain interface → npm test → npm run lint'
+          - 'git add → git commit -m "feat(domain): add __USE_CASE__ interface"'
+
+        data_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/data/usecases/remote-__USE_CASE__.ts'
+          - 'Implement HTTP client for use case → npm test → npm run lint'
+          - 'git add → git commit -m "feat(data): implement remote __USE_CASE__"'
+
+        validation_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/validation/schemas/__USE_CASE__-schema.ts'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/validation/validators/__USE_CASE__-validator.ts'
+          - 'Write validation tests → npm test → npm run lint'
+          - 'git add → git commit -m "feat(validation): add __USE_CASE__ schema and validators"'
+
+        presentation_slice_actions:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/actions/__USE_CASE__-action.ts'
+          - 'Write server action tests → npm test → npm run lint'
+          - 'git add → git commit -m "feat(actions): add __USE_CASE__ server action"'
+
+        presentation_slice_hooks:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/hooks/use-__USE_CASE__.ts'
+          - 'Write hook tests (React Testing Library) → npm test → npm run lint'
+          - 'git add → git commit -m "feat(hooks): add use-__USE_CASE__ hook"'
+
+        presentation_slice_components:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/components/__USE_CASE__-form.tsx'
+          - 'Write component tests (React Testing Library) → npm test → npm run lint'
+          - 'git add → git commit -m "feat(components): add __USE_CASE__ form component"'
+
+        main_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/main/composites/__USE_CASE__-composite.tsx'
+          - 'Wire all dependencies (hooks, actions, components) → npm test → npm run lint'
+          - 'git add → git commit -m "feat(main): add __USE_CASE__ composite"'
+
+        feature_integration:
+          - 'Update: src/features/__FEATURE_NAME__/main/pages/__FEATURE__-page-composer.tsx'
+          - 'Import and compose use case composite → import from ../__USE_CASE_NAME__/main/composites'
+          - 'Test feature page integration → npm test'
+          - 'git add → git commit -m "feat(pages): integrate __USE_CASE__ in feature page"'
+
+        app_router_integration:
+          - 'Update: src/app/(features)/__FEATURE_NAME__/page.tsx'
+          - 'Import feature page composer → from ../../../features/__FEATURE_NAME__/main/pages'
+          - 'Test app router integration → npm run dev → manual test'
+          - 'git add → git commit -m "feat(app): integrate __USE_CASE__ in app router"'
+
+        integration_testing:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__tests__/integration/__USE_CASE__.integration.spec.ts'
+          - 'Write integration tests → npm run test:integration'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__tests__/e2e/__USE_CASE__.e2e.spec.ts'
+          - 'Write E2E tests → npm run test:e2e'
+          - 'git add → git commit -m "test(e2e): add __USE_CASE__ integration and e2e tests"'
+
+        finalization:
+          - 'Run full test suite → npm test'
+          - 'Run linting → npm run lint'
+          - 'Run type checking → npm run type-check'
+          - 'Run build → npm run build'
+          - 'git push origin feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'gh pr create --base main --title "feat(__FEATURE__): implement __USE_CASE__ frontend feature"'
+
+        benefits:
+          - 'Atomic delivery: Each PR delivers a complete, working frontend feature'
+          - 'Component isolation: Each slice can be developed and tested independently'
+          - 'Type safety: Full TypeScript coverage from domain to UI'
+          - 'Test coverage: Unit, integration, and E2E tests for complete confidence'
+          - 'Next.js optimization: Leverages App Router, Server Actions, and RSC patterns'
+
+    dependency_rules:
+      domain:
+        can_import_from: []  # Domain layer is the core - imports nothing
+        cannot_import_from: ['data', 'infra', 'presentation', 'validation', 'main']
+
+      data:
+        can_import_from: ['domain']  # Data layer implements domain interfaces
+        cannot_import_from: ['presentation', 'validation', 'main']
+
+      validation:
+        can_import_from: ['domain']  # Zod schemas validate domain entities and DTOs
+        cannot_import_from: ['data', 'presentation', 'main']
+
+      presentation:
+        can_import_from: ['domain', 'validation']  # Presentation uses domain and validation
+        cannot_import_from: ['data', 'main']
+
+      main:
+        can_import_from: ['data', 'domain', 'presentation', 'validation']  # Main layer composes everything
+        cannot_import_from: []  # Main is the composition root
+
+    # Clean Architecture principles adapted for React/Next.js
+    principles:
+      core_principles:
+        - "Component Independence: UI components don't depend on external libraries directly"
+        - "Testability: Business logic can be tested without DOM, API, or framework dependencies"
+        - "Framework Independence: Business rules don't depend on Next.js or React specifics"
+        - "Separation: Business rules are isolated from UI concerns"
+        - "Dependency Rule: Dependencies point inward toward the domain"
+
+      design_patterns:
+        domain:
+          - "Interface Pattern: Define contracts for use cases and entities"
+          - "ES2015 Modules: Use import/export for code organization"
+          - "Type Exports: Separate types for Input and Output DTOs"
+          - "Single Method Pattern: One execute() method per use case"
+          - "Entity Pattern: Rich domain models with behavior"
+
+        data:
+          - "Repository Pattern: HTTP clients implementing domain repositories"
+          - "Adapter Pattern: Transform external API data to domain entities"
+          - "Cache Pattern: Next.js cache and SWR/React Query integration"
+          - "Error Handling: Transform HTTP errors to domain errors"
+          - "Fetch Wrapper: Centralized HTTP client with interceptors"
+
+        validation:
+          - "Schema Validation: Zod schemas for runtime type validation"
+          - "Form Validation: Integration with React Hook Form"
+          - "Composite Pattern: Combine multiple field validators"
+          - "Builder Pattern: Fluent interface for validation construction"
+          - "Error Mapping: Transform validation errors to user-friendly messages"
+
+        presentation:
+          actions:
+            - "Server Actions: Next.js 15 server-side form handling"
+            - "Progressive Enhancement: Works without JavaScript"
+            - "Error Boundaries: Graceful error handling in actions"
+            - "Revalidation: Automatic cache invalidation after mutations"
+          components:
+            - "Composition Pattern: Small, composable UI components"
+            - "Controlled Components: React controlled inputs with state"
+            - "Compound Components: Complex components built from simpler ones"
+            - "Render Props: Flexible component composition patterns"
+            - "Shadcn/ui: Consistent design system components"
+          hooks:
+            - "Custom Hooks: Encapsulate business logic and state"
+            - "State Management: useState, useReducer for local state"
+            - "Effect Management: useEffect for side effects"
+            - "Context API: Share state without prop drilling"
+            - "Optimistic Updates: Immediate UI feedback for better UX"
+
+        main:
+          - "Composite Pattern: Combine use case slices into feature pages"
+          - "Factory Pattern: Create composites with all dependencies wired"
+          - "Provider Pattern: Context providers for feature-level state"
+          - "Higher-Order Components: Add cross-cutting concerns"
+          - "Dependency Injection: Constructor injection for composites"
+
+      testing_strategy:
+        domain:
+          approach: "Unit Tests - Pure functions and business logic"
+          coverage_target: "100%"
+          tools: ["Vitest"]
+          practices:
+            - "Use fixed test data helpers instead of faker"
+            - "Create mock factories with deterministic data"
+            - "Test domain entities and use case interfaces"
+            - "Use mockUserParams() with fixed values"
+            - "Keep test helpers in tests/domain/mocks directory"
+            - "No external dependencies or randomness in tests"
+
+        data:
+          approach: "Unit Tests with MSW (Mock Service Worker)"
+          coverage_target: "95%"
+          tools: ["Vitest", "MSW", "vi.mock"]
+          practices:
+            - "Mock HTTP clients with MSW handlers"
+            - "Use makeSut() factory for test setup"
+            - "Test API error scenarios and edge cases"
+            - "Verify request payloads and headers"
+            - "Use fixed test data from mocks directory"
+            - "Mock external API responses consistently"
+
+        validation:
+          approach: "Unit Tests - Schema and form validation"
+          coverage_target: "100%"
+          tools: ["Vitest", "Zod", "@testing-library/react"]
+          practices:
+            - "Test Zod schemas with valid and invalid data"
+            - "Test form validation integration with React Hook Form"
+            - "Use makeSut() factory for validator creation"
+            - "Test specific error types and messages"
+            - "Test validation factories return correct schemas"
+            - "Test edge cases (empty fields, malformed data)"
+
+        presentation:
+          approach: "Component and Hook Tests"
+          coverage_target: "90%"
+          tools: ["Vitest", "@testing-library/react", "@testing-library/user-event"]
+          practices:
+            - "Use render() from React Testing Library for components"
+            - "Test user interactions with userEvent.click/type/submit"
+            - "Use screen queries (getByRole, getByLabelText, getByTestId)"
+            - "Create test helpers (renderWithProviders, setupUser)"
+            - "Mock hooks and actions with vi.mock()"
+            - "Test loading states, error states, and success states"
+            - "Use MSW for integration testing with real API calls"
+            - "Test accessibility with jest-axe"
+
+        main:
+          approach: "Integration and E2E Tests"
+          coverage_target: "80%"
+          tools: ["Vitest", "Playwright", "Cypress", "@testing-library/react"]
+          practices:
+            - "Test complete user flows with Playwright/Cypress"
+            - "Test composite components with all dependencies"
+            - "Use page object model for E2E tests"
+            - "Test responsive design and mobile interactions"
+            - "Verify SEO and meta tags in E2E tests"
+            - "Test performance metrics (Core Web Vitals)"
+            - "Use fixed test data for E2E scenarios"
+
+      best_practices:
+        - "SOLID Principles: Apply to React components and hooks"
+        - "DRY: Extract common logic to custom hooks"
+        - "KISS: Keep components simple and focused"
+        - "YAGNI: Build only what's needed, when it's needed"
+        - "Component Composition: Favor composition over inheritance"
+        - "TypeScript: Use strict type checking throughout"
+        - "Accessibility: Follow WCAG guidelines for inclusive design"
+        - "Performance: Optimize with React.memo, useMemo, useCallback"
+        - "SEO: Leverage Next.js SSR/SSG for search optimization"
+        - "Security: Sanitize inputs and validate on both client and server"
+
+
+
+# --- From: frontend/03-rules.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: IMMUTABLE SECTIONS AHEAD.
+  # The sections from here until 'steps' are architectural rules.
+  # You MUST copy them verbatim into the implementation file without ANY modification.
+  #
+  # AUTOMATED LEARNING SYSTEM:
+  # The RLHF system automatically:
+  # - Tracks success/failure patterns across executions
+  # - Identifies common error types and their fixes
+  # - Applies improvements when confidence > 80%
+  # - Generates learning reports with actionable insights
+  # - Prevents hallucinations with score 0 for uncertain cases
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # RULES SECTION
+  # All architectural and pattern rules consolidated
+  # ------------------------------------------------------------------------------
+
+  rules:
+    # Domain layer rules (modern approach)
+    domain:
+      allowed:
+        - 'Type definitions and interfaces (Models)'
+        - 'Use case interfaces with single execute() method'
+        - 'Separate Input and Output types for each use case'
+        - 'Simple data models without behavior'
+        - 'JSDoc documentation for all public interfaces'
+        - 'ES2015 module exports (export type, export interface)'
+
+      forbidden:
+        - 'Multiple methods in a single use case interface'
+        - 'Combined operations (e.g., __USE_CASE_NAME__And__OTHER_ACTION__)'
+        - 'Framework dependencies (React, Next.js hooks, third-party libraries)'
+        - 'External libraries (HTTP clients, validation libraries)'
+        - 'Implementation details of any kind'
+        - 'React components or UI logic'
+        - 'HTTP/API calls or browser APIs'
+        - 'Environment variables or client configuration'
+        - 'Console.log or any side effects'
+        - 'Implementation of business logic (only interfaces allowed)'
+        - 'Validation implementations'
+        - 'Error throwing or handling'
+        - 'Dependency injection'
+        - 'Domain entities with methods/behavior (use simple data structures)'
+
+      should:
+        - 'Define business entities and value objects'
+        - 'Contain only interfaces and types'
+        - 'Be framework-agnostic'
+        - 'Follow domain-driven design principles'
+
+      should_not:
+        - 'Import from other layers'
+        - 'Contain implementation details'
+        - 'Have framework dependencies'
+      use_case:
+        should:
+          - 'Have only ONE execute() method per interface'
+          - 'Define separate Input and Output types'
+          - 'Have EXACTLY ONE responsibility (one business operation)'
+          - 'Be named with single verb describing ONE action (CreateUser, not CreateUserAndSendEmail)'
+          - 'Include comprehensive JSDoc documentation'
+          - 'Return Promise<Output> from execute method'
+          - 'Be framework agnostic'
+          - 'Follow naming convention: VerbNoun (e.g., CreateUser, LoadSurvey, AuthenticateUser)'
+        should_not:
+          - 'Have multiple methods (no createUser() AND readUser() in same interface)'
+          - 'Combine multiple operations (CreateUserAndSendEmail violates SRP)'
+          - 'Contain implementation logic'
+          - 'Know about HTTP, databases, or external services'
+          - 'Import from data, presentation, or infrastructure layers'
+          - 'Have side effects'
+          - 'Use generic method names like handle(), process(), or run()'
+
+    # Data layer rules
+    data:
+      should:
+        - 'Implement domain use case interfaces'
+        - 'Use constructor injection for dependencies'
+        - 'Define protocols for external dependencies'
+        - 'Use prefix naming (Remote__USE_CASE_NAME__, Api__USE_CASE_NAME__)'
+        - 'Handle errors and status codes appropriately'
+        - 'Keep business logic minimal (only orchestration)'
+        - 'Return domain types, not infrastructure types'
+
+      should_not:
+        - 'Import from infrastructure layer directly'
+        - 'Contain complex business logic (belongs in domain)'
+        - 'Expose infrastructure details to domain'
+        - 'Use concrete implementations instead of protocols'
+        - 'Have direct API calls or browser APIs (use protocols)'
+
+    # Infrastructure layer rules (Frontend-specific)
+    infra:
+      should:
+        - 'Implement data layer protocols for frontend'
+        - 'Use native Fetch API for HTTP requests'
+        - 'Use browser localStorage/sessionStorage adapters'
+        - 'Implement cache strategies (React Query, SWR, or similar)'
+        - 'Handle network retry logic and offline scenarios'
+        - 'Use environment variables for API endpoints'
+        - 'Implement request/response interceptors'
+        - 'Handle CORS and authentication headers'
+
+      should_not:
+        - 'Import from domain or use case layers'
+        - 'Contain business logic'
+        - 'Use multiple HTTP client implementations'
+        - 'Expose HTTP-specific types to other layers'
+        - 'Use axios or other HTTP libraries (use Fetch API)'
+        - 'Access browser APIs directly from other layers'
+
+    # Presentation layer rules (Frontend-specific)
+    presentation:
+      actions:
+        should:
+          - 'Use Next.js 15+ Server Actions for form submission'
+          - 'Implement proper error handling with redirect/revalidate'
+          - 'Use Zod schemas for server-side validation'
+          - 'Return ActionResult<T> or FormState for form feedback'
+          - 'Handle authentication and authorization'
+        should_not:
+          - 'Contain business logic (delegate to use cases)'
+          - 'Make direct database calls'
+          - 'Import from infra layer directly'
+
+      components:
+        should:
+          - 'Use Shadcn/ui components with Tailwind CSS'
+          - 'Prefer Server Components over Client Components'
+          - 'Use "use client" directive only when necessary'
+          - 'Follow atomic design principles (atoms, molecules, organisms)'
+          - 'Implement proper error boundaries'
+          - 'Use TypeScript for props and state'
+        should_not:
+          - 'Use custom CSS/SASS (use Tailwind CSS)'
+          - 'Contain business logic (use custom hooks)'
+          - 'Make direct API calls (use Server Actions or hooks)'
+
+      hooks:
+        should:
+          - 'Use React hooks for state management and side effects'
+          - 'Implement custom hooks for reusable logic'
+          - 'Use Context API for feature-specific state'
+          - 'Handle loading, error, and success states'
+          - 'Follow hooks rules (no conditional calls)'
+        should_not:
+          - 'Use Redux or external state managers (use Context API)'
+          - 'Contain business logic (delegate to use cases)'
+          - 'Make direct API calls (use data layer)'
+
+    # Error rules
+    error:
+      should:
+        - 'Extend the native Error class'
+        - 'Have descriptive names ending with Error'
+        - 'Contain meaningful error messages'
+        - 'Represent business rule violations'
+        - 'Be thrown when domain invariants are violated'
+
+      should_not:
+        - 'Contain HTTP status codes'
+        - 'Include technical/implementation details'
+        - 'Expose sensitive information'
+        - 'Import external dependencies'
+
+    # Test helper rules
+    test_helper:
+      should:
+        - 'Create mock/stub implementations of use cases'
+        - 'Generate fake test data'
+        - 'Be pure functions that return consistent data'
+        - 'Help reduce test boilerplate'
+        - 'Use ONLY Vitest (Jest is prohibited)'
+
+      should_not:
+        - 'Make real API calls or database queries'
+        - 'Depend on external services'
+        - 'Contain test assertions (those belong in test files)'
+        - 'Have side effects or maintain state'
+        - 'Use Jest (use Vitest instead)'
+
+    # Validation rules (Frontend-specific)
+    validation:
+      schemas:
+        should:
+          - 'Use Zod for schema definition and validation'
+          - 'Define schemas that match domain models'
+          - 'Support both client and server-side validation'
+          - 'Include proper error messages for form fields'
+          - 'Export schemas for reuse across components'
+        should_not:
+          - 'Import from domain layer'
+          - 'Contain business logic (only validation rules)'
+          - 'Use other validation libraries (use Zod)'
+
+      validators:
+        should:
+          - 'Implement reusable field validators'
+          - 'Support synchronous validation for forms'
+          - 'Return user-friendly error messages'
+          - 'Follow Zod patterns and conventions'
+        should_not:
+          - 'Import from data or infra layers'
+          - 'Throw exceptions (return validation results)'
+          - 'Access external services for validation'
+          - 'Use async validation (prefer synchronous)'
+
+    # Main layer rules (Frontend-specific)
+    main:
+      composites:
+        should:
+          - 'Create composite components that wire all dependencies'
+          - 'Compose Server Actions with validation schemas'
+          - 'Wire use cases with data layer and validation'
+          - 'Export fully configured components ready for App Router'
+          - 'Handle error states and loading states'
+        should_not:
+          - 'Contain business logic (only composition)'
+          - 'Make direct API calls'
+          - 'Define new interfaces or types'
+
+      pages:
+        should:
+          - 'Create page composers that aggregate feature composites'
+          - 'Use Next.js 15 App Router patterns (layout, page, loading, error)'
+          - 'Implement proper SEO metadata and structured data'
+          - 'Handle authentication and route protection'
+          - 'Export React.FC components for App Router integration'
+        should_not:
+          - 'Contain business logic (delegate to composites)'
+          - 'Have direct state management (use providers)'
+          - 'Include complex algorithms or calculations'
+          - 'Store application state directly'
+
+    # Reference patterns
+    reference_patterns:
+      clean_architecture:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'clean architecture use case'
+        url: 'https://github.com/...'
+        description: 'Following Clean Architecture pattern.'
+
+      ddd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'domain driven design'
+        url: 'https://github.com/...'
+        description: 'Following DDD patterns.'
+
+      tdd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'test driven development'
+        url: 'https://github.com/...'
+        description: 'Following TDD patterns.'
+
+    # Learning patterns (Frontend-specific)
+    learning_patterns:
+      common_errors:
+        - pattern: 'import axios'
+          fix: 'Use Fetch API instead of axios in frontend infra layer'
+          score_impact: -2
+
+        - pattern: '"use client" everywhere'
+          fix: 'Prefer Server Components, use "use client" only when necessary'
+          score_impact: -1
+
+        - pattern: 'useState for server state'
+          fix: 'Use Server Actions and revalidation instead of client state'
+          score_impact: -1
+
+        - pattern: '__USE_CASE_NAME__And__OTHER_ACTION__'
+          fix: 'Split into two separate use cases (SRP violation)'
+          score_impact: -1
+
+        - pattern: 'missing Zod validation'
+          fix: 'Add Zod schema validation for forms and Server Actions'
+          score_impact: -2
+
+      success_indicators:
+        - 'Uses ubiquitous language consistently'
+        - 'Follows single responsibility principle'
+        - 'No dependency violations between layers'
+        - 'Proper Server Component vs Client Component usage'
+        - 'Comprehensive test coverage with Vitest'
+        - 'Clean git history with atomic commits'
+        - 'Effective use of Next.js App Router patterns'
+        - 'Strong TypeScript typing throughout'
+
+    # Required protocols for all layers
+    required_protocols:
+      # Domain Layer
+      domain:
+        - 'All use cases must have single execute() method'
+        - 'All use cases must define separate Input and Output types'
+        - 'All domain types must be immutable'
+        - 'No use case can perform multiple operations (SRP)'
+        - 'All models must be simple DTOs without behavior'
+
+      # Data Layer
+      data:
+        - 'All implementations must inject dependencies via constructor'
+        - 'All protocols must be interfaces, not concrete classes'
+        - 'All implementations must use Db or Remote prefix'
+        - 'Must return domain types, not infrastructure types'
+        - 'Must handle errors and map status codes appropriately'
+
+      # Infrastructure Layer
+      infra:
+        - 'All adapters must implement data layer protocols'
+        - 'HTTP clients must use Fetch API, not axios'
+        - 'Browser storage adapters must use localStorage/sessionStorage'
+        - 'All external configs must come from environment variables'
+        - 'Must not expose infrastructure types to other layers'
+
+      # Presentation Layer
+      presentation:
+        - 'Server Actions must return ActionResult<T> or FormState'
+        - 'React components must use function components with hooks'
+        - 'Pages must be Server Components by default'
+        - 'Custom hooks must follow React hooks rules'
+        - 'Components must receive dependencies as props'
+
+      # Validation Layer
+      validation:
+        - 'All schemas must use Zod for validation'
+        - 'Schemas must match domain model structure'
+        - 'Validation must be synchronous for forms'
+        - 'Must support both client and server validation'
+        - 'Error messages must be user-friendly'
+
+      # Main Layer
+      main:
+        - 'All composites must return configured components'
+        - 'Composite functions must wire all dependencies'
+        - 'No business logic allowed (only composition)'
+        - 'Pages must use Next.js App Router patterns'
+        - 'Must not define new types (use existing from other layers)'
+
+      # Cross-cutting Concerns
+      general:
+        - 'All public interfaces must have JSDoc documentation'
+        - 'All errors must extend native Error class'
+        - 'All test helpers must be pure functions'
+        - 'All tests must use Vitest, not Jest'
+        - 'No use of faker - fixed test data only'
+        - 'All components must be properly typed with TypeScript'
+        - 'Use "use client" directive only when necessary'
+
+    # Documentation standards (JSDoc)
+    documentation:
+      # Domain Layer Documentation
+      domain:
+        use_case_interface:
+          - '@description - Clear description of the use case purpose'
+          - '@example - Usage example with execute() method'
+          - '@see - Reference to related use cases or documentation'
+        input_output_types:
+          - '@typedef - Define Input and Output types'
+          - '@property - Document each field with type and constraints'
+          - '@example - Show valid input/output instances'
+        model_type:
+          - '@typedef - Define the domain model'
+          - '@property - Document each property with business rules'
+          - '@example - Show valid model instance'
+
+      # Data Layer Documentation
+      data:
+        protocol_interface:
+          - '@interface - Define protocol contracts'
+          - '@method - Document each method signature'
+          - '@throws - Document possible errors'
+        implementation_class:
+          - '@class - Describe the use case implementation'
+          - '@implements - List implemented interfaces'
+          - '@constructor - Document dependency injection'
+          - '@method - Document orchestration logic'
+
+      # Infrastructure Layer Documentation
+      infra:
+        api_client:
+          - '@class - Describe the API client purpose'
+          - '@implements - Protocol being implemented'
+          - '@dependency - External libraries used (Fetch API)'
+        storage_adapter:
+          - '@class - Browser storage adapter implementation'
+          - '@method - Document storage operations'
+          - '@throws - Storage-related errors'
+        http_client:
+          - '@class - HTTP client implementation for frontend'
+          - '@method - Document request/response handling'
+          - '@throws - Network-related errors'
+
+      # Presentation Layer Documentation
+      presentation:
+        server_action:
+          - '@function - Server Action description'
+          - '@param - Form data or action parameters'
+          - '@returns - ActionResult<T> or FormState'
+          - '@throws - Validation or business errors'
+        react_component:
+          - '@component - Component description'
+          - '@props - Component properties with TypeScript types'
+          - '@state - Component state (if Client Component)'
+          - '@returns - JSX.Element'
+        custom_hook:
+          - '@hook - Custom hook description'
+          - '@param - Hook parameters'
+          - '@returns - Hook return value with types'
+          - '@example - Usage example'
+
+      # Validation Layer Documentation
+      validation:
+        zod_schema:
+          - '@schema - Zod schema description'
+          - '@property - Document each field with validation rules'
+          - '@example - Show valid and invalid examples'
+          - '@returns - Parsed data or validation errors'
+        validator_function:
+          - '@function - Field validator description'
+          - '@param - Value to validate'
+          - '@returns - Validation result or error message'
+
+      # Main Layer Documentation
+      main:
+        composite:
+          - '@component - Composite component description'
+          - '@returns - Configured component with all dependencies'
+          - '@example - How to use the composite'
+        page_composer:
+          - '@component - Page composer description'
+          - '@param - Page props and metadata'
+          - '@returns - Next.js page component'
+        composition:
+          - '@function - Dependency composition for frontend'
+          - '@returns - Fully configured React component'
+
+      example_template: |
+        /**
+        * @description __USE_CASE_DESCRIPTION__
+        * @example
+        * const __USE_CASE_NAME_CAMEL_CASE__ = new __USE_CASE_NAME_PASCAL_CASE__Impl(__DEPENDENCY_NAME__)
+        * const result = await __USE_CASE_NAME_CAMEL_CASE__.execute({
+        *   __INPUT_FIELD_1__: '__EXAMPLE_VALUE_1__',
+        *   __INPUT_FIELD_2__: '__EXAMPLE_VALUE_2__',
+        *   __INPUT_FIELD_3__: '__EXAMPLE_VALUE_3__'
+        * })
+        * @see {@link __RELATED_USE_CASE__} for __RELATED_DESCRIPTION__
+        */
+        export interface __USE_CASE_NAME_PASCAL_CASE__ {
+          execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output>
+        }
+
+        /**
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Input
+        * @property {string} __INPUT_FIELD_1__ - __FIELD_1_DESCRIPTION__ (__FIELD_1_CONSTRAINTS__)
+        * @property {string} __INPUT_FIELD_2__ - __FIELD_2_DESCRIPTION__
+        * @property {string} __INPUT_FIELD_3__ - __FIELD_3_DESCRIPTION__ (__FIELD_3_CONSTRAINTS__)
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Input = {
+          __INPUT_FIELD_1__: string
+          __INPUT_FIELD_2__: string
+          __INPUT_FIELD_3__: string
+        }
+
+        /**
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Output
+        * @property {string} __OUTPUT_FIELD_1__ - __OUTPUT_FIELD_1_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_2__ - __OUTPUT_FIELD_2_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_3__ - __OUTPUT_FIELD_3_DESCRIPTION__
+        * @property {Date} __TIMESTAMP_FIELD__ - __TIMESTAMP_DESCRIPTION__
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Output = {
+          __OUTPUT_FIELD_1__: string
+          __OUTPUT_FIELD_2__: string
+          __OUTPUT_FIELD_3__: string
+          __TIMESTAMP_FIELD__: Date
+        }
+
+
+# --- From: frontend/steps/02-data.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: DATA LAYER IMPLEMENTATION STEPS FOR FRONTEND (TDD)
+  # Simplified to match actual codebase patterns - no over-engineering
+  # Based on real code: RemoteAuthentication, RemoteLoadSurveyList patterns
+  # ------------------------------------------------------------------------------
+
+  data_steps:
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create feature branch for __USE_CASE_NAME_PASCAL_CASE__ frontend data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Following Git Flow pattern for feature development.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'git workflow feature branch naming conventions'
+          url: 'https://github.com/...'
+          description: 'Git Flow and feature branch best practices.'
+      run_scripts:
+        description: 'Create and checkout feature branch for data layer development'
+        scripts:
+          - name: 'Create feature branch'
+            command: 'git checkout -b feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-frontend'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Push feature branch'
+            command: 'git push -u origin feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-frontend'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: CREATE DATA STRUCTURE ===
+    - id: 'create-data-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'Create data layer folder structure for __USE_CASE_NAME_PASCAL_CASE__ frontend use case'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'FRONTEND_ARCHITECTURE.md'
+          description: 'Following Clean Architecture data layer structure for frontend.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture data layer frontend typescript'
+          url: 'https://github.com/...'
+          description: 'Data layer patterns for frontend with simple Remote implementations.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+          folders:
+            - 'usecases'     # Use case implementations (Remote prefix)
+
+    # === STEP 3: CREATE FAILING TESTS (RED PHASE) ===
+    - id: 'create-data-failing-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create failing tests for Remote__USE_CASE_NAME_PASCAL_CASE__ data implementation (RED)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Following existing test patterns from RemoteAuthentication and RemoteLoadSurveyList.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development vitest typescript'
+          url: 'https://github.com/...'
+          description: 'TDD patterns with Vitest for TypeScript.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { describe, it, expect, beforeEach, vi } from 'vitest'
+        import { HttpClient, HttpStatusCode } from '@/data/protocols/http'
+        import { Remote__USE_CASE_NAME_PASCAL_CASE__ } from './remote-__USE_CASE_NAME_KEBAB_CASE__'
+        import type { __USE_CASE_NAME_PASCAL_CASE__ } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import { UnexpectedError } from '@/domain/errors'
+
+        /**
+         * TDD Tests for Remote__USE_CASE_NAME_PASCAL_CASE__ - Following real codebase patterns
+         * Simple tests matching RemoteAuthentication/RemoteLoadSurveyList style
+         */
+        describe('Remote__USE_CASE_NAME_PASCAL_CASE__', () => {
+          let sut: Remote__USE_CASE_NAME_PASCAL_CASE__
+          let url: string
+          let httpClientSpy: HttpClient
+
+          beforeEach(() => {
+            url = 'any_url'
+            httpClientSpy = {
+              request: vi.fn()
+            }
+            sut = new Remote__USE_CASE_NAME_PASCAL_CASE__(url, httpClientSpy)
+          })
+
+          describe('RED Phase - These should FAIL initially', () => {
+            it('should call HttpClient with correct values', async () => {
+              const params = {
+                __INPUT_FIELD_1__: 'any_value_1',
+                __INPUT_FIELD_2__: 'any_value_2'
+              }
+
+              vi.spyOn(httpClientSpy, 'request').mockResolvedValueOnce({
+                statusCode: HttpStatusCode.ok,
+                body: 'any_body'
+              })
+
+              await sut.__USE_CASE_METHOD_NAME__(params)
+
+              expect(httpClientSpy.request).toHaveBeenCalledWith({
+                url: 'any_url',
+                method: 'post',
+                body: params
+              })
+            })
+
+            it('should return correct data on HttpStatusCode.ok', async () => {
+              const httpResult = {
+                __OUTPUT_FIELD_1__: 'any_value_1',
+                __OUTPUT_FIELD_2__: 'any_value_2'
+              }
+
+              vi.spyOn(httpClientSpy, 'request').mockResolvedValueOnce({
+                statusCode: HttpStatusCode.ok,
+                body: httpResult
+              })
+
+              const result = await sut.__USE_CASE_METHOD_NAME__({
+                __INPUT_FIELD_1__: 'any_input_1',
+                __INPUT_FIELD_2__: 'any_input_2'
+              })
+
+              expect(result).toEqual(httpResult)
+            })
+
+            it('should throw UnexpectedError on HttpStatusCode.serverError', async () => {
+              vi.spyOn(httpClientSpy, 'request').mockResolvedValueOnce({
+                statusCode: HttpStatusCode.serverError,
+                body: 'any_body'
+              })
+
+              const promise = sut.__USE_CASE_METHOD_NAME__({
+                __INPUT_FIELD_1__: 'any_input_1',
+                __INPUT_FIELD_2__: 'any_input_2'
+              })
+
+              await expect(promise).rejects.toThrow(new UnexpectedError())
+            })
+
+            it('should throw UnexpectedError on HttpStatusCode.notFound', async () => {
+              vi.spyOn(httpClientSpy, 'request').mockResolvedValueOnce({
+                statusCode: HttpStatusCode.notFound,
+                body: 'any_body'
+              })
+
+              const promise = sut.__USE_CASE_METHOD_NAME__({
+                __INPUT_FIELD_1__: 'any_input_1',
+                __INPUT_FIELD_2__: 'any_input_2'
+              })
+
+              await expect(promise).rejects.toThrow(new UnexpectedError())
+            })
+          })
+        })
+
+
+    # === STEP 4: CREATE DATA IMPLEMENTATION (GREEN PHASE) ===
+    - id: 'create-data-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create Remote__USE_CASE_NAME_PASCAL_CASE__ implementation following real codebase patterns (GREEN)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Following RemoteAuthentication and RemoteLoadSurveyList patterns.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture use case implementation'
+          url: 'https://github.com/...'
+          description: 'Simple use case implementation patterns without over-engineering.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        import { HttpClient, HttpStatusCode } from '@/data/protocols/http'
+        import { UnexpectedError } from '@/domain/errors'
+        import type { __USE_CASE_NAME_PASCAL_CASE__ } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * Remote implementation of __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Following the exact pattern of RemoteAuthentication and RemoteLoadSurveyList
+         */
+        export class Remote__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
+          constructor(
+            private readonly url: string,
+            private readonly httpClient: HttpClient<Remote__USE_CASE_NAME_PASCAL_CASE__.Model>
+          ) {}
+
+          async __USE_CASE_METHOD_NAME__(params: __USE_CASE_NAME_PASCAL_CASE__.Params): Promise<__USE_CASE_NAME_PASCAL_CASE__.Model> {
+            const httpResponse = await this.httpClient.request({
+              url: this.url,
+              method: 'post',
+              body: params
+            })
+
+            switch (httpResponse.statusCode) {
+              case HttpStatusCode.ok: return httpResponse.body
+              case HttpStatusCode.forbidden: throw new AccessDeniedError()
+              case HttpStatusCode.unauthorized: throw new InvalidCredentialsError()
+              default: throw new UnexpectedError()
+            }
+          }
+        }
+
+        export namespace Remote__USE_CASE_NAME_PASCAL_CASE__ {
+          export type Model = __USE_CASE_NAME_PASCAL_CASE__.Model
+        }
+
+    # === STEP 5: RUN PASSING TESTS (GREEN PHASE) ===
+    - id: 'run-passing-tests-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Verify all tests pass with implementation (GREEN phase)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development green phase'
+          url: 'https://github.com/...'
+          description: 'TDD Green phase - making tests pass.'
+      run_scripts:
+        description: 'Run tests to verify GREEN phase completion'
+        scripts:
+          - name: 'Run passing tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data --coverage'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit GREEN phase'
+            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ data layer (GREEN)"'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 6: REFACTOR IMPLEMENTATION (REFACTOR PHASE) ===
+    - id: 'refactor-data-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Refactor Remote__USE_CASE_NAME_PASCAL_CASE__ for specific domain needs (REFACTOR)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'test driven development refactor phase'
+          url: 'https://github.com/...'
+          description: 'TDD Refactor phase - improving code without breaking tests.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        import { HttpClient, HttpStatusCode } from '@/data/protocols/http'
+        import { UnexpectedError, AccessDeniedError, InvalidCredentialsError } from '@/domain/errors'
+        import type { __USE_CASE_NAME_PASCAL_CASE__ } from '../../domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * Remote implementation of __USE_CASE_NAME_PASCAL_CASE__ use case
+         * Refactored version with domain-specific logic and data transformations
+         */
+        export class Remote__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {
+          constructor(
+            private readonly url: string,
+            private readonly httpClient: HttpClient<Remote__USE_CASE_NAME_PASCAL_CASE__.Model>
+          ) {}
+
+          async __USE_CASE_METHOD_NAME__(params: __USE_CASE_NAME_PASCAL_CASE__.Params): Promise<__USE_CASE_NAME_PASCAL_CASE__.Model> {
+            const httpResponse = await this.httpClient.request({
+              url: this.url,
+              method: 'post',
+              body: params
+            })
+
+            const remoteData = httpResponse.body || {}
+
+            switch (httpResponse.statusCode) {
+              case HttpStatusCode.ok: return this.adapt(remoteData)
+              case HttpStatusCode.noContent: return this.getDefaultResponse()
+              case HttpStatusCode.forbidden: throw new AccessDeniedError()
+              case HttpStatusCode.unauthorized: throw new InvalidCredentialsError()
+              default: throw new UnexpectedError()
+            }
+          }
+
+          private adapt(remoteData: Remote__USE_CASE_NAME_PASCAL_CASE__.Model): __USE_CASE_NAME_PASCAL_CASE__.Model {
+            return {
+              __OUTPUT_FIELD_1__: remoteData.__OUTPUT_FIELD_1__,
+              __OUTPUT_FIELD_2__: remoteData.__OUTPUT_FIELD_2__,
+              __TIMESTAMP_FIELD__: new Date(remoteData.__TIMESTAMP_FIELD__)
+            }
+          }
+
+          private getDefaultResponse(): __USE_CASE_NAME_PASCAL_CASE__.Model {
+            return {
+              __OUTPUT_FIELD_1__: '',
+              __OUTPUT_FIELD_2__: '',
+              __TIMESTAMP_FIELD__: new Date()
+            }
+          }
+        }
+
+        export namespace Remote__USE_CASE_NAME_PASCAL_CASE__ {
+          export type Model = {
+            __OUTPUT_FIELD_1__: string
+            __OUTPUT_FIELD_2__: string
+            __TIMESTAMP_FIELD__: string
+          }
+        }
+
+    # === STEP 7: FINAL VALIDATION (REFACTOR PHASE) ===
+    - id: 'validate-refactored-implementation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Run all tests and validations after refactoring (REFACTOR phase complete)'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'TESTING_STRATEGY.md'
+          description: 'Complete test coverage and validation requirements.'
+      run_scripts:
+        description: 'Complete TDD cycle validation and commit refactored code'
+        scripts:
+          - name: 'Run all data layer tests'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data --coverage --reporter=verbose'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'TypeScript compilation check'
+            command: 'npx tsc --noEmit --project tsconfig.json'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'ESLint validation'
+            command: 'npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Commit refactored implementation'
+            command: 'git add . && git commit -m "refactor(__FEATURE_NAME_KEBAB_CASE__): improve __USE_CASE_NAME_KEBAB_CASE__ data layer design (REFACTOR)"'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 8: VALIDATE COMPLETE DATA LAYER ===
+    - id: 'validate-complete-data-layer-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Final validation of complete frontend data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'CI_CD.md'
+          description: 'Following CI/CD validation requirements.'
+      run_scripts:
+        description: 'Run comprehensive validation of frontend data layer'
+        scripts:
+          - name: 'Complete test suite'
+            command: 'npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data --coverage --run'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'TypeScript strict compilation'
+            command: 'npx tsc --noEmit --strict --project tsconfig.json'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'ESLint with strict rules'
+            command: 'npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data --max-warnings 0'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Final commit'
+            command: 'git add . && git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): complete __USE_CASE_NAME_KEBAB_CASE__ frontend data layer with TDD"'
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 9: OPEN PULL REQUEST ===
+    - id: 'open-pull-request-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Open Pull Request for frontend data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Pull Request process and review guidelines.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'github pull request best practices'
+          url: 'https://github.com/...'
+          description: 'Pull request creation and documentation standards.'
+      run_scripts:
+        description: 'Create pull request with simple, focused description'
+        scripts:
+          - name: 'Push final changes'
+            command: 'git push origin feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-frontend'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Create Pull Request'
+            command: |
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement __USE_CASE_NAME_KEBAB_CASE__ frontend data layer" \
+                --body "## Summary
+
+              Implements frontend data layer for __USE_CASE_NAME_PASCAL_CASE__ following established codebase patterns.
+
+              ### Implementation Details
+              - ✅ Remote__USE_CASE_NAME_PASCAL_CASE__ class following RemoteAuthentication pattern
+              - ✅ Uses existing HttpClient from @/data/protocols/http
+              - ✅ Simple switch case error handling
+              - ✅ Namespace types pattern (__USE_CASE_NAME_PASCAL_CASE__.Params, __USE_CASE_NAME_PASCAL_CASE__.Model)
+              - ✅ TDD methodology (RED-GREEN-REFACTOR)
+
+              ### Files Added
+              - src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.ts
+              - src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases/remote-__USE_CASE_NAME_KEBAB_CASE__.spec.ts
+
+              ### Testing
+              - Unit tests with mocked HttpClient
+              - Complete status code coverage
+              - Following existing test patterns
+
+              Follows the exact same patterns as RemoteAuthentication and RemoteLoadSurveyList." \
+                --draft
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 10: AI CODE REVIEW ===
+    - id: 'ai-code-review-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'AI-powered code review focusing on pattern consistency'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'AI_CODE_REVIEW.md'
+          description: 'AI review patterns and quality gates.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'automated code review ai patterns'
+          url: 'https://github.com/...'
+          description: 'AI-powered code review best practices.'
+      ai_review_prompts:
+        pattern_consistency: |
+          Please review this Remote__USE_CASE_NAME_PASCAL_CASE__ implementation for consistency with existing codebase patterns:
+
+          Compare with:
+          - RemoteAuthentication (src/data/usecases/remote-authentication.ts)
+          - RemoteLoadSurveyList (src/data/usecases/remote-load-survey-list.ts)
+
+          Check:
+          1. Constructor pattern (url + httpClient)
+          2. Method naming (domain-specific, not generic execute)
+          3. HttpClient usage from @/data/protocols/http
+          4. Switch case error handling
+          5. Namespace types pattern
+          6. Simple, direct implementation (no over-engineering)
+
+          Verify it matches the established 25-30 line pattern, not complex implementations.
+
+    # === STEP 11: CLEANUP AND MERGE ===
+    - id: 'cleanup-and-merge-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Final cleanup and merge frontend data layer implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Merge process and branch cleanup.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'git merge squash cleanup'
+          url: 'https://github.com/...'
+          description: 'Git merge strategies and branch cleanup.'
+      run_scripts:
+        description: 'Complete PR merge and cleanup process'
+        scripts:
+          - name: 'Final validation'
+            command: 'npm run validate:all -- src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Merge Pull Request'
+            command: 'gh pr merge --squash --delete-branch'
+            workingDirectory: '__PROJECT_NAME__'
+          - name: 'Cleanup'
+            command: 'git checkout main && git pull origin main && git branch -d feat/__FEATURE_NAME_KEBAB_CASE__-data-__USE_CASE_NAME_KEBAB_CASE__-frontend'
+            workingDirectory: '__PROJECT_NAME__'
+
+  # ------------------------------------------------------------------------------
+  # BROWNFIELD REFACTORING STEPS (OPTIONAL)
+  # For existing projects that need to adapt to Clean Architecture patterns
+  # ------------------------------------------------------------------------------
+
+  brownfield_data_steps:
+    # === STEP 12: IDENTIFY EXISTING IMPLEMENTATIONS ===
+    - id: 'identify-existing-implementations-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'analysis'
+      description: 'Identify existing __USE_CASE_NAME_PASCAL_CASE__ implementations to refactor'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Brownfield refactoring strategies for legacy code.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'refactoring legacy code to clean architecture'
+          url: 'https://github.com/...'
+          description: 'Strategies for refactoring existing code to Clean Architecture.'
+      analysis_script: |
+        echo "🔍 Searching for existing implementations..."
+        grep -r "__USE_CASE_NAME__\|__USE_CASE_KEYWORD__" --include="*.ts" --include="*.tsx" src/ || true
+        echo "📋 Analyzing current architecture patterns..."
+        find src/ -name "*__USE_CASE_NAME_KEBAB_CASE__*" -o -name "*__USE_CASE_KEYWORD__*" || true
+
+    # === STEP 13: CREATE ADAPTER LAYER ===
+    - id: 'create-adapter-layer-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create adapter to bridge legacy code with new Clean Architecture implementation'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'adapter pattern legacy migration'
+          url: 'https://github.com/...'
+          description: 'Adapter pattern for legacy system integration.'
+      template: |
+        /**
+         * Legacy adapter for __USE_CASE_NAME_PASCAL_CASE__
+         * Bridges existing implementation with new Clean Architecture
+         * @deprecated Will be removed once migration is complete
+         */
+        export class Legacy__USE_CASE_NAME_PASCAL_CASE__Adapter {
+          // Bridge between old and new implementations
+        }
+
+    # === STEP 14: GRADUAL MIGRATION ===
+    - id: 'gradual-migration-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Implement gradual migration strategy from legacy to Clean Architecture'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'strangler fig pattern refactoring'
+          url: 'https://github.com/...'
+          description: 'Strangler Fig pattern for gradual system replacement.'
+      migration_strategy: |
+        1. Identify all consumers of legacy implementation
+        2. Create feature flag for gradual rollout
+        3. Run both implementations in parallel (shadow mode)
+        4. Compare outputs for consistency
+        5. Gradually increase traffic to new implementation
+        6. Remove legacy code once fully migrated
+
+
+
+# --- From: shared/01-footer.part.regent ---
+  # ============= BEGIN FOOTER SECTION =============
+
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: IMMUTABLE DOCUMENTATION SECTIONS AHEAD.
+  # Copy these sections verbatim. The [placeholders] inside the commands
+  # are for HUMAN examples and MUST NOT be replaced by the AI.
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # TROUBLESHOOTING & RECOVERY
+  # ------------------------------------------------------------------------------
+
+  troubleshooting:
+    lint_fails:
+      - 'DO NOT commit - Fix all lint errors first'
+      - 'Check for unused imports'
+      - 'Verify proper TypeScript types'
+      - 'Ensure no console.log statements'
+      - 'Run yarn lint --fix to auto-fix when possible'
+
+    tests_fail:
+      - 'DO NOT commit - All tests must pass'
+      - 'Check if mocks match the actual interfaces'
+      - 'Verify Input/Output types are correct'
+      - 'Ensure test coverage meets requirements'
+      - 'Run specific test: yarn test [test-file-path]'
+
+    typescript_fails:
+      - 'Check all type definitions match'
+      - 'Ensure no missing imports'
+      - 'Verify interface implementations are complete'
+      - 'Run yarn tsc --noEmit to check types'
+
+  # Refactoring checklist
+  refactoring:
+    before_refactoring: |
+      # Check current status and differences
+      echo "📊 Checking current changes..."
+      git status
+      git diff
+
+      # Ensure clean working directory
+      echo "✅ Saving current work..."
+      git stash save "WIP: before refactoring"
+
+      # Create refactoring branch
+      echo "🌿 Creating refactor branch..."
+      git checkout -b refactor/[feature-name]
+
+      # Run tests to ensure starting point is stable
+      echo "🧪 Validating current state..."
+      yarn test --run
+      if [ $? -ne 0 ]; then
+        echo "❌ Tests failing before refactor - fix first!"
+        exit 1
+      fi
+      echo "✅ Ready to refactor"
+
+    during_refactoring: |
+      # After each change, check what was modified
+      echo "🔍 Reviewing changes..."
+      git diff --stat
+      git diff
+
+      # Validate the change
+      yarn lint && yarn test --run
+
+      # Commit atomically
+      git add -p  # Interactive staging
+      git commit -m "refactor([feature-name]): [specific change description]"
+
+      # Show what was changed
+      git show --stat
+
+    common_scenarios:
+      - name: 'Splitting a use case'
+        wrong_example: |
+          interface CreateUserAndSendEmail {
+            execute: (input: CreateUserAndSendEmailInput) => Promise<CreateUserAndSendEmailOutput>
+          }
+        correct_example: |
+          interface CreateUser{
+            execute: (input: CreateUserInput) => Promise<CreateUserOutput>
+          }
+          interface SendWelcomeEmail {
+            execute: (input: SendWelcomeEmailInput) => Promise<SendWelcomeEmailOutput>
+          }
+
+      - name: 'Renaming domain errors'
+        wrong_example: |
+          export class ErrorUserExists extends Error {
+            constructor() {
+              super('Error: user exists')
+              this.name = 'ErrorUserExists'
+            }
+          }
+        correct_example: |
+          export class UserAlreadyExistsError extends Error {
+            constructor() {
+              super('User with this email already exists')
+              this.name = 'UserAlreadyExistsError'
+            }
+          }
+
+  # ------------------------------------------------------------------------------
+  # LEARNING & IMPROVEMENT PATTERNS
+  # The system tracks these patterns to improve over time
+  # ------------------------------------------------------------------------------
+  learning_patterns:
+    common_errors:
+      # Domain Layer Violations
+      - pattern: 'import axios|fetch|prisma|redis'
+        fix: 'Remove external library imports from domain layer'
+        layer: 'domain'
+        score_impact: -2
+
+      - pattern: 'CreateUserAndSend|GetDataAndFormat'
+        fix: 'Split into two separate use cases (SRP violation)'
+        layer: 'domain'
+        score_impact: -1
+
+      - pattern: 'missing @domainConcept'
+        fix: 'Add domain concept documentation for +2 score'
+        layer: 'domain'
+        score_impact: +1
+
+      # Data Layer Violations
+      - pattern: 'direct database access in data layer'
+        fix: 'Use repository protocols instead of direct database access'
+        layer: 'data'
+        score_impact: -2
+
+      - pattern: 'business logic in data layer'
+        fix: 'Move business logic to domain layer'
+        layer: 'data'
+        score_impact: -1
+
+      # Infrastructure Layer Violations
+      - pattern: 'business logic in infrastructure'
+        fix: 'Infrastructure should only contain adapters and implementations'
+        layer: 'infra'
+        score_impact: -2
+
+      - pattern: 'missing error handling in adapters'
+        fix: 'Add proper error handling and recovery in infrastructure adapters'
+        layer: 'infra'
+        score_impact: -1
+
+      # Presentation Layer Violations
+      - pattern: 'business logic in controllers|components'
+        fix: 'Move business logic to use cases in domain layer'
+        layer: 'presentation'
+        score_impact: -2
+
+      - pattern: 'direct database access from presentation'
+        fix: 'Use use cases and factories from main layer'
+        layer: 'presentation'
+        score_impact: -2
+
+      # Main Layer Violations
+      - pattern: 'business logic in factories'
+        fix: 'Main layer should only compose, not implement business logic'
+        layer: 'main'
+        score_impact: -2
+
+      - pattern: 'missing dependency injection'
+        fix: 'Use factories and dependency injection for all dependencies'
+        layer: 'main'
+        score_impact: -1
+
+    success_indicators:
+      - 'Uses ubiquitous language consistently across all layers'
+      - 'Follows single responsibility principle in every component'
+      - 'No dependency violations between layers'
+      - 'Comprehensive test coverage (Domain: 100%, Data: 95%, Infra: 80%, Presentation: 90%)'
+      - 'Clean git history with atomic commits'
+      - 'Proper error handling at each layer boundary'
+      - 'Clear separation of concerns between layers'
+      - 'Type safety maintained throughout the stack'
+
+  # AI Guidelines for All Layers
+  ai_guidelines:
+    general:
+      - 'Always validate before committing: Run lint first, Run tests second, Only commit if both pass'
+      - 'If generation fails: Identify the specific error, Fix only that error, Re-run validation, Do NOT proceed until fixed'
+      - 'MUST generate different case styles from the input names (e.g., "Add Item To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart, lower case=add item to cart).'
+      - 'MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__) with actual values'
+      - 'MUST NOT leave any placeholder variables in the final implementation'
+      - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery'
+      - 'MUST use vitest for backend, @testing-library/react for frontend'
+      - 'When in doubt: Choose simplicity over complexity, Split rather than combine, Ask for clarification rather than assume'
+
+    layer_specific:
+      domain:
+        - 'Follow the principle: One use case = One file = One responsibility'
+        - 'If tempted to add "And" in a use case name, split it'
+        - 'MUST follow all domain rules - no business logic implementation, only contracts'
+        - 'No external dependencies allowed in domain layer'
+        - 'Use value objects for domain concepts'
+        - 'Define clear domain errors with meaningful messages'
+
+      data:
+        - 'Implement use cases defined in domain layer'
+        - 'Use repository protocols for data access'
+        - 'Transform external data to domain models'
+        - 'Handle data-specific errors and map to domain errors'
+        - 'No direct database or API calls'
+
+      infrastructure:
+        - 'Implement repository interfaces defined in data layer'
+        - 'Handle external service integrations (database, cache, APIs)'
+        - 'Provide concrete implementations of protocols'
+        - 'Include proper error handling and retry logic'
+        - 'Use appropriate design patterns (Adapter, Facade)'
+
+      presentation:
+        - 'Controllers/Components should be thin - delegate to use cases'
+        - 'Handle input validation and transformation'
+        - 'Format responses for clients'
+        - 'Implement proper error responses'
+        - 'For frontend: Use hooks for business logic extraction'
+        - 'For backend: Use middleware for cross-cutting concerns'
+
+      main:
+        - 'Composition root only - no business logic'
+        - 'Wire up all dependencies using factories'
+        - 'Configure dependency injection'
+        - 'Setup application bootstrap and configuration'
+        - 'For Next.js: Configure providers and middleware'
+        - 'For Express/Fastify: Setup server and routes'
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: TASK EVALUATION SECTION.
+  # After the entire execution is complete, this section will be populated by a
+  # human reviewer or an evaluation script.
+  # ------------------------------------------------------------------------------
+
+  evaluation:
+    # AI-NOTE: This final_status will be 'SUCCESS' if all steps passed, or 'FAILED' if any step failed.
+    final_status: 'PENDING' # PENDING | SUCCESS | FAILED
+    # AI-NOTE: The final_rlhf_score is calculated automatically based on execution quality
+    # -2: Catastrophic errors (architecture violations, wrong REPLACE/WITH format)
+    # -1: Runtime errors (lint, tests, git failures)
+    #  0: Low confidence (system uncertain, prevents hallucinations)
+    # +1: Good execution but missing DDD elements
+    # +2: Perfect with Clean Architecture, DDD, ubiquitous language
+    final_rlhf_score: null # -2, -1, 0, 1, 2
+    # AI-NOTE: The system automatically analyzes patterns and learns from each execution
+    # This text is enhanced by automated RLHF analysis for continuous improvement
+    reviewer_summary: |
+      - What went well:
+        - ...
+      - Areas for improvement:
+        - ...
+    # AI-NOTE: This section lists actionable suggestions for improving the master templates or prompts.
+    # This is the key to the continuous learning loop.
+    template_improvement_suggestions:
+      - target_template: '[layer].template.yaml'
+        target_step_id: '[step-id]'
+        suggestion: '[specific improvement suggestion based on execution results]'
+        priority: 'medium'
+        
+  # ============= END FOOTER SECTION =============
+
+  # End of TEMPLATE.yaml

@@ -186,7 +186,7 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
   }
 
   // Copy templates to .regent/templates
-  const sourceTemplatesDir = path.join(packageRoot, 'templates');
+  const sourceTemplatesDir = path.join(packageRoot, 'src/templates');
   const targetTemplatesDir = path.join(projectPath, '.regent/templates');
 
   if (await fs.pathExists(sourceTemplatesDir)) {
@@ -195,7 +195,7 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
   }
 
   // Copy core files to .regent/core
-  const sourceCoreDir = path.join(packageRoot, 'core');
+  const sourceCoreDir = path.join(packageRoot, 'src/core');
   const targetCoreDir = path.join(projectPath, '.regent/core');
 
   if (await fs.pathExists(sourceCoreDir)) {
@@ -204,7 +204,7 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
   }
 
   // Copy scripts to .regent/scripts
-  const sourceScriptsDir = path.join(packageRoot, 'scripts');
+  const sourceScriptsDir = path.join(packageRoot, 'src/scripts');
   const targetScriptsDir = path.join(projectPath, '.regent/scripts');
 
   if (await fs.pathExists(sourceScriptsDir)) {
@@ -213,7 +213,7 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
   }
 
   // Copy utils to .regent/utils
-  const sourceUtilsDir = path.join(packageRoot, 'utils');
+  const sourceUtilsDir = path.join(packageRoot, 'src/utils');
   const targetUtilsDir = path.join(projectPath, '.regent/utils');
 
   if (await fs.pathExists(sourceUtilsDir)) {
@@ -230,18 +230,28 @@ async function createProjectStructure(projectPath: string, options: InitOptions,
 
   // Copy config files to .regent/config
   const configFiles = [
-    'execute-steps.ts',
-    'validate-template.ts',
-    'regent.schema.json'
+    { name: 'execute-steps.ts', source: 'src/execute-steps.ts', transformImports: true },
+    { name: 'validate-template.ts', source: 'src/validate-template.ts', transformImports: true },
+    { name: 'regent.schema.json', source: 'src/regent.schema.json', transformImports: false }
   ];
 
   console.log(chalk.cyan('⚙️ Installing configuration files...'));
   for (const file of configFiles) {
-    const sourcePath = path.join(packageRoot, file);
-    const targetPath = path.join(projectPath, '.regent/config', file);
+    const sourcePath = path.join(packageRoot, file.source);
+    const targetPath = path.join(projectPath, '.regent/config', file.name);
 
     if (await fs.pathExists(sourcePath)) {
-      await fs.copy(sourcePath, targetPath);
+      if (file.transformImports) {
+        // Read file content and transform imports for .regent/config/ location
+        const content = await fs.readFile(sourcePath, 'utf-8');
+        // Transform: './core/' -> '../core/', './utils/' -> '../utils/', './validate-template' -> './validate-template'
+        const transformedContent = content
+          .replace(/from '\.\/core\//g, "from '../core/")
+          .replace(/from '\.\/utils\//g, "from '../utils/");
+        await fs.writeFile(targetPath, transformedContent, 'utf-8');
+      } else {
+        await fs.copy(sourcePath, targetPath);
+      }
     }
   }
 

@@ -1,0 +1,2812 @@
+# =============================================
+# GENERATED FILE - DO NOT EDIT DIRECTLY
+# Target: fullstack
+# Layer: main
+# Built from parts in templates/parts
+# Generated at: 2025-09-30 23:13:55
+# To modify, edit the part files and rebuild
+# =============================================
+
+
+# --- From: shared/00-header.part.regent ---
+
+# AI-NOTE: This YAML file is the single source of truth for generating clean architecture layers.
+# This is the MASTER TEMPLATE that will evolve to support all architectural layers.
+#
+# INTELLIGENT RLHF SCORING SYSTEM:
+# The system uses Reinforcement Learning from Human Feedback to score execution quality:
+# -2: CATASTROPHIC - Architecture violations, incorrect REPLACE/WITH format in refactor steps
+# -1: RUNTIME ERROR - Lint failures, test failures, git operation problems
+#  0: LOW CONFIDENCE - System is uncertain, avoids hallucinations
+# +1: GOOD - Task complete but missing architectural elements
+# +2: PERFECT - Exceptional quality with Clean Architecture, DDD principles, ubiquitous language
+#
+# QUALITY INDICATORS FOR +2 SCORE:
+# - Uses ubiquitous language terminology
+# - Follows Domain-Driven Design principles
+# - Applies Clean Architecture concepts
+# - Implements patterns: Aggregate Root, Value Objects, Domain Events
+# - Perfect branch naming convention
+# - Comprehensive PR descriptions
+#
+version: '3.0.0'
+# AI-NOTE: Update these fields to describe the specific feature and layers.
+metadata:
+  title: '__FEATURE_NAME_PASCAL_CASE__ Clean Architecture Implementation'
+  description: 'Clean Architecture template for __FEATURE_NAME_LOWER_CASE__ feature following master template rules.'
+  source: 'TEMPLATE.yaml'
+  # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
+  lastUpdated: '__CURRENT_DATE__'
+  # AI-NOTE: Specify which layers are being implemented
+  layers:
+    - 'domain'
+    # Future layers will be added here:
+    # - 'data'
+    # - 'infra'
+    # - 'presentation'
+    # - 'validation'
+    # - 'main'
+  # AI-NOTE: Define ubiquitous language for +2 RLHF score
+  ubiquitousLanguage:
+    - term: '__ENTITY_NAME__'
+      definition: '__ENTITY_DEFINITION_IN_BUSINESS_CONTEXT__'
+    - term: '__VALUE_OBJECT_NAME__'
+      definition: '__VALUE_OBJECT_BUSINESS_MEANING__'
+    - term: '__DOMAIN_EVENT__'
+      definition: '__EVENT_BUSINESS_SIGNIFICANCE__'
+
+
+
+# --- From: fullstack/01-structure.part.regent ---
+# ============= BEGIN STRUCTURE FULLSTACK NEXT.JS 15 =============
+  # AI-NOTE: Full Next.js 15 with App Router + API Routes
+  # Hybrid Architecture - "Feature Module with Use Case Slices"
+  # Single project for both frontend and backend using Next.js capabilities
+
+structure:
+  # Next.js 15 App Router (Pages + API Routes)
+  app:
+    basePath: '__PROJECT_NAME__/src/app'
+    folders:
+      # Frontend routes
+      - '(features)'              # Route group for features
+      - '__FEATURE_NAME__'        # Feature pages
+      - '_components'             # Private app components
+
+      # API Routes (Backend)
+      - 'api'                     # API root
+      - 'api/__FEATURE_NAME__'    # Feature API endpoints
+      - 'api/auth'                # Authentication endpoints
+      - 'api/health'              # Health check endpoint
+    files:
+      # Frontend files
+      - 'layout.tsx'
+      - 'page.tsx'
+      - 'loading.tsx'
+      - 'error.tsx'
+      - 'not-found.tsx'
+      - 'global-error.tsx'
+
+      # Middleware
+      - 'middleware.ts'           # Next.js middleware for auth, etc.
+
+  # Feature Module: Unified frontend + backend for a business domain
+  # __FEATURE_NAME_KEBAB_CASE__ = user, product, order, etc.
+  feature_module:
+    basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__'
+
+    # 1. Use Case Slices: Each folder is self-contained, atomic use case
+    # __USE_CASE_NAME_KEBAB_CASE__ = create-user, get-users, etc.
+    use_case_slice:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+      layers:
+        # Domain Layer: Core business logic (shared between frontend/backend)
+        domain:
+          folders:
+            - 'entities'      # Business entities
+            - 'usecases'      # Use case interfaces
+            - 'errors'        # Domain errors
+            - 'types'         # Domain types
+
+        # Data Layer: Data operations
+        data:
+          folders:
+            - 'usecases'      # Use case implementations
+            - 'dto'           # Data transfer objects
+            - 'mappers'       # Data mappers
+
+        # Infrastructure Layer: Use case specific adapters only
+        # Note: Concrete repository implementations live in feature_shared/infra
+        infra:
+          folders:
+            - 'cache'         # Use case specific cache strategies
+            - 'external'      # External API calls specific to this use case
+
+        # Presentation Layer: UI and API handlers
+        presentation:
+          folders:
+            # Frontend
+            - 'components'    # React components for this use case
+            - 'hooks'         # React hooks for this use case
+            - 'actions'       # Server Actions ('use server')
+
+            # Backend
+            - 'handlers'      # API route handlers
+            - 'middleware'    # Use case specific middleware
+
+        # Validation Layer
+        validation:
+          folders:
+            - 'schemas'       # Zod schemas (shared frontend/backend)
+            - 'validators'    # Custom validators
+            - 'rules'         # Business rules
+
+        # Main Layer: Composition
+        main:
+          folders:
+            - 'composites'    # Frontend composites
+            - 'factories'     # Dependency injection
+            - 'routes'        # API route definitions
+
+        # Integration and E2E tests only (not unit tests)
+        __tests__:
+          folders:
+            - 'integration'   # Tests that cross layers
+            - 'e2e'           # E2E tests (Playwright)
+        # Note: Unit tests are placed side by side with source files:
+        # - domain/usecases/create-user.ts + create-user.spec.ts
+        # - data/usecases/db-create-user.ts + db-create-user.spec.ts
+        # - presentation/components/create-user-form.tsx + create-user-form.spec.tsx
+        # - presentation/handlers/create-user-handler.ts + create-user-handler.spec.ts
+
+    # 2. Feature-Specific Shared: Code shared within this feature
+    feature_shared:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+      layers:
+        domain:
+          folders:
+            - 'models'        # Shared models (used by frontend + backend)
+            - 'repositories'  # Repository interfaces
+            - 'value-objects' # Value objects
+            - 'constants'     # Feature constants
+
+        infra:
+          folders:
+            - 'db'            # Database repository implementations
+            - 'api-client'    # Internal API client for frontend
+            - 'services'      # Feature services
+
+        presentation:
+          folders:
+            - 'ui'            # Shared UI components
+            - 'styles'        # Feature styles
+            - 'utils'         # Presentation utilities
+            - 'types'         # TypeScript types for API
+
+    # 3. Feature Main: Integration point
+    feature_main:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+      folders:
+        - 'pages'             # Page composers for App Router
+        - 'api-routes'        # API route aggregation (handlers for src/app/api)
+        - 'config'            # Feature configuration
+        - 'docs'              # Feature documentation
+
+  # Global Shared Code (truly generic, app-wide)
+  shared:
+    basePath: '__PROJECT_NAME__/src/shared'
+    layers:
+      # Domain Layer
+      domain:
+        folders:
+          - 'errors'          # Base error classes
+          - 'protocols'       # Domain protocols
+          - 'types'           # Shared types
+          - 'value-objects'   # Generic value objects
+
+      # Data Layer
+      data:
+        folders:
+          - 'protocols'       # Data protocols
+          - 'helpers'         # Data helpers
+          - 'dto'             # Shared DTOs
+
+      # Infrastructure Layer
+      infra:
+        folders:
+          # Backend focused
+          - 'db'              # Database client (Prisma/Drizzle)
+          - 'cache'           # Cache client (Redis)
+          - 'queue'           # Queue system (BullMQ)
+          - 'email'           # Email service
+          - 'storage'         # File storage (S3, local)
+
+          # Frontend focused
+          - 'http'            # HTTP client (fetch wrapper)
+          - 'websocket'       # WebSocket client
+          - 'local-storage'   # LocalStorage wrapper
+
+          # Shared
+          - 'auth'            # Authentication (NextAuth, Clerk)
+          - 'telemetry'       # Monitoring (Sentry, DataDog)
+          - 'logger'          # Logging system
+
+      # Presentation Layer
+      presentation:
+        folders:
+          # UI Components
+          - 'components'      # Shared UI components
+          - 'ui'              # shadcn/ui components
+          - 'layouts'         # Shared layouts
+          - 'providers'       # Context providers
+
+          # Utilities
+          - 'hooks'           # Shared React hooks
+          - 'utils'           # Presentation utils
+          - 'styles'          # Global styles
+
+          # API
+          - 'middleware'      # Shared API middleware
+          - 'responses'       # Standard API responses
+
+      # Validation Layer
+      validation:
+        folders:
+          - 'schemas'         # Shared Zod schemas
+          - 'validators'      # Shared validators
+          - 'rules'           # Business rules
+
+      # Main Layer
+      main:
+        folders:
+          - 'config'          # App configuration
+          - 'lib'             # Utility libraries
+          - 'adapters'        # Adapters
+          - 'factories'       # Shared factories
+
+# Example of Fullstack Use Case Implementation
+integration:
+  use_case_example:
+    # Task: "Generate create-user use case for fullstack Next.js 15"
+    # __FEATURE_NAME_KEBAB_CASE__ = user
+    # __USE_CASE_NAME_KEBAB_CASE__ = create-user
+
+    # STEP 1: Create Feature directories
+    create_feature_structure:
+      - 'src/features/user/'
+      - 'src/features/user/shared/'
+      - 'src/features/user/main/'
+
+    # STEP 2: Create Use Case Slice
+    create_slice_directory:
+      - 'src/features/user/create-user/'
+
+    # STEP 3: Create slice files (Frontend + Backend) WITH TESTS
+    create_slice_files:
+      # Domain (shared) with unit tests
+      - 'src/features/user/create-user/domain/entities/user.ts'
+      - 'src/features/user/create-user/domain/entities/user.spec.ts'
+      - 'src/features/user/create-user/domain/usecases/create-user.ts'
+      - 'src/features/user/create-user/domain/usecases/create-user.spec.ts'
+      - 'src/features/user/create-user/domain/types/create-user-dto.ts'
+
+      # Data with unit tests
+      - 'src/features/user/create-user/data/usecases/db-create-user.ts'
+      - 'src/features/user/create-user/data/usecases/db-create-user.spec.ts'
+      - 'src/features/user/create-user/data/mappers/user-mapper.ts'
+      - 'src/features/user/create-user/data/mappers/user-mapper.spec.ts'
+
+      # Note: Repository implementation lives in shared/infra/db
+      # Use case will receive repository interface via dependency injection
+
+      # Validation (shared frontend/backend) with unit tests
+      - 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+      - 'src/features/user/create-user/validation/schemas/create-user-schema.spec.ts'
+
+      # Presentation - Frontend with unit tests
+      - 'src/features/user/create-user/presentation/components/create-user-form.tsx'
+      - 'src/features/user/create-user/presentation/components/create-user-form.spec.tsx'
+      - 'src/features/user/create-user/presentation/hooks/use-create-user.ts'
+      - 'src/features/user/create-user/presentation/hooks/use-create-user.spec.ts'
+      - 'src/features/user/create-user/presentation/actions/create-user-action.ts'
+      - 'src/features/user/create-user/presentation/actions/create-user-action.spec.ts'
+
+      # Presentation - Backend with unit tests
+      - 'src/features/user/create-user/presentation/handlers/create-user-handler.ts'
+      - 'src/features/user/create-user/presentation/handlers/create-user-handler.spec.ts'
+
+      # Main with unit tests
+      - 'src/features/user/create-user/main/composites/create-user-page.tsx'
+      - 'src/features/user/create-user/main/composites/create-user-page.spec.tsx'
+      - 'src/features/user/create-user/main/factories/create-user-factory.ts'
+      - 'src/features/user/create-user/main/factories/create-user-factory.spec.ts'
+      - 'src/features/user/create-user/main/routes/create-user-route.ts'
+      - 'src/features/user/create-user/main/routes/create-user-route.spec.ts'
+
+      # Integration and E2E tests
+      - 'src/features/user/create-user/__tests__/integration/create-user.integration.spec.ts'
+      - 'src/features/user/create-user/__tests__/e2e/create-user.e2e.spec.ts'
+
+    # STEP 4: Feature shared files
+    feature_shared_files:
+      - create_if_not_exists: 'src/features/user/shared/domain/models/user-model.ts'
+      - create_if_not_exists: 'src/features/user/shared/domain/repositories/user-repository.ts'
+      - create_if_not_exists: 'src/features/user/shared/infra/db/prisma-user-repository.ts'
+      - create_if_not_exists: 'src/features/user/shared/infra/api-client/user-api.ts'
+
+    # STEP 5: Integrate with Next.js
+    integrate_nextjs:
+      # Frontend - App Router page
+      - create_if_not_exists: 'src/app/(features)/users/create/page.tsx'
+      - modify: 'src/app/(features)/users/create/page.tsx'
+        action: 'Import and render CreateUserPage from feature'
+
+      # Backend - API Route
+      - create_if_not_exists: 'src/app/api/users/route.ts'
+      - modify: 'src/app/api/users/route.ts'
+        action: 'Import and use createUserHandler from feature'
+
+      # Feature main integration
+      - create_if_not_exists: 'src/features/user/main/pages/user-pages.tsx'
+      - create_if_not_exists: 'src/features/user/main/api-routes/user-api-routes.ts'
+
+  example_flow:
+    # Frontend Flow
+    frontend:
+      1_user_visits: 'src/app/(features)/users/create/page.tsx'
+      2_page_renders: 'src/features/user/create-user/main/composites/create-user-page.tsx'
+      3_form_component: 'src/features/user/create-user/presentation/components/create-user-form.tsx'
+      4_validation: 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+      5_server_action: 'src/features/user/create-user/presentation/actions/create-user-action.ts'
+      6_or_api_call: 'src/features/user/shared/infra/api-client/user-api.ts'
+
+    # Backend Flow
+    backend:
+      1_api_route: 'src/app/api/users/route.ts'
+      2_handler: 'src/features/user/create-user/presentation/handlers/create-user-handler.ts'
+      3_validation: 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+      4_use_case: 'src/features/user/create-user/data/usecases/db-create-user.ts'
+      5_repository_interface: 'src/features/user/shared/domain/repositories/user-repository.ts'
+      6_repository_impl: 'src/features/user/shared/infra/db/prisma-user-repository.ts'
+      7_factory_injection: 'src/features/user/create-user/main/factories/create-user-factory.ts'
+
+    # Benefits
+    benefits:
+      - 'Single codebase for frontend and backend'
+      - 'Shared validation schemas (Zod) between client and server'
+      - 'Type safety across the entire stack'
+      - 'Server Actions for seamless client-server communication'
+      - 'API Routes for RESTful endpoints when needed'
+      - 'Perfect isolation per use case'
+      - 'Feature-level shared code without global pollution'
+
+# ============= END STRUCTURE FULLSTACK NEXT.JS 15 =============
+
+# --- From: fullstack/02-architecture.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # FULLSTACK ARCHITECTURAL RULES SECTION - NEXT.JS 15 UNIFIED STACK
+  # These rules define Clean Architecture for integrated frontend + backend development
+  # ------------------------------------------------------------------------------
+
+  architecture:
+    folder_structure:
+      use_case_slice: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+      feature_shared: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+      feature_main: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+      global_shared: '__PROJECT_NAME__/src/shared'
+      app_router: '__PROJECT_NAME__/src/app'
+      api_routes: '__PROJECT_NAME__/src/app/api'
+
+    execution_order:
+      description: 'Fullstack use cases are implemented vertically, covering both frontend and backend atomically'
+      approach: 'Unified Vertical Slice Architecture - One complete fullstack feature at a time'
+      sequence_per_use_case:
+        1: 'domain'      # Shared business logic (frontend + backend)
+        2: 'data'        # Use case implementations for both client and server
+        3: 'validation'  # Shared Zod schemas (client + server validation)
+        4: 'presentation_backend'  # API handlers and middleware
+        5: 'presentation_frontend' # Server Actions, components, and hooks
+        6: 'main'        # Factories and composition
+        7: 'integration' # Connect to App Router and API Routes
+
+      workflow_diagram: |
+        ```mermaid
+        graph TD
+          Start([Start Fullstack Use Case])
+
+          %% Branch Creation
+          B1[Create Branch: feat/__FEATURE_NAME__/__USE_CASE_NAME__]
+
+          %% Use Case Slice Directory
+          UC1[Create Fullstack Use Case Directory Structure]
+
+          %% Domain Slice (Shared)
+          D1[Create Domain Entities & Interfaces]
+          D2[Write Domain Tests - TDD Red]
+          D3[Run: npm test - Expect Failure]
+          D4[Git Commit: 'test(domain): add __USE_CASE__ shared domain tests']
+
+          %% Data Slice - Backend
+          DTB1[Create Backend Use Case Implementation]
+          DTB2[Write Backend Data Tests]
+          DTB3[Run: npm test - Green]
+          DTB4[Git Commit: 'feat(data-backend): implement __USE_CASE__ server logic']
+
+          %% Data Slice - Frontend
+          DTF1[Create Frontend API Client]
+          DTF2[Write API Client Tests with MSW]
+          DTF3[Run: npm test - Green]
+          DTF4[Git Commit: 'feat(data-frontend): implement __USE_CASE__ api client']
+
+          %% Validation Slice (Shared)
+          V1[Create Shared Zod Schemas]
+          V2[Write Validation Tests]
+          V3[Run: npm test - Green]
+          V4[Git Commit: 'feat(validation): add __USE_CASE__ shared schemas']
+
+          %% Backend Presentation
+          PB1[Create API Route Handler]
+          PB2[Write Handler Tests]
+          PB3[Run: npm test - Green]
+          PB4[Git Commit: 'feat(api): add __USE_CASE__ endpoint']
+
+          %% Frontend Presentation - Server Actions
+          PSA1[Create Server Actions]
+          PSA2[Write Server Action Tests]
+          PSA3[Run: npm test - Green]
+          PSA4[Git Commit: 'feat(actions): add __USE_CASE__ server actions']
+
+          %% Frontend Presentation - Hooks
+          PH1[Create Custom Hooks]
+          PH2[Write Hook Tests]
+          PH3[Run: npm test - Green]
+          PH4[Git Commit: 'feat(hooks): add use-__USE_CASE__ hook']
+
+          %% Frontend Presentation - Components
+          PC1[Create UI Components]
+          PC2[Write Component Tests]
+          PC3[Run: npm test - Green]
+          PC4[Git Commit: 'feat(components): add __USE_CASE__ UI components']
+
+          %% Main - Backend Factory
+          MBF1[Create Backend Factory]
+          MBF2[Wire Backend Dependencies]
+          MBF3[Write Factory Tests]
+          MBF4[Run: npm test - Green]
+          MBF5[Git Commit: 'feat(main-backend): add __USE_CASE__ factory']
+
+          %% Main - Frontend Composite
+          MFC1[Create Frontend Composite]
+          MFC2[Wire Frontend Dependencies]
+          MFC3[Write Composite Tests]
+          MFC4[Run: npm test - Green]
+          MFC5[Git Commit: 'feat(main-frontend): add __USE_CASE__ composite']
+
+          %% Feature Integration
+          FI1[Update Feature Page Composer]
+          FI2[Update Feature API Routes]
+          FI3[Test Feature Integration]
+          FI4[Git Commit: 'feat(feature): integrate __USE_CASE__ in feature main']
+
+          %% App Integration
+          AI1[Update App Router Page]
+          AI2[Update API Route Registration]
+          AI3[Test App Integration]
+          AI4[Git Commit: 'feat(app): integrate __USE_CASE__ in app router']
+
+          %% Testing
+          IT1[Write Integration Tests]
+          IT2[Run: npm run test:integration]
+          IT3[Write E2E Tests with Playwright]
+          IT4[Run: npm run test:e2e]
+          IT5[Git Commit: 'test(e2e): add __USE_CASE__ fullstack e2e tests']
+
+          %% Final Steps
+          F1[Run All Tests]
+          F2[Run: npm run lint]
+          F3[Run: npm run type-check]
+          F4[Run: npm run build]
+          F5[Git Push: Push Branch]
+          F6[Create PR: '__FEATURE__/__USE_CASE__ Fullstack Implementation']
+
+          End([Fullstack Use Case Complete])
+
+          %% Flow - Vertical Development Through Fullstack Layers
+          Start --> B1
+          B1 --> UC1
+
+          %% Domain Flow (Shared)
+          UC1 --> D1 --> D2 --> D3 --> D4
+
+          %% Data Flow - Backend First, Then Frontend
+          D4 --> DTB1 --> DTB2 --> DTB3 --> DTB4
+          DTB4 --> DTF1 --> DTF2 --> DTF3 --> DTF4
+
+          %% Validation Flow (Shared)
+          DTF4 --> V1 --> V2 --> V3 --> V4
+
+          %% Backend Presentation Flow
+          V4 --> PB1 --> PB2 --> PB3 --> PB4
+
+          %% Frontend Presentation Flow
+          PB4 --> PSA1 --> PSA2 --> PSA3 --> PSA4
+          PSA4 --> PH1 --> PH2 --> PH3 --> PH4
+          PH4 --> PC1 --> PC2 --> PC3 --> PC4
+
+          %% Main Flow - Backend Then Frontend
+          PC4 --> MBF1 --> MBF2 --> MBF3 --> MBF4 --> MBF5
+          MBF5 --> MFC1 --> MFC2 --> MFC3 --> MFC4 --> MFC5
+
+          %% Integration Flows
+          MFC5 --> FI1 --> FI2 --> FI3 --> FI4
+          FI4 --> AI1 --> AI2 --> AI3 --> AI4
+
+          %% Testing Flow
+          AI4 --> IT1 --> IT2 --> IT3 --> IT4 --> IT5
+
+          %% Final Flow
+          IT5 --> F1 --> F2 --> F3 --> F4 --> F5 --> F6 --> End
+
+          classDef branch fill:#FFF9C4,stroke:#F57C00,stroke-width:2px
+          classDef domain fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px
+          classDef dataBackend fill:#E3F2FD,stroke:#2196F3,stroke-width:2px
+          classDef dataFrontend fill:#BBDEFB,stroke:#1976D2,stroke-width:2px
+          classDef validation fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
+          classDef presentationBackend fill:#FCE4EC,stroke:#E91E63,stroke-width:2px
+          classDef presentationFrontend fill:#F8BBD9,stroke:#C2185B,stroke-width:2px
+          classDef mainBackend fill:#E0F2F1,stroke:#009688,stroke-width:2px
+          classDef mainFrontend fill:#B2DFDB,stroke:#00695C,stroke-width:2px
+          classDef integration fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
+          classDef testing fill:#FFEBEE,stroke:#F44336,stroke-width:2px
+          classDef final fill:#E8EAF6,stroke:#3F51B5,stroke-width:2px
+
+          class B1,UC1 branch
+          class D1,D2,D3,D4 domain
+          class DTB1,DTB2,DTB3,DTB4 dataBackend
+          class DTF1,DTF2,DTF3,DTF4 dataFrontend
+          class V1,V2,V3,V4 validation
+          class PB1,PB2,PB3,PB4 presentationBackend
+          class PSA1,PSA2,PSA3,PSA4,PH1,PH2,PH3,PH4,PC1,PC2,PC3,PC4 presentationFrontend
+          class MBF1,MBF2,MBF3,MBF4,MBF5 mainBackend
+          class MFC1,MFC2,MFC3,MFC4,MFC5 mainFrontend
+          class FI1,FI2,FI3,FI4,AI1,AI2,AI3,AI4 integration
+          class IT1,IT2,IT3,IT4,IT5 testing
+          class F1,F2,F3,F4,F5,F6 final
+        ```
+
+      git_workflow_per_use_case:
+        description: 'Fullstack vertical slice development - complete frontend + backend feature at once'
+        example_use_case: 'create-user with form submission and API endpoint'
+
+        workflow_steps:
+          - 'git checkout -b feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'Create fullstack use case slice directory: src/features/__FEATURE_NAME__/__USE_CASE_NAME__'
+
+        domain_slice_shared:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/entities/__ENTITY__.ts'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/usecases/__USE_CASE__.ts'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/types/__USE_CASE__-dto.ts'
+          - 'Write domain tests (TDD - RED) → npm test (expect failure)'
+          - 'git add → git commit -m "test(domain): add failing tests for __USE_CASE__ shared domain"'
+          - 'Implement domain logic → npm test → npm run lint'
+          - 'git add → git commit -m "feat(domain): add __USE_CASE__ shared domain logic"'
+
+        data_slice_backend:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/data/usecases/db-__USE_CASE__.ts'
+          - 'Implement server-side use case → npm test → npm run lint'
+          - 'git add → git commit -m "feat(data-backend): implement __USE_CASE__ server logic"'
+
+        data_slice_frontend:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/data/usecases/remote-__USE_CASE__.ts'
+          - 'Implement API client → npm test (with MSW) → npm run lint'
+          - 'git add → git commit -m "feat(data-frontend): implement __USE_CASE__ api client"'
+
+        validation_slice_shared:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/validation/schemas/__USE_CASE__-schema.ts'
+          - 'Create shared Zod schemas for both client and server validation'
+          - 'Write validation tests → npm test → npm run lint'
+          - 'git add → git commit -m "feat(validation): add __USE_CASE__ shared schemas"'
+
+        presentation_backend:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/handlers/__USE_CASE__-handler.ts'
+          - 'Write API handler tests → npm test → npm run lint'
+          - 'git add → git commit -m "feat(api): add __USE_CASE__ endpoint handler"'
+
+        presentation_frontend_actions:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/actions/__USE_CASE__-action.ts'
+          - 'Write server action tests → npm test → npm run lint'
+          - 'git add → git commit -m "feat(actions): add __USE_CASE__ server actions"'
+
+        presentation_frontend_hooks:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/hooks/use-__USE_CASE__.ts'
+          - 'Write hook tests (React Testing Library) → npm test → npm run lint'
+          - 'git add → git commit -m "feat(hooks): add use-__USE_CASE__ hook"'
+
+        presentation_frontend_components:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/components/__USE_CASE__-form.tsx'
+          - 'Write component tests (React Testing Library) → npm test → npm run lint'
+          - 'git add → git commit -m "feat(components): add __USE_CASE__ form component"'
+
+        main_backend:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/main/factories/__USE_CASE__-factory.ts'
+          - 'Wire backend dependencies → npm test → npm run lint'
+          - 'git add → git commit -m "feat(main-backend): add __USE_CASE__ backend factory"'
+
+        main_frontend:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/main/composites/__USE_CASE__-composite.tsx'
+          - 'Wire frontend dependencies → npm test → npm run lint'
+          - 'git add → git commit -m "feat(main-frontend): add __USE_CASE__ frontend composite"'
+
+        feature_integration:
+          - 'Update: src/features/__FEATURE_NAME__/main/pages/__FEATURE__-page-composer.tsx'
+          - 'Update: src/features/__FEATURE_NAME__/main/api-routes/__FEATURE__-api-routes.ts'
+          - 'Test feature integration → npm test'
+          - 'git add → git commit -m "feat(feature): integrate __USE_CASE__ in feature main"'
+
+        app_integration:
+          - 'Update: src/app/(features)/__FEATURE_NAME__/page.tsx (frontend)'
+          - 'Update: src/app/api/__FEATURE_NAME__/route.ts (backend)'
+          - 'Test app integration → npm run dev → manual test both frontend and API'
+          - 'git add → git commit -m "feat(app): integrate __USE_CASE__ in app router and api"'
+
+        integration_testing:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__tests__/integration/__USE_CASE__.integration.spec.ts'
+          - 'Write fullstack integration tests → npm run test:integration'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__tests__/e2e/__USE_CASE__.e2e.spec.ts'
+          - 'Write E2E tests covering entire user flow → npm run test:e2e'
+          - 'git add → git commit -m "test(e2e): add __USE_CASE__ fullstack integration and e2e tests"'
+
+        finalization:
+          - 'Run full test suite → npm test'
+          - 'Run linting → npm run lint'
+          - 'Run type checking → npm run type-check'
+          - 'Run build → npm run build'
+          - 'git push origin feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'gh pr create --base main --title "feat(__FEATURE__): implement __USE_CASE__ fullstack feature"'
+
+        benefits:
+          - 'Single codebase: Frontend and backend developed together atomically'
+          - 'Shared validation: Zod schemas work on both client and server'
+          - 'Type safety: End-to-end TypeScript across the entire stack'
+          - 'Server Actions: Seamless client-server communication with progressive enhancement'
+          - 'API Routes: RESTful endpoints available when needed'
+          - 'Unified testing: Integration tests cover the complete user journey'
+
+    dependency_rules:
+      domain:
+        can_import_from: []  # Domain layer is the core - imports nothing
+        cannot_import_from: ['data', 'infra', 'presentation', 'validation', 'main']
+        notes: 'Shared between frontend and backend - must remain framework agnostic'
+
+      data:
+        can_import_from: ['domain']  # Data layer implements domain interfaces
+        cannot_import_from: ['presentation', 'validation', 'main']
+        notes: 'Split into backend (db operations) and frontend (api calls) implementations'
+
+      validation:
+        can_import_from: ['domain']  # Zod schemas validate domain entities and DTOs
+        cannot_import_from: ['data', 'presentation', 'main']
+        notes: 'Shared Zod schemas used by both frontend forms and backend validation'
+
+      presentation:
+        can_import_from: ['domain', 'validation']  # Presentation uses domain and validation
+        cannot_import_from: ['data', 'main']
+        notes: 'Split into backend (handlers) and frontend (actions, hooks, components)'
+
+      main:
+        can_import_from: ['data', 'domain', 'presentation', 'validation']  # Main layer composes everything
+        cannot_import_from: []  # Main is the composition root
+        notes: 'Split into backend (factories) and frontend (composites) composition'
+
+    # Clean Architecture principles adapted for Next.js fullstack
+    principles:
+      core_principles:
+        - "Unified Development: Frontend and backend share domain logic and validation"
+        - "Type Safety: End-to-end TypeScript from database to UI components"
+        - "Framework Independence: Business rules don't depend on Next.js specifics"
+        - "Testability: Each layer can be tested in isolation and integration"
+        - "Dependency Rule: Dependencies point inward toward the shared domain"
+
+      communication_patterns:
+        server_actions:
+          - "Progressive Enhancement: Forms work without JavaScript enabled"
+          - "Type Safety: Shared schemas ensure type safety across client-server boundary"
+          - "Error Handling: Unified error types from domain layer"
+          - "Validation: Same Zod schemas validate on both client and server"
+
+        api_routes:
+          - "RESTful Design: Standard HTTP methods and status codes"
+          - "Content Negotiation: Support for JSON and form data"
+          - "Middleware: Shared validation and authentication logic"
+          - "Error Responses: Consistent error format across all endpoints"
+
+        shared_validation:
+          - "Zod Schemas: Runtime validation that generates TypeScript types"
+          - "Client Validation: Immediate feedback in forms"
+          - "Server Validation: Security validation on all inputs"
+          - "Error Mapping: Transform validation errors to user-friendly messages"
+
+      design_patterns:
+        domain:
+          - "Shared Entities: Domain models used by both frontend and backend"
+          - "Interface Pattern: Use case contracts implemented differently per side"
+          - "DTO Pattern: Data transfer objects for API communication"
+          - "Error Types: Domain errors handled consistently across stack"
+          - "Value Objects: Shared validation logic for domain concepts"
+
+        data:
+          backend:
+            - "Repository Pattern: Database operations through interfaces"
+            - "Unit of Work: Transaction management for complex operations"
+            - "Query Objects: Complex queries encapsulated in objects"
+            - "Mapper Pattern: Transform database models to domain entities"
+          frontend:
+            - "API Client Pattern: HTTP requests through typed interfaces"
+            - "Cache Strategy: Next.js cache integration for performance"
+            - "Optimistic Updates: Immediate UI feedback with rollback"
+            - "Error Recovery: Retry logic and fallback strategies"
+
+        validation:
+          - "Schema Composition: Build complex schemas from simple ones"
+          - "Conditional Validation: Rules that depend on other fields"
+          - "Transform Pipeline: Parse and transform input data"
+          - "Error Aggregation: Collect all validation errors at once"
+          - "Client-Server Sync: Ensure validation rules match exactly"
+
+        presentation:
+          backend:
+            - "Handler Pattern: Request/response processing in API routes"
+            - "Middleware Chain: Cross-cutting concerns like auth and logging"
+            - "Response Builders: Consistent API response formats"
+            - "Content Type Handling: Support multiple input/output formats"
+          frontend:
+            - "Server Actions: Form handling with progressive enhancement"
+            - "Custom Hooks: Encapsulate state and side effects"
+            - "Component Composition: Build complex UIs from simple parts"
+            - "Error Boundaries: Graceful error handling in React tree"
+
+        main:
+          - "Dependency Injection: Wire dependencies at composition root"
+          - "Factory Pattern: Create complete feature implementations"
+          - "Adapter Pattern: Bridge between layers and frameworks"
+          - "Configuration: Environment-based feature toggles"
+
+      testing_strategy:
+        domain:
+          approach: "Unit Tests - Pure business logic"
+          coverage_target: "100%"
+          tools: ["Vitest"]
+          practices:
+            - "Test shared domain logic used by both frontend and backend"
+            - "Use fixed test data helpers instead of randomized data"
+            - "Test domain entities and use case interfaces"
+            - "Ensure domain tests run in both Node.js and browser environments"
+            - "Mock external dependencies at domain boundaries"
+
+        data:
+          backend:
+            approach: "Unit Tests with Database Integration"
+            coverage_target: "95%"
+            tools: ["Vitest", "Prisma test client", "Docker"]
+            practices:
+              - "Use test database with Docker for integration tests"
+              - "Test repository implementations with real database"
+              - "Mock external APIs and services"
+              - "Test transaction handling and rollback scenarios"
+          frontend:
+            approach: "Unit Tests with MSW"
+            coverage_target: "90%"
+            tools: ["Vitest", "MSW", "@testing-library/react"]
+            practices:
+              - "Mock API calls with MSW handlers"
+              - "Test optimistic updates and error recovery"
+              - "Verify request payloads and headers"
+              - "Test cache strategies and invalidation"
+
+        validation:
+          approach: "Unit Tests - Shared schema validation"
+          coverage_target: "100%"
+          tools: ["Vitest", "Zod"]
+          practices:
+            - "Test Zod schemas with both valid and invalid data"
+            - "Verify schemas work identically on client and server"
+            - "Test complex conditional validation rules"
+            - "Test schema composition and transformation"
+            - "Verify TypeScript type generation from schemas"
+
+        presentation:
+          backend:
+            approach: "Integration Tests - API endpoints"
+            coverage_target: "90%"
+            tools: ["Vitest", "Supertest", "MSW"]
+            practices:
+              - "Test complete request/response cycles"
+              - "Test authentication and authorization"
+              - "Test error handling and status codes"
+              - "Test middleware chain execution"
+          frontend:
+            approach: "Component and Integration Tests"
+            coverage_target: "85%"
+            tools: ["Vitest", "@testing-library/react", "React Hook Form"]
+            practices:
+              - "Test component rendering and user interactions"
+              - "Test Server Actions with form submissions"
+              - "Test custom hooks with React Testing Library"
+              - "Test error states and loading states"
+              - "Test accessibility with jest-axe"
+
+        main:
+          approach: "E2E and Integration Tests"
+          coverage_target: "80%"
+          tools: ["Playwright", "Vitest"]
+          practices:
+            - "Test complete user flows from UI to database"
+            - "Test both Server Actions and API Routes paths"
+            - "Test responsive design and mobile interactions"
+            - "Test progressive enhancement (JavaScript disabled)"
+            - "Test performance and Core Web Vitals"
+            - "Use page object model for maintainable E2E tests"
+
+      best_practices:
+        development:
+          - "Shared First: Start with domain and validation, then split implementation"
+          - "Type Safety: Use TypeScript strict mode across entire stack"
+          - "Error Handling: Consistent error types from domain to UI"
+          - "Performance: Leverage Next.js optimizations (SSR, SSG, caching)"
+          - "Security: Validate inputs on both client and server"
+
+        architecture:
+          - "Layer Separation: Keep business rules independent of frameworks"
+          - "Dependency Direction: Always point toward the domain core"
+          - "Interface Segregation: Define minimal, focused interfaces"
+          - "Single Responsibility: Each class/function has one reason to change"
+          - "Open/Closed: Open for extension, closed for modification"
+
+        testing:
+          - "Test Pyramid: More unit tests, fewer integration tests, minimal E2E"
+          - "Fast Feedback: Unit tests run in milliseconds"
+          - "Isolated Tests: Each test can run independently"
+          - "Deterministic: Tests produce same results every time"
+          - "Readable: Tests serve as documentation for behavior"
+
+        deployment:
+          - "Environment Parity: Development, staging, and production match"
+          - "Immutable Builds: Same artifact deployed across environments"
+          - "Health Checks: Monitor both frontend and backend health"
+          - "Rollback Strategy: Ability to quickly revert problematic deployments"
+          - "Feature Flags: Control feature rollout independently"
+
+
+
+# --- From: fullstack/03-rules.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: IMMUTABLE SECTIONS AHEAD.
+  # The sections from here until 'steps' are architectural rules.
+  # You MUST copy them verbatim into the implementation file without ANY modification.
+  #
+  # AUTOMATED LEARNING SYSTEM:
+  # The RLHF system automatically:
+  # - Tracks success/failure patterns across executions
+  # - Identifies common error types and their fixes
+  # - Applies improvements when confidence > 80%
+  # - Generates learning reports with actionable insights
+  # - Prevents hallucinations with score 0 for uncertain cases
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # FULLSTACK RULES SECTION
+  # Clean Architecture rules for unified Next.js 15 frontend + backend development
+  # Shared components: domain, validation | Split components: data, presentation, main
+  # ------------------------------------------------------------------------------
+
+  rules:
+    # Domain layer rules (Shared between frontend and backend)
+    domain:
+      shared_purpose: 'Domain logic must be 100% shared between frontend and backend'
+
+      allowed:
+        - 'Business entities with immutable data structures'
+        - 'Use case interfaces with single execute() method'
+        - 'Separate Input and Output types for each use case'
+        - 'Domain types and DTOs for API communication'
+        - 'Domain errors for business rule violations'
+        - 'JSDoc documentation for all public interfaces'
+        - 'ES2015 module exports (export type, export interface)'
+
+      forbidden:
+        - 'Multiple methods in a single use case interface'
+        - 'Combined operations (e.g., __USE_CASE_NAME__And__OTHER_ACTION__)'
+        - 'Framework dependencies (React, Next.js, Node.js specifics)'
+        - 'External libraries (HTTP, database, or browser clients)'
+        - 'Implementation details of any kind'
+        - 'React components or API handlers'
+        - 'HTTP/Database/File system operations'
+        - 'Environment variables or configuration'
+        - 'Console.log or any I/O operations'
+        - 'Implementation of business logic (only interfaces allowed)'
+        - 'Validation implementations (use validation layer)'
+        - 'Error throwing or handling (define error types only)'
+        - 'Dependency injection'
+        - 'Domain entities with methods/behavior (use simple data structures)'
+
+      use_case:
+        should:
+          - 'Have only ONE execute() method per interface'
+          - 'Define separate Input and Output types'
+          - 'Have EXACTLY ONE responsibility (one business operation)'
+          - 'Be named with single verb describing ONE action (__USE_CASE_NAME__, not __USE_CASE_NAME__And__OTHER_ACTION__)'
+          - 'Include comprehensive JSDoc documentation'
+          - 'Return Promise<Output> from execute method'
+          - 'Be framework agnostic (runnable in both browser and Node.js)'
+          - 'Follow naming convention: VerbNoun (e.g., __USE_CASE_EXAMPLE_1__, __USE_CASE_EXAMPLE_2__, __USE_CASE_EXAMPLE_3__)'
+        should_not:
+          - 'Have multiple methods (no __METHOD_1__() AND __METHOD_2__() in same interface)'
+          - 'Combine multiple operations (__USE_CASE_NAME__And__OTHER_ACTION__ violates SRP)'
+          - 'Contain implementation logic'
+          - 'Know about HTTP, databases, or external services'
+          - 'Import from data, presentation, or infrastructure layers'
+          - 'Have side effects'
+          - 'Use generic method names like handle(), process(), or run()'
+
+    # Data layer rules (Split: backend and frontend implementations)
+    data:
+      split_purpose: 'Data layer splits into backend (database operations) and frontend (API calls)'
+
+      backend:
+        should:
+          - 'Implement domain use case interfaces for server-side logic'
+          - 'Use constructor injection for dependencies'
+          - 'Define protocols for database and external services'
+          - 'Use prefix naming (Db__USE_CASE_NAME__, Service__USE_CASE_NAME__)'
+          - 'Handle database transactions and rollbacks'
+          - 'Map database models to domain entities'
+          - 'Return domain types, not database-specific types'
+          - 'Handle server-side errors and status codes'
+        should_not:
+          - 'Import from infrastructure layer directly'
+          - 'Contain complex business logic (belongs in domain)'
+          - 'Expose database details to domain'
+          - 'Use concrete database implementations instead of protocols'
+          - 'Have direct database calls (use repository protocols)'
+          - 'Know about HTTP requests or browser APIs'
+
+      frontend:
+        should:
+          - 'Implement domain use case interfaces for client-side logic'
+          - 'Use constructor injection for dependencies'
+          - 'Define protocols for API communication'
+          - 'Use prefix naming (Remote__USE_CASE_NAME__, Api__USE_CASE_NAME__)'
+          - 'Handle network errors and retry logic'
+          - 'Map API responses to domain entities'
+          - 'Return domain types, not HTTP-specific types'
+          - 'Handle client-side caching and optimistic updates'
+        should_not:
+          - 'Import from infrastructure layer directly'
+          - 'Contain complex business logic (belongs in domain)'
+          - 'Expose HTTP details to domain'
+          - 'Use concrete HTTP implementations instead of protocols'
+          - 'Have direct API calls (use HTTP client protocols)'
+          - 'Know about database operations or server-side logic'
+
+    # Infrastructure layer rules (Split: server-side and client-side)
+    infra:
+      split_purpose: 'Infrastructure splits into server-side (database, cache) and client-side (HTTP, storage)'
+
+      backend:
+        should:
+          - 'Implement data layer protocols for server operations'
+          - 'Use Prisma ORM for database operations'
+          - 'Support PostgreSQL with pgvector extension'
+          - 'Use Redis for server-side caching'
+          - 'Handle database connection pooling and transactions'
+          - 'Use environment variables for server configuration'
+          - 'Implement background job processing'
+          - 'Handle file storage (S3, local filesystem)'
+        should_not:
+          - 'Import from domain or use case layers'
+          - 'Contain business logic'
+          - 'Expose database-specific types to other layers'
+          - 'Use MongoDB (use Prisma with PostgreSQL)'
+          - 'Know about browser APIs or client-side concerns'
+
+      frontend:
+        should:
+          - 'Implement data layer protocols for client operations'
+          - 'Use native Fetch API for HTTP requests'
+          - 'Handle browser localStorage/sessionStorage'
+          - 'Implement client-side cache strategies (React Query, SWR)'
+          - 'Handle network retry logic and offline scenarios'
+          - 'Use environment variables for client configuration (NEXT_PUBLIC_*)'
+          - 'Handle CORS and authentication headers'
+          - 'Implement WebSocket connections for real-time features'
+        should_not:
+          - 'Import from domain or use case layers'
+          - 'Contain business logic'
+          - 'Use multiple HTTP client implementations'
+          - 'Expose HTTP-specific types to other layers'
+          - 'Use axios or other HTTP libraries (use Fetch API)'
+          - 'Know about database operations or server-side concerns'
+
+    # Presentation layer rules (Split: backend handlers and frontend UI)
+    presentation:
+      split_purpose: 'Presentation splits into backend (API handlers) and frontend (Server Actions, components, hooks)'
+
+      backend:
+        handlers:
+          should:
+            - 'Use Next.js 15 API Routes for RESTful endpoints'
+            - 'Implement handler functions with standard HTTP methods (GET, POST, PUT, DELETE)'
+            - 'Return standardized API responses (NextResponse.json)'
+            - 'Use Next.js middleware for cross-cutting concerns'
+            - 'Handle errors gracefully with try/catch'
+            - 'Validate requests with shared Zod schemas'
+            - 'Use dependency injection from main layer factories'
+          should_not:
+            - 'Use Express or other HTTP frameworks (use Next.js API Routes)'
+            - 'Import from infra layer directly'
+            - 'Contain business logic (delegate to use cases)'
+            - 'Make direct database calls'
+            - 'Know about React components or client-side concerns'
+
+      frontend:
+        actions:
+          should:
+            - 'Use Next.js 15 Server Actions for form submission'
+            - 'Implement "use server" directive for server-side execution'
+            - 'Return ActionResult<T> or FormState for form feedback'
+            - 'Validate with shared Zod schemas'
+            - 'Handle errors with redirect/revalidate patterns'
+            - 'Use dependency injection from main layer composites'
+          should_not:
+            - 'Contain business logic (delegate to use cases)'
+            - 'Make direct database calls'
+            - 'Import from infra layer directly'
+
+        components:
+          should:
+            - 'Use Shadcn/ui components with Tailwind CSS'
+            - 'Prefer Server Components over Client Components'
+            - 'Use "use client" directive only when necessary'
+            - 'Follow atomic design principles (atoms, molecules, organisms)'
+            - 'Implement proper error boundaries'
+            - 'Use TypeScript for props and state'
+            - 'Receive dependencies as props from main layer'
+          should_not:
+            - 'Use custom CSS/SASS (use Tailwind CSS)'
+            - 'Contain business logic (use custom hooks)'
+            - 'Make direct API calls (use Server Actions or hooks)'
+            - 'Import from data or infra layers directly'
+
+        hooks:
+          should:
+            - 'Use React hooks for state management and side effects'
+            - 'Implement custom hooks for reusable logic'
+            - 'Use Context API for feature-specific state'
+            - 'Handle loading, error, and success states'
+            - 'Follow hooks rules (no conditional calls)'
+            - 'Integrate with client-side data layer when needed'
+          should_not:
+            - 'Use Redux or external state managers (use Context API)'
+            - 'Contain business logic (delegate to use cases)'
+            - 'Make direct API calls (use data layer)'
+            - 'Import from infra layer directly'
+
+    # Error rules
+    error:
+      should:
+        - 'Extend the native Error class'
+        - 'Have descriptive names ending with Error'
+        - 'Contain meaningful error messages'
+        - 'Represent business rule violations'
+        - 'Be thrown when domain invariants are violated'
+
+      should_not:
+        - 'Contain HTTP status codes'
+        - 'Include technical/implementation details'
+        - 'Expose sensitive information'
+        - 'Import external dependencies'
+
+    # Test helper rules
+    test_helper:
+      should:
+        - 'Create mock/stub implementations of use cases'
+        - 'Generate fake test data'
+        - 'Be pure functions that return consistent data'
+        - 'Help reduce test boilerplate'
+        - 'Use ONLY Vitest (Jest is prohibited)'
+
+      should_not:
+        - 'Make real API calls or database queries'
+        - 'Depend on external services'
+        - 'Contain test assertions (those belong in test files)'
+        - 'Have side effects or maintain state'
+        - 'Use Jest (use Vitest instead)'
+
+    # Validation rules (Shared between frontend and backend)
+    validation:
+      shared_purpose: 'Validation schemas must be 100% shared between frontend and backend using Zod'
+
+      schemas:
+        should:
+          - 'Use Zod for schema definition and validation'
+          - 'Define schemas that match domain Input/Output types'
+          - 'Support both client and server-side validation'
+          - 'Include descriptive error messages for form fields'
+          - 'Export schemas for reuse across frontend and backend'
+          - 'Use consistent naming: __USE_CASE_NAME__InputSchema, __USE_CASE_NAME__OutputSchema'
+          - 'Support nested object validation for complex domain types'
+          - 'Provide transform functions for data sanitization'
+        should_not:
+          - 'Import from domain layer (validation is independent)'
+          - 'Import from data, presentation, or infra layers'
+          - 'Contain business logic (only validation rules)'
+          - 'Use other validation libraries (Zod only)'
+          - 'Access external services for validation'
+          - 'Use async validation (keep schemas synchronous)'
+
+      validators:
+        should:
+          - 'Implement reusable field validators with Zod'
+          - 'Support synchronous validation for forms and APIs'
+          - 'Return user-friendly error messages'
+          - 'Follow Zod patterns and conventions'
+          - 'Provide helper functions for common validation patterns'
+          - 'Support type inference for TypeScript integration'
+          - 'Use refinements for complex validation rules'
+        should_not:
+          - 'Import from data or infra layers'
+          - 'Throw exceptions (return validation results)'
+          - 'Access external services for validation'
+          - 'Use async validation (prefer synchronous)'
+          - 'Duplicate validation logic between schemas'
+
+    # Main layer rules (Split: backend factories and frontend composites)
+    main:
+      split_purpose: 'Main layer splits into backend (factories for API handlers) and frontend (composites for UI components)'
+
+      backend:
+        factories:
+          should:
+            - 'Create factory functions for Next.js API route handlers'
+            - 'Wire up all dependencies using composition root pattern'
+            - 'Apply decorators for cross-cutting concerns (logging, monitoring)'
+            - 'Configure Next.js middleware for API routes'
+            - 'Handle environment configuration and secrets'
+            - 'Use dependency injection containers'
+            - 'Return fully configured API handlers'
+            - 'Setup database connections and migrations'
+            - 'Initialize monitoring and health checks'
+          should_not:
+            - 'Contain business logic (only wiring and composition)'
+            - 'Have direct database or API calls'
+            - 'Include complex algorithms or calculations'
+            - 'Store application state'
+            - 'Define new interfaces or types (use existing from other layers)'
+            - 'Handle request/response logic (belongs in presentation)'
+
+      frontend:
+        composites:
+          should:
+            - 'Create composite components that wire all dependencies'
+            - 'Compose Server Actions with validation schemas'
+            - 'Wire use cases with data layer and validation'
+            - 'Export fully configured components ready for App Router'
+            - 'Handle error states and loading states'
+            - 'Use Next.js 15 App Router patterns (layout, page, loading, error)'
+            - 'Implement proper SEO metadata and structured data'
+            - 'Handle authentication and route protection'
+          should_not:
+            - 'Contain business logic (only composition)'
+            - 'Make direct API calls'
+            - 'Define new interfaces or types'
+            - 'Store application state directly'
+            - 'Include complex algorithms or calculations'
+
+        pages:
+          should:
+            - 'Create page composers that aggregate feature composites'
+            - 'Use Next.js 15 App Router patterns (layout, page, loading, error)'
+            - 'Implement proper SEO metadata and structured data'
+            - 'Handle authentication and route protection'
+            - 'Export React.FC components for App Router integration'
+            - 'Use Server Components by default, Client Components when necessary'
+          should_not:
+            - 'Contain business logic (delegate to composites)'
+            - 'Have direct state management (use providers)'
+            - 'Include complex algorithms or calculations'
+            - 'Store application state directly'
+
+    # Reference patterns
+    reference_patterns:
+      clean_architecture:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'clean architecture use case'
+        url: 'https://github.com/...'
+        description: 'Following Clean Architecture pattern.'
+
+      ddd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'domain driven design'
+        url: 'https://github.com/...'
+        description: 'Following DDD patterns.'
+
+      tdd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'test driven development'
+        url: 'https://github.com/...'
+        description: 'Following TDD patterns.'
+
+    # Learning patterns (Fullstack-specific)
+    learning_patterns:
+      common_errors:
+        - pattern: 'import axios'
+          fix: 'Use Fetch API instead of axios in fullstack infra layer'
+          score_impact: -2
+
+        - pattern: '__USE_CASE_NAME__And__OTHER_ACTION__'
+          fix: 'Split into two separate use cases (SRP violation)'
+          score_impact: -1
+
+        - pattern: '"use client" everywhere'
+          fix: 'Prefer Server Components, use "use client" only when necessary'
+          score_impact: -1
+
+        - pattern: 'useState for server state'
+          fix: 'Use Server Actions and revalidation instead of client state'
+          score_impact: -1
+
+        - pattern: 'missing Zod validation'
+          fix: 'Add Zod schema validation for forms and APIs'
+          score_impact: -2
+
+        - pattern: 'duplicate validation logic'
+          fix: 'Share Zod schemas between frontend and backend'
+          score_impact: -1
+
+        - pattern: 'Express in fullstack'
+          fix: 'Use Next.js API Routes instead of Express for fullstack'
+          score_impact: -2
+
+      success_indicators:
+        - 'Uses ubiquitous language consistently'
+        - 'Follows single responsibility principle'
+        - 'No dependency violations between layers'
+        - 'Proper Server Component vs Client Component usage'
+        - 'Shared Zod schemas between frontend and backend'
+        - 'Comprehensive test coverage with Vitest'
+        - 'Clean git history with atomic commits'
+        - 'Effective use of Next.js App Router patterns'
+        - 'Strong TypeScript typing throughout'
+
+    # Required protocols for all layers
+    required_protocols:
+      # Domain Layer
+      domain:
+        - 'All use cases must have single execute() method'
+        - 'All use cases must define separate Input and Output types'
+        - 'All domain types must be immutable'
+        - 'No use case can perform multiple operations (SRP)'
+        - 'All models must be simple DTOs without behavior'
+
+      # Data Layer
+      data:
+        - 'All implementations must inject dependencies via constructor'
+        - 'All protocols must be interfaces, not concrete classes'
+        - 'All implementations must use Db or Remote prefix'
+        - 'Must return domain types, not infrastructure types'
+        - 'Must handle errors and map status codes appropriately'
+
+      # Infrastructure Layer
+      infra:
+        - 'All adapters must implement data layer protocols'
+        - 'HTTP clients must use Fetch API, not axios'
+        - 'Database repositories must use Prisma with PostgreSQL'
+        - 'All external configs must come from environment variables'
+        - 'Must not expose infrastructure types to other layers'
+
+      # Presentation Layer
+      presentation:
+        - 'Controllers must implement handle() method'
+        - 'Controllers must return HTTP helpers (ok, badRequest, etc.)'
+        - 'React components must use function components with hooks'
+        - 'Pages must receive dependencies as props'
+        - 'Middlewares must implement handle() with next parameter'
+
+      # Validation Layer (Shared)
+      validation:
+        - 'All schemas must use Zod for validation'
+        - 'Schemas must match domain model structure'
+        - 'Validation must be synchronous for forms and APIs'
+        - 'Must support both client and server validation'
+        - 'Error messages must be user-friendly'
+        - 'Schema naming: __USE_CASE_NAME__InputSchema, __USE_CASE_NAME__OutputSchema'
+
+      # Main Layer (Split)
+      main:
+        - 'Backend factories must return configured API handlers'
+        - 'Frontend composites must return configured React components'
+        - 'All factory functions must wire all dependencies'
+        - 'No business logic allowed (only composition)'
+        - 'Must use Next.js patterns for both API routes and App Router'
+        - 'Must not define new types (use existing from other layers)'
+
+      # Cross-cutting Concerns
+      general:
+        - 'All public interfaces must have JSDoc documentation'
+        - 'All errors must extend native Error class'
+        - 'All test helpers must be pure functions'
+        - 'All tests must use Vitest, not Jest'
+        - 'No use of faker - fixed test data only'
+
+    # Documentation standards (JSDoc)
+    documentation:
+      # Domain Layer Documentation
+      domain:
+        use_case_interface:
+          - '@description - Clear description of the use case purpose'
+          - '@example - Usage example with execute() method'
+          - '@see - Reference to related use cases or documentation'
+        input_output_types:
+          - '@typedef - Define Input and Output types'
+          - '@property - Document each field with type and constraints'
+          - '@example - Show valid input/output instances'
+        model_type:
+          - '@typedef - Define the domain model'
+          - '@property - Document each property with business rules'
+          - '@example - Show valid model instance'
+
+      # Data Layer Documentation
+      data:
+        protocol_interface:
+          - '@interface - Define protocol contracts'
+          - '@method - Document each method signature'
+          - '@throws - Document possible errors'
+        implementation_class:
+          - '@class - Describe the use case implementation'
+          - '@implements - List implemented interfaces'
+          - '@constructor - Document dependency injection'
+          - '@method - Document orchestration logic'
+
+      # Infrastructure Layer Documentation
+      infra:
+        adapter_class:
+          - '@class - Describe the adapter purpose'
+          - '@implements - Protocol being implemented'
+          - '@dependency - External libraries used'
+        database_repository:
+          - '@class - Repository implementation'
+          - '@method - Document CRUD operations'
+          - '@throws - Database-specific errors'
+        http_client:
+          - '@class - HTTP client implementation'
+          - '@method - Document request/response handling'
+          - '@throws - Network-related errors'
+
+      # Presentation Layer Documentation
+      presentation:
+        controller:
+          - '@class - Controller description'
+          - '@route - HTTP route and method'
+          - '@param - Request parameters'
+          - '@returns - HTTP response format'
+          - '@throws - HTTP error responses'
+        middleware:
+          - '@function - Middleware purpose'
+          - '@param - Request, Response, Next'
+          - '@throws - Authorization/validation errors'
+        react_component:
+          - '@component - Component description'
+          - '@props - Component properties'
+          - '@state - Component state (if any)'
+          - '@returns - JSX element'
+
+      # Validation Layer Documentation (Shared)
+      validation:
+        zod_schema:
+          - '@schema - Zod schema description'
+          - '@property - Document each field with validation rules'
+          - '@example - Show valid and invalid examples'
+          - '@returns - Parsed data or validation errors'
+        validator_function:
+          - '@function - Field validator description'
+          - '@param - Value to validate'
+          - '@returns - Validation result or error message'
+        shared_validator:
+          - '@function - Shared validator for frontend and backend'
+          - '@param - Input data to validate'
+          - '@returns - Type-safe parsed data or validation errors'
+
+      # Main Layer Documentation (Split)
+      main:
+        backend_factory:
+          - '@function - Backend factory function description'
+          - '@returns - Configured API handler with dependencies'
+          - '@example - How to use the factory in API routes'
+        frontend_composite:
+          - '@component - Frontend composite description'
+          - '@returns - Configured React component with all dependencies'
+          - '@example - How to use the composite in App Router'
+        page_composer:
+          - '@component - Page composer description'
+          - '@param - Page props and metadata'
+          - '@returns - Next.js page component'
+        dependency_composition:
+          - '@function - Dependency composition for fullstack'
+          - '@returns - Fully configured instances for both frontend and backend'
+
+      example_template: |
+        /**
+        * @description __USE_CASE_DESCRIPTION__
+        * @example
+        * const __USE_CASE_NAME_CAMEL_CASE__ = new __USE_CASE_NAME_PASCAL_CASE__Impl(__DEPENDENCY_NAME__)
+        * const result = await __USE_CASE_NAME_CAMEL_CASE__.execute({
+        *   __INPUT_FIELD_1__: '__EXAMPLE_VALUE_1__',
+        *   __INPUT_FIELD_2__: '__EXAMPLE_VALUE_2__',
+        *   __INPUT_FIELD_3__: '__EXAMPLE_VALUE_3__'
+        * })
+        * @see {@link __RELATED_USE_CASE__} for __RELATED_DESCRIPTION__
+        */
+        export interface __USE_CASE_NAME_PASCAL_CASE__ {
+          execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output>
+        }
+
+        /**
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Input
+        * @property {string} __INPUT_FIELD_1__ - __FIELD_1_DESCRIPTION__ (__FIELD_1_CONSTRAINTS__)
+        * @property {string} __INPUT_FIELD_2__ - __FIELD_2_DESCRIPTION__
+        * @property {string} __INPUT_FIELD_3__ - __FIELD_3_DESCRIPTION__ (__FIELD_3_CONSTRAINTS__)
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Input = {
+          __INPUT_FIELD_1__: string
+          __INPUT_FIELD_2__: string
+          __INPUT_FIELD_3__: string
+        }
+
+        /**
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Output
+        * @property {string} __OUTPUT_FIELD_1__ - __OUTPUT_FIELD_1_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_2__ - __OUTPUT_FIELD_2_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_3__ - __OUTPUT_FIELD_3_DESCRIPTION__
+        * @property {Date} __TIMESTAMP_FIELD__ - __TIMESTAMP_DESCRIPTION__
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Output = {
+          __OUTPUT_FIELD_1__: string
+          __OUTPUT_FIELD_2__: string
+          __OUTPUT_FIELD_3__: string
+          __TIMESTAMP_FIELD__: Date
+        }
+
+
+# --- From: fullstack/steps/05-main.part.regent ---
+# ------------------------------------------------------------------------------
+# FULLSTACK MAIN LAYER TEMPLATE
+# Next.js 15 App Router - Complete Fullstack Composition Root
+# Supports: Next.js 15 with App Router, API Routes, Server Components, and Server Actions
+# Pattern: Factory Pattern, Composite Pattern, Full Dependency Injection
+# ------------------------------------------------------------------------------
+
+metadata:
+  layer: 'main'
+  project_type: 'fullstack'
+  architecture_style: 'clean'
+  framework: 'nextjs15'
+  rendering: 'rsc' # React Server Components
+  api: 'routes' # Next.js API Routes
+  patterns:
+    - 'composition-root'
+    - 'factory-pattern'
+    - 'composite-pattern'
+    - 'provider-pattern'
+    - 'server-components'
+    - 'server-actions'
+    - 'api-routes'
+  references:
+    - 'Next.js 15 App Router documentation'
+    - 'Next.js API Routes'
+    - 'React Server Components'
+    - 'Clean Architecture principles'
+    - 'Factory Pattern'
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER STRUCTURE
+# ------------------------------------------------------------------------------
+
+structure:
+  main_structure:
+    description: 'Setup main layer for Next.js 15 fullstack architecture'
+    folders:
+      - 'src/app'
+      - 'src/app/(features)'
+      - 'src/app/api'
+      - 'src/shared/main/config'
+      - 'src/shared/main/factories'
+      - 'src/shared/main/composites'
+      - 'src/shared/main/providers'
+      - 'src/shared/main/adapters'
+      - 'src/shared/main/middleware'
+      - 'src/shared/main/lib'
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER IMPLEMENTATION STEPS
+# Following Factory and Composite Patterns for Fullstack Next.js 15
+# ------------------------------------------------------------------------------
+
+steps:
+  main_steps:
+    # === STEP 1: CREATE MAIN BRANCH ===
+    - id: 'create-main-branch-fullstack'
+      type: 'validation'
+      description: 'Create feature branch for fullstack main layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Create and checkout fullstack main layer branch'
+        scripts:
+          - name: 'Create main branch'
+            command: |
+              git checkout -b "feat/__FEATURE_NAME_KEBAB_CASE__-fullstack-main"
+              echo "✅ Created branch: feat/__FEATURE_NAME_KEBAB_CASE__-fullstack-main"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: CREATE ENVIRONMENT CONFIGURATION ===
+    - id: 'create-env-config-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack environment configuration'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/shared/main/config/env.ts'
+      template: |
+        /**
+         * Fullstack environment configuration
+         * @layer Main Layer - Configuration
+         * @pattern Configuration Pattern
+         */
+        const config = {
+          // App Configuration
+          nodeEnv: process.env.NODE_ENV || 'development',
+          port: process.env.PORT || 3000,
+          appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+
+          // Database Configuration
+          mongoUrl: process.env.MONGO_URL || 'mongodb://localhost:27017/__PROJECT_NAME__',
+          postgresUrl: process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/__PROJECT_NAME__',
+
+          // Cache Configuration
+          redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
+
+          // Authentication Configuration
+          jwtSecret: process.env.JWT_SECRET || 'your-secret-key',
+          nextAuthSecret: process.env.NEXTAUTH_SECRET || 'your-nextauth-secret',
+          nextAuthUrl: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+
+          // API Configuration
+          apiPrefix: '/api',
+          corsOrigin: process.env.CORS_ORIGIN || '*',
+          rateLimitWindow: parseInt(process.env.RATE_LIMIT_WINDOW || '900000'), // 15 minutes
+          rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX || '100'),
+
+          // External Services
+          uploadthingSecret: process.env.UPLOADTHING_SECRET,
+          uploadthingAppId: process.env.UPLOADTHING_APP_ID,
+        } as const
+
+        export default config
+
+    # === STEP 3: CREATE ROOT LAYOUT ===
+    - id: 'create-root-layout-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack root layout with providers'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/app/layout.tsx'
+      template: |
+        import type { Metadata } from 'next'
+        import { Inter } from 'next/font/google'
+        import './globals.css'
+        import { RootProviders } from '@/shared/main/providers/root-providers'
+        import { ThemeProvider } from '@/shared/main/providers/theme-provider'
+        import { SessionProvider } from '@/shared/main/providers/session-provider'
+        import config from '@/shared/main/config/env'
+
+        const inter = Inter({ subsets: ['latin'] })
+
+        /**
+         * Root metadata for fullstack application
+         * @layer Main Layer - App Router
+         */
+        export const metadata: Metadata = {
+          title: {
+            default: '__PROJECT_NAME__',
+            template: '%s | __PROJECT_NAME__'
+          },
+          description: 'Full-stack Clean Architecture Next.js 15 Application',
+          metadataBase: new URL(config.appUrl),
+          openGraph: {
+            title: '__PROJECT_NAME__',
+            description: 'Full-stack Clean Architecture Next.js 15 Application',
+            url: config.appUrl,
+            siteName: '__PROJECT_NAME__',
+            locale: 'en_US',
+            type: 'website',
+          },
+          twitter: {
+            card: 'summary_large_image',
+            title: '__PROJECT_NAME__',
+            description: 'Full-stack Clean Architecture Next.js 15 Application',
+          },
+        }
+
+        /**
+         * Root layout component for fullstack app
+         * @layer Main Layer - App Router
+         * @pattern Provider Pattern, Server Component
+         */
+        export default function RootLayout({
+          children,
+        }: {
+          children: React.ReactNode
+        }) {
+          return (
+            <html lang="en" suppressHydrationWarning>
+              <body className={inter.className}>
+                <SessionProvider>
+                  <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                  >
+                    <RootProviders>
+                      {children}
+                    </RootProviders>
+                  </ThemeProvider>
+                </SessionProvider>
+              </body>
+            </html>
+          )
+        }
+
+    # === STEP 4: CREATE ROOT PROVIDERS ===
+    - id: 'create-root-providers-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack root providers'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/shared/main/providers/root-providers.tsx'
+      template: |
+        'use client'
+
+        import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+        import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+        import { useState } from 'react'
+        import { Toaster } from '@/shared/presentation/ui/toaster'
+        import { AppContextProvider } from '@/shared/main/providers/app-context-provider'
+        import config from '@/shared/main/config/env'
+
+        /**
+         * Root providers for fullstack application
+         * @layer Main Layer - Providers
+         * @pattern Provider Pattern, Client Component
+         */
+        export function RootProviders({ children }: { children: React.ReactNode }) {
+          const [queryClient] = useState(
+            () =>
+              new QueryClient({
+                defaultOptions: {
+                  queries: {
+                    staleTime: 60 * 1000, // 1 minute
+                    gcTime: 5 * 60 * 1000, // 5 minutes
+                    retry: (failureCount, error: any) => {
+                      // Don't retry on 4xx errors
+                      if (error?.status >= 400 && error?.status < 500) {
+                        return false
+                      }
+                      return failureCount < 3
+                    },
+                  },
+                  mutations: {
+                    retry: false,
+                  },
+                },
+              })
+          )
+
+          return (
+            <QueryClientProvider client={queryClient}>
+              <AppContextProvider>
+                {children}
+                <Toaster />
+                {config.nodeEnv === 'development' && (
+                  <ReactQueryDevtools initialIsOpen={false} />
+                )}
+              </AppContextProvider>
+            </QueryClientProvider>
+          )
+        }
+
+    # === STEP 5: CREATE API ROUTE HANDLER FACTORY ===
+    - id: 'create-api-handler-factory'
+      type: 'create_file'
+      description: 'Create factory for API route handlers'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/shared/main/factories/api-handler-factory.ts'
+      template: |
+        import { NextRequest, NextResponse } from 'next/server'
+        import { ZodSchema } from 'zod'
+        import { makeLoggerDecorator } from './decorators/logger-factory'
+
+        /**
+         * Factory for creating API route handlers with validation and error handling
+         * @layer Main Layer - Factory
+         * @pattern Factory Pattern, Error Handling
+         */
+        export function createApiHandler<T = any>({
+          schema,
+          handler,
+          requireAuth = false,
+        }: {
+          schema?: ZodSchema<T>
+          handler: (data: T, request: NextRequest) => Promise<any>
+          requireAuth?: boolean
+        }) {
+          return async function apiHandler(request: NextRequest) {
+            try {
+              // Authentication check
+              if (requireAuth) {
+                const session = await getServerSession()
+                if (!session) {
+                  return NextResponse.json(
+                    { error: 'Unauthorized' },
+                    { status: 401 }
+                  )
+                }
+              }
+
+              // Parse and validate request body
+              let data: T
+              if (schema) {
+                const body = await request.json()
+                const result = schema.safeParse(body)
+
+                if (!result.success) {
+                  return NextResponse.json(
+                    { error: 'Validation failed', details: result.error.issues },
+                    { status: 400 }
+                  )
+                }
+                data = result.data
+              } else {
+                data = {} as T
+              }
+
+              // Execute handler
+              const result = await handler(data, request)
+
+              return NextResponse.json(result, { status: 200 })
+
+            } catch (error) {
+              console.error('API handler error:', error)
+
+              // Handle known errors
+              if (error instanceof Error) {
+                if (error.message.includes('not found')) {
+                  return NextResponse.json(
+                    { error: 'Resource not found' },
+                    { status: 404 }
+                  )
+                }
+
+                if (error.message.includes('unauthorized')) {
+                  return NextResponse.json(
+                    { error: 'Unauthorized' },
+                    { status: 401 }
+                  )
+                }
+              }
+
+              return NextResponse.json(
+                { error: 'Internal server error' },
+                { status: 500 }
+              )
+            }
+          }
+        }
+
+        // AI-NOTE: Import getServerSession based on your auth provider
+        async function getServerSession() {
+          // Implementation depends on your auth solution
+          // NextAuth: import { getServerSession } from 'next-auth'
+          // Auth0: implementation for Auth0
+          // Clerk: implementation for Clerk
+          return null
+        }
+
+    # === STEP 6: CREATE FEATURE COMPOSITE ===
+    - id: 'create-feature-composite-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack composite component'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main/composites/__USE_CASE_NAME_KEBAB_CASE__-composite.tsx'
+      template: |
+        import { Suspense } from 'react'
+        import { __USE_CASE_NAME_PASCAL_CASE__Form } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components'
+        import { __USE_CASE_NAME_PASCAL_CASE__Loading } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components/loading'
+        import { make__USE_CASE_NAME_PASCAL_CASE__Props } from '../factories/__USE_CASE_NAME_KEBAB_CASE__-factory'
+
+        /**
+         * Fullstack composite component for __USE_CASE_NAME_PASCAL_CASE__
+         * @layer Main Layer - Composite
+         * @pattern Composite Pattern, Server Component
+         */
+        export async function __USE_CASE_NAME_PASCAL_CASE__Composite() {
+          // Server-side data fetching and dependency injection
+          const props = await make__USE_CASE_NAME_PASCAL_CASE__Props()
+
+          return (
+            <Suspense fallback={<__USE_CASE_NAME_PASCAL_CASE__Loading />}>
+              <__USE_CASE_NAME_PASCAL_CASE__Form {...props} />
+            </Suspense>
+          )
+        }
+
+    # === STEP 7: CREATE COMPONENT FACTORY ===
+    - id: 'create-component-factory-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack component factory'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/__USE_CASE_NAME_KEBAB_CASE__-factory.ts'
+      template: |
+        import { makeDb__USE_CASE_NAME_PASCAL_CASE__ } from './usecases/__USE_CASE_NAME_KEBAB_CASE__-factory'
+        import { make__USE_CASE_NAME_PASCAL_CASE__Validation } from './validation/__USE_CASE_NAME_KEBAB_CASE__-validation-factory'
+        import { cache } from 'react'
+
+        /**
+         * Factory for __USE_CASE_NAME_PASCAL_CASE__ component props (cached)
+         * @layer Main Layer - Factory
+         * @pattern Factory Pattern, React Cache, Dependency Injection
+         */
+        export const make__USE_CASE_NAME_PASCAL_CASE__Props = cache(async () => {
+          const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+
+          // AI-NOTE: Server-side data fetching can happen here
+          // const initialData = await useCase.getInitialData()
+
+          return {
+            useCase,
+            validation: make__USE_CASE_NAME_PASCAL_CASE__Validation(),
+            // initialData,
+          }
+        })
+
+    # === STEP 8: CREATE USE CASE FACTORY ===
+    - id: 'create-usecase-factory-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack use case factory'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/usecases/__USE_CASE_NAME_KEBAB_CASE__-factory.ts'
+      template: |
+        import { Db__USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/data/usecases'
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases'
+        import { make__FEATURE_NAME_PASCAL_CASE__Repository } from './repository-factory'
+        import { makeCacheRepository } from '@/shared/main/factories/cache'
+        import { makeLogger } from '@/shared/main/factories/logger'
+
+        /**
+         * Factory for __USE_CASE_NAME_PASCAL_CASE__ use case (fullstack)
+         * @layer Main Layer - Factory
+         * @pattern Factory Pattern, Dependency Injection
+         */
+        export const makeDb__USE_CASE_NAME_PASCAL_CASE__ = (): __USE_CASE_NAME_PASCAL_CASE__ => {
+          const repository = make__FEATURE_NAME_PASCAL_CASE__Repository()
+          const cacheRepository = makeCacheRepository()
+          const logger = makeLogger()
+
+          return new Db__USE_CASE_NAME_PASCAL_CASE__(
+            repository,
+            cacheRepository,
+            logger
+          )
+        }
+
+    # === STEP 9: CREATE SERVER ACTION ===
+    - id: 'create-server-action-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack Server Action'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/actions/__USE_CASE_NAME_KEBAB_CASE__-action.ts'
+      template: |
+        'use server'
+
+        import { revalidatePath, revalidateTag } from 'next/cache'
+        import { redirect } from 'next/navigation'
+        import { makeDb__USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/usecases'
+        import { make__USE_CASE_NAME_PASCAL_CASE__Validation } from '@/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/validation'
+        import { ActionResult } from '@/shared/presentation/protocols'
+        import { getServerSession } from '@/shared/main/lib/auth'
+
+        /**
+         * Server Action for __USE_CASE_NAME_PASCAL_CASE__ (fullstack)
+         * @layer Presentation Layer - Server Action
+         * @pattern Server Action, Form Handling, Authentication
+         */
+        export async function __USE_CASE_NAME_CAMEL_CASE__Action(
+          prevState: ActionResult | null,
+          formData: FormData
+        ): Promise<ActionResult> {
+          try {
+            // Authentication check
+            const session = await getServerSession()
+            if (!session) {
+              return { success: false, error: 'Authentication required' }
+            }
+
+            // Convert FormData to object
+            const data = Object.fromEntries(formData)
+
+            // Validate input
+            const validation = make__USE_CASE_NAME_PASCAL_CASE__Validation()
+            const error = validation.validate(data)
+            if (error) {
+              return { success: false, error: error.message }
+            }
+
+            // Execute use case
+            const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+            const result = await useCase.execute({
+              ...data,
+              userId: session.user.id
+            })
+
+            // Revalidate cache and redirect
+            revalidateTag('__FEATURE_NAME_KEBAB_CASE__')
+            revalidatePath('/__FEATURE_NAME_KEBAB_CASE__')
+
+            if (result.id) {
+              redirect(`/__FEATURE_NAME_KEBAB_CASE__/${result.id}`)
+            }
+
+            return { success: true, data: result }
+          } catch (error) {
+            console.error('Server action error:', error)
+            return {
+              success: false,
+              error: error instanceof Error ? error.message : 'An error occurred'
+            }
+          }
+        }
+
+    # === STEP 10: CREATE API ROUTE ===
+    - id: 'create-api-route-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack API route'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/app/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/route.ts'
+      template: |
+        import { NextRequest } from 'next/server'
+        import { createApiHandler } from '@/shared/main/factories/api-handler-factory'
+        import { makeDb__USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/main/factories/usecases'
+        import { __USE_CASE_NAME_CAMEL_CASE__Schema } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/validation/schemas'
+
+        /**
+         * API Route for __USE_CASE_NAME_PASCAL_CASE__ (fullstack)
+         * @layer App Router - API Route
+         * @pattern Route Handler, Factory Pattern
+         */
+
+        // POST handler
+        export const POST = createApiHandler({
+          schema: __USE_CASE_NAME_CAMEL_CASE__Schema,
+          requireAuth: true,
+          handler: async (data, request) => {
+            const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+
+            // Extract user info from request if needed
+            // const session = await getServerSession()
+
+            return await useCase.execute(data)
+          }
+        })
+
+        // GET handler
+        export const GET = createApiHandler({
+          requireAuth: true,
+          handler: async (_, request) => {
+            const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+
+            // Extract query parameters
+            const { searchParams } = new URL(request.url)
+            const page = parseInt(searchParams.get('page') || '1')
+            const limit = parseInt(searchParams.get('limit') || '10')
+
+            return await useCase.list({ page, limit })
+          }
+        })
+
+        // PUT handler
+        export const PUT = createApiHandler({
+          schema: __USE_CASE_NAME_CAMEL_CASE__Schema,
+          requireAuth: true,
+          handler: async (data, request) => {
+            const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+
+            // Extract ID from URL
+            const url = new URL(request.url)
+            const pathSegments = url.pathname.split('/')
+            const id = pathSegments[pathSegments.length - 1]
+
+            return await useCase.update(id, data)
+          }
+        })
+
+        // DELETE handler
+        export const DELETE = createApiHandler({
+          requireAuth: true,
+          handler: async (_, request) => {
+            const useCase = makeDb__USE_CASE_NAME_PASCAL_CASE__()
+
+            // Extract ID from URL
+            const url = new URL(request.url)
+            const pathSegments = url.pathname.split('/')
+            const id = pathSegments[pathSegments.length - 1]
+
+            return await useCase.delete(id)
+          }
+        })
+
+    # === STEP 11: CREATE PAGE COMPOSER ===
+    - id: 'create-page-composer-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack page composer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main/pages/__FEATURE_NAME_KEBAB_CASE__-page-composer.tsx'
+      template: |
+        import { __USE_CASE_NAME_PASCAL_CASE__Composite } from '../composites/__USE_CASE_NAME_KEBAB_CASE__-composite'
+        import { PageHeader } from '@/shared/presentation/components/page-header'
+        import { ErrorBoundary } from '@/shared/presentation/components/error-boundary'
+        // AI-NOTE: Import other use case composites
+
+        /**
+         * Fullstack page composer for __FEATURE_NAME_PASCAL_CASE__ feature
+         * @layer Main Layer - Page Composer
+         * @pattern Composite Pattern, Server Component
+         */
+        export function __FEATURE_NAME_PASCAL_CASE__PageComposer() {
+          return (
+            <div className="container mx-auto py-8">
+              <PageHeader
+                title="__FEATURE_NAME_PASCAL_CASE__"
+                description="Manage your __FEATURE_NAME_KEBAB_CASE__ data"
+              />
+
+              <div className="grid gap-8">
+                <ErrorBoundary fallback={<div>Something went wrong</div>}>
+                  <__USE_CASE_NAME_PASCAL_CASE__Composite />
+                </ErrorBoundary>
+
+                {/* AI-NOTE: Add other use case composites */}
+              </div>
+            </div>
+          )
+        }
+
+    # === STEP 12: CREATE FEATURE PAGE ===
+    - id: 'create-feature-page-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack feature page'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/app/(features)/__FEATURE_NAME_KEBAB_CASE__/page.tsx'
+      template: |
+        import { Metadata } from 'next'
+        import { __FEATURE_NAME_PASCAL_CASE__PageComposer } from '@/features/__FEATURE_NAME_KEBAB_CASE__/main/pages'
+        import { getServerSession } from '@/shared/main/lib/auth'
+        import { redirect } from 'next/navigation'
+
+        /**
+         * Generate metadata for __FEATURE_NAME_PASCAL_CASE__ page
+         * @layer App Router - Metadata
+         */
+        export async function generateMetadata(): Promise<Metadata> {
+          // AI-NOTE: Can fetch dynamic data for metadata here
+          return {
+            title: '__FEATURE_NAME_PASCAL_CASE__',
+            description: 'Manage your __FEATURE_NAME_KEBAB_CASE__ data',
+            openGraph: {
+              title: '__FEATURE_NAME_PASCAL_CASE__',
+              description: 'Manage your __FEATURE_NAME_KEBAB_CASE__ data',
+            },
+          }
+        }
+
+        /**
+         * __FEATURE_NAME_PASCAL_CASE__ page component (fullstack)
+         * @layer App Router - Page
+         * @pattern Server Component, Authentication
+         */
+        export default async function __FEATURE_NAME_PASCAL_CASE__Page() {
+          // Server-side authentication check
+          const session = await getServerSession()
+          if (!session) {
+            redirect('/auth/signin')
+          }
+
+          return <__FEATURE_NAME_PASCAL_CASE__PageComposer />
+        }
+
+    # === STEP 13: CREATE MIDDLEWARE ===
+    - id: 'create-middleware-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack Next.js middleware'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/middleware.ts'
+      template: |
+        import { NextResponse } from 'next/server'
+        import type { NextRequest } from 'next/server'
+        import { getToken } from 'next-auth/jwt'
+        import { rateLimit } from './shared/main/lib/rate-limit'
+        import config from './shared/main/config/env'
+
+        /**
+         * Next.js Middleware for fullstack app
+         * @layer Main Layer - Middleware
+         * @pattern Edge Runtime, Authentication, Rate Limiting, Security
+         */
+        export async function middleware(request: NextRequest) {
+          const response = NextResponse.next()
+
+          // Add security headers
+          response.headers.set('X-Frame-Options', 'DENY')
+          response.headers.set('X-Content-Type-Options', 'nosniff')
+          response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+          response.headers.set(
+            'Strict-Transport-Security',
+            'max-age=31536000; includeSubDomains'
+          )
+
+          const { pathname } = request.nextUrl
+
+          // Rate limiting for API routes
+          if (pathname.startsWith('/api/')) {
+            try {
+              await rateLimit(request)
+            } catch (error) {
+              return NextResponse.json(
+                { error: 'Too many requests' },
+                { status: 429 }
+              )
+            }
+          }
+
+          // Authentication for protected routes
+          const protectedPaths = ['/dashboard', '/profile', '/admin', '/(features)']
+          const isProtectedPath = protectedPaths.some(path =>
+            pathname.startsWith(path)
+          )
+
+          if (isProtectedPath) {
+            const token = await getToken({
+              req: request,
+              secret: config.nextAuthSecret,
+            })
+
+            if (!token) {
+              const url = new URL('/auth/signin', request.url)
+              url.searchParams.set('callbackUrl', pathname)
+              return NextResponse.redirect(url)
+            }
+
+            // Add user info to headers for API routes
+            if (pathname.startsWith('/api/')) {
+              response.headers.set('x-user-id', token.sub || '')
+              response.headers.set('x-user-email', token.email || '')
+            }
+          }
+
+          // CORS for API routes
+          if (pathname.startsWith('/api/')) {
+            response.headers.set('Access-Control-Allow-Origin', config.corsOrigin)
+            response.headers.set(
+              'Access-Control-Allow-Methods',
+              'GET, POST, PUT, DELETE, OPTIONS'
+            )
+            response.headers.set(
+              'Access-Control-Allow-Headers',
+              'Content-Type, Authorization'
+            )
+
+            // Handle preflight requests
+            if (request.method === 'OPTIONS') {
+              return new Response(null, { status: 200, headers: response.headers })
+            }
+          }
+
+          return response
+        }
+
+        export const config = {
+          matcher: [
+            /*
+             * Match all request paths except:
+             * - _next/static (static files)
+             * - _next/image (image optimization files)
+             * - favicon.ico, robots.txt, sitemap.xml
+             */
+            '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
+          ],
+        }
+
+    # === STEP 14: CREATE DATABASE FACTORY ===
+    - id: 'create-database-factory'
+      type: 'create_file'
+      description: 'Create database connection factory'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/shared/main/factories/database-factory.ts'
+      template: |
+        import { PrismaClient } from '@prisma/client'
+        import config from '../config/env'
+
+        /**
+         * Database connection factory
+         * @layer Main Layer - Factory
+         * @pattern Singleton, Factory Pattern
+         */
+
+        const globalForPrisma = globalThis as unknown as {
+          prisma: PrismaClient | undefined
+        }
+
+        export const db = globalForPrisma.prisma ?? new PrismaClient({
+          log: config.nodeEnv === 'development' ? ['query', 'error', 'warn'] : ['error'],
+        })
+
+        if (config.nodeEnv !== 'production') globalForPrisma.prisma = db
+
+        /**
+         * Factory for database connection
+         */
+        export const makeDb = () => db
+
+        /**
+         * Alternative: MongoDB connection factory
+         */
+        // import { MongoClient } from 'mongodb'
+        //
+        // let client: MongoClient
+        // let clientPromise: Promise<MongoClient>
+        //
+        // if (config.nodeEnv === 'development') {
+        //   const globalWithMongo = global as typeof globalThis & {
+        //     _mongoClientPromise?: Promise<MongoClient>
+        //   }
+        //
+        //   if (!globalWithMongo._mongoClientPromise) {
+        //     client = new MongoClient(config.mongoUrl)
+        //     globalWithMongo._mongoClientPromise = client.connect()
+        //   }
+        //   clientPromise = globalWithMongo._mongoClientPromise
+        // } else {
+        //   client = new MongoClient(config.mongoUrl)
+        //   clientPromise = client.connect()
+        // }
+        //
+        // export const makeMongoDb = () => clientPromise
+
+    # === STEP 15: CREATE E2E TESTS ===
+    - id: 'create-e2e-tests-fullstack'
+      type: 'create_file'
+      description: 'Create fullstack E2E tests'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/e2e/__FEATURE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { test, expect } from '@playwright/test'
+
+        /**
+         * E2E tests for __FEATURE_NAME_PASCAL_CASE__ feature (fullstack)
+         * @layer Main Layer - E2E Tests
+         * @pattern E2E Testing, Authentication Flow
+         */
+        test.describe('__FEATURE_NAME_PASCAL_CASE__ Fullstack Feature', () => {
+          test.beforeEach(async ({ page }) => {
+            // Mock authentication or login
+            await page.goto('/auth/signin')
+            await page.fill('input[name="email"]', 'test@example.com')
+            await page.fill('input[name="password"]', 'password123')
+            await page.click('button[type="submit"]')
+
+            // Navigate to feature page
+            await page.goto('/__FEATURE_NAME_KEBAB_CASE__')
+          })
+
+          test('should display authenticated feature page', async ({ page }) => {
+            await expect(page).toHaveTitle(/__FEATURE_NAME_PASCAL_CASE__/)
+            await expect(page.locator('h1')).toContainText('__FEATURE_NAME_PASCAL_CASE__')
+          })
+
+          test('should submit form with Server Action', async ({ page }) => {
+            // Fill form fields
+            await page.fill('input[name="name"]', 'Test Name')
+            await page.fill('input[name="email"]', 'test@example.com')
+
+            // Submit form (Server Action)
+            await page.click('button[type="submit"]')
+
+            // Check success message or redirect
+            await expect(page.locator('[role="alert"]')).toContainText('Success')
+          })
+
+          test('should work with API endpoints', async ({ page }) => {
+            // Test API route directly
+            const response = await page.request.post('/api/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__', {
+              data: {
+                name: 'API Test',
+                email: 'api@example.com'
+              }
+            })
+
+            expect(response.ok()).toBeTruthy()
+            const data = await response.json()
+            expect(data).toHaveProperty('id')
+          })
+
+          test('should handle authentication errors', async ({ page }) => {
+            // Clear auth cookies
+            await page.context().clearCookies()
+
+            // Try to access protected page
+            await page.goto('/__FEATURE_NAME_KEBAB_CASE__')
+
+            // Should redirect to signin
+            await expect(page.url()).toContain('/auth/signin')
+          })
+
+          test('should validate forms client and server side', async ({ page }) => {
+            // Submit empty form
+            await page.click('button[type="submit"]')
+
+            // Check client-side validation
+            await expect(page.locator('[role="alert"]')).toContainText('Required')
+
+            // Fill invalid data
+            await page.fill('input[name="email"]', 'invalid-email')
+            await page.click('button[type="submit"]')
+
+            // Check server-side validation
+            await expect(page.locator('[role="alert"]')).toContainText('Invalid')
+          })
+        })
+
+    # === STEP 16: CREATE PR ===
+    - id: 'create-pr-fullstack-main'
+      type: 'validation'
+      description: 'Create Pull Request for fullstack main layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Create PR using GitHub CLI'
+        scripts:
+          - name: 'Push and create PR'
+            command: |
+              git add .
+              git commit -m "feat(__FEATURE_NAME_KEBAB_CASE__): implement fullstack main layer for Next.js 15"
+              git push -u origin "feat/__FEATURE_NAME_KEBAB_CASE__-fullstack-main"
+
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): add fullstack main layer for Next.js 15" \
+                --body "## Summary
+
+              Implemented fullstack main layer for __FEATURE_NAME_PASCAL_CASE__ feature in Next.js 15.
+
+              ## Changes
+              - ✅ Created root layout with providers and session management
+              - ✅ Implemented composite components with server-side data fetching
+              - ✅ Created factories for complete dependency injection
+              - ✅ Added Server Actions with authentication and validation
+              - ✅ Setup API route handlers with error handling
+              - ✅ Configured middleware for auth, CORS, and security
+              - ✅ Added database connection factory
+              - ✅ Created E2E tests with authentication flow
+
+              ## Architecture
+              - App Router with Server Components and API Routes
+              - Factory Pattern for complete dependency injection
+              - Composite Pattern for page assembly
+              - Server Actions and API Routes for data mutations
+              - Edge Runtime middleware for auth and security
+              - Database connection with Prisma/MongoDB
+
+              ## Testing
+              - [ ] Unit tests pass
+              - [ ] E2E tests pass with authentication
+              - [ ] API endpoints tested
+              - [ ] Manual testing completed
+              " \
+                --assignee @me \
+                --label "feature,fullstack,nextjs15,main-layer"
+            workingDirectory: '__PROJECT_NAME__'
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER REFACTORING PATTERNS
+# ------------------------------------------------------------------------------
+
+main_refactoring_patterns:
+  - id: 'combine-api-server-actions'
+    description: 'Combine API routes and Server Actions for better fullstack architecture'
+    detection:
+      - 'Duplicate logic between API routes and Server Actions'
+      - 'Client-side API calls that could be Server Actions'
+      - 'Missing authentication in Server Actions'
+    example:
+      original: |
+        # AI-NOTE: Combine API route and Server Action logic
+        <<<FIND>>>
+        // Separate API route
+        export async function POST(request: NextRequest) {
+          const body = await request.json()
+          const useCase = makeCreateUser()
+          return NextResponse.json(await useCase.execute(body))
+        }
+
+        // Separate Server Action
+        export async function createUserAction(formData: FormData) {
+          const data = Object.fromEntries(formData)
+          const useCase = makeCreateUser()
+          return await useCase.execute(data)
+        }
+        <<</FIND>>>
+        <<<REPLACE>>>
+        // Unified handler factory
+        const createUserHandler = createApiHandler({
+          schema: createUserSchema,
+          requireAuth: true,
+          handler: async (data) => {
+            const useCase = makeCreateUser()
+            return await useCase.execute(data)
+          }
+        })
+
+        // API route
+        export const POST = createUserHandler
+
+        // Server Action
+        export async function createUserAction(formData: FormData) {
+          const data = Object.fromEntries(formData)
+          return createUserHandler.execute(data)
+        }
+        <<</REPLACE>>>
+      category: 'architecture'
+      severity: 'HIGH'
+      rlhf_impact: 2
+
+# ------------------------------------------------------------------------------
+# MAIN LAYER ANTI-PATTERNS
+# ------------------------------------------------------------------------------
+
+main_anti_patterns:
+  - name: 'Business Logic in API Routes'
+    description: 'API routes should not contain business logic'
+    example: 'Complex calculations or business rules directly in route handlers'
+    correct: 'Delegate to use cases through factories'
+    rlhf_impact: -2
+
+  - name: 'Missing Authentication in Server Actions'
+    description: 'Server Actions without proper authentication checks'
+    example: 'Server Action that modifies data without checking user session'
+    correct: 'Always validate authentication in Server Actions'
+    rlhf_impact: -2
+
+  - name: 'Inconsistent Error Handling'
+    description: 'Different error handling between API routes and Server Actions'
+    example: 'API returns JSON errors, Server Actions throw exceptions'
+    correct: 'Use consistent error handling patterns across both'
+    rlhf_impact: -1
+
+  - name: 'Direct Database Access'
+    description: 'Components or actions accessing database directly'
+    example: 'prisma.user.create() in Server Action'
+    correct: 'Use repositories and use cases through factories'
+    rlhf_impact: -2
+
+  - name: 'Missing Cache Invalidation'
+    description: 'Server Actions not invalidating relevant cache'
+    example: 'Mutating data without revalidateTag() or revalidatePath()'
+    correct: 'Always invalidate relevant cache after mutations'
+    rlhf_impact: -1
+
+# --- From: shared/01-footer.part.regent ---
+  # ============= BEGIN FOOTER SECTION =============
+
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: IMMUTABLE DOCUMENTATION SECTIONS AHEAD.
+  # Copy these sections verbatim. The [placeholders] inside the commands
+  # are for HUMAN examples and MUST NOT be replaced by the AI.
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # TROUBLESHOOTING & RECOVERY
+  # ------------------------------------------------------------------------------
+
+  troubleshooting:
+    lint_fails:
+      - 'DO NOT commit - Fix all lint errors first'
+      - 'Check for unused imports'
+      - 'Verify proper TypeScript types'
+      - 'Ensure no console.log statements'
+      - 'Run yarn lint --fix to auto-fix when possible'
+
+    tests_fail:
+      - 'DO NOT commit - All tests must pass'
+      - 'Check if mocks match the actual interfaces'
+      - 'Verify Input/Output types are correct'
+      - 'Ensure test coverage meets requirements'
+      - 'Run specific test: yarn test [test-file-path]'
+
+    typescript_fails:
+      - 'Check all type definitions match'
+      - 'Ensure no missing imports'
+      - 'Verify interface implementations are complete'
+      - 'Run yarn tsc --noEmit to check types'
+
+  # Refactoring checklist
+  refactoring:
+    before_refactoring: |
+      # Check current status and differences
+      echo "📊 Checking current changes..."
+      git status
+      git diff
+
+      # Ensure clean working directory
+      echo "✅ Saving current work..."
+      git stash save "WIP: before refactoring"
+
+      # Create refactoring branch
+      echo "🌿 Creating refactor branch..."
+      git checkout -b refactor/[feature-name]
+
+      # Run tests to ensure starting point is stable
+      echo "🧪 Validating current state..."
+      yarn test --run
+      if [ $? -ne 0 ]; then
+        echo "❌ Tests failing before refactor - fix first!"
+        exit 1
+      fi
+      echo "✅ Ready to refactor"
+
+    during_refactoring: |
+      # After each change, check what was modified
+      echo "🔍 Reviewing changes..."
+      git diff --stat
+      git diff
+
+      # Validate the change
+      yarn lint && yarn test --run
+
+      # Commit atomically
+      git add -p  # Interactive staging
+      git commit -m "refactor([feature-name]): [specific change description]"
+
+      # Show what was changed
+      git show --stat
+
+    common_scenarios:
+      - name: 'Splitting a use case'
+        wrong_example: |
+          interface CreateUserAndSendEmail {
+            execute: (input: CreateUserAndSendEmailInput) => Promise<CreateUserAndSendEmailOutput>
+          }
+        correct_example: |
+          interface CreateUser{
+            execute: (input: CreateUserInput) => Promise<CreateUserOutput>
+          }
+          interface SendWelcomeEmail {
+            execute: (input: SendWelcomeEmailInput) => Promise<SendWelcomeEmailOutput>
+          }
+
+      - name: 'Renaming domain errors'
+        wrong_example: |
+          export class ErrorUserExists extends Error {
+            constructor() {
+              super('Error: user exists')
+              this.name = 'ErrorUserExists'
+            }
+          }
+        correct_example: |
+          export class UserAlreadyExistsError extends Error {
+            constructor() {
+              super('User with this email already exists')
+              this.name = 'UserAlreadyExistsError'
+            }
+          }
+
+  # ------------------------------------------------------------------------------
+  # LEARNING & IMPROVEMENT PATTERNS
+  # The system tracks these patterns to improve over time
+  # ------------------------------------------------------------------------------
+  learning_patterns:
+    common_errors:
+      # Domain Layer Violations
+      - pattern: 'import axios|fetch|prisma|redis'
+        fix: 'Remove external library imports from domain layer'
+        layer: 'domain'
+        score_impact: -2
+
+      - pattern: 'CreateUserAndSend|GetDataAndFormat'
+        fix: 'Split into two separate use cases (SRP violation)'
+        layer: 'domain'
+        score_impact: -1
+
+      - pattern: 'missing @domainConcept'
+        fix: 'Add domain concept documentation for +2 score'
+        layer: 'domain'
+        score_impact: +1
+
+      # Data Layer Violations
+      - pattern: 'direct database access in data layer'
+        fix: 'Use repository protocols instead of direct database access'
+        layer: 'data'
+        score_impact: -2
+
+      - pattern: 'business logic in data layer'
+        fix: 'Move business logic to domain layer'
+        layer: 'data'
+        score_impact: -1
+
+      # Infrastructure Layer Violations
+      - pattern: 'business logic in infrastructure'
+        fix: 'Infrastructure should only contain adapters and implementations'
+        layer: 'infra'
+        score_impact: -2
+
+      - pattern: 'missing error handling in adapters'
+        fix: 'Add proper error handling and recovery in infrastructure adapters'
+        layer: 'infra'
+        score_impact: -1
+
+      # Presentation Layer Violations
+      - pattern: 'business logic in controllers|components'
+        fix: 'Move business logic to use cases in domain layer'
+        layer: 'presentation'
+        score_impact: -2
+
+      - pattern: 'direct database access from presentation'
+        fix: 'Use use cases and factories from main layer'
+        layer: 'presentation'
+        score_impact: -2
+
+      # Main Layer Violations
+      - pattern: 'business logic in factories'
+        fix: 'Main layer should only compose, not implement business logic'
+        layer: 'main'
+        score_impact: -2
+
+      - pattern: 'missing dependency injection'
+        fix: 'Use factories and dependency injection for all dependencies'
+        layer: 'main'
+        score_impact: -1
+
+    success_indicators:
+      - 'Uses ubiquitous language consistently across all layers'
+      - 'Follows single responsibility principle in every component'
+      - 'No dependency violations between layers'
+      - 'Comprehensive test coverage (Domain: 100%, Data: 95%, Infra: 80%, Presentation: 90%)'
+      - 'Clean git history with atomic commits'
+      - 'Proper error handling at each layer boundary'
+      - 'Clear separation of concerns between layers'
+      - 'Type safety maintained throughout the stack'
+
+  # AI Guidelines for All Layers
+  ai_guidelines:
+    general:
+      - 'Always validate before committing: Run lint first, Run tests second, Only commit if both pass'
+      - 'If generation fails: Identify the specific error, Fix only that error, Re-run validation, Do NOT proceed until fixed'
+      - 'MUST generate different case styles from the input names (e.g., "Add Item To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart, lower case=add item to cart).'
+      - 'MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__) with actual values'
+      - 'MUST NOT leave any placeholder variables in the final implementation'
+      - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery'
+      - 'MUST use vitest for backend, @testing-library/react for frontend'
+      - 'When in doubt: Choose simplicity over complexity, Split rather than combine, Ask for clarification rather than assume'
+
+    layer_specific:
+      domain:
+        - 'Follow the principle: One use case = One file = One responsibility'
+        - 'If tempted to add "And" in a use case name, split it'
+        - 'MUST follow all domain rules - no business logic implementation, only contracts'
+        - 'No external dependencies allowed in domain layer'
+        - 'Use value objects for domain concepts'
+        - 'Define clear domain errors with meaningful messages'
+
+      data:
+        - 'Implement use cases defined in domain layer'
+        - 'Use repository protocols for data access'
+        - 'Transform external data to domain models'
+        - 'Handle data-specific errors and map to domain errors'
+        - 'No direct database or API calls'
+
+      infrastructure:
+        - 'Implement repository interfaces defined in data layer'
+        - 'Handle external service integrations (database, cache, APIs)'
+        - 'Provide concrete implementations of protocols'
+        - 'Include proper error handling and retry logic'
+        - 'Use appropriate design patterns (Adapter, Facade)'
+
+      presentation:
+        - 'Controllers/Components should be thin - delegate to use cases'
+        - 'Handle input validation and transformation'
+        - 'Format responses for clients'
+        - 'Implement proper error responses'
+        - 'For frontend: Use hooks for business logic extraction'
+        - 'For backend: Use middleware for cross-cutting concerns'
+
+      main:
+        - 'Composition root only - no business logic'
+        - 'Wire up all dependencies using factories'
+        - 'Configure dependency injection'
+        - 'Setup application bootstrap and configuration'
+        - 'For Next.js: Configure providers and middleware'
+        - 'For Express/Fastify: Setup server and routes'
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: TASK EVALUATION SECTION.
+  # After the entire execution is complete, this section will be populated by a
+  # human reviewer or an evaluation script.
+  # ------------------------------------------------------------------------------
+
+  evaluation:
+    # AI-NOTE: This final_status will be 'SUCCESS' if all steps passed, or 'FAILED' if any step failed.
+    final_status: 'PENDING' # PENDING | SUCCESS | FAILED
+    # AI-NOTE: The final_rlhf_score is calculated automatically based on execution quality
+    # -2: Catastrophic errors (architecture violations, wrong REPLACE/WITH format)
+    # -1: Runtime errors (lint, tests, git failures)
+    #  0: Low confidence (system uncertain, prevents hallucinations)
+    # +1: Good execution but missing DDD elements
+    # +2: Perfect with Clean Architecture, DDD, ubiquitous language
+    final_rlhf_score: null # -2, -1, 0, 1, 2
+    # AI-NOTE: The system automatically analyzes patterns and learns from each execution
+    # This text is enhanced by automated RLHF analysis for continuous improvement
+    reviewer_summary: |
+      - What went well:
+        - ...
+      - Areas for improvement:
+        - ...
+    # AI-NOTE: This section lists actionable suggestions for improving the master templates or prompts.
+    # This is the key to the continuous learning loop.
+    template_improvement_suggestions:
+      - target_template: '[layer].template.yaml'
+        target_step_id: '[step-id]'
+        suggestion: '[specific improvement suggestion based on execution results]'
+        priority: 'medium'
+        
+  # ============= END FOOTER SECTION =============
+
+  # End of TEMPLATE.yaml

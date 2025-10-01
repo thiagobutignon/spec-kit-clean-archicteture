@@ -1,0 +1,3315 @@
+# =============================================
+# GENERATED FILE - DO NOT EDIT DIRECTLY
+# Target: frontend
+# Layer: presentation
+# Built from parts in templates/parts
+# Generated at: 2025-09-30 23:13:55
+# To modify, edit the part files and rebuild
+# =============================================
+
+
+# --- From: shared/00-header.part.regent ---
+
+# AI-NOTE: This YAML file is the single source of truth for generating clean architecture layers.
+# This is the MASTER TEMPLATE that will evolve to support all architectural layers.
+#
+# INTELLIGENT RLHF SCORING SYSTEM:
+# The system uses Reinforcement Learning from Human Feedback to score execution quality:
+# -2: CATASTROPHIC - Architecture violations, incorrect REPLACE/WITH format in refactor steps
+# -1: RUNTIME ERROR - Lint failures, test failures, git operation problems
+#  0: LOW CONFIDENCE - System is uncertain, avoids hallucinations
+# +1: GOOD - Task complete but missing architectural elements
+# +2: PERFECT - Exceptional quality with Clean Architecture, DDD principles, ubiquitous language
+#
+# QUALITY INDICATORS FOR +2 SCORE:
+# - Uses ubiquitous language terminology
+# - Follows Domain-Driven Design principles
+# - Applies Clean Architecture concepts
+# - Implements patterns: Aggregate Root, Value Objects, Domain Events
+# - Perfect branch naming convention
+# - Comprehensive PR descriptions
+#
+version: '3.0.0'
+# AI-NOTE: Update these fields to describe the specific feature and layers.
+metadata:
+  title: '__FEATURE_NAME_PASCAL_CASE__ Clean Architecture Implementation'
+  description: 'Clean Architecture template for __FEATURE_NAME_LOWER_CASE__ feature following master template rules.'
+  source: 'TEMPLATE.yaml'
+  # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
+  lastUpdated: '__CURRENT_DATE__'
+  # AI-NOTE: Specify which layers are being implemented
+  layers:
+    - 'domain'
+    # Future layers will be added here:
+    # - 'data'
+    # - 'infra'
+    # - 'presentation'
+    # - 'validation'
+    # - 'main'
+  # AI-NOTE: Define ubiquitous language for +2 RLHF score
+  ubiquitousLanguage:
+    - term: '__ENTITY_NAME__'
+      definition: '__ENTITY_DEFINITION_IN_BUSINESS_CONTEXT__'
+    - term: '__VALUE_OBJECT_NAME__'
+      definition: '__VALUE_OBJECT_BUSINESS_MEANING__'
+    - term: '__DOMAIN_EVENT__'
+      definition: '__EVENT_BUSINESS_SIGNIFICANCE__'
+
+
+
+# --- From: frontend/01-structure.part.regent ---
+# ============= BEGIN STRUCTURE NEXT.JS 15 + CLEAN ARCHITECTURE =============
+  # AI-NOTE: Hybrid Architecture - "Feature Module with Use Case Slices"
+  # Features are modules containing atomic use case slices for domain cohesion and generation safety
+
+structure:
+  # App Router centralized (MUST be in src/app)
+  app:
+    basePath: '__PROJECT_NAME__/src/app'
+    folders:
+      - '(features)'              # Route group for features
+      - '__FEATURE_NAME__'        # Feature routes
+      - 'api/__FEATURE_NAME__'   # Feature API routes
+      - '_components'             # Private app components
+    files:
+      - 'layout.tsx'
+      - 'page.tsx'
+      - 'loading.tsx'             # File, not folder
+      - 'error.tsx'               # File, not folder
+      - 'not-found.tsx'           # File, not folder
+
+  # Feature Module: Container for a business domain (e.g., user, product)
+  # __FEATURE_NAME_KEBAB_CASE__ = user, product, etc.
+  feature_module:
+    basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__'
+
+    # 1. Use Case Slices: Each folder is self-contained, atomic use case
+    # __USE_CASE_NAME_KEBAB_CASE__ = create-user, get-users, etc.
+    use_case_slice:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+      layers:
+        domain:
+          folders:
+            - 'usecases'      # Interface for this specific use case
+          # Unit tests: create-user.ts + create-user.spec.ts (side by side)
+        data:
+          folders:
+            - 'usecases'      # Implementation for this specific use case
+          # Unit tests: remote-create-user.ts + remote-create-user.spec.ts (side by side)
+        presentation:
+          folders:
+            - 'actions'       # Server Action for this use case
+            - 'components'    # Components for this use case
+            - 'hooks'         # Hooks for this use case
+          # Unit tests: create-user-action.spec.ts, create-user-form.spec.tsx, use-create-user.spec.ts
+        validation:
+          folders:
+            - 'schemas'       # Schema for this specific use case
+            - 'validators'    # Validator for this specific use case
+          # Unit tests: create-user-schema.spec.ts, create-user-validator.spec.ts
+        main:
+          folders:
+            - 'composites'    # Composite component for this use case
+          # Unit tests: create-user-composite.spec.tsx
+        # Integration and E2E tests only (not unit tests)
+        __tests__:
+          folders:
+            - 'integration'   # Tests that cross layers
+            - 'e2e'          # End-to-end tests (Playwright, Cypress)
+
+    # 2. Feature-Specific Shared: Code shared ONLY within this feature
+    feature_shared:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+      layers:
+        domain:
+          folders:
+            - 'entities'      # e.g., user-entity.ts (shared by all user use cases)
+            - 'models'        # e.g., user-model.ts
+            - 'repositories'  # e.g., user-repository.ts (interface)
+            - 'errors'        # e.g., user-not-found-error.ts
+            - 'value-objects' # e.g., email-value-object.ts
+        infra:
+          folders:
+            - 'api'           # e.g., user-api-client.ts (implementation)
+            - 'services'      # e.g., user-external-service.ts
+        presentation:
+          folders:
+            - 'ui'            # Feature-specific UI components
+            - 'styles'        # Feature-specific styles
+            - 'providers'     # Feature-specific context providers
+
+    # 3. Feature Main/Integration: Connects all slices to App Router
+    feature_main:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+      folders:
+        - 'pages'         # e.g., user-page-composer.tsx (aggregates use case composites)
+        - 'config'        # Feature-level configuration
+        - 'docs'          # Feature documentation
+
+  # Shared code with Clean Architecture layers
+  shared:
+    basePath: '__PROJECT_NAME__/src/shared'
+    layers:
+      domain:
+        folders:
+          - 'errors'          # Base error classes
+          - 'protocols'       # Domain contracts/interfaces
+          - 'types'           # Shared domain types
+          - 'value-objects'   # Shared value objects
+
+      data:
+        folders:
+          - 'protocols'       # Data layer protocols
+          - 'helpers'         # Data transformation helpers
+          - 'models'          # Shared DTOs
+
+      infra:
+        folders:
+          - 'cache'           # Next.js cache utilities
+          - 'http'            # Fetch wrappers and interceptors
+          - 'storage'         # LocalStorage/SessionStorage adapters
+          - 'cookies'         # Cookie management utilities
+          - 'telemetry'       # Analytics and monitoring
+
+      presentation:
+        folders:
+          - 'components'      # Shared UI components
+          - 'hooks'           # Shared React hooks
+          - 'providers'       # Shared context providers
+          - 'ui'              # Shared shadcn/ui components
+          - 'styles'          # Global styles and utilities
+          - 'helpers'         # Presentation helpers
+
+      validation:
+        folders:
+          - 'schemas'         # Shared Zod/Yup schemas
+          - 'validators'      # Shared validation functions
+          - 'protocols'       # Validation interfaces
+
+      main:
+        folders:
+          - 'adapters'        # Shared adapters
+          - 'builders'        # Shared builders
+          - 'composites'      # Shared composites
+          - 'decorators'      # Shared decorators
+          - 'factories'       # Shared factories
+          - 'lib'             # Utility functions
+
+# Example of Hybrid Architecture workflow for Next.js
+integration:
+  use_case_example:
+    # Task: "Generate create-user use case for user feature"
+    # __FEATURE_NAME_KEBAB_CASE__ = user
+    # __USE_CASE_NAME_KEBAB_CASE__ = create-user
+
+    # STEP 1: Create Feature directories (if not exist)
+    create_feature_structure:
+      - 'src/features/user/'
+      - 'src/features/user/shared/'     # Feature-specific shared code
+      - 'src/features/user/main/'       # Feature integration
+
+    # STEP 2: Create Use Case Slice directory (isolated)
+    create_slice_directory:
+      - 'src/features/user/create-user/' # Self-contained use case
+
+    # STEP 3: Create NEW files (totally isolated within slice) WITH TESTS
+    create_slice_files:
+      # Domain layer with unit tests
+      - 'src/features/user/create-user/domain/usecases/create-user.ts'
+      - 'src/features/user/create-user/domain/usecases/create-user.spec.ts'
+
+      # Data layer with unit tests
+      - 'src/features/user/create-user/data/usecases/remote-create-user.ts'
+      - 'src/features/user/create-user/data/usecases/remote-create-user.spec.ts'
+
+      # Presentation layer with unit tests
+      - 'src/features/user/create-user/presentation/actions/create-user-action.ts'
+      - 'src/features/user/create-user/presentation/actions/create-user-action.spec.ts'
+      - 'src/features/user/create-user/presentation/components/create-user-form.tsx'
+      - 'src/features/user/create-user/presentation/components/create-user-form.spec.tsx'
+      - 'src/features/user/create-user/presentation/hooks/use-create-user.ts'
+      - 'src/features/user/create-user/presentation/hooks/use-create-user.spec.ts'
+
+      # Validation layer with unit tests
+      - 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+      - 'src/features/user/create-user/validation/schemas/create-user-schema.spec.ts'
+      - 'src/features/user/create-user/validation/validators/create-user-validator.ts'
+      - 'src/features/user/create-user/validation/validators/create-user-validator.spec.ts'
+
+      # Main layer with unit tests
+      - 'src/features/user/create-user/main/composites/create-user-composite.tsx'
+      - 'src/features/user/create-user/main/composites/create-user-composite.spec.tsx'
+
+      # Integration tests (cross-layer)
+      - 'src/features/user/create-user/__tests__/integration/create-user.integration.spec.ts'
+      - 'src/features/user/create-user/__tests__/e2e/create-user.e2e.spec.ts'
+
+    # STEP 4: Check/Modify FEATURE-SPECIFIC shared code
+    feature_shared_files:
+      - create_if_not_exists: 'src/features/user/shared/domain/models/user-model.ts'
+      - create_if_not_exists: 'src/features/user/shared/domain/repositories/user-repository.ts'
+      - modify: 'src/features/user/shared/domain/repositories/user-repository.ts'
+        action: 'Add create() method to interface'
+      - create_if_not_exists: 'src/features/user/shared/infra/api/user-api-client.ts'
+      - modify: 'src/features/user/shared/infra/api/user-api-client.ts'
+        action: 'Implement create() method for API calls'
+
+    # STEP 5: Integrate with App Router
+    integrate_app_router:
+      - create_if_not_exists: 'src/features/user/main/pages/user-page-composer.tsx'
+      - modify: 'src/features/user/main/pages/user-page-composer.tsx'
+        action: 'Import and compose CreateUserComposite'
+      - modify: 'src/app/(features)/user/page.tsx'
+        action: 'Import and render UserPageComposer from feature/main'
+
+    # RESULT: Perfect isolation for Next.js
+    # - Use case slice is completely isolated in its own directory
+    # - Feature-specific shared code stays within the feature
+    # - App Router imports only from feature/main
+    # - Zero risk of affecting other use cases
+
+  example_integration:
+    # How features connect to the App Router
+    app_route: 'src/app/(features)/user/page.tsx'
+    imports_from: 'src/features/user/main/pages/user-page-composer.tsx'
+
+    use_case_composite: 'src/features/user/create-user/main/composites/create-user-composite.tsx'
+    used_in: 'src/features/user/main/pages/user-page-composer.tsx'
+
+    feature_shared_model: 'src/features/user/shared/domain/models/user-model.ts'
+    used_by_slices: 'src/features/user/*/domain/usecases/*.ts'
+
+    global_shared_ui: 'src/shared/presentation/components'
+    global_shared_hooks: 'src/shared/presentation/hooks'
+
+# ============= END STRUCTURE NEXT.JS 15 + CLEAN ARCHITECTURE =============
+
+# --- From: frontend/02-architecture.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # FRONTEND ARCHITECTURAL RULES SECTION - NEXT.JS 15 + CLEAN ARCHITECTURE
+  # These rules define the Clean Architecture boundaries for React/Next.js frontend
+  # AI-NOTE: Frontend follows same Clean Architecture principles adapted for React/Next.js
+  # AI-NOTE: Server components and client components have different dependency rules
+  # ------------------------------------------------------------------------------
+
+  architecture:
+    folder_structure:
+      use_case_slice: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+      feature_shared: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+      feature_main: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+      global_shared: '__PROJECT_NAME__/src/shared'
+      app_router: '__PROJECT_NAME__/src/app'
+
+    execution_order:
+      # AI-NOTE: Frontend vertical slicing includes UI components
+      # Server Actions should be created before client hooks
+      # Components should be tested in isolation before integration
+      description: 'Frontend use cases are implemented vertically, from domain to UI components'
+      approach: 'Vertical Slice Architecture - One feature at a time, through all frontend layers'
+      sequence_per_use_case:
+        1: 'domain'      # Use case interface and entities
+        2: 'data'        # HTTP clients and remote implementations
+        3: 'validation'  # Zod schemas and form validation
+        4: 'presentation'# Actions, components, and hooks
+        5: 'main'        # Composite components
+        6: 'integration' # Connect to App Router
+
+      workflow_diagram: |
+        ```mermaid
+        graph TD
+          Start([Start Frontend Use Case])
+
+          %% Branch Creation
+          B1[Create Branch: feat/__FEATURE_NAME__/__USE_CASE_NAME__]
+
+          %% Use Case Slice Directory
+          UC1[Create Use Case Directory Structure]
+
+          %% Domain Slice
+          D1[Create Domain Interface]
+          D2[Write Domain Tests - TDD Red]
+          D3[Run: npm test - Expect Failure]
+          D4[Git Commit: 'test(domain): add __USE_CASE__ tests']
+
+          %% Data Slice
+          DT1[Create Remote Implementation]
+          DT2[Write HTTP Client Tests]
+          DT3[Run: npm test - Green]
+          DT4[Git Commit: 'feat(data): implement remote __USE_CASE__']
+
+          %% Validation Slice
+          V1[Create Zod Schema]
+          V2[Create Form Validators]
+          V3[Write Validation Tests]
+          V4[Run: npm test - Green]
+          V5[Git Commit: 'feat(validation): add __USE_CASE__ schema']
+
+          %% Presentation Slice - Actions
+          %% AI-NOTE: Server Actions use 'use server' directive
+          %% Must handle form validation and error states
+          PA1[Create Server Actions]
+          PA2[Write Action Tests]
+          PA3[Run: npm test - Green]
+          PA4[Git Commit: 'feat(actions): add __USE_CASE__ server action']
+
+          %% Presentation Slice - Hooks
+          PH1[Create Custom Hooks]
+          PH2[Write Hook Tests]
+          PH3[Run: npm test - Green]
+          PH4[Git Commit: 'feat(hooks): add use-__USE_CASE__ hook']
+
+          %% Presentation Slice - Components
+          PC1[Create UI Components]
+          PC2[Write Component Tests]
+          PC3[Run: npm test - Green]
+          PC4[Git Commit: 'feat(components): add __USE_CASE__ form/ui']
+
+          %% Main Slice - Composite
+          M1[Create Composite Component]
+          M2[Wire Dependencies]
+          M3[Write Composite Tests]
+          M4[Run: npm test - Green]
+          M5[Git Commit: 'feat(main): add __USE_CASE__ composite']
+
+          %% Feature Integration
+          FI1[Update Feature Page Composer]
+          FI2[Integrate Composite in Feature Main]
+          FI3[Test Feature Integration]
+          FI4[Git Commit: 'feat(pages): integrate __USE_CASE__ in page']
+
+          %% App Router Integration
+          AR1[Update App Router Page]
+          AR2[Import Feature Page Composer]
+          AR3[Test App Router Integration]
+          AR4[Git Commit: 'feat(app): integrate __USE_CASE__ in app router']
+
+          %% Testing
+          IT1[Write Integration Tests]
+          IT2[Run: npm run test:integration]
+          IT3[Write E2E Tests with Playwright/Cypress]
+          IT4[Run: npm run test:e2e]
+          IT5[Git Commit: 'test(e2e): add __USE_CASE__ e2e tests']
+
+          %% Final Steps
+          F1[Run All Tests]
+          F2[Run: npm run lint]
+          F3[Run: npm run build]
+          F4[Run: npm run type-check]
+          F5[Git Push: Push Branch]
+          F6[Create PR: '__FEATURE__/__USE_CASE__ Frontend Implementation']
+
+          End([Frontend Use Case Complete])
+
+          %% Flow - Vertical Development Through Frontend Layers
+          Start --> B1
+          B1 --> UC1
+
+          %% Domain Flow
+          UC1 --> D1 --> D2 --> D3 --> D4
+
+          %% Data Flow
+          D4 --> DT1 --> DT2 --> DT3 --> DT4
+
+          %% Validation Flow
+          DT4 --> V1 --> V2 --> V3 --> V4 --> V5
+
+          %% Presentation Flow - Actions
+          V5 --> PA1 --> PA2 --> PA3 --> PA4
+
+          %% Presentation Flow - Hooks
+          PA4 --> PH1 --> PH2 --> PH3 --> PH4
+
+          %% Presentation Flow - Components
+          PH4 --> PC1 --> PC2 --> PC3 --> PC4
+
+          %% Main Flow
+          PC4 --> M1 --> M2 --> M3 --> M4 --> M5
+
+          %% Feature Integration Flow
+          M5 --> FI1 --> FI2 --> FI3 --> FI4
+
+          %% App Router Integration Flow
+          FI4 --> AR1 --> AR2 --> AR3 --> AR4
+
+          %% Testing Flow
+          AR4 --> IT1 --> IT2 --> IT3 --> IT4 --> IT5
+
+          %% Final Flow
+          IT5 --> F1 --> F2 --> F3 --> F4 --> F5 --> F6 --> End
+
+          classDef branch fill:#FFF9C4,stroke:#F57C00,stroke-width:2px
+          classDef domain fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px
+          classDef data fill:#E3F2FD,stroke:#2196F3,stroke-width:2px
+          classDef validation fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
+          classDef presentation fill:#FCE4EC,stroke:#E91E63,stroke-width:2px
+          classDef main fill:#E0F2F1,stroke:#009688,stroke-width:2px
+          classDef integration fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
+          classDef testing fill:#FFEBEE,stroke:#F44336,stroke-width:2px
+          classDef final fill:#E8EAF6,stroke:#3F51B5,stroke-width:2px
+
+          class B1,UC1 branch
+          class D1,D2,D3,D4 domain
+          class DT1,DT2,DT3,DT4 data
+          class V1,V2,V3,V4,V5 validation
+          class PA1,PA2,PA3,PA4,PH1,PH2,PH3,PH4,PC1,PC2,PC3,PC4 presentation
+          class M1,M2,M3,M4,M5 main
+          class FI1,FI2,FI3,FI4,AR1,AR2,AR3,AR4 integration
+          class IT1,IT2,IT3,IT4,IT5 testing
+          class F1,F2,F3,F4,F5,F6 final
+        ```
+
+      git_workflow_per_use_case:
+        description: 'Vertical slice development for Next.js - one complete feature at a time'
+        example_use_case: 'create-user form in user feature'
+
+        workflow_steps:
+          - 'git checkout -b feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'Create use case slice directory: src/features/__FEATURE_NAME__/__USE_CASE_NAME__'
+
+        domain_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/usecases/__USE_CASE__.ts'
+          - 'Write domain tests (TDD - RED) → npm test (expect failure)'
+          - 'git add → git commit -m "test(domain): add failing tests for __USE_CASE__"'
+          - 'Create domain interface → npm test → npm run lint'
+          - 'git add → git commit -m "feat(domain): add __USE_CASE__ interface"'
+
+        data_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/data/usecases/remote-__USE_CASE__.ts'
+          - 'Implement HTTP client for use case → npm test → npm run lint'
+          - 'git add → git commit -m "feat(data): implement remote __USE_CASE__"'
+
+        validation_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/validation/schemas/__USE_CASE__-schema.ts'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/validation/validators/__USE_CASE__-validator.ts'
+          - 'Write validation tests → npm test → npm run lint'
+          - 'git add → git commit -m "feat(validation): add __USE_CASE__ schema and validators"'
+
+        presentation_slice_actions:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/actions/__USE_CASE__-action.ts'
+          - 'Write server action tests → npm test → npm run lint'
+          - 'git add → git commit -m "feat(actions): add __USE_CASE__ server action"'
+
+        presentation_slice_hooks:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/hooks/use-__USE_CASE__.ts'
+          - 'Write hook tests (React Testing Library) → npm test → npm run lint'
+          - 'git add → git commit -m "feat(hooks): add use-__USE_CASE__ hook"'
+
+        presentation_slice_components:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/components/__USE_CASE__-form.tsx'
+          - 'Write component tests (React Testing Library) → npm test → npm run lint'
+          - 'git add → git commit -m "feat(components): add __USE_CASE__ form component"'
+
+        main_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/main/composites/__USE_CASE__-composite.tsx'
+          - 'Wire all dependencies (hooks, actions, components) → npm test → npm run lint'
+          - 'git add → git commit -m "feat(main): add __USE_CASE__ composite"'
+
+        feature_integration:
+          - 'Update: src/features/__FEATURE_NAME__/main/pages/__FEATURE__-page-composer.tsx'
+          - 'Import and compose use case composite → import from ../__USE_CASE_NAME__/main/composites'
+          - 'Test feature page integration → npm test'
+          - 'git add → git commit -m "feat(pages): integrate __USE_CASE__ in feature page"'
+
+        app_router_integration:
+          - 'Update: src/app/(features)/__FEATURE_NAME__/page.tsx'
+          - 'Import feature page composer → from ../../../features/__FEATURE_NAME__/main/pages'
+          - 'Test app router integration → npm run dev → manual test'
+          - 'git add → git commit -m "feat(app): integrate __USE_CASE__ in app router"'
+
+        integration_testing:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__tests__/integration/__USE_CASE__.integration.spec.ts'
+          - 'Write integration tests → npm run test:integration'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__tests__/e2e/__USE_CASE__.e2e.spec.ts'
+          - 'Write E2E tests → npm run test:e2e'
+          - 'git add → git commit -m "test(e2e): add __USE_CASE__ integration and e2e tests"'
+
+        finalization:
+          - 'Run full test suite → npm test'
+          - 'Run linting → npm run lint'
+          - 'Run type checking → npm run type-check'
+          - 'Run build → npm run build'
+          - 'git push origin feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'gh pr create --base main --title "feat(__FEATURE__): implement __USE_CASE__ frontend feature"'
+
+        benefits:
+          - 'Atomic delivery: Each PR delivers a complete, working frontend feature'
+          - 'Component isolation: Each slice can be developed and tested independently'
+          - 'Type safety: Full TypeScript coverage from domain to UI'
+          - 'Test coverage: Unit, integration, and E2E tests for complete confidence'
+          - 'Next.js optimization: Leverages App Router, Server Actions, and RSC patterns'
+
+    dependency_rules:
+      domain:
+        can_import_from: []  # Domain layer is the core - imports nothing
+        cannot_import_from: ['data', 'infra', 'presentation', 'validation', 'main']
+
+      data:
+        can_import_from: ['domain']  # Data layer implements domain interfaces
+        cannot_import_from: ['presentation', 'validation', 'main']
+
+      validation:
+        can_import_from: ['domain']  # Zod schemas validate domain entities and DTOs
+        cannot_import_from: ['data', 'presentation', 'main']
+
+      presentation:
+        can_import_from: ['domain', 'validation']  # Presentation uses domain and validation
+        cannot_import_from: ['data', 'main']
+
+      main:
+        can_import_from: ['data', 'domain', 'presentation', 'validation']  # Main layer composes everything
+        cannot_import_from: []  # Main is the composition root
+
+    # Clean Architecture principles adapted for React/Next.js
+    principles:
+      core_principles:
+        - "Component Independence: UI components don't depend on external libraries directly"
+        - "Testability: Business logic can be tested without DOM, API, or framework dependencies"
+        - "Framework Independence: Business rules don't depend on Next.js or React specifics"
+        - "Separation: Business rules are isolated from UI concerns"
+        - "Dependency Rule: Dependencies point inward toward the domain"
+
+      design_patterns:
+        domain:
+          - "Interface Pattern: Define contracts for use cases and entities"
+          - "ES2015 Modules: Use import/export for code organization"
+          - "Type Exports: Separate types for Input and Output DTOs"
+          - "Single Method Pattern: One execute() method per use case"
+          - "Entity Pattern: Rich domain models with behavior"
+
+        data:
+          - "Repository Pattern: HTTP clients implementing domain repositories"
+          - "Adapter Pattern: Transform external API data to domain entities"
+          - "Cache Pattern: Next.js cache and SWR/React Query integration"
+          - "Error Handling: Transform HTTP errors to domain errors"
+          - "Fetch Wrapper: Centralized HTTP client with interceptors"
+
+        validation:
+          - "Schema Validation: Zod schemas for runtime type validation"
+          - "Form Validation: Integration with React Hook Form"
+          - "Composite Pattern: Combine multiple field validators"
+          - "Builder Pattern: Fluent interface for validation construction"
+          - "Error Mapping: Transform validation errors to user-friendly messages"
+
+        presentation:
+          actions:
+            - "Server Actions: Next.js 15 server-side form handling"
+            - "Progressive Enhancement: Works without JavaScript"
+            - "Error Boundaries: Graceful error handling in actions"
+            - "Revalidation: Automatic cache invalidation after mutations"
+          components:
+            - "Composition Pattern: Small, composable UI components"
+            - "Controlled Components: React controlled inputs with state"
+            - "Compound Components: Complex components built from simpler ones"
+            - "Render Props: Flexible component composition patterns"
+            - "Shadcn/ui: Consistent design system components"
+          hooks:
+            - "Custom Hooks: Encapsulate business logic and state"
+            - "State Management: useState, useReducer for local state"
+            - "Effect Management: useEffect for side effects"
+            - "Context API: Share state without prop drilling"
+            - "Optimistic Updates: Immediate UI feedback for better UX"
+
+        main:
+          - "Composite Pattern: Combine use case slices into feature pages"
+          - "Factory Pattern: Create composites with all dependencies wired"
+          - "Provider Pattern: Context providers for feature-level state"
+          - "Higher-Order Components: Add cross-cutting concerns"
+          - "Dependency Injection: Constructor injection for composites"
+
+      testing_strategy:
+        domain:
+          approach: "Unit Tests - Pure functions and business logic"
+          coverage_target: "100%"
+          tools: ["Vitest"]
+          practices:
+            - "Use fixed test data helpers instead of faker"
+            - "Create mock factories with deterministic data"
+            - "Test domain entities and use case interfaces"
+            - "Use mockUserParams() with fixed values"
+            - "Keep test helpers in tests/domain/mocks directory"
+            - "No external dependencies or randomness in tests"
+
+        data:
+          approach: "Unit Tests with MSW (Mock Service Worker)"
+          coverage_target: "95%"
+          tools: ["Vitest", "MSW", "vi.mock"]
+          practices:
+            - "Mock HTTP clients with MSW handlers"
+            - "Use makeSut() factory for test setup"
+            - "Test API error scenarios and edge cases"
+            - "Verify request payloads and headers"
+            - "Use fixed test data from mocks directory"
+            - "Mock external API responses consistently"
+
+        validation:
+          approach: "Unit Tests - Schema and form validation"
+          coverage_target: "100%"
+          tools: ["Vitest", "Zod", "@testing-library/react"]
+          practices:
+            - "Test Zod schemas with valid and invalid data"
+            - "Test form validation integration with React Hook Form"
+            - "Use makeSut() factory for validator creation"
+            - "Test specific error types and messages"
+            - "Test validation factories return correct schemas"
+            - "Test edge cases (empty fields, malformed data)"
+
+        presentation:
+          approach: "Component and Hook Tests"
+          coverage_target: "90%"
+          tools: ["Vitest", "@testing-library/react", "@testing-library/user-event"]
+          practices:
+            - "Use render() from React Testing Library for components"
+            - "Test user interactions with userEvent.click/type/submit"
+            - "Use screen queries (getByRole, getByLabelText, getByTestId)"
+            - "Create test helpers (renderWithProviders, setupUser)"
+            - "Mock hooks and actions with vi.mock()"
+            - "Test loading states, error states, and success states"
+            - "Use MSW for integration testing with real API calls"
+            - "Test accessibility with jest-axe"
+
+        main:
+          approach: "Integration and E2E Tests"
+          coverage_target: "80%"
+          tools: ["Vitest", "Playwright", "Cypress", "@testing-library/react"]
+          practices:
+            - "Test complete user flows with Playwright/Cypress"
+            - "Test composite components with all dependencies"
+            - "Use page object model for E2E tests"
+            - "Test responsive design and mobile interactions"
+            - "Verify SEO and meta tags in E2E tests"
+            - "Test performance metrics (Core Web Vitals)"
+            - "Use fixed test data for E2E scenarios"
+
+      best_practices:
+        - "SOLID Principles: Apply to React components and hooks"
+        - "DRY: Extract common logic to custom hooks"
+        - "KISS: Keep components simple and focused"
+        - "YAGNI: Build only what's needed, when it's needed"
+        - "Component Composition: Favor composition over inheritance"
+        - "TypeScript: Use strict type checking throughout"
+        - "Accessibility: Follow WCAG guidelines for inclusive design"
+        - "Performance: Optimize with React.memo, useMemo, useCallback"
+        - "SEO: Leverage Next.js SSR/SSG for search optimization"
+        - "Security: Sanitize inputs and validate on both client and server"
+
+
+
+# --- From: frontend/03-rules.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: IMMUTABLE SECTIONS AHEAD.
+  # The sections from here until 'steps' are architectural rules.
+  # You MUST copy them verbatim into the implementation file without ANY modification.
+  #
+  # AUTOMATED LEARNING SYSTEM:
+  # The RLHF system automatically:
+  # - Tracks success/failure patterns across executions
+  # - Identifies common error types and their fixes
+  # - Applies improvements when confidence > 80%
+  # - Generates learning reports with actionable insights
+  # - Prevents hallucinations with score 0 for uncertain cases
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # RULES SECTION
+  # All architectural and pattern rules consolidated
+  # ------------------------------------------------------------------------------
+
+  rules:
+    # Domain layer rules (modern approach)
+    domain:
+      allowed:
+        - 'Type definitions and interfaces (Models)'
+        - 'Use case interfaces with single execute() method'
+        - 'Separate Input and Output types for each use case'
+        - 'Simple data models without behavior'
+        - 'JSDoc documentation for all public interfaces'
+        - 'ES2015 module exports (export type, export interface)'
+
+      forbidden:
+        - 'Multiple methods in a single use case interface'
+        - 'Combined operations (e.g., __USE_CASE_NAME__And__OTHER_ACTION__)'
+        - 'Framework dependencies (React, Next.js hooks, third-party libraries)'
+        - 'External libraries (HTTP clients, validation libraries)'
+        - 'Implementation details of any kind'
+        - 'React components or UI logic'
+        - 'HTTP/API calls or browser APIs'
+        - 'Environment variables or client configuration'
+        - 'Console.log or any side effects'
+        - 'Implementation of business logic (only interfaces allowed)'
+        - 'Validation implementations'
+        - 'Error throwing or handling'
+        - 'Dependency injection'
+        - 'Domain entities with methods/behavior (use simple data structures)'
+
+      should:
+        - 'Define business entities and value objects'
+        - 'Contain only interfaces and types'
+        - 'Be framework-agnostic'
+        - 'Follow domain-driven design principles'
+
+      should_not:
+        - 'Import from other layers'
+        - 'Contain implementation details'
+        - 'Have framework dependencies'
+      use_case:
+        should:
+          - 'Have only ONE execute() method per interface'
+          - 'Define separate Input and Output types'
+          - 'Have EXACTLY ONE responsibility (one business operation)'
+          - 'Be named with single verb describing ONE action (CreateUser, not CreateUserAndSendEmail)'
+          - 'Include comprehensive JSDoc documentation'
+          - 'Return Promise<Output> from execute method'
+          - 'Be framework agnostic'
+          - 'Follow naming convention: VerbNoun (e.g., CreateUser, LoadSurvey, AuthenticateUser)'
+        should_not:
+          - 'Have multiple methods (no createUser() AND readUser() in same interface)'
+          - 'Combine multiple operations (CreateUserAndSendEmail violates SRP)'
+          - 'Contain implementation logic'
+          - 'Know about HTTP, databases, or external services'
+          - 'Import from data, presentation, or infrastructure layers'
+          - 'Have side effects'
+          - 'Use generic method names like handle(), process(), or run()'
+
+    # Data layer rules
+    data:
+      should:
+        - 'Implement domain use case interfaces'
+        - 'Use constructor injection for dependencies'
+        - 'Define protocols for external dependencies'
+        - 'Use prefix naming (Remote__USE_CASE_NAME__, Api__USE_CASE_NAME__)'
+        - 'Handle errors and status codes appropriately'
+        - 'Keep business logic minimal (only orchestration)'
+        - 'Return domain types, not infrastructure types'
+
+      should_not:
+        - 'Import from infrastructure layer directly'
+        - 'Contain complex business logic (belongs in domain)'
+        - 'Expose infrastructure details to domain'
+        - 'Use concrete implementations instead of protocols'
+        - 'Have direct API calls or browser APIs (use protocols)'
+
+    # Infrastructure layer rules (Frontend-specific)
+    infra:
+      should:
+        - 'Implement data layer protocols for frontend'
+        - 'Use native Fetch API for HTTP requests'
+        - 'Use browser localStorage/sessionStorage adapters'
+        - 'Implement cache strategies (React Query, SWR, or similar)'
+        - 'Handle network retry logic and offline scenarios'
+        - 'Use environment variables for API endpoints'
+        - 'Implement request/response interceptors'
+        - 'Handle CORS and authentication headers'
+
+      should_not:
+        - 'Import from domain or use case layers'
+        - 'Contain business logic'
+        - 'Use multiple HTTP client implementations'
+        - 'Expose HTTP-specific types to other layers'
+        - 'Use axios or other HTTP libraries (use Fetch API)'
+        - 'Access browser APIs directly from other layers'
+
+    # Presentation layer rules (Frontend-specific)
+    presentation:
+      actions:
+        should:
+          - 'Use Next.js 15+ Server Actions for form submission'
+          - 'Implement proper error handling with redirect/revalidate'
+          - 'Use Zod schemas for server-side validation'
+          - 'Return ActionResult<T> or FormState for form feedback'
+          - 'Handle authentication and authorization'
+        should_not:
+          - 'Contain business logic (delegate to use cases)'
+          - 'Make direct database calls'
+          - 'Import from infra layer directly'
+
+      components:
+        should:
+          - 'Use Shadcn/ui components with Tailwind CSS'
+          - 'Prefer Server Components over Client Components'
+          - 'Use "use client" directive only when necessary'
+          - 'Follow atomic design principles (atoms, molecules, organisms)'
+          - 'Implement proper error boundaries'
+          - 'Use TypeScript for props and state'
+        should_not:
+          - 'Use custom CSS/SASS (use Tailwind CSS)'
+          - 'Contain business logic (use custom hooks)'
+          - 'Make direct API calls (use Server Actions or hooks)'
+
+      hooks:
+        should:
+          - 'Use React hooks for state management and side effects'
+          - 'Implement custom hooks for reusable logic'
+          - 'Use Context API for feature-specific state'
+          - 'Handle loading, error, and success states'
+          - 'Follow hooks rules (no conditional calls)'
+        should_not:
+          - 'Use Redux or external state managers (use Context API)'
+          - 'Contain business logic (delegate to use cases)'
+          - 'Make direct API calls (use data layer)'
+
+    # Error rules
+    error:
+      should:
+        - 'Extend the native Error class'
+        - 'Have descriptive names ending with Error'
+        - 'Contain meaningful error messages'
+        - 'Represent business rule violations'
+        - 'Be thrown when domain invariants are violated'
+
+      should_not:
+        - 'Contain HTTP status codes'
+        - 'Include technical/implementation details'
+        - 'Expose sensitive information'
+        - 'Import external dependencies'
+
+    # Test helper rules
+    test_helper:
+      should:
+        - 'Create mock/stub implementations of use cases'
+        - 'Generate fake test data'
+        - 'Be pure functions that return consistent data'
+        - 'Help reduce test boilerplate'
+        - 'Use ONLY Vitest (Jest is prohibited)'
+
+      should_not:
+        - 'Make real API calls or database queries'
+        - 'Depend on external services'
+        - 'Contain test assertions (those belong in test files)'
+        - 'Have side effects or maintain state'
+        - 'Use Jest (use Vitest instead)'
+
+    # Validation rules (Frontend-specific)
+    validation:
+      schemas:
+        should:
+          - 'Use Zod for schema definition and validation'
+          - 'Define schemas that match domain models'
+          - 'Support both client and server-side validation'
+          - 'Include proper error messages for form fields'
+          - 'Export schemas for reuse across components'
+        should_not:
+          - 'Import from domain layer'
+          - 'Contain business logic (only validation rules)'
+          - 'Use other validation libraries (use Zod)'
+
+      validators:
+        should:
+          - 'Implement reusable field validators'
+          - 'Support synchronous validation for forms'
+          - 'Return user-friendly error messages'
+          - 'Follow Zod patterns and conventions'
+        should_not:
+          - 'Import from data or infra layers'
+          - 'Throw exceptions (return validation results)'
+          - 'Access external services for validation'
+          - 'Use async validation (prefer synchronous)'
+
+    # Main layer rules (Frontend-specific)
+    main:
+      composites:
+        should:
+          - 'Create composite components that wire all dependencies'
+          - 'Compose Server Actions with validation schemas'
+          - 'Wire use cases with data layer and validation'
+          - 'Export fully configured components ready for App Router'
+          - 'Handle error states and loading states'
+        should_not:
+          - 'Contain business logic (only composition)'
+          - 'Make direct API calls'
+          - 'Define new interfaces or types'
+
+      pages:
+        should:
+          - 'Create page composers that aggregate feature composites'
+          - 'Use Next.js 15 App Router patterns (layout, page, loading, error)'
+          - 'Implement proper SEO metadata and structured data'
+          - 'Handle authentication and route protection'
+          - 'Export React.FC components for App Router integration'
+        should_not:
+          - 'Contain business logic (delegate to composites)'
+          - 'Have direct state management (use providers)'
+          - 'Include complex algorithms or calculations'
+          - 'Store application state directly'
+
+    # Reference patterns
+    reference_patterns:
+      clean_architecture:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'clean architecture use case'
+        url: 'https://github.com/...'
+        description: 'Following Clean Architecture pattern.'
+
+      ddd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'domain driven design'
+        url: 'https://github.com/...'
+        description: 'Following DDD patterns.'
+
+      tdd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'test driven development'
+        url: 'https://github.com/...'
+        description: 'Following TDD patterns.'
+
+    # Learning patterns (Frontend-specific)
+    learning_patterns:
+      common_errors:
+        - pattern: 'import axios'
+          fix: 'Use Fetch API instead of axios in frontend infra layer'
+          score_impact: -2
+
+        - pattern: '"use client" everywhere'
+          fix: 'Prefer Server Components, use "use client" only when necessary'
+          score_impact: -1
+
+        - pattern: 'useState for server state'
+          fix: 'Use Server Actions and revalidation instead of client state'
+          score_impact: -1
+
+        - pattern: '__USE_CASE_NAME__And__OTHER_ACTION__'
+          fix: 'Split into two separate use cases (SRP violation)'
+          score_impact: -1
+
+        - pattern: 'missing Zod validation'
+          fix: 'Add Zod schema validation for forms and Server Actions'
+          score_impact: -2
+
+      success_indicators:
+        - 'Uses ubiquitous language consistently'
+        - 'Follows single responsibility principle'
+        - 'No dependency violations between layers'
+        - 'Proper Server Component vs Client Component usage'
+        - 'Comprehensive test coverage with Vitest'
+        - 'Clean git history with atomic commits'
+        - 'Effective use of Next.js App Router patterns'
+        - 'Strong TypeScript typing throughout'
+
+    # Required protocols for all layers
+    required_protocols:
+      # Domain Layer
+      domain:
+        - 'All use cases must have single execute() method'
+        - 'All use cases must define separate Input and Output types'
+        - 'All domain types must be immutable'
+        - 'No use case can perform multiple operations (SRP)'
+        - 'All models must be simple DTOs without behavior'
+
+      # Data Layer
+      data:
+        - 'All implementations must inject dependencies via constructor'
+        - 'All protocols must be interfaces, not concrete classes'
+        - 'All implementations must use Db or Remote prefix'
+        - 'Must return domain types, not infrastructure types'
+        - 'Must handle errors and map status codes appropriately'
+
+      # Infrastructure Layer
+      infra:
+        - 'All adapters must implement data layer protocols'
+        - 'HTTP clients must use Fetch API, not axios'
+        - 'Browser storage adapters must use localStorage/sessionStorage'
+        - 'All external configs must come from environment variables'
+        - 'Must not expose infrastructure types to other layers'
+
+      # Presentation Layer
+      presentation:
+        - 'Server Actions must return ActionResult<T> or FormState'
+        - 'React components must use function components with hooks'
+        - 'Pages must be Server Components by default'
+        - 'Custom hooks must follow React hooks rules'
+        - 'Components must receive dependencies as props'
+
+      # Validation Layer
+      validation:
+        - 'All schemas must use Zod for validation'
+        - 'Schemas must match domain model structure'
+        - 'Validation must be synchronous for forms'
+        - 'Must support both client and server validation'
+        - 'Error messages must be user-friendly'
+
+      # Main Layer
+      main:
+        - 'All composites must return configured components'
+        - 'Composite functions must wire all dependencies'
+        - 'No business logic allowed (only composition)'
+        - 'Pages must use Next.js App Router patterns'
+        - 'Must not define new types (use existing from other layers)'
+
+      # Cross-cutting Concerns
+      general:
+        - 'All public interfaces must have JSDoc documentation'
+        - 'All errors must extend native Error class'
+        - 'All test helpers must be pure functions'
+        - 'All tests must use Vitest, not Jest'
+        - 'No use of faker - fixed test data only'
+        - 'All components must be properly typed with TypeScript'
+        - 'Use "use client" directive only when necessary'
+
+    # Documentation standards (JSDoc)
+    documentation:
+      # Domain Layer Documentation
+      domain:
+        use_case_interface:
+          - '@description - Clear description of the use case purpose'
+          - '@example - Usage example with execute() method'
+          - '@see - Reference to related use cases or documentation'
+        input_output_types:
+          - '@typedef - Define Input and Output types'
+          - '@property - Document each field with type and constraints'
+          - '@example - Show valid input/output instances'
+        model_type:
+          - '@typedef - Define the domain model'
+          - '@property - Document each property with business rules'
+          - '@example - Show valid model instance'
+
+      # Data Layer Documentation
+      data:
+        protocol_interface:
+          - '@interface - Define protocol contracts'
+          - '@method - Document each method signature'
+          - '@throws - Document possible errors'
+        implementation_class:
+          - '@class - Describe the use case implementation'
+          - '@implements - List implemented interfaces'
+          - '@constructor - Document dependency injection'
+          - '@method - Document orchestration logic'
+
+      # Infrastructure Layer Documentation
+      infra:
+        api_client:
+          - '@class - Describe the API client purpose'
+          - '@implements - Protocol being implemented'
+          - '@dependency - External libraries used (Fetch API)'
+        storage_adapter:
+          - '@class - Browser storage adapter implementation'
+          - '@method - Document storage operations'
+          - '@throws - Storage-related errors'
+        http_client:
+          - '@class - HTTP client implementation for frontend'
+          - '@method - Document request/response handling'
+          - '@throws - Network-related errors'
+
+      # Presentation Layer Documentation
+      presentation:
+        server_action:
+          - '@function - Server Action description'
+          - '@param - Form data or action parameters'
+          - '@returns - ActionResult<T> or FormState'
+          - '@throws - Validation or business errors'
+        react_component:
+          - '@component - Component description'
+          - '@props - Component properties with TypeScript types'
+          - '@state - Component state (if Client Component)'
+          - '@returns - JSX.Element'
+        custom_hook:
+          - '@hook - Custom hook description'
+          - '@param - Hook parameters'
+          - '@returns - Hook return value with types'
+          - '@example - Usage example'
+
+      # Validation Layer Documentation
+      validation:
+        zod_schema:
+          - '@schema - Zod schema description'
+          - '@property - Document each field with validation rules'
+          - '@example - Show valid and invalid examples'
+          - '@returns - Parsed data or validation errors'
+        validator_function:
+          - '@function - Field validator description'
+          - '@param - Value to validate'
+          - '@returns - Validation result or error message'
+
+      # Main Layer Documentation
+      main:
+        composite:
+          - '@component - Composite component description'
+          - '@returns - Configured component with all dependencies'
+          - '@example - How to use the composite'
+        page_composer:
+          - '@component - Page composer description'
+          - '@param - Page props and metadata'
+          - '@returns - Next.js page component'
+        composition:
+          - '@function - Dependency composition for frontend'
+          - '@returns - Fully configured React component'
+
+      example_template: |
+        /**
+        * @description __USE_CASE_DESCRIPTION__
+        * @example
+        * const __USE_CASE_NAME_CAMEL_CASE__ = new __USE_CASE_NAME_PASCAL_CASE__Impl(__DEPENDENCY_NAME__)
+        * const result = await __USE_CASE_NAME_CAMEL_CASE__.execute({
+        *   __INPUT_FIELD_1__: '__EXAMPLE_VALUE_1__',
+        *   __INPUT_FIELD_2__: '__EXAMPLE_VALUE_2__',
+        *   __INPUT_FIELD_3__: '__EXAMPLE_VALUE_3__'
+        * })
+        * @see {@link __RELATED_USE_CASE__} for __RELATED_DESCRIPTION__
+        */
+        export interface __USE_CASE_NAME_PASCAL_CASE__ {
+          execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output>
+        }
+
+        /**
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Input
+        * @property {string} __INPUT_FIELD_1__ - __FIELD_1_DESCRIPTION__ (__FIELD_1_CONSTRAINTS__)
+        * @property {string} __INPUT_FIELD_2__ - __FIELD_2_DESCRIPTION__
+        * @property {string} __INPUT_FIELD_3__ - __FIELD_3_DESCRIPTION__ (__FIELD_3_CONSTRAINTS__)
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Input = {
+          __INPUT_FIELD_1__: string
+          __INPUT_FIELD_2__: string
+          __INPUT_FIELD_3__: string
+        }
+
+        /**
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Output
+        * @property {string} __OUTPUT_FIELD_1__ - __OUTPUT_FIELD_1_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_2__ - __OUTPUT_FIELD_2_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_3__ - __OUTPUT_FIELD_3_DESCRIPTION__
+        * @property {Date} __TIMESTAMP_FIELD__ - __TIMESTAMP_DESCRIPTION__
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Output = {
+          __OUTPUT_FIELD_1__: string
+          __OUTPUT_FIELD_2__: string
+          __OUTPUT_FIELD_3__: string
+          __TIMESTAMP_FIELD__: Date
+        }
+
+
+# --- From: frontend/steps/04-presentation.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: PRESENTATION LAYER IMPLEMENTATION STEPS FOR FRONTEND
+  # These steps create Next.js 15 components with Shadcn UI, Server Actions,
+  # and React Hooks following Clean Architecture and Vertical Slice patterns
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION LAYER STEPS SECTION
+  # Steps for generating presentation layer artifacts in frontend features
+  # Following "Feature Module with Use Case Slices" architecture
+  # Adapted for Next.js 15 App Router, Shadcn UI, Tailwind CSS
+  # ------------------------------------------------------------------------------
+
+  presentation_steps:
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create and checkout feature branch for __USE_CASE_NAME_PASCAL_CASE__ presentation implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Git branching strategy and naming conventions'
+      run_scripts:
+        description: 'Create feature branch with proper naming convention'
+        scripts:
+          - name: 'Create feature branch'
+            command: |
+              # Stash any uncommitted changes
+              git stash save "WIP: Before creating __FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__ presentation branch"
+
+              # Ensure we're on the main branch and up to date
+              git checkout main || git checkout master
+              git pull origin main || git pull origin master
+
+              # Create and checkout new feature branch
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__-presentation"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
+
+              echo "✅ Created and checked out branch: $BRANCH_NAME"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: CREATE TEST STRUCTURE (TDD - RED PHASE) ===
+    - id: 'create-test-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'TDD RED: Create test structure for __USE_CASE_NAME_PASCAL_CASE__ presentation layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'TDD_GUIDE.md'
+          description: 'Following Test-Driven Development: RED-GREEN-REFACTOR cycle.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/__tests__/presentation'
+          folders:
+            - 'components'      # Component tests
+            - 'hooks'           # Hook tests
+            - 'actions'         # Server action tests
+            - 'mocks'           # Test mocks
+
+    # === STEP 3: CREATE TEST MOCKS (TDD - RED PHASE) ===
+    - id: 'create-test-mocks-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Create test mocks for __USE_CASE_NAME_PASCAL_CASE__ components'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'TDD_GUIDE.md'
+          description: 'Test doubles and mocking patterns for React components'
+      path: '__PROJECT_NAME__/__tests__/presentation/mocks/mock-__USE_CASE_NAME_KEBAB_CASE__.tsx'
+      template: |
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * Test doubles for __USE_CASE_NAME_PASCAL_CASE__ presentation testing
+         * AI-NOTE: TDD - Create mocks BEFORE implementation
+         * These mocks define the expected behavior for Next.js components
+         */
+
+        export class __USE_CASE_NAME_PASCAL_CASE__Spy implements __USE_CASE_NAME_PASCAL_CASE__ {
+          params: any
+          result = {
+            __OUTPUT_FIELD_1__: 'test-output-1',
+            __OUTPUT_FIELD_2__: 'test-output-2',
+            __OUTPUT_FIELD_3__: 'test-output-3',
+            __TIMESTAMP_FIELD__: new Date('2024-01-01')
+          }
+          callsCount = 0
+
+          async execute(input: any): Promise<any> {
+            this.params = input
+            this.callsCount++
+            return this.result
+          }
+        }
+
+        // Context Provider mock
+        export const Mock__USE_CASE_NAME_PASCAL_CASE__Provider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+          return <>{children}</>
+        }
+
+        // Server Action mock
+        export const mock__USE_CASE_NAME_PASCAL_CASE__Action = vi.fn().mockResolvedValue({
+          success: true,
+          data: {
+            __OUTPUT_FIELD_1__: 'test-output-1',
+            __OUTPUT_FIELD_2__: 'test-output-2'
+          }
+        })
+
+    # === STEP 4: CREATE COMPONENT TEST (TDD - RED PHASE) ===
+    - id: 'create-component-test-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Write failing tests for __USE_CASE_NAME_PASCAL_CASE__ component'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'react testing library vitest nextjs components'
+          description: 'Testing patterns for Next.js components'
+      path: '__PROJECT_NAME__/__tests__/presentation/components/__USE_CASE_NAME_KEBAB_CASE__-form.spec.tsx'
+      template: |
+        import { describe, it, expect, vi, beforeEach } from 'vitest'
+        import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+        import { __USE_CASE_NAME_PASCAL_CASE__Form } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components/__USE_CASE_NAME_KEBAB_CASE__-form'
+        import { Mock__USE_CASE_NAME_PASCAL_CASE__Provider } from '../mocks/mock-__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * TDD RED Phase: Write tests BEFORE implementation
+         * AI-NOTE: These tests will FAIL initially - that's expected!
+         * Testing Next.js 15 components with Shadcn UI
+         */
+
+        describe('__USE_CASE_NAME_PASCAL_CASE__Form', () => {
+          // AI-NOTE: NEVER use faker - use fixed test data
+          const mockFormData = {
+            __INPUT_FIELD_1__: 'test-value-1',
+            __INPUT_FIELD_2__: 'test-value-2',
+            __INPUT_FIELD_3__: 'test-value-3'
+          }
+
+          beforeEach(() => {
+            vi.clearAllMocks()
+          })
+
+          describe('TDD RED - These tests will fail initially', () => {
+            it('should render form with Shadcn UI components', () => {
+              render(
+                <Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+                  <__USE_CASE_NAME_PASCAL_CASE__Form />
+                </Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+              )
+
+              // AI-NOTE: Testing Shadcn UI form components
+              expect(screen.getByLabelText('__INPUT_LABEL_1__')).toBeInTheDocument()
+              expect(screen.getByLabelText('__INPUT_LABEL_2__')).toBeInTheDocument()
+              expect(screen.getByLabelText('__INPUT_LABEL_3__')).toBeInTheDocument()
+              expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument()
+            })
+
+            it('should handle form submission with Server Action', async () => {
+              const onSubmit = vi.fn()
+              render(
+                <Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+                  <__USE_CASE_NAME_PASCAL_CASE__Form onSubmit={onSubmit} />
+                </Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+              )
+
+              // Fill form fields
+              fireEvent.change(screen.getByLabelText('__INPUT_LABEL_1__'), {
+                target: { value: mockFormData.__INPUT_FIELD_1__ }
+              })
+              fireEvent.change(screen.getByLabelText('__INPUT_LABEL_2__'), {
+                target: { value: mockFormData.__INPUT_FIELD_2__ }
+              })
+
+              // Submit form
+              fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+
+              await waitFor(() => {
+                expect(onSubmit).toHaveBeenCalledWith(mockFormData)
+              })
+            })
+
+            it('should show validation errors', async () => {
+              render(
+                <Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+                  <__USE_CASE_NAME_PASCAL_CASE__Form />
+                </Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+              )
+
+              // Submit empty form
+              fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
+
+              await waitFor(() => {
+                expect(screen.getByText('__FIELD_1__ is required')).toBeInTheDocument()
+              })
+            })
+
+            it('should disable submit button while loading', async () => {
+              render(
+                <Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+                  <__USE_CASE_NAME_PASCAL_CASE__Form isLoading={true} />
+                </Mock__USE_CASE_NAME_PASCAL_CASE__Provider>
+              )
+
+              const submitButton = screen.getByRole('button', { name: 'Submit' })
+              expect(submitButton).toBeDisabled()
+            })
+          })
+        })
+
+    # === STEP 5: CREATE HOOK TEST (TDD - RED PHASE) ===
+    - id: 'create-hook-test-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD RED: Write tests for use__USE_CASE_NAME_PASCAL_CASE__ hook'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/__tests__/presentation/hooks/use-__USE_CASE_NAME_KEBAB_CASE__.spec.ts'
+      template: |
+        import { describe, it, expect, vi } from 'vitest'
+        import { renderHook, act, waitFor } from '@testing-library/react'
+        import { use__USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/hooks/use-__USE_CASE_NAME_KEBAB_CASE__'
+        import { Mock__USE_CASE_NAME_PASCAL_CASE__Provider } from '../mocks/mock-__USE_CASE_NAME_KEBAB_CASE__'
+
+        describe('use__USE_CASE_NAME_PASCAL_CASE__ Hook', () => {
+          it('should execute use case and return data', async () => {
+            const { result } = renderHook(() => use__USE_CASE_NAME_PASCAL_CASE__(), {
+              wrapper: Mock__USE_CASE_NAME_PASCAL_CASE__Provider
+            })
+
+            await act(async () => {
+              await result.current.execute({
+                __INPUT_FIELD_1__: 'test-value-1'
+              })
+            })
+
+            expect(result.current.data).toEqual({
+              __OUTPUT_FIELD_1__: 'test-output-1',
+              __OUTPUT_FIELD_2__: 'test-output-2'
+            })
+            expect(result.current.isLoading).toBe(false)
+            expect(result.current.error).toBeNull()
+          })
+
+          it('should handle loading state', async () => {
+            const { result } = renderHook(() => use__USE_CASE_NAME_PASCAL_CASE__(), {
+              wrapper: Mock__USE_CASE_NAME_PASCAL_CASE__Provider
+            })
+
+            expect(result.current.isLoading).toBe(false)
+
+            act(() => {
+              result.current.execute({ __INPUT_FIELD_1__: 'test' })
+            })
+
+            expect(result.current.isLoading).toBe(true)
+          })
+        })
+
+    # === STEP 6: RUN TESTS - VERIFY RED (TDD - RED PHASE) ===
+    - id: 'verify-tests-fail-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD RED: Verify tests fail (components do not exist yet)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to ensure they fail (RED phase)'
+        scripts:
+          - name: 'Run failing tests'
+            command: |
+              echo "🔴 TDD RED: Running tests - they should FAIL..."
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__ || {
+                echo "✅ Good! Tests are failing as expected (RED phase)"
+                echo "   Now we'll implement the components to make them pass..."
+                exit 0
+              }
+              echo "❌ ERROR: Tests are passing but components don't exist yet!"
+              exit 1
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 7: CREATE PRESENTATION STRUCTURE (TDD - GREEN PHASE) ===
+    - id: 'create-presentation-structure-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'TDD GREEN: Create presentation layer structure to make tests pass'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation'
+          folders:
+            - 'components'      # React components with Shadcn UI
+            - 'hooks'           # Custom React hooks
+            - 'actions'         # Next.js Server Actions
+            - 'providers'       # Context providers
+            - 'types'           # TypeScript types
+
+    # === STEP 8: CREATE SERVER ACTION (TDD - GREEN PHASE) ===
+    - id: 'create-server-action-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement Next.js 15 Server Action'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'nextjs 15 server actions use server directive'
+          description: 'Server Actions pattern for Next.js 15'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/actions/__USE_CASE_NAME_KEBAB_CASE__-action.ts'
+      template: |
+        'use server'
+
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+        import { __USE_CASE_NAME_PASCAL_CASE__Schema } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/validation/schemas/__USE_CASE_NAME_KEBAB_CASE__-schema'
+        import { revalidatePath } from 'next/cache'
+
+        /**
+         * Server Action for __USE_CASE_NAME_PASCAL_CASE__
+         * AI-NOTE: Server Actions run on the server only
+         * Use 'use server' directive at the top
+         * Handle validation and errors properly
+         */
+
+        export async function __USE_CASE_NAME_CAMEL_CASE__Action(
+          prevState: any,
+          formData: FormData
+        ) {
+          try {
+            // AI-NOTE: Parse and validate form data
+            const rawData = {
+              __INPUT_FIELD_1__: formData.get('__INPUT_FIELD_1__'),
+              __INPUT_FIELD_2__: formData.get('__INPUT_FIELD_2__'),
+              __INPUT_FIELD_3__: formData.get('__INPUT_FIELD_3__')
+            }
+
+            // Validate with Zod schema
+            const validatedData = __USE_CASE_NAME_PASCAL_CASE__Schema.parse(rawData)
+
+            // AI-NOTE: Get use case implementation from factory
+            const __USE_CASE_NAME_CAMEL_CASE__ = make__USE_CASE_NAME_PASCAL_CASE__()
+
+            // Execute use case
+            const result = await __USE_CASE_NAME_CAMEL_CASE__.execute(validatedData)
+
+            // Revalidate cache if needed
+            revalidatePath('/__FEATURE_NAME_KEBAB_CASE__')
+
+            return {
+              success: true,
+              data: result,
+              error: null
+            }
+          } catch (error) {
+            // AI-NOTE: Proper error handling for Server Actions
+            if (error instanceof ZodError) {
+              return {
+                success: false,
+                data: null,
+                error: {
+                  type: 'validation',
+                  errors: error.errors
+                }
+              }
+            }
+
+            return {
+              success: false,
+              data: null,
+              error: {
+                type: 'server',
+                message: 'An error occurred. Please try again.'
+              }
+            }
+          }
+        }
+
+    # === STEP 9: CREATE REACT HOOK (TDD - GREEN PHASE) ===
+    - id: 'create-hook-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement custom React hook'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/hooks/use-__USE_CASE_NAME_KEBAB_CASE__.ts'
+      template: |
+        'use client'
+
+        import { useState, useCallback } from 'react'
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * Custom hook for __USE_CASE_NAME_PASCAL_CASE__
+         * AI-NOTE: Hooks must start with 'use'
+         * Use 'use client' directive for client components
+         * Manage loading, error, and data states
+         */
+
+        export function use__USE_CASE_NAME_PASCAL_CASE__() {
+          const [data, setData] = useState<any>(null)
+          const [error, setError] = useState<Error | null>(null)
+          const [isLoading, setIsLoading] = useState(false)
+
+          const execute = useCallback(async (input: any) => {
+            setIsLoading(true)
+            setError(null)
+
+            try {
+              // AI-NOTE: Get use case from context or factory
+              const __USE_CASE_NAME_CAMEL_CASE__ = use__USE_CASE_NAME_PASCAL_CASE__Context()
+              const result = await __USE_CASE_NAME_CAMEL_CASE__.execute(input)
+              setData(result)
+              return result
+            } catch (err) {
+              const error = err as Error
+              setError(error)
+              throw error
+            } finally {
+              setIsLoading(false)
+            }
+          }, [])
+
+          const reset = useCallback(() => {
+            setData(null)
+            setError(null)
+            setIsLoading(false)
+          }, [])
+
+          return {
+            data,
+            error,
+            isLoading,
+            execute,
+            reset
+          }
+        }
+
+    # === STEP 10: CREATE COMPONENT WITH SHADCN (TDD - GREEN PHASE) ===
+    - id: 'create-component-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement React component with Shadcn UI'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'shadcn ui form components nextjs tailwind'
+          description: 'Shadcn UI component patterns'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components/__USE_CASE_NAME_KEBAB_CASE__-form.tsx'
+      template: |
+        'use client'
+
+        import { useFormState } from 'react-dom'
+        import { __USE_CASE_NAME_CAMEL_CASE__Action } from '../actions/__USE_CASE_NAME_KEBAB_CASE__-action'
+        import { use__USE_CASE_NAME_PASCAL_CASE__ } from '../hooks/use-__USE_CASE_NAME_KEBAB_CASE__'
+        import { Button } from '@/shared/presentation/ui/button'
+        import { Input } from '@/shared/presentation/ui/input'
+        import { Label } from '@/shared/presentation/ui/label'
+        import { Card, CardContent, CardHeader, CardTitle } from '@/shared/presentation/ui/card'
+        import { Alert, AlertDescription } from '@/shared/presentation/ui/alert'
+        import { Loader2 } from 'lucide-react'
+
+        /**
+         * __USE_CASE_NAME_PASCAL_CASE__ Form Component
+         * AI-NOTE: Using Shadcn UI components with Tailwind CSS
+         * Integrates with Server Actions for form submission
+         * Uses React hooks for state management
+         */
+
+        interface __USE_CASE_NAME_PASCAL_CASE__FormProps {
+          onSubmit?: (data: any) => void
+          isLoading?: boolean
+        }
+
+        export function __USE_CASE_NAME_PASCAL_CASE__Form({
+          onSubmit,
+          isLoading: externalLoading
+        }: __USE_CASE_NAME_PASCAL_CASE__FormProps) {
+          const [state, formAction] = useFormState(__USE_CASE_NAME_CAMEL_CASE__Action, {
+            success: false,
+            data: null,
+            error: null
+          })
+
+          const { isLoading: hookLoading } = use__USE_CASE_NAME_PASCAL_CASE__()
+          const isLoading = externalLoading || hookLoading
+
+          return (
+            <Card className="w-full max-w-md mx-auto">
+              <CardHeader>
+                <CardTitle>__FORM_TITLE__</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form action={formAction} className="space-y-4">
+                  {/* AI-NOTE: Shadcn UI form fields with Tailwind classes */}
+                  <div className="space-y-2">
+                    <Label htmlFor="__INPUT_FIELD_1__">__INPUT_LABEL_1__</Label>
+                    <Input
+                      id="__INPUT_FIELD_1__"
+                      name="__INPUT_FIELD_1__"
+                      type="text"
+                      placeholder="Enter __INPUT_LABEL_1__"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="__INPUT_FIELD_2__">__INPUT_LABEL_2__</Label>
+                    <Input
+                      id="__INPUT_FIELD_2__"
+                      name="__INPUT_FIELD_2__"
+                      type="text"
+                      placeholder="Enter __INPUT_LABEL_2__"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="__INPUT_FIELD_3__">__INPUT_LABEL_3__</Label>
+                    <Input
+                      id="__INPUT_FIELD_3__"
+                      name="__INPUT_FIELD_3__"
+                      type="text"
+                      placeholder="Enter __INPUT_LABEL_3__"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  {/* AI-NOTE: Error display */}
+                  {state.error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>
+                        {state.error.message || 'An error occurred'}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* AI-NOTE: Success display */}
+                  {state.success && (
+                    <Alert>
+                      <AlertDescription>
+                        __SUCCESS_MESSAGE__
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* AI-NOTE: Submit button with loading state */}
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      'Submit'
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          )
+        }
+
+    # === STEP 11: CREATE CONTEXT PROVIDER (TDD - GREEN PHASE) ===
+    - id: 'create-context-provider-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create React Context Provider for state management'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/providers/__USE_CASE_NAME_KEBAB_CASE__-provider.tsx'
+      template: |
+        'use client'
+
+        import { createContext, useContext, ReactNode } from 'react'
+        import { __USE_CASE_NAME_PASCAL_CASE__ } from '@/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/domain/usecases/__USE_CASE_NAME_KEBAB_CASE__'
+
+        /**
+         * Context Provider for __USE_CASE_NAME_PASCAL_CASE__
+         * AI-NOTE: Using React Context API instead of Redux/Recoil
+         * Provides use case instance to child components
+         */
+
+        interface __USE_CASE_NAME_PASCAL_CASE__ContextType {
+          __USE_CASE_NAME_CAMEL_CASE__: __USE_CASE_NAME_PASCAL_CASE__
+        }
+
+        const __USE_CASE_NAME_PASCAL_CASE__Context = createContext<__USE_CASE_NAME_PASCAL_CASE__ContextType | undefined>(undefined)
+
+        export function use__USE_CASE_NAME_PASCAL_CASE__Context() {
+          const context = useContext(__USE_CASE_NAME_PASCAL_CASE__Context)
+          if (!context) {
+            throw new Error('use__USE_CASE_NAME_PASCAL_CASE__Context must be used within __USE_CASE_NAME_PASCAL_CASE__Provider')
+          }
+          return context
+        }
+
+        interface __USE_CASE_NAME_PASCAL_CASE__ProviderProps {
+          children: ReactNode
+          __USE_CASE_NAME_CAMEL_CASE__: __USE_CASE_NAME_PASCAL_CASE__
+        }
+
+        export function __USE_CASE_NAME_PASCAL_CASE__Provider({
+          children,
+          __USE_CASE_NAME_CAMEL_CASE__
+        }: __USE_CASE_NAME_PASCAL_CASE__ProviderProps) {
+          return (
+            <__USE_CASE_NAME_PASCAL_CASE__Context.Provider value={{ __USE_CASE_NAME_CAMEL_CASE__ }}>
+              {children}
+            </__USE_CASE_NAME_PASCAL_CASE__Context.Provider>
+          )
+        }
+
+    # === STEP 12: RUN TESTS - VERIFY GREEN (TDD - GREEN PHASE) ===
+    - id: 'verify-tests-pass-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD GREEN: Verify all tests pass with implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to ensure they pass (GREEN phase)'
+        scripts:
+          - name: 'Run passing tests'
+            command: |
+              echo "🟢 TDD GREEN: Running tests - they should PASS now..."
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__ || {
+                echo "❌ ERROR: Tests are still failing after implementation!"
+                echo "   Review the component implementation and fix issues."
+                exit 1
+              }
+              echo "✅ Excellent! All tests are passing (GREEN phase)"
+              echo "   Consider refactoring if needed (REFACTOR phase)..."
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 13: REFACTOR (TDD - REFACTOR PHASE - OPTIONAL) ===
+    - id: 'refactor-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'TDD REFACTOR: Improve code quality while keeping tests green'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      condition: '__NEEDS_REFACTORING__'
+      run_scripts:
+        description: 'Refactor code while ensuring tests remain green'
+        scripts:
+          - name: 'Refactor with safety'
+            command: |
+              echo "♻️ TDD REFACTOR: Improving code quality..."
+              echo "   Common refactorings for React/Next.js:"
+              echo "   - Extract smaller components"
+              echo "   - Optimize re-renders with memo/useMemo"
+              echo "   - Improve type safety"
+              echo "   - Extract custom hooks"
+              echo "   - Simplify Server Action logic"
+
+              # Run tests before refactoring
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__ || {
+                echo "❌ Tests must be green before refactoring!"
+                exit 1
+              }
+
+              # AI-NOTE: Apply refactorings here
+              # Examples:
+              # - Extract form fields to separate components
+              # - Create custom hooks for form validation
+              # - Optimize with React.memo
+
+              # Run tests after refactoring
+              npm test -- __USE_CASE_NAME_KEBAB_CASE__ || {
+                echo "❌ Refactoring broke tests! Revert changes."
+                exit 1
+              }
+
+              echo "✅ Refactoring complete - tests still green!"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 14: REFACTOR FOR BROWNFIELD (CONDITIONAL) ===
+    - id: 'refactor-presentation-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor __FILE_TO_MODIFY_KEBAB_CASE__ to Clean Architecture patterns'
+      condition: 'check_if_presentation_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.tsx'
+      template: |
+        # AI-NOTE: FIND/REPLACE Pattern for Brownfield Refactoring
+        # The AI must identify SPECIFIC code blocks that violate Clean Architecture
+        # Common presentation layer violations in frontend:
+        # - Business logic in components
+        # - Direct API calls instead of use cases
+        # - Missing separation of concerns
+
+        <<<FIND>>>
+        # AI-NOTE: Match the EXACT code including imports if needed
+        # Be specific to avoid matching wrong code blocks
+        # Include enough context for unique identification
+        [ORIGINAL_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        # AI-NOTE: Apply Clean Architecture transformation
+        # Ensure the refactored code:
+        # - Delegates business logic to use cases
+        # - Uses hooks for state management
+        # - Follows separation of concerns
+        # - Has proper error handling
+        [REFACTORED_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # === STEP 15: CREATE PULL REQUEST ===
+    - id: 'create-pr-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create Pull Request for __USE_CASE_NAME_PASCAL_CASE__ presentation layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Create PR using GitHub CLI'
+        scripts:
+          - name: 'Push branch and create PR'
+            command: |
+              # Push branch to remote
+              git push -u origin "feat/__FEATURE_NAME_KEBAB_CASE__-__USE_CASE_NAME_KEBAB_CASE__-presentation"
+
+              # Create PR using GitHub CLI
+              gh pr create \
+                --title "feat(__FEATURE_NAME_KEBAB_CASE__): add __USE_CASE_NAME_KEBAB_CASE__ presentation layer" \
+                --body "## Summary
+
+              Added presentation layer for __USE_CASE_NAME_PASCAL_CASE__ using Next.js 15 and Shadcn UI.
+
+              ## Changes
+              - ✅ Created Server Actions with form validation
+              - ✅ Implemented React components with Shadcn UI
+              - ✅ Added custom hooks for state management
+              - ✅ Created Context Provider for dependency injection
+              - ✅ Styled with Tailwind CSS
+              - ✅ Full test coverage with Vitest and React Testing Library
+
+              ## Testing
+              - [ ] Component tests pass
+              - [ ] Hook tests pass
+              - [ ] Server Action tests pass
+              - [ ] E2E tests pass
+
+              ## Checklist
+              - [ ] Uses 'use client' and 'use server' directives correctly
+              - [ ] No business logic in components
+              - [ ] Follows Clean Architecture principles
+              - [ ] Responsive design with Tailwind
+              - [ ] Accessibility standards met
+              " \
+                --assignee @me \
+                --label "feature,frontend,nextjs,shadcn"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 16: CODE REVIEW ===
+    - id: 'code-review-presentation-__USE_CASE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Automated code review for frontend presentation implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run automated code review checks'
+        scripts:
+          - name: 'Frontend architecture compliance check'
+            command: |
+              echo "🔍 Running frontend presentation layer compliance checks..."
+
+              # Check for business logic in components
+              if grep -r "calculateTotal\|validateBusiness\|processData" src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/components/; then
+                echo "❌ CRITICAL: Business logic found in components"
+                exit 1
+              fi
+
+              # Check for proper directive usage
+              if ! grep -r "use client\|use server" src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/; then
+                echo "⚠️ WARNING: Missing 'use client' or 'use server' directives"
+              fi
+
+              # Check for Tailwind usage
+              if grep -r "\.scss\|\.css" src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__/presentation/; then
+                echo "⚠️ WARNING: Found CSS/SCSS files - should use Tailwind"
+              fi
+
+              echo "✅ Frontend presentation layer compliance passed"
+            workingDirectory: '__PROJECT_NAME__'
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION REFACTORING PATTERN
+  # Single pattern for refactoring existing code to Clean Architecture
+  # ------------------------------------------------------------------------------
+
+  presentation_refactoring_patterns:
+    - id: 'refactor-to-clean-presentation'
+      description: 'Refactor existing frontend code to follow Clean Architecture'
+      detection:
+        - 'Business logic in components'
+        - 'Direct API calls in components'
+        - 'Data manipulation in presentation layer'
+        - 'Missing use cases'
+        - 'Tight coupling between layers'
+      example:
+        original: |
+          # AI-NOTE: Extract business logic from React components to hooks or server actions
+          <<<FIND>>>
+          'use client'
+
+          export function ProductList() {
+            const [products, setProducts] = useState([])
+            const [total, setTotal] = useState(0)
+
+            useEffect(() => {
+              // Business logic in component
+              const calculateTotal = () => {
+                const sum = products.reduce((acc, p) => {
+                  if (p.discount > 0) {
+                    return acc + (p.price * (1 - p.discount))
+                  }
+                  return acc + p.price
+                }, 0)
+                const tax = sum * 0.1
+                return sum + tax
+              }
+
+              setTotal(calculateTotal())
+            }, [products])
+
+            return (
+              <div>{/* UI */}</div>
+            )
+          }
+          <<</FIND>>>
+          <<<REPLACE>>>
+          'use client'
+
+          import { useProductCalculations } from '@/presentation/hooks/useProductCalculations'
+
+          export function ProductList() {
+            const [products, setProducts] = useState([])
+            const { total } = useProductCalculations(products)
+
+            return (
+              <div>{/* UI */}</div>
+            )
+          }
+          <<</REPLACE>>>
+        category: 'presentation-refactoring'
+        severity: 'HIGH'
+        rlhf_impact: -2
+
+  # ------------------------------------------------------------------------------
+  # PRESENTATION ANTI-PATTERNS TO AVOID
+  # Common mistakes in Next.js 15 + React development
+  # ------------------------------------------------------------------------------
+
+  presentation_anti_patterns:
+    - name: 'Business Logic in Components'
+      description: 'Components contain business rules instead of just presentation'
+      example: 'const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)'
+      correct: 'Call use case or custom hook that encapsulates business logic'
+      rlhf_impact: -2
+
+    - name: 'Direct API Calls in Components'
+      description: 'Components making direct fetch/axios calls'
+      example: 'const data = await fetch("/api/users")'
+      correct: 'Use Server Actions or custom hooks with use cases'
+      rlhf_impact: -2
+
+    - name: 'Missing Directives'
+      description: 'Not using "use client" or "use server" directives'
+      example: 'function Component() { useState(...) }'
+      correct: '"use client" at top of file when using hooks/browser APIs'
+      rlhf_impact: -1
+
+    - name: 'Inline Styles Instead of Tailwind'
+      description: 'Using style prop instead of Tailwind classes'
+      example: 'style={{ margin: "10px", padding: "5px" }}'
+      correct: 'className="m-2.5 p-1.25"'
+      rlhf_impact: -1
+
+    - name: 'Not Using Shadcn Components'
+      description: 'Creating custom UI components from scratch'
+      example: 'Custom Button, Input, Card components'
+      correct: 'Import from @/shared/presentation/ui/*'
+      rlhf_impact: -1
+
+
+
+# --- From: shared/steps/validation.part.regent ---
+# ------------------------------------------------------------------------------
+# SHARED VALIDATION LAYER TEMPLATE
+# Clean Architecture - Shared Validation Components
+# Supports: Backend (Node.js), Frontend (Next.js), Fullstack
+# Pattern: TDD with RED-GREEN-REFACTOR cycle
+# ------------------------------------------------------------------------------
+
+metadata:
+  layer: 'validation'
+  project_type: 'backend' # backend | frontend | fullstack - AI-NOTE: Replace with actual project type
+  architecture_style: 'clean'
+  test_framework: 'jest' # jest | vitest - AI-NOTE: Replace with actual test framework
+  language: 'typescript'
+  patterns:
+    - 'validation-composite'
+    - 'field-validators'
+    - 'error-handling'
+  references:
+    - 'Clean Architecture principles'
+    - 'SOLID principles'
+    - 'TDD methodology'
+
+# ------------------------------------------------------------------------------
+# VALIDATION STRUCTURE SETUP
+# ------------------------------------------------------------------------------
+
+structure:
+  validation_structure:
+    description: 'Setup validation layer structure'
+    folders:
+      - 'src/validation'
+      - 'src/validation/protocols'
+      - 'src/validation/validators'
+      - 'src/validation/errors'
+      - 'tests/validation'
+      - 'tests/validation/validators'
+      - 'tests/validation/mocks'
+
+# ------------------------------------------------------------------------------
+# VALIDATION IMPLEMENTATION STEPS
+# Following TDD: RED -> GREEN -> REFACTOR
+# ------------------------------------------------------------------------------
+
+steps:
+  validation_steps:
+    # === STEP 1: CREATE VALIDATION BRANCH ===
+    - id: 'create-validation-branch'
+      type: 'validation'
+      description: 'Create feature branch for validation implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Create and checkout validation feature branch'
+        scripts:
+          - name: 'Create validation branch'
+            command: |
+              git checkout -b "feat/__FEATURE_NAME_KEBAB_CASE__-validation"
+              echo "✅ Created branch: feat/__FEATURE_NAME_KEBAB_CASE__-validation"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: TDD RED - CREATE VALIDATION PROTOCOLS ===
+    - id: 'test-validation-protocols'
+      type: 'test'
+      description: 'TDD RED: Create validation protocol tests (should fail)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/tests/validation/protocols/validation.spec.ts'
+      template: |
+        import { Validation } from '@/validation/protocols'
+
+        describe('Validation Protocol', () => {
+          test('Should have validate method', () => {
+            const validation: Validation = {
+              validate: jest.fn()
+            }
+
+            const input = { field: 'value' }
+            validation.validate(input)
+
+            expect(validation.validate).toHaveBeenCalledWith(input)
+          })
+        })
+
+    # === STEP 3: TDD RED - CREATE ERROR TESTS ===
+    - id: 'test-validation-errors'
+      type: 'create_file'
+      description: 'TDD RED: Create validation error tests'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/tests/validation/errors/validation-errors.spec.ts'
+      template: |
+        import {
+          MissingParamError,
+          InvalidParamError,
+          MinLengthError,
+          MaxLengthError
+        } from '@/validation/errors'
+
+        describe('Validation Errors', () => {
+          describe('MissingParamError', () => {
+            test('Should return correct error message', () => {
+              const error = new MissingParamError('email')
+              expect(error.message).toBe('Missing param: email')
+              expect(error.name).toBe('MissingParamError')
+            })
+          })
+
+          describe('InvalidParamError', () => {
+            test('Should return correct error message', () => {
+              const error = new InvalidParamError('email')
+              expect(error.message).toBe('Invalid param: email')
+              expect(error.name).toBe('InvalidParamError')
+            })
+          })
+
+          describe('MinLengthError', () => {
+            test('Should return correct error message', () => {
+              const error = new MinLengthError('password', 8)
+              expect(error.message).toBe('password must be at least 8 characters')
+              expect(error.name).toBe('MinLengthError')
+            })
+          })
+
+          describe('MaxLengthError', () => {
+            test('Should return correct error message', () => {
+              const error = new MaxLengthError('name', 50)
+              expect(error.message).toBe('name must be at most 50 characters')
+              expect(error.name).toBe('MaxLengthError')
+            })
+          })
+        })
+
+    # === STEP 4: TDD RED - CREATE VALIDATOR TESTS ===
+    - id: 'test-required-field-validation'
+      type: 'create_file'
+      description: 'TDD RED: Create RequiredFieldValidation tests'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/tests/validation/validators/required-field-validation.spec.ts'
+      template: |
+        import { RequiredFieldValidation } from '@/validation/validators'
+        import { MissingParamError } from '@/validation/errors'
+
+        const makeSut = (fieldName: string): RequiredFieldValidation => {
+          return new RequiredFieldValidation(fieldName)
+        }
+
+        describe('RequiredFieldValidation', () => {
+          test('Should return MissingParamError if field is missing', () => {
+            const sut = makeSut('email')
+            const error = sut.validate({ name: 'John' })
+            expect(error).toEqual(new MissingParamError('email'))
+          })
+
+          test('Should return MissingParamError if field is empty', () => {
+            const sut = makeSut('email')
+            const error = sut.validate({ email: '' })
+            expect(error).toEqual(new MissingParamError('email'))
+          })
+
+          test('Should return null if field is present', () => {
+            const sut = makeSut('email')
+            const error = sut.validate({ email: 'john@example.com' })
+            expect(error).toBeNull()
+          })
+
+          test('Should return null if field is 0', () => {
+            const sut = makeSut('age')
+            const error = sut.validate({ age: 0 })
+            expect(error).toBeNull()
+          })
+
+          test('Should return null if field is false', () => {
+            const sut = makeSut('active')
+            const error = sut.validate({ active: false })
+            expect(error).toBeNull()
+          })
+        })
+
+    # === STEP 5: TDD RED - CREATE EMAIL VALIDATION TESTS ===
+    - id: 'test-email-validation'
+      type: 'create_file'
+      description: 'TDD RED: Create EmailValidation tests'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/tests/validation/validators/email-validation.spec.ts'
+      template: |
+        import { EmailValidation } from '@/validation/validators'
+        import { InvalidParamError } from '@/validation/errors'
+        import { EmailValidator } from '@/validation/protocols'
+
+        const makeEmailValidator = (): EmailValidator => {
+          class EmailValidatorStub implements EmailValidator {
+            isValid(email: string): boolean {
+              return true
+            }
+          }
+          return new EmailValidatorStub()
+        }
+
+        const makeSut = (): { sut: EmailValidation, emailValidatorStub: EmailValidator } => {
+          const emailValidatorStub = makeEmailValidator()
+          const sut = new EmailValidation('email', emailValidatorStub)
+          return {
+            sut,
+            emailValidatorStub
+          }
+        }
+
+        describe('EmailValidation', () => {
+          test('Should return InvalidParamError if email is invalid', () => {
+            const { sut, emailValidatorStub } = makeSut()
+            jest.spyOn(emailValidatorStub, 'isValid').mockReturnValueOnce(false)
+            const error = sut.validate({ email: 'invalid_email' })
+            expect(error).toEqual(new InvalidParamError('email'))
+          })
+
+          test('Should call EmailValidator with correct email', () => {
+            const { sut, emailValidatorStub } = makeSut()
+            const isValidSpy = jest.spyOn(emailValidatorStub, 'isValid')
+            sut.validate({ email: 'john@example.com' })
+            expect(isValidSpy).toHaveBeenCalledWith('john@example.com')
+          })
+
+          test('Should return null if email is valid', () => {
+            const { sut } = makeSut()
+            const error = sut.validate({ email: 'john@example.com' })
+            expect(error).toBeNull()
+          })
+        })
+
+    # === STEP 6: TDD RED - CREATE VALIDATION COMPOSITE TESTS ===
+    - id: 'test-validation-composite'
+      type: 'create_file'
+      description: 'TDD RED: Create ValidationComposite tests'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/tests/validation/validators/validation-composite.spec.ts'
+      template: |
+        import { ValidationComposite } from '@/validation/validators'
+        import { Validation } from '@/validation/protocols'
+        import { InvalidParamError, MissingParamError } from '@/validation/errors'
+
+        const makeValidation = (): Validation => {
+          class ValidationStub implements Validation {
+            validate(input: any): Error | null {
+              return null
+            }
+          }
+          return new ValidationStub()
+        }
+
+        const makeSut = (): { sut: ValidationComposite, validationStubs: Validation[] } => {
+          const validationStubs = [makeValidation(), makeValidation()]
+          const sut = new ValidationComposite(validationStubs)
+          return {
+            sut,
+            validationStubs
+          }
+        }
+
+        describe('ValidationComposite', () => {
+          test('Should return error if any validation fails', () => {
+            const { sut, validationStubs } = makeSut()
+            const error = new MissingParamError('field')
+            jest.spyOn(validationStubs[1], 'validate').mockReturnValueOnce(error)
+            const result = sut.validate({ field: 'value' })
+            expect(result).toEqual(error)
+          })
+
+          test('Should return first error if more than one validation fails', () => {
+            const { sut, validationStubs } = makeSut()
+            const firstError = new MissingParamError('field')
+            const secondError = new InvalidParamError('field')
+            jest.spyOn(validationStubs[0], 'validate').mockReturnValueOnce(firstError)
+            jest.spyOn(validationStubs[1], 'validate').mockReturnValueOnce(secondError)
+            const result = sut.validate({ field: 'value' })
+            expect(result).toEqual(firstError)
+          })
+
+          test('Should return null if all validations succeed', () => {
+            const { sut } = makeSut()
+            const result = sut.validate({ field: 'value' })
+            expect(result).toBeNull()
+          })
+
+          test('Should call all validations with correct input', () => {
+            const { sut, validationStubs } = makeSut()
+            const input = { field: 'value' }
+            const validateSpy0 = jest.spyOn(validationStubs[0], 'validate')
+            const validateSpy1 = jest.spyOn(validationStubs[1], 'validate')
+            sut.validate(input)
+            expect(validateSpy0).toHaveBeenCalledWith(input)
+            expect(validateSpy1).toHaveBeenCalledWith(input)
+          })
+        })
+
+    # === STEP 7: VERIFY RED PHASE ===
+    - id: 'verify-red-phase'
+      type: 'validation'
+      description: 'TDD RED: Verify all tests fail as expected'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to verify they fail (RED phase)'
+        scripts:
+          - name: 'Verify failing tests'
+            command: |
+              echo "🔴 TDD RED: Running tests - they should FAIL..."
+              npm test -- validation || {
+                echo "✅ Good! Tests are failing as expected (RED phase)"
+                echo "   Now implementing validation layer..."
+                exit 0
+              }
+              echo "❌ ERROR: Tests should fail in RED phase but they passed!"
+              exit 1
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 8: TDD GREEN - IMPLEMENT PROTOCOLS ===
+    - id: 'create-validation-protocols'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement validation protocols'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/protocols/validation.ts'
+      template: |
+        /**
+         * Validation protocol for field validation
+         * @interface Validation
+         */
+        export interface Validation {
+          /**
+           * Validates input and returns error if validation fails
+           * @param input - The input object to validate
+           * @returns Error if validation fails, null otherwise
+           */
+          validate(input: any): Error | null
+        }
+
+    - id: 'create-email-validator-protocol'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement EmailValidator protocol'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/protocols/email-validator.ts'
+      template: |
+        /**
+         * Email validation protocol
+         * @interface EmailValidator
+         */
+        export interface EmailValidator {
+          /**
+           * Checks if email is valid
+           * @param email - Email to validate
+           * @returns true if valid, false otherwise
+           */
+          isValid(email: string): boolean
+        }
+
+    - id: 'create-protocols-index'
+      type: 'create_file'
+      description: 'TDD GREEN: Create protocols index'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/protocols/index.ts'
+      template: |
+        export * from './validation'
+        export * from './email-validator'
+
+    # === STEP 9: TDD GREEN - IMPLEMENT ERRORS ===
+    - id: 'create-validation-errors'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement validation errors'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/errors/index.ts'
+      template: |
+        /**
+         * Error thrown when a required parameter is missing
+         */
+        export class MissingParamError extends Error {
+          constructor(paramName: string) {
+            super(`Missing param: ${paramName}`)
+            this.name = 'MissingParamError'
+          }
+        }
+
+        /**
+         * Error thrown when a parameter is invalid
+         */
+        export class InvalidParamError extends Error {
+          constructor(paramName: string) {
+            super(`Invalid param: ${paramName}`)
+            this.name = 'InvalidParamError'
+          }
+        }
+
+        /**
+         * Error thrown when field length is below minimum
+         */
+        export class MinLengthError extends Error {
+          constructor(fieldName: string, minLength: number) {
+            super(`${fieldName} must be at least ${minLength} characters`)
+            this.name = 'MinLengthError'
+          }
+        }
+
+        /**
+         * Error thrown when field length exceeds maximum
+         */
+        export class MaxLengthError extends Error {
+          constructor(fieldName: string, maxLength: number) {
+            super(`${fieldName} must be at most ${maxLength} characters`)
+            this.name = 'MaxLengthError'
+          }
+        }
+
+    # === STEP 10: TDD GREEN - IMPLEMENT VALIDATORS ===
+    - id: 'create-required-field-validation'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement RequiredFieldValidation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/required-field-validation.ts'
+      template: |
+        import { Validation } from '@/validation/protocols'
+        import { MissingParamError } from '@/validation/errors'
+
+        /**
+         * Validates that a required field is present and not empty
+         */
+        export class RequiredFieldValidation implements Validation {
+          constructor(private readonly fieldName: string) {}
+
+          validate(input: any): Error | null {
+            const value = input[this.fieldName]
+
+            // Check if field exists and is not empty string
+            // Allow 0, false, and other falsy values except undefined, null, and empty string
+            if (value === undefined || value === null || value === '') {
+              return new MissingParamError(this.fieldName)
+            }
+
+            return null
+          }
+        }
+
+    - id: 'create-email-validation'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement EmailValidation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/email-validation.ts'
+      template: |
+        import { Validation, EmailValidator } from '@/validation/protocols'
+        import { InvalidParamError } from '@/validation/errors'
+
+        /**
+         * Validates email format using EmailValidator protocol
+         */
+        export class EmailValidation implements Validation {
+          constructor(
+            private readonly fieldName: string,
+            private readonly emailValidator: EmailValidator
+          ) {}
+
+          validate(input: any): Error | null {
+            const email = input[this.fieldName]
+
+            if (email && !this.emailValidator.isValid(email)) {
+              return new InvalidParamError(this.fieldName)
+            }
+
+            return null
+          }
+        }
+
+    - id: 'create-compare-fields-validation'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement CompareFieldsValidation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/compare-fields-validation.ts'
+      template: |
+        import { Validation } from '@/validation/protocols'
+        import { InvalidParamError } from '@/validation/errors'
+
+        /**
+         * Validates that two fields have the same value
+         */
+        export class CompareFieldsValidation implements Validation {
+          constructor(
+            private readonly fieldName: string,
+            private readonly fieldToCompareName: string
+          ) {}
+
+          validate(input: any): Error | null {
+            if (input[this.fieldName] !== input[this.fieldToCompareName]) {
+              return new InvalidParamError(this.fieldToCompareName)
+            }
+
+            return null
+          }
+        }
+
+    - id: 'create-min-length-validation'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement MinLengthValidation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/min-length-validation.ts'
+      template: |
+        import { Validation } from '@/validation/protocols'
+        import { MinLengthError } from '@/validation/errors'
+
+        /**
+         * Validates minimum field length
+         */
+        export class MinLengthValidation implements Validation {
+          constructor(
+            private readonly fieldName: string,
+            private readonly minLength: number
+          ) {}
+
+          validate(input: any): Error | null {
+            const value = input[this.fieldName]
+
+            if (value && value.length < this.minLength) {
+              return new MinLengthError(this.fieldName, this.minLength)
+            }
+
+            return null
+          }
+        }
+
+    - id: 'create-max-length-validation'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement MaxLengthValidation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/max-length-validation.ts'
+      template: |
+        import { Validation } from '@/validation/protocols'
+        import { MaxLengthError } from '@/validation/errors'
+
+        /**
+         * Validates maximum field length
+         */
+        export class MaxLengthValidation implements Validation {
+          constructor(
+            private readonly fieldName: string,
+            private readonly maxLength: number
+          ) {}
+
+          validate(input: any): Error | null {
+            const value = input[this.fieldName]
+
+            if (value && value.length > this.maxLength) {
+              return new MaxLengthError(this.fieldName, this.maxLength)
+            }
+
+            return null
+          }
+        }
+
+    - id: 'create-validation-composite'
+      type: 'create_file'
+      description: 'TDD GREEN: Implement ValidationComposite'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/validation-composite.ts'
+      template: |
+        import { Validation } from '@/validation/protocols'
+
+        /**
+         * Composite pattern for combining multiple validations
+         */
+        export class ValidationComposite implements Validation {
+          constructor(private readonly validations: Validation[]) {}
+
+          validate(input: any): Error | null {
+            for (const validation of this.validations) {
+              const error = validation.validate(input)
+              if (error) {
+                return error
+              }
+            }
+
+            return null
+          }
+        }
+
+    - id: 'create-validators-index'
+      type: 'create_file'
+      description: 'TDD GREEN: Create validators index'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/validators/index.ts'
+      template: |
+        export * from './required-field-validation'
+        export * from './email-validation'
+        export * from './compare-fields-validation'
+        export * from './min-length-validation'
+        export * from './max-length-validation'
+        export * from './validation-composite'
+
+    # === STEP 11: TDD GREEN - CREATE EMAIL VALIDATOR ADAPTER ===
+    - id: 'create-email-validator-adapter'
+      type: 'conditional_file'
+      description: 'TDD GREEN: Create EmailValidatorAdapter'
+      condition: '__PROJECT_TYPE__ !== "frontend"' # Backend and Fullstack need this
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/infra/validators/email-validator-adapter.ts'
+      template: |
+        import { EmailValidator } from '@/validation/protocols'
+        import validator from 'validator'
+
+        /**
+         * Adapter for validator.js email validation
+         */
+        export class EmailValidatorAdapter implements EmailValidator {
+          isValid(email: string): boolean {
+            return validator.isEmail(email)
+          }
+        }
+
+    - id: 'create-zod-email-validator'
+      type: 'conditional_file'
+      description: 'TDD GREEN: Create Zod EmailValidator'
+      condition: '__PROJECT_TYPE__ === "frontend" || __PROJECT_TYPE__ === "fullstack"'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/infra/validators/zod-email-validator.ts'
+      template: |
+        import { EmailValidator } from '@/validation/protocols'
+        import { z } from 'zod'
+
+        /**
+         * Zod-based email validator for frontend/fullstack
+         */
+        export class ZodEmailValidator implements EmailValidator {
+          private readonly schema = z.string().email()
+
+          isValid(email: string): boolean {
+            const result = this.schema.safeParse(email)
+            return result.success
+          }
+        }
+
+    # === STEP 12: TDD GREEN - CREATE VALIDATION FACTORY ===
+    - id: 'create-validation-factory'
+      type: 'create_file'
+      description: 'TDD GREEN: Create validation factory example'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/src/validation/factories/__USE_CASE_NAME_KEBAB_CASE__-validation-factory.ts'
+      template: |
+        import {
+          ValidationComposite,
+          RequiredFieldValidation,
+          EmailValidation,
+          MinLengthValidation,
+          CompareFieldsValidation
+        } from '@/validation/validators'
+        import { Validation } from '@/validation/protocols'
+        // AI-NOTE: Import appropriate EmailValidator based on project type
+        // Backend: import { EmailValidatorAdapter } from '@/infra/validators/email-validator-adapter'
+        // Frontend: import { ZodEmailValidator } from '@/infra/validators/zod-email-validator'
+
+        /**
+         * Factory for creating __USE_CASE_NAME_PASCAL_CASE__ validation
+         * @example
+         * const validation = make__USE_CASE_NAME_PASCAL_CASE__Validation()
+         * const error = validation.validate(input)
+         */
+        export const make__USE_CASE_NAME_PASCAL_CASE__Validation = (): Validation => {
+          const validations: Validation[] = []
+
+          // Required fields
+          const requiredFields = ['email', 'password', 'name']
+          for (const field of requiredFields) {
+            validations.push(new RequiredFieldValidation(field))
+          }
+
+          // Email validation
+          // AI-NOTE: Use appropriate EmailValidator
+          // const emailValidator = new EmailValidatorAdapter() // Backend
+          // const emailValidator = new ZodEmailValidator() // Frontend
+          // validations.push(new EmailValidation('email', emailValidator))
+
+          // Password minimum length
+          validations.push(new MinLengthValidation('password', 8))
+
+          // Password confirmation
+          validations.push(new CompareFieldsValidation('password', 'passwordConfirmation'))
+
+          return new ValidationComposite(validations)
+        }
+
+    # === STEP 13: VERIFY GREEN PHASE ===
+    - id: 'verify-green-phase'
+      type: 'validation'
+      description: 'TDD GREEN: Verify all tests pass'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      run_scripts:
+        description: 'Run tests to ensure they pass (GREEN phase)'
+        scripts:
+          - name: 'Verify passing tests'
+            command: |
+              echo "🟢 TDD GREEN: Running tests - they should PASS now..."
+              npm test -- validation || {
+                echo "❌ ERROR: Tests are still failing after implementation!"
+                echo "   Review the implementation and fix issues."
+                exit 1
+              }
+              echo "✅ Excellent! All validation tests are passing (GREEN phase)"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 14: TDD REFACTOR - IMPROVE CODE QUALITY ===
+    - id: 'refactor-validation-layer'
+      type: 'validation'
+      description: 'TDD REFACTOR: Improve validation code quality'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      condition: '__NEEDS_REFACTORING__'
+      run_scripts:
+        description: 'Refactor while keeping tests green'
+        scripts:
+          - name: 'Refactor validation layer'
+            command: |
+              echo "♻️ TDD REFACTOR: Improving validation layer..."
+              echo "   Common refactorings:"
+              echo "   - Extract validation builders"
+              echo "   - Add custom validation types"
+              echo "   - Improve error messages"
+              echo "   - Add validation middleware"
+
+              # Run tests before refactoring
+              npm test -- validation || {
+                echo "❌ Tests must be green before refactoring!"
+                exit 1
+              }
+
+              # AI-NOTE: Apply refactorings here
+
+              # Run tests after refactoring
+              npm test -- validation || {
+                echo "❌ Refactoring broke tests! Revert changes."
+                exit 1
+              }
+
+              echo "✅ Refactoring complete - tests still green!"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 15: CREATE INTEGRATION EXAMPLE ===
+    - id: 'create-integration-example'
+      type: 'create_file'
+      description: 'Create example of validation integration'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      path: '__PROJECT_NAME__/docs/validation-integration.md'
+      template: |
+        # Validation Layer Integration Guide
+
+        ## Backend Integration (Express/Node.js)
+
+        ```typescript
+        // In presentation layer controller
+        import { makeSignUpValidation } from '@/validation/factories'
+
+        export class SignUpController {
+          constructor(
+            private readonly validation: Validation,
+            private readonly signUp: SignUp
+          ) {}
+
+          async handle(request: HttpRequest): Promise<HttpResponse> {
+            const error = this.validation.validate(request.body)
+            if (error) {
+              return badRequest(error)
+            }
+
+            // Continue with use case execution
+          }
+        }
+
+        // In factory
+        const validation = makeSignUpValidation()
+        const controller = new SignUpController(validation, signUpUseCase)
+        ```
+
+        ## Frontend Integration (Next.js/React)
+
+        ```typescript
+        // In Server Action
+        'use server'
+        import { makeSignUpValidation } from '@/validation/factories'
+
+        export async function signUpAction(formData: FormData) {
+          const validation = makeSignUpValidation()
+          const input = Object.fromEntries(formData)
+
+          const error = validation.validate(input)
+          if (error) {
+            return { success: false, error: error.message }
+          }
+
+          // Continue with use case
+        }
+        ```
+
+        ## Custom Validators
+
+        ```typescript
+        // Create custom validator
+        export class CpfValidation implements Validation {
+          constructor(private readonly fieldName: string) {}
+
+          validate(input: any): Error | null {
+            const cpf = input[this.fieldName]
+            if (!isValidCpf(cpf)) {
+              return new InvalidParamError(this.fieldName)
+            }
+            return null
+          }
+        }
+
+        // Add to factory
+        validations.push(new CpfValidation('cpf'))
+        ```
+
+# ------------------------------------------------------------------------------
+# VALIDATION REFACTORING PATTERNS
+# ------------------------------------------------------------------------------
+
+validation_refactoring_patterns:
+  - id: 'extract-validation-logic'
+    description: 'Extract inline validation to validation layer'
+    detection:
+      - 'Validation logic in controllers'
+      - 'Validation logic in use cases'
+      - 'Repeated validation code'
+    example:
+      original: |
+        # AI-NOTE: Extract validation from controller to validation layer
+        <<<FIND>>>
+        export class SignUpController {
+          async handle(request: HttpRequest): Promise<HttpResponse> {
+            // Inline validation
+            if (!request.body.email) {
+              return badRequest(new Error('Email is required'))
+            }
+            if (!request.body.password) {
+              return badRequest(new Error('Password is required'))
+            }
+            if (request.body.password.length < 8) {
+              return badRequest(new Error('Password too short'))
+            }
+
+            // Use case execution
+            const result = await this.signUp.execute(request.body)
+            return ok(result)
+          }
+        }
+        <<</FIND>>>
+        <<<REPLACE>>>
+        export class SignUpController {
+          constructor(
+            private readonly validation: Validation,
+            private readonly signUp: SignUp
+          ) {}
+
+          async handle(request: HttpRequest): Promise<HttpResponse> {
+            // Delegate to validation layer
+            const error = this.validation.validate(request.body)
+            if (error) {
+              return badRequest(error)
+            }
+
+            // Use case execution
+            const result = await this.signUp.execute(request.body)
+            return ok(result)
+          }
+        }
+        <<</REPLACE>>>
+      category: 'architecture'
+      severity: 'HIGH'
+      rlhf_impact: 2
+
+# ------------------------------------------------------------------------------
+# VALIDATION ANTI-PATTERNS
+# ------------------------------------------------------------------------------
+
+validation_anti_patterns:
+  - name: 'Validation in Use Cases'
+    description: 'Use cases should not contain validation logic'
+    example: 'if (!email || !password) throw new Error("Invalid input")'
+    correct: 'Validation should be in presentation layer before use case'
+    rlhf_impact: -2
+
+  - name: 'Duplicate Validation'
+    description: 'Same validation logic repeated in multiple places'
+    example: 'Email validation in controller and use case'
+    correct: 'Use ValidationComposite to reuse validation logic'
+    rlhf_impact: -1
+
+  - name: 'Business Rules in Validators'
+    description: 'Validators should not contain business logic'
+    example: 'Checking if user exists in EmailValidation'
+    correct: 'Keep validators focused on format/structure validation'
+    rlhf_impact: -2
+
+  - name: 'Hardcoded Error Messages'
+    description: 'Error messages hardcoded in multiple places'
+    example: 'return { error: "Email is required" }'
+    correct: 'Use error classes with consistent messages'
+    rlhf_impact: -1
+
+  - name: 'Missing Validation Composition'
+    description: 'Not using composite pattern for multiple validations'
+    example: 'Multiple if statements for validation'
+    correct: 'Use ValidationComposite to combine validators'
+    rlhf_impact: -1
+
+# --- From: shared/01-footer.part.regent ---
+  # ============= BEGIN FOOTER SECTION =============
+
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: IMMUTABLE DOCUMENTATION SECTIONS AHEAD.
+  # Copy these sections verbatim. The [placeholders] inside the commands
+  # are for HUMAN examples and MUST NOT be replaced by the AI.
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # TROUBLESHOOTING & RECOVERY
+  # ------------------------------------------------------------------------------
+
+  troubleshooting:
+    lint_fails:
+      - 'DO NOT commit - Fix all lint errors first'
+      - 'Check for unused imports'
+      - 'Verify proper TypeScript types'
+      - 'Ensure no console.log statements'
+      - 'Run yarn lint --fix to auto-fix when possible'
+
+    tests_fail:
+      - 'DO NOT commit - All tests must pass'
+      - 'Check if mocks match the actual interfaces'
+      - 'Verify Input/Output types are correct'
+      - 'Ensure test coverage meets requirements'
+      - 'Run specific test: yarn test [test-file-path]'
+
+    typescript_fails:
+      - 'Check all type definitions match'
+      - 'Ensure no missing imports'
+      - 'Verify interface implementations are complete'
+      - 'Run yarn tsc --noEmit to check types'
+
+  # Refactoring checklist
+  refactoring:
+    before_refactoring: |
+      # Check current status and differences
+      echo "📊 Checking current changes..."
+      git status
+      git diff
+
+      # Ensure clean working directory
+      echo "✅ Saving current work..."
+      git stash save "WIP: before refactoring"
+
+      # Create refactoring branch
+      echo "🌿 Creating refactor branch..."
+      git checkout -b refactor/[feature-name]
+
+      # Run tests to ensure starting point is stable
+      echo "🧪 Validating current state..."
+      yarn test --run
+      if [ $? -ne 0 ]; then
+        echo "❌ Tests failing before refactor - fix first!"
+        exit 1
+      fi
+      echo "✅ Ready to refactor"
+
+    during_refactoring: |
+      # After each change, check what was modified
+      echo "🔍 Reviewing changes..."
+      git diff --stat
+      git diff
+
+      # Validate the change
+      yarn lint && yarn test --run
+
+      # Commit atomically
+      git add -p  # Interactive staging
+      git commit -m "refactor([feature-name]): [specific change description]"
+
+      # Show what was changed
+      git show --stat
+
+    common_scenarios:
+      - name: 'Splitting a use case'
+        wrong_example: |
+          interface CreateUserAndSendEmail {
+            execute: (input: CreateUserAndSendEmailInput) => Promise<CreateUserAndSendEmailOutput>
+          }
+        correct_example: |
+          interface CreateUser{
+            execute: (input: CreateUserInput) => Promise<CreateUserOutput>
+          }
+          interface SendWelcomeEmail {
+            execute: (input: SendWelcomeEmailInput) => Promise<SendWelcomeEmailOutput>
+          }
+
+      - name: 'Renaming domain errors'
+        wrong_example: |
+          export class ErrorUserExists extends Error {
+            constructor() {
+              super('Error: user exists')
+              this.name = 'ErrorUserExists'
+            }
+          }
+        correct_example: |
+          export class UserAlreadyExistsError extends Error {
+            constructor() {
+              super('User with this email already exists')
+              this.name = 'UserAlreadyExistsError'
+            }
+          }
+
+  # ------------------------------------------------------------------------------
+  # LEARNING & IMPROVEMENT PATTERNS
+  # The system tracks these patterns to improve over time
+  # ------------------------------------------------------------------------------
+  learning_patterns:
+    common_errors:
+      # Domain Layer Violations
+      - pattern: 'import axios|fetch|prisma|redis'
+        fix: 'Remove external library imports from domain layer'
+        layer: 'domain'
+        score_impact: -2
+
+      - pattern: 'CreateUserAndSend|GetDataAndFormat'
+        fix: 'Split into two separate use cases (SRP violation)'
+        layer: 'domain'
+        score_impact: -1
+
+      - pattern: 'missing @domainConcept'
+        fix: 'Add domain concept documentation for +2 score'
+        layer: 'domain'
+        score_impact: +1
+
+      # Data Layer Violations
+      - pattern: 'direct database access in data layer'
+        fix: 'Use repository protocols instead of direct database access'
+        layer: 'data'
+        score_impact: -2
+
+      - pattern: 'business logic in data layer'
+        fix: 'Move business logic to domain layer'
+        layer: 'data'
+        score_impact: -1
+
+      # Infrastructure Layer Violations
+      - pattern: 'business logic in infrastructure'
+        fix: 'Infrastructure should only contain adapters and implementations'
+        layer: 'infra'
+        score_impact: -2
+
+      - pattern: 'missing error handling in adapters'
+        fix: 'Add proper error handling and recovery in infrastructure adapters'
+        layer: 'infra'
+        score_impact: -1
+
+      # Presentation Layer Violations
+      - pattern: 'business logic in controllers|components'
+        fix: 'Move business logic to use cases in domain layer'
+        layer: 'presentation'
+        score_impact: -2
+
+      - pattern: 'direct database access from presentation'
+        fix: 'Use use cases and factories from main layer'
+        layer: 'presentation'
+        score_impact: -2
+
+      # Main Layer Violations
+      - pattern: 'business logic in factories'
+        fix: 'Main layer should only compose, not implement business logic'
+        layer: 'main'
+        score_impact: -2
+
+      - pattern: 'missing dependency injection'
+        fix: 'Use factories and dependency injection for all dependencies'
+        layer: 'main'
+        score_impact: -1
+
+    success_indicators:
+      - 'Uses ubiquitous language consistently across all layers'
+      - 'Follows single responsibility principle in every component'
+      - 'No dependency violations between layers'
+      - 'Comprehensive test coverage (Domain: 100%, Data: 95%, Infra: 80%, Presentation: 90%)'
+      - 'Clean git history with atomic commits'
+      - 'Proper error handling at each layer boundary'
+      - 'Clear separation of concerns between layers'
+      - 'Type safety maintained throughout the stack'
+
+  # AI Guidelines for All Layers
+  ai_guidelines:
+    general:
+      - 'Always validate before committing: Run lint first, Run tests second, Only commit if both pass'
+      - 'If generation fails: Identify the specific error, Fix only that error, Re-run validation, Do NOT proceed until fixed'
+      - 'MUST generate different case styles from the input names (e.g., "Add Item To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart, lower case=add item to cart).'
+      - 'MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__) with actual values'
+      - 'MUST NOT leave any placeholder variables in the final implementation'
+      - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery'
+      - 'MUST use vitest for backend, @testing-library/react for frontend'
+      - 'When in doubt: Choose simplicity over complexity, Split rather than combine, Ask for clarification rather than assume'
+
+    layer_specific:
+      domain:
+        - 'Follow the principle: One use case = One file = One responsibility'
+        - 'If tempted to add "And" in a use case name, split it'
+        - 'MUST follow all domain rules - no business logic implementation, only contracts'
+        - 'No external dependencies allowed in domain layer'
+        - 'Use value objects for domain concepts'
+        - 'Define clear domain errors with meaningful messages'
+
+      data:
+        - 'Implement use cases defined in domain layer'
+        - 'Use repository protocols for data access'
+        - 'Transform external data to domain models'
+        - 'Handle data-specific errors and map to domain errors'
+        - 'No direct database or API calls'
+
+      infrastructure:
+        - 'Implement repository interfaces defined in data layer'
+        - 'Handle external service integrations (database, cache, APIs)'
+        - 'Provide concrete implementations of protocols'
+        - 'Include proper error handling and retry logic'
+        - 'Use appropriate design patterns (Adapter, Facade)'
+
+      presentation:
+        - 'Controllers/Components should be thin - delegate to use cases'
+        - 'Handle input validation and transformation'
+        - 'Format responses for clients'
+        - 'Implement proper error responses'
+        - 'For frontend: Use hooks for business logic extraction'
+        - 'For backend: Use middleware for cross-cutting concerns'
+
+      main:
+        - 'Composition root only - no business logic'
+        - 'Wire up all dependencies using factories'
+        - 'Configure dependency injection'
+        - 'Setup application bootstrap and configuration'
+        - 'For Next.js: Configure providers and middleware'
+        - 'For Express/Fastify: Setup server and routes'
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: TASK EVALUATION SECTION.
+  # After the entire execution is complete, this section will be populated by a
+  # human reviewer or an evaluation script.
+  # ------------------------------------------------------------------------------
+
+  evaluation:
+    # AI-NOTE: This final_status will be 'SUCCESS' if all steps passed, or 'FAILED' if any step failed.
+    final_status: 'PENDING' # PENDING | SUCCESS | FAILED
+    # AI-NOTE: The final_rlhf_score is calculated automatically based on execution quality
+    # -2: Catastrophic errors (architecture violations, wrong REPLACE/WITH format)
+    # -1: Runtime errors (lint, tests, git failures)
+    #  0: Low confidence (system uncertain, prevents hallucinations)
+    # +1: Good execution but missing DDD elements
+    # +2: Perfect with Clean Architecture, DDD, ubiquitous language
+    final_rlhf_score: null # -2, -1, 0, 1, 2
+    # AI-NOTE: The system automatically analyzes patterns and learns from each execution
+    # This text is enhanced by automated RLHF analysis for continuous improvement
+    reviewer_summary: |
+      - What went well:
+        - ...
+      - Areas for improvement:
+        - ...
+    # AI-NOTE: This section lists actionable suggestions for improving the master templates or prompts.
+    # This is the key to the continuous learning loop.
+    template_improvement_suggestions:
+      - target_template: '[layer].template.yaml'
+        target_step_id: '[step-id]'
+        suggestion: '[specific improvement suggestion based on execution results]'
+        priority: 'medium'
+        
+  # ============= END FOOTER SECTION =============
+
+  # End of TEMPLATE.yaml
