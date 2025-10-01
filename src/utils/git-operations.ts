@@ -43,7 +43,7 @@ interface GitError {
 export async function executeGitOperation(
   operation: GitOperation,
   command: () => Promise<CommandResult>,
-  maxRetries = RETRY.MAX_GIT_RETRIES
+  maxRetries: number = RETRY.MAX_GIT_RETRIES
 ): Promise<GitOperationResult> {
   let lastError: unknown = null;
   let attempt = 0;
@@ -130,11 +130,13 @@ export async function gitAdd(files: string | string[]): Promise<GitOperationResu
     GIT_OPERATIONS.ADD,
     async () => {
       // Add files one by one to catch specific errors
+      let lastResult;
       for (const file of fileList) {
         // Sanitize file path to prevent injection
         const sanitizedFile = file.replace(/[;&|`$()]/g, '');
-        await $`git add ${sanitizedFile}`;
+        lastResult = await $`git add ${sanitizedFile}`;
       }
+      return lastResult || { stdout: '', toString: () => '' };
     }
   );
 }
@@ -192,11 +194,13 @@ export async function gitCheckout(files: string | string[]): Promise<GitOperatio
   return executeGitOperation(
     GIT_OPERATIONS.CHECKOUT,
     async () => {
+      let lastResult;
       for (const file of fileList) {
         // Sanitize file path
         const sanitizedFile = file.replace(/[;&|`$()]/g, '');
-        await $`git checkout -- ${sanitizedFile}`;
+        lastResult = await $`git checkout -- ${sanitizedFile}`;
       }
+      return lastResult || { stdout: '', toString: () => '' };
     }
   );
 }

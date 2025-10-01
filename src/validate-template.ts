@@ -114,7 +114,7 @@ class EnhancedTemplateValidator {
       }
 
       const schemaContent = fs.readFileSync(absolutePath, 'utf-8')
-      const schema = JSON.parse(schemaContent) as unknown
+      const schema = JSON.parse(schemaContent)
 
       // Compile and cache schema
       const validate = this.ajv.compile(schema)
@@ -182,11 +182,12 @@ class EnhancedTemplateValidator {
       // Load schema if not cached
       let schemaData = this.schemas.get(layerSchema.schemaPath)
       if (!schemaData) {
-        schemaData = this.loadSchema(layerSchema.schemaPath)
-        if (!schemaData) {
+        const loadedSchema = this.loadSchema(layerSchema.schemaPath)
+        if (!loadedSchema) {
           result.warnings.push(`Schema ${layerSchema.schemaPath} not available, using generic validation`)
           return this.validateGeneric(data, result)
         }
+        schemaData = loadedSchema
       }
 
       // Validate against schema
