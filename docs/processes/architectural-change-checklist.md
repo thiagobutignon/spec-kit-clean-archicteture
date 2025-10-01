@@ -2,6 +2,27 @@
 
 > **Context**: Issue #152 - Process for maintaining prompt consistency across AI commands during architectural changes
 
+## Quick Start
+
+**When to use this checklist**: Any change affecting:
+- Core data structures (JSON format, YAML structure)
+- Workflow steps (adding/removing phases)
+- Architectural patterns (new layer rules)
+- Template structures (new .regent patterns)
+- Validation rules (new compliance checks)
+- RLHF scoring criteria (new scoring rules)
+
+**How to use**:
+1. Start with **Phase 1: Impact Analysis** - identify what's affected
+2. Complete all applicable checkboxes in each phase
+3. Run `npm run validate:commands` after making updates
+4. Document your changes in CHANGELOG.md
+5. Create issues for any automation opportunities discovered
+
+**Rule of thumb**: If the change affects how AI commands interpret or generate data, use this checklist.
+
+---
+
 ## Problem Statement
 
 When implementing architectural changes that affect multiple AI commands (like Issue #117 - modular YAML structure), there's no systematic checklist to ensure ALL affected command prompts are updated consistently.
