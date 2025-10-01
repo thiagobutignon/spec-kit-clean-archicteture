@@ -26,7 +26,7 @@ describe('Init Command - Directory Structure', () => {
       // Simulate what init command does
       await fs.ensureDir(path.join(testProjectPath, '.regent/utils'));
 
-      const sourceUtilsDir = path.join(packageRoot, 'utils');
+      const sourceUtilsDir = path.join(packageRoot, 'src/utils');
       const targetUtilsDir = path.join(testProjectPath, '.regent/utils');
 
       // Verify source exists
@@ -71,14 +71,18 @@ describe('Init Command - Directory Structure', () => {
       // Simulate copying execute-steps.ts to .regent/config/
       await fs.ensureDir(path.join(testProjectPath, '.regent/config'));
 
-      const sourceFile = path.join(packageRoot, 'execute-steps.ts');
+      const sourceFile = path.join(packageRoot, 'src/execute-steps.ts');
       const targetFile = path.join(testProjectPath, '.regent/config/execute-steps.ts');
 
       // Verify source exists
       expect(await fs.pathExists(sourceFile)).toBe(true);
 
-      // Copy file
-      await fs.copy(sourceFile, targetFile);
+      // Simulate init command's import transformation
+      const sourceContent = await fs.readFile(sourceFile, 'utf-8');
+      const transformedContent = sourceContent
+        .replace(/from '\.\/core\//g, "from '../core/")
+        .replace(/from '\.\/utils\//g, "from '../utils/");
+      await fs.writeFile(targetFile, transformedContent, 'utf-8');
 
       // Read and verify imports
       const content = await fs.readFile(targetFile, 'utf-8');

@@ -1,0 +1,3160 @@
+# =============================================
+# GENERATED FILE - DO NOT EDIT DIRECTLY
+# Target: backend
+# Layer: infra
+# Built from parts in templates/parts
+# Generated at: 2025-09-30 23:13:55
+# To modify, edit the part files and rebuild
+# =============================================
+
+
+# --- From: shared/00-header.part.regent ---
+
+# AI-NOTE: This YAML file is the single source of truth for generating clean architecture layers.
+# This is the MASTER TEMPLATE that will evolve to support all architectural layers.
+#
+# INTELLIGENT RLHF SCORING SYSTEM:
+# The system uses Reinforcement Learning from Human Feedback to score execution quality:
+# -2: CATASTROPHIC - Architecture violations, incorrect REPLACE/WITH format in refactor steps
+# -1: RUNTIME ERROR - Lint failures, test failures, git operation problems
+#  0: LOW CONFIDENCE - System is uncertain, avoids hallucinations
+# +1: GOOD - Task complete but missing architectural elements
+# +2: PERFECT - Exceptional quality with Clean Architecture, DDD principles, ubiquitous language
+#
+# QUALITY INDICATORS FOR +2 SCORE:
+# - Uses ubiquitous language terminology
+# - Follows Domain-Driven Design principles
+# - Applies Clean Architecture concepts
+# - Implements patterns: Aggregate Root, Value Objects, Domain Events
+# - Perfect branch naming convention
+# - Comprehensive PR descriptions
+#
+version: '3.0.0'
+# AI-NOTE: Update these fields to describe the specific feature and layers.
+metadata:
+  title: '__FEATURE_NAME_PASCAL_CASE__ Clean Architecture Implementation'
+  description: 'Clean Architecture template for __FEATURE_NAME_LOWER_CASE__ feature following master template rules.'
+  source: 'TEMPLATE.yaml'
+  # AI-NOTE: This should be replaced with the current date, e.g., YYYY-MM-DD.
+  lastUpdated: '__CURRENT_DATE__'
+  # AI-NOTE: Specify which layers are being implemented
+  layers:
+    - 'domain'
+    # Future layers will be added here:
+    # - 'data'
+    # - 'infra'
+    # - 'presentation'
+    # - 'validation'
+    # - 'main'
+  # AI-NOTE: Define ubiquitous language for +2 RLHF score
+  ubiquitousLanguage:
+    - term: '__ENTITY_NAME__'
+      definition: '__ENTITY_DEFINITION_IN_BUSINESS_CONTEXT__'
+    - term: '__VALUE_OBJECT_NAME__'
+      definition: '__VALUE_OBJECT_BUSINESS_MEANING__'
+    - term: '__DOMAIN_EVENT__'
+      definition: '__EVENT_BUSINESS_SIGNIFICANCE__'
+
+
+
+# --- From: backend/01-structure.part.regent ---
+  # AI-NOTE: Hybrid Architecture - "Feature Module with Use Case Slices"
+  # Features are modules containing atomic use case slices for domain cohesion and generation safety
+
+  structure:
+    # Main application structure (entry point)
+    app:
+      basePath: '__PROJECT_NAME__/src'
+      folders:
+        - 'main'           # Application bootstrap and configuration
+        - 'shared'         # Truly generic, app-wide shared code
+        - 'features'       # Feature modules
+
+    # Feature Module: Container for a business domain (e.g., user, product)
+    # __FEATURE_NAME_KEBAB_CASE__ = user, product, etc.
+    feature_module:
+      basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__'
+
+      # 1. Use Case Slices: Each folder is self-contained, atomic use case
+      # __USE_CASE_NAME_KEBAB_CASE__ = create-user, delete-user, etc.
+      use_case_slice:
+        basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+        layers:
+          domain:
+            folders:
+              - 'usecases'      # Interface for this specific use case
+              - 'errors'        # Use case specific domain errors
+            # Unit tests: create-user.ts + create-user.spec.ts (side by side)
+          data:
+            folders:
+              - 'usecases'      # Implementation for this specific use case
+            # Unit tests: db-create-user.ts + db-create-user.spec.ts (side by side)
+          presentation:
+            folders:
+              - 'controllers'   # Controller for this specific use case
+              - 'errors'        # HTTP errors specific to this use case
+            # Unit tests: create-user-controller.ts + create-user-controller.spec.ts
+          validation:
+            folders:
+              - 'validators'    # Validator for this specific use case
+              - 'schemas'       # Schema for this specific use case
+            # Unit tests: create-user-validator.spec.ts + create-user-schema.spec.ts
+          main:
+            folders:
+              - 'factories'     # Factory for this specific use case
+            # Unit tests: create-user-controller-factory.spec.ts
+          # Integration and E2E tests only (not unit tests)
+          __tests__:
+            folders:
+              - 'integration'   # Tests that cross layers
+              - 'e2e'          # End-to-end tests
+
+      # 2. Feature-Specific Shared: Code shared ONLY within this feature
+      feature_shared:
+        basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+        layers:
+          domain:
+            folders:
+              - 'models'        # e.g., user-model.ts (shared by all user use cases)
+              - 'repositories'  # e.g., user-repository.ts (interface)
+              - 'errors'        # e.g., user-not-found-error.ts
+              - 'value-objects' # e.g., email-value-object.ts
+          infra:
+            folders:
+              - 'db'            # e.g., user-prisma-repository.ts (implementation)
+          presentation:
+            folders:
+              - 'protocols'     # e.g., user-http-protocols.ts
+              - 'errors'        # e.g., user-http-errors.ts
+
+      # 3. Feature Main/Integration: Connects all slices to main application
+      feature_main:
+        basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+        folders:
+          - 'routes'        # e.g., user-routes.ts (aggregates all use case routes)
+          - 'config'        # Feature-level configuration
+          - 'docs'          # Feature documentation
+
+  # Integration between features and main application
+  integration:
+    main_server:
+      basePath: '__PROJECT_NAME__/src/main'
+      folders:
+        - 'config'          # Server configuration (express, fastify, etc)
+        - 'routes'          # Route aggregation from all features
+        - 'middlewares'     # Global middlewares
+        - 'adapters'        # Framework adapters
+        - 'docs'            # API documentation (Swagger, etc)
+      files:
+        - 'server.ts'       # Main server file
+        - 'app.ts'          # Application setup
+
+    shared:
+      basePath: '__PROJECT_NAME__/src/shared'
+      layers:
+        domain:
+          folders:
+            - 'errors'          # Base error classes
+            - 'protocols'       # Domain contracts/interfaces
+            - 'types'           # Shared domain types
+            - 'value-objects'   # Shared value objects
+
+        data:
+          folders:
+            - 'protocols'       # Data layer protocols
+            - 'helpers'         # Data transformation helpers
+
+        infra:
+          folders:
+            - 'cryptography'    # Shared encryption/hashing adapters (bcrypt, jwt)
+            - 'http'            # Shared HTTP clients and adapters
+            - 'validators'      # Shared validators (email, cpf, etc)
+            - 'cache'           # Shared cache implementations (Redis, memory)
+            - 'telemetry'       # Shared logging and monitoring
+            - 'messaging'       # Shared message queue adapters
+
+        presentation:
+          folders:
+            - 'protocols'       # Presentation protocols
+            - 'helpers'         # Presentation helpers
+            - 'middlewares'     # Shared middlewares
+
+        main:
+          folders:
+            - 'adapters'        # Shared adapters
+            - 'decorators'      # Shared decorators
+            - 'factories'       # Shared factories
+
+    # Example of Hybrid Architecture workflow
+    use_case_example:
+      # Task: "Generate create-user use case for user feature"
+      # __FEATURE_NAME_KEBAB_CASE__ = user
+      # __USE_CASE_NAME_KEBAB_CASE__ = create-user
+
+      # STEP 1: Create Feature directories (if not exist)
+      create_feature_structure:
+        - 'src/features/user/'
+        - 'src/features/user/shared/'     # Feature-specific shared code
+        - 'src/features/user/main/'       # Feature integration
+
+      # STEP 2: Create Use Case Slice directory (isolated)
+      create_slice_directory:
+        - 'src/features/user/create-user/' # Self-contained use case
+
+      # STEP 3: Create NEW files (totally isolated within slice) WITH TESTS
+      create_slice_files:
+        # Domain layer with unit tests
+        - 'src/features/user/create-user/domain/usecases/create-user.ts'
+        - 'src/features/user/create-user/domain/usecases/create-user.spec.ts'
+        - 'src/features/user/create-user/domain/errors/create-user-errors.ts'
+
+        # Data layer with unit tests
+        - 'src/features/user/create-user/data/usecases/db-create-user.ts'
+        - 'src/features/user/create-user/data/usecases/db-create-user.spec.ts'
+
+        # Presentation layer with unit tests
+        - 'src/features/user/create-user/presentation/controllers/create-user-controller.ts'
+        - 'src/features/user/create-user/presentation/controllers/create-user-controller.spec.ts'
+        - 'src/features/user/create-user/presentation/errors/create-user-http-errors.ts'
+
+        # Validation layer with unit tests
+        - 'src/features/user/create-user/validation/validators/create-user-validator.ts'
+        - 'src/features/user/create-user/validation/validators/create-user-validator.spec.ts'
+        - 'src/features/user/create-user/validation/schemas/create-user-schema.ts'
+        - 'src/features/user/create-user/validation/schemas/create-user-schema.spec.ts'
+
+        # Main layer with unit tests
+        - 'src/features/user/create-user/main/factories/create-user-controller-factory.ts'
+        - 'src/features/user/create-user/main/factories/create-user-controller-factory.spec.ts'
+
+        # Integration tests (cross-layer)
+        - 'src/features/user/create-user/__tests__/integration/create-user.integration.spec.ts'
+
+      # STEP 4: Check/Modify FEATURE-SPECIFIC shared code
+      feature_shared_files:
+        - create_if_not_exists: 'src/features/user/shared/domain/models/user-model.ts'
+        - create_if_not_exists: 'src/features/user/shared/domain/repositories/user-repository.ts'
+        - modify: 'src/features/user/shared/domain/repositories/user-repository.ts'
+          action: 'Add add() method to interface'
+        - create_if_not_exists: 'src/features/user/shared/infra/db/user-prisma-repository.ts'
+        - modify: 'src/features/user/shared/infra/db/user-prisma-repository.ts'
+          action: 'Implement add() method'
+
+      # STEP 5: Integrate route
+      integrate_route:
+        - create_if_not_exists: 'src/features/user/main/routes/user-routes.ts'
+        - modify: 'src/features/user/main/routes/user-routes.ts'
+          action: 'Add POST /users route importing from ../create-user/main/factories'
+
+      # RESULT: Perfect isolation
+      # - Use case slice is completely isolated in its own directory
+      # - Feature-specific shared code stays within the feature
+      # - Global shared remains unpolluted
+      # - Zero risk of affecting other use cases (delete-user, update-user)
+
+    example_integration:
+      # How features connect to the main application
+      feature_route: 'src/features/user/main/routes/user-routes.ts'
+      imports_to: 'src/main/routes/index.ts'
+
+      use_case_factory: 'src/features/user/create-user/main/factories/create-user-controller-factory.ts'
+      used_in: 'src/features/user/main/routes/user-routes.ts'
+
+      feature_shared_model: 'src/features/user/shared/domain/models/user-model.ts'
+      used_by_slices: 'src/features/user/*/domain/usecases/*.ts'
+
+      global_shared_protocol: 'src/shared/protocols/http.ts'
+      used_by_features: 'src/features/*/shared/presentation/protocols'
+
+
+
+# --- From: backend/02-architecture.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # ARCHITECTURAL RULES SECTION
+  # These rules define the Clean Architecture boundaries and dependencies
+  # AI-NOTE: These rules are CRITICAL - any violation should trigger RLHF score: -2
+  # AI-NOTE: Use these rules to validate generated code and refactoring decisions
+  # ------------------------------------------------------------------------------
+
+  architecture:
+    folder_structure:
+      use_case_slice: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__USE_CASE_NAME_KEBAB_CASE__'
+      feature_shared: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared'
+      feature_main: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/main'
+      global_shared: '__PROJECT_NAME__/src/shared'
+      main_server: '__PROJECT_NAME__/src/main'
+
+    execution_order:
+      # AI-NOTE: Vertical slicing ensures atomic feature delivery
+      # Each use case should be independently deployable and testable
+      # Complete one use case through ALL layers before starting another
+      description: 'Use cases are implemented vertically, crossing all layers atomically'
+      approach: 'Vertical Slice Architecture - One use case at a time, through all layers'
+      sequence_per_use_case:
+        1: 'domain'     # Use case interface and models
+        2: 'data'       # Use case implementation
+        3: 'infra'      # Repository implementation (only if new repository needed in feature/shared)
+        4: 'validation' # Input validation for the use case
+        5: 'presentation' # Controller for the use case
+        6: 'main'       # Factory and route integration
+        7: 'integration' # Connect to feature main routes
+
+      workflow_diagram: |
+        ```mermaid
+        graph TD
+          Start([Start Use Case Implementation])
+
+          %% Branch Creation
+          B1[Create Branch: feat/__FEATURE_NAME__/__USE_CASE_NAME__]
+
+          %% Use Case Slice - Vertical Development
+          UC1[Create Use Case Directory Structure]
+
+          %% Domain Slice
+          D1[Create Domain Interface]
+          D2[Write Domain Tests - TDD Red]
+          D3[Run: yarn test:unit - Expect Failure]
+          D4[Git Commit: 'test(domain): add __USE_CASE__ tests']
+
+          %% Data Slice
+          DT1[Implement Data Use Case]
+          DT2[Write Data Tests]
+          DT3[Run: yarn test:unit - Green]
+          DT4[Git Commit: 'feat(data): implement __USE_CASE__']
+
+          %% Infra Slice (if needed)
+          %% AI-NOTE: Repository creation is CONDITIONAL
+          %% Only create if no existing repository handles this entity
+          I1[Check if Repository Exists]
+          I2{Need New Repository?}
+          I3[Implement Repository in Feature Shared]
+          I4[Write Repository Tests]
+          I5[Run: yarn test:unit - Green]
+          I6[Git Commit: 'feat(infra): add repository for __USE_CASE__']
+
+          %% Validation Slice
+          V1[Create Validation Schema]
+          V2[Create Validators]
+          V3[Write Validation Tests]
+          V4[Run: yarn test:unit - Green]
+          V5[Git Commit: 'feat(validation): add __USE_CASE__ validation']
+
+          %% Presentation Slice
+          P1[Create Controller]
+          P2[Write Controller Tests]
+          P3[Run: yarn test:unit - Green]
+          P4[Git Commit: 'feat(presentation): add __USE_CASE__ controller']
+
+          %% Main Slice
+          M1[Create Controller Factory]
+          M2[Write Factory Tests]
+          M3[Run: yarn test:unit - Green]
+          M4[Git Commit: 'feat(main): add __USE_CASE__ factory']
+
+          %% Feature Integration
+          FI1[Update Feature Routes]
+          FI2[Add Route for Use Case]
+          FI3[Update API Documentation]
+          FI4[Git Commit: 'feat(routes): integrate __USE_CASE__ route']
+
+          %% Integration Testing
+          IT1[Write Integration Tests]
+          IT2[Run: yarn test:integration]
+          IT3[Write E2E Tests]
+          IT4[Run: yarn test:e2e]
+          IT5[Git Commit: 'test(integration): add __USE_CASE__ integration tests']
+
+          %% Final Steps
+          F1[Run All Tests]
+          F2[Run: yarn lint]
+          F3[Run: yarn build]
+          F4[Git Push: Push Branch]
+          F5[Create PR: '__FEATURE__/__USE_CASE__ Implementation']
+
+          End([Use Case Complete])
+
+          %% Flow - Vertical Development Through Layers
+          Start --> B1
+          B1 --> UC1
+
+          %% Domain Flow
+          UC1 --> D1 --> D2 --> D3 --> D4
+
+          %% Data Flow
+          D4 --> DT1 --> DT2 --> DT3 --> DT4
+
+          %% Infra Flow (conditional)
+          DT4 --> I1 --> I2
+          I2 -->|Yes| I3 --> I4 --> I5 --> I6
+          I2 -->|No| V1
+          I6 --> V1
+
+          %% Validation Flow
+          V1 --> V2 --> V3 --> V4 --> V5
+
+          %% Presentation Flow
+          V5 --> P1 --> P2 --> P3 --> P4
+
+          %% Main Flow
+          P4 --> M1 --> M2 --> M3 --> M4
+
+          %% Feature Integration Flow
+          M4 --> FI1 --> FI2 --> FI3 --> FI4
+
+          %% Testing Flow
+          FI4 --> IT1 --> IT2 --> IT3 --> IT4 --> IT5
+
+          %% Final Flow
+          IT5 --> F1 --> F2 --> F3 --> F4 --> F5 --> End
+
+          classDef branch fill:#FFF9C4,stroke:#F57C00,stroke-width:2px
+          classDef domain fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px
+          classDef data fill:#E3F2FD,stroke:#2196F3,stroke-width:2px
+          classDef infra fill:#FFF3E0,stroke:#FF9800,stroke-width:2px
+          classDef validation fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
+          classDef presentation fill:#FCE4EC,stroke:#E91E63,stroke-width:2px
+          classDef main fill:#E0F2F1,stroke:#009688,stroke-width:2px
+          classDef integration fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
+          classDef testing fill:#FFEBEE,stroke:#F44336,stroke-width:2px
+          classDef final fill:#E8EAF6,stroke:#3F51B5,stroke-width:2px
+
+          class B1,UC1 branch
+          class D1,D2,D3,D4 domain
+          class DT1,DT2,DT3,DT4 data
+          class I1,I2,I3,I4,I5,I6 infra
+          class V1,V2,V3,V4,V5 validation
+          class P1,P2,P3,P4 presentation
+          class M1,M2,M3,M4 main
+          class FI1,FI2,FI3,FI4 integration
+          class IT1,IT2,IT3,IT4,IT5 testing
+          class F1,F2,F3,F4,F5 final
+        ```
+
+      git_workflow_per_use_case:
+        description: 'Vertical slice development - one complete use case at a time'
+        example_use_case: 'create-user in user feature'
+
+        workflow_steps:
+          - 'git checkout -b feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'Create use case slice directory: src/features/__FEATURE_NAME__/__USE_CASE_NAME__'
+
+        domain_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/domain/usecases/__USE_CASE__.ts'
+          - 'Write domain tests (TDD - RED) → yarn test:unit (expect failure)'
+          - 'git add → git commit -m "test(domain): add failing tests for __USE_CASE__"'
+          - 'Create domain interface → yarn test:unit → yarn lint'
+          - 'git add → git commit -m "feat(domain): add __USE_CASE__ interface"'
+
+        data_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/data/usecases/db-__USE_CASE__.ts'
+          - 'Implement use case → yarn test:unit (GREEN) → yarn lint'
+          - 'git add → git commit -m "feat(data): implement __USE_CASE__"'
+
+        infra_slice_if_needed:
+          - 'IMPORTANT: Infra layer is NOT in use case slice - it goes in feature/shared'
+          - 'Check if repository exists in: src/features/__FEATURE_NAME__/shared/infra/db/'
+          - 'Only create new repository if needed for this use case:'
+          - '  Create: src/features/__FEATURE_NAME__/shared/infra/db/__ENTITY__-repository.ts'
+          - '  Write repository tests → yarn test:unit → yarn lint'
+          - '  git add → git commit -m "feat(infra): add __ENTITY__ repository for __FEATURE__"'
+          - 'If repository already exists, skip this step entirely'
+
+        validation_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/validation/validators/__USE_CASE__-validator.ts'
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/validation/schemas/__USE_CASE__-schema.ts'
+          - 'Write validation tests → yarn test:unit → yarn lint'
+          - 'git add → git commit -m "feat(validation): add __USE_CASE__ validation"'
+
+        presentation_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/presentation/controllers/__USE_CASE__-controller.ts'
+          - 'Write controller tests (TDD) → yarn test:unit → yarn lint'
+          - 'git add → git commit -m "feat(presentation): add __USE_CASE__ controller"'
+
+        main_slice:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/main/factories/__USE_CASE__-controller-factory.ts'
+          - 'Wire dependencies → yarn test:unit → yarn lint'
+          - 'git add → git commit -m "feat(main): add __USE_CASE__ factory"'
+
+        feature_integration:
+          - 'Update: src/features/__FEATURE_NAME__/main/routes/__FEATURE__-routes.ts'
+          - 'Add route for new use case → import factory from ../__USE_CASE_NAME__/main/factories'
+          - 'Update API documentation if needed'
+          - 'git add → git commit -m "feat(routes): integrate __USE_CASE__ route"'
+
+        integration_testing:
+          - 'Create: src/features/__FEATURE_NAME__/__USE_CASE_NAME__/__tests__/integration/__USE_CASE__.integration.spec.ts'
+          - 'Write integration tests → yarn test:integration'
+          - 'Write E2E tests if needed → yarn test:e2e'
+          - 'git add → git commit -m "test(integration): add __USE_CASE__ integration tests"'
+
+        finalization:
+          - 'Run full test suite → yarn test'
+          - 'Run linting → yarn lint'
+          - 'Run build → yarn build'
+          - 'git push origin feat/__FEATURE_NAME__/__USE_CASE_NAME__'
+          - 'gh pr create --base main --title "feat(__FEATURE__): implement __USE_CASE__ use case"'
+
+        benefits:
+          - 'Atomic delivery: Each PR delivers a complete, working feature'
+          - 'Reduced integration risk: No big bang integration at the end'
+          - 'Faster feedback: Working software delivered incrementally'
+          - 'Better testing: Each slice can be tested in isolation and integrated'
+          - 'Cleaner git history: Each commit represents a logical unit of work'  
+
+    dependency_rules:
+      # AI-NOTE: Dependency direction is INWARD toward domain
+      # Any outward dependency is a CRITICAL violation
+      # Use these rules to validate imports in generated code
+      domain:
+        can_import_from: []  # Domain layer is the core - imports nothing
+        cannot_import_from: ['data', 'infra', 'presentation', 'validation', 'main']
+        notes: 'Domain defines business rules and contracts - must remain framework agnostic'
+
+      data:
+        can_import_from: ['domain']  # Data layer implements domain interfaces
+        cannot_import_from: ['infra', 'presentation', 'validation', 'main']
+        notes: 'Data orchestrates use cases but delegates infrastructure concerns to infra layer'
+
+      infra:
+        can_import_from: ['data', 'domain']  # Infrastructure implements data protocols
+        cannot_import_from: ['presentation', 'main']
+        notes: 'Infrastructure provides concrete implementations for data layer protocols'
+
+      presentation:
+        can_import_from: ['domain', 'validation']  # Presentation uses domain models and validation
+        cannot_import_from: ['data', 'infra', 'main']
+        notes: 'Presentation handles HTTP concerns - uses domain models and validation rules'
+
+      validation:
+        can_import_from: []  # Validation layer is independent - no imports
+        cannot_import_from: ['domain', 'data', 'infra', 'presentation', 'main']
+        notes: 'Validation is pure - implements generic validation interfaces, not presentation-specific'
+
+      main:
+        can_import_from: ['data', 'domain', 'infra', 'presentation', 'validation']  # Main layer composes everything
+        cannot_import_from: []  # Main is the composition root
+        notes: 'Main is the composition root - wires all dependencies and creates factories'
+
+    # Clean Architecture principles and practices
+    principles:
+      core_principles:
+        - "Independence: Business rules don't know about outside world"
+        - "Testability: Business rules can be tested without UI, Database, Web Server, etc."
+        - "Flexibility: UI, Database, and any external agency are plugins"
+        - "Separation: Business rules are the core, everything else is detail"
+        - "Dependency Rule: Dependencies point inward toward the domain"
+
+      design_patterns:
+        domain:
+          - "Interface Pattern: Define contracts for use cases"
+          - "ES2015 Modules: Use import/export for code organization"
+          - "Type Exports: Separate types for Input and Output"
+          - "Single Method Pattern: One execute() method per use case"
+          - "Port Pattern: Define boundaries for external communication"
+          - "DTO Pattern: Simple data transfer objects without behavior"
+
+        data:
+          - "Implementation Pattern: Concrete implementations of domain use cases"
+          - "Repository Pattern: Define protocols for data persistence"
+          - "Protocol Pattern: Abstractions for external dependencies (HTTP, DB, Crypto)"
+          - "Dependency Injection: Constructor injection of protocols"
+          - "Prefix Pattern: Use 'Db' or 'Remote' prefix for implementations"
+
+        infra:
+          - "Adapter Pattern: Implement data protocols (FetchHttpClient, PrismaAdapter)"
+          - "Single HTTP Client: One FetchClient for all HTTP operations"
+          - "ORM Pattern: Prisma for PostgreSQL + pgvector support"
+          - "Cache Pattern: Redis adapter for caching strategies"
+          - "Helper Pattern: Database and cache helpers for connections"
+
+        presentation:
+          - "Controller Pattern: Express controllers for REST API"
+          - "Middleware Pattern: Express middleware pipeline"
+          - "Helper Pattern: HTTP response helpers (ok, badRequest, etc.)"
+          - "Protocol Pattern: Define controller and validation interfaces"
+          - "Error Handling: Centralized error middleware"
+          - "Request Validation: Input sanitization and validation"
+
+        validation:
+          - "Composite Pattern: Combine multiple field validators (ValidationComposite)"
+          - "Builder Pattern: Fluent interface for validation construction (ValidationBuilder)"
+          - "Factory Pattern: Create validation composites (makeLoginValidation, makeSignupValidation)"
+
+        main:
+          - "Factory Pattern: Create controllers with all dependencies (makeLoginController)"
+          - "Decorator Pattern: Add logging and monitoring (LogControllerDecorator)"
+          - "Adapter Pattern: Express route and middleware adapters"
+          - "Composition Root: Wire up controllers, middlewares, and routes"
+          - "Configuration Pattern: Centralized app, env, and swagger config"
+          - "Dependency Injection: IoC container for dependency management"
+          - "Route Aggregation: Collect routes from all features"
+
+      testing_strategy:
+        # AI-NOTE: Testing strategy varies by layer
+        # Domain: Pure unit tests with no external dependencies
+        # Data: Unit tests with mocked protocols
+        # Infra: Integration tests with real databases
+        domain:
+          approach: "Unit Tests - Pure functions and business logic"
+          coverage_target: "100%"
+          tools: ["Vitest", "Testing Library"]
+          practices:
+            # AI-NOTE: NEVER use faker or random data in tests
+            # Always use deterministic, fixed test data
+            - "Use fixed test data helpers instead of faker"
+            - "Create mock factories with deterministic data"
+            - "Test domain models and use case interfaces"
+            - "Use mockAddAccountParams() with fixed values"
+            - "Keep test helpers in tests/domain/mocks directory"
+            - "No external dependencies or randomness in tests"
+
+        data:
+          approach: "Unit Tests with Mocks"
+          coverage_target: "95%"
+          tools: ["Vitest", "vi.spyOn", "vi.fn"]
+          practices:
+            - "Create spy classes (HasherSpy, RepositorySpy)"
+            - "Use makeSut() factory for test setup"
+            - "Mock protocol implementations with classes"
+            - "Use vi.spyOn() for spying on methods"
+            - "Test error cases with throwError helper"
+            - "Verify method calls and parameters"
+            - "Use fixed test data from mocks directory"
+
+        infra:
+          approach: "Integration Tests"
+          coverage_target: "80%"
+          tools: ["Vitest", "Prisma test database", "Module mocking"]
+          practices:
+            - "Use vi.mock() to mock external modules (bcrypt, jsonwebtoken)"
+            - "Test with Prisma test client and PostgreSQL"
+            - "Clean database between tests with Prisma reset"
+            - "Use makeSut() factory pattern"
+            - "Mock localStorage with jsdom or happy-dom"
+            - "Use vi.mock() for Fetch API mocking"
+            - "Use fixed test data - no faker"
+
+        presentation:
+          approach: "Unit Tests for Controllers and Middlewares"
+          coverage_target: "90%"
+          tools: ["Vitest", "HTTP helpers (ok, badRequest, serverError)"]
+          practices:
+            - "Use spy classes (AuthenticationSpy, ValidationSpy)"
+            - "Test controller handle() method"
+            - "Use makeSut() factory with dependency injection"
+            - "Test HTTP response helpers (ok, badRequest, unauthorized)"
+            - "Mock requests with fixed data"
+            - "Test error scenarios with throwError helper"
+            - "Test middleware chain execution"
+            - "Verify proper error propagation"
+
+        validation:
+          approach: "Unit Tests - Validation logic"
+          coverage_target: "100%"
+          tools: ["Vitest", "ValidationSpy for mocking"]
+          practices:
+            - "Test each validator independently (RequiredField, Email, MinLength)"
+            - "Test ValidationComposite with multiple validators"
+            - "Use makeSut() factory for validator creation"
+            - "Test specific error types (MissingParamError, InvalidFieldError)"
+            - "Test validation factories return correct composites"
+            - "Test edge cases (empty fields, invalid formats)"
+            - "Use fixed field names and error messages"
+
+        main:
+          approach: "E2E and Integration Tests"
+          coverage_target: "70%"
+          tools: ["Vitest", "Playwright", "MSW"]
+          practices:
+            - "Test complete user flows with Playwright"
+            - "Test factory functions with Vitest"
+            - "Mock HTTP layer with MSW"
+            - "Verify dependency wiring"
+            - "Use fixed test data for E2E scenarios"
+            - "No faker in integration tests"
+
+      best_practices:
+        - "SOLID Principles: Single Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, Dependency Inversion"
+        - "DRY: Don't Repeat Yourself - Extract common logic"
+        - "KISS: Keep It Simple, Silly - Avoid over-engineering"
+        - "YAGNI: You Aren't Gonna Need It - Build only what's needed"
+        - "SOC: Separation of Concerns - Each layer has its responsibility"
+        - "Small Commits: Make atomic, focused commits"
+        - "Composition over Inheritance: Favor object composition"
+        - "Conventional Commits: Use semantic commit messages"
+        - "TDD: Write tests first, then implementation"
+        - "Clean Code: Self-documenting, readable code"
+
+
+# --- From: backend/03-rules.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: IMMUTABLE SECTIONS AHEAD.
+  # The sections from here until 'steps' are architectural rules.
+  # You MUST copy them verbatim into the implementation file without ANY modification.
+  #
+  # AUTOMATED LEARNING SYSTEM:
+  # The RLHF system automatically:
+  # - Tracks success/failure patterns across executions
+  # - Identifies common error types and their fixes
+  # - Applies improvements when confidence > 80%
+  # - Generates learning reports with actionable insights
+  # - Prevents hallucinations with score 0 for uncertain cases
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # RULES SECTION
+  # All architectural and pattern rules consolidated
+  # ------------------------------------------------------------------------------
+
+  rules:
+    # Domain layer rules (modern approach)
+    domain:
+      allowed:
+        - 'Type definitions and interfaces (Models)'
+        - 'Use case interfaces with single execute() method'
+        - 'Separate Input and Output types for each use case'
+        - 'Simple data models without behavior'
+        - 'JSDoc documentation for all public interfaces'
+        - 'ES2015 module exports (export type, export interface)'
+
+      forbidden:
+        - 'Multiple methods in a single use case interface'
+        - 'Combined operations (e.g., CreateUserAndSendEmail)'
+        - 'Framework dependencies (Express, third-party libraries)'
+        - 'External libraries (HTTP or database clients)'
+        - 'Implementation details of any kind'
+        - 'UI components or presentation logic'
+        - 'HTTP/Database/File system operations'
+        - 'Environment variables or configuration'
+        - 'Console.log or any I/O operations'
+        - 'Implementation of business logic (only interfaces allowed)'
+        - 'Validation implementations'
+        - 'Error throwing or handling'
+        - 'Dependency injection'
+        - 'Domain entities with methods/behavior (use simple data structures)'
+
+      should:
+        - 'Define business entities and value objects'
+        - 'Contain only interfaces and types'
+        - 'Be framework-agnostic'
+        - 'Follow domain-driven design principles'
+
+      should_not:
+        - 'Import from other layers'
+        - 'Contain implementation details'
+        - 'Have framework dependencies'
+      use_case:
+        should:
+          - 'Have only ONE execute() method per interface'
+          - 'Define separate Input and Output types'
+          - 'Have EXACTLY ONE responsibility (one business operation)'
+          - 'Be named with single verb describing ONE action (__USE_CASE_NAME__, not __USE_CASE_NAME__And__OTHER_ACTION__)'
+          - 'Include comprehensive JSDoc documentation'
+          - 'Return Promise<Output> from execute method'
+          - 'Be framework agnostic'
+          - 'Follow naming convention: VerbNoun (e.g., __USE_CASE_EXAMPLE_1__, __USE_CASE_EXAMPLE_2__, __USE_CASE_EXAMPLE_3__)'
+        should_not:
+          - 'Have multiple methods (no __METHOD_1__() AND __METHOD_2__() in same interface)'
+          - 'Combine multiple operations (__USE_CASE_NAME__And__OTHER_ACTION__ violates SRP)'
+          - 'Contain implementation logic'
+          - 'Know about HTTP, databases, or external services'
+          - 'Import from data, presentation, or infrastructure layers'
+          - 'Have side effects'
+          - 'Use generic method names like handle(), process(), or run()'
+
+    # Data layer rules
+    data:
+      should:
+        - 'Implement domain use case interfaces'
+        - 'Use constructor injection for dependencies'
+        - 'Define protocols for external dependencies'
+        - 'Use prefix naming (Db__USE_CASE_NAME__, Remote__USE_CASE_NAME__)'
+        - 'Handle errors and status codes appropriately'
+        - 'Keep business logic minimal (only orchestration)'
+        - 'Return domain types, not infrastructure types'
+
+      should_not:
+        - 'Import from infrastructure layer directly'
+        - 'Contain complex business logic (belongs in domain)'
+        - 'Expose infrastructure details to domain'
+        - 'Use concrete implementations instead of protocols'
+        - 'Have direct database or HTTP calls (use protocols)'
+
+    # Infrastructure layer rules
+    infra:
+      should:
+        - 'Implement data layer protocols'
+        - 'Use native Fetch API instead of axios'
+        - 'Use Prisma ORM for database operations'
+        - 'Support PostgreSQL with pgvector extension'
+        - 'Use Redis for caching when needed'
+        - 'Provide single FetchHttpClient for all HTTP needs'
+        - 'Handle connection management and retries'
+        - 'Use environment variables for configuration'
+
+      should_not:
+        - 'Import from domain or use case layers'
+        - 'Contain business logic'
+        - 'Use multiple HTTP client implementations'
+        - 'Expose database-specific types to other layers'
+        - 'Use axios or other HTTP libraries (use Fetch API)'
+        - 'Use MongoDB (use Prisma with PostgreSQL)'
+
+    # Presentation layer rules
+    presentation:
+      should:
+        - 'Use Express for HTTP server and routing'
+        - 'Implement Controller interface with handle method'
+        - 'Return standardized HTTP responses (ok, badRequest, etc.)'
+        - 'Use middlewares for cross-cutting concerns'
+        - 'Handle errors gracefully with try/catch'
+        - 'Validate requests before processing'
+        - 'Use RESTful API design principles'
+        - 'Implement proper HTTP status codes'
+
+      should_not:
+        - 'Use GraphQL (use REST with Express)'
+        - 'Import from data or infra layers directly'
+        - 'Contain business logic (belongs in use cases)'
+        - 'Make direct HTTP calls (use data layer)'
+        - 'Expose internal implementation details'
+        - 'Implement middleware that does not follow the Express middleware signature (req, res, next)'
+
+    # Error rules
+    error:
+      should:
+        - 'Extend the native Error class'
+        - 'Have descriptive names ending with Error'
+        - 'Contain meaningful error messages'
+        - 'Represent business rule violations'
+        - 'Be thrown when domain invariants are violated'
+
+      should_not:
+        - 'Contain HTTP status codes'
+        - 'Include technical/implementation details'
+        - 'Expose sensitive information'
+        - 'Import external dependencies'
+
+    # Test helper rules
+    test_helper:
+      should:
+        - 'Create mock/stub implementations of use cases'
+        - 'Generate fake test data'
+        - 'Be pure functions that return consistent data'
+        - 'Help reduce test boilerplate'
+        - 'Use ONLY Vitest (Jest is prohibited)'
+
+      should_not:
+        - 'Make real API calls or database queries'
+        - 'Depend on external services'
+        - 'Contain test assertions (those belong in test files)'
+        - 'Have side effects or maintain state'
+        - 'Use Jest (use Vitest instead)'
+
+    # Validation rules
+    validation:
+      should:
+        - 'Implement FieldValidation interface for field validators'
+        - 'Use ValidationComposite to combine multiple validators'
+        - 'Use ValidationBuilder for fluent validation construction'
+        - 'Create factory functions for validation composites'
+        - 'Validate individual fields with specific rules'
+        - 'Return descriptive error messages'
+        - 'Support chaining of validation rules'
+        - 'Use static build() method for composite creation'
+      should_not:
+        - 'Import from domain layer'
+        - 'Import from data or infra layers'
+        - 'Contain business logic (only validation rules)'
+        - 'Throw exceptions (return Error objects instead)'
+        - 'Access external services or databases'
+        - 'Use async validation (keep validators synchronous)'
+
+    # Main layer rules
+    main:
+      should:
+        - 'Create factory functions for controllers'
+        - 'Wire up all dependencies using composition'
+        - 'Apply decorators for cross-cutting concerns (logging, monitoring)'
+        - 'Configure Express routes and middlewares'
+        - 'Setup Swagger documentation'
+        - 'Handle environment configuration'
+        - 'Use adapters for framework integration'
+        - 'Return decorated controllers from factories'
+        - 'Setup dependency injection container'
+        - 'Configure database connections and migrations'
+        - 'Initialize monitoring and health checks'
+
+      should_not:
+        - 'Contain business logic (only wiring)'
+        - 'Have direct database or API calls'
+        - 'Include complex algorithms or calculations'
+        - 'Store application state'
+        - 'Define new interfaces or types (only use existing ones)'
+        - 'Handle request/response logic (belongs in presentation)'
+
+    # Reference patterns
+    reference_patterns:
+      clean_architecture:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'clean architecture use case'
+        url: 'https://github.com/...'
+        description: 'Following Clean Architecture pattern.'
+
+      ddd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'domain driven design'
+        url: 'https://github.com/...'
+        description: 'Following DDD patterns.'
+
+      tdd_pattern:
+        type: 'external_pattern'
+        source: 'context7'
+        query: 'test driven development'
+        url: 'https://github.com/...'
+        description: 'Following TDD patterns.'
+
+    # Learning patterns
+    learning_patterns:
+      common_errors:
+        - pattern: 'import axios'
+          fix: 'Use Fetch API instead of axios in infra layer'
+          score_impact: -2
+
+        - pattern: '__USE_CASE_NAME__And__OTHER_ACTION__'
+          fix: 'Split into two separate use cases (SRP violation)'
+          score_impact: -1
+
+        - pattern: 'missing @domainConcept'
+          fix: 'Add domain concept documentation for +2 score'
+          score_impact: +1
+
+      success_indicators:
+        - 'Uses ubiquitous language consistently'
+        - 'Follows single responsibility principle'
+        - 'No dependency violations'
+        - 'Comprehensive test coverage'
+        - 'Clean git history with atomic commits'
+
+    # Required protocols for all layers
+    required_protocols:
+      # Domain Layer
+      domain:
+        - 'All use cases must have single execute() method'
+        - 'All use cases must define separate Input and Output types'
+        - 'All domain types must be immutable'
+        - 'No use case can perform multiple operations (SRP)'
+        - 'All models must be simple DTOs without behavior'
+
+      # Data Layer
+      data:
+        - 'All implementations must inject dependencies via constructor'
+        - 'All protocols must be interfaces, not concrete classes'
+        - 'All implementations must use Db or Remote prefix'
+        - 'Must return domain types, not infrastructure types'
+        - 'Must handle errors and map status codes appropriately'
+
+      # Infrastructure Layer
+      infra:
+        - 'All adapters must implement data layer protocols'
+        - 'HTTP clients must use Fetch API, not axios'
+        - 'Database repositories must use Prisma with PostgreSQL'
+        - 'All external configs must come from environment variables'
+        - 'Must not expose infrastructure types to other layers'
+
+      # Presentation Layer
+      presentation:
+        - 'Controllers must implement handle() method'
+        - 'Controllers must return HTTP helpers (ok, badRequest, etc.)'
+        - 'Middlewares must implement handle() with next parameter'
+        - 'Request handlers must validate input before processing'
+        - 'Response handlers must use standard HTTP status codes'
+
+      # Validation Layer
+      validation:
+        - 'All validators must implement FieldValidation interface'
+        - 'Validators must return Error or undefined'
+        - 'ValidationComposite must use static build() method'
+        - 'Validation must be synchronous (no async/await)'
+        - 'Factory functions must return ValidationComposite (make__USE_CASE_NAME__Validation)'
+
+      # Main Layer
+      main:
+        - 'All factories must return configured instances'
+        - 'Factory functions must wire all dependencies'
+        - 'No business logic allowed (only composition)'
+        - 'Routes must use adapter pattern for framework integration'
+        - 'Must not define new types (use existing from other layers)'
+
+      # Cross-cutting Concerns
+      general:
+        - 'All public interfaces must have JSDoc documentation'
+        - 'All errors must extend native Error class'
+        - 'All test helpers must be pure functions'
+        - 'All tests must use Vitest, not Jest'
+        - 'No use of faker - fixed test data only'
+
+    # Documentation standards (JSDoc)
+    documentation:
+      # Domain Layer Documentation
+      domain:
+        use_case_interface:
+          - '@description - Clear description of the use case purpose'
+          - '@example - Usage example with execute() method'
+          - '@see - Reference to related use cases or documentation'
+        input_output_types:
+          - '@typedef - Define Input and Output types'
+          - '@property - Document each field with type and constraints'
+          - '@example - Show valid input/output instances'
+        model_type:
+          - '@typedef - Define the domain model'
+          - '@property - Document each property with business rules'
+          - '@example - Show valid model instance'
+
+      # Data Layer Documentation
+      data:
+        protocol_interface:
+          - '@interface - Define protocol contracts'
+          - '@method - Document each method signature'
+          - '@throws - Document possible errors'
+        implementation_class:
+          - '@class - Describe the use case implementation'
+          - '@implements - List implemented interfaces'
+          - '@constructor - Document dependency injection'
+          - '@method - Document orchestration logic'
+
+      # Infrastructure Layer Documentation
+      infra:
+        adapter_class:
+          - '@class - Describe the adapter purpose'
+          - '@implements - Protocol being implemented'
+          - '@dependency - External libraries used'
+        database_repository:
+          - '@class - Repository implementation'
+          - '@method - Document CRUD operations'
+          - '@throws - Database-specific errors'
+        http_client:
+          - '@class - HTTP client implementation'
+          - '@method - Document request/response handling'
+          - '@throws - Network-related errors'
+
+      # Presentation Layer Documentation
+      presentation:
+        controller:
+          - '@class - Controller description'
+          - '@route - HTTP route and method'
+          - '@param - Request parameters'
+          - '@returns - HTTP response format'
+          - '@throws - HTTP error responses'
+        middleware:
+          - '@function - Middleware purpose'
+          - '@param - Request, Response, Next'
+          - '@throws - Authorization/validation errors'
+        route_handler:
+          - '@function - Route handler description'
+          - '@param - Request and response objects'
+          - '@returns - HTTP response with status and data'
+          - '@throws - HTTP error responses'
+
+      # Validation Layer Documentation
+      validation:
+        validator_class:
+          - '@class - Validator description'
+          - '@implements - FieldValidation interface'
+          - '@method - validate() method logic'
+          - '@returns - Error or undefined'
+        composite:
+          - '@class - ValidationComposite'
+          - '@method - Combines multiple validators'
+          - '@returns - First error found or undefined'
+
+      # Main Layer Documentation
+      main:
+        factory:
+          - '@function - Factory function description'
+          - '@returns - Configured instance with dependencies'
+          - '@example - How to use the factory'
+        route:
+          - '@function - Route configuration'
+          - '@param - Express router instance'
+          - '@middleware - Applied middlewares'
+        composition:
+          - '@function - Dependency composition'
+          - '@returns - Fully configured instance with dependencies injected'
+
+      example_template: |
+        /**
+        * @description __USE_CASE_DESCRIPTION__
+        * @example
+        * const __USE_CASE_NAME_CAMEL_CASE__ = new __USE_CASE_NAME_PASCAL_CASE__Impl(__DEPENDENCY_NAME__)
+        * const result = await __USE_CASE_NAME_CAMEL_CASE__.execute({
+        *   __INPUT_FIELD_1__: '__EXAMPLE_VALUE_1__',
+        *   __INPUT_FIELD_2__: '__EXAMPLE_VALUE_2__',
+        *   __INPUT_FIELD_3__: '__EXAMPLE_VALUE_3__'
+        * })
+        * @see {@link __RELATED_USE_CASE__} for __RELATED_DESCRIPTION__
+        */
+        export interface __USE_CASE_NAME_PASCAL_CASE__ {
+          execute(input: __USE_CASE_NAME_PASCAL_CASE__Input): Promise<__USE_CASE_NAME_PASCAL_CASE__Output>
+        }
+
+        /**
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Input
+        * @property {string} __INPUT_FIELD_1__ - __FIELD_1_DESCRIPTION__ (__FIELD_1_CONSTRAINTS__)
+        * @property {string} __INPUT_FIELD_2__ - __FIELD_2_DESCRIPTION__
+        * @property {string} __INPUT_FIELD_3__ - __FIELD_3_DESCRIPTION__ (__FIELD_3_CONSTRAINTS__)
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Input = {
+          __INPUT_FIELD_1__: string
+          __INPUT_FIELD_2__: string
+          __INPUT_FIELD_3__: string
+        }
+
+        /**
+        * @typedef {Object} __USE_CASE_NAME_PASCAL_CASE__Output
+        * @property {string} __OUTPUT_FIELD_1__ - __OUTPUT_FIELD_1_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_2__ - __OUTPUT_FIELD_2_DESCRIPTION__
+        * @property {string} __OUTPUT_FIELD_3__ - __OUTPUT_FIELD_3_DESCRIPTION__
+        * @property {Date} __TIMESTAMP_FIELD__ - __TIMESTAMP_DESCRIPTION__
+        */
+        export type __USE_CASE_NAME_PASCAL_CASE__Output = {
+          __OUTPUT_FIELD_1__: string
+          __OUTPUT_FIELD_2__: string
+          __OUTPUT_FIELD_3__: string
+          __TIMESTAMP_FIELD__: Date
+        }
+
+
+
+# --- From: backend/steps/03-infra.part.regent ---
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: INFRASTRUCTURE LAYER IMPLEMENTATION STEPS FOR BACKEND WITH TDD
+  # Following Test-Driven Development (TDD): RED → GREEN → REFACTOR
+  # Tests are created FIRST (RED), then implementation (GREEN), then optimized (REFACTOR)
+  # Infrastructure layer provides concrete implementations of data layer protocols
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # INFRASTRUCTURE LAYER STEPS SECTION
+  # Steps for implementing infrastructure layer following TDD methodology
+  # Each infrastructure component implementation starts with failing tests
+  # Following "Feature Module with Use Case Slices" architecture
+  # ------------------------------------------------------------------------------
+
+  infra_steps:
+    # === STEP 1: CREATE FEATURE BRANCH ===
+    - id: 'create-feature-branch-infra-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create and checkout feature branch for __FEATURE_NAME_PASCAL_CASE__ infrastructure implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Git branching strategy and naming conventions for infrastructure layer'
+      run_scripts:
+        description: 'Create feature branch with proper naming convention for infrastructure'
+        scripts:
+          - name: 'Create infrastructure feature branch'
+            command: |
+              # Stash any uncommitted changes
+              git stash save "WIP: Before creating __FEATURE_NAME_KEBAB_CASE__-infra branch"
+
+              # Ensure we're on the main branch and up to date
+              git checkout main || git checkout master
+              git pull origin main || git pull origin master
+
+              # Create and checkout new feature branch
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-infrastructure-layer"
+              git checkout -b "$BRANCH_NAME" || {
+                echo "❌ Failed to create branch: $BRANCH_NAME"
+                exit 1
+              }
+
+              echo "✅ Created and checked out branch: $BRANCH_NAME"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 2: CREATE INFRASTRUCTURE STRUCTURE ===
+    - id: 'create-infra-structure-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'folder'
+      description: 'Create infrastructure layer folder structure for __FEATURE_NAME_PASCAL_CASE__ feature'
+      status: 'PENDING' # PENDING | SUCCESS | FAILED | SKIPPED
+      rlhf_score: null # -2, -1, 0, 1, 2
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'BACKEND_ARCHITECTURE.md'
+          description: 'Following Clean Architecture infrastructure layer structure for backend.'
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'clean architecture infrastructure layer TDD backend node.js'
+          url: 'https://github.com/...'
+          description: 'Infrastructure layer patterns with TDD for backend development.'
+      action:
+        create_folders:
+          basePath: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra'
+          folders:
+            - 'db'            # Database implementations (Prisma repositories)
+            - 'http'          # HTTP client implementations (Fetch adapters)
+            - 'cache'         # Cache implementations (Redis, in-memory)
+            - 'crypto'        # Cryptography implementations (bcrypt, JWT)
+            - 'validators'    # External validation adapters (Zod, Joi)
+            - 'messaging'     # Message queue implementations (optional)
+            - 'storage'       # File storage implementations (optional)
+
+    # === STEP 3: CREATE DATABASE REPOSITORY TEST (TDD RED PHASE) ===
+    - id: 'create-db-repository-test-red-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create failing test for __FEATURE_NAME_PASCAL_CASE__ database repository (TDD RED)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'TDD test first red phase prisma repository typescript'
+          url: 'https://github.com/...'
+          description: 'TDD Red phase - writing failing repository tests first.'
+        - type: 'internal_guideline'
+          source: 'TESTING_GUIDE.md'
+          description: 'Following TDD methodology - test first approach for infrastructure.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.spec.ts'
+      template: |
+        import { describe, test, expect, beforeEach, vi } from 'vitest'
+        import { PrismaClient } from '@prisma/client'
+        import { Prisma__FEATURE_NAME_PASCAL_CASE__Repository } from './prisma-__FEATURE_NAME_KEBAB_CASE__-repository'
+        // AI-NOTE: Import repository protocol interface if exists
+        // import { __FEATURE_NAME_PASCAL_CASE__Repository } from '../../data/protocols/__FEATURE_NAME_KEBAB_CASE__-repository-protocol'
+
+        /**
+         * Test suite for Prisma__FEATURE_NAME_PASCAL_CASE__Repository implementation
+         * Following TDD - Test First Approach (RED Phase)
+         * @layer Infrastructure Layer Tests
+         * @pattern TDD - Red-Green-Refactor, Repository Pattern
+         */
+        describe('Prisma__FEATURE_NAME_PASCAL_CASE__Repository', () => {
+          let prismaClient: PrismaClient
+          let sut: Prisma__FEATURE_NAME_PASCAL_CASE__Repository
+
+          beforeEach(() => {
+            // AI-NOTE: Mock PrismaClient for unit tests
+            prismaClient = {
+              __MODEL_NAME__: {
+                create: vi.fn(),
+                findFirst: vi.fn(),
+                findMany: vi.fn(),
+                update: vi.fn(),
+                delete: vi.fn()
+              },
+              $transaction: vi.fn()
+            } as any
+
+            sut = new Prisma__FEATURE_NAME_PASCAL_CASE__Repository(prismaClient)
+          })
+
+          const makeFakeRepositoryInput = () => ({
+            __INPUT_FIELD_1__: 'any_value_1',
+            __INPUT_FIELD_2__: 'any_value_2',
+            __INPUT_FIELD_3__: 'any_value_3'
+          })
+
+          describe('save', () => {
+            test('Should call Prisma create with correct values', async () => {
+              // This test will FAIL initially (RED phase)
+              const createSpy = prismaClient.__MODEL_NAME__.create as any
+              createSpy.mockResolvedValueOnce({
+                id: 'any_id',
+                __INPUT_FIELD_1__: 'any_value_1',
+                __INPUT_FIELD_2__: 'any_value_2',
+                __INPUT_FIELD_3__: 'any_value_3',
+                createdAt: new Date('2024-01-01'),
+                updatedAt: new Date('2024-01-01')
+              })
+
+              const input = makeFakeRepositoryInput()
+              await sut.save(input)
+
+              expect(createSpy).toHaveBeenCalledWith({
+                data: {
+                  __INPUT_FIELD_1__: 'any_value_1',
+                  __INPUT_FIELD_2__: 'any_value_2',
+                  __INPUT_FIELD_3__: 'any_value_3'
+                }
+              })
+            })
+
+            test('Should return created entity with all required fields', async () => {
+              // This test will FAIL initially (RED phase)
+              const mockResult = {
+                id: 'any_id',
+                __INPUT_FIELD_1__: 'any_value_1',
+                __INPUT_FIELD_2__: 'any_value_2',
+                __INPUT_FIELD_3__: 'any_value_3',
+                createdAt: new Date('2024-01-01'),
+                updatedAt: new Date('2024-01-01')
+              }
+              ;(prismaClient.__MODEL_NAME__.create as any).mockResolvedValueOnce(mockResult)
+
+              const input = makeFakeRepositoryInput()
+              const result = await sut.save(input)
+
+              expect(result).toEqual({
+                id: 'any_id',
+                __INPUT_FIELD_1__: 'any_value_1',
+                __INPUT_FIELD_2__: 'any_value_2',
+                __INPUT_FIELD_3__: 'any_value_3',
+                createdAt: new Date('2024-01-01'),
+                updatedAt: new Date('2024-01-01')
+              })
+            })
+
+            test('Should throw if Prisma throws', async () => {
+              // This test will FAIL initially (RED phase)
+              ;(prismaClient.__MODEL_NAME__.create as any).mockRejectedValueOnce(new Error('Database error'))
+
+              const input = makeFakeRepositoryInput()
+              const promise = sut.save(input)
+
+              await expect(promise).rejects.toThrow('Database error')
+            })
+          })
+
+          describe('findById', () => {
+            test('Should call Prisma findFirst with correct id', async () => {
+              // This test will FAIL initially (RED phase)
+              const findFirstSpy = prismaClient.__MODEL_NAME__.findFirst as any
+              findFirstSpy.mockResolvedValueOnce(null)
+
+              await sut.findById('any_id')
+
+              expect(findFirstSpy).toHaveBeenCalledWith({
+                where: { id: 'any_id' }
+              })
+            })
+
+            test('Should return null if entity not found', async () => {
+              // This test will FAIL initially (RED phase)
+              ;(prismaClient.__MODEL_NAME__.findFirst as any).mockResolvedValueOnce(null)
+
+              const result = await sut.findById('any_id')
+
+              expect(result).toBeNull()
+            })
+
+            test('Should return entity if found', async () => {
+              // This test will FAIL initially (RED phase)
+              const mockEntity = {
+                id: 'any_id',
+                __INPUT_FIELD_1__: 'any_value_1',
+                __INPUT_FIELD_2__: 'any_value_2',
+                __INPUT_FIELD_3__: 'any_value_3',
+                createdAt: new Date('2024-01-01'),
+                updatedAt: new Date('2024-01-01')
+              }
+              ;(prismaClient.__MODEL_NAME__.findFirst as any).mockResolvedValueOnce(mockEntity)
+
+              const result = await sut.findById('any_id')
+
+              expect(result).toEqual(mockEntity)
+            })
+          })
+        })
+
+    # === STEP 4: CREATE DATABASE REPOSITORY IMPLEMENTATION (TDD GREEN PHASE) ===
+    - id: 'create-db-repository-green-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create __FEATURE_NAME_PASCAL_CASE__ database repository to make tests pass (TDD GREEN)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'prisma repository pattern dependency injection typescript'
+          url: 'https://github.com/...'
+          description: 'Repository implementation with Prisma and dependency injection.'
+        - type: 'internal_guideline'
+          source: 'TESTING_GUIDE.md'
+          description: 'TDD Green phase - making repository tests pass.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository.ts'
+      template: |
+        import { PrismaClient } from '@prisma/client'
+        // AI-NOTE: Import repository protocol interface if exists
+        // import { __FEATURE_NAME_PASCAL_CASE__Repository } from '../../data/protocols/__FEATURE_NAME_KEBAB_CASE__-repository-protocol'
+
+        /**
+         * Prisma implementation of __FEATURE_NAME_PASCAL_CASE__ repository
+         * Handles database operations using Prisma ORM with transaction support
+         * @layer Infrastructure Layer
+         * @pattern Repository Pattern, Dependency Injection
+         * @implements __FEATURE_NAME_PASCAL_CASE__Repository
+         */
+        export class Prisma__FEATURE_NAME_PASCAL_CASE__Repository {
+          /**
+           * Constructor with dependency injection
+           * @param prisma - PrismaClient instance for database operations
+           */
+          constructor(
+            private readonly prisma: PrismaClient
+          ) {}
+
+          /**
+           * Save a new __FEATURE_NAME_LOWER_CASE__ entity to database
+           * @param data - Entity data to persist
+           * @param tx - Optional Prisma transaction client for atomic operations
+           * @returns Promise with persisted entity including id and timestamps
+           */
+          async save(
+            data: {
+              __INPUT_FIELD_1__: string
+              __INPUT_FIELD_2__: string
+              __INPUT_FIELD_3__: string
+            },
+            tx?: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>
+          ): Promise<{
+            id: string
+            __INPUT_FIELD_1__: string
+            __INPUT_FIELD_2__: string
+            __INPUT_FIELD_3__: string
+            createdAt: Date
+            updatedAt: Date
+          }> {
+            // AI-NOTE: Use transaction client if provided, otherwise use main client
+            const client = tx || this.prisma
+
+            try {
+              const result = await client.__MODEL_NAME__.create({
+                data: {
+                  __INPUT_FIELD_1__: data.__INPUT_FIELD_1__,
+                  __INPUT_FIELD_2__: data.__INPUT_FIELD_2__,
+                  __INPUT_FIELD_3__: data.__INPUT_FIELD_3__
+                }
+              })
+
+              return {
+                id: result.id,
+                __INPUT_FIELD_1__: result.__INPUT_FIELD_1__,
+                __INPUT_FIELD_2__: result.__INPUT_FIELD_2__,
+                __INPUT_FIELD_3__: result.__INPUT_FIELD_3__,
+                createdAt: result.createdAt,
+                updatedAt: result.updatedAt
+              }
+            } catch (error) {
+              // AI-NOTE: Transform Prisma errors to domain-friendly errors
+              if (error instanceof Error) {
+                throw new Error(`Failed to save __FEATURE_NAME_LOWER_CASE__: ${error.message}`)
+              }
+              throw error
+            }
+          }
+
+          /**
+           * Find __FEATURE_NAME_LOWER_CASE__ entity by id
+           * @param id - Entity unique identifier
+           * @returns Promise with entity or null if not found
+           */
+          async findById(id: string): Promise<{
+            id: string
+            __INPUT_FIELD_1__: string
+            __INPUT_FIELD_2__: string
+            __INPUT_FIELD_3__: string
+            createdAt: Date
+            updatedAt: Date
+          } | null> {
+            try {
+              const result = await this.prisma.__MODEL_NAME__.findFirst({
+                where: { id }
+              })
+
+              if (!result) {
+                return null
+              }
+
+              return {
+                id: result.id,
+                __INPUT_FIELD_1__: result.__INPUT_FIELD_1__,
+                __INPUT_FIELD_2__: result.__INPUT_FIELD_2__,
+                __INPUT_FIELD_3__: result.__INPUT_FIELD_3__,
+                createdAt: result.createdAt,
+                updatedAt: result.updatedAt
+              }
+            } catch (error) {
+              if (error instanceof Error) {
+                throw new Error(`Failed to find __FEATURE_NAME_LOWER_CASE__ by id: ${error.message}`)
+              }
+              throw error
+            }
+          }
+
+          /**
+           * Update existing __FEATURE_NAME_LOWER_CASE__ entity
+           * @param id - Entity identifier
+           * @param data - Partial data to update
+           * @returns Promise with updated entity
+           */
+          async update(
+            id: string,
+            data: Partial<{
+              __INPUT_FIELD_1__: string
+              __INPUT_FIELD_2__: string
+              __INPUT_FIELD_3__: string
+            }>
+          ): Promise<{
+            id: string
+            __INPUT_FIELD_1__: string
+            __INPUT_FIELD_2__: string
+            __INPUT_FIELD_3__: string
+            createdAt: Date
+            updatedAt: Date
+          }> {
+            try {
+              const result = await this.prisma.__MODEL_NAME__.update({
+                where: { id },
+                data
+              })
+
+              return {
+                id: result.id,
+                __INPUT_FIELD_1__: result.__INPUT_FIELD_1__,
+                __INPUT_FIELD_2__: result.__INPUT_FIELD_2__,
+                __INPUT_FIELD_3__: result.__INPUT_FIELD_3__,
+                createdAt: result.createdAt,
+                updatedAt: result.updatedAt
+              }
+            } catch (error) {
+              if (error instanceof Error) {
+                throw new Error(`Failed to update __FEATURE_NAME_LOWER_CASE__: ${error.message}`)
+              }
+              throw error
+            }
+          }
+
+          /**
+           * Delete __FEATURE_NAME_LOWER_CASE__ entity by id
+           * @param id - Entity identifier to delete
+           * @returns Promise<void>
+           */
+          async delete(id: string): Promise<void> {
+            try {
+              await this.prisma.__MODEL_NAME__.delete({
+                where: { id }
+              })
+            } catch (error) {
+              if (error instanceof Error) {
+                throw new Error(`Failed to delete __FEATURE_NAME_LOWER_CASE__: ${error.message}`)
+              }
+              throw error
+            }
+          }
+
+          /**
+           * Execute operations within a transaction for data consistency
+           * @param fn - Function to execute within transaction
+           * @returns Promise with transaction result
+           */
+          async executeInTransaction<T>(
+            fn: (tx: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>) => Promise<T>
+          ): Promise<T> {
+            return await this.prisma.$transaction(fn)
+          }
+        }
+
+    # === STEP 5: CREATE HTTP CLIENT TEST (TDD RED PHASE) ===
+    - id: 'create-http-client-test-red-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create failing test for HTTP client implementation (TDD RED)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'TDD test first http client fetch api typescript'
+          url: 'https://github.com/...'
+          description: 'TDD Red phase - writing failing HTTP client tests first.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.spec.ts'
+      template: |
+        import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'
+        import { FetchHttpClient } from './fetch-http-client'
+        import { HttpRequest, HttpResponse, HttpClient } from './http-client-protocol'
+
+        /**
+         * Test suite for FetchHttpClient implementation
+         * Following TDD - Test First Approach (RED Phase)
+         * @layer Infrastructure Layer Tests
+         * @pattern TDD - Red-Green-Refactor, HTTP Client Pattern
+         */
+        describe('FetchHttpClient', () => {
+          let sut: HttpClient
+
+          beforeEach(() => {
+            sut = new FetchHttpClient()
+
+            // AI-NOTE: Mock global fetch for tests
+            global.fetch = vi.fn()
+          })
+
+          afterEach(() => {
+            vi.resetAllMocks()
+          })
+
+          const makeFakeRequest = (): HttpRequest => ({
+            url: 'http://any-url.com',
+            method: 'POST',
+            body: { any: 'data' },
+            headers: { 'Content-Type': 'application/json' }
+          })
+
+          describe('request', () => {
+            test('Should call fetch with correct url and options', async () => {
+              // This test will FAIL initially (RED phase)
+              const fetchSpy = global.fetch as any
+              fetchSpy.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: vi.fn().mockResolvedValueOnce({ data: 'any_data' })
+              })
+
+              const httpRequest = makeFakeRequest()
+              await sut.request(httpRequest)
+
+              expect(fetchSpy).toHaveBeenCalledWith('http://any-url.com', {
+                method: 'POST',
+                body: JSON.stringify({ any: 'data' }),
+                headers: { 'Content-Type': 'application/json' },
+                signal: expect.any(AbortSignal)
+              })
+            })
+
+            test('Should return correct response on success', async () => {
+              // This test will FAIL initially (RED phase)
+              const fetchSpy = global.fetch as any
+              const mockResponse = { data: 'any_data' }
+              fetchSpy.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: vi.fn().mockResolvedValueOnce(mockResponse)
+              })
+
+              const httpRequest = makeFakeRequest()
+              const response = await sut.request<any>(httpRequest)
+
+              expect(response).toEqual({
+                statusCode: 200,
+                body: mockResponse
+              })
+            })
+
+            test('Should throw if fetch throws', async () => {
+              // This test will FAIL initially (RED phase)
+              const fetchSpy = global.fetch as any
+              fetchSpy.mockRejectedValueOnce(new Error('Network error'))
+
+              const httpRequest = makeFakeRequest()
+              const promise = sut.request(httpRequest)
+
+              await expect(promise).rejects.toThrow('Network error')
+            })
+
+            test('Should handle timeout correctly', async () => {
+              // This test will FAIL initially (RED phase)
+              const fetchSpy = global.fetch as any
+              fetchSpy.mockRejectedValueOnce(new Error('AbortError'))
+
+              const httpRequest = { ...makeFakeRequest(), timeout: 1000 }
+              const promise = sut.request(httpRequest)
+
+              await expect(promise).rejects.toThrow()
+            })
+          })
+        })
+
+    # === STEP 6: CREATE HTTP CLIENT PROTOCOL ===
+    - id: 'create-http-client-protocol-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create HTTP client protocol interface'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'BACKEND_ARCHITECTURE.md'
+          description: 'HTTP client abstraction for external API calls.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/http-client-protocol.ts'
+      template: |
+        /**
+         * HTTP request configuration
+         * @layer Infrastructure Layer Protocol
+         */
+        export interface HttpRequest {
+          url: string
+          method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+          body?: any
+          headers?: Record<string, string>
+          timeout?: number
+        }
+
+        /**
+         * HTTP response structure
+         * @layer Infrastructure Layer Protocol
+         */
+        export interface HttpResponse<T = any> {
+          statusCode: number
+          body: T
+        }
+
+        /**
+         * Protocol for HTTP client implementations
+         * Defines the contract for making external HTTP requests
+         * @layer Infrastructure Layer Protocol
+         * @pattern HTTP Client Pattern
+         */
+        export interface HttpClient {
+          /**
+           * Make HTTP request to external service
+           * @param request - HTTP request configuration
+           * @returns Promise with HTTP response
+           */
+          request<T = any>(request: HttpRequest): Promise<HttpResponse<T>>
+        }
+
+    # === STEP 7: CREATE HTTP CLIENT IMPLEMENTATION (TDD GREEN PHASE) ===
+    - id: 'create-http-client-green-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create HTTP client implementation to make tests pass (TDD GREEN)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'fetch api http client timeout error handling'
+          url: 'https://github.com/...'
+          description: 'HTTP client implementation with Fetch API and timeout.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/http/fetch-http-client.ts'
+      template: |
+        import { HttpClient, HttpRequest, HttpResponse } from './http-client-protocol'
+
+        /**
+         * Fetch API implementation of HTTP client
+         * Handles external HTTP requests with timeout and error handling
+         * @layer Infrastructure Layer
+         * @pattern HTTP Client Pattern
+         * @implements HttpClient
+         */
+        export class FetchHttpClient implements HttpClient {
+          private readonly DEFAULT_TIMEOUT = 5000 // 5 seconds
+
+          /**
+           * Make HTTP request using native Fetch API
+           * @param request - HTTP request configuration
+           * @returns Promise with typed HTTP response
+           * @throws Error on network failures or timeouts
+           */
+          async request<T = any>(request: HttpRequest): Promise<HttpResponse<T>> {
+            const controller = new AbortController()
+            const timeout = request.timeout || this.DEFAULT_TIMEOUT
+
+            // Set timeout for request
+            const timeoutId = setTimeout(() => {
+              controller.abort()
+            }, timeout)
+
+            try {
+              // Prepare fetch options
+              const options: RequestInit = {
+                method: request.method,
+                headers: request.headers,
+                signal: controller.signal
+              }
+
+              // Add body for non-GET requests
+              if (request.body && request.method !== 'GET') {
+                options.body = typeof request.body === 'string'
+                  ? request.body
+                  : JSON.stringify(request.body)
+              }
+
+              // Make the request
+              const response = await fetch(request.url, options)
+
+              // Clear timeout
+              clearTimeout(timeoutId)
+
+              // Parse response body
+              const body = await response.json()
+
+              return {
+                statusCode: response.status,
+                body
+              }
+            } catch (error) {
+              clearTimeout(timeoutId)
+
+              if (error instanceof Error) {
+                if (error.name === 'AbortError') {
+                  throw new Error(`HTTP request timeout after ${timeout}ms`)
+                }
+                throw new Error(`HTTP request failed: ${error.message}`)
+              }
+              throw error
+            }
+          }
+
+          /**
+           * Make GET request with query parameters
+           * @param url - Base URL
+           * @param params - Query parameters
+           * @param headers - Optional headers
+           * @returns Promise with typed response
+           */
+          async get<T = any>(
+            url: string,
+            params?: Record<string, string>,
+            headers?: Record<string, string>
+          ): Promise<HttpResponse<T>> {
+            let requestUrl = url
+
+            if (params) {
+              const searchParams = new URLSearchParams(params)
+              requestUrl += `?${searchParams.toString()}`
+            }
+
+            return this.request<T>({
+              url: requestUrl,
+              method: 'GET',
+              headers
+            })
+          }
+
+          /**
+           * Make POST request with JSON body
+           * @param url - Request URL
+           * @param body - Request body
+           * @param headers - Optional headers
+           * @returns Promise with typed response
+           */
+          async post<T = any>(
+            url: string,
+            body: any,
+            headers?: Record<string, string>
+          ): Promise<HttpResponse<T>> {
+            return this.request<T>({
+              url,
+              method: 'POST',
+              body,
+              headers: {
+                'Content-Type': 'application/json',
+                ...headers
+              }
+            })
+          }
+        }
+
+    # === STEP 8: CREATE CACHE IMPLEMENTATION TEST (TDD RED PHASE) ===
+    - id: 'create-cache-test-red-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create failing test for cache implementation (TDD RED)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'TDD redis cache implementation fallback memory'
+          url: 'https://github.com/...'
+          description: 'TDD approach for cache implementation with Redis and fallback.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache.spec.ts'
+      template: |
+        import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'
+        import { RedisCache } from './redis-cache'
+        import { CacheClient } from './cache-client-protocol'
+
+        /**
+         * Test suite for RedisCache implementation
+         * Following TDD - Test First Approach (RED Phase)
+         * @layer Infrastructure Layer Tests
+         * @pattern TDD - Red-Green-Refactor, Cache Pattern
+         */
+        describe('RedisCache', () => {
+          let mockRedisClient: any
+          let sut: CacheClient
+
+          beforeEach(() => {
+            // AI-NOTE: Mock Redis client
+            mockRedisClient = {
+              get: vi.fn(),
+              set: vi.fn(),
+              del: vi.fn(),
+              exists: vi.fn(),
+              ping: vi.fn()
+            }
+
+            sut = new RedisCache(mockRedisClient)
+          })
+
+          afterEach(() => {
+            vi.resetAllMocks()
+          })
+
+          describe('get', () => {
+            test('Should call Redis get with correct key', async () => {
+              // This test will FAIL initially (RED phase)
+              mockRedisClient.get.mockResolvedValueOnce('{"data":"any_data"}')
+
+              await sut.get('any_key')
+
+              expect(mockRedisClient.get).toHaveBeenCalledWith('any_key')
+            })
+
+            test('Should return parsed value if key exists', async () => {
+              // This test will FAIL initially (RED phase)
+              const mockData = { data: 'any_data' }
+              mockRedisClient.get.mockResolvedValueOnce(JSON.stringify(mockData))
+
+              const result = await sut.get<any>('any_key')
+
+              expect(result).toEqual(mockData)
+            })
+
+            test('Should return null if key does not exist', async () => {
+              // This test will FAIL initially (RED phase)
+              mockRedisClient.get.mockResolvedValueOnce(null)
+
+              const result = await sut.get('any_key')
+
+              expect(result).toBeNull()
+            })
+
+            test('Should fallback to memory cache if Redis fails', async () => {
+              // This test will FAIL initially (RED phase)
+              mockRedisClient.get.mockRejectedValueOnce(new Error('Redis connection failed'))
+
+              // Should not throw, but fallback silently
+              const result = await sut.get('any_key')
+
+              expect(result).toBeNull()
+            })
+          })
+
+          describe('set', () => {
+            test('Should call Redis set with correct key, value and ttl', async () => {
+              // This test will FAIL initially (RED phase)
+              mockRedisClient.set.mockResolvedValueOnce('OK')
+
+              const data = { test: 'data' }
+              await sut.set('any_key', data, 3600)
+
+              expect(mockRedisClient.set).toHaveBeenCalledWith(
+                'any_key',
+                JSON.stringify(data),
+                'EX',
+                3600
+              )
+            })
+
+            test('Should handle Redis set failure gracefully', async () => {
+              // This test will FAIL initially (RED phase)
+              mockRedisClient.set.mockRejectedValueOnce(new Error('Redis error'))
+
+              const data = { test: 'data' }
+
+              // Should not throw
+              await expect(sut.set('any_key', data)).resolves.toBeUndefined()
+            })
+          })
+
+          describe('delete', () => {
+            test('Should call Redis del with correct key', async () => {
+              // This test will FAIL initially (RED phase)
+              mockRedisClient.del.mockResolvedValueOnce(1)
+
+              await sut.delete('any_key')
+
+              expect(mockRedisClient.del).toHaveBeenCalledWith('any_key')
+            })
+          })
+        })
+
+    # === STEP 9: CREATE CACHE PROTOCOL ===
+    - id: 'create-cache-protocol-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create cache client protocol interface'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'BACKEND_ARCHITECTURE.md'
+          description: 'Cache abstraction for performance optimization.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/cache-client-protocol.ts'
+      template: |
+        /**
+         * Protocol for cache client implementations
+         * Defines the contract for caching operations
+         * @layer Infrastructure Layer Protocol
+         * @pattern Cache Pattern
+         */
+        export interface CacheClient {
+          /**
+           * Get value from cache by key
+           * @param key - Cache key
+           * @returns Promise with cached value or null if not found
+           */
+          get<T = any>(key: string): Promise<T | null>
+
+          /**
+           * Set value in cache with optional TTL
+           * @param key - Cache key
+           * @param value - Value to cache
+           * @param ttlSeconds - Time to live in seconds (optional)
+           * @returns Promise<void>
+           */
+          set<T = any>(key: string, value: T, ttlSeconds?: number): Promise<void>
+
+          /**
+           * Delete value from cache
+           * @param key - Cache key to delete
+           * @returns Promise<void>
+           */
+          delete(key: string): Promise<void>
+
+          /**
+           * Check if key exists in cache
+           * @param key - Cache key to check
+           * @returns Promise<boolean>
+           */
+          exists(key: string): Promise<boolean>
+
+          /**
+           * Clear all cache entries (use with caution)
+           * @returns Promise<void>
+           */
+          clear?(): Promise<void>
+        }
+
+    # === STEP 10: CREATE CACHE IMPLEMENTATION (TDD GREEN PHASE) ===
+    - id: 'create-cache-green-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create cache implementation to make tests pass (TDD GREEN)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'redis cache implementation nodejs fallback memory'
+          url: 'https://github.com/...'
+          description: 'Cache implementation with Redis primary and memory fallback.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/cache/redis-cache.ts'
+      template: |
+        import { CacheClient } from './cache-client-protocol'
+
+        /**
+         * Redis cache implementation with in-memory fallback
+         * Provides caching capabilities with graceful degradation
+         * @layer Infrastructure Layer
+         * @pattern Cache Pattern, Fallback Pattern
+         * @implements CacheClient
+         */
+        export class RedisCache implements CacheClient {
+          private memoryCache = new Map<string, { value: any; expiry?: number }>()
+          private redisAvailable = true
+
+          /**
+           * Constructor with Redis client dependency injection
+           * @param redisClient - Redis client instance
+           */
+          constructor(
+            private readonly redisClient: any // AI-NOTE: Use appropriate Redis client type
+          ) {}
+
+          /**
+           * Get value from cache, fallback to memory if Redis fails
+           * @param key - Cache key
+           * @returns Promise with cached value or null
+           */
+          async get<T = any>(key: string): Promise<T | null> {
+            try {
+              // Try Redis first
+              if (this.redisAvailable) {
+                const value = await this.redisClient.get(key)
+                if (value !== null) {
+                  return JSON.parse(value)
+                }
+              }
+            } catch (error) {
+              console.warn(`Redis get failed for key ${key}:`, error)
+              this.redisAvailable = false
+
+              // Fall back to memory cache
+              return this.getFromMemory<T>(key)
+            }
+
+            // Check memory cache as fallback
+            return this.getFromMemory<T>(key)
+          }
+
+          /**
+           * Set value in cache, fallback to memory if Redis fails
+           * @param key - Cache key
+           * @param value - Value to cache
+           * @param ttlSeconds - TTL in seconds
+           */
+          async set<T = any>(key: string, value: T, ttlSeconds?: number): Promise<void> {
+            try {
+              // Try Redis first
+              if (this.redisAvailable) {
+                const serializedValue = JSON.stringify(value)
+
+                if (ttlSeconds) {
+                  await this.redisClient.set(key, serializedValue, 'EX', ttlSeconds)
+                } else {
+                  await this.redisClient.set(key, serializedValue)
+                }
+
+                return
+              }
+            } catch (error) {
+              console.warn(`Redis set failed for key ${key}:`, error)
+              this.redisAvailable = false
+            }
+
+            // Fallback to memory cache
+            this.setInMemory(key, value, ttlSeconds)
+          }
+
+          /**
+           * Delete value from cache
+           * @param key - Cache key to delete
+           */
+          async delete(key: string): Promise<void> {
+            try {
+              if (this.redisAvailable) {
+                await this.redisClient.del(key)
+              }
+            } catch (error) {
+              console.warn(`Redis delete failed for key ${key}:`, error)
+              this.redisAvailable = false
+            }
+
+            // Always try memory cache as well
+            this.memoryCache.delete(key)
+          }
+
+          /**
+           * Check if key exists in cache
+           * @param key - Cache key to check
+           * @returns Promise<boolean>
+           */
+          async exists(key: string): Promise<boolean> {
+            try {
+              if (this.redisAvailable) {
+                const result = await this.redisClient.exists(key)
+                return result > 0
+              }
+            } catch (error) {
+              console.warn(`Redis exists failed for key ${key}:`, error)
+              this.redisAvailable = false
+            }
+
+            // Check memory cache
+            const memoryItem = this.memoryCache.get(key)
+            if (!memoryItem) return false
+
+            if (memoryItem.expiry && Date.now() > memoryItem.expiry) {
+              this.memoryCache.delete(key)
+              return false
+            }
+
+            return true
+          }
+
+          /**
+           * Get value from memory cache
+           * @private
+           */
+          private getFromMemory<T>(key: string): T | null {
+            const item = this.memoryCache.get(key)
+            if (!item) return null
+
+            // Check expiry
+            if (item.expiry && Date.now() > item.expiry) {
+              this.memoryCache.delete(key)
+              return null
+            }
+
+            return item.value
+          }
+
+          /**
+           * Set value in memory cache
+           * @private
+           */
+          private setInMemory<T>(key: string, value: T, ttlSeconds?: number): void {
+            const expiry = ttlSeconds ? Date.now() + (ttlSeconds * 1000) : undefined
+            this.memoryCache.set(key, { value, expiry })
+          }
+
+          /**
+           * Health check for Redis connection
+           * @returns Promise<boolean>
+           */
+          async isHealthy(): Promise<boolean> {
+            try {
+              if (this.redisAvailable) {
+                await this.redisClient.ping()
+                return true
+              }
+            } catch (error) {
+              this.redisAvailable = false
+            }
+            return false
+          }
+        }
+
+    # === STEP 11: CREATE CRYPTO IMPLEMENTATION ===
+    - id: 'create-crypto-implementation-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create cryptography implementation for password hashing and JWT'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'context7'
+          query: 'bcrypt password hashing jwt token nodejs'
+          url: 'https://github.com/...'
+          description: 'Cryptography implementation with bcrypt and JWT.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra/crypto/bcrypt-jwt-crypto.ts'
+      template: |
+        import bcrypt from 'bcrypt'
+        import jwt from 'jsonwebtoken'
+        import { CryptoProvider } from './crypto-provider-protocol'
+
+        /**
+         * Cryptography implementation using bcrypt and JWT
+         * Handles password hashing and token generation/validation
+         * @layer Infrastructure Layer
+         * @pattern Cryptography Pattern
+         * @implements CryptoProvider
+         */
+        export class BcryptJwtCrypto implements CryptoProvider {
+          private readonly SALT_ROUNDS = 12
+          private readonly JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-in-production'
+
+          /**
+           * Hash password using bcrypt
+           * @param plaintext - Password to hash
+           * @returns Promise with hashed password
+           */
+          async hashPassword(plaintext: string): Promise<string> {
+            try {
+              return await bcrypt.hash(plaintext, this.SALT_ROUNDS)
+            } catch (error) {
+              if (error instanceof Error) {
+                throw new Error(`Failed to hash password: ${error.message}`)
+              }
+              throw error
+            }
+          }
+
+          /**
+           * Compare password with hash
+           * @param plaintext - Plain text password
+           * @param hash - Hashed password to compare against
+           * @returns Promise<boolean>
+           */
+          async comparePassword(plaintext: string, hash: string): Promise<boolean> {
+            try {
+              return await bcrypt.compare(plaintext, hash)
+            } catch (error) {
+              if (error instanceof Error) {
+                throw new Error(`Failed to compare password: ${error.message}`)
+              }
+              throw error
+            }
+          }
+
+          /**
+           * Generate JWT token
+           * @param payload - Token payload
+           * @param expiresIn - Token expiration (default: 1 hour)
+           * @returns Promise with JWT token
+           */
+          async generateToken(payload: object, expiresIn = '1h'): Promise<string> {
+            try {
+              return jwt.sign(payload, this.JWT_SECRET, { expiresIn })
+            } catch (error) {
+              if (error instanceof Error) {
+                throw new Error(`Failed to generate token: ${error.message}`)
+              }
+              throw error
+            }
+          }
+
+          /**
+           * Verify JWT token
+           * @param token - JWT token to verify
+           * @returns Promise with decoded payload or null if invalid
+           */
+          async verifyToken(token: string): Promise<object | null> {
+            try {
+              const decoded = jwt.verify(token, this.JWT_SECRET)
+              return typeof decoded === 'object' ? decoded : null
+            } catch (error) {
+              // Token is invalid or expired
+              return null
+            }
+          }
+
+          /**
+           * Generate random string for various purposes
+           * @param length - String length (default: 32)
+           * @returns Random string
+           */
+          generateRandomString(length = 32): string {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+            let result = ''
+            for (let i = 0; i < length; i++) {
+              result += chars.charAt(Math.floor(Math.random() * chars.length))
+            }
+            return result
+          }
+        }
+
+        /**
+         * Crypto provider protocol interface
+         */
+        export interface CryptoProvider {
+          hashPassword(plaintext: string): Promise<string>
+          comparePassword(plaintext: string, hash: string): Promise<boolean>
+          generateToken(payload: object, expiresIn?: string): Promise<string>
+          verifyToken(token: string): Promise<object | null>
+          generateRandomString(length?: number): string
+        }
+
+    # === STEP 12: REFACTOR AND OPTIMIZE (TDD REFACTOR PHASE) ===
+    - id: 'refactor-infra-implementation-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Refactor infrastructure implementations while keeping tests green (TDD REFACTOR)'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'TESTING_GUIDE.md'
+          description: 'TDD Refactor phase - improve code while keeping tests green.'
+      run_scripts:
+        description: 'Refactor and validate infrastructure implementations'
+        scripts:
+          - name: 'Run all infrastructure tests'
+            command: |
+              echo "♻️  TDD REFACTOR phase - improving infrastructure code quality..."
+
+              # Ensure all tests still pass after any refactoring
+              npm run test -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra
+
+              if [ $? -eq 0 ]; then
+                echo "✅ Tests still passing after refactoring"
+              else
+                echo "❌ Refactoring broke tests - please fix"
+                exit 1
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+          - name: 'Check test coverage'
+            command: |
+              echo "📊 Checking test coverage for infrastructure layer..."
+
+              npm run test:coverage -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra
+
+              echo "✅ Coverage report generated"
+            workingDirectory: '__PROJECT_NAME__'
+
+          - name: 'Lint and format code'
+            command: |
+              echo "🔧 Running lint and format for infrastructure layer..."
+
+              npm run lint -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra --fix
+              npm run format -- src/features/__FEATURE_NAME_KEBAB_CASE__/shared/infra || echo "Format command not available"
+
+              echo "✅ Code formatted and linted"
+            workingDirectory: '__PROJECT_NAME__'
+
+          - name: 'Final commit'
+            command: |
+              git add .
+              git commit -m "refactor(infra): optimize __FEATURE_NAME_KEBAB_CASE__ implementations (TDD REFACTOR phase)" || echo "No changes to commit"
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 13: INTEGRATION TESTS FOR INFRASTRUCTURE ===
+    - id: 'create-infra-integration-tests-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'create_file'
+      description: 'Create integration tests for infrastructure layer with real dependencies'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'TESTING_GUIDE.md'
+          description: 'Integration testing for infrastructure layer with external dependencies.'
+      path: '__PROJECT_NAME__/src/features/__FEATURE_NAME_KEBAB_CASE__/__tests__/integration/infrastructure.test.ts'
+      template: |
+        import { describe, test, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest'
+        import { PrismaClient } from '@prisma/client'
+        import { Prisma__FEATURE_NAME_PASCAL_CASE__Repository } from '../../shared/infra/db/prisma-__FEATURE_NAME_KEBAB_CASE__-repository'
+        import { FetchHttpClient } from '../../shared/infra/http/fetch-http-client'
+        import { RedisCache } from '../../shared/infra/cache/redis-cache'
+        import { BcryptJwtCrypto } from '../../shared/infra/crypto/bcrypt-jwt-crypto'
+
+        /**
+         * Integration tests for __FEATURE_NAME_PASCAL_CASE__ infrastructure layer
+         * Tests with real external dependencies when available
+         * @layer Integration Tests
+         * @pattern Integration Testing
+         */
+        describe('__FEATURE_NAME_PASCAL_CASE__ Infrastructure Integration', () => {
+          let prisma: PrismaClient
+          let repository: Prisma__FEATURE_NAME_PASCAL_CASE__Repository
+          let httpClient: FetchHttpClient
+          let cache: RedisCache
+          let crypto: BcryptJwtCrypto
+
+          beforeAll(async () => {
+            // Setup test database connection
+            if (process.env.DATABASE_TEST_URL) {
+              prisma = new PrismaClient({
+                datasources: {
+                  db: {
+                    url: process.env.DATABASE_TEST_URL
+                  }
+                }
+              })
+              await prisma.$connect()
+              repository = new Prisma__FEATURE_NAME_PASCAL_CASE__Repository(prisma)
+            }
+
+            // Setup other infrastructure components
+            httpClient = new FetchHttpClient()
+            crypto = new BcryptJwtCrypto()
+
+            // Setup cache (mock Redis if not available)
+            const mockRedis = {
+              get: vi.fn().mockResolvedValue(null),
+              set: vi.fn().mockResolvedValue('OK'),
+              del: vi.fn().mockResolvedValue(1),
+              exists: vi.fn().mockResolvedValue(0),
+              ping: vi.fn().mockResolvedValue('PONG')
+            }
+            cache = new RedisCache(mockRedis)
+          })
+
+          afterAll(async () => {
+            if (prisma) {
+              await prisma.__MODEL_NAME__.deleteMany({})
+              await prisma.$disconnect()
+            }
+          })
+
+          describe('Database Repository Integration', () => {
+            test('Should create and retrieve entity from real database', async () => {
+              if (!repository) {
+                console.log('⏭️  Skipping database test - DATABASE_TEST_URL not set')
+                return
+              }
+
+              // Arrange
+              const input = {
+                __INPUT_FIELD_1__: 'integration_value_1',
+                __INPUT_FIELD_2__: 'integration_value_2',
+                __INPUT_FIELD_3__: 'integration_value_3'
+              }
+
+              // Act
+              const saved = await repository.save(input)
+              const retrieved = await repository.findById(saved.id)
+
+              // Assert
+              expect(saved).toBeTruthy()
+              expect(saved.id).toBeTruthy()
+              expect(retrieved).toEqual(saved)
+            })
+          })
+
+          describe('HTTP Client Integration', () => {
+            test('Should make real HTTP request to external API', async () => {
+              // Skip if no test endpoint available
+              const testUrl = process.env.HTTP_TEST_ENDPOINT
+              if (!testUrl) {
+                console.log('⏭️  Skipping HTTP test - HTTP_TEST_ENDPOINT not set')
+                return
+              }
+
+              const response = await httpClient.get(testUrl)
+
+              expect(response.statusCode).toBeDefined()
+              expect(response.body).toBeDefined()
+            }, 10000) // 10 second timeout for network requests
+          })
+
+          describe('Cache Integration', () => {
+            test('Should store and retrieve values from cache', async () => {
+              const key = 'test_key_integration'
+              const value = { test: 'integration_data', timestamp: Date.now() }
+
+              // Set value
+              await cache.set(key, value, 60)
+
+              // Get value
+              const retrieved = await cache.get<typeof value>(key)
+
+              expect(retrieved).toEqual(value)
+
+              // Clean up
+              await cache.delete(key)
+            })
+          })
+
+          describe('Crypto Integration', () => {
+            test('Should hash and compare passwords correctly', async () => {
+              const password = 'test_password_123'
+
+              // Hash password
+              const hash = await crypto.hashPassword(password)
+              expect(hash).toBeTruthy()
+              expect(hash).not.toBe(password)
+
+              // Compare passwords
+              const isValid = await crypto.comparePassword(password, hash)
+              expect(isValid).toBe(true)
+
+              const isInvalid = await crypto.comparePassword('wrong_password', hash)
+              expect(isInvalid).toBe(false)
+            })
+
+            test('Should generate and verify JWT tokens', async () => {
+              const payload = { userId: '123', role: 'user' }
+
+              // Generate token
+              const token = await crypto.generateToken(payload, '1h')
+              expect(token).toBeTruthy()
+
+              // Verify token
+              const decoded = await crypto.verifyToken(token)
+              expect(decoded).toMatchObject(payload)
+
+              // Verify invalid token
+              const invalidDecoded = await crypto.verifyToken('invalid_token')
+              expect(invalidDecoded).toBeNull()
+            })
+          })
+
+          describe('Cross-Component Integration', () => {
+            test('Should work together in a complete workflow', async () => {
+              if (!repository) {
+                console.log('⏭️  Skipping workflow test - DATABASE_TEST_URL not set')
+                return
+              }
+
+              // Step 1: Create data
+              const input = {
+                __INPUT_FIELD_1__: 'workflow_test_1',
+                __INPUT_FIELD_2__: 'workflow_test_2',
+                __INPUT_FIELD_3__: 'workflow_test_3'
+              }
+
+              const saved = await repository.save(input)
+
+              // Step 2: Cache the result
+              const cacheKey = `__FEATURE_NAME_KEBAB_CASE__:${saved.id}`
+              await cache.set(cacheKey, saved, 300)
+
+              // Step 3: Retrieve from cache
+              const cached = await cache.get(cacheKey)
+              expect(cached).toEqual(saved)
+
+              // Step 4: Generate token for the entity
+              const token = await crypto.generateToken({ entityId: saved.id })
+              expect(token).toBeTruthy()
+
+              // Step 5: Verify the workflow completed successfully
+              const verified = await crypto.verifyToken(token)
+              expect(verified).toMatchObject({ entityId: saved.id })
+
+              // Clean up
+              await cache.delete(cacheKey)
+              await repository.delete(saved.id)
+            })
+          })
+        })
+
+    # === STEP 14: REFACTOR FOR BROWNFIELD (CONDITIONAL MULTI-STEP) ===
+    # AI-NOTE: When brownfield refactoring is needed, the AI should dynamically generate
+    # multiple steps based on the specific files that need refactoring. Each file should
+    # have its own step for better tracking and granular control.
+    #
+    # RULE: For each file requiring refactoring, create a separate step with:
+    # - Unique ID: refactor-{index}-{filename}
+    # - Clear description of what changes are needed
+    # - Specific validation for that file's refactoring
+    # - Rollback point for each major refactoring
+    #
+    # EXAMPLE PATTERN:
+    # If 3 files need refactoring, generate:
+    # Step 14a: refactor-1-user-controller
+    # Step 14b: refactor-2-user-service
+    # Step 14c: refactor-3-user-repository
+    - id: 'refactor-rollback-point-infra-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create rollback point before starting infrastructure layer brownfield refactoring'
+      condition: 'check_if_brownfield_refactor_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Best practices for safe infrastructure layer refactoring with rollback points'
+      run_scripts:
+        description: 'Create git tag for rollback before infrastructure layer refactoring'
+        scripts:
+          - name: 'Create infrastructure refactor rollback tag'
+            command: |
+              # Create rollback point before infrastructure layer refactoring
+              git tag "before-refactor-infra-__FEATURE_NAME_KEBAB_CASE__" || {
+                echo "⚠️  Failed to create rollback tag"
+                exit 1
+              }
+              echo "✅ Created infrastructure rollback point: before-refactor-infra-__FEATURE_NAME_KEBAB_CASE__"
+              echo "   To rollback: git reset --hard before-refactor-infra-__FEATURE_NAME_KEBAB_CASE__"
+              # Document files that need refactoring
+              echo "📋 Infrastructure layer files identified for refactoring:"
+              # AI should list files here based on analysis
+            workingDirectory: '__PROJECT_NAME__'
+
+    # AI-NOTE: The following is a template that should be duplicated for each file
+    # that needs refactoring. The AI should generate one step per file.
+    - id: 'refactor-infra-__INDEX__-__FILE_TO_MODIFY_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Refactor __FILE_TO_MODIFY_KEBAB_CASE__ infrastructure layer to Clean Architecture'
+      condition: 'check_if_infra_file_needs_refactoring'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Clean Architecture infrastructure layer refactoring patterns for backend'
+        - type: 'internal_code_analysis'
+          source: 'serena'
+          description: 'Analyze current infrastructure layer file structure and dependencies'
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_MODIFY_KEBAB_CASE__.ts'
+      template: |
+        # AI-NOTE: FIND/REPLACE for Infrastructure Refactoring
+        # Common backend infra violations:
+        # - Missing adapter pattern for external services
+        # - Direct database access without repository
+        # - Hard-coded configurations
+        # - Missing error handling and fallbacks
+        # - Tight coupling to specific implementations
+
+        <<<FIND>>>
+        # AI-NOTE: Identify EXACT infra code with violations
+        # Include imports that show tight coupling
+        # Match constructor and method implementations
+        # The AI should identify the exact code block that needs refactoring
+        # This will be the original infrastructure code that violates Clean Architecture
+        [ORIGINAL_INFRA_CODE_TO_BE_REPLACED]
+        <<</FIND>>>
+        <<<REPLACE>>>
+        # AI-NOTE: Apply infrastructure patterns:
+        # - Implement adapter/protocol pattern
+        # - Use dependency injection
+        # - Add proper error handling
+        # - Include fallback mechanisms
+        # - Make it testable with mocks
+
+        // TODO: Refactor this infrastructure layer file to comply with Clean Architecture
+        // Estimated effort: __EFFORT__ (hours)
+        // SPECIFIC INFRASTRUCTURE LAYER REFACTORING TASKS FOR THIS FILE:
+        // 1. Extract any leaked business logic to domain layer
+        // 2. Ensure proper abstraction with data layer protocols
+        // 3. Implement proper dependency injection patterns
+        // 4. Add proper error handling and logging
+        // 5. Ensure infrastructure only handles external concerns
+        // 6. Update imports to follow Clean Architecture boundaries
+        // 7. Add unit tests for refactored infrastructure code
+        // 8. Ensure proper separation from business logic
+        // INFRASTRUCTURE LAYER DEPENDENCIES TO UPDATE:
+        // - [AI should list specific infrastructure dependencies]
+        // FILES THAT DEPEND ON THIS INFRASTRUCTURE:
+        // - [AI should list dependent files]
+        */
+        // NEW REFACTORED INFRASTRUCTURE LAYER CODE:
+        [REFACTORED_INFRA_CODE_FOLLOWING_CLEAN_ARCHITECTURE]
+        <<</REPLACE>>>
+
+    # === STEP 15: DELETE OBSOLETE INFRASTRUCTURE FILES (CONDITIONAL) ===
+    - id: 'delete-infra-file-__FILE_TO_DELETE_KEBAB_CASE__'
+      type: 'conditional_file'
+      description: 'Delete obsolete infrastructure layer files when refactoring to Clean Architecture'
+      condition: 'check_if_infra_file_deletion_needed'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'REFACTORING_GUIDE.md'
+          description: 'Safe file deletion during infrastructure layer refactoring'
+      path: '__PROJECT_NAME__/src/__PATH_TO_FILE__/__FILE_TO_DELETE_KEBAB_CASE__.ts'
+      template: ''
+
+    # === STEP 16: CREATE PULL REQUEST ===
+    - id: 'create-pull-request-infra-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Create pull request for __FEATURE_NAME_PASCAL_CASE__ infrastructure implementation'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'PR_TEMPLATE.md'
+          description: 'Pull request template and review checklist for infrastructure layer'
+      run_scripts:
+        description: 'Push branch and create pull request for infrastructure layer'
+        scripts:
+          - name: 'Push and create infrastructure PR'
+            command: |
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-infrastructure-layer"
+
+              # Push the branch
+              git push -u origin "$BRANCH_NAME" || {
+                echo "❌ Failed to push branch to remote"
+                exit 1
+              }
+
+              # Create PR using GitHub CLI if available
+              if command -v gh &> /dev/null; then
+                gh pr create \
+                  --title "feat(__FEATURE_NAME_KEBAB_CASE__): implement infrastructure layer with TDD" \
+                  --body "## Summary
+
+                Implements comprehensive infrastructure layer for __FEATURE_NAME_PASCAL_CASE__ feature following Clean Architecture and TDD methodology.
+
+                ## Infrastructure Components Implemented
+                - ✅ **Database Repository**: Prisma-based repository with transaction support
+                - ✅ **HTTP Client**: Fetch API client with timeout and error handling
+                - ✅ **Cache Layer**: Redis cache with in-memory fallback
+                - ✅ **Cryptography**: bcrypt password hashing and JWT token management
+                - ✅ **Integration Tests**: Comprehensive tests with real dependencies
+                - ✅ **Error Handling**: Graceful degradation and error transformation
+
+                ## TDD Methodology Applied
+                - 🔴 **RED**: Failing tests written first for each component
+                - 🟢 **GREEN**: Minimal implementation to make tests pass
+                - ♻️  **REFACTOR**: Code optimization while maintaining test coverage
+
+                ## Testing Strategy
+                - [ ] Unit tests pass (>90% coverage)
+                - [ ] Integration tests pass with real dependencies
+                - [ ] Error scenarios properly handled
+                - [ ] Performance benchmarks meet requirements
+                - [ ] Security best practices followed
+
+                ## Architecture Compliance
+                - [ ] Dependency Inversion Principle followed
+                - [ ] Infrastructure protocols properly defined
+                - [ ] No business logic in infrastructure layer
+                - [ ] Proper error handling and logging
+                - [ ] Configuration externalized
+
+                ## Performance & Security
+                - [ ] Database queries optimized
+                - [ ] HTTP requests have timeout handling
+                - [ ] Cache invalidation strategy defined
+                - [ ] Password hashing uses proper salt rounds
+                - [ ] JWT tokens have appropriate expiration
+
+                ## Checklist
+                - [ ] Code follows Clean Architecture principles
+                - [ ] All tests pass with adequate coverage
+                - [ ] Documentation is updated
+                - [ ] No breaking changes introduced
+                - [ ] External dependencies properly configured
+                - [ ] Error handling covers all edge cases" \
+                  --assignee @me \
+                  --label "enhancement,infrastructure,clean-architecture,tdd"
+
+                echo "✅ Pull request created successfully"
+              else
+                echo "📝 Push successful. Please create PR manually at:"
+                echo "   https://github.com/__GITHUB_ORG__/__PROJECT_NAME__/compare/$BRANCH_NAME"
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 17: TRIGGER AI CODE REVIEW ===
+    - id: 'trigger-ai-review-infra-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Trigger AI-powered code review with Claude for infrastructure layer'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'external_pattern'
+          source: 'claude-cli'
+          query: 'claude code review infrastructure layer clean architecture'
+          url: 'https://claude.ai/docs/code-review'
+          description: 'AI-powered code review using Claude for infrastructure patterns'
+      run_scripts:
+        description: 'Run Claude AI code review on the infrastructure implementation'
+        scripts:
+          - name: 'Trigger Claude infrastructure review'
+            command: |
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-infrastructure-layer"
+
+              # Check if Claude CLI is available
+              if command -v claude &> /dev/null; then
+                echo "🤖 Starting AI code review with Claude for infrastructure layer..."
+
+                claude /review \
+                  --branch "$BRANCH_NAME" \
+                  --focus "clean-architecture,infrastructure-patterns,tdd,security" \
+                  --checklist ".github/infrastructure_review_checklist.md" \
+                  --output "review-infra-__FEATURE_NAME_KEBAB_CASE__.md"
+
+                echo "✅ AI infrastructure review complete. Check review-infra-__FEATURE_NAME_KEBAB_CASE__.md"
+
+                # Add review as PR comment if gh CLI is available
+                if command -v gh &> /dev/null && [ -f "review-infra-__FEATURE_NAME_KEBAB_CASE__.md" ]; then
+                  gh pr comment --body-file "review-infra-__FEATURE_NAME_KEBAB_CASE__.md"
+                  echo "✅ Review posted to PR"
+                fi
+              else
+                echo "⚠️  Claude CLI not installed. Skipping AI review."
+                echo "   Install with: npm install -g @anthropic/claude-cli"
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+    # === STEP 18: POST-MERGE CLEANUP ===
+    - id: 'post-merge-cleanup-infra-__FEATURE_NAME_KEBAB_CASE__'
+      type: 'validation'
+      description: 'Cleanup after infrastructure PR merge'
+      status: 'PENDING'
+      rlhf_score: null
+      execution_log: ''
+      references:
+        - type: 'internal_guideline'
+          source: 'GIT_WORKFLOW.md'
+          description: 'Post-merge cleanup procedures for infrastructure layer'
+      run_scripts:
+        description: 'Clean up local and remote branches after infrastructure merge'
+        scripts:
+          - name: 'Post-merge infrastructure cleanup'
+            command: |
+              BRANCH_NAME="feat/__FEATURE_NAME_KEBAB_CASE__-infrastructure-layer"
+
+              # Check if PR is merged
+              if command -v gh &> /dev/null; then
+                PR_STATE=$(gh pr view "$BRANCH_NAME" --json state -q .state 2>/dev/null || echo "UNKNOWN")
+
+                if [ "$PR_STATE" = "MERGED" ]; then
+                  echo "🧹 Starting post-merge cleanup for infrastructure..."
+
+                  # Switch to main branch
+                  git checkout main || git checkout master
+                  git pull origin main || git pull origin master
+
+                  # Delete local branch
+                  git branch -d "$BRANCH_NAME"
+
+                  # Delete remote branch
+                  git push origin --delete "$BRANCH_NAME"
+
+                  # Clean up review files
+                  rm -f review-infra-__FEATURE_NAME_KEBAB_CASE__.md
+
+                  echo "✅ Infrastructure cleanup complete. Branch deleted locally and remotely."
+                else
+                  echo "⏳ Infrastructure PR not yet merged. Skipping cleanup."
+                fi
+              else
+                echo "⚠️  GitHub CLI not available. Please clean up branches manually after merge."
+              fi
+            workingDirectory: '__PROJECT_NAME__'
+
+
+
+# --- From: shared/01-footer.part.regent ---
+  # ============= BEGIN FOOTER SECTION =============
+
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: IMMUTABLE DOCUMENTATION SECTIONS AHEAD.
+  # Copy these sections verbatim. The [placeholders] inside the commands
+  # are for HUMAN examples and MUST NOT be replaced by the AI.
+  # ------------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------------
+  # TROUBLESHOOTING & RECOVERY
+  # ------------------------------------------------------------------------------
+
+  troubleshooting:
+    lint_fails:
+      - 'DO NOT commit - Fix all lint errors first'
+      - 'Check for unused imports'
+      - 'Verify proper TypeScript types'
+      - 'Ensure no console.log statements'
+      - 'Run yarn lint --fix to auto-fix when possible'
+
+    tests_fail:
+      - 'DO NOT commit - All tests must pass'
+      - 'Check if mocks match the actual interfaces'
+      - 'Verify Input/Output types are correct'
+      - 'Ensure test coverage meets requirements'
+      - 'Run specific test: yarn test [test-file-path]'
+
+    typescript_fails:
+      - 'Check all type definitions match'
+      - 'Ensure no missing imports'
+      - 'Verify interface implementations are complete'
+      - 'Run yarn tsc --noEmit to check types'
+
+  # Refactoring checklist
+  refactoring:
+    before_refactoring: |
+      # Check current status and differences
+      echo "📊 Checking current changes..."
+      git status
+      git diff
+
+      # Ensure clean working directory
+      echo "✅ Saving current work..."
+      git stash save "WIP: before refactoring"
+
+      # Create refactoring branch
+      echo "🌿 Creating refactor branch..."
+      git checkout -b refactor/[feature-name]
+
+      # Run tests to ensure starting point is stable
+      echo "🧪 Validating current state..."
+      yarn test --run
+      if [ $? -ne 0 ]; then
+        echo "❌ Tests failing before refactor - fix first!"
+        exit 1
+      fi
+      echo "✅ Ready to refactor"
+
+    during_refactoring: |
+      # After each change, check what was modified
+      echo "🔍 Reviewing changes..."
+      git diff --stat
+      git diff
+
+      # Validate the change
+      yarn lint && yarn test --run
+
+      # Commit atomically
+      git add -p  # Interactive staging
+      git commit -m "refactor([feature-name]): [specific change description]"
+
+      # Show what was changed
+      git show --stat
+
+    common_scenarios:
+      - name: 'Splitting a use case'
+        wrong_example: |
+          interface CreateUserAndSendEmail {
+            execute: (input: CreateUserAndSendEmailInput) => Promise<CreateUserAndSendEmailOutput>
+          }
+        correct_example: |
+          interface CreateUser{
+            execute: (input: CreateUserInput) => Promise<CreateUserOutput>
+          }
+          interface SendWelcomeEmail {
+            execute: (input: SendWelcomeEmailInput) => Promise<SendWelcomeEmailOutput>
+          }
+
+      - name: 'Renaming domain errors'
+        wrong_example: |
+          export class ErrorUserExists extends Error {
+            constructor() {
+              super('Error: user exists')
+              this.name = 'ErrorUserExists'
+            }
+          }
+        correct_example: |
+          export class UserAlreadyExistsError extends Error {
+            constructor() {
+              super('User with this email already exists')
+              this.name = 'UserAlreadyExistsError'
+            }
+          }
+
+  # ------------------------------------------------------------------------------
+  # LEARNING & IMPROVEMENT PATTERNS
+  # The system tracks these patterns to improve over time
+  # ------------------------------------------------------------------------------
+  learning_patterns:
+    common_errors:
+      # Domain Layer Violations
+      - pattern: 'import axios|fetch|prisma|redis'
+        fix: 'Remove external library imports from domain layer'
+        layer: 'domain'
+        score_impact: -2
+
+      - pattern: 'CreateUserAndSend|GetDataAndFormat'
+        fix: 'Split into two separate use cases (SRP violation)'
+        layer: 'domain'
+        score_impact: -1
+
+      - pattern: 'missing @domainConcept'
+        fix: 'Add domain concept documentation for +2 score'
+        layer: 'domain'
+        score_impact: +1
+
+      # Data Layer Violations
+      - pattern: 'direct database access in data layer'
+        fix: 'Use repository protocols instead of direct database access'
+        layer: 'data'
+        score_impact: -2
+
+      - pattern: 'business logic in data layer'
+        fix: 'Move business logic to domain layer'
+        layer: 'data'
+        score_impact: -1
+
+      # Infrastructure Layer Violations
+      - pattern: 'business logic in infrastructure'
+        fix: 'Infrastructure should only contain adapters and implementations'
+        layer: 'infra'
+        score_impact: -2
+
+      - pattern: 'missing error handling in adapters'
+        fix: 'Add proper error handling and recovery in infrastructure adapters'
+        layer: 'infra'
+        score_impact: -1
+
+      # Presentation Layer Violations
+      - pattern: 'business logic in controllers|components'
+        fix: 'Move business logic to use cases in domain layer'
+        layer: 'presentation'
+        score_impact: -2
+
+      - pattern: 'direct database access from presentation'
+        fix: 'Use use cases and factories from main layer'
+        layer: 'presentation'
+        score_impact: -2
+
+      # Main Layer Violations
+      - pattern: 'business logic in factories'
+        fix: 'Main layer should only compose, not implement business logic'
+        layer: 'main'
+        score_impact: -2
+
+      - pattern: 'missing dependency injection'
+        fix: 'Use factories and dependency injection for all dependencies'
+        layer: 'main'
+        score_impact: -1
+
+    success_indicators:
+      - 'Uses ubiquitous language consistently across all layers'
+      - 'Follows single responsibility principle in every component'
+      - 'No dependency violations between layers'
+      - 'Comprehensive test coverage (Domain: 100%, Data: 95%, Infra: 80%, Presentation: 90%)'
+      - 'Clean git history with atomic commits'
+      - 'Proper error handling at each layer boundary'
+      - 'Clear separation of concerns between layers'
+      - 'Type safety maintained throughout the stack'
+
+  # AI Guidelines for All Layers
+  ai_guidelines:
+    general:
+      - 'Always validate before committing: Run lint first, Run tests second, Only commit if both pass'
+      - 'If generation fails: Identify the specific error, Fix only that error, Re-run validation, Do NOT proceed until fixed'
+      - 'MUST generate different case styles from the input names (e.g., "Add Item To Cart" becomes: PascalCase=AddItemToCart, kebab-case=add-item-to-cart, lower case=add item to cart).'
+      - 'MUST replace ALL placeholder variables (like __FEATURE_NAME_KEBAB_CASE__) with actual values'
+      - 'MUST NOT leave any placeholder variables in the final implementation'
+      - 'MUST NOT replace any [placeholders] found inside documentation sections like refactoring or recovery'
+      - 'MUST use vitest for backend, @testing-library/react for frontend'
+      - 'When in doubt: Choose simplicity over complexity, Split rather than combine, Ask for clarification rather than assume'
+
+    layer_specific:
+      domain:
+        - 'Follow the principle: One use case = One file = One responsibility'
+        - 'If tempted to add "And" in a use case name, split it'
+        - 'MUST follow all domain rules - no business logic implementation, only contracts'
+        - 'No external dependencies allowed in domain layer'
+        - 'Use value objects for domain concepts'
+        - 'Define clear domain errors with meaningful messages'
+
+      data:
+        - 'Implement use cases defined in domain layer'
+        - 'Use repository protocols for data access'
+        - 'Transform external data to domain models'
+        - 'Handle data-specific errors and map to domain errors'
+        - 'No direct database or API calls'
+
+      infrastructure:
+        - 'Implement repository interfaces defined in data layer'
+        - 'Handle external service integrations (database, cache, APIs)'
+        - 'Provide concrete implementations of protocols'
+        - 'Include proper error handling and retry logic'
+        - 'Use appropriate design patterns (Adapter, Facade)'
+
+      presentation:
+        - 'Controllers/Components should be thin - delegate to use cases'
+        - 'Handle input validation and transformation'
+        - 'Format responses for clients'
+        - 'Implement proper error responses'
+        - 'For frontend: Use hooks for business logic extraction'
+        - 'For backend: Use middleware for cross-cutting concerns'
+
+      main:
+        - 'Composition root only - no business logic'
+        - 'Wire up all dependencies using factories'
+        - 'Configure dependency injection'
+        - 'Setup application bootstrap and configuration'
+        - 'For Next.js: Configure providers and middleware'
+        - 'For Express/Fastify: Setup server and routes'
+
+  # ------------------------------------------------------------------------------
+  # AI-NOTE: TASK EVALUATION SECTION.
+  # After the entire execution is complete, this section will be populated by a
+  # human reviewer or an evaluation script.
+  # ------------------------------------------------------------------------------
+
+  evaluation:
+    # AI-NOTE: This final_status will be 'SUCCESS' if all steps passed, or 'FAILED' if any step failed.
+    final_status: 'PENDING' # PENDING | SUCCESS | FAILED
+    # AI-NOTE: The final_rlhf_score is calculated automatically based on execution quality
+    # -2: Catastrophic errors (architecture violations, wrong REPLACE/WITH format)
+    # -1: Runtime errors (lint, tests, git failures)
+    #  0: Low confidence (system uncertain, prevents hallucinations)
+    # +1: Good execution but missing DDD elements
+    # +2: Perfect with Clean Architecture, DDD, ubiquitous language
+    final_rlhf_score: null # -2, -1, 0, 1, 2
+    # AI-NOTE: The system automatically analyzes patterns and learns from each execution
+    # This text is enhanced by automated RLHF analysis for continuous improvement
+    reviewer_summary: |
+      - What went well:
+        - ...
+      - Areas for improvement:
+        - ...
+    # AI-NOTE: This section lists actionable suggestions for improving the master templates or prompts.
+    # This is the key to the continuous learning loop.
+    template_improvement_suggestions:
+      - target_template: '[layer].template.yaml'
+        target_step_id: '[step-id]'
+        suggestion: '[specific improvement suggestion based on execution results]'
+        priority: 'medium'
+        
+  # ============= END FOOTER SECTION =============
+
+  # End of TEMPLATE.yaml

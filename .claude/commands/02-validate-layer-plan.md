@@ -165,13 +165,80 @@ You **MUST** validate the input JSON against every rule in this checklist. The v
 
 ### A. Schema and Structure Validation 📋
 
+#### **🔄 CRITICAL: Support for Both Legacy and Modular Structures (Issue #117)**
+
+The validator now supports **TWO valid JSON structures**:
+
+**1️⃣ LEGACY Structure (pre-Issue #117):**
+```json
+{
+  "featureName": "FeatureName",
+  "featureNumber": "001",
+  "layer": "domain",
+  "target": "backend",
+  "steps": [...]  // ← Flat array of all steps
+}
+```
+
+**2️⃣ MODULAR Structure (Issue #117 - NEW):**
+```json
+{
+  "featureName": "FeatureName",
+  "featureNumber": "001",
+  "layer": "domain",
+  "target": "backend",
+  "layerContext": { "ubiquitousLanguage": {...}, "businessRules": [...] },
+  "sharedComponents": {    // ← Shared models, VOs, repos, errors
+    "models": [...],
+    "valueObjects": [...],
+    "repositories": [...],
+    "sharedErrors": [...]
+  },
+  "useCases": [...]        // ← Individual use case definitions
+}
+```
+
+**Validation Logic**: Check if JSON has `steps` array OR (`sharedComponents` + `useCases`). If NEITHER exists, fail validation.
+
+---
+
+#### Structure Validation Rules
+
 | Rule | Description | Impact if Violated |
 |------|-------------|-------------------|
-| **Root Keys** | Must contain `featureName` (string) and `steps` (array) | RUNTIME (-1) |
-| **Ubiquitous Language** | If present, must be object with string key-value pairs | GOOD (+1) if missing |
-| **Step Keys** | Every step must have `id`, `type`, `description`, `path` | RUNTIME (-1) |
+| **Root Keys (Required)** | Must contain `featureName` (string), `featureNumber` (string), `layer` (string), `target` (string) | RUNTIME (-1) |
+| **Structure Type** | Must have EITHER `steps` array (legacy) OR `sharedComponents` object + `useCases` array (modular) | RUNTIME (-1) |
+| **Layer Context** | If modular structure: MUST have `layerContext` with `ubiquitousLanguage` and `businessRules` | GOOD (+1) if present |
+| **Ubiquitous Language** | If present, must be object with string key-value pairs | GOOD (+1) if comprehensive |
+| **Step Keys (Legacy)** | If using `steps[]`: Every step must have `id`, `type`, `description`, `path` | RUNTIME (-1) |
+| **Use Case Keys (Modular)** | If using `useCases[]`: Every use case must have `name`, `description`, `input`, `output`, `path` | RUNTIME (-1) |
 | **Step Types** | Must be one of: `create_file`, `refactor_file`, `delete_file`, `folder` | RUNTIME (-1) |
-| **References** | Every step must have `references` array (can be empty for errors) | LOW CONFIDENCE (0) |
+| **References** | Every step/component must have `references` (can be empty) | LOW CONFIDENCE (0) |
+
+---
+
+#### 🔍 Detection Algorithm
+
+```typescript
+// Pseudo-code for structure detection
+function detectStructureType(json: any): 'legacy' | 'modular' | 'invalid' {
+  const hasSteps = Array.isArray(json.steps);
+  const hasSharedComponents = typeof json.sharedComponents === 'object';
+  const hasUseCases = Array.isArray(json.useCases);
+
+  if (hasSteps && !hasSharedComponents && !hasUseCases) {
+    return 'legacy';  // Pre-Issue #117 structure
+  }
+
+  if (!hasSteps && hasSharedComponents && hasUseCases) {
+    return 'modular'; // Issue #117 modular structure
+  }
+
+  return 'invalid';   // Fail validation - neither structure detected
+}
+```
+
+**Important**: When validating MODULAR structure, validate `sharedComponents` definitions AND `useCases` definitions separately, as they will generate separate YAML files downstream.
 
 ### B. Logical Consistency and Completeness 🔍
 
@@ -600,6 +667,54 @@ After validation completes, provide clear guidance on the next workflow step:
 ```
 
 **Important**: Always suggest the next command with `--file` parameter referencing the **actual** validated plan.json file path from the input (replace the example path with the real one).
+
+---
+
+#### 📊 Validation Output Examples
+
+**Example 1: MODULAR Structure (Issue #117) - SUCCESS**
+```markdown
+✅ Validation Complete - RLHF Score: +2 (PERFECT)
+
+📋 Structure Analysis:
+- Type: MODULAR (Issue #117) ✅
+- Shared Components: 4 categories (models: 1, valueObjects: 3, repositories: 1, sharedErrors: 4)
+- Use Cases: 3 (CreateProduct, UpdateProduct, ArchiveProduct)
+- Layer Context: Present with comprehensive ubiquitous language (6 terms) ✅
+- Business Rules: 7 rules defined ✅
+
+🎯 Quality Indicators:
+- Ubiquitous Language: Comprehensive (+1)
+- Business Rules: Well-defined (+1)
+- Architectural Approach: Explicitly documented (+1)
+- Design Decisions: 5 key decisions documented (+1)
+
+🚀 Next Step:
+/03-generate-layer-code --layer=domain --file=spec/001-product-catalog-management/domain/plan.json
+
+💡 Expected Output: Will generate 4 separate YAML files:
+   - shared-implementation.yaml (models, VOs, repos, errors)
+   - create-product-implementation.yaml
+   - update-product-implementation.yaml
+   - archive-product-implementation.yaml
+```
+
+**Example 2: LEGACY Structure - SUCCESS**
+```markdown
+✅ Validation Complete - RLHF Score: +1 (GOOD)
+
+📋 Structure Analysis:
+- Type: LEGACY (pre-Issue #117) ✅
+- Steps: 19 steps in flat array
+- Warning: Consider migrating to modular structure for better atomic commits
+
+🚀 Next Step:
+/03-generate-layer-code --layer=domain --file=spec/001-user-authentication/domain/plan.json
+
+💡 This will generate a single monolithic implementation.yaml file.
+```
+
+---
 
 ### ❌ If validation FAILED:
 
