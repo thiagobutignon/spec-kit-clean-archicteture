@@ -85,7 +85,7 @@ const MCP_TOOLS: ToolCheck[] = [
     name: 'context7',
     command: 'context7',
     description: 'Documentation retrieval',
-    installUrl: 'See SETUP_MCP.md',
+    installUrl: 'See docs/setup/SETUP_MCP.md',
     required: false
   },
   {
@@ -204,7 +204,7 @@ export async function checkCommand(): Promise<void> {
   if (mcpToolsAvailable > 0) {
     console.log(chalk.green(`✅ ${mcpToolsAvailable} MCP tool(s) available.`));
   } else {
-    console.log(chalk.yellow.bold('💡 Install MCP tools for enhanced code intelligence (see SETUP_MCP.md)'));
+    console.log(chalk.yellow.bold('💡 Install MCP tools for enhanced code intelligence (see docs/setup/SETUP_MCP.md)'));
   }
 
   console.log();
