@@ -182,7 +182,7 @@
           __ERROR_NAME_PASCAL_CASE__Error,
           __USE_CASE_NAME_PASCAL_CASE__ValidationError,
           __USE_CASE_NAME_PASCAL_CASE__BusinessRuleError
-        } from '../errors/__USE_CASE_NAME_KEBAB_CASE__-errors'
+        } from '../errors'
 
         // Mock implementation for testing the interface contract
         class Mock__USE_CASE_NAME_PASCAL_CASE__ implements __USE_CASE_NAME_PASCAL_CASE__ {

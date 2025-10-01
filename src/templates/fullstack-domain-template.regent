@@ -1950,7 +1950,7 @@ integration:
           __USE_CASE_NAME_PASCAL_CASE__ValidationError,
           __USE_CASE_NAME_PASCAL_CASE__NotFoundError,
           is__USE_CASE_NAME_PASCAL_CASE__Error
-        } from '../errors/__USE_CASE_NAME_KEBAB_CASE__-errors'
+        } from '../errors'
 
         /**
          * Shared domain layer tests for __USE_CASE_NAME_PASCAL_CASE__
