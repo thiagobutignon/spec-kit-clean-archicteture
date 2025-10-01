@@ -8,6 +8,13 @@ import inquirer from 'inquirer';
 import crypto from 'crypto';
 import { MCPInstaller, promptMCPInstallation } from '../utils/mcp-installer.js';
 import { DEFAULT_GITIGNORE_TEMPLATE, REGENT_GITIGNORE_ENTRIES } from '../templates/default-gitignore.js';
+import {
+  mcpJsonExists,
+  generateMcpJson,
+  createCustomMcpConfig,
+  displayMcpJsonInfo,
+  displayPrerequisites
+} from '../utils/mcp-json-generator.js';
 
 // Get the directory where this package is installed
 const __filename = fileURLToPath(import.meta.url);
@@ -104,43 +111,113 @@ export async function initCommand(projectName: string | undefined, options: Init
     // Show success message
     console.log(chalk.green.bold('✅ Project initialized successfully!\n'));
 
-    // Install MCP servers if not skipped
+    // Setup MCP configuration if not skipped
     if (!options.skipMcp) {
       try {
-        const mcpConfig = await promptMCPInstallation();
+        // Check if .mcp.json already exists
+        const hasMcpJson = await mcpJsonExists(projectPath);
 
-        if (Object.keys(mcpConfig).length > 0) {
-          const installer = new MCPInstaller(projectPath);
-          await installer.installAll(mcpConfig);
+        if (hasMcpJson) {
+          console.log(chalk.green('✅ .mcp.json already exists - project-level MCP configuration detected'));
+          console.log(chalk.dim('   MCPs will work automatically in all subdirectories'));
+          console.log(chalk.cyan('   💡 Reload Claude Code to detect MCP servers\n'));
+        } else {
+          // Prompt for MCP setup method
+          console.log(chalk.cyan.bold('\n🔧 MCP Server Setup\n'));
+          console.log(chalk.white('Choose how to configure MCP servers:\n'));
+          console.log(chalk.dim('  1. Project-level (.mcp.json) - RECOMMENDED'));
+          console.log(chalk.dim('     • Works in all subdirectories'));
+          console.log(chalk.dim('     • Shared via git (team-wide)'));
+          console.log(chalk.dim('     • No per-developer setup\n'));
+          console.log(chalk.dim('  2. Local installation'));
+          console.log(chalk.dim('     • User-specific configuration'));
+          console.log(chalk.dim('     • Not shared via git\n'));
 
-          // Verify installation
-          console.log(chalk.cyan.bold('\n🔍 Verifying MCP installation...\n'));
-          const installedServers = await installer.verifyInstallation();
+          const setupChoice = await inquirer.prompt([
+            {
+              type: 'list',
+              name: 'method',
+              message: 'How do you want to configure MCP servers?',
+              choices: [
+                { name: 'Create .mcp.json (project-level) - Recommended', value: 'project' },
+                { name: 'Install locally (user-specific)', value: 'local' },
+                { name: 'Skip MCP setup', value: 'skip' }
+              ],
+              default: 'project'
+            }
+          ]);
 
-          if (installedServers.length > 0) {
-            console.log(chalk.green.bold('✅ MCP Servers Verified:\n'));
-            installedServers.forEach(server => console.log(chalk.green(`   • ${server}`)));
-            console.log();
-            console.log(chalk.cyan('💡 Run /mcp in Claude Code to see available servers\n'));
+          if (setupChoice.method === 'project') {
+            // Generate .mcp.json
+            console.log(chalk.cyan('\n📝 Creating project-level .mcp.json...\n'));
+
+            // Ask which servers to include
+            const serverSelection = await inquirer.prompt([
+              {
+                type: 'checkbox',
+                name: 'servers',
+                message: 'Select MCP servers to configure:',
+                choices: [
+                  { name: 'serena (semantic code search)', value: 'serena', checked: true },
+                  { name: 'context7 (library docs)', value: 'context7', checked: true },
+                  { name: 'chrome-devtools (browser automation)', value: 'chromeDevtools', checked: true },
+                  { name: 'playwright (web testing)', value: 'playwright', checked: true }
+                ]
+              }
+            ]);
+
+            // Create custom config based on selections
+            const customConfig = createCustomMcpConfig({
+              serena: serverSelection.servers.includes('serena'),
+              context7: serverSelection.servers.includes('context7'),
+              chromeDevtools: serverSelection.servers.includes('chromeDevtools'),
+              playwright: serverSelection.servers.includes('playwright')
+            });
+
+            // Generate .mcp.json file
+            await generateMcpJson(projectPath, customConfig);
+
+            // Display information
+            displayMcpJsonInfo();
+            displayPrerequisites();
+
+          } else if (setupChoice.method === 'local') {
+            // Use legacy local installation
+            console.log(chalk.cyan('\n📦 Installing MCP servers locally...\n'));
+            const mcpConfig = await promptMCPInstallation();
+
+            if (Object.keys(mcpConfig).length > 0) {
+              const installer = new MCPInstaller(projectPath);
+              await installer.installAll(mcpConfig);
+
+              // Verify installation
+              console.log(chalk.cyan.bold('\n🔍 Verifying MCP installation...\n'));
+              const installedServers = await installer.verifyInstallation();
+
+              if (installedServers.length > 0) {
+                console.log(chalk.green.bold('✅ MCP Servers Verified:\n'));
+                installedServers.forEach(server => console.log(chalk.green(`   • ${server}`)));
+                console.log();
+                console.log(chalk.cyan('💡 Run /mcp in Claude Code to see available servers\n'));
+              } else {
+                console.log(chalk.yellow('⚠️ No MCP servers detected after installation'));
+                console.log(chalk.dim('   • MCP servers may require a Claude Code restart'));
+                console.log(chalk.dim('   • See docs/setup/mcp-configuration.md for troubleshooting\n'));
+              }
+            }
           } else {
-            console.log(chalk.yellow('⚠️ No MCP servers detected after installation'));
-            console.log(chalk.dim('   Possible causes:'));
-            console.log(chalk.dim('   • MCP servers may require a Claude Code restart'));
-            console.log(chalk.dim('   • Installation may have failed silently'));
-            console.log(chalk.dim('   • Claude CLI may not be properly configured'));
-            console.log(chalk.dim('\n   Next steps:'));
-            console.log(chalk.dim('   1. Run: claude mcp list'));
-            console.log(chalk.dim('   2. Restart your Claude Code session'));
-            console.log(chalk.dim('   3. Check docs/setup/SETUP_MCP.md for troubleshooting\n'));
+            console.log(chalk.yellow('⏭️  Skipping MCP setup'));
+            console.log(chalk.dim('   💡 Run "regent setup-mcp" later to configure MCP servers\n'));
           }
         }
       } catch (error) {
-        console.log(chalk.yellow('⚠️ MCP installation encountered an issue - continuing without MCP servers'));
+        console.log(chalk.yellow('⚠️ MCP setup encountered an issue - continuing without MCP servers'));
         console.log(chalk.dim(`   Error: ${(error as Error).message}`));
-        console.log(chalk.dim('   💡 You can install MCP servers manually (see docs/setup/SETUP_MCP.md)\n'));
+        console.log(chalk.dim('   💡 Run "regent setup-mcp" later or see docs/setup/mcp-configuration.md\n'));
       }
     } else {
-      console.log(chalk.yellow('⏭️  Skipping MCP installation (--skip-mcp flag)\n'));
+      console.log(chalk.yellow('⏭️  Skipping MCP setup (--skip-mcp flag)'));
+      console.log(chalk.dim('   💡 Run "regent setup-mcp" later to configure MCP servers\n'));
     }
 
     // Show next steps

@@ -56,6 +56,8 @@ This release focuses on three key areas:
   - Configured 4 essential servers: serena, context7, chrome-devtools, playwright
   - MCPs now work automatically in all subdirectories
   - Supports environment variables for optional API keys (Context7)
+  - **CLI Integration**: `regent init` now offers to create `.mcp.json` (recommended option)
+  - **New command**: `regent setup-mcp` to create/update `.mcp.json` in existing projects
   - File: `.mcp.json`
 
 - **MCP Configuration Documentation** (#150)

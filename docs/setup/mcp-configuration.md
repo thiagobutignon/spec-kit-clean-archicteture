@@ -65,6 +65,38 @@ The `.mcp.json` file at the project root contains:
 }
 ```
 
+## Creating .mcp.json
+
+### Using regent CLI (Recommended)
+
+The `regent` CLI provides an integrated way to create `.mcp.json`:
+
+**During project initialization:**
+```bash
+# regent init will prompt you to create .mcp.json
+regent init my-project
+
+# Choose "Create .mcp.json (project-level)" when prompted
+# Select which MCP servers to configure
+```
+
+**After project initialization:**
+```bash
+# Create or update .mcp.json in existing project
+cd my-project
+regent setup-mcp
+
+# Create with all servers without prompts
+regent setup-mcp --all
+
+# Force overwrite existing .mcp.json
+regent setup-mcp --force
+```
+
+### Manual Creation
+
+You can also create `.mcp.json` manually by copying the template above to your project root.
+
 ## How It Works
 
 ### 1. First-Time Setup
