@@ -25,7 +25,7 @@ parameters:
     description: "Target environment URL"
 required_mcp: "chrome-devtools"
 previous_command: "/06-execute-layer-steps"
-next_command: "/08-apply-layer-improvements"
+next_command: "/09-apply-layer-improvements"
 ---
 
 # Task: E2E Performance Testing
@@ -364,6 +364,6 @@ After successful E2E testing:
 1. Review performance insights
 2. Apply recommended optimizations
 3. Update templates with learnings
-4. Run `/08-apply-layer-improvements`
+4. Run `/09-apply-layer-improvements`
 
 > 💡 **Pro Tip**: Use Chrome DevTools MCP throughout development, not just at the end. Early testing prevents architectural drift and ensures consistent quality across all layers.
