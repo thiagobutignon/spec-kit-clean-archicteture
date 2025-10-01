@@ -139,6 +139,36 @@ describe('Init Command - Directory Structure', () => {
       expect(stats.isDirectory()).toBe(true);
     });
 
+    it('should copy .regent/tsconfig.json during initialization', async () => {
+      await fs.ensureDir(path.join(testProjectPath, '.regent'));
+
+      const sourceTsconfigPath = path.join(packageRoot, '.regent/tsconfig.json');
+      const targetTsconfigPath = path.join(testProjectPath, '.regent/tsconfig.json');
+
+      // Verify source exists
+      expect(await fs.pathExists(sourceTsconfigPath)).toBe(true);
+
+      // Simulate init command copy
+      await fs.copy(sourceTsconfigPath, targetTsconfigPath);
+
+      // Verify target exists
+      expect(await fs.pathExists(targetTsconfigPath)).toBe(true);
+
+      // Verify content is valid JSON with expected configuration
+      const content = await fs.readJson(targetTsconfigPath);
+      expect(content.compilerOptions).toBeDefined();
+      expect(content.compilerOptions.module).toBe('ESNext');
+      expect(content.compilerOptions.target).toBe('ESNext');
+      expect(content.compilerOptions.esModuleInterop).toBe(true);
+      expect(content.compilerOptions.forceConsistentCasingInFileNames).toBe(true);
+
+      // Verify include paths are set correctly
+      expect(content.include).toContain('config/**/*.ts');
+      expect(content.include).toContain('core/**/*.ts');
+      expect(content.include).toContain('utils/**/*.ts');
+      expect(content.include).toContain('scripts/**/*.ts');
+    });
+
     it('should not create legacy .specify directories', async () => {
       // These directories should NOT be created anymore
       const legacyDirs = [
