@@ -26,12 +26,11 @@ program
   .description('The Regent - AI-powered Clean Architecture CLI with guaranteed architectural quality')
   .version(packageJson.version, '-v, --version', 'output the current version');
 
-// Custom help display
-const originalHelp = program.help.bind(program);
-program.help = function(options?: unknown) {
+// Custom help display - show banner before help
+program.addHelpText('beforeAll', () => {
   showBanner();
-  return originalHelp(options);
-};
+  return '';
+});
 
 // Commands
 program
