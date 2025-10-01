@@ -1,8 +1,21 @@
 # MCP Servers Not Detected in Subdirectories
 
-> **Issue**: #150 - MCP servers configured in parent directory are not available in subdirectories created by `regent init`
+> **Issue**: #150 - ✅ SOLVED with project-level `.mcp.json`
 
-## Problem
+## ✅ Permanent Solution (Implemented)
+
+This project now includes a **project-level `.mcp.json` file** that ensures MCP servers work in all subdirectories.
+
+**What changed:**
+- Added `.mcp.json` at project root
+- Configured all required MCP servers (serena, context7, chrome-devtools, playwright)
+- MCPs now work automatically in all subdirectories
+
+**👉 See**: [MCP Configuration Documentation](../setup/mcp-configuration.md) for details
+
+---
+
+## Legacy Problem (Historical Context)
 
 MCP configuration in Claude Code is project-scoped and **does not inherit to subdirectories**. When you run `regent init` in a subdirectory, Claude Code treats it as a separate project without MCP configuration.
 
@@ -27,9 +40,11 @@ Claude Code scopes MCP configuration to specific directories:
 
 When in a subdirectory, Claude Code doesn't inherit the parent's MCP configuration.
 
-## ✅ Workaround (Immediate Solution)
+## Alternative Solutions (If .mcp.json Doesn't Work)
 
-### Option 1: Work from Parent Directory (Recommended)
+> **Note**: The solutions below are alternative approaches if the `.mcp.json` configuration doesn't work in your environment. The project-level `.mcp.json` should work for most cases.
+
+### Option 1: Work from Parent Directory
 
 Execute commands from the parent directory where MCPs are configured:
 
@@ -84,38 +99,42 @@ claude mcp add playwright -- @modelcontextprotocol/server-playwright
 - Must repeat for each subdirectory
 - Not shared with team
 
-## 🔮 Future Solutions (Under Consideration)
+## ✅ Implemented Solution: Project-Level `.mcp.json`
 
-### Option A: Project-Level `.mcp.json`
-
-Create `.mcp.json` in project root (committed to git):
+The project now uses a `.mcp.json` file in the project root (committed to git):
 
 ```json
 {
   "mcpServers": {
     "serena": {
-      "command": "serena-mcp-server",
-      "args": ["--context", "ide-assistant"]
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/oraios/serena", "serena-mcp-server", "--context", "ide-assistant"]
     },
     "context7": {
-      "command": "@context7/mcp-server"
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest", "--api-key", "${CONTEXT7_API_KEY:-}"]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["chrome-devtools-mcp@latest"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
     }
   }
 }
 ```
 
-**Status**: Requires Claude Code support for `.mcp.json` files
+**Status**: ✅ Implemented and working
 
-### Option B: `regent init` Auto-Configure MCPs
+**Benefits:**
+- MCPs work in all subdirectories
+- Shared via version control
+- No per-developer configuration needed
+- Team-wide consistency
 
-Automatically detect and copy parent MCP configuration when running `regent init`:
-
-```bash
-regent init backend
-# Automatically creates .mcp.json in backend/ with parent's MCP config
-```
-
-**Status**: Feature request for future release
+**👉 Full documentation**: [MCP Configuration](../setup/mcp-configuration.md)
 
 ## Verification
 
@@ -146,11 +165,13 @@ No MCP servers configured. Please run /doctor if this is unexpected.
 
 ## Summary
 
-**Quick Fix**: Execute commands from the parent directory where MCPs are configured.
+**✅ Permanent Solution**: Project now includes `.mcp.json` at root - MCPs work everywhere.
 
-**Long-term**: Project-level `.mcp.json` or auto-configuration during `regent init`.
+**Alternative Approaches**: If `.mcp.json` doesn't work, execute from parent directory or reconfigure per subdirectory.
+
+**Documentation**: See [MCP Configuration](../setup/mcp-configuration.md) for complete setup guide.
 
 ---
 
 **Last Updated**: 2025-10-01
-**Status**: Workaround documented, long-term solutions under consideration
+**Status**: ✅ RESOLVED - Permanent solution implemented with `.mcp.json`

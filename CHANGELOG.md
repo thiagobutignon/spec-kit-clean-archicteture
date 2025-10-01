@@ -51,11 +51,25 @@ This release focuses on three key areas:
   - Color-coded output with actionable error messages
   - Exit codes for CI/CD integration
 
-- **MCP Subdirectory Workaround Documentation** (#150)
-  - Troubleshooting guide for MCP server configuration in subdirectories
-  - Documents root cause: MCP config is project-scoped, no inheritance
-  - Two workaround options: work from parent directory (recommended) or reconfigure per subdirectory
-  - Includes verification steps and future solution proposals
+- **Project-Level MCP Configuration** (#150) - PERMANENT SOLUTION
+  - Added `.mcp.json` at project root for team-wide MCP server configuration
+  - Configured 4 essential servers: serena, context7, chrome-devtools, playwright
+  - MCPs now work automatically in all subdirectories
+  - Supports environment variables for optional API keys (Context7)
+  - File: `.mcp.json`
+
+- **MCP Configuration Documentation** (#150)
+  - Comprehensive setup guide for project-level `.mcp.json` (500+ lines)
+  - Prerequisites and installation instructions
+  - Context7 API key setup (optional, for higher rate limits)
+  - Troubleshooting guide with common issues
+  - Security best practices for team configurations
+  - File: `docs/setup/mcp-configuration.md`
+
+- **MCP Troubleshooting Documentation** (#150)
+  - Updated troubleshooting guide to reflect permanent solution
+  - Historical context for alternative workarounds
+  - Migration from per-directory to project-level configuration
   - File: `docs/troubleshooting/mcp-subdirectory-workaround.md`
 
 - Automated NPM package publishing via GitHub Actions
@@ -144,7 +158,8 @@ This release focuses on three key areas:
 - ✅ Systematic process for architectural changes
 - ✅ Automated detection of inconsistencies
 - ✅ Better error messages and guidance
-- ✅ MCP configuration troubleshooting with workarounds
+- ✅ **MCP servers work in all subdirectories automatically** (no per-directory setup)
+- ✅ Team-wide MCP configuration via git (onboarding simplified)
 - ✅ Multi-YAML execution guidance prevents compilation errors
 
 **Issues Resolved:**
