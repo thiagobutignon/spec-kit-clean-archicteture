@@ -70,21 +70,26 @@ jobs:
         run: |
           echo "📋 ESLint Boundaries Validation"
           echo "================================"
-          npm run lint || echo "⚠️ ESLint warnings found (not blocking)"
+          npm run lint
+        continue-on-error: false
 
       - name: Validate Architecture with Dependency Cruiser
         run: |
           echo "📋 Dependency Cruiser Validation"
           echo "================================="
           npm run arch:validate
+        continue-on-error: false
+
+      - name: Install Graphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+        continue-on-error: true
 
       - name: Generate Architecture Graph
         run: |
           echo "📊 Generating Architecture Graph"
           echo "================================="
-          # Install Graphviz if available (optional)
-          sudo apt-get update && sudo apt-get install -y graphviz || echo "⚠️ Graphviz not available, skipping graph generation"
-          npm run arch:graph || echo "⚠️ Could not generate graph"
+          npm run arch:graph
+        continue-on-error: true
 
       - name: Upload Architecture Graph
         if: success()

@@ -315,16 +315,33 @@ Architectural validation passes if:
 ### Step 6.4: Failure Handling
 
 If architectural validation fails:
+
+**Example 1: Layer Violation (CATASTROPHIC)**
 ```json
 {
   "status": "FAILED",
   "errors": [
-    "ESLint boundaries violation: domain/models/user.ts imports from data layer (RLHF: -2)",
-    "Dependency cruiser error: circular dependency detected in use-cases (RLHF: 0)"
+    "ESLint boundaries violation: domain/models/user.ts imports from data layer (RLHF: -2)"
   ],
   "severity": "CATASTROPHIC"
 }
 ```
+
+**Example 2: Circular Dependency (WARNING)**
+```json
+{
+  "status": "FAILED",
+  "errors": [
+    "Dependency cruiser warning: circular dependency detected in use-cases (RLHF: 0)"
+  ],
+  "severity": "WARNING"
+}
+```
+
+**Severity Classification:**
+- **CATASTROPHIC (-2)**: Layer violations, domain importing from outer layers
+- **WARNING (0)**: Circular dependencies (should fix but not blocking)
+- Circular dependencies are warnings, not errors, as they don't violate Clean Architecture but should be addressed
 
 **Important:** These are **objective, tool-based validations**, not LLM opinions. They provide deterministic, repeatable quality gates.
 
