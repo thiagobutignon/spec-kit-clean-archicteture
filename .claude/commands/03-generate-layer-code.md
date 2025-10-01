@@ -241,6 +241,90 @@ steps:
 3. **Better Reviews**: Small, focused PRs (50 lines vs 500 lines)
 4. **Vertical Slices**: Each use case is self-contained and independently deployable
 
+## 1.2. Edge Case Handling (Issue #145) 🔍
+
+Before generating your YAMLs, check for these edge cases:
+
+### Edge Case 1: Single Use Case Feature
+**Detection**: JSON plan has only ONE use case
+**Action**: Still generate BOTH shared + use case YAMLs
+**Reason**: Consistency, future-proof, tool compatibility
+
+```
+spec/001-simple-feature/domain/
+├── shared-implementation.yaml          # Generate anyway
+└── single-use-case-implementation.yaml # The one use case
+```
+
+### Edge Case 2: No Shared Components
+**Detection**: `sharedComponents` object is empty or has all empty arrays
+**Action**: SKIP shared-implementation.yaml generation
+**Reason**: Don't create empty files
+
+```
+spec/002-standalone-feature/domain/
+├── use-case-1-implementation.yaml      # Generate only use case YAMLs
+└── use-case-2-implementation.yaml
+```
+
+**⚠️ Warning**: Most features DO have shared components. Double-check before skipping:
+- Do use cases share entities? → Need shared YAML
+- Do use cases share VOs? → Need shared YAML
+- Do use cases share errors? → Need shared YAML
+- Do use cases share repositories? → Need shared YAML
+
+### Edge Case 3: Modifying Shared Components
+**Detection**: User explicitly requests modification to existing shared component
+**Action**: Create `update-shared-implementation.yaml` instead of editing original
+
+```
+spec/001-product-catalog/domain/
+├── shared-implementation.yaml           # Original (DO NOT EDIT)
+├── create-product-implementation.yaml
+└── update-shared-implementation.yaml    # NEW: Modifications to shared
+```
+
+**Naming Pattern**:
+- `update-shared-implementation.yaml` (generic)
+- `update-shared-implementation-add-sku.yaml` (specific purpose)
+
+### Edge Case 4: Use Case Dependencies
+**Detection**: JSON plan has `dependencies` array in use case metadata
+**Action**: Add dependencies to YAML metadata for validation
+
+```yaml
+# update-product-implementation.yaml
+metadata:
+  feature: "product-catalog"
+  layer: "domain"
+  use_case: "update-product"
+  dependencies:
+    - shared-implementation.yaml
+    - create-product-implementation.yaml  # Must be executed first
+
+steps:
+  # ... implementation
+```
+
+**Execution Impact**: `/06-execute-layer-steps` will:
+1. Check if dependency files exist
+2. Validate dependencies were executed
+3. Fail with clear error if dependency missing
+
+### Decision Matrix
+
+| Scenario | Shared YAML | Use Case YAMLs | Notes |
+|----------|-------------|----------------|-------|
+| Single use case | ✅ Generate | ✅ Generate 1 | Always consistent |
+| No shared components | ❌ Skip | ✅ Generate N | Rare case |
+| Multiple use cases | ✅ Generate | ✅ Generate N | Standard flow |
+| Modify shared later | ✅ Keep original | ✅ Generate `update-shared` | Preserves history |
+| Dependent use cases | ✅ Generate | ✅ Add `dependencies` | Explicit order |
+
+**📖 For detailed edge case documentation**: `docs/edge-cases/modular-yaml-edge-cases.md`
+
+---
+
 ## 2. Prohibited Actions ❌
 
 | Action | Status | Reason |

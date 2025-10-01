@@ -503,7 +503,73 @@ import { Server } from './server'; // ✅ Application setup
 - Direct feature implementation
 - Complex algorithms
 
-## 6. JSON Output Structure
+## 6. Edge Case Guidance (Issue #145)
+
+Before generating your JSON plan, consider these edge cases for modular YAML structure:
+
+### Edge Case 1: Single Use Case Feature
+**Question**: Should we still generate both shared + use case YAMLs?
+**Answer**: YES - Always follow the modular pattern for consistency.
+
+```
+spec/001-simple-feature/domain/
+├── shared-implementation.yaml          # Shared components
+└── single-use-case-implementation.yaml # The one use case
+```
+
+**Rationale**: Consistency, future-proof, clear separation, tool compatibility.
+
+### Edge Case 2: No Shared Components
+**Question**: Skip shared YAML if empty?
+**Answer**: YES - Don't create empty files.
+
+```
+spec/002-standalone-feature/domain/
+├── use-case-1-implementation.yaml
+└── use-case-2-implementation.yaml
+```
+
+**Warning**: Most features DO have shared components (entities, VOs, errors, repositories). Only skip if truly nothing is shared.
+
+### Edge Case 3: Modifying Shared After Use Cases
+**Question**: How to modify shared components after implementing use cases?
+**Answer**: Create `update-shared-implementation.yaml`
+
+```
+spec/001-product-catalog/domain/
+├── shared-implementation.yaml           # Original (DO NOT EDIT)
+├── create-product-implementation.yaml
+├── update-product-implementation.yaml
+└── update-shared-implementation.yaml    # NEW: Adds field to Product
+```
+
+**Rationale**: Maintains history, atomic commits, rollback safety, audit trail.
+
+### Edge Case 4: Use Case Dependencies
+**Question**: How to handle use case dependencies?
+**Answer**: Add `dependencies` metadata to JSON plan
+
+```json
+{
+  "useCases": [
+    {
+      "name": "UpdateProduct",
+      "dependencies": [
+        "shared-implementation.yaml",
+        "create-product-implementation.yaml"
+      ]
+    }
+  ]
+}
+```
+
+**Rationale**: Explicit execution order, validation safety, self-documenting.
+
+**📖 For detailed edge case documentation, see**: `docs/edge-cases/modular-yaml-edge-cases.md`
+
+---
+
+## 7. JSON Output Structure
 
 **CRITICAL UPDATE (Issue #117)**: The output structure now supports modular YAML generation - one for shared components, one per use case.
 
@@ -745,7 +811,7 @@ The `sharedComponents` and `useCases` separation enables `/03-generate-layer-cod
 }
 ```
 
-## 7. Final Validation Checklist
+## 8. Final Validation Checklist
 
 ### Template Compliance ✅
 - [ ] Completed Step 1.5.1: Read and wrote down header context
@@ -791,7 +857,7 @@ The `sharedComponents` and `useCases` separation enables `/03-generate-layer-cod
 - [ ] Graceful shutdown
 - [ ] Health checks
 
-## 8. Common Mistakes to Avoid
+## 9. Common Mistakes to Avoid
 
 | Layer | Common Mistake | Impact |
 |-------|---------------|--------|
