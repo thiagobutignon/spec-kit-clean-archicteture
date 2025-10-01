@@ -274,7 +274,7 @@ export async function createProjectStructure(projectPath: string, options: InitO
 
   // Create initial files if new project
   if (!isExistingProject) {
-    await createInitialFiles(projectPath, options);
+    await createInitialFiles(projectPath);
   } else {
     await updateExistingProject(projectPath);
   }

@@ -86,14 +86,16 @@ export class MCPInstaller {
    * Handle installation errors and update report accordingly
    * Reduces code duplication across all install methods
    */
-  private handleInstallError(error: Error, serverName: string, displayName: string, report: InstallReport): void {
+  private handleInstallError(error: unknown, serverName: string, displayName: string, report: InstallReport): void {
     if (this.isAlreadyExistsError(error)) {
       report.skipped.push(`${serverName} (already installed)`);
       console.log(chalk.yellow(`⏭️  ${displayName} - Already installed (skipped)\n`));
-    } else {
-      report.failed.push(serverName);
-      console.log(chalk.red(`❌ ${displayName} installation failed: ${error.message}\n`));
+      return;
     }
+
+    report.failed.push(serverName);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.log(chalk.red(`❌ ${displayName} installation failed: ${errorMessage}\n`));
   }
 
   /**

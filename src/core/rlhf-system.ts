@@ -189,14 +189,14 @@ class EnhancedRLHFSystem {
         stepId: step.id,
         stepType: step.type,
         success: step.status === 'SUCCESS',
-        duration: this.extractDuration(step.execution_log),
+        duration: this.extractDuration(step.execution_log || ''),
         timestamp: new Date(),
         layer: layerInfo?.layer,
         target: layerInfo?.target
       };
 
       if (step.status === 'FAILED') {
-        const errorInfo = this.extractErrorInfo(step.execution_log);
+        const errorInfo = this.extractErrorInfo(step.execution_log || '');
         metric.errorType = errorInfo.type;
         metric.errorMessage = errorInfo.message;
         metric.codePattern = this.extractCodePattern(step);
@@ -237,7 +237,7 @@ class EnhancedRLHFSystem {
     }
 
     // Try layer-specific steps first
-    const layerStepsKey = `${layerInfo.layer}_steps`;
+    const layerStepsKey = `${layerInfo.layer}_steps` as keyof ExecutionPlan;
     const layerSteps = plan[layerStepsKey];
     if (Array.isArray(layerSteps)) {
       return layerSteps;
@@ -303,7 +303,7 @@ class EnhancedRLHFSystem {
   /**
    * Apply template-defined score impacts
    */
-  private applyTemplateScoreImpacts(score: number, stepData: StepData, layerInfo: LayerInfo): number {
+  private applyTemplateScoreImpacts(score: number, stepData: StepData | undefined, layerInfo: LayerInfo): number {
     if (!stepData?.template) return score;
 
     const template = stepData.template.toLowerCase();

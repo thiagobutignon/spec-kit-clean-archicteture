@@ -6,7 +6,7 @@ import * as childProcess from 'child_process';
 vi.mock('child_process');
 
 // Helper to mock execSync properly for string encoding
-const mockExecSyncWithString = (output: string) => output as unknown;
+const mockExecSyncWithString = (output: string): string | Buffer => output;
 
 describe('MCPInstaller', () => {
   let installer: MCPInstaller;

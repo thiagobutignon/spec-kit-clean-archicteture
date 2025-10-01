@@ -24,7 +24,7 @@ import {
   createQualityCheckResult,
 } from './utils/commit-generator';
 import { validateConfig } from './utils/config-validator';
-import { EXIT_CODES, RATE_LIMITS } from './utils/constants';
+import { EXIT_CODES, RATE_LIMITS, RETRY, TIMING } from './utils/constants';
 
 $.verbose = true;
 $.shell = '/bin/bash';
@@ -39,18 +39,27 @@ function extractErrorMessage(error: unknown, fallback = 'Unknown error'): string
   if (!error) return fallback;
 
   // For shell command errors (zx ProcessOutput), prioritize stderr
-  if (error.stderr && typeof error.stderr === 'string' && error.stderr.trim()) {
-    return error.stderr.trim();
+  if (typeof error === 'object' && error !== null && 'stderr' in error) {
+    const stderr = (error as { stderr?: unknown }).stderr;
+    if (typeof stderr === 'string' && stderr.trim()) {
+      return stderr.trim();
+    }
   }
 
   // Fallback to stdout for commands that output errors to stdout
-  if (error.stdout && typeof error.stdout === 'string' && error.stdout.trim()) {
-    return error.stdout.trim();
+  if (typeof error === 'object' && error !== null && 'stdout' in error) {
+    const stdout = (error as { stdout?: unknown }).stdout;
+    if (typeof stdout === 'string' && stdout.trim()) {
+      return stdout.trim();
+    }
   }
 
   // Standard Error object
-  if (error.message) {
-    return error.message;
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === 'string') {
+      return message;
+    }
   }
 
   // If error is a string
@@ -67,8 +76,24 @@ function extractErrorMessage(error: unknown, fallback = 'Unknown error'): string
  * @returns Combined stdout + stderr
  */
 function extractCommandOutput(error: unknown): string {
-  const stdout = error.stdout || '';
-  const stderr = error.stderr || '';
+  let stdout = '';
+  let stderr = '';
+
+  if (typeof error === 'object' && error !== null) {
+    if ('stdout' in error) {
+      const stdoutValue = (error as { stdout?: unknown }).stdout;
+      if (typeof stdoutValue === 'string') {
+        stdout = stdoutValue;
+      }
+    }
+    if ('stderr' in error) {
+      const stderrValue = (error as { stderr?: unknown }).stderr;
+      if (typeof stderrValue === 'string') {
+        stderr = stderrValue;
+      }
+    }
+  }
+
   return (stdout + stderr).trim();
 }
 
