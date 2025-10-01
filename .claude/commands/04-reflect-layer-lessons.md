@@ -187,13 +187,127 @@ graph TD
 
 1. **Parse Input**: Load YAML plan into memory
 2. **Analyze & Reflect**: Evaluate against all checklist categories
-3. **Decide on Action**:
+3. **Run Objective Validation**: Execute architectural validation tools (see section 6)
+4. **Decide on Action**:
    - **Optimal**: No changes needed
    - **Improvable**: Create revised version
-4. **Calculate RLHF Score**: Estimate based on quality indicators
-5. **Generate Report**: Produce appropriate JSON output
+5. **Calculate RLHF Score**: Based on objective validation results
+6. **Generate Report**: Produce appropriate JSON output
 
-## 6. Example Reflections
+## 6. Objective Architectural Analysis
+
+**CRITICAL CHANGE**: This section replaces subjective LLM evaluation with objective, tool-based validation.
+
+### 6.1 Run Architectural Validation Tools
+
+Execute both validation tools to get objective quality metrics:
+
+```bash
+# Run ESLint boundaries validation
+npm run lint
+
+# Run dependency-cruiser validation
+npm run arch:validate
+
+# Generate architecture graph (optional but recommended)
+npm run arch:graph
+```
+
+### 6.2 Parse Validation Results
+
+**ESLint Boundaries Output:**
+- ✅ No violations = Clean Architecture compliance
+- ❌ Violations = Record each with file path and description
+
+**Dependency Cruiser Output:**
+- ✅ "no dependency violations found" = +2 potential
+- ❌ Errors detected = CATASTROPHIC (-2)
+- ⚠️ Warnings (circular deps) = Note but acceptable (0)
+
+### 6.3 Calculate Objective RLHF Score
+
+**Deterministic scoring based on violations:**
+
+| Violations | RLHF Score | Status |
+|------------|------------|--------|
+| 0 errors, 0 warnings | **+2** | PERFECT |
+| 0 errors, 1-3 warnings | **+1** | GOOD |
+| 0 errors, 4+ warnings | **0** | ACCEPTABLE |
+| 1+ errors | **-1 to -2** | FAILED |
+
+**Scoring Logic:**
+```javascript
+// Pseudocode for objective scoring
+if (eslintErrors > 0 || depCruiserErrors > 0) {
+  score = -2; // CATASTROPHIC
+} else if (warnings === 0) {
+  score = 2;  // PERFECT
+} else if (warnings <= 3) {
+  score = 1;  // GOOD
+} else {
+  score = 0;  // ACCEPTABLE (needs improvement)
+}
+```
+
+### 6.4 Include Architecture Graph
+
+If architecture graph was generated:
+- Location: `docs/architecture-graph.svg`
+- Include reference in reflection report
+- Visual validation of layer separation
+- Useful for onboarding and code reviews
+
+### 6.5 Report Format with Objective Metrics
+
+**Success Example (No Violations):**
+```json
+{
+  "status": "NO_CHANGES_NEEDED",
+  "reflection": "Objective validation passed with 0 violations. ESLint boundaries: ✅ clean. Dependency cruiser: ✅ 0 errors, 0 warnings. Architecture graph generated at docs/architecture-graph.svg.",
+  "revised_yaml": null,
+  "estimated_rlhf_score": 2,
+  "validation_results": {
+    "eslint_violations": 0,
+    "dependency_cruiser_errors": 0,
+    "dependency_cruiser_warnings": 0,
+    "architecture_graph": "docs/architecture-graph.svg"
+  }
+}
+```
+
+**Failure Example (Violations Detected):**
+```json
+{
+  "status": "REVISED",
+  "reflection": "Detected 2 architectural violations that must be fixed. ESLint found domain layer importing from data layer (src/domain/user.ts:5). Dependency cruiser detected circular dependency in use-cases. Fixed by removing data layer import and breaking circular dependency.",
+  "revised_yaml": "... fixed YAML ...",
+  "estimated_rlhf_score": 2,
+  "validation_results": {
+    "eslint_violations": 1,
+    "dependency_cruiser_errors": 0,
+    "dependency_cruiser_warnings": 1,
+    "fixes_applied": [
+      "Removed data layer import from domain/user.ts",
+      "Broke circular dependency by introducing interface"
+    ]
+  }
+}
+```
+
+### 6.6 Benefits of Objective Validation
+
+| Benefit | Description |
+|---------|-------------|
+| **Deterministic** | Same code always produces same score |
+| **No Circular Logic** | Tools validate code, not LLM validating LLM |
+| **Actionable Feedback** | Specific file paths and line numbers |
+| **IDE Integration** | Real-time feedback during development |
+| **CI/CD Ready** | Automated quality gates |
+| **Zero Maintenance** | Mature, battle-tested tools |
+
+**Important:** The RLHF score is now based on **objective metrics**, not subjective LLM opinions. This provides reliable, reproducible quality gates for Clean Architecture compliance.
+
+## 7. Example Reflections
 
 ### Example 1: 🔧 Inefficient Steps
 
@@ -275,7 +389,7 @@ steps:
 }
 ```
 
-## 7. Optimization Patterns
+## 8. Optimization Patterns
 
 ### 🎯 Common Improvements for +2 Score:
 
@@ -296,7 +410,7 @@ steps:
 | **Class Use Cases** | `class` keyword | Change to `interface` | +2 points |
 | **Missing Steps** | No branch/PR | Add workflow steps | +1 point |
 
-## 8. RLHF Score Estimation Guide
+## 9. RLHF Score Estimation Guide
 
 | Score | Requirements | Indicators |
 |-------|-------------|------------|
