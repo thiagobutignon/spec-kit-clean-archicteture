@@ -80,7 +80,11 @@ interface PlanStep {
 
 interface ExecutionPlan {
   steps?: PlanStep[];
-  [key: string]: PlanStep[] | unknown;
+  domain_steps?: PlanStep[];
+  data_steps?: PlanStep[];
+  infra_steps?: PlanStep[];
+  presentation_steps?: PlanStep[];
+  main_steps?: PlanStep[];
 }
 
 interface StepData {
