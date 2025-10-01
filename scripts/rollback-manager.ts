@@ -19,6 +19,15 @@ interface RollbackSnapshot {
   branch: string;
 }
 
+interface StepForRollback {
+  id: string;
+  type?: string;
+  path?: string;
+  status?: string;
+  execution_log?: string;
+  rlhf_score?: number | null;
+}
+
 class RollbackManager {
   private snapshotsDir = '.rlhf/snapshots';
   private currentSnapshot?: RollbackSnapshot;
@@ -30,7 +39,7 @@ class RollbackManager {
   /**
    * Create a snapshot before executing a step
    */
-  async createSnapshot(step: any): Promise<void> {
+  async createSnapshot(step: StepForRollback): Promise<void> {
     console.log(chalk.blue(`📸 Creating snapshot for step: ${step.id}`));
 
     const snapshot: RollbackSnapshot = {
@@ -103,7 +112,7 @@ class RollbackManager {
       console.log(chalk.gray(`   Switching branch: ${snapshot.branch}`));
       try {
         execSync(`git checkout ${snapshot.branch}`, { stdio: 'pipe' });
-      } catch (error) {
+      } catch {
         console.log(chalk.yellow(`   ⚠️ Could not switch to branch: ${snapshot.branch}`));
       }
     }
@@ -119,7 +128,7 @@ class RollbackManager {
     const plan = yaml.parse(content);
 
     // Find all failed steps
-    const failedSteps = plan.steps.filter((s: any) => s.status === 'FAILED');
+    const failedSteps = plan.steps.filter((s: StepForRollback) => s.status === 'FAILED');
 
     if (failedSteps.length === 0) {
       console.log(chalk.yellow('No failed steps to rollback'));
@@ -230,7 +239,7 @@ class RollbackManager {
     if (gitInfo.branch !== this.getCurrentBranch()) {
       try {
         execSync(`git checkout ${gitInfo.branch}`, { stdio: 'pipe' });
-      } catch (error) {
+      } catch {
         console.log(chalk.yellow(`   ⚠️ Could not restore branch: ${gitInfo.branch}`));
       }
     }

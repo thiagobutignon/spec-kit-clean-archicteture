@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MCPInstaller } from '../utils/mcp-installer';
 
 // Mock the entire utils/mcp-installer module
 vi.mock('../utils/mcp-installer');

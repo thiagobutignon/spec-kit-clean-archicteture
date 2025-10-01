@@ -23,13 +23,19 @@ export const RETRY_DELAY_MS = 1000; // 1 second delay between retry attempts
 // Error message patterns
 const ALREADY_EXISTS_PATTERN = 'already exists';
 
+interface ExecError {
+  stderr?: Buffer | string;
+  message?: string;
+}
+
 /**
  * Custom error class for MCP installation failures
  * Preserves original error as cause for debugging
  */
 export class MCPInstallationError extends Error {
-  constructor(serverName: string, originalError: any) {
-    const errorMsg = originalError?.stderr?.toString() || originalError?.message || 'Unknown error';
+  constructor(serverName: string, originalError: unknown) {
+    const err = originalError as ExecError;
+    const errorMsg = err?.stderr?.toString() || err?.message || 'Unknown error';
     super(`Failed to install ${serverName} MCP server: ${errorMsg}`);
     this.name = 'MCPInstallationError';
     this.cause = originalError;
@@ -168,8 +174,9 @@ export class MCPInstaller {
     const command = `claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project ${quotedPath}`;
     try {
       execSync(command, { stdio: 'pipe' });
-    } catch (error: any) {
-      const stderr = error.stderr?.toString() || error.message || '';
+    } catch (error: unknown) {
+      const err = error as ExecError;
+      const stderr = err.stderr?.toString() || err.message || '';
 
       // Check if it's "already exists" error
       if (stderr.includes(ALREADY_EXISTS_PATTERN)) {
@@ -187,8 +194,9 @@ export class MCPInstaller {
     const command = `claude mcp add --transport http context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY: ${apiKey}"`;
     try {
       execSync(command, { stdio: 'pipe' });
-    } catch (error: any) {
-      const stderr = error.stderr?.toString() || error.message || '';
+    } catch (error: unknown) {
+      const err = error as ExecError;
+      const stderr = err.stderr?.toString() || err.message || '';
 
       // Check if it's "already exists" error
       if (stderr.includes(ALREADY_EXISTS_PATTERN)) {
@@ -206,8 +214,9 @@ export class MCPInstaller {
     const command = 'claude mcp add chrome-devtools npx chrome-devtools-mcp@latest';
     try {
       execSync(command, { stdio: 'pipe' });
-    } catch (error: any) {
-      const stderr = error.stderr?.toString() || error.message || '';
+    } catch (error: unknown) {
+      const err = error as ExecError;
+      const stderr = err.stderr?.toString() || err.message || '';
 
       // Check if it's "already exists" error
       if (stderr.includes(ALREADY_EXISTS_PATTERN)) {
@@ -225,8 +234,9 @@ export class MCPInstaller {
     const command = 'claude mcp add playwright npx @playwright/mcp@latest';
     try {
       execSync(command, { stdio: 'pipe' });
-    } catch (error: any) {
-      const stderr = error.stderr?.toString() || error.message || '';
+    } catch (error: unknown) {
+      const err = error as ExecError;
+      const stderr = err.stderr?.toString() || err.message || '';
 
       // Check if it's "already exists" error
       if (stderr.includes(ALREADY_EXISTS_PATTERN)) {

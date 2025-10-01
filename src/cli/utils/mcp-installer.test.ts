@@ -6,7 +6,7 @@ import * as childProcess from 'child_process';
 vi.mock('child_process');
 
 // Helper to mock execSync properly for string encoding
-const mockExecSyncWithString = (output: string) => output as any;
+const mockExecSyncWithString = (output: string) => output as unknown;
 
 describe('MCPInstaller', () => {
   let installer: MCPInstaller;
@@ -111,7 +111,7 @@ describe('MCPInstaller', () => {
       vi.spyOn(childProcess, 'execSync')
         .mockReturnValueOnce(Buffer.from('')) // which claude succeeds
         .mockImplementationOnce(() => {
-          const error: any = new Error('Command timed out');
+          const error = new Error('Command timed out') as NodeJS.ErrnoException;
           error.code = 'ETIMEDOUT';
           throw error;
         });
@@ -218,7 +218,10 @@ chrome-devtools installation failed
     });
 
     it('should throw error on installation failure', async () => {
-      const error: any = new Error('Installation failed');
+      interface ExecError extends Error {
+        stderr: Buffer;
+      }
+      const error = new Error('Installation failed') as ExecError;
       error.stderr = Buffer.from('Error: package not found');
 
       vi.spyOn(childProcess, 'execSync').mockImplementationOnce(() => {
@@ -229,7 +232,10 @@ chrome-devtools installation failed
     });
 
     it('should throw MCPAlreadyExistsError when server already exists', async () => {
-      const error: any = new Error('Installation failed');
+      interface ExecError extends Error {
+        stderr: Buffer;
+      }
+      const error = new Error('Installation failed') as ExecError;
       error.stderr = Buffer.from('MCP server serena already exists in local config');
 
       vi.spyOn(childProcess, 'execSync').mockImplementation(() => {
@@ -243,7 +249,10 @@ chrome-devtools installation failed
 
   describe('installContext7', () => {
     it('should throw MCPAlreadyExistsError when server already exists', async () => {
-      const error: any = new Error('Installation failed');
+      interface ExecError extends Error {
+        stderr: Buffer;
+      }
+      const error = new Error('Installation failed') as ExecError;
       error.stderr = Buffer.from('MCP server context7 already exists in local config');
 
       vi.spyOn(childProcess, 'execSync').mockImplementation(() => {
@@ -257,7 +266,10 @@ chrome-devtools installation failed
 
   describe('installChromeDevTools', () => {
     it('should throw MCPAlreadyExistsError when server already exists', async () => {
-      const error: any = new Error('Installation failed');
+      interface ExecError extends Error {
+        stderr: Buffer;
+      }
+      const error = new Error('Installation failed') as ExecError;
       error.stderr = Buffer.from('MCP server chrome-devtools already exists in local config');
 
       vi.spyOn(childProcess, 'execSync').mockImplementation(() => {
@@ -271,7 +283,10 @@ chrome-devtools installation failed
 
   describe('installPlaywright', () => {
     it('should throw MCPAlreadyExistsError when server already exists', async () => {
-      const error: any = new Error('Installation failed');
+      interface ExecError extends Error {
+        stderr: Buffer;
+      }
+      const error = new Error('Installation failed') as ExecError;
       error.stderr = Buffer.from('MCP server playwright already exists in local config');
 
       vi.spyOn(childProcess, 'execSync').mockImplementation(() => {
@@ -286,7 +301,10 @@ chrome-devtools installation failed
   describe('installAll', () => {
     it('should handle already exists errors as skipped', async () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      const error: any = new Error('Installation failed');
+      interface ExecError extends Error {
+        stderr: Buffer;
+      }
+      const error = new Error('Installation failed') as ExecError;
       error.stderr = Buffer.from('MCP server serena already exists in local config');
 
       vi.spyOn(childProcess, 'execSync').mockImplementationOnce(() => {
@@ -307,10 +325,13 @@ chrome-devtools installation failed
 
     it('should handle multiple already exists errors correctly', async () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      const serenaError: any = new Error('Installation failed');
+      interface ExecError extends Error {
+        stderr: Buffer;
+      }
+      const serenaError = new Error('Installation failed') as ExecError;
       serenaError.stderr = Buffer.from('MCP server serena already exists in local config');
 
-      const chromeError: any = new Error('Installation failed');
+      const chromeError = new Error('Installation failed') as ExecError;
       chromeError.stderr = Buffer.from('MCP server chrome-devtools already exists in local config');
 
       vi.spyOn(childProcess, 'execSync')
@@ -332,10 +353,13 @@ chrome-devtools installation failed
 
     it('should differentiate between genuine failures and already exists', async () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      const alreadyExistsError: any = new Error('Installation failed');
+      interface ExecError extends Error {
+        stderr: Buffer;
+      }
+      const alreadyExistsError = new Error('Installation failed') as ExecError;
       alreadyExistsError.stderr = Buffer.from('MCP server serena already exists in local config');
 
-      const realError: any = new Error('Installation failed');
+      const realError = new Error('Installation failed') as ExecError;
       realError.stderr = Buffer.from('Error: network timeout');
 
       vi.spyOn(childProcess, 'execSync')

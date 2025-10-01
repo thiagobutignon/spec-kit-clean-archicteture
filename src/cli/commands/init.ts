@@ -134,7 +134,7 @@ export async function initCommand(projectName: string | undefined, options: Init
             console.log(chalk.dim('   3. Check SETUP_MCP.md for troubleshooting\n'));
           }
         }
-      } catch (error) {
+      } catch {
         console.log(chalk.yellow('⚠️ MCP installation encountered an issue - continuing without MCP servers'));
         console.log(chalk.dim(`   Error: ${(error as Error).message}`));
         console.log(chalk.dim('   💡 You can install MCP servers manually (see SETUP_MCP.md)\n'));
@@ -146,7 +146,7 @@ export async function initCommand(projectName: string | undefined, options: Init
     // Show next steps
     showNextSteps(displayName, options.here ?? false, isExistingProject);
 
-  } catch (error) {
+  } catch {
     console.error(chalk.red('❌ Failed to initialize project:'), error);
     process.exit(1);
   }
@@ -323,7 +323,7 @@ async function createBackup(filePath: string, projectPath: string, backupDir?: s
         `Maximum backup size is ${MAX_BACKUP_FILE_SIZE / 1024 / 1024}MB`
       );
     }
-  } catch (error) {
+  } catch {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
       throw error;
     }
@@ -359,7 +359,7 @@ async function createBackup(filePath: string, projectPath: string, backupDir?: s
 
     try {
       await fs.ensureDir(resolvedBackupDir);
-    } catch (error) {
+    } catch {
       throw new Error(`Cannot create backup directory: ${backupDir} - ${(error as Error).message}`);
     }
   } else {
@@ -376,7 +376,7 @@ async function createBackup(filePath: string, projectPath: string, backupDir?: s
       await fs.writeFile(testFile, '');
       await fs.remove(testFile);
     });
-  } catch (error) {
+  } catch {
     throw new Error(
       `Backup directory is not writable: ${targetBackupDir}\n` +
       `Please check directory permissions or specify a different directory with --backup-dir`
@@ -390,7 +390,7 @@ async function createBackup(filePath: string, projectPath: string, backupDir?: s
 
   try {
     await fs.copy(filePath, backupPath);
-  } catch (error) {
+  } catch {
     throw new Error(
       `Failed to create backup of ${path.basename(filePath)}: ${(error as Error).message}\n` +
       `Please check file permissions and available disk space`
@@ -414,7 +414,7 @@ async function cleanupBackups(backupPaths: string[]): Promise<void> {
     try {
       await fs.remove(backupPath);
       console.log(chalk.dim(`   ✓ Removed: ${path.basename(backupPath)}`));
-    } catch (error) {
+    } catch {
       console.log(chalk.dim(`   ⚠ Could not remove: ${path.basename(backupPath)}`));
     }
   }
@@ -468,7 +468,7 @@ async function cleanupOldBackups(backupDir: string, keepCount: number = BACKUP_R
         console.log(chalk.dim(`   ✓ Removed: ${file}`));
       }
     }
-  } catch (error) {
+  } catch {
     // Non-critical operation, just log warning
     console.log(chalk.yellow(`⚠️  Could not clean up old backups: ${(error as Error).message}`));
   }
@@ -558,7 +558,7 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
         const backupDir = options.backupDir || path.join(projectPath, '.regent-backups');
         await cleanupOldBackups(backupDir);
       }
-    } catch (error) {
+    } catch {
       console.log(chalk.red(`\n   ❌ Failed to create backup: ${(error as Error).message}`));
 
       // Rollback: clean up any successful backups to maintain consistency
@@ -630,7 +630,7 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
       try {
         const eslintConfig = await fs.readFile(sourceEslintPath, 'utf-8');
         await fs.writeFile(eslintPath, eslintConfig);
-      } catch (error) {
+      } catch {
         console.log(chalk.yellow(`⚠️  Could not copy eslint.config.js: ${(error as Error).message}`));
         console.log(chalk.dim('   You can manually copy it from the regent package later if needed'));
       }
@@ -648,7 +648,7 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
       try {
         const vitestConfig = await fs.readFile(sourceVitestPath, 'utf-8');
         await fs.writeFile(vitestPath, vitestConfig);
-      } catch (error) {
+      } catch {
         console.log(chalk.yellow(`⚠️  Could not copy vitest.config.ts: ${(error as Error).message}`));
         console.log(chalk.dim('   You can manually copy it from the regent package later if needed'));
       }
@@ -695,7 +695,7 @@ async function copyProjectConfigFiles(projectPath: string, isExistingProject: bo
   }
 }
 
-async function createInitialFiles(projectPath: string, _options: InitOptions): Promise<void> {
+async function createInitialFiles(projectPath: string): Promise<void> {
   // Create a minimal package.json if it doesn't exist
   const packageJsonPath = path.join(projectPath, 'package.json');
   if (!await fs.pathExists(packageJsonPath)) {
@@ -886,7 +886,7 @@ async function initializeGit(projectPath: string): Promise<void> {
     });
 
     console.log(chalk.green('✅ Git repository initialized'));
-  } catch (error) {
+  } catch {
     console.log(chalk.yellow('⚠️ Git initialization failed - continuing without git'));
   }
 }

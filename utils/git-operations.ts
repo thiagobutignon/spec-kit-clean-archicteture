@@ -23,6 +23,16 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+interface CommandResult {
+  stdout?: string;
+  toString(): string;
+}
+
+interface GitError {
+  stderr?: string;
+  message?: string;
+}
+
 /**
  * Execute a git operation with retry logic
  * @param operation - Type of git operation
@@ -32,10 +42,10 @@ function sleep(ms: number): Promise<void> {
  */
 export async function executeGitOperation(
   operation: GitOperation,
-  command: () => Promise<any>,
+  command: () => Promise<CommandResult>,
   maxRetries = RETRY.MAX_GIT_RETRIES
 ): Promise<GitOperationResult> {
-  let lastError: any = null;
+  let lastError: unknown = null;
   let attempt = 0;
 
   while (attempt <= maxRetries) {
@@ -46,12 +56,13 @@ export async function executeGitOperation(
         output: result.stdout || result.toString(),
         retries: attempt,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
       attempt++;
 
       // Don't retry on certain errors
-      const errorMessage = error.stderr || error.message || '';
+      const err = error as GitError;
+      const errorMessage = err.stderr || err.message || '';
       if (shouldNotRetry(operation, errorMessage)) {
         break;
       }
@@ -92,8 +103,9 @@ function shouldNotRetry(operation: GitOperation, errorMessage: string): boolean 
 /**
  * Format git error message for user display
  */
-function formatGitError(operation: GitOperation, error: any): string {
-  const errorMessage = error.stderr || error.message || 'Unknown git error';
+function formatGitError(operation: GitOperation, error: unknown): string {
+  const err = error as GitError;
+  const errorMessage = err.stderr || err.message || 'Unknown git error';
 
   const suggestions: Record<GitOperation, string> = {
     [GIT_OPERATIONS.ADD]: 'Ensure the file exists and is not in .gitignore',

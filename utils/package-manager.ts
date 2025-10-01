@@ -92,6 +92,13 @@ export function buildPackageManagerCommand(
   }
 }
 
+interface ExecError {
+  stdout?: string;
+  stderr?: string;
+  message?: string;
+  exitCode?: number;
+}
+
 /**
  * Execute package manager command safely
  * Uses direct command execution instead of sh -c to prevent injection
@@ -121,11 +128,12 @@ export async function executePackageManagerCommand(
       stderr: result.stderr,
       exitCode: result.exitCode || 0,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as ExecError;
     return {
-      stdout: error.stdout || '',
-      stderr: error.stderr || error.message || '',
-      exitCode: error.exitCode || 1,
+      stdout: err.stdout || '',
+      stderr: err.stderr || err.message || '',
+      exitCode: err.exitCode || 1,
     };
   } finally {
     $.verbose = originalVerbose;
@@ -139,7 +147,7 @@ export async function validateScriptExists(scriptName: string): Promise<boolean>
   try {
     const packageJson = await fs.readJson('package.json');
     return scriptName in (packageJson.scripts || {});
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -151,7 +159,7 @@ export async function getAvailableScripts(): Promise<string[]> {
   try {
     const packageJson = await fs.readJson('package.json');
     return Object.keys(packageJson.scripts || {});
-  } catch (error) {
+  } catch {
     return [];
   }
 }
