@@ -109,12 +109,24 @@ Each layer has specific responsibilities and constraints:
 
 2. **Factory Functions for Value Objects** (NOT classes)
    ```typescript
-   // ✅ CORRECT - Type + factory function
+   // ✅ CORRECT - Type + factory function with error handling
    export type SKU = { value: string };
+   export type ValidationError = { message: string };
 
+   // Option 1: Throw errors (simpler, but less functional)
    export const createSKU = (value: string): SKU => {
-     if (!value) throw new Error('SKU cannot be empty');
+     if (!value?.trim()) throw new Error('SKU cannot be empty');
      return { value: value.trim().toUpperCase() };
+   };
+
+   // Option 2: Result type (more functional, better composability)
+   export type Result<T, E> = { success: true; value: T } | { success: false; error: E };
+
+   export const createSKUSafe = (value: string): Result<SKU, ValidationError> => {
+     if (!value?.trim()) {
+       return { success: false, error: { message: 'SKU cannot be empty' } };
+     }
+     return { success: true, value: { value: value.trim().toUpperCase() } };
    };
 
    // ❌ WRONG - Don't use classes
@@ -127,13 +139,16 @@ Each layer has specific responsibilities and constraints:
 3. **Use Case Interfaces in Domain, Logic in Data Layer**
    ```typescript
    // domain/usecases/archive-product.ts (interface only - WHAT)
+   export type ArchiveProductInput = { productId: string };
+   export type ArchiveProductOutput = { product: Product };
+
    export interface ArchiveProduct {
      execute(input: ArchiveProductInput): Promise<ArchiveProductOutput>;
    }
 
    // data/usecases/db-archive-product.ts (implementation with logic - HOW)
    export class DbArchiveProduct implements ArchiveProduct {
-     async execute(input: ArchiveProductInput) {
+     async execute(input: ArchiveProductInput): Promise<ArchiveProductOutput> {
        const product = await this.repository.findById(input.productId);
 
        // ✅ Business logic HERE (data layer), NOT in Product entity
@@ -141,10 +156,15 @@ Each layer has specific responsibilities and constraints:
          throw new ProductAlreadyArchivedError(product.id);
        }
 
-       const updated = { ...product, isArchived: true };
-       await this.repository.update(updated);
+       // ✅ Immutability: Always create new objects, never mutate
+       const archivedProduct: Product = {
+         ...product,
+         isArchived: true
+       };
 
-       return { product: updated };
+       await this.repository.update(archivedProduct);
+
+       return { product: archivedProduct };
      }
    }
    ```
@@ -155,7 +175,11 @@ Each layer has specific responsibilities and constraints:
    export interface ProductRepository {
      findById(id: string): Promise<Product | null>;
      save(product: Product): Promise<void>;
-     // ❌ DON'T: archive(productId: string) - this is business logic
+     update(product: Product): Promise<void>;
+
+     // ❌ DON'T: archive(productId: string)
+     // Why: Business logic (knowing HOW to archive) belongs in use cases
+     // Repositories should only handle data persistence operations (CRUD)
    }
    ```
 
@@ -169,12 +193,15 @@ Each layer has specific responsibilities and constraints:
 
 #### Research Queries (Domain Layer)
 
-When researching domain patterns, use:
+When researching domain patterns, prefer functional approaches but keep valuable DDD concepts:
 - ✅ `"functional domain design TypeScript"`
 - ✅ `"anemic domain model patterns"`
 - ✅ `"type-driven architecture"`
 - ✅ `"clean architecture interfaces TypeScript"`
-- ❌ **DON'T**: `"DDD rich entities"`, `"aggregate root class"`
+- ✅ `"functional domain modeling [concept]"`
+- ✅ `"DDD without classes [feature]"`
+- ✅ `"bounded contexts"`, `"ubiquitous language"`, `"domain events"` (these are valid in functional approach)
+- ❌ **AVOID**: `"DDD rich entities"`, `"aggregate root class"`, `"entity encapsulation"`
 
 ---
 
