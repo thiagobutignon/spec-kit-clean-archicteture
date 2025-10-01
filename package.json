@@ -60,7 +60,8 @@
     "arch:validate": "depcruise src --config .dependency-cruiser.cjs",
     "arch:graph": "depcruise src --include-only '^src' --output-type dot | dot -T svg > docs/architecture-graph.svg",
     "arch:report": "depcruise src --output-type err-html > docs/architecture-report.html",
-    "arch:check": "npm run arch:validate && npm run arch:graph"
+    "arch:check": "npm run arch:validate && npm run arch:graph",
+    "validate:commands": "tsx scripts/validate-command-consistency.ts"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
