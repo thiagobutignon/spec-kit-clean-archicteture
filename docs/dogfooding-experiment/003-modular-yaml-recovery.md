@@ -121,6 +121,83 @@ spec/001-product-catalog-management/domain/
 - ⚠️ Bug #117 modular generation must be implemented
 - ✅ Clean workspace for testing
 
+### Initial Installation & Verification
+
+**Step 1: Install The Regent CLI globally**
+```bash
+# Navigate to dogfooding directory
+cd dogfooding
+
+# Install latest version globally
+npm i -g the-regent-cli
+
+# Expected output:
+# added 87 packages, and changed 1 package in 6s
+```
+
+**Step 2: Verify installation**
+```bash
+# Check version (should be 2.2.0)
+regent -v
+
+# Expected output:
+# 2.2.0
+
+# View help
+regent --help
+
+# Expected output:
+# Usage: regent [options] [command]
+# The Regent - AI-powered Clean Architecture CLI with guaranteed architectural quality
+# Commands:
+#   init [options] [project-name]  Initialize a new Clean Architecture project
+#   check                          Check that all required tools are installed
+```
+
+**Step 3: Check system requirements**
+```bash
+regent check
+
+# Expected output:
+# Essential Tools:
+#   git             ✅ available
+#   node            ✅ available
+#   npm             ✅ available
+#   claude          ✅ available
+#   tsx             ✅ available
+#
+# AI Assistant Tools:
+#   claude          ✅ available
+#   gemini          ✅ available
+#   cursor          ✅ available
+#
+# MCP Tools:
+#   serena          ✅ available
+#   context7        ✅ available
+#   chrome-devtools ✅ available
+#   playwright      ✅ available
+#
+# Project Configuration:
+#   .claude/        ⚠️  missing (expected - not in project yet)
+#   templates/      ⚠️  missing (expected - not in project yet)
+#   package.json    ⚠️  missing (expected - not in project yet)
+```
+
+**Step 4: Verify dogfooding directory is clean**
+```bash
+ls -la
+
+# Expected output:
+# total 0
+# drwxr-xr-x  2 user  staff  64 Sep 30 23:41 .
+# drwxr-xr-x 40 user  staff 1280 Oct  1 00:49 ..
+# (empty directory - ready for experiment)
+```
+
+✅ **Installation Complete**: Ready to proceed with pre-experiment validation
+
+---
+
 ### Pre-Experiment Validation
 
 **Check 1: Verify Bug #122 Fix**
