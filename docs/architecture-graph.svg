@@ -31,8 +31,8 @@
 </g>
 <g id="clust5" class="cluster">
 <title>cluster_src/cli/templates</title>
-<path fill="#ffffff" stroke="black" stroke-width="2" d="M208,-114C208,-114 291.75,-114 291.75,-114 297.75,-114 303.75,-120 303.75,-126 303.75,-126 303.75,-154 303.75,-154 303.75,-160 297.75,-166 291.75,-166 291.75,-166 208,-166 208,-166 202,-166 196,-160 196,-154 196,-154 196,-126 196,-126 196,-120 202,-114 208,-114"/>
-<text xml:space="preserve" text-anchor="middle" x="249.88" y="-153.45" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">templates</text>
+<path fill="#ffffff" stroke="black" stroke-width="2" d="M208,-144C208,-144 291.75,-144 291.75,-144 297.75,-144 303.75,-150 303.75,-156 303.75,-156 303.75,-184 303.75,-184 303.75,-190 297.75,-196 291.75,-196 291.75,-196 208,-196 208,-196 202,-196 196,-190 196,-184 196,-184 196,-156 196,-156 196,-150 202,-144 208,-144"/>
+<text xml:space="preserve" text-anchor="middle" x="249.88" y="-183.45" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">templates</text>
 </g>
 <g id="clust6" class="cluster">
 <title>cluster_src/cli/utils</title>
@@ -61,76 +61,70 @@
 <g id="node3" class="node">
 <title>src/cli/commands/init.test.ts</title>
 <g id="a_node3"><a xlink:href="src/cli/commands/init.test.ts" xlink:title="init.test.ts">
-<path fill="#ddfeff" stroke="black" d="M162.08,-169.88C162.08,-169.88 119.92,-169.88 119.92,-169.88 116.96,-169.88 114,-166.92 114,-163.96 114,-163.96 114,-158.04 114,-158.04 114,-155.08 116.96,-152.12 119.92,-152.12 119.92,-152.12 162.08,-152.12 162.08,-152.12 165.04,-152.12 168,-155.08 168,-158.04 168,-158.04 168,-163.96 168,-163.96 168,-166.92 165.04,-169.88 162.08,-169.88"/>
-<text xml:space="preserve" text-anchor="start" x="122.25" y="-157.32" font-family="Helvetica,sans-Serif" font-size="9.00">init.test.ts</text>
+<path fill="#ccffcc" stroke="black" d="M162.08,-139.88C162.08,-139.88 119.92,-139.88 119.92,-139.88 116.96,-139.88 114,-136.92 114,-133.96 114,-133.96 114,-128.04 114,-128.04 114,-125.08 116.96,-122.12 119.92,-122.12 119.92,-122.12 162.08,-122.12 162.08,-122.12 165.04,-122.12 168,-125.08 168,-128.04 168,-128.04 168,-133.96 168,-133.96 168,-136.92 165.04,-139.88 162.08,-139.88"/>
+<text xml:space="preserve" text-anchor="start" x="122.25" y="-127.33" font-family="Helvetica,sans-Serif" font-size="9.00">init.test.ts</text>
 </a>
 </g>
-</g>
-<!-- src/cli/utils/mcp&#45;installer.ts -->
-<g id="node4" class="node">
-<title>src/cli/utils/mcp&#45;installer.ts</title>
-<g id="a_node4"><a xlink:href="src/cli/utils/mcp-installer.ts" xlink:title="mcp&#45;installer.ts">
-<path fill="#ddfeff" stroke="black" d="M282.71,-229.88C282.71,-229.88 217.04,-229.88 217.04,-229.88 214.08,-229.88 211.12,-226.92 211.12,-223.96 211.12,-223.96 211.12,-218.04 211.12,-218.04 211.12,-215.08 214.08,-212.12 217.04,-212.12 217.04,-212.12 282.71,-212.12 282.71,-212.12 285.67,-212.12 288.62,-215.08 288.62,-218.04 288.62,-218.04 288.62,-223.96 288.62,-223.96 288.62,-226.92 285.67,-229.88 282.71,-229.88"/>
-<text xml:space="preserve" text-anchor="start" x="219.12" y="-217.32" font-family="Helvetica,sans-Serif" font-size="9.00">mcp&#45;installer.ts</text>
-</a>
-</g>
-</g>
-<!-- src/cli/commands/init.test.ts&#45;&gt;src/cli/utils/mcp&#45;installer.ts -->
-<g id="edge1" class="edge">
-<title>src/cli/commands/init.test.ts&#45;&gt;src/cli/utils/mcp&#45;installer.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M158.7,-170.38C176.35,-180.28 204.35,-196.01 224.47,-207.3"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="223.39,-209.1 229.65,-210.21 225.45,-205.44 223.39,-209.1"/>
 </g>
 <!-- src/cli/commands/init.ts -->
-<g id="node5" class="node">
+<g id="node4" class="node">
 <title>src/cli/commands/init.ts</title>
-<g id="a_node5"><a xlink:href="src/cli/commands/init.ts" xlink:title="init.ts">
-<path fill="#ddfeff" stroke="black" d="M162.08,-139.88C162.08,-139.88 119.92,-139.88 119.92,-139.88 116.96,-139.88 114,-136.92 114,-133.96 114,-133.96 114,-128.04 114,-128.04 114,-125.08 116.96,-122.12 119.92,-122.12 119.92,-122.12 162.08,-122.12 162.08,-122.12 165.04,-122.12 168,-125.08 168,-128.04 168,-128.04 168,-133.96 168,-133.96 168,-136.92 165.04,-139.88 162.08,-139.88"/>
-<text xml:space="preserve" text-anchor="start" x="130.5" y="-127.33" font-family="Helvetica,sans-Serif" font-size="9.00">init.ts</text>
+<g id="a_node4"><a xlink:href="src/cli/commands/init.ts" xlink:title="init.ts">
+<path fill="#ddfeff" stroke="black" d="M162.08,-169.88C162.08,-169.88 119.92,-169.88 119.92,-169.88 116.96,-169.88 114,-166.92 114,-163.96 114,-163.96 114,-158.04 114,-158.04 114,-155.08 116.96,-152.12 119.92,-152.12 119.92,-152.12 162.08,-152.12 162.08,-152.12 165.04,-152.12 168,-155.08 168,-158.04 168,-158.04 168,-163.96 168,-163.96 168,-166.92 165.04,-169.88 162.08,-169.88"/>
+<text xml:space="preserve" text-anchor="start" x="130.5" y="-157.32" font-family="Helvetica,sans-Serif" font-size="9.00">init.ts</text>
 </a>
 </g>
 </g>
-<!-- src/cli/commands/init.ts&#45;&gt;src/cli/utils/mcp&#45;installer.ts -->
-<g id="edge3" class="edge">
-<title>src/cli/commands/init.ts&#45;&gt;src/cli/utils/mcp&#45;installer.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M168.13,-135.06C175.31,-137.28 182.6,-140.71 188,-146 195.73,-153.58 190.21,-159.85 196,-169 205.04,-183.28 218.71,-196.59 229.88,-206.16"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="228.5,-207.75 234.46,-209.96 231.18,-204.51 228.5,-207.75"/>
-</g>
 <!-- src/cli/templates/default&#45;gitignore.ts -->
-<g id="node6" class="node">
+<g id="node5" class="node">
 <title>src/cli/templates/default&#45;gitignore.ts</title>
-<g id="a_node6"><a xlink:href="src/cli/templates/default-gitignore.ts" xlink:title="default&#45;gitignore.ts">
-<path fill="#ddfeff" stroke="black" d="M289.83,-139.88C289.83,-139.88 209.92,-139.88 209.92,-139.88 206.96,-139.88 204,-136.92 204,-133.96 204,-133.96 204,-128.04 204,-128.04 204,-125.08 206.96,-122.12 209.92,-122.12 209.92,-122.12 289.83,-122.12 289.83,-122.12 292.79,-122.12 295.75,-125.08 295.75,-128.04 295.75,-128.04 295.75,-133.96 295.75,-133.96 295.75,-136.92 292.79,-139.88 289.83,-139.88"/>
-<text xml:space="preserve" text-anchor="start" x="212" y="-127.33" font-family="Helvetica,sans-Serif" font-size="9.00">default&#45;gitignore.ts</text>
+<g id="a_node5"><a xlink:href="src/cli/templates/default-gitignore.ts" xlink:title="default&#45;gitignore.ts">
+<path fill="#ddfeff" stroke="black" d="M289.83,-169.88C289.83,-169.88 209.92,-169.88 209.92,-169.88 206.96,-169.88 204,-166.92 204,-163.96 204,-163.96 204,-158.04 204,-158.04 204,-155.08 206.96,-152.12 209.92,-152.12 209.92,-152.12 289.83,-152.12 289.83,-152.12 292.79,-152.12 295.75,-155.08 295.75,-158.04 295.75,-158.04 295.75,-163.96 295.75,-163.96 295.75,-166.92 292.79,-169.88 289.83,-169.88"/>
+<text xml:space="preserve" text-anchor="start" x="212" y="-157.32" font-family="Helvetica,sans-Serif" font-size="9.00">default&#45;gitignore.ts</text>
 </a>
 </g>
 </g>
 <!-- src/cli/commands/init.ts&#45;&gt;src/cli/templates/default&#45;gitignore.ts -->
-<g id="edge2" class="edge">
+<g id="edge1" class="edge">
 <title>src/cli/commands/init.ts&#45;&gt;src/cli/templates/default&#45;gitignore.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M168.42,-131C176.48,-131 185.64,-131 194.84,-131"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="194.6,-133.1 200.6,-131 194.6,-128.9 194.6,-133.1"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M168.42,-161C176.48,-161 185.64,-161 194.84,-161"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="194.6,-163.1 200.6,-161 194.6,-158.9 194.6,-163.1"/>
+</g>
+<!-- src/cli/utils/mcp&#45;installer.ts -->
+<g id="node6" class="node">
+<title>src/cli/utils/mcp&#45;installer.ts</title>
+<g id="a_node6"><a xlink:href="src/cli/utils/mcp-installer.ts" xlink:title="mcp&#45;installer.ts">
+<path fill="#ddfeff" stroke="black" d="M282.71,-244.88C282.71,-244.88 217.04,-244.88 217.04,-244.88 214.08,-244.88 211.12,-241.92 211.12,-238.96 211.12,-238.96 211.12,-233.04 211.12,-233.04 211.12,-230.08 214.08,-227.12 217.04,-227.12 217.04,-227.12 282.71,-227.12 282.71,-227.12 285.67,-227.12 288.62,-230.08 288.62,-233.04 288.62,-233.04 288.62,-238.96 288.62,-238.96 288.62,-241.92 285.67,-244.88 282.71,-244.88"/>
+<text xml:space="preserve" text-anchor="start" x="219.12" y="-232.32" font-family="Helvetica,sans-Serif" font-size="9.00">mcp&#45;installer.ts</text>
+</a>
+</g>
+</g>
+<!-- src/cli/commands/init.ts&#45;&gt;src/cli/utils/mcp&#45;installer.ts -->
+<g id="edge2" class="edge">
+<title>src/cli/commands/init.ts&#45;&gt;src/cli/utils/mcp&#45;installer.ts</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M154.87,-170.07C165.8,-177.77 181.92,-189.12 196,-199 206.71,-206.52 218.65,-214.87 228.47,-221.74"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="227.23,-223.43 233.35,-225.15 229.64,-219.99 227.23,-223.43"/>
 </g>
 <!-- src/cli/main.ts -->
 <g id="node7" class="node">
 <title>src/cli/main.ts</title>
 <g id="a_node7"><a xlink:href="src/cli/main.ts" xlink:title="main.ts">
-<path fill="#ddfeff" stroke="black" d="M72.08,-139.88C72.08,-139.88 29.92,-139.88 29.92,-139.88 26.96,-139.88 24,-136.92 24,-133.96 24,-133.96 24,-128.04 24,-128.04 24,-125.08 26.96,-122.12 29.92,-122.12 29.92,-122.12 72.08,-122.12 72.08,-122.12 75.04,-122.12 78,-125.08 78,-128.04 78,-128.04 78,-133.96 78,-133.96 78,-136.92 75.04,-139.88 72.08,-139.88"/>
-<text xml:space="preserve" text-anchor="start" x="36.38" y="-127.33" font-family="Helvetica,sans-Serif" font-size="9.00">main.ts</text>
+<path fill="#ddfeff" stroke="black" d="M72.08,-169.88C72.08,-169.88 29.92,-169.88 29.92,-169.88 26.96,-169.88 24,-166.92 24,-163.96 24,-163.96 24,-158.04 24,-158.04 24,-155.08 26.96,-152.12 29.92,-152.12 29.92,-152.12 72.08,-152.12 72.08,-152.12 75.04,-152.12 78,-155.08 78,-158.04 78,-158.04 78,-163.96 78,-163.96 78,-166.92 75.04,-169.88 72.08,-169.88"/>
+<text xml:space="preserve" text-anchor="start" x="36.38" y="-157.32" font-family="Helvetica,sans-Serif" font-size="9.00">main.ts</text>
 </a>
 </g>
 </g>
 <!-- src/cli/main.ts&#45;&gt;src/cli/commands/check.ts -->
-<g id="edge4" class="edge">
+<g id="edge3" class="edge">
 <title>src/cli/main.ts&#45;&gt;src/cli/commands/check.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M71.94,-121.63C76.51,-119.64 81.38,-117.65 86,-116 92.11,-113.82 98.7,-111.75 105.11,-109.89"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="105.54,-111.95 110.75,-108.31 104.41,-107.91 105.54,-111.95"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M56.47,-151.98C62.01,-141.74 72.4,-125.25 86,-116 91.71,-112.11 98.41,-109.23 105.11,-107.09"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="105.38,-109.19 110.6,-105.57 104.26,-105.15 105.38,-109.19"/>
 </g>
 <!-- src/cli/main.ts&#45;&gt;src/cli/commands/init.ts -->
-<g id="edge5" class="edge">
+<g id="edge4" class="edge">
 <title>src/cli/main.ts&#45;&gt;src/cli/commands/init.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M78.4,-131C86.67,-131 95.93,-131 104.71,-131"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="104.59,-133.1 110.59,-131 104.59,-128.9 104.59,-133.1"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M78.4,-161C86.67,-161 95.93,-161 104.71,-161"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="104.59,-163.1 110.59,-161 104.59,-158.9 104.59,-163.1"/>
 </g>
 <!-- src/cli/utils/banner.ts -->
 <g id="node8" class="node">
@@ -142,10 +136,10 @@
 </g>
 </g>
 <!-- src/cli/main.ts&#45;&gt;src/cli/utils/banner.ts -->
-<g id="edge6" class="edge">
+<g id="edge5" class="edge">
 <title>src/cli/main.ts&#45;&gt;src/cli/utils/banner.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M54.33,-140.2C58.41,-154.59 68.18,-182.5 86,-199 91.5,-204.09 98.33,-208.08 105.27,-211.17"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="104.23,-213.02 110.58,-213.29 105.78,-209.12 104.23,-213.02"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M58.34,-170.22C64.56,-178.67 74.71,-191.04 86,-199 91.82,-203.1 98.51,-206.61 105.17,-209.54"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="104.35,-211.47 110.7,-211.8 105.94,-207.59 104.35,-211.47"/>
 </g>
 <!-- src/cli/utils/mcp&#45;installer.test.ts -->
 <g id="node9" class="node">
@@ -157,10 +151,10 @@
 </g>
 </g>
 <!-- src/cli/utils/mcp&#45;installer.test.ts&#45;&gt;src/cli/utils/mcp&#45;installer.ts -->
-<g id="edge7" class="edge">
+<g id="edge6" class="edge">
 <title>src/cli/utils/mcp&#45;installer.test.ts&#45;&gt;src/cli/utils/mcp&#45;installer.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M175.23,-241.67C185.28,-238.85 196.46,-235.71 207,-232.76"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="207.54,-234.78 212.75,-231.14 206.41,-230.74 207.54,-234.78"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M188.26,-244.51C192.86,-243.86 197.54,-243.2 202.15,-242.56"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="202.25,-244.66 207.9,-241.75 201.67,-240.5 202.25,-244.66"/>
 </g>
 </g>
 </svg>

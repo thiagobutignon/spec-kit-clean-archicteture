@@ -195,6 +195,58 @@ The Regent system uses **9 numbered commands** (`/01` through `/09`) that follow
 
 > **Migration Note**: If you were using legacy commands (`/constitution`, `/specify`, `/plan`, `/tasks`, `/implement`, `/clarify`, `/analyze`), they have been removed as of v2.2.0. Use the numbered workflow above instead - start with `/01-plan-layer-features` to begin your implementation.
 
+### Architecture Validation Scripts
+
+The Regent includes powerful NPM scripts to validate and visualize your Clean Architecture:
+
+| Script | Purpose | Output |
+|--------|---------|--------|
+| `npm run arch:validate` | Validate dependency rules with Dependency Cruiser | Console report with violations |
+| `npm run arch:graph` | Generate visual dependency graph | `docs/architecture-graph.svg` |
+| `npm run arch:report` | Generate detailed HTML report | `docs/architecture-report.html` |
+| `npm run arch:check` | Run validation + generate graph | Both validation and SVG |
+
+**Requirements:**
+- **Graphviz**: Required for `arch:graph` and `arch:check`
+  ```bash
+  # macOS
+  brew install graphviz
+
+  # Ubuntu/Debian
+  sudo apt-get install graphviz
+
+  # Windows (using Chocolatey)
+  choco install graphviz
+  ```
+
+**Usage Examples:**
+
+```bash
+# Validate architecture (fails on violations)
+npm run arch:validate
+
+# Generate visual dependency graph
+npm run arch:graph
+# → Creates docs/architecture-graph.svg
+
+# Generate detailed HTML report
+npm run arch:report
+# → Creates docs/architecture-report.html
+
+# Run both validation and graph generation
+npm run arch:check
+```
+
+**Architecture Graph:**
+
+The generated graph (`docs/architecture-graph.svg`) provides a visual representation of your codebase dependencies, making it easy to:
+- ✅ Verify layer separation
+- ✅ Identify circular dependencies
+- ✅ Onboard new team members
+- ✅ Review PRs with architectural context
+
+![Architecture Graph Example](docs/architecture-graph.svg)
+
 ## 🏗️ Layer-Driven Clean Architecture
 
 ### The Innovation
