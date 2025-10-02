@@ -91,7 +91,7 @@ For convenience, you can iterate over all YAMLs in a directory:
 ```bash
 # Reflect on all domain YAMLs in a feature
 for yaml in spec/001-product-catalog/domain/*.yaml; do
-  /04-reflect-layer-lessons from yaml: $yaml
+  /04-reflect-layer-lessons from yaml: "$yaml"
 done
 ```
 

@@ -112,7 +112,10 @@ The project now uses a `.mcp.json` file in the project root (committed to git):
     },
     "context7": {
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest", "--api-key", "${CONTEXT7_API_KEY:-}"]
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "env": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY:-}"
+      }
     },
     "chrome-devtools": {
       "command": "npx",

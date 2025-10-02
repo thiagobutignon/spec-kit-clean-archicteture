@@ -39,11 +39,11 @@ export const DEFAULT_MCP_CONFIG: MCPJsonConfig = {
       command: 'npx',
       args: [
         '-y',
-        '@upstash/context7-mcp@latest',
-        '--api-key',
-        '${CONTEXT7_API_KEY:-}'
+        '@upstash/context7-mcp@latest'
       ],
-      env: {}
+      env: {
+        CONTEXT7_API_KEY: '${CONTEXT7_API_KEY:-}'
+      }
     },
     'chrome-devtools': {
       command: 'npx',
@@ -79,7 +79,7 @@ export async function readMcpJson(projectPath: string): Promise<MCPJsonConfig | 
     const mcpJsonPath = path.join(projectPath, '.mcp.json');
     const content = await fs.readFile(mcpJsonPath, 'utf-8');
     return JSON.parse(content) as MCPJsonConfig;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

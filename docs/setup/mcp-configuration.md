@@ -49,7 +49,9 @@ The `.mcp.json` file at the project root contains:
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"],
-      "env": {}
+      "env": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY:-}"
+      }
     },
     "chrome-devtools": {
       "command": "npx",
