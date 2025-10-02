@@ -49,6 +49,10 @@ export default tseslint.config(
       'boundaries/ignore': ['**/*.spec.ts', '**/*.test.ts'],
     },
     rules: {
+      // Allow namespaces for Clean Architecture patterns (DOM002, DAT004)
+      // Use cases and repositories use namespaces for Params and Result types
+      '@typescript-eslint/no-namespace': 'off',
+
       // Enforce Clean Architecture dependency rules
       // Inner layers cannot depend on outer layers
       'boundaries/element-types': ['error', {
