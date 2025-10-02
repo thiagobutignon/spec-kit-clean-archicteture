@@ -4,7 +4,7 @@
  */
 
 import fs from 'fs-extra';
-import 'zx/globals';
+import { $ } from 'zx';
 
 export type PackageManager = 'npm' | 'yarn' | 'pnpm';
 
