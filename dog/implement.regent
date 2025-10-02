@@ -520,6 +520,10 @@ steps:
     validation:
       patterns: []
       command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:30:53.444Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-14-presentation-errors
     type: create_file
     layer: presentation
@@ -536,6 +540,10 @@ steps:
       patterns:
         - PRE004
       command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:30:57.949Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-15-presentation-controller
     type: create_file
     layer: presentation
@@ -587,6 +595,10 @@ steps:
         - PRE002
         - PRE005
       command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:31:02.423Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-16-validation-protocol
     type: create_file
     layer: validation
@@ -594,7 +606,7 @@ steps:
     path: src/validation/protocols/validation.ts
     template: |
       export interface Validation {
-        validate: (input: any) => Error | null
+        validate: (input: unknown) => Error | null
       }
     validation:
       patterns: []
@@ -610,7 +622,7 @@ steps:
       export class ValidationComposite implements Validation {
         constructor (private readonly validations: Validation[]) {}
 
-        validate (input: any): Error | null {
+        validate (input: unknown): Error | null {
           for (const validation of this.validations) {
             const error = validation.validate(input)
             if (error) {
