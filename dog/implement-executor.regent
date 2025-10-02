@@ -904,3 +904,650 @@ steps:
     status: SUCCESS
     execution_log: "Action completed successfully at 2025-10-02T10:33:53.351Z (0ms).
       RLHF Score: 1. No validation script provided."
+
+  # ============================================================================
+  # INFRA LAYER - ADAPTERS (12 arquivos)
+  # ============================================================================
+
+  - id: step-31-infra-yaml-template-validator
+    type: create_file
+    layer: infra
+    description: Create YAML template validator adapter
+    path: src/infra/template/yaml-template-validator.ts
+    template: |
+      import { type TemplateValidatorRepository } from '@/data/protocols/template/template-validator-repository'
+      import * as yaml from 'yaml'
+
+      export class YamlTemplateValidator implements TemplateValidatorRepository {
+        async validateSchema (params: TemplateValidatorRepository.ValidateParams): Promise<TemplateValidatorRepository.ValidateResult> {
+          const { content } = params
+          const errors: string[] = []
+          const warnings: string[] = []
+
+          try {
+            const parsed = yaml.parse(content)
+
+            if (!parsed.steps || !Array.isArray(parsed.steps)) {
+              errors.push('Missing or invalid steps array')
+            }
+
+            if (parsed.steps) {
+              parsed.steps.forEach((step: unknown, index: number) => {
+                if (typeof step !== 'object' || step === null) {
+                  errors.push(`Step ${index} is not an object`)
+                  return
+                }
+
+                const s = step as Record<string, unknown>
+                if (!s.id) errors.push(`Step ${index}: missing id`)
+                if (!s.type) errors.push(`Step ${index}: missing type`)
+                if (!s.path && s.type === 'create_file') {
+                  errors.push(`Step ${index}: missing path for create_file`)
+                }
+              })
+            }
+
+            return {
+              valid: errors.length === 0,
+              errors,
+              warnings
+            }
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            return {
+              valid: false,
+              errors: [`YAML parsing error: ${message}`],
+              warnings
+            }
+          }
+        }
+      }
+
+  - id: step-32-infra-npm-quality-check
+    type: create_file
+    layer: infra
+    description: Create NPM quality check adapter
+    path: src/infra/quality/npm-quality-check-adapter.ts
+    template: |
+      import { type QualityCheckRepository } from '@/data/protocols/quality/quality-check-repository'
+      import { $ } from 'zx'
+
+      export class NpmQualityCheckAdapter implements QualityCheckRepository {
+        async runLint (command: string): Promise<QualityCheckRepository.CheckResult> {
+          try {
+            $.verbose = false
+            const result = await $`npm run ${command}`
+            $.verbose = true
+
+            return {
+              passed: true,
+              output: result.stdout + result.stderr
+            }
+          } catch (error) {
+            $.verbose = true
+            const output = this.extractOutput(error)
+
+            return {
+              passed: false,
+              output
+            }
+          }
+        }
+
+        async runTest (command: string): Promise<QualityCheckRepository.CheckResult> {
+          try {
+            $.verbose = false
+            const result = await $`npm run ${command}`
+            $.verbose = true
+
+            return {
+              passed: true,
+              output: result.stdout + result.stderr
+            }
+          } catch (error) {
+            $.verbose = true
+            const output = this.extractOutput(error)
+
+            return {
+              passed: false,
+              output
+            }
+          }
+        }
+
+        private extractOutput (error: unknown): string {
+          if (typeof error === 'object' && error !== null) {
+            const err = error as { stdout?: string; stderr?: string }
+            return (err.stdout || '') + (err.stderr || '')
+          }
+          return String(error)
+        }
+      }
+
+  - id: step-33-infra-json-rlhf
+    type: create_file
+    layer: infra
+    description: Create JSON RLHF adapter
+    path: src/infra/rlhf/json-rlhf-adapter.ts
+    template: |
+      import { type RLHFRepository } from '@/data/protocols/rlhf/rlhf-repository'
+      import { type FileSystem } from '@/data/protocols/fs/file-system'
+
+      export class JsonRLHFAdapter implements RLHFRepository {
+        private scores: Map<string, number> = new Map()
+
+        constructor (
+          private readonly fileSystem: FileSystem
+        ) {}
+
+        async calculateScore (params: RLHFRepository.ScoreParams): Promise<RLHFRepository.ScoreResult> {
+          const { stepType, success, layerInfo } = params
+
+          let score = success ? 1 : 0
+
+          if (layerInfo) {
+            if (layerInfo.layer === 'domain' || layerInfo.layer === 'main') {
+              score = success ? 1.2 : -0.5
+            }
+          }
+
+          return { score }
+        }
+
+        async saveScore (params: RLHFRepository.SaveParams): Promise<void> {
+          const { stepId, score } = params
+          this.scores.set(stepId, score)
+        }
+      }
+
+  - id: step-34-infra-yaml-config
+    type: create_file
+    layer: infra
+    description: Create YAML config adapter
+    path: src/infra/config/yaml-config-adapter.ts
+    template: |
+      import { type ConfigRepository } from '@/data/protocols/config/config-repository'
+      import { type CommitConfig } from '@/domain/models/commit-config'
+      import { type FileSystem } from '@/data/protocols/fs/file-system'
+      import * as yaml from 'yaml'
+
+      export class YamlConfigAdapter implements ConfigRepository {
+        constructor (
+          private readonly fileSystem: FileSystem
+        ) {}
+
+        async load (configPath: string): Promise<ConfigRepository.LoadResult> {
+          try {
+            const exists = await this.fileSystem.pathExists(configPath)
+
+            if (!exists) {
+              return {
+                config: null,
+                errors: ['Config file not found']
+              }
+            }
+
+            const content = await this.fileSystem.readFile(configPath)
+            const parsed = yaml.parse(content)
+
+            const config: CommitConfig = {
+              enabled: parsed.commit?.enabled ?? true,
+              qualityChecks: {
+                lint: parsed.commit?.quality_checks?.lint ?? true,
+                lintCommand: parsed.commit?.quality_checks?.lint_command ?? 'lint',
+                test: parsed.commit?.quality_checks?.test ?? true,
+                testCommand: parsed.commit?.quality_checks?.test_command ?? 'test --run'
+              },
+              conventionalCommits: {
+                enabled: parsed.commit?.conventional_commits?.enabled ?? true,
+                typeMapping: parsed.commit?.conventional_commits?.type_mapping ?? {}
+              },
+              coAuthor: parsed.commit?.co_author ?? 'Claude <noreply@anthropic.com>',
+              emoji: parsed.commit?.emoji ?? true,
+              interactiveSafety: parsed.commit?.interactive_safety ?? true
+            }
+
+            return { config, errors: [] }
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            return {
+              config: null,
+              errors: [`Failed to load config: ${message}`]
+            }
+          }
+        }
+      }
+
+  - id: step-35-infra-file-audit
+    type: create_file
+    layer: infra
+    description: Create file audit adapter
+    path: src/infra/audit/file-audit-adapter.ts
+    template: |
+      import { type AuditRepository } from '@/data/protocols/audit/audit-repository'
+      import { type AuditLogEntry } from '@/domain/models/audit-log'
+      import { type FileSystem } from '@/data/protocols/fs/file-system'
+
+      export class FileAuditAdapter implements AuditRepository {
+        private entries: AuditLogEntry[] = []
+
+        constructor (
+          private readonly fileSystem: FileSystem,
+          private readonly logPath: string
+        ) {}
+
+        async log (entry: AuditLogEntry): Promise<void> {
+          this.entries.push(entry)
+
+          if (this.entries.length > 100) {
+            this.entries = this.entries.slice(-100)
+          }
+
+          try {
+            const content = JSON.stringify(this.entries, null, 2)
+            await this.fileSystem.writeFile(this.logPath, content)
+          } catch {
+            // Ignore write errors
+          }
+        }
+
+        async getRecent (limit: number): Promise<AuditLogEntry[]> {
+          return this.entries.slice(-limit)
+        }
+      }
+
+  - id: step-36-infra-bash-script-executor
+    type: create_file
+    layer: infra
+    description: Create bash script executor adapter
+    path: src/infra/script/bash-script-executor.ts
+    template: |
+      import { type ScriptExecutorRepository } from '@/data/protocols/script/script-executor-repository'
+      import { type FileSystem } from '@/data/protocols/fs/file-system'
+      import { $ } from 'zx'
+      import * as os from 'os'
+      import * as path from 'path'
+
+      export class BashScriptExecutor implements ScriptExecutorRepository {
+        constructor (
+          private readonly fileSystem: FileSystem
+        ) {}
+
+        async execute (params: ScriptExecutorRepository.ExecuteParams): Promise<ScriptExecutorRepository.ExecuteResult> {
+          const { scriptContent, stepId } = params
+
+          const tempScriptPath = path.join(os.tmpdir(), `step-${stepId}.sh`)
+
+          try {
+            await this.fileSystem.writeFile(tempScriptPath, scriptContent)
+
+            $.verbose = false
+            const result = await $`bash ${tempScriptPath}`
+            $.verbose = true
+
+            await this.fileSystem.remove(tempScriptPath)
+
+            return {
+              output: result.stdout + result.stderr,
+              success: true
+            }
+          } catch (error) {
+            $.verbose = true
+
+            try {
+              await this.fileSystem.remove(tempScriptPath)
+            } catch {
+              // Ignore cleanup errors
+            }
+
+            const message = error instanceof Error ? error.message : String(error)
+            return {
+              output: message,
+              success: false
+            }
+          }
+        }
+      }
+
+  - id: step-37-infra-enhanced-git-repository
+    type: create_file
+    layer: infra
+    description: Extend ZxGitRepository with rollback methods
+    path: src/infra/git/enhanced-git-repository.ts
+    template: |
+      import { type GitRepository } from '@/data/protocols/git/git-repository'
+      import { $ } from 'zx'
+
+      export class EnhancedGitRepository implements GitRepository {
+        async add (path: string): Promise<void> {
+          await $`git add ${path}`
+        }
+
+        async commit (message: string): Promise<void> {
+          await $`git commit -m ${message}`
+        }
+
+        async getHeadHash (): Promise<string> {
+          const result = await $`git rev-parse --short HEAD`
+          return result.stdout.trim()
+        }
+
+        async status (): Promise<string> {
+          const result = await $`git status --porcelain`
+          return result.stdout.trim()
+        }
+
+        async resetHead (): Promise<void> {
+          await $`git reset HEAD`
+        }
+
+        async checkoutFile (path: string): Promise<void> {
+          await $`git checkout HEAD -- ${path}`
+        }
+      }
+
+  - id: step-38-infra-package-manager-detector
+    type: create_file
+    layer: infra
+    description: Create package manager detector
+    path: src/infra/package/package-manager-detector.ts
+    template: |
+      import { type PackageManagerRepository } from '@/data/protocols/package/package-manager-repository'
+      import { type FileSystem } from '@/data/protocols/fs/file-system'
+      import { $ } from 'zx'
+
+      export class PackageManagerDetector implements PackageManagerRepository {
+        constructor (
+          private readonly fileSystem: FileSystem
+        ) {}
+
+        async detect (): Promise<PackageManagerRepository.DetectResult> {
+          if (await this.fileSystem.pathExists('pnpm-lock.yaml')) {
+            if (await this.isInstalled('pnpm')) {
+              return { packageManager: 'pnpm' }
+            }
+          }
+
+          if (await this.fileSystem.pathExists('yarn.lock')) {
+            if (await this.isInstalled('yarn')) {
+              return { packageManager: 'yarn' }
+            }
+          }
+
+          return { packageManager: 'npm' }
+        }
+
+        async isInstalled (pm: string): Promise<boolean> {
+          try {
+            $.verbose = false
+            await $`which ${pm}`
+            $.verbose = true
+            return true
+          } catch {
+            $.verbose = true
+            return false
+          }
+        }
+      }
+
+  - id: step-39-infra-layer-validator
+    type: create_file
+    layer: infra
+    description: Create layer validator
+    path: src/infra/layer/layer-validator.ts
+    template: |
+      import { type LayerValidatorRepository } from '@/data/protocols/layer/layer-validator-repository'
+
+      export class LayerValidator implements LayerValidatorRepository {
+        private readonly forbiddenImports: Record<string, string[]> = {
+          domain: ['@/data', '@/infra', '@/presentation', '@/validation', '@/main'],
+          data: ['@/infra', '@/presentation', '@/validation', '@/main'],
+          infra: ['@/presentation', '@/validation', '@/main'],
+          presentation: ['@/data', '@/infra', '@/main'],
+          validation: ['@/domain', '@/data', '@/infra', '@/main']
+        }
+
+        async validateImports (params: LayerValidatorRepository.ValidateParams): Promise<LayerValidatorRepository.ValidateResult> {
+          const { code, layer } = params
+          const violations: string[] = []
+          const warnings: string[] = []
+
+          const forbidden = this.forbiddenImports[layer] || []
+
+          for (const forbiddenPath of forbidden) {
+            if (code.includes(`from '${forbiddenPath}`) || code.includes(`from "${forbiddenPath}`)) {
+              violations.push(`Layer '${layer}' cannot import from '${forbiddenPath}'`)
+            }
+          }
+
+          if (layer === 'domain') {
+            if (code.match(/import.*from\s+['"](?!@\/domain)[^'"]+['"]/)) {
+              warnings.push('Domain layer should only import from @/domain')
+            }
+          }
+
+          return {
+            valid: violations.length === 0,
+            violations,
+            warnings
+          }
+        }
+      }
+
+  - id: step-40-infra-script-validator
+    type: create_file
+    layer: infra
+    description: Create script validator
+    path: src/infra/security/script-validator.ts
+    template: |
+      import { type ScriptValidatorRepository } from '@/data/protocols/script/script-validator-repository'
+
+      export class ScriptValidator implements ScriptValidatorRepository {
+        private readonly dangerousKeywords = [
+          'rm', 'rmdir', 'del', 'delete',
+          'chmod', 'chown', 'sudo', 'su',
+          'curl', 'wget', 'nc', 'ssh',
+          'kill', 'killall', 'eval', 'exec'
+        ]
+
+        async validate (params: ScriptValidatorRepository.ValidateParams): Promise<ScriptValidatorRepository.ValidateResult> {
+          const { script, allowedScripts } = params
+
+          if (allowedScripts.includes(script)) {
+            return { safe: true }
+          }
+
+          const safePattern = /^[a-zA-Z0-9:\-\s]+$/
+          if (!safePattern.test(script)) {
+            return {
+              safe: false,
+              reason: 'Script contains invalid characters'
+            }
+          }
+
+          for (const keyword of this.dangerousKeywords) {
+            if (script.includes(keyword)) {
+              return {
+                safe: false,
+                reason: `Script contains dangerous keyword: ${keyword}`
+              }
+            }
+          }
+
+          return { safe: true }
+        }
+      }
+
+  # ============================================================================
+  # PRESENTATION LAYER - ERRORS (4 arquivos)
+  # ============================================================================
+
+  - id: step-41-presentation-lint-error
+    type: create_file
+    layer: presentation
+    description: Create LintError class
+    path: src/presentation/errors/lint-error.ts
+    template: |
+      export class LintError extends Error {
+        constructor (message: string) {
+          super(message)
+          this.name = 'LintError'
+        }
+      }
+
+  - id: step-42-presentation-test-error
+    type: create_file
+    layer: presentation
+    description: Create TestError class
+    path: src/presentation/errors/test-error.ts
+    template: |
+      export class TestError extends Error {
+        constructor (message: string) {
+          super(message)
+          this.name = 'TestError'
+        }
+      }
+
+  - id: step-43-presentation-invalid-script-error
+    type: create_file
+    layer: presentation
+    description: Create InvalidScriptError class
+    path: src/presentation/errors/invalid-script-error.ts
+    template: |
+      export class InvalidScriptError extends Error {
+        constructor (public readonly script: string, reason: string) {
+          super(`Invalid script "${script}": ${reason}`)
+          this.name = 'InvalidScriptError'
+        }
+      }
+
+  - id: step-44-presentation-layer-violation-error
+    type: create_file
+    layer: presentation
+    description: Create LayerViolationError class
+    path: src/presentation/errors/layer-violation-error.ts
+    template: |
+      export class LayerViolationError extends Error {
+        constructor (
+          public readonly layer: string,
+          public readonly violations: string[]
+        ) {
+          super(`Layer violation in ${layer}: ${violations.join(', ')}`)
+          this.name = 'LayerViolationError'
+        }
+      }
+
+  # ============================================================================
+  # MAIN LAYER - FACTORIES (6 arquivos)
+  # ============================================================================
+
+  - id: step-45-main-validate-template-factory
+    type: create_file
+    layer: main
+    description: Create validate template factory
+    path: src/main/factories/usecases/validate-template-factory.ts
+    template: |
+      import { type ValidateTemplate } from '@/domain/usecases/validate-template'
+      import { DbValidateTemplate } from '@/data/usecases/template/db-validate-template'
+      import { FsExtraAdapter } from '@/infra/fs/fs-extra-adapter'
+      import { YamlTemplateValidator } from '@/infra/template/yaml-template-validator'
+
+      export const makeValidateTemplate = (): ValidateTemplate => {
+        const fileSystem = new FsExtraAdapter()
+        const validator = new YamlTemplateValidator()
+        return new DbValidateTemplate(fileSystem, validator)
+      }
+
+  - id: step-46-main-run-quality-check-factory
+    type: create_file
+    layer: main
+    description: Create run quality check factory
+    path: src/main/factories/usecases/run-quality-check-factory.ts
+    template: |
+      import { type RunQualityCheck } from '@/domain/usecases/run-quality-check'
+      import { DbRunQualityCheck } from '@/data/usecases/quality/db-run-quality-check'
+      import { NpmQualityCheckAdapter } from '@/infra/quality/npm-quality-check-adapter'
+      import { ChalkLoggerAdapter } from '@/infra/log/chalk-logger-adapter'
+
+      export const makeRunQualityCheck = (): RunQualityCheck => {
+        const qualityCheck = new NpmQualityCheckAdapter()
+        const logger = new ChalkLoggerAdapter()
+        return new DbRunQualityCheck(qualityCheck, logger)
+      }
+
+  - id: step-47-main-calculate-score-factory
+    type: create_file
+    layer: main
+    description: Create calculate score factory
+    path: src/main/factories/usecases/calculate-score-factory.ts
+    template: |
+      import { type CalculateScore } from '@/domain/usecases/calculate-score'
+      import { DbCalculateScore } from '@/data/usecases/rlhf/db-calculate-score'
+      import { JsonRLHFAdapter } from '@/infra/rlhf/json-rlhf-adapter'
+      import { FsExtraAdapter } from '@/infra/fs/fs-extra-adapter'
+
+      export const makeCalculateScore = (): CalculateScore => {
+        const fileSystem = new FsExtraAdapter()
+        const rlhfRepository = new JsonRLHFAdapter(fileSystem)
+        return new DbCalculateScore(rlhfRepository)
+      }
+
+  - id: step-48-main-rollback-step-factory
+    type: create_file
+    layer: main
+    description: Create rollback step factory
+    path: src/main/factories/usecases/rollback-step-factory.ts
+    template: |
+      import { type RollbackStep } from '@/domain/usecases/rollback-step'
+      import { DbRollbackStep } from '@/data/usecases/git/db-rollback-step'
+      import { EnhancedGitRepository } from '@/infra/git/enhanced-git-repository'
+      import { FsExtraAdapter } from '@/infra/fs/fs-extra-adapter'
+      import { ChalkLoggerAdapter } from '@/infra/log/chalk-logger-adapter'
+
+      export const makeRollbackStep = (): RollbackStep => {
+        const gitRepository = new EnhancedGitRepository()
+        const fileSystem = new FsExtraAdapter()
+        const logger = new ChalkLoggerAdapter()
+        return new DbRollbackStep(gitRepository, fileSystem, logger)
+      }
+
+  - id: step-49-main-check-git-safety-factory
+    type: create_file
+    layer: main
+    description: Create check git safety factory
+    path: src/main/factories/usecases/check-git-safety-factory.ts
+    template: |
+      import { type CheckGitSafety } from '@/domain/usecases/check-git-safety'
+      import { DbCheckGitSafety } from '@/data/usecases/git/db-check-git-safety'
+      import { EnhancedGitRepository } from '@/infra/git/enhanced-git-repository'
+      import { ChalkLoggerAdapter } from '@/infra/log/chalk-logger-adapter'
+
+      export const makeCheckGitSafety = (): CheckGitSafety => {
+        const gitRepository = new EnhancedGitRepository()
+        const logger = new ChalkLoggerAdapter()
+        return new DbCheckGitSafety(gitRepository, logger)
+      }
+
+  - id: step-50-main-enhanced-executor
+    type: create_file
+    layer: main
+    description: Create enhanced executor composition
+    path: src/main/enhanced-executor.ts
+    template: |
+      import { makeExecutePlan } from './factories/usecases/db-execute-plan-factory'
+      import { makeValidateTemplate } from './factories/usecases/validate-template-factory'
+      import { makeRunQualityCheck } from './factories/usecases/run-quality-check-factory'
+      import { makeCalculateScore } from './factories/usecases/calculate-score-factory'
+      import { makeRollbackStep } from './factories/usecases/rollback-step-factory'
+      import { makeCheckGitSafety } from './factories/usecases/check-git-safety-factory'
+
+      export const makeEnhancedExecutor = () => {
+        return {
+          executePlan: makeExecutePlan(),
+          validateTemplate: makeValidateTemplate(),
+          runQualityCheck: makeRunQualityCheck(),
+          calculateScore: makeCalculateScore(),
+          rollbackStep: makeRollbackStep(),
+          checkGitSafety: makeCheckGitSafety()
+        }
+      }
