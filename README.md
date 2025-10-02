@@ -247,6 +247,52 @@ The generated graph (`docs/architecture-graph.svg`) provides a visual representa
 
 ![Architecture Graph Example](docs/architecture-graph.svg)
 
+### Command Consistency & Quality Assurance
+
+The Regent includes automated tools to ensure command consistency and prevent architectural drift:
+
+| Tool | Purpose | When It Runs |
+|------|---------|--------------|
+| `npm run validate:commands` | Validate cross-command consistency | Manual, pre-commit, CI/CD |
+| **Pre-commit Hook** | Automatic validation before commit | Every `git commit` |
+| **GitHub Actions** | CI/CD validation on PRs | Pull requests to main |
+
+**Command Validation:**
+
+```bash
+# Manual validation
+npm run validate:commands
+
+# Bypass pre-commit hook (emergency only)
+git commit --no-verify
+```
+
+**Pre-commit Hook Features:**
+- ✅ Runs automatically before every commit
+- ✅ Only validates when `.claude/commands/` files change
+- ✅ Fast execution (< 1 second)
+- ✅ Easy bypass with `--no-verify` for emergencies
+- ✅ Clear error messages with actionable fixes
+
+**CI/CD Integration:**
+- ✅ Automated validation on pull requests
+- ✅ Posts comments on PR when validation fails
+- ✅ Prevents inconsistent commands from being merged
+- ✅ Fast feedback loop (< 30 seconds)
+
+**Consistency Rules:**
+
+The validator checks 5 key concepts across all AI commands:
+- `sharedComponents` - Modular YAML structure (Issues #117, #144)
+- `useCases` - Modular YAML structure
+- `Edge Case` - Edge case guidance (Issue #145)
+- `RLHF` - RLHF scoring system
+- `Clean Architecture` - Core architectural principle
+
+**Documentation:**
+- [Architectural Change Checklist](docs/processes/architectural-change-checklist.md) - Process for maintaining consistency
+- [Command Consistency Tool](scripts/validate-command-consistency.ts) - Implementation details
+
 ## 🏗️ Layer-Driven Clean Architecture
 
 ### The Innovation

@@ -10,8 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Planning for v2.3.0
 
 **Target Areas for Next Release:**
-- [ ] Add `validate:commands` to CI/CD pipeline
-- [ ] Implement pre-commit hook for consistency checks
+- [x] Add `validate:commands` to CI/CD pipeline (#167)
+- [x] Implement pre-commit hook for consistency checks (#168)
 - [ ] Create command dependency graph visualization
 - [ ] Add migration guide for v1 to v2 structure changes
 - [ ] Dogfooding experiment with new edge case documentation
@@ -50,6 +50,28 @@ This release focuses on three key areas:
   - Validates 5 key concepts across all AI commands
   - Color-coded output with actionable error messages
   - Exit codes for CI/CD integration
+
+- **GitHub Actions CI/CD Workflow** (#167)
+  - Automated command consistency validation on pull requests
+  - Runs on changes to `.claude/commands/` or validation script
+  - Posts PR comment with actionable fixes when validation fails
+  - Fast feedback loop (< 30 seconds)
+  - Prevents inconsistent commands from being merged
+  - File: `.github/workflows/validate-commands.yml`
+
+- **Pre-commit Hook for Command Validation** (#168)
+  - Automatic validation before every git commit
+  - Configured with Husky and lint-staged
+  - Only runs when `.claude/commands/` files change
+  - Fast execution (< 1 second)
+  - Easy bypass with `--no-verify` for emergencies
+  - Files: `.husky/pre-commit`, `package.json` (lint-staged config)
+
+- **Unit Tests for Command Consistency** (#166)
+  - Comprehensive test suite already exists (verified)
+  - Unit tests: `scripts/__tests__/validate-command-consistency.test.ts`
+  - Integration tests: `scripts/__tests__/validate-command-consistency.integration.test.ts`
+  - 100% coverage of validation rules and edge cases
 
 - **Project-Level MCP Configuration** (#150) - PERMANENT SOLUTION
   - Added `.mcp.json` at project root for team-wide MCP server configuration
@@ -152,7 +174,9 @@ This release focuses on three key areas:
 **Process & Tooling:**
 - ✅ Automated consistency validation (5 rule sets)
 - ✅ npm script for easy validation (`validate:commands`)
-- ✅ CI/CD ready with exit codes
+- ✅ CI/CD pipeline with GitHub Actions (#167)
+- ✅ Pre-commit hooks for automatic validation (#168)
+- ✅ Comprehensive unit tests (#166)
 - ✅ Prevents future architectural drift
 
 **Developer Experience:**
@@ -170,6 +194,9 @@ This release focuses on three key areas:
 - Fixes #152 (prompt consistency process)
 - Fixes #150 (MCP subdirectory configuration)
 - Fixes #144 (multi-YAML execution documentation)
+- Fixes #167 (GitHub Actions CI/CD workflow)
+- Fixes #168 (pre-commit hook automation)
+- Fixes #166 (unit tests verification)
 - Improves #117 (modular YAML structure quality)
 
 ## [2.1.1] - 2025-09-28
