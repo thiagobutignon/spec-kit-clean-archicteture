@@ -51,6 +51,29 @@ This release focuses on three key areas:
   - Color-coded output with actionable error messages
   - Exit codes for CI/CD integration
 
+- **Project-Level MCP Configuration** (#150) - PERMANENT SOLUTION
+  - Added `.mcp.json` at project root for team-wide MCP server configuration
+  - Configured 4 essential servers: serena, context7, chrome-devtools, playwright
+  - MCPs now work automatically in all subdirectories
+  - Supports environment variables for optional API keys (Context7)
+  - **CLI Integration**: `regent init` now offers to create `.mcp.json` (recommended option)
+  - **New command**: `regent setup-mcp` to create/update `.mcp.json` in existing projects
+  - File: `.mcp.json`
+
+- **MCP Configuration Documentation** (#150)
+  - Comprehensive setup guide for project-level `.mcp.json` (500+ lines)
+  - Prerequisites and installation instructions
+  - Context7 API key setup (optional, for higher rate limits)
+  - Troubleshooting guide with common issues
+  - Security best practices for team configurations
+  - File: `docs/setup/mcp-configuration.md`
+
+- **MCP Troubleshooting Documentation** (#150)
+  - Updated troubleshooting guide to reflect permanent solution
+  - Historical context for alternative workarounds
+  - Migration from per-directory to project-level configuration
+  - File: `docs/troubleshooting/mcp-subdirectory-workaround.md`
+
 - Automated NPM package publishing via GitHub Actions
 - Release process documentation
 - CHANGELOG.md for tracking project changes
@@ -82,6 +105,13 @@ This release focuses on three key areas:
   - Updated `/03-generate-layer-code.md` with edge case handling section
   - Both commands now reference comprehensive edge case documentation
   - Helps AI make correct decisions during planning and generation
+
+- **Multiple YAML Support Documentation** (#144)
+  - Updated `/04-reflect-layer-lessons.md` with multi-YAML execution patterns
+  - Updated `/06-execute-layer-steps.md` with critical execution order guidance
+  - Documents proper sequence: shared components → use cases → updates
+  - Includes batch processing examples and dependency tracking patterns
+  - Prevents TypeScript compilation errors from incorrect execution order
 
 - Reorganized documentation into thematic directories under `docs/` (#137)
   - Moved 10 markdown files from root to organized structure:
@@ -130,11 +160,16 @@ This release focuses on three key areas:
 - ✅ Systematic process for architectural changes
 - ✅ Automated detection of inconsistencies
 - ✅ Better error messages and guidance
+- ✅ **MCP servers work in all subdirectories automatically** (no per-directory setup)
+- ✅ Team-wide MCP configuration via git (onboarding simplified)
+- ✅ Multi-YAML execution guidance prevents compilation errors
 
 **Issues Resolved:**
 - Fixes #154 (P0 BLOCKER - import path mismatch)
 - Fixes #145 (edge case documentation)
 - Fixes #152 (prompt consistency process)
+- Fixes #150 (MCP subdirectory configuration)
+- Fixes #144 (multi-YAML execution documentation)
 - Improves #117 (modular YAML structure quality)
 
 ## [2.1.1] - 2025-09-28

@@ -9,6 +9,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { initCommand } from './commands/init.js';
 import { checkCommand } from './commands/check.js';
+import { setupMcpCommand } from './commands/setup-mcp.js';
 import { showBanner } from './utils/banner.js';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
@@ -52,6 +53,13 @@ program
   .command('check')
   .description('Check that all required tools are installed')
   .action(checkCommand);
+
+program
+  .command('setup-mcp')
+  .description('Create or update project-level .mcp.json configuration')
+  .option('--force', 'Overwrite existing .mcp.json without prompting')
+  .option('--all', 'Configure all MCP servers without prompting')
+  .action(setupMcpCommand);
 
 // Handle case where no command is provided
 program.action(() => {

@@ -47,6 +47,58 @@ next_command: "/05-evaluate-layer-results from yaml: <refined-yaml>"
 
 # Task: Reflect on Layer YAML Plan
 
+## 🎯 Working with Multiple YAMLs (Issue #144)
+
+Since `/03-generate-layer-code` now generates **multiple YAML files** (shared + per use case), you need to run this command **once for each YAML file**:
+
+### Execution Pattern
+
+```bash
+# Reflect on shared components first
+/04-reflect-layer-lessons from yaml: spec/001-product-catalog/domain/shared-implementation.yaml
+
+# Then reflect on each use case YAML
+/04-reflect-layer-lessons from yaml: spec/001-product-catalog/domain/create-product-implementation.yaml
+/04-reflect-layer-lessons from yaml: spec/001-product-catalog/domain/update-product-implementation.yaml
+```
+
+### Recommended Order
+
+1. **Shared YAML first** - Review foundation components
+2. **Use case YAMLs next** - Review in dependency order
+3. **Update YAMLs last** - Review modifications after base implementation
+
+### Example Workflow
+
+```bash
+# Feature with shared components + 2 use cases
+cd your-project/
+
+# Step 1: Reflect on shared
+/04-reflect-layer-lessons from yaml: spec/001-auth/domain/shared-implementation.yaml
+
+# Step 2: Reflect on login use case
+/04-reflect-layer-lessons from yaml: spec/001-auth/domain/login-implementation.yaml
+
+# Step 3: Reflect on register use case
+/04-reflect-layer-lessons from yaml: spec/001-auth/domain/register-implementation.yaml
+```
+
+### Batch Processing (Optional)
+
+For convenience, you can iterate over all YAMLs in a directory:
+
+```bash
+# Reflect on all domain YAMLs in a feature
+for yaml in spec/001-product-catalog/domain/*.yaml; do
+  /04-reflect-layer-lessons from yaml: "$yaml"
+done
+```
+
+**Note**: Each YAML is reflected independently. Ensure shared components are reflected and approved before use cases.
+
+---
+
 ## 🤖 RLHF Scoring Optimization
 
 During reflection, optimize the plan for the highest RLHF score:

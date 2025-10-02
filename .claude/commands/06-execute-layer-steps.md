@@ -54,6 +54,87 @@ next_command_failure: "/08-fix-layer-errors from yaml: <yaml-with-failed-step>"
 
 # Task: Execute Domain YAML Plan
 
+## 🎯 Working with Multiple YAMLs (Issue #144)
+
+Since `/03-generate-layer-code` now generates **multiple YAML files** (shared + per use case), you need to run this command **once for each YAML file**:
+
+### Execution Pattern
+
+```bash
+# Execute shared components FIRST (required by use cases)
+/06-execute-layer-steps spec/001-product-catalog/domain/shared-implementation.yaml
+
+# Then execute use cases in dependency order
+/06-execute-layer-steps spec/001-product-catalog/domain/create-product-implementation.yaml
+/06-execute-layer-steps spec/001-product-catalog/domain/update-product-implementation.yaml
+```
+
+### Critical Execution Order
+
+1. **Shared YAML first** - Creates foundation (entities, VOs, errors, repositories)
+2. **Use case YAMLs next** - Implement use cases that depend on shared components
+3. **Update YAMLs last** - Modifications to shared components after base implementation
+
+**⚠️ Important**: Executing use cases before shared components will cause errors because:
+- Use cases import from shared components
+- TypeScript compilation will fail if shared types don't exist
+- Tests will fail if shared helpers aren't available
+
+### Example Workflow
+
+```bash
+# Feature: Authentication with shared + 2 use cases
+cd your-project/
+
+# Step 1: Execute shared components (entities, VOs, errors)
+/06-execute-layer-steps spec/001-auth/domain/shared-implementation.yaml
+# ✅ Creates: User entity, Email VO, Password VO, AuthErrors, UserRepository
+
+# Step 2: Execute login use case (depends on shared)
+/06-execute-layer-steps spec/001-auth/domain/login-implementation.yaml
+# ✅ Creates: LoginUseCase, tests, imports from shared components
+
+# Step 3: Execute register use case (depends on shared)
+/06-execute-layer-steps spec/001-auth/domain/register-implementation.yaml
+# ✅ Creates: RegisterUseCase, tests, imports from shared components
+```
+
+### Batch Processing (Advanced)
+
+For automated execution of all YAMLs in a feature:
+
+```bash
+# Execute all YAMLs in correct order
+# Shared first, then use cases
+cd your-project/
+
+# Execute shared
+/06-execute-layer-steps spec/001-product-catalog/domain/shared-implementation.yaml
+
+# Execute use cases (after shared completes)
+for yaml in spec/001-product-catalog/domain/*-implementation.yaml; do
+  # Skip shared (already executed)
+  if [[ ! "$yaml" =~ "shared" ]]; then
+    /06-execute-layer-steps "$yaml"
+  fi
+done
+```
+
+### Dependency Tracking (Future Enhancement)
+
+YAML files include `dependencies` metadata to enforce execution order:
+
+```yaml
+# use-case-implementation.yaml
+metadata:
+  dependencies:
+    - shared-implementation.yaml  # Must be executed first
+```
+
+The executor will verify dependencies before execution.
+
+---
+
 ## 🤖 RLHF Scoring During Execution
 
 The .regent/config/execute-steps.ts script automatically calculates RLHF scores for each step:
