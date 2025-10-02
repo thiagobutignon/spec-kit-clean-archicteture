@@ -100,22 +100,15 @@ Extract patterns that would catch violations in similar code.`;
 
 async function getFilesFromSerena(targetDir: string, layer: string): Promise<string[]> {
   try {
-    // Use Serena MCP to search for files in specific layer
-    const searchQuery = `files in ${targetDir} containing ${layer} layer`;
-    
-    // Fallback: use filesystem if Serena not available
+    // Use filesystem to search for files in specific layer
     const files = await fs.readdir(targetDir, { recursive: true });
     return files
       .filter(f => f.toString().includes(layer))
       .filter(f => f.toString().endsWith('.ts') || f.toString().endsWith('.tsx'))
       .map(f => `${targetDir}/${f}`);
-  } catch (error) {
-    console.warn('Serena MCP not available, using filesystem fallback');
-    const files = await fs.readdir(targetDir, { recursive: true });
-    return files
-      .filter(f => f.toString().includes(layer))
-      .filter(f => f.toString().endsWith('.ts') || f.toString().endsWith('.tsx'))
-      .map(f => `${targetDir}/${f}`);
+  } catch {
+    console.warn('Failed to read directory, returning empty array');
+    return [];
   }
 }
 
@@ -140,7 +133,7 @@ async function extractPatternsForLayer(
     try {
       const content = await fs.readFile(file, 'utf-8');
       combinedCode += `\n// File: ${file}\n${content}\n`;
-    } catch (error) {
+    } catch {
       console.warn(`   ⚠️  Could not read ${file}`);
     }
   }

@@ -90,7 +90,8 @@ describe('Init Command - Directory Structure', () => {
 
       // Should import from ../core/ (one level up)
       expect(content).toContain("import Logger from '../core/logger'");
-      expect(content).toContain("import { EnhancedRLHFSystem, LayerInfo } from '../core/rlhf-system'");
+      expect(content).toContain("import { EnhancedRLHFSystem } from '../core/rlhf-system'");
+      expect(content).toContain("import type { LayerInfo } from '../core/rlhf-system'");
 
       // Should import from ../utils/ (one level up)
       expect(content).toContain("import { resolveLogDirectory } from '../utils/log-path-resolver'");
