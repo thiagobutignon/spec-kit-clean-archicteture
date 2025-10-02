@@ -105,6 +105,10 @@ steps:
       patterns:
         - DAT003
       command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:20:37.780Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-4-data-protocols-git
     type: create_file
     layer: data
@@ -131,6 +135,10 @@ steps:
         - DAT003
         - DAT004
       command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:20:42.380Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-5-data-protocols-log
     type: create_file
     layer: data
@@ -148,6 +156,10 @@ steps:
       patterns:
         - DAT003
       command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:20:46.996Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-6-data-protocols-plan
     type: create_file
     layer: data
@@ -170,6 +182,10 @@ steps:
       patterns:
         - DAT003
       command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:20:51.497Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-7-data-usecase-implementation
     type: create_file
     layer: data
@@ -202,38 +218,33 @@ steps:
 
         async execute (params: ExecutePlan.Params): Promise<ExecutePlan.Result> {
           const { implementationPath } = params
-          try {
-            const plan = await this.planLoaderRepository.load(implementationPath)
-            this.logger.info(`🚀 Starting execution of ${plan.steps.length} steps...`)
+          const plan: ImplementationPlan = await this.planLoaderRepository.load(implementationPath)
+          this.logger.info(`🚀 Starting execution of ${plan.steps.length} steps...`)
 
-            for (const [index, step] of plan.steps.entries()) {
-              this.logger.info(`\n▶️  Processing Step ${index + 1}/${plan.steps.length}: ${step.id}`)
-              if (step.status === 'SUCCESS' || step.status === 'SKIPPED') {
-                this.logger.log(`   ⏭️  Skipping step with status '${step.status}'.`)
-                continue
-              }
-              try {
-                await this.executeStepAction(step)
-                step.status = 'SUCCESS'
-                step.execution_log = `Completed successfully at ${new Date().toISOString()}`
-                await this.commitStep(step)
-              } catch (error) {
-                step.status = 'FAILED'
-                step.execution_log = `Failed at ${new Date().toISOString()}.\nError: ${(error as Error).message}`
-                await this.planSaverRepository.save(implementationPath, plan)
-                this.logger.error(`❌ Step '${step.id}' failed.`, error as Error)
-                throw error
-              }
+          for (const [index, step] of plan.steps.entries()) {
+            this.logger.info(`\n▶️  Processing Step ${index + 1}/${plan.steps.length}: ${step.id}`)
+            if (step.status === 'SUCCESS' || step.status === 'SKIPPED') {
+              this.logger.log(`   ⏭️  Skipping step with status '${step.status}'.`)
+              continue
             }
-
-            plan.evaluation = { ...plan.evaluation, final_status: 'SUCCESS' }
-            await this.planSaverRepository.save(implementationPath, plan)
-            this.logger.success('\n🎉 All steps completed successfully!')
-            return { finalPlan: plan, success: true }
-          } catch (error) {
-            this.logger.error('Execution failed.', error as Error)
-            return { finalPlan: {} as any, success: false }
+            try {
+              await this.executeStepAction(step)
+              step.status = 'SUCCESS'
+              step.execution_log = `Completed successfully at ${new Date().toISOString()}`
+              await this.commitStep(step)
+            } catch (stepError) {
+              step.status = 'FAILED'
+              step.execution_log = `Failed at ${new Date().toISOString()}.\nError: ${(stepError as Error).message}`
+              await this.planSaverRepository.save(implementationPath, plan)
+              this.logger.error(`❌ Step '${step.id}' failed.`, stepError as Error)
+              return { finalPlan: plan, success: false }
+            }
           }
+
+          plan.evaluation = { ...plan.evaluation, final_status: 'SUCCESS' }
+          await this.planSaverRepository.save(implementationPath, plan)
+          this.logger.success('\n🎉 All steps completed successfully!')
+          return { finalPlan: plan, success: true }
         }
 
         private async executeStepAction (step: Step): Promise<void> {
