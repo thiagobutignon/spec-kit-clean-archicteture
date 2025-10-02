@@ -1,14 +1,14 @@
 metadata:
-  feature: "CLI Step Executor Refactor"
-  domain: "Software Development Automation"
+  feature: CLI Step Executor Refactor
+  domain: Software Development Automation
   estimatedFiles: 21
 steps:
-  - id: "step-1-domain-models"
-    type: "create_file"
-    layer: "domain"
-    description: "Create domain models for Step and ImplementationPlan"
-    path: "src/domain/models/implementation-plan.ts"
-    template: |
+  - id: step-1-domain-models
+    type: create_file
+    layer: domain
+    description: Create domain models for Step and ImplementationPlan
+    path: src/domain/models/implementation-plan.ts
+    template: >
       export type Step = {
         id: string
         type: 'create_file' | 'refactor_file' | 'delete_file' | 'folder' | 'branch' | 'pull_request' | 'validation' | 'test'
@@ -30,6 +30,7 @@ steps:
         validation_script?: string
       }
 
+
       export type ImplementationPlan = {
         steps: Step[]
         metadata?: {
@@ -44,19 +45,33 @@ steps:
         }
       }
     validation:
-      patterns: ["DOM004"]
-      command: "tsc --noEmit"
-  - id: "step-2-domain-usecase-execute-plan"
-    type: "create_file"
-    layer: "domain"
-    description: "Create the ExecutePlan use case interface"
-    path: "src/domain/usecases/execute-plan.ts"
-    template: |
-      import { type ImplementationPlan } from '@/domain/models/implementation-plan'
+      patterns:
+        - DOM004
+      command: tsc --noEmit
+    rlhf_score: 0
+    status: FAILED
+    execution_log: |-
+      Failed at 2025-10-02T09:11:21.764Z (5106ms).
+      RLHF Score: 0
+
+      --- ERROR LOG ---
+      Quality checks failed. Changes have been rolled back.
+      Lint: ❌
+      Test: ❌
+  - id: step-2-domain-usecase-execute-plan
+    type: create_file
+    layer: domain
+    description: Create the ExecutePlan use case interface
+    path: src/domain/usecases/execute-plan.ts
+    template: >
+      import { type ImplementationPlan } from
+      '@/domain/models/implementation-plan'
+
 
       export interface ExecutePlan {
         execute: (params: ExecutePlan.Params) => Promise<ExecutePlan.Result>
       }
+
 
       export namespace ExecutePlan {
         export type Params = {
@@ -69,13 +84,16 @@ steps:
         }
       }
     validation:
-      patterns: ["DOM001", "DOM002", "DOM003"]
-      command: "tsc --noEmit"
-  - id: "step-3-data-protocols-fs"
-    type: "create_file"
-    layer: "data"
-    description: "Create data protocol for File System operations"
-    path: "src/data/protocols/fs/file-system.ts"
+      patterns:
+        - DOM001
+        - DOM002
+        - DOM003
+      command: tsc --noEmit
+  - id: step-3-data-protocols-fs
+    type: create_file
+    layer: data
+    description: Create data protocol for File System operations
+    path: src/data/protocols/fs/file-system.ts
     template: |
       export interface FileSystem {
         readFile: (path: string) => Promise<string>
@@ -86,13 +104,14 @@ steps:
         chmod: (path: string, mode: string | number) => Promise<void>
       }
     validation:
-      patterns: ["DAT003"]
-      command: "tsc --noEmit"
-  - id: "step-4-data-protocols-git"
-    type: "create_file"
-    layer: "data"
-    description: "Create data protocol for Git operations"
-    path: "src/data/protocols/git/git-repository.ts"
+      patterns:
+        - DAT003
+      command: tsc --noEmit
+  - id: step-4-data-protocols-git
+    type: create_file
+    layer: data
+    description: Create data protocol for Git operations
+    path: src/data/protocols/git/git-repository.ts
     template: |
       export interface GitRepository {
         status: () => Promise<string>
@@ -110,13 +129,15 @@ steps:
         }
       }
     validation:
-      patterns: ["DAT003", "DAT004"]
-      command: "tsc --noEmit"
-  - id: "step-5-data-protocols-log"
-    type: "create_file"
-    layer: "data"
-    description: "Create data protocol for logging"
-    path: "src/data/protocols/log/logger.ts"
+      patterns:
+        - DAT003
+        - DAT004
+      command: tsc --noEmit
+  - id: step-5-data-protocols-log
+    type: create_file
+    layer: data
+    description: Create data protocol for logging
+    path: src/data/protocols/log/logger.ts
     template: |
       export interface Logger {
         log: (message: string) => void
@@ -126,38 +147,51 @@ steps:
         success: (message: string) => void
       }
     validation:
-      patterns: ["DAT003"]
-      command: "tsc --noEmit"
-  - id: "step-6-data-protocols-plan"
-    type: "create_file"
-    layer: "data"
-    description: "Create data protocols for loading and saving plans"
-    path: "src/data/protocols/plan/plan-repository.ts"
-    template: |
-      import { type ImplementationPlan } from '@/domain/models/implementation-plan'
+      patterns:
+        - DAT003
+      command: tsc --noEmit
+  - id: step-6-data-protocols-plan
+    type: create_file
+    layer: data
+    description: Create data protocols for loading and saving plans
+    path: src/data/protocols/plan/plan-repository.ts
+    template: >
+      import { type ImplementationPlan } from
+      '@/domain/models/implementation-plan'
+
 
       export interface PlanLoaderRepository {
         load: (path: string) => Promise<ImplementationPlan>
       }
 
+
       export interface PlanSaverRepository {
         save: (path: string, plan: ImplementationPlan) => Promise<void>
       }
     validation:
-      patterns: ["DAT003"]
-      command: "tsc --noEmit"
-  - id: "step-7-data-usecase-implementation"
-    type: "create_file"
-    layer: "data"
-    description: "Implement the DbExecutePlan use case"
-    path: "src/data/usecases/plan/db-execute-plan.ts"
-    template: |
+      patterns:
+        - DAT003
+      command: tsc --noEmit
+  - id: step-7-data-usecase-implementation
+    type: create_file
+    layer: data
+    description: Implement the DbExecutePlan use case
+    path: src/data/usecases/plan/db-execute-plan.ts
+    template: >
       import { type ExecutePlan } from '@/domain/usecases/execute-plan'
-      import { type Step, type ImplementationPlan } from '@/domain/models/implementation-plan'
+
+      import { type Step, type ImplementationPlan } from
+      '@/domain/models/implementation-plan'
+
       import { type FileSystem } from '@/data/protocols/fs/file-system'
+
       import { type GitRepository } from '@/data/protocols/git/git-repository'
+
       import { type Logger } from '@/data/protocols/log/logger'
-      import { type PlanLoaderRepository, type PlanSaverRepository } from '@/data/protocols/plan/plan-repository'
+
+      import { type PlanLoaderRepository, type PlanSaverRepository } from
+      '@/data/protocols/plan/plan-repository'
+
 
       export class DbExecutePlan implements ExecutePlan {
         constructor (
@@ -245,13 +279,16 @@ steps:
         }
       }
     validation:
-      patterns: ["DAT001", "DAT002", "DAT005"]
-      command: "tsc --noEmit"
-  - id: "step-8-infra-fs-adapter"
-    type: "create_file"
-    layer: "infra"
-    description: "Create FileSystem adapter using fs-extra"
-    path: "src/infra/fs/fs-extra-adapter.ts"
+      patterns:
+        - DAT001
+        - DAT002
+        - DAT005
+      command: tsc --noEmit
+  - id: step-8-infra-fs-adapter
+    type: create_file
+    layer: infra
+    description: Create FileSystem adapter using fs-extra
+    path: src/infra/fs/fs-extra-adapter.ts
     template: |
       import { type FileSystem } from '@/data/protocols/fs/file-system'
       import fs from 'fs-extra'
@@ -282,13 +319,15 @@ steps:
         }
       }
     validation:
-      patterns: ["INF001", "INF003"]
-      command: "tsc --noEmit"
-  - id: "step-9-infra-git-adapter"
-    type: "create_file"
-    layer: "infra"
-    description: "Create GitRepository adapter using zx"
-    path: "src/infra/git/zx-git-repository.ts"
+      patterns:
+        - INF001
+        - INF003
+      command: tsc --noEmit
+  - id: step-9-infra-git-adapter
+    type: create_file
+    layer: infra
+    description: Create GitRepository adapter using zx
+    path: src/infra/git/zx-git-repository.ts
     template: |
       import { type GitRepository } from '@/data/protocols/git/git-repository'
       import { $ } from 'zx'
@@ -326,13 +365,15 @@ steps:
         }
       }
     validation:
-      patterns: ["INF001", "INF003"]
-      command: "tsc --noEmit"
-  - id: "step-10-infra-log-adapter"
-    type: "create_file"
-    layer: "infra"
-    description: "Create Logger adapter using chalk"
-    path: "src/infra/log/chalk-logger-adapter.ts"
+      patterns:
+        - INF001
+        - INF003
+      command: tsc --noEmit
+  - id: step-10-infra-log-adapter
+    type: create_file
+    layer: infra
+    description: Create Logger adapter using chalk
+    path: src/infra/log/chalk-logger-adapter.ts
     template: |
       import { type Logger } from '@/data/protocols/log/logger'
       import chalk from 'chalk'
@@ -362,20 +403,29 @@ steps:
         }
       }
     validation:
-      patterns: ["INF001", "INF003"]
-      command: "tsc --noEmit"
-  - id: "step-11-infra-plan-repository"
-    type: "create_file"
-    layer: "infra"
-    description: "Create Plan repository for loading/saving YAML files"
-    path: "src/infra/plan/yaml-plan-repository.ts"
-    template: |
-      import { type PlanLoaderRepository, type PlanSaverRepository } from '@/data/protocols/plan/plan-repository'
-      import { type ImplementationPlan } from '@/domain/models/implementation-plan'
+      patterns:
+        - INF001
+        - INF003
+      command: tsc --noEmit
+  - id: step-11-infra-plan-repository
+    type: create_file
+    layer: infra
+    description: Create Plan repository for loading/saving YAML files
+    path: src/infra/plan/yaml-plan-repository.ts
+    template: >
+      import { type PlanLoaderRepository, type PlanSaverRepository } from
+      '@/data/protocols/plan/plan-repository'
+
+      import { type ImplementationPlan } from
+      '@/domain/models/implementation-plan'
+
       import fs from 'fs/promises'
+
       import yaml from 'yaml'
 
-      export class YamlPlanRepository implements PlanLoaderRepository, PlanSaverRepository {
+
+      export class YamlPlanRepository implements PlanLoaderRepository,
+      PlanSaverRepository {
         async load (path: string): Promise<ImplementationPlan> {
           const fileContent = await fs.readFile(path, 'utf-8')
           return yaml.parse(fileContent)
@@ -387,13 +437,16 @@ steps:
         }
       }
     validation:
-      patterns: ["INF001", "INF002", "INF003"]
-      command: "tsc --noEmit"
-  - id: "step-12-presentation-protocols"
-    type: "create_file"
-    layer: "presentation"
-    description: "Create generic Controller and HttpResponse protocols"
-    path: "src/presentation/protocols/index.ts"
+      patterns:
+        - INF001
+        - INF002
+        - INF003
+      command: tsc --noEmit
+  - id: step-12-presentation-protocols
+    type: create_file
+    layer: presentation
+    description: Create generic Controller and HttpResponse protocols
+    path: src/presentation/protocols/index.ts
     template: |
       export interface Controller<T = any> {
         handle: (request: T) => Promise<HttpResponse>
@@ -405,24 +458,27 @@ steps:
       }
     validation:
       patterns: []
-      command: "tsc --noEmit"
-  - id: "step-13-presentation-helpers"
-    type: "create_file"
-    layer: "presentation"
-    description: "Create helpers for HTTP responses"
-    path: "src/presentation/helpers/http-helper.ts"
-    template: |
+      command: tsc --noEmit
+  - id: step-13-presentation-helpers
+    type: create_file
+    layer: presentation
+    description: Create helpers for HTTP responses
+    path: src/presentation/helpers/http-helper.ts
+    template: >
       import { type HttpResponse } from '@/presentation/protocols'
+
 
       export const ok = (data: any): HttpResponse => ({
         statusCode: 200,
         body: data
       })
 
+
       export const serverError = (error: Error): HttpResponse => ({
         statusCode: 500,
         body: { error: 'Internal Server Error', message: error.message, stack: error.stack }
       })
+
 
       export const badRequest = (error: Error): HttpResponse => ({
         statusCode: 400,
@@ -430,12 +486,12 @@ steps:
       })
     validation:
       patterns: []
-      command: "tsc --noEmit"
-  - id: "step-14-presentation-errors"
-    type: "create_file"
-    layer: "presentation"
-    description: "Create custom error classes"
-    path: "src/presentation/errors/missing-param-error.ts"
+      command: tsc --noEmit
+  - id: step-14-presentation-errors
+    type: create_file
+    layer: presentation
+    description: Create custom error classes
+    path: src/presentation/errors/missing-param-error.ts
     template: |
       export class MissingParamError extends Error {
         constructor (paramName: string) {
@@ -444,20 +500,29 @@ steps:
         }
       }
     validation:
-      patterns: ["PRE004"]
-      command: "tsc --noEmit"
-  - id: "step-15-presentation-controller"
-    type: "create_file"
-    layer: "presentation"
-    description: "Create the CLI controller for executing a plan"
-    path: "src/presentation/controllers/cli/execute-plan-controller.ts"
-    template: |
-      import { type Controller, type HttpResponse } from '@/presentation/protocols'
-      import { type ExecutePlan } from '@/domain/usecases/execute-plan'
-      import { badRequest, ok, serverError } from '@/presentation/helpers/http-helper'
-      import { MissingParamError } from '@/presentation/errors/missing-param-error'
+      patterns:
+        - PRE004
+      command: tsc --noEmit
+  - id: step-15-presentation-controller
+    type: create_file
+    layer: presentation
+    description: Create the CLI controller for executing a plan
+    path: src/presentation/controllers/cli/execute-plan-controller.ts
+    template: >
+      import { type Controller, type HttpResponse } from
+      '@/presentation/protocols'
 
-      export class ExecutePlanController implements Controller<ExecutePlanController.Request> {
+      import { type ExecutePlan } from '@/domain/usecases/execute-plan'
+
+      import { badRequest, ok, serverError } from
+      '@/presentation/helpers/http-helper'
+
+      import { MissingParamError } from
+      '@/presentation/errors/missing-param-error'
+
+
+      export class ExecutePlanController implements
+      Controller<ExecutePlanController.Request> {
         constructor (
           private readonly executePlan: ExecutePlan
         ) {}
@@ -477,31 +542,35 @@ steps:
         }
       }
 
+
       export namespace ExecutePlanController {
         export type Request = {
           implementationPath: string
         }
       }
     validation:
-      patterns: ["PRE001", "PRE002", "PRE005"]
-      command: "tsc --noEmit"
-  - id: "step-16-validation-protocol"
-    type: "create_file"
-    layer: "validation"
-    description: "Create the Validation protocol"
-    path: "src/validation/protocols/validation.ts"
+      patterns:
+        - PRE001
+        - PRE002
+        - PRE005
+      command: tsc --noEmit
+  - id: step-16-validation-protocol
+    type: create_file
+    layer: validation
+    description: Create the Validation protocol
+    path: src/validation/protocols/validation.ts
     template: |
       export interface Validation {
         validate: (input: any) => Error | null
       }
     validation:
       patterns: []
-      command: "tsc --noEmit"
-  - id: "step-17-validation-composite"
-    type: "create_file"
-    layer: "validation"
-    description: "Create the ValidationComposite to group validators"
-    path: "src/validation/validators/validation-composite.ts"
+      command: tsc --noEmit
+  - id: step-17-validation-composite
+    type: create_file
+    layer: validation
+    description: Create the ValidationComposite to group validators
+    path: src/validation/validators/validation-composite.ts
     template: |
       import { type Validation } from '@/validation/protocols/validation'
 
@@ -519,13 +588,16 @@ steps:
         }
       }
     validation:
-      patterns: ["VAL001", "VAL002", "VAL003"]
-      command: "tsc --noEmit"
-  - id: "step-18-main-factory-usecase"
-    type: "create_file"
-    layer: "main"
-    description: "Create factory for DbExecutePlan use case"
-    path: "src/main/factories/usecases/db-execute-plan-factory.ts"
+      patterns:
+        - VAL001
+        - VAL002
+        - VAL003
+      command: tsc --noEmit
+  - id: step-18-main-factory-usecase
+    type: create_file
+    layer: main
+    description: Create factory for DbExecutePlan use case
+    path: src/main/factories/usecases/db-execute-plan-factory.ts
     template: |
       import { DbExecutePlan } from '@/data/usecases/plan/db-execute-plan'
       import { type ExecutePlan } from '@/domain/usecases/execute-plan'
@@ -548,34 +620,49 @@ steps:
         )
       }
     validation:
-      patterns: ["MAIN001", "MAIN002", "MAIN006"]
-      command: "tsc --noEmit"
-  - id: "step-19-main-factory-controller"
-    type: "create_file"
-    layer: "main"
-    description: "Create factory for ExecutePlanController"
-    path: "src/main/factories/controllers/execute-plan-controller-factory.ts"
-    template: |
-      import { ExecutePlanController } from '@/presentation/controllers/cli/execute-plan-controller'
+      patterns:
+        - MAIN001
+        - MAIN002
+        - MAIN006
+      command: tsc --noEmit
+  - id: step-19-main-factory-controller
+    type: create_file
+    layer: main
+    description: Create factory for ExecutePlanController
+    path: src/main/factories/controllers/execute-plan-controller-factory.ts
+    template: >
+      import { ExecutePlanController } from
+      '@/presentation/controllers/cli/execute-plan-controller'
+
       import { type Controller } from '@/presentation/protocols'
-      import { makeDbExecutePlan } from '@/main/factories/usecases/db-execute-plan-factory'
+
+      import { makeDbExecutePlan } from
+      '@/main/factories/usecases/db-execute-plan-factory'
+
 
       export const makeExecutePlanController = (): Controller => {
         const executePlan = makeDbExecutePlan()
         return new ExecutePlanController(executePlan)
       }
     validation:
-      patterns: ["MAIN001", "MAIN002", "MAIN006"]
-      command: "tsc --noEmit"
-  - id: "step-20-main-server"
-    type: "create_file"
-    layer: "main"
-    description: "Create the main application entry point"
-    path: "src/main/server.ts"
-    template: |
+      patterns:
+        - MAIN001
+        - MAIN002
+        - MAIN006
+      command: tsc --noEmit
+  - id: step-20-main-server
+    type: create_file
+    layer: main
+    description: Create the main application entry point
+    path: src/main/server.ts
+    template: >
       import 'module-alias/register'
-      import { makeExecutePlanController } from './factories/controllers/execute-plan-controller-factory'
+
+      import { makeExecutePlanController } from
+      './factories/controllers/execute-plan-controller-factory'
+
       import { ChalkLoggerAdapter } from '../infra/log/chalk-logger-adapter'
+
 
       const main = async (): Promise<void> => {
         const logger = new ChalkLoggerAdapter()
@@ -599,25 +686,31 @@ steps:
         }
       }
 
+
       main().catch(console.error)
     validation:
       patterns: []
-      command: "tsc --noEmit"
-  - id: "step-21-setup-module-alias"
-    type: "refactor_file"
-    layer: "main"
-    description: "Configure module-alias in package.json for path aliases"
-    path: "package.json"
-    template: |
+      command: tsc --noEmit
+  - id: step-21-setup-module-alias
+    type: refactor_file
+    layer: main
+    description: Configure module-alias in package.json for path aliases
+    path: package.json
+    template: >
       // Find the "main" or "scripts" section and add this at the root level
+
       // This is a conceptual refactor, as I cannot edit JSON directly.
+
       // The user should add this to their package.json:
+
       /*
         "_moduleAliases": {
           "@": "dist"
         }
       */
+
       // And in tsconfig.json:
+
       /*
         "compilerOptions": {
           "baseUrl": "src",
@@ -626,51 +719,91 @@ steps:
           }
         }
       */
+
       // For the purpose of this step, we will create a placeholder file
+
       // to signify this configuration is needed.
+
       // ---
+
       // create file: config/paths.md
+
       // content: |
+
       // ## Path Alias Configuration
+
       //
+
       // 1. **Install `module-alias`:**
+
       //    ```bash
+
       //    npm install module-alias
+
       //    ```
+
       //
+
       // 2. **Configure `tsconfig.json`:**
+
       //    ```json
+
       //    {
+
       //      "compilerOptions": {
+
       //        "baseUrl": "src",
+
       //        "paths": {
+
       //          "@/*": ["*"]
+
       //        }
+
       //      }
+
       //    }
+
       //    ```
+
       //
+
       // 3. **Configure `package.json`:**
+
       //    ```json
+
       //    {
+
       //      "name": "your-project",
+
       //      "version": "1.0.0",
+
       //      "_moduleAliases": {
+
       //        "@": "dist"
+
       //      }
+
       //    }
+
       //    ```
+
       //
+
       // 4. **Add to entrypoint:**
-      //    Add `import 'module-alias/register'` to the top of `src/main/server.ts`.
+
+      //    Add `import 'module-alias/register'` to the top of
+      `src/main/server.ts`.
+
       //
+
       // This step is complete.
 dependencies:
   npm:
-    - "fs-extra"
-    - "yaml"
-    - "zx"
-    - "chalk"
-    - "module-alias"
+    - fs-extra
+    - yaml
+    - zx
+    - chalk
+    - module-alias
     - "@types/fs-extra"
     - "@types/yaml"
