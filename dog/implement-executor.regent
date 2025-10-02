@@ -5,12 +5,7 @@ metadata:
   layer: all
   project_type: backend
   architecture_style: clean
-
 steps:
-  # ============================================================================
-  # DOMAIN LAYER - MODELS (3 arquivos)
-  # ============================================================================
-
   - id: step-1-domain-commit-config-model
     type: create_file
     layer: domain
@@ -33,7 +28,10 @@ steps:
         emoji: boolean
         interactiveSafety: boolean
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:28:50.874Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-2-domain-quality-check-model
     type: create_file
     layer: domain
@@ -50,7 +48,10 @@ steps:
         test: CheckResult
         overallPassed: boolean
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:28:55.943Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-3-domain-audit-log-model
     type: create_file
     layer: domain
@@ -66,20 +67,20 @@ steps:
       export type AuditLog = {
         entries: AuditLogEntry[]
       }
-
-  # ============================================================================
-  # DOMAIN LAYER - USE CASES (9 arquivos)
-  # ============================================================================
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:29:00.702Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-4-domain-validate-template
     type: create_file
     layer: domain
     description: Create ValidateTemplate use case interface
     path: src/domain/usecases/validate-template.ts
-    template: |
+    template: >
       export interface ValidateTemplate {
         validate: (params: ValidateTemplate.Params) => Promise<ValidateTemplate.Result>
       }
+
 
       export namespace ValidateTemplate {
         export type Params = {
@@ -94,19 +95,26 @@ steps:
           layerValidated?: string
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:29:05.689Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-5-domain-run-quality-check
     type: create_file
     layer: domain
     description: Create RunQualityCheck use case interface
     path: src/domain/usecases/run-quality-check.ts
-    template: |
-      import { type QualityCheckResult } from '@/domain/models/quality-check-result'
+    template: >
+      import { type QualityCheckResult } from
+      '@/domain/models/quality-check-result'
+
       import { type CommitConfig } from '@/domain/models/commit-config'
+
 
       export interface RunQualityCheck {
         run: (params: RunQualityCheck.Params) => Promise<RunQualityCheck.Result>
       }
+
 
       export namespace RunQualityCheck {
         export type Params = {
@@ -115,18 +123,23 @@ steps:
 
         export type Result = QualityCheckResult
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:29:10.587Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-6-domain-calculate-score
     type: create_file
     layer: domain
     description: Create CalculateScore use case interface
     path: src/domain/usecases/calculate-score.ts
-    template: |
+    template: >
       import { type Step } from '@/domain/models/implementation-plan'
+
 
       export interface CalculateScore {
         calculate: (params: CalculateScore.Params) => Promise<CalculateScore.Result>
       }
+
 
       export namespace CalculateScore {
         export type Params = {
@@ -143,7 +156,10 @@ steps:
           score: number
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:29:15.420Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-7-domain-rollback-step
     type: create_file
     layer: domain
@@ -167,7 +183,10 @@ steps:
           message: string
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:29:20.236Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-8-domain-check-git-safety
     type: create_file
     layer: domain
@@ -191,16 +210,20 @@ steps:
           userConfirmed?: boolean
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:29:24.945Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-9-domain-validate-script
     type: create_file
     layer: domain
     description: Create ValidateScript use case interface
     path: src/domain/usecases/validate-script.ts
-    template: |
+    template: >
       export interface ValidateScript {
         validate: (params: ValidateScript.Params) => Promise<ValidateScript.Result>
       }
+
 
       export namespace ValidateScript {
         export type Params = {
@@ -213,7 +236,10 @@ steps:
           reason?: string
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:29:29.766Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-10-domain-detect-package-manager
     type: create_file
     layer: domain
@@ -230,18 +256,23 @@ steps:
           command: string
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:29:34.580Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-11-domain-validate-layer
     type: create_file
     layer: domain
     description: Create ValidateLayer use case interface
     path: src/domain/usecases/validate-layer.ts
-    template: |
+    template: >
       import { type Step } from '@/domain/models/implementation-plan'
+
 
       export interface ValidateLayer {
         validate: (params: ValidateLayer.Params) => Promise<ValidateLayer.Result>
       }
+
 
       export namespace ValidateLayer {
         export type Params = {
@@ -258,16 +289,20 @@ steps:
           violations: string[]
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:29:39.404Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-12-domain-execute-validation-script
     type: create_file
     layer: domain
     description: Create ExecuteValidationScript use case interface
     path: src/domain/usecases/execute-validation-script.ts
-    template: |
+    template: >
       export interface ExecuteValidationScript {
         execute: (params: ExecuteValidationScript.Params) => Promise<ExecuteValidationScript.Result>
       }
+
 
       export namespace ExecuteValidationScript {
         export type Params = {
@@ -280,20 +315,20 @@ steps:
           success: boolean
         }
       }
-
-  # ============================================================================
-  # DATA LAYER - PROTOCOLS (9 arquivos)
-  # ============================================================================
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:29:44.112Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-13-data-template-validator-protocol
     type: create_file
     layer: data
     description: Create TemplateValidatorRepository protocol
     path: src/data/protocols/template/template-validator-repository.ts
-    template: |
+    template: >
       export interface TemplateValidatorRepository {
         validateSchema: (params: TemplateValidatorRepository.ValidateParams) => Promise<TemplateValidatorRepository.ValidateResult>
       }
+
 
       export namespace TemplateValidatorRepository {
         export type ValidateParams = {
@@ -306,17 +341,21 @@ steps:
           warnings: string[]
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:29:48.942Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-14-data-quality-check-protocol
     type: create_file
     layer: data
     description: Create QualityCheckRepository protocol
     path: src/data/protocols/quality/quality-check-repository.ts
-    template: |
+    template: >
       export interface QualityCheckRepository {
         runLint: (command: string) => Promise<QualityCheckRepository.CheckResult>
         runTest: (command: string) => Promise<QualityCheckRepository.CheckResult>
       }
+
 
       export namespace QualityCheckRepository {
         export type CheckResult = {
@@ -324,17 +363,21 @@ steps:
           output: string
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:29:53.792Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-15-data-rlhf-protocol
     type: create_file
     layer: data
     description: Create RLHFRepository protocol
     path: src/data/protocols/rlhf/rlhf-repository.ts
-    template: |
+    template: >
       export interface RLHFRepository {
         calculateScore: (params: RLHFRepository.ScoreParams) => Promise<RLHFRepository.ScoreResult>
         saveScore: (params: RLHFRepository.SaveParams) => Promise<void>
       }
+
 
       export namespace RLHFRepository {
         export type ScoreParams = {
@@ -357,7 +400,10 @@ steps:
           timestamp: string
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:29:58.467Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-16-data-config-protocol
     type: create_file
     layer: data
@@ -376,7 +422,10 @@ steps:
           errors?: string[]
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:30:03.436Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-17-data-audit-protocol
     type: create_file
     layer: data
@@ -389,16 +438,20 @@ steps:
         log: (entry: AuditLogEntry) => Promise<void>
         getRecent: (limit: number) => Promise<AuditLogEntry[]>
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:30:08.223Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-18-data-script-executor-protocol
     type: create_file
     layer: data
     description: Create ScriptExecutorRepository protocol
     path: src/data/protocols/script/script-executor-repository.ts
-    template: |
+    template: >
       export interface ScriptExecutorRepository {
         execute: (params: ScriptExecutorRepository.ExecuteParams) => Promise<ScriptExecutorRepository.ExecuteResult>
       }
+
 
       export namespace ScriptExecutorRepository {
         export type ExecuteParams = {
@@ -411,7 +464,10 @@ steps:
           success: boolean
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:30:12.932Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-19-data-package-manager-protocol
     type: create_file
     layer: data
@@ -428,16 +484,20 @@ steps:
           packageManager: 'npm' | 'yarn' | 'pnpm'
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:30:17.744Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-20-data-layer-validator-protocol
     type: create_file
     layer: data
     description: Create LayerValidatorRepository protocol
     path: src/data/protocols/layer/layer-validator-repository.ts
-    template: |
+    template: >
       export interface LayerValidatorRepository {
         validateImports: (params: LayerValidatorRepository.ValidateParams) => Promise<LayerValidatorRepository.ValidateResult>
       }
+
 
       export namespace LayerValidatorRepository {
         export type ValidateParams = {
@@ -451,16 +511,20 @@ steps:
           warnings: string[]
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:30:22.820Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-21-data-script-validator-protocol
     type: create_file
     layer: data
     description: Create ScriptValidatorRepository protocol
     path: src/data/protocols/script/script-validator-repository.ts
-    template: |
+    template: >
       export interface ScriptValidatorRepository {
         validate: (params: ScriptValidatorRepository.ValidateParams) => Promise<ScriptValidatorRepository.ValidateResult>
       }
+
 
       export namespace ScriptValidatorRepository {
         export type ValidateParams = {
@@ -473,20 +537,24 @@ steps:
           reason?: string
         }
       }
-
-  # ============================================================================
-  # DATA LAYER - USE CASE IMPLEMENTATIONS (9 arquivos)
-  # ============================================================================
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:30:27.560Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-22-data-validate-template-impl
     type: create_file
     layer: data
     description: Implement DbValidateTemplate use case
     path: src/data/usecases/template/db-validate-template.ts
-    template: |
-      import { type ValidateTemplate } from '@/domain/usecases/validate-template'
+    template: >
+      import { type ValidateTemplate } from
+      '@/domain/usecases/validate-template'
+
       import { type FileSystem } from '@/data/protocols/fs/file-system'
-      import { type TemplateValidatorRepository } from '@/data/protocols/template/template-validator-repository'
+
+      import { type TemplateValidatorRepository } from
+      '@/data/protocols/template/template-validator-repository'
+
 
       export class DbValidateTemplate implements ValidateTemplate {
         constructor (
@@ -507,16 +575,23 @@ steps:
           }
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:30:32.447Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-23-data-run-quality-check-impl
     type: create_file
     layer: data
     description: Implement DbRunQualityCheck use case
     path: src/data/usecases/quality/db-run-quality-check.ts
-    template: |
+    template: >
       import { type RunQualityCheck } from '@/domain/usecases/run-quality-check'
-      import { type QualityCheckRepository } from '@/data/protocols/quality/quality-check-repository'
+
+      import { type QualityCheckRepository } from
+      '@/data/protocols/quality/quality-check-repository'
+
       import { type Logger } from '@/data/protocols/log/logger'
+
 
       export class DbRunQualityCheck implements RunQualityCheck {
         constructor (
@@ -547,15 +622,21 @@ steps:
           }
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:30:37.423Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-24-data-calculate-score-impl
     type: create_file
     layer: data
     description: Implement DbCalculateScore use case
     path: src/data/usecases/rlhf/db-calculate-score.ts
-    template: |
+    template: >
       import { type CalculateScore } from '@/domain/usecases/calculate-score'
-      import { type RLHFRepository } from '@/data/protocols/rlhf/rlhf-repository'
+
+      import { type RLHFRepository } from
+      '@/data/protocols/rlhf/rlhf-repository'
+
 
       export class DbCalculateScore implements CalculateScore {
         constructor (
@@ -581,17 +662,24 @@ steps:
           return { score: result.score }
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T10:30:42.424Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-25-data-rollback-step-impl
     type: create_file
     layer: data
     description: Implement DbRollbackStep use case
     path: src/data/usecases/git/db-rollback-step.ts
-    template: |
+    template: >
       import { type RollbackStep } from '@/domain/usecases/rollback-step'
+
       import { type GitRepository } from '@/data/protocols/git/git-repository'
+
       import { type FileSystem } from '@/data/protocols/fs/file-system'
+
       import { type Logger } from '@/data/protocols/log/logger'
+
 
       export class DbRollbackStep implements RollbackStep {
         constructor (
@@ -601,7 +689,7 @@ steps:
         ) {}
 
         async rollback (params: RollbackStep.Params): Promise<RollbackStep.Result> {
-          const { step, lastKnownCommitHash } = params
+          const { step } = params
 
           try {
             this.logger.info('Rolling back changes...')
@@ -625,16 +713,31 @@ steps:
           }
         }
       }
+    rlhf_score: 0
+    status: FAILED
+    execution_log: |-
+      Failed at 2025-10-02T10:30:54.950Z (7550ms).
+      RLHF Score: 0
 
+      --- ERROR LOG ---
+
+      Layer Context: backend / all
+
+      Original error: Quality checks failed. Changes have been rolled back.
+      Lint: ❌
+      Test: ✅
   - id: step-26-data-check-git-safety-impl
     type: create_file
     layer: data
     description: Implement DbCheckGitSafety use case
     path: src/data/usecases/git/db-check-git-safety.ts
-    template: |
+    template: >
       import { type CheckGitSafety } from '@/domain/usecases/check-git-safety'
+
       import { type GitRepository } from '@/data/protocols/git/git-repository'
+
       import { type Logger } from '@/data/protocols/log/logger'
+
 
       export class DbCheckGitSafety implements CheckGitSafety {
         constructor (
@@ -668,15 +771,17 @@ steps:
           }
         }
       }
-
   - id: step-27-data-validate-script-impl
     type: create_file
     layer: data
     description: Implement DbValidateScript use case
     path: src/data/usecases/script/db-validate-script.ts
-    template: |
+    template: >
       import { type ValidateScript } from '@/domain/usecases/validate-script'
-      import { type ScriptValidatorRepository } from '@/data/protocols/script/script-validator-repository'
+
+      import { type ScriptValidatorRepository } from
+      '@/data/protocols/script/script-validator-repository'
+
 
       export class DbValidateScript implements ValidateScript {
         constructor (
@@ -692,15 +797,18 @@ steps:
           })
         }
       }
-
   - id: step-28-data-detect-package-manager-impl
     type: create_file
     layer: data
     description: Implement DbDetectPackageManager use case
     path: src/data/usecases/package/db-detect-package-manager.ts
-    template: |
-      import { type DetectPackageManager } from '@/domain/usecases/detect-package-manager'
-      import { type PackageManagerRepository } from '@/data/protocols/package/package-manager-repository'
+    template: >
+      import { type DetectPackageManager } from
+      '@/domain/usecases/detect-package-manager'
+
+      import { type PackageManagerRepository } from
+      '@/data/protocols/package/package-manager-repository'
+
 
       export class DbDetectPackageManager implements DetectPackageManager {
         constructor (
@@ -722,15 +830,17 @@ steps:
           }
         }
       }
-
   - id: step-29-data-validate-layer-impl
     type: create_file
     layer: data
     description: Implement DbValidateLayer use case
     path: src/data/usecases/layer/db-validate-layer.ts
-    template: |
+    template: >
       import { type ValidateLayer } from '@/domain/usecases/validate-layer'
-      import { type LayerValidatorRepository } from '@/data/protocols/layer/layer-validator-repository'
+
+      import { type LayerValidatorRepository } from
+      '@/data/protocols/layer/layer-validator-repository'
+
 
       export class DbValidateLayer implements ValidateLayer {
         constructor (
@@ -750,18 +860,23 @@ steps:
           })
         }
       }
-
   - id: step-30-data-execute-validation-script-impl
     type: create_file
     layer: data
     description: Implement DbExecuteValidationScript use case
     path: src/data/usecases/script/db-execute-validation-script.ts
-    template: |
-      import { type ExecuteValidationScript } from '@/domain/usecases/execute-validation-script'
-      import { type ScriptExecutorRepository } from '@/data/protocols/script/script-executor-repository'
+    template: >
+      import { type ExecuteValidationScript } from
+      '@/domain/usecases/execute-validation-script'
+
+      import { type ScriptExecutorRepository } from
+      '@/data/protocols/script/script-executor-repository'
+
       import { type Logger } from '@/data/protocols/log/logger'
 
-      export class DbExecuteValidationScript implements ExecuteValidationScript {
+
+      export class DbExecuteValidationScript implements ExecuteValidationScript
+      {
         constructor (
           private readonly executor: ScriptExecutorRepository,
           private readonly logger: Logger
