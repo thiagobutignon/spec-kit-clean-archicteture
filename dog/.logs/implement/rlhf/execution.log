@@ -30,3 +30,12 @@
 [2025-10-02T09:15:37.092Z] ❌ Failure analysis: Score 0
 [2025-10-02T09:15:37.092Z] 📊 Final layer-aware score: 0
 [2025-10-02T09:15:37.094Z] 🤖 Starting layer-aware RLHF analysis for: implement.regent
+[2025-10-02T09:16:33.825Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:16:33.825Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T09:16:33.825Z] ✅ Success analysis: Score 1
+[2025-10-02T09:16:33.825Z] 📊 Final layer-aware score: 1
+[2025-10-02T09:16:37.992Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:16:37.992Z] 🧮 Calculating base RLHF score for create_file (failure)
+[2025-10-02T09:16:37.992Z] ❌ Failure analysis: Score 0
+[2025-10-02T09:16:37.992Z] 📊 Final layer-aware score: 0
+[2025-10-02T09:16:37.994Z] 🤖 Starting layer-aware RLHF analysis for: implement.regent

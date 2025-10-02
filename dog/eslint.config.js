@@ -13,5 +13,11 @@ export default tseslint.config(
       'src/**/*.js',
       'src/**/*.d.ts'
     ]
+  },
+  {
+    rules: {
+      // Allow namespaces for Clean Architecture patterns (DOM002, DAT004)
+      '@typescript-eslint/no-namespace': 'off'
+    }
   }
 );
