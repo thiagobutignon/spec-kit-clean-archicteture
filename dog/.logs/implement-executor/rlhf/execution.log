@@ -129,3 +129,24 @@
 [2025-10-02T10:30:54.950Z] ❌ Failure analysis: Score 0
 [2025-10-02T10:30:54.950Z] 📊 Final layer-aware score: 0
 [2025-10-02T10:30:54.952Z] 🤖 Starting layer-aware RLHF analysis for: dog/implement-executor.regent
+[2025-10-02T10:31:23.932Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T10:31:23.932Z]    Layer: all, Target: backend
+[2025-10-02T10:31:23.932Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T10:31:23.932Z] ✅ Success analysis: Score 1
+[2025-10-02T10:31:23.933Z] 📊 Final layer-aware score: 1
+[2025-10-02T10:31:28.705Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T10:31:28.705Z]    Layer: all, Target: backend
+[2025-10-02T10:31:28.706Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T10:31:28.706Z] ✅ Success analysis: Score 1
+[2025-10-02T10:31:28.706Z] 📊 Final layer-aware score: 1
+[2025-10-02T10:31:33.527Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T10:31:33.527Z]    Layer: all, Target: backend
+[2025-10-02T10:31:33.527Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T10:31:33.527Z] ✅ Success analysis: Score 1
+[2025-10-02T10:31:33.527Z] 📊 Final layer-aware score: 1
+[2025-10-02T10:31:40.790Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T10:31:40.790Z]    Layer: all, Target: backend
+[2025-10-02T10:31:40.790Z] 🧮 Calculating base RLHF score for create_file (failure)
+[2025-10-02T10:31:40.790Z] ❌ Failure analysis: Score 0
+[2025-10-02T10:31:40.790Z] 📊 Final layer-aware score: 0
+[2025-10-02T10:31:40.793Z] 🤖 Starting layer-aware RLHF analysis for: dog/implement-executor.regent
