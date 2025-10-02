@@ -16,3 +16,10 @@ templates/*-main-template.regent
 
 # Dogfooding test projects
 dogfooding/
+
+# Temporary analysis directories
+Auditor/
+clean-ts-api/
+dist/
+docs/analise-estrategica-integracao.md
+docs/comparacao-theauditor-vs-regent.md
