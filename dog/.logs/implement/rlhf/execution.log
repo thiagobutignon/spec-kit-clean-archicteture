@@ -86,3 +86,32 @@
 [2025-10-02T09:22:02.370Z] ❌ Failure analysis: Score 0
 [2025-10-02T09:22:02.370Z] 📊 Final layer-aware score: 0
 [2025-10-02T09:22:02.372Z] 🤖 Starting layer-aware RLHF analysis for: implement.regent
+[2025-10-02T09:22:47.324Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:22:47.324Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T09:22:47.324Z] ✅ Success analysis: Score 1
+[2025-10-02T09:22:47.324Z] 📊 Final layer-aware score: 1
+[2025-10-02T09:22:52.112Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:22:52.112Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T09:22:52.112Z] ✅ Success analysis: Score 1
+[2025-10-02T09:22:52.112Z] 📊 Final layer-aware score: 1
+[2025-10-02T09:22:57.084Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:22:57.084Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T09:22:57.084Z] ✅ Success analysis: Score 1
+[2025-10-02T09:22:57.084Z] 📊 Final layer-aware score: 1
+[2025-10-02T09:23:01.653Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:23:01.653Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T09:23:01.653Z] ✅ Success analysis: Score 1
+[2025-10-02T09:23:01.653Z] 📊 Final layer-aware score: 1
+[2025-10-02T09:23:06.103Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:23:06.103Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T09:23:06.103Z] ✅ Success analysis: Score 1
+[2025-10-02T09:23:06.103Z] 📊 Final layer-aware score: 1
+[2025-10-02T09:23:10.575Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:23:10.575Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T09:23:10.575Z] ✅ Success analysis: Score 1
+[2025-10-02T09:23:10.575Z] 📊 Final layer-aware score: 1
+[2025-10-02T09:23:14.861Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:23:14.861Z] 🧮 Calculating base RLHF score for create_file (failure)
+[2025-10-02T09:23:14.861Z] ❌ Failure analysis: Score 0
+[2025-10-02T09:23:14.861Z] 📊 Final layer-aware score: 0
+[2025-10-02T09:23:14.863Z] 🤖 Starting layer-aware RLHF analysis for: implement.regent
