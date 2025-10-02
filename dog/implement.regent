@@ -282,7 +282,7 @@ steps:
               const hash = await this.gitRepository.getHeadHash()
               this.logger.success(`   ✅ Committed: ${hash.substring(0, 7)} - ${commitMessage}`)
             }
-          } catch (error) {
+          } catch {
             this.logger.warn(`   ⚠️  Could not commit step ${step.id}. Maybe no changes were made.`)
           }
         }
