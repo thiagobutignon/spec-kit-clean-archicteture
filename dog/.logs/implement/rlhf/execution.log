@@ -149,3 +149,28 @@
 [2025-10-02T09:31:10.943Z] ❌ Failure analysis: Score 0
 [2025-10-02T09:31:10.943Z] 📊 Final layer-aware score: 0
 [2025-10-02T09:31:10.945Z] 🤖 Starting layer-aware RLHF analysis for: implement.regent
+[2025-10-02T09:31:53.715Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:31:53.715Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T09:31:53.716Z] ✅ Success analysis: Score 1
+[2025-10-02T09:31:53.716Z] 📊 Final layer-aware score: 1
+[2025-10-02T09:31:58.241Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:31:58.241Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T09:31:58.241Z] ✅ Success analysis: Score 1
+[2025-10-02T09:31:58.241Z] 📊 Final layer-aware score: 1
+[2025-10-02T09:32:02.676Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:32:02.677Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T09:32:02.677Z] ✅ Success analysis: Score 1
+[2025-10-02T09:32:02.677Z] 📊 Final layer-aware score: 1
+[2025-10-02T09:32:07.143Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:32:07.143Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T09:32:07.143Z] ✅ Success analysis: Score 1
+[2025-10-02T09:32:07.143Z] 📊 Final layer-aware score: 1
+[2025-10-02T09:32:11.551Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:32:11.551Z] 🧮 Calculating base RLHF score for create_file (success)
+[2025-10-02T09:32:11.551Z] ✅ Success analysis: Score 1
+[2025-10-02T09:32:11.551Z] 📊 Final layer-aware score: 1
+[2025-10-02T09:32:16.030Z] 🧮 Calculating layer-aware RLHF score
+[2025-10-02T09:32:16.030Z] 🧮 Calculating base RLHF score for refactor_file (failure)
+[2025-10-02T09:32:16.030Z] ❌ Failure analysis: Score -2
+[2025-10-02T09:32:16.030Z] 📊 Final layer-aware score: -2
+[2025-10-02T09:32:16.033Z] 🤖 Starting layer-aware RLHF analysis for: implement.regent
