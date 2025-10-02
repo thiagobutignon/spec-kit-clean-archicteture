@@ -9,7 +9,9 @@
 import * as crypto from 'crypto';
 import * as os from 'os';
 import * as yaml from 'yaml';
-import { $, chalk, argv, fs, path } from 'zx';
+import * as fs from 'fs-extra';
+import * as path from 'path';
+import { $, chalk, argv } from 'zx';
 import Logger from './core/logger';
 import { EnhancedRLHFSystem } from './core/rlhf-system';
 import type { LayerInfo } from './core/rlhf-system';
