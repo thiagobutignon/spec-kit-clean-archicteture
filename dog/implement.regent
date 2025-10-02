@@ -488,6 +488,10 @@ steps:
     validation:
       patterns: []
       command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:23:47.831Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-13-presentation-helpers
     type: create_file
     layer: presentation
@@ -497,7 +501,7 @@ steps:
       import { type HttpResponse } from '@/presentation/protocols'
 
 
-      export const ok = (data: any): HttpResponse => ({
+      export const ok = (data: unknown): HttpResponse => ({
         statusCode: 200,
         body: data
       })
