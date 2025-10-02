@@ -14,6 +14,7 @@ export default tseslint.config(
       "validate-implementation.ts", // Ignora nosso script validador
       "execute-steps.ts", // Ignora nosso script executor
       "coverage/", // Ignore generated coverage reports
+      "**/__test-temp-project__/**", // Ignore temporary test projects
     ],
   },
 
