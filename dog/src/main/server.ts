@@ -1,4 +1,3 @@
-import 'module-alias/register'
 import { makeExecutePlanController } from './factories/controllers/execute-plan-controller-factory'
 import { ChalkLoggerAdapter } from '../infra/log/chalk-logger-adapter'
 

@@ -1,0 +1,780 @@
+metadata:
+  feature: Enhanced Executor with Clean Architecture
+  domain: Software Development Automation
+  estimatedFiles: 50
+  layer: all
+  project_type: backend
+  architecture_style: clean
+
+steps:
+  # ============================================================================
+  # DOMAIN LAYER - MODELS (3 arquivos)
+  # ============================================================================
+
+  - id: step-1-domain-commit-config-model
+    type: create_file
+    layer: domain
+    description: Create CommitConfig model for commit configuration
+    path: src/domain/models/commit-config.ts
+    template: |
+      export type CommitConfig = {
+        enabled: boolean
+        qualityChecks: {
+          lint: boolean
+          lintCommand: string
+          test: boolean
+          testCommand: string
+        }
+        conventionalCommits: {
+          enabled: boolean
+          typeMapping: Record<string, string>
+        }
+        coAuthor: string
+        emoji: boolean
+        interactiveSafety: boolean
+      }
+
+  - id: step-2-domain-quality-check-model
+    type: create_file
+    layer: domain
+    description: Create QualityCheckResult model
+    path: src/domain/models/quality-check-result.ts
+    template: |
+      export type CheckResult = {
+        passed: boolean
+        output: string
+      }
+
+      export type QualityCheckResult = {
+        lint: CheckResult
+        test: CheckResult
+        overallPassed: boolean
+      }
+
+  - id: step-3-domain-audit-log-model
+    type: create_file
+    layer: domain
+    description: Create AuditLog model for security events
+    path: src/domain/models/audit-log.ts
+    template: |
+      export type AuditLogEntry = {
+        timestamp: string
+        event: string
+        details: Record<string, unknown>
+      }
+
+      export type AuditLog = {
+        entries: AuditLogEntry[]
+      }
+
+  # ============================================================================
+  # DOMAIN LAYER - USE CASES (9 arquivos)
+  # ============================================================================
+
+  - id: step-4-domain-validate-template
+    type: create_file
+    layer: domain
+    description: Create ValidateTemplate use case interface
+    path: src/domain/usecases/validate-template.ts
+    template: |
+      export interface ValidateTemplate {
+        validate: (params: ValidateTemplate.Params) => Promise<ValidateTemplate.Result>
+      }
+
+      export namespace ValidateTemplate {
+        export type Params = {
+          implementationPath: string
+        }
+
+        export type Result = {
+          valid: boolean
+          errors: string[]
+          warnings: string[]
+          targetValidated?: string
+          layerValidated?: string
+        }
+      }
+
+  - id: step-5-domain-run-quality-check
+    type: create_file
+    layer: domain
+    description: Create RunQualityCheck use case interface
+    path: src/domain/usecases/run-quality-check.ts
+    template: |
+      import { type QualityCheckResult } from '@/domain/models/quality-check-result'
+      import { type CommitConfig } from '@/domain/models/commit-config'
+
+      export interface RunQualityCheck {
+        run: (params: RunQualityCheck.Params) => Promise<RunQualityCheck.Result>
+      }
+
+      export namespace RunQualityCheck {
+        export type Params = {
+          config: CommitConfig
+        }
+
+        export type Result = QualityCheckResult
+      }
+
+  - id: step-6-domain-calculate-score
+    type: create_file
+    layer: domain
+    description: Create CalculateScore use case interface
+    path: src/domain/usecases/calculate-score.ts
+    template: |
+      import { type Step } from '@/domain/models/implementation-plan'
+
+      export interface CalculateScore {
+        calculate: (params: CalculateScore.Params) => Promise<CalculateScore.Result>
+      }
+
+      export namespace CalculateScore {
+        export type Params = {
+          step: Step
+          success: boolean
+          output?: string
+          layerInfo?: {
+            target: string
+            layer: string
+          }
+        }
+
+        export type Result = {
+          score: number
+        }
+      }
+
+  - id: step-7-domain-rollback-step
+    type: create_file
+    layer: domain
+    description: Create RollbackStep use case interface
+    path: src/domain/usecases/rollback-step.ts
+    template: |
+      import { type Step } from '@/domain/models/implementation-plan'
+
+      export interface RollbackStep {
+        rollback: (params: RollbackStep.Params) => Promise<RollbackStep.Result>
+      }
+
+      export namespace RollbackStep {
+        export type Params = {
+          step: Step
+          lastKnownCommitHash: string | null
+        }
+
+        export type Result = {
+          success: boolean
+          message: string
+        }
+      }
+
+  - id: step-8-domain-check-git-safety
+    type: create_file
+    layer: domain
+    description: Create CheckGitSafety use case interface
+    path: src/domain/usecases/check-git-safety.ts
+    template: |
+      import { type CommitConfig } from '@/domain/models/commit-config'
+
+      export interface CheckGitSafety {
+        check: (params: CheckGitSafety.Params) => Promise<CheckGitSafety.Result>
+      }
+
+      export namespace CheckGitSafety {
+        export type Params = {
+          config: CommitConfig
+        }
+
+        export type Result = {
+          safe: boolean
+          hasUncommittedChanges: boolean
+          userConfirmed?: boolean
+        }
+      }
+
+  - id: step-9-domain-validate-script
+    type: create_file
+    layer: domain
+    description: Create ValidateScript use case interface
+    path: src/domain/usecases/validate-script.ts
+    template: |
+      export interface ValidateScript {
+        validate: (params: ValidateScript.Params) => Promise<ValidateScript.Result>
+      }
+
+      export namespace ValidateScript {
+        export type Params = {
+          script: string
+          allowedScripts?: string[]
+        }
+
+        export type Result = {
+          safe: boolean
+          reason?: string
+        }
+      }
+
+  - id: step-10-domain-detect-package-manager
+    type: create_file
+    layer: domain
+    description: Create DetectPackageManager use case interface
+    path: src/domain/usecases/detect-package-manager.ts
+    template: |
+      export interface DetectPackageManager {
+        detect: () => Promise<DetectPackageManager.Result>
+      }
+
+      export namespace DetectPackageManager {
+        export type Result = {
+          packageManager: 'npm' | 'yarn' | 'pnpm'
+          command: string
+        }
+      }
+
+  - id: step-11-domain-validate-layer
+    type: create_file
+    layer: domain
+    description: Create ValidateLayer use case interface
+    path: src/domain/usecases/validate-layer.ts
+    template: |
+      import { type Step } from '@/domain/models/implementation-plan'
+
+      export interface ValidateLayer {
+        validate: (params: ValidateLayer.Params) => Promise<ValidateLayer.Result>
+      }
+
+      export namespace ValidateLayer {
+        export type Params = {
+          step: Step
+          layerInfo: {
+            target: string
+            layer: string
+          }
+        }
+
+        export type Result = {
+          valid: boolean
+          warnings: string[]
+          violations: string[]
+        }
+      }
+
+  - id: step-12-domain-execute-validation-script
+    type: create_file
+    layer: domain
+    description: Create ExecuteValidationScript use case interface
+    path: src/domain/usecases/execute-validation-script.ts
+    template: |
+      export interface ExecuteValidationScript {
+        execute: (params: ExecuteValidationScript.Params) => Promise<ExecuteValidationScript.Result>
+      }
+
+      export namespace ExecuteValidationScript {
+        export type Params = {
+          scriptContent: string
+          stepId: string
+        }
+
+        export type Result = {
+          output: string
+          success: boolean
+        }
+      }
+
+  # ============================================================================
+  # DATA LAYER - PROTOCOLS (9 arquivos)
+  # ============================================================================
+
+  - id: step-13-data-template-validator-protocol
+    type: create_file
+    layer: data
+    description: Create TemplateValidatorRepository protocol
+    path: src/data/protocols/template/template-validator-repository.ts
+    template: |
+      export interface TemplateValidatorRepository {
+        validateSchema: (params: TemplateValidatorRepository.ValidateParams) => Promise<TemplateValidatorRepository.ValidateResult>
+      }
+
+      export namespace TemplateValidatorRepository {
+        export type ValidateParams = {
+          content: string
+        }
+
+        export type ValidateResult = {
+          valid: boolean
+          errors: string[]
+          warnings: string[]
+        }
+      }
+
+  - id: step-14-data-quality-check-protocol
+    type: create_file
+    layer: data
+    description: Create QualityCheckRepository protocol
+    path: src/data/protocols/quality/quality-check-repository.ts
+    template: |
+      export interface QualityCheckRepository {
+        runLint: (command: string) => Promise<QualityCheckRepository.CheckResult>
+        runTest: (command: string) => Promise<QualityCheckRepository.CheckResult>
+      }
+
+      export namespace QualityCheckRepository {
+        export type CheckResult = {
+          passed: boolean
+          output: string
+        }
+      }
+
+  - id: step-15-data-rlhf-protocol
+    type: create_file
+    layer: data
+    description: Create RLHFRepository protocol
+    path: src/data/protocols/rlhf/rlhf-repository.ts
+    template: |
+      export interface RLHFRepository {
+        calculateScore: (params: RLHFRepository.ScoreParams) => Promise<RLHFRepository.ScoreResult>
+        saveScore: (params: RLHFRepository.SaveParams) => Promise<void>
+      }
+
+      export namespace RLHFRepository {
+        export type ScoreParams = {
+          stepType: string
+          success: boolean
+          layerInfo?: {
+            target: string
+            layer: string
+          }
+          output?: string
+        }
+
+        export type ScoreResult = {
+          score: number
+        }
+
+        export type SaveParams = {
+          stepId: string
+          score: number
+          timestamp: string
+        }
+      }
+
+  - id: step-16-data-config-protocol
+    type: create_file
+    layer: data
+    description: Create ConfigRepository protocol
+    path: src/data/protocols/config/config-repository.ts
+    template: |
+      import { type CommitConfig } from '@/domain/models/commit-config'
+
+      export interface ConfigRepository {
+        load: (configPath: string) => Promise<ConfigRepository.LoadResult>
+      }
+
+      export namespace ConfigRepository {
+        export type LoadResult = {
+          config: CommitConfig | null
+          errors?: string[]
+        }
+      }
+
+  - id: step-17-data-audit-protocol
+    type: create_file
+    layer: data
+    description: Create AuditRepository protocol
+    path: src/data/protocols/audit/audit-repository.ts
+    template: |
+      import { type AuditLogEntry } from '@/domain/models/audit-log'
+
+      export interface AuditRepository {
+        log: (entry: AuditLogEntry) => Promise<void>
+        getRecent: (limit: number) => Promise<AuditLogEntry[]>
+      }
+
+  - id: step-18-data-script-executor-protocol
+    type: create_file
+    layer: data
+    description: Create ScriptExecutorRepository protocol
+    path: src/data/protocols/script/script-executor-repository.ts
+    template: |
+      export interface ScriptExecutorRepository {
+        execute: (params: ScriptExecutorRepository.ExecuteParams) => Promise<ScriptExecutorRepository.ExecuteResult>
+      }
+
+      export namespace ScriptExecutorRepository {
+        export type ExecuteParams = {
+          scriptContent: string
+          stepId: string
+        }
+
+        export type ExecuteResult = {
+          output: string
+          success: boolean
+        }
+      }
+
+  - id: step-19-data-package-manager-protocol
+    type: create_file
+    layer: data
+    description: Create PackageManagerRepository protocol
+    path: src/data/protocols/package/package-manager-repository.ts
+    template: |
+      export interface PackageManagerRepository {
+        detect: () => Promise<PackageManagerRepository.DetectResult>
+        isInstalled: (pm: string) => Promise<boolean>
+      }
+
+      export namespace PackageManagerRepository {
+        export type DetectResult = {
+          packageManager: 'npm' | 'yarn' | 'pnpm'
+        }
+      }
+
+  - id: step-20-data-layer-validator-protocol
+    type: create_file
+    layer: data
+    description: Create LayerValidatorRepository protocol
+    path: src/data/protocols/layer/layer-validator-repository.ts
+    template: |
+      export interface LayerValidatorRepository {
+        validateImports: (params: LayerValidatorRepository.ValidateParams) => Promise<LayerValidatorRepository.ValidateResult>
+      }
+
+      export namespace LayerValidatorRepository {
+        export type ValidateParams = {
+          code: string
+          layer: string
+        }
+
+        export type ValidateResult = {
+          valid: boolean
+          violations: string[]
+          warnings: string[]
+        }
+      }
+
+  - id: step-21-data-script-validator-protocol
+    type: create_file
+    layer: data
+    description: Create ScriptValidatorRepository protocol
+    path: src/data/protocols/script/script-validator-repository.ts
+    template: |
+      export interface ScriptValidatorRepository {
+        validate: (params: ScriptValidatorRepository.ValidateParams) => Promise<ScriptValidatorRepository.ValidateResult>
+      }
+
+      export namespace ScriptValidatorRepository {
+        export type ValidateParams = {
+          script: string
+          allowedScripts: string[]
+        }
+
+        export type ValidateResult = {
+          safe: boolean
+          reason?: string
+        }
+      }
+
+  # ============================================================================
+  # DATA LAYER - USE CASE IMPLEMENTATIONS (9 arquivos)
+  # ============================================================================
+
+  - id: step-22-data-validate-template-impl
+    type: create_file
+    layer: data
+    description: Implement DbValidateTemplate use case
+    path: src/data/usecases/template/db-validate-template.ts
+    template: |
+      import { type ValidateTemplate } from '@/domain/usecases/validate-template'
+      import { type FileSystem } from '@/data/protocols/fs/file-system'
+      import { type TemplateValidatorRepository } from '@/data/protocols/template/template-validator-repository'
+
+      export class DbValidateTemplate implements ValidateTemplate {
+        constructor (
+          private readonly fileSystem: FileSystem,
+          private readonly validator: TemplateValidatorRepository
+        ) {}
+
+        async validate (params: ValidateTemplate.Params): Promise<ValidateTemplate.Result> {
+          const { implementationPath } = params
+
+          const content = await this.fileSystem.readFile(implementationPath)
+          const result = await this.validator.validateSchema({ content })
+
+          return {
+            valid: result.valid,
+            errors: result.errors,
+            warnings: result.warnings
+          }
+        }
+      }
+
+  - id: step-23-data-run-quality-check-impl
+    type: create_file
+    layer: data
+    description: Implement DbRunQualityCheck use case
+    path: src/data/usecases/quality/db-run-quality-check.ts
+    template: |
+      import { type RunQualityCheck } from '@/domain/usecases/run-quality-check'
+      import { type QualityCheckRepository } from '@/data/protocols/quality/quality-check-repository'
+      import { type Logger } from '@/data/protocols/log/logger'
+
+      export class DbRunQualityCheck implements RunQualityCheck {
+        constructor (
+          private readonly qualityCheck: QualityCheckRepository,
+          private readonly logger: Logger
+        ) {}
+
+        async run (params: RunQualityCheck.Params): Promise<RunQualityCheck.Result> {
+          const { config } = params
+
+          let lintResult = { passed: true, output: '' }
+          let testResult = { passed: true, output: '' }
+
+          if (config.qualityChecks.lint) {
+            this.logger.info('Running lint check...')
+            lintResult = await this.qualityCheck.runLint(config.qualityChecks.lintCommand)
+          }
+
+          if (config.qualityChecks.test) {
+            this.logger.info('Running tests...')
+            testResult = await this.qualityCheck.runTest(config.qualityChecks.testCommand)
+          }
+
+          return {
+            lint: lintResult,
+            test: testResult,
+            overallPassed: lintResult.passed && testResult.passed
+          }
+        }
+      }
+
+  - id: step-24-data-calculate-score-impl
+    type: create_file
+    layer: data
+    description: Implement DbCalculateScore use case
+    path: src/data/usecases/rlhf/db-calculate-score.ts
+    template: |
+      import { type CalculateScore } from '@/domain/usecases/calculate-score'
+      import { type RLHFRepository } from '@/data/protocols/rlhf/rlhf-repository'
+
+      export class DbCalculateScore implements CalculateScore {
+        constructor (
+          private readonly rlhfRepository: RLHFRepository
+        ) {}
+
+        async calculate (params: CalculateScore.Params): Promise<CalculateScore.Result> {
+          const { step, success, output, layerInfo } = params
+
+          const result = await this.rlhfRepository.calculateScore({
+            stepType: step.type,
+            success,
+            layerInfo,
+            output
+          })
+
+          await this.rlhfRepository.saveScore({
+            stepId: step.id,
+            score: result.score,
+            timestamp: new Date().toISOString()
+          })
+
+          return { score: result.score }
+        }
+      }
+
+  - id: step-25-data-rollback-step-impl
+    type: create_file
+    layer: data
+    description: Implement DbRollbackStep use case
+    path: src/data/usecases/git/db-rollback-step.ts
+    template: |
+      import { type RollbackStep } from '@/domain/usecases/rollback-step'
+      import { type GitRepository } from '@/data/protocols/git/git-repository'
+      import { type FileSystem } from '@/data/protocols/fs/file-system'
+      import { type Logger } from '@/data/protocols/log/logger'
+
+      export class DbRollbackStep implements RollbackStep {
+        constructor (
+          private readonly gitRepository: GitRepository,
+          private readonly fileSystem: FileSystem,
+          private readonly logger: Logger
+        ) {}
+
+        async rollback (params: RollbackStep.Params): Promise<RollbackStep.Result> {
+          const { step, lastKnownCommitHash } = params
+
+          try {
+            this.logger.info('Rolling back changes...')
+
+            await this.gitRepository.resetHead()
+
+            if (step.path && await this.fileSystem.pathExists(step.path)) {
+              await this.gitRepository.checkoutFile(step.path)
+            }
+
+            return {
+              success: true,
+              message: 'Rollback completed successfully'
+            }
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            return {
+              success: false,
+              message: `Rollback failed: ${message}`
+            }
+          }
+        }
+      }
+
+  - id: step-26-data-check-git-safety-impl
+    type: create_file
+    layer: data
+    description: Implement DbCheckGitSafety use case
+    path: src/data/usecases/git/db-check-git-safety.ts
+    template: |
+      import { type CheckGitSafety } from '@/domain/usecases/check-git-safety'
+      import { type GitRepository } from '@/data/protocols/git/git-repository'
+      import { type Logger } from '@/data/protocols/log/logger'
+
+      export class DbCheckGitSafety implements CheckGitSafety {
+        constructor (
+          private readonly gitRepository: GitRepository,
+          private readonly logger: Logger
+        ) {}
+
+        async check (params: CheckGitSafety.Params): Promise<CheckGitSafety.Result> {
+          const { config } = params
+
+          const statusOutput = await this.gitRepository.status()
+          const hasUncommittedChanges = statusOutput.trim().length > 0
+
+          if (hasUncommittedChanges) {
+            this.logger.warn('Uncommitted changes detected')
+
+            if (!config.interactiveSafety) {
+              this.logger.info('Non-interactive mode: continuing after delay')
+              return {
+                safe: true,
+                hasUncommittedChanges,
+                userConfirmed: false
+              }
+            }
+          }
+
+          return {
+            safe: true,
+            hasUncommittedChanges,
+            userConfirmed: true
+          }
+        }
+      }
+
+  - id: step-27-data-validate-script-impl
+    type: create_file
+    layer: data
+    description: Implement DbValidateScript use case
+    path: src/data/usecases/script/db-validate-script.ts
+    template: |
+      import { type ValidateScript } from '@/domain/usecases/validate-script'
+      import { type ScriptValidatorRepository } from '@/data/protocols/script/script-validator-repository'
+
+      export class DbValidateScript implements ValidateScript {
+        constructor (
+          private readonly validator: ScriptValidatorRepository
+        ) {}
+
+        async validate (params: ValidateScript.Params): Promise<ValidateScript.Result> {
+          const { script, allowedScripts = [] } = params
+
+          return await this.validator.validate({
+            script,
+            allowedScripts
+          })
+        }
+      }
+
+  - id: step-28-data-detect-package-manager-impl
+    type: create_file
+    layer: data
+    description: Implement DbDetectPackageManager use case
+    path: src/data/usecases/package/db-detect-package-manager.ts
+    template: |
+      import { type DetectPackageManager } from '@/domain/usecases/detect-package-manager'
+      import { type PackageManagerRepository } from '@/data/protocols/package/package-manager-repository'
+
+      export class DbDetectPackageManager implements DetectPackageManager {
+        constructor (
+          private readonly repository: PackageManagerRepository
+        ) {}
+
+        async detect (): Promise<DetectPackageManager.Result> {
+          const result = await this.repository.detect()
+
+          const commands: Record<string, string> = {
+            npm: 'npm run',
+            yarn: 'yarn',
+            pnpm: 'pnpm'
+          }
+
+          return {
+            packageManager: result.packageManager,
+            command: commands[result.packageManager]
+          }
+        }
+      }
+
+  - id: step-29-data-validate-layer-impl
+    type: create_file
+    layer: data
+    description: Implement DbValidateLayer use case
+    path: src/data/usecases/layer/db-validate-layer.ts
+    template: |
+      import { type ValidateLayer } from '@/domain/usecases/validate-layer'
+      import { type LayerValidatorRepository } from '@/data/protocols/layer/layer-validator-repository'
+
+      export class DbValidateLayer implements ValidateLayer {
+        constructor (
+          private readonly validator: LayerValidatorRepository
+        ) {}
+
+        async validate (params: ValidateLayer.Params): Promise<ValidateLayer.Result> {
+          const { step, layerInfo } = params
+
+          if (!step.template) {
+            return { valid: true, warnings: [], violations: [] }
+          }
+
+          return await this.validator.validateImports({
+            code: step.template,
+            layer: layerInfo.layer
+          })
+        }
+      }
+
+  - id: step-30-data-execute-validation-script-impl
+    type: create_file
+    layer: data
+    description: Implement DbExecuteValidationScript use case
+    path: src/data/usecases/script/db-execute-validation-script.ts
+    template: |
+      import { type ExecuteValidationScript } from '@/domain/usecases/execute-validation-script'
+      import { type ScriptExecutorRepository } from '@/data/protocols/script/script-executor-repository'
+      import { type Logger } from '@/data/protocols/log/logger'
+
+      export class DbExecuteValidationScript implements ExecuteValidationScript {
+        constructor (
+          private readonly executor: ScriptExecutorRepository,
+          private readonly logger: Logger
+        ) {}
+
+        async execute (params: ExecuteValidationScript.Params): Promise<ExecuteValidationScript.Result> {
+          const { scriptContent, stepId } = params
+
+          this.logger.info(`Running validation script for step: ${stepId}`)
+
+          return await this.executor.execute({
+            scriptContent,
+            stepId
+          })
+        }
+      }
