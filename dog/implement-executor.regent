@@ -904,21 +904,20 @@ steps:
     status: SUCCESS
     execution_log: "Action completed successfully at 2025-10-02T10:33:53.351Z (0ms).
       RLHF Score: 1. No validation script provided."
-
-  # ============================================================================
-  # INFRA LAYER - ADAPTERS (12 arquivos)
-  # ============================================================================
-
   - id: step-31-infra-yaml-template-validator
     type: create_file
     layer: infra
     description: Create YAML template validator adapter
     path: src/infra/template/yaml-template-validator.ts
-    template: |
-      import { type TemplateValidatorRepository } from '@/data/protocols/template/template-validator-repository'
+    template: >
+      import { type TemplateValidatorRepository } from
+      '@/data/protocols/template/template-validator-repository'
+
       import * as yaml from 'yaml'
 
-      export class YamlTemplateValidator implements TemplateValidatorRepository {
+
+      export class YamlTemplateValidator implements TemplateValidatorRepository
+      {
         async validateSchema (params: TemplateValidatorRepository.ValidateParams): Promise<TemplateValidatorRepository.ValidateResult> {
           const { content } = params
           const errors: string[] = []
@@ -962,15 +961,21 @@ steps:
           }
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T13:09:18.136Z (1ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-32-infra-npm-quality-check
     type: create_file
     layer: infra
     description: Create NPM quality check adapter
     path: src/infra/quality/npm-quality-check-adapter.ts
-    template: |
-      import { type QualityCheckRepository } from '@/data/protocols/quality/quality-check-repository'
+    template: >
+      import { type QualityCheckRepository } from
+      '@/data/protocols/quality/quality-check-repository'
+
       import { $ } from 'zx'
+
 
       export class NpmQualityCheckAdapter implements QualityCheckRepository {
         async runLint (command: string): Promise<QualityCheckRepository.CheckResult> {
@@ -1023,15 +1028,21 @@ steps:
           return String(error)
         }
       }
-
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T13:09:23.273Z (0ms).
+      RLHF Score: 1. No validation script provided."
   - id: step-33-infra-json-rlhf
     type: create_file
     layer: infra
     description: Create JSON RLHF adapter
     path: src/infra/rlhf/json-rlhf-adapter.ts
-    template: |
-      import { type RLHFRepository } from '@/data/protocols/rlhf/rlhf-repository'
+    template: >
+      import { type RLHFRepository } from
+      '@/data/protocols/rlhf/rlhf-repository'
+
       import { type FileSystem } from '@/data/protocols/fs/file-system'
+
 
       export class JsonRLHFAdapter implements RLHFRepository {
         private scores: Map<string, number> = new Map()
@@ -1041,7 +1052,7 @@ steps:
         ) {}
 
         async calculateScore (params: RLHFRepository.ScoreParams): Promise<RLHFRepository.ScoreResult> {
-          const { stepType, success, layerInfo } = params
+          const { success, layerInfo } = params
 
           let score = success ? 1 : 0
 
@@ -1059,17 +1070,24 @@ steps:
           this.scores.set(stepId, score)
         }
       }
-
+    rlhf_score: null
+    status: null
+    execution_log: null
   - id: step-34-infra-yaml-config
     type: create_file
     layer: infra
     description: Create YAML config adapter
     path: src/infra/config/yaml-config-adapter.ts
-    template: |
-      import { type ConfigRepository } from '@/data/protocols/config/config-repository'
+    template: >
+      import { type ConfigRepository } from
+      '@/data/protocols/config/config-repository'
+
       import { type CommitConfig } from '@/domain/models/commit-config'
+
       import { type FileSystem } from '@/data/protocols/fs/file-system'
+
       import * as yaml from 'yaml'
+
 
       export class YamlConfigAdapter implements ConfigRepository {
         constructor (
@@ -1117,16 +1135,19 @@ steps:
           }
         }
       }
-
   - id: step-35-infra-file-audit
     type: create_file
     layer: infra
     description: Create file audit adapter
     path: src/infra/audit/file-audit-adapter.ts
-    template: |
-      import { type AuditRepository } from '@/data/protocols/audit/audit-repository'
+    template: >
+      import { type AuditRepository } from
+      '@/data/protocols/audit/audit-repository'
+
       import { type AuditLogEntry } from '@/domain/models/audit-log'
+
       import { type FileSystem } from '@/data/protocols/fs/file-system'
+
 
       export class FileAuditAdapter implements AuditRepository {
         private entries: AuditLogEntry[] = []
@@ -1155,18 +1176,23 @@ steps:
           return this.entries.slice(-limit)
         }
       }
-
   - id: step-36-infra-bash-script-executor
     type: create_file
     layer: infra
     description: Create bash script executor adapter
     path: src/infra/script/bash-script-executor.ts
-    template: |
-      import { type ScriptExecutorRepository } from '@/data/protocols/script/script-executor-repository'
+    template: >
+      import { type ScriptExecutorRepository } from
+      '@/data/protocols/script/script-executor-repository'
+
       import { type FileSystem } from '@/data/protocols/fs/file-system'
+
       import { $ } from 'zx'
+
       import * as os from 'os'
+
       import * as path from 'path'
+
 
       export class BashScriptExecutor implements ScriptExecutorRepository {
         constructor (
@@ -1208,7 +1234,6 @@ steps:
           }
         }
       }
-
   - id: step-37-infra-enhanced-git-repository
     type: create_file
     layer: infra
@@ -1245,16 +1270,19 @@ steps:
           await $`git checkout HEAD -- ${path}`
         }
       }
-
   - id: step-38-infra-package-manager-detector
     type: create_file
     layer: infra
     description: Create package manager detector
     path: src/infra/package/package-manager-detector.ts
-    template: |
-      import { type PackageManagerRepository } from '@/data/protocols/package/package-manager-repository'
+    template: >
+      import { type PackageManagerRepository } from
+      '@/data/protocols/package/package-manager-repository'
+
       import { type FileSystem } from '@/data/protocols/fs/file-system'
+
       import { $ } from 'zx'
+
 
       export class PackageManagerDetector implements PackageManagerRepository {
         constructor (
@@ -1289,14 +1317,15 @@ steps:
           }
         }
       }
-
   - id: step-39-infra-layer-validator
     type: create_file
     layer: infra
     description: Create layer validator
     path: src/infra/layer/layer-validator.ts
-    template: |
-      import { type LayerValidatorRepository } from '@/data/protocols/layer/layer-validator-repository'
+    template: >
+      import { type LayerValidatorRepository } from
+      '@/data/protocols/layer/layer-validator-repository'
+
 
       export class LayerValidator implements LayerValidatorRepository {
         private readonly forbiddenImports: Record<string, string[]> = {
@@ -1333,14 +1362,15 @@ steps:
           }
         }
       }
-
   - id: step-40-infra-script-validator
     type: create_file
     layer: infra
     description: Create script validator
     path: src/infra/security/script-validator.ts
-    template: |
-      import { type ScriptValidatorRepository } from '@/data/protocols/script/script-validator-repository'
+    template: >
+      import { type ScriptValidatorRepository } from
+      '@/data/protocols/script/script-validator-repository'
+
 
       export class ScriptValidator implements ScriptValidatorRepository {
         private readonly dangerousKeywords = [
@@ -1377,11 +1407,6 @@ steps:
           return { safe: true }
         }
       }
-
-  # ============================================================================
-  # PRESENTATION LAYER - ERRORS (4 arquivos)
-  # ============================================================================
-
   - id: step-41-presentation-lint-error
     type: create_file
     layer: presentation
@@ -1394,7 +1419,6 @@ steps:
           this.name = 'LintError'
         }
       }
-
   - id: step-42-presentation-test-error
     type: create_file
     layer: presentation
@@ -1407,7 +1431,6 @@ steps:
           this.name = 'TestError'
         }
       }
-
   - id: step-43-presentation-invalid-script-error
     type: create_file
     layer: presentation
@@ -1420,7 +1443,6 @@ steps:
           this.name = 'InvalidScriptError'
         }
       }
-
   - id: step-44-presentation-layer-violation-error
     type: create_file
     layer: presentation
@@ -1436,45 +1458,51 @@ steps:
           this.name = 'LayerViolationError'
         }
       }
-
-  # ============================================================================
-  # MAIN LAYER - FACTORIES (6 arquivos)
-  # ============================================================================
-
   - id: step-45-main-validate-template-factory
     type: create_file
     layer: main
     description: Create validate template factory
     path: src/main/factories/usecases/validate-template-factory.ts
-    template: |
-      import { type ValidateTemplate } from '@/domain/usecases/validate-template'
-      import { DbValidateTemplate } from '@/data/usecases/template/db-validate-template'
+    template: >
+      import { type ValidateTemplate } from
+      '@/domain/usecases/validate-template'
+
+      import { DbValidateTemplate } from
+      '@/data/usecases/template/db-validate-template'
+
       import { FsExtraAdapter } from '@/infra/fs/fs-extra-adapter'
-      import { YamlTemplateValidator } from '@/infra/template/yaml-template-validator'
+
+      import { YamlTemplateValidator } from
+      '@/infra/template/yaml-template-validator'
+
 
       export const makeValidateTemplate = (): ValidateTemplate => {
         const fileSystem = new FsExtraAdapter()
         const validator = new YamlTemplateValidator()
         return new DbValidateTemplate(fileSystem, validator)
       }
-
   - id: step-46-main-run-quality-check-factory
     type: create_file
     layer: main
     description: Create run quality check factory
     path: src/main/factories/usecases/run-quality-check-factory.ts
-    template: |
+    template: >
       import { type RunQualityCheck } from '@/domain/usecases/run-quality-check'
-      import { DbRunQualityCheck } from '@/data/usecases/quality/db-run-quality-check'
-      import { NpmQualityCheckAdapter } from '@/infra/quality/npm-quality-check-adapter'
+
+      import { DbRunQualityCheck } from
+      '@/data/usecases/quality/db-run-quality-check'
+
+      import { NpmQualityCheckAdapter } from
+      '@/infra/quality/npm-quality-check-adapter'
+
       import { ChalkLoggerAdapter } from '@/infra/log/chalk-logger-adapter'
+
 
       export const makeRunQualityCheck = (): RunQualityCheck => {
         const qualityCheck = new NpmQualityCheckAdapter()
         const logger = new ChalkLoggerAdapter()
         return new DbRunQualityCheck(qualityCheck, logger)
       }
-
   - id: step-47-main-calculate-score-factory
     type: create_file
     layer: main
@@ -1491,18 +1519,23 @@ steps:
         const rlhfRepository = new JsonRLHFAdapter(fileSystem)
         return new DbCalculateScore(rlhfRepository)
       }
-
   - id: step-48-main-rollback-step-factory
     type: create_file
     layer: main
     description: Create rollback step factory
     path: src/main/factories/usecases/rollback-step-factory.ts
-    template: |
+    template: >
       import { type RollbackStep } from '@/domain/usecases/rollback-step'
+
       import { DbRollbackStep } from '@/data/usecases/git/db-rollback-step'
-      import { EnhancedGitRepository } from '@/infra/git/enhanced-git-repository'
+
+      import { EnhancedGitRepository } from
+      '@/infra/git/enhanced-git-repository'
+
       import { FsExtraAdapter } from '@/infra/fs/fs-extra-adapter'
+
       import { ChalkLoggerAdapter } from '@/infra/log/chalk-logger-adapter'
+
 
       export const makeRollbackStep = (): RollbackStep => {
         const gitRepository = new EnhancedGitRepository()
@@ -1510,36 +1543,51 @@ steps:
         const logger = new ChalkLoggerAdapter()
         return new DbRollbackStep(gitRepository, fileSystem, logger)
       }
-
   - id: step-49-main-check-git-safety-factory
     type: create_file
     layer: main
     description: Create check git safety factory
     path: src/main/factories/usecases/check-git-safety-factory.ts
-    template: |
+    template: >
       import { type CheckGitSafety } from '@/domain/usecases/check-git-safety'
+
       import { DbCheckGitSafety } from '@/data/usecases/git/db-check-git-safety'
-      import { EnhancedGitRepository } from '@/infra/git/enhanced-git-repository'
+
+      import { EnhancedGitRepository } from
+      '@/infra/git/enhanced-git-repository'
+
       import { ChalkLoggerAdapter } from '@/infra/log/chalk-logger-adapter'
+
 
       export const makeCheckGitSafety = (): CheckGitSafety => {
         const gitRepository = new EnhancedGitRepository()
         const logger = new ChalkLoggerAdapter()
         return new DbCheckGitSafety(gitRepository, logger)
       }
-
   - id: step-50-main-enhanced-executor
     type: create_file
     layer: main
     description: Create enhanced executor composition
     path: src/main/enhanced-executor.ts
-    template: |
-      import { makeExecutePlan } from './factories/usecases/db-execute-plan-factory'
-      import { makeValidateTemplate } from './factories/usecases/validate-template-factory'
-      import { makeRunQualityCheck } from './factories/usecases/run-quality-check-factory'
-      import { makeCalculateScore } from './factories/usecases/calculate-score-factory'
-      import { makeRollbackStep } from './factories/usecases/rollback-step-factory'
-      import { makeCheckGitSafety } from './factories/usecases/check-git-safety-factory'
+    template: >
+      import { makeExecutePlan } from
+      './factories/usecases/db-execute-plan-factory'
+
+      import { makeValidateTemplate } from
+      './factories/usecases/validate-template-factory'
+
+      import { makeRunQualityCheck } from
+      './factories/usecases/run-quality-check-factory'
+
+      import { makeCalculateScore } from
+      './factories/usecases/calculate-score-factory'
+
+      import { makeRollbackStep } from
+      './factories/usecases/rollback-step-factory'
+
+      import { makeCheckGitSafety } from
+      './factories/usecases/check-git-safety-factory'
+
 
       export const makeEnhancedExecutor = () => {
         return {
