@@ -17,6 +17,26 @@ export default tseslint.config(
     ],
   },
 
+  // Custom rules to prevent namespace pollution and ensure ESM compatibility
+  {
+    rules: {
+      // Prevent import 'zx/globals' to avoid namespace pollution
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['zx/globals'],
+          message: 'Do not import "zx/globals" as it pollutes the global namespace. Use explicit imports: import { $, chalk, argv } from "zx" instead.',
+        }],
+      }],
+      // Prevent namespace imports from fs-extra in ESM context
+      '@typescript-eslint/no-require-imports': 'error',
+      // Enforce default import for fs-extra to prevent ESM compatibility issues
+      'no-restricted-syntax': ['error', {
+        selector: 'ImportDeclaration[source.value="fs-extra"] ImportNamespaceSpecifier',
+        message: 'Use default import for fs-extra in ESM context: import fs from "fs-extra" (not import * as fs from "fs-extra"). Namespace imports only work with native Node.js modules like "fs".',
+      }],
+    },
+  },
+
   // Clean Architecture boundaries validation configuration
   // Enforces proper layer separation and dependency rules
   {

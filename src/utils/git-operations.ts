@@ -3,7 +3,7 @@
  * Provides safe git operations with proper error handling and retries
  */
 
-import 'zx/globals';
+import { $ } from 'zx';
 import { RETRY, TIMING, type GitOperation, GIT_OPERATIONS } from './constants';
 
 /**
