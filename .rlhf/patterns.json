@@ -1,0 +1,9 @@
+{
+  "all_create_file_success": {
+    "pattern": "all_create_file_success",
+    "successRate": 1,
+    "occurrences": 50,
+    "lastSeen": "2025-10-02T19:25:36.487Z",
+    "layer": "all"
+  }
+}

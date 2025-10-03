@@ -1,0 +1,850 @@
+metadata:
+  feature: CLI Step Executor Refactor
+  domain: Software Development Automation
+  estimatedFiles: 21
+steps:
+  - id: step-1-domain-models
+    type: create_file
+    layer: domain
+    description: Create domain models for Step and ImplementationPlan
+    path: src/domain/models/implementation-plan.ts
+    template: >
+      export type Step = {
+        id: string
+        type: 'create_file' | 'refactor_file' | 'delete_file' | 'folder' | 'branch' | 'pull_request' | 'validation' | 'test'
+        status: 'PENDING' | 'SUCCESS' | 'FAILED' | 'SKIPPED'
+        rlhf_score: number | null
+        execution_log: string
+        path?: string
+        template?: string
+        action?: {
+          create_folders?: {
+            basePath?: string
+            folders?: string[]
+          }
+          branch_name?: string
+          target_branch?: string
+          source_branch?: string
+          title?: string
+        }
+        validation_script?: string
+      }
+
+
+      export type ImplementationPlan = {
+        steps: Step[]
+        metadata?: {
+          layer?: string
+          project_type?: string
+          architecture_style?: string
+        }
+        evaluation?: {
+          final_rlhf_score?: number
+          final_status?: string
+          commit_hashes?: string[]
+        }
+      }
+    validation:
+      patterns:
+        - DOM004
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:12:41.921Z (0ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-2-domain-usecase-execute-plan
+    type: create_file
+    layer: domain
+    description: Create the ExecutePlan use case interface
+    path: src/domain/usecases/execute-plan.ts
+    template: >
+      import { type ImplementationPlan } from
+      '@/domain/models/implementation-plan'
+
+
+      export interface ExecutePlan {
+        execute: (params: ExecutePlan.Params) => Promise<ExecutePlan.Result>
+      }
+
+
+      export namespace ExecutePlan {
+        export type Params = {
+          implementationPath: string
+        }
+
+        export type Result = {
+          finalPlan: ImplementationPlan
+          success: boolean
+        }
+      }
+    validation:
+      patterns:
+        - DOM001
+        - DOM002
+        - DOM003
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:18:08.614Z (1ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-3-data-protocols-fs
+    type: create_file
+    layer: data
+    description: Create data protocol for File System operations
+    path: src/data/protocols/fs/file-system.ts
+    template: |
+      export interface FileSystem {
+        readFile: (path: string) => Promise<string>
+        writeFile: (path: string, content: string) => Promise<void>
+        ensureDir: (path: string) => Promise<void>
+        pathExists: (path: string) => Promise<boolean>
+        remove: (path: string) => Promise<void>
+        chmod: (path: string, mode: string | number) => Promise<void>
+      }
+    validation:
+      patterns:
+        - DAT003
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:20:37.780Z (1ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-4-data-protocols-git
+    type: create_file
+    layer: data
+    description: Create data protocol for Git operations
+    path: src/data/protocols/git/git-repository.ts
+    template: |
+      export interface GitRepository {
+        status: () => Promise<string>
+        add: (filePath: string | string[]) => Promise<void>
+        commit: (message: string) => Promise<void>
+        getHeadHash: () => Promise<string>
+        resetHead: () => Promise<void>
+        checkout: (filePath: string) => Promise<void>
+      }
+
+      export namespace GitRepository {
+        export type StatusResult = {
+          isClean: boolean
+          files: string[]
+        }
+      }
+    validation:
+      patterns:
+        - DAT003
+        - DAT004
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:20:42.380Z (1ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-5-data-protocols-log
+    type: create_file
+    layer: data
+    description: Create data protocol for logging
+    path: src/data/protocols/log/logger.ts
+    template: |
+      export interface Logger {
+        log: (message: string) => void
+        info: (message: string) => void
+        warn: (message: string) => void
+        error: (message: string, error?: Error) => void
+        success: (message: string) => void
+      }
+    validation:
+      patterns:
+        - DAT003
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:20:46.996Z (1ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-6-data-protocols-plan
+    type: create_file
+    layer: data
+    description: Create data protocols for loading and saving plans
+    path: src/data/protocols/plan/plan-repository.ts
+    template: >
+      import { type ImplementationPlan } from
+      '@/domain/models/implementation-plan'
+
+
+      export interface PlanLoaderRepository {
+        load: (path: string) => Promise<ImplementationPlan>
+      }
+
+
+      export interface PlanSaverRepository {
+        save: (path: string, plan: ImplementationPlan) => Promise<void>
+      }
+    validation:
+      patterns:
+        - DAT003
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:20:51.497Z (1ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-7-data-usecase-implementation
+    type: create_file
+    layer: data
+    description: Implement the DbExecutePlan use case
+    path: src/data/usecases/plan/db-execute-plan.ts
+    template: >
+      import { type ExecutePlan } from '@/domain/usecases/execute-plan'
+
+      import { type Step, type ImplementationPlan } from
+      '@/domain/models/implementation-plan'
+
+      import { type FileSystem } from '@/data/protocols/fs/file-system'
+
+      import { type GitRepository } from '@/data/protocols/git/git-repository'
+
+      import { type Logger } from '@/data/protocols/log/logger'
+
+      import { type PlanLoaderRepository, type PlanSaverRepository } from
+      '@/data/protocols/plan/plan-repository'
+
+
+      export class DbExecutePlan implements ExecutePlan {
+        constructor (
+          private readonly planLoaderRepository: PlanLoaderRepository,
+          private readonly planSaverRepository: PlanSaverRepository,
+          private readonly fileSystem: FileSystem,
+          private readonly gitRepository: GitRepository,
+          private readonly logger: Logger
+        ) {}
+
+        async execute (params: ExecutePlan.Params): Promise<ExecutePlan.Result> {
+          const { implementationPath } = params
+          const plan: ImplementationPlan = await this.planLoaderRepository.load(implementationPath)
+          this.logger.info(`🚀 Starting execution of ${plan.steps.length} steps...`)
+
+          for (const [index, step] of plan.steps.entries()) {
+            this.logger.info(`\n▶️  Processing Step ${index + 1}/${plan.steps.length}: ${step.id}`)
+            if (step.status === 'SUCCESS' || step.status === 'SKIPPED') {
+              this.logger.log(`   ⏭️  Skipping step with status '${step.status}'.`)
+              continue
+            }
+            try {
+              await this.executeStepAction(step)
+              step.status = 'SUCCESS'
+              step.execution_log = `Completed successfully at ${new Date().toISOString()}`
+              await this.commitStep(step)
+            } catch (stepError) {
+              step.status = 'FAILED'
+              step.execution_log = `Failed at ${new Date().toISOString()}.\nError: ${(stepError as Error).message}`
+              await this.planSaverRepository.save(implementationPath, plan)
+              this.logger.error(`❌ Step '${step.id}' failed.`, stepError as Error)
+              return { finalPlan: plan, success: false }
+            }
+          }
+
+          plan.evaluation = { ...plan.evaluation, final_status: 'SUCCESS' }
+          await this.planSaverRepository.save(implementationPath, plan)
+          this.logger.success('\n🎉 All steps completed successfully!')
+          return { finalPlan: plan, success: true }
+        }
+
+        private async executeStepAction (step: Step): Promise<void> {
+          switch (step.type) {
+            case 'create_file':
+              if (!step.path || !step.template) throw new Error('Missing path or template for create_file')
+              this.logger.log(`   📄 Creating file: ${step.path}`)
+              await this.fileSystem.ensureDir(step.path.substring(0, step.path.lastIndexOf('/')))
+              await this.fileSystem.writeFile(step.path, step.template)
+              break
+            case 'delete_file':
+              if (!step.path) throw new Error('Missing path for delete_file')
+              this.logger.log(`   🗑️ Deleting file: ${step.path}`)
+              if (await this.fileSystem.pathExists(step.path)) {
+                await this.fileSystem.remove(step.path)
+              } else {
+                this.logger.warn(`   ⚠️  File to delete at ${step.path} does not exist.`)
+              }
+              break
+            // Other step types would be implemented here
+            default:
+              this.logger.warn(`   ⚠️  Step type '${step.type}' not implemented. Skipping.`)
+          }
+        }
+
+        private async commitStep (step: Step): Promise<void> {
+          if (step.type !== 'create_file' && step.type !== 'refactor_file' && step.type !== 'delete_file') {
+            return
+          }
+          try {
+            if (step.path) {
+              await this.gitRepository.add(step.path)
+              const commitMessage = `feat(${step.id}): ${step.type.replace('_', ' ')} ${step.path}`
+              await this.gitRepository.commit(commitMessage)
+              const hash = await this.gitRepository.getHeadHash()
+              this.logger.success(`   ✅ Committed: ${hash.substring(0, 7)} - ${commitMessage}`)
+            }
+          } catch {
+            this.logger.warn(`   ⚠️  Could not commit step ${step.id}. Maybe no changes were made.`)
+          }
+        }
+      }
+    validation:
+      patterns:
+        - DAT001
+        - DAT002
+        - DAT005
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:22:47.324Z (1ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-8-infra-fs-adapter
+    type: create_file
+    layer: infra
+    description: Create FileSystem adapter using fs-extra
+    path: src/infra/fs/fs-extra-adapter.ts
+    template: |
+      import { type FileSystem } from '@/data/protocols/fs/file-system'
+      import fs from 'fs-extra'
+
+      export class FsExtraAdapter implements FileSystem {
+        async readFile (path: string): Promise<string> {
+          return fs.readFile(path, 'utf-8')
+        }
+
+        async writeFile (path: string, content: string): Promise<void> {
+          await fs.writeFile(path, content)
+        }
+
+        async ensureDir (path: string): Promise<void> {
+          await fs.ensureDir(path)
+        }
+
+        async pathExists (path: string): Promise<boolean> {
+          return fs.pathExists(path)
+        }
+
+        async remove (path: string): Promise<void> {
+          await fs.remove(path)
+        }
+
+        async chmod (path: string, mode: string | number): Promise<void> {
+          await fs.chmod(path, mode)
+        }
+      }
+    validation:
+      patterns:
+        - INF001
+        - INF003
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:22:52.112Z (0ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-9-infra-git-adapter
+    type: create_file
+    layer: infra
+    description: Create GitRepository adapter using zx
+    path: src/infra/git/zx-git-repository.ts
+    template: |
+      import { type GitRepository } from '@/data/protocols/git/git-repository'
+      import { $ } from 'zx'
+
+      export class ZxGitRepository implements GitRepository {
+        constructor () {
+          $.verbose = false
+        }
+
+        async status (): Promise<string> {
+          const result = await $`git status --porcelain`
+          return result.stdout.trim()
+        }
+
+        async add (filePath: string | string[]): Promise<void> {
+          const files = Array.isArray(filePath) ? filePath : [filePath]
+          await $`git add ${files}`
+        }
+
+        async commit (message: string): Promise<void> {
+          await $`git commit -m ${message}`
+        }
+
+        async getHeadHash (): Promise<string> {
+          const result = await $`git rev-parse HEAD`
+          return result.stdout.trim()
+        }
+
+        async resetHead (): Promise<void> {
+          await $`git reset HEAD`
+        }
+
+        async checkout (filePath: string): Promise<void> {
+          await $`git checkout HEAD -- ${filePath}`
+        }
+      }
+    validation:
+      patterns:
+        - INF001
+        - INF003
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:22:57.084Z (0ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-10-infra-log-adapter
+    type: create_file
+    layer: infra
+    description: Create Logger adapter using chalk
+    path: src/infra/log/chalk-logger-adapter.ts
+    template: |
+      import { type Logger } from '@/data/protocols/log/logger'
+      import chalk from 'chalk'
+
+      export class ChalkLoggerAdapter implements Logger {
+        log (message: string): void {
+          console.log(message)
+        }
+
+        info (message: string): void {
+          console.log(chalk.blue.bold(message))
+        }
+
+        warn (message: string): void {
+          console.log(chalk.yellow(message))
+        }
+
+        error (message: string, error?: Error): void {
+          console.error(chalk.red.bold(message))
+          if (error?.stack) {
+            console.error(chalk.red(error.stack))
+          }
+        }
+
+        success (message: string): void {
+          console.log(chalk.green(message))
+        }
+      }
+    validation:
+      patterns:
+        - INF001
+        - INF003
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:23:01.653Z (0ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-11-infra-plan-repository
+    type: create_file
+    layer: infra
+    description: Create Plan repository for loading/saving YAML files
+    path: src/infra/plan/yaml-plan-repository.ts
+    template: >
+      import { type PlanLoaderRepository, type PlanSaverRepository } from
+      '@/data/protocols/plan/plan-repository'
+
+      import { type ImplementationPlan } from
+      '@/domain/models/implementation-plan'
+
+      import fs from 'fs/promises'
+
+      import yaml from 'yaml'
+
+
+      export class YamlPlanRepository implements PlanLoaderRepository,
+      PlanSaverRepository {
+        async load (path: string): Promise<ImplementationPlan> {
+          const fileContent = await fs.readFile(path, 'utf-8')
+          return yaml.parse(fileContent)
+        }
+
+        async save (path: string, plan: ImplementationPlan): Promise<void> {
+          const yamlString = yaml.stringify(plan)
+          await fs.writeFile(path, yamlString, 'utf-8')
+        }
+      }
+    validation:
+      patterns:
+        - INF001
+        - INF002
+        - INF003
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:23:06.103Z (0ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-12-presentation-protocols
+    type: create_file
+    layer: presentation
+    description: Create generic Controller and HttpResponse protocols
+    path: src/presentation/protocols/index.ts
+    template: |
+      export interface Controller<T = unknown> {
+        handle: (request: T) => Promise<HttpResponse>
+      }
+
+      export type HttpResponse = {
+        statusCode: number
+        body: unknown
+      }
+    validation:
+      patterns: []
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:23:47.831Z (1ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-13-presentation-helpers
+    type: create_file
+    layer: presentation
+    description: Create helpers for HTTP responses
+    path: src/presentation/helpers/http-helper.ts
+    template: >
+      import { type HttpResponse } from '@/presentation/protocols'
+
+
+      export const ok = (data: unknown): HttpResponse => ({
+        statusCode: 200,
+        body: data
+      })
+
+
+      export const serverError = (error: Error): HttpResponse => ({
+        statusCode: 500,
+        body: { error: 'Internal Server Error', message: error.message, stack: error.stack }
+      })
+
+
+      export const badRequest = (error: Error): HttpResponse => ({
+        statusCode: 400,
+        body: { error: error.name, message: error.message }
+      })
+    validation:
+      patterns: []
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:30:53.444Z (1ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-14-presentation-errors
+    type: create_file
+    layer: presentation
+    description: Create custom error classes
+    path: src/presentation/errors/missing-param-error.ts
+    template: |
+      export class MissingParamError extends Error {
+        constructor (paramName: string) {
+          super(`Missing param: ${paramName}`)
+          this.name = 'MissingParamError'
+        }
+      }
+    validation:
+      patterns:
+        - PRE004
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:30:57.949Z (0ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-15-presentation-controller
+    type: create_file
+    layer: presentation
+    description: Create the CLI controller for executing a plan
+    path: src/presentation/controllers/cli/execute-plan-controller.ts
+    template: >
+      import { type Controller, type HttpResponse } from
+      '@/presentation/protocols'
+
+      import { type ExecutePlan } from '@/domain/usecases/execute-plan'
+
+      import { badRequest, ok, serverError } from
+      '@/presentation/helpers/http-helper'
+
+      import { MissingParamError } from
+      '@/presentation/errors/missing-param-error'
+
+
+      export class ExecutePlanController implements
+      Controller<ExecutePlanController.Request> {
+        constructor (
+          private readonly executePlan: ExecutePlan
+        ) {}
+
+        async handle (request: ExecutePlanController.Request): Promise<HttpResponse> {
+          try {
+            if (!request.implementationPath) {
+              return badRequest(new MissingParamError('implementationPath'))
+            }
+            const result = await this.executePlan.execute({
+              implementationPath: request.implementationPath
+            })
+            return ok(result)
+          } catch (error) {
+            return serverError(error as Error)
+          }
+        }
+      }
+
+
+      export namespace ExecutePlanController {
+        export type Request = {
+          implementationPath: string
+        }
+      }
+    validation:
+      patterns:
+        - PRE001
+        - PRE002
+        - PRE005
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:31:02.423Z (1ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-16-validation-protocol
+    type: create_file
+    layer: validation
+    description: Create the Validation protocol
+    path: src/validation/protocols/validation.ts
+    template: |
+      export interface Validation {
+        validate: (input: unknown) => Error | null
+      }
+    validation:
+      patterns: []
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:31:53.716Z (1ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-17-validation-composite
+    type: create_file
+    layer: validation
+    description: Create the ValidationComposite to group validators
+    path: src/validation/validators/validation-composite.ts
+    template: |
+      import { type Validation } from '@/validation/protocols/validation'
+
+      export class ValidationComposite implements Validation {
+        constructor (private readonly validations: Validation[]) {}
+
+        validate (input: unknown): Error | null {
+          for (const validation of this.validations) {
+            const error = validation.validate(input)
+            if (error) {
+              return error
+            }
+          }
+          return null
+        }
+      }
+    validation:
+      patterns:
+        - VAL001
+        - VAL002
+        - VAL003
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:31:58.241Z (1ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-18-main-factory-usecase
+    type: create_file
+    layer: main
+    description: Create factory for DbExecutePlan use case
+    path: src/main/factories/usecases/db-execute-plan-factory.ts
+    template: |
+      import { DbExecutePlan } from '@/data/usecases/plan/db-execute-plan'
+      import { type ExecutePlan } from '@/domain/usecases/execute-plan'
+      import { FsExtraAdapter } from '@/infra/fs/fs-extra-adapter'
+      import { ZxGitRepository } from '@/infra/git/zx-git-repository'
+      import { ChalkLoggerAdapter } from '@/infra/log/chalk-logger-adapter'
+      import { YamlPlanRepository } from '@/infra/plan/yaml-plan-repository'
+
+      export const makeDbExecutePlan = (): ExecutePlan => {
+        const yamlPlanRepository = new YamlPlanRepository()
+        const fsExtraAdapter = new FsExtraAdapter()
+        const zxGitRepository = new ZxGitRepository()
+        const chalkLoggerAdapter = new ChalkLoggerAdapter()
+        return new DbExecutePlan(
+          yamlPlanRepository,
+          yamlPlanRepository,
+          fsExtraAdapter,
+          zxGitRepository,
+          chalkLoggerAdapter
+        )
+      }
+    validation:
+      patterns:
+        - MAIN001
+        - MAIN002
+        - MAIN006
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:32:02.677Z (0ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-19-main-factory-controller
+    type: create_file
+    layer: main
+    description: Create factory for ExecutePlanController
+    path: src/main/factories/controllers/execute-plan-controller-factory.ts
+    template: >
+      import { ExecutePlanController } from
+      '@/presentation/controllers/cli/execute-plan-controller'
+
+      import { type Controller } from '@/presentation/protocols'
+
+      import { makeDbExecutePlan } from
+      '@/main/factories/usecases/db-execute-plan-factory'
+
+
+      export const makeExecutePlanController = (): Controller => {
+        const executePlan = makeDbExecutePlan()
+        return new ExecutePlanController(executePlan)
+      }
+    validation:
+      patterns:
+        - MAIN001
+        - MAIN002
+        - MAIN006
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:32:07.143Z (1ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-20-main-server
+    type: create_file
+    layer: main
+    description: Create the main application entry point
+    path: src/main/server.ts
+    template: >
+      import 'module-alias/register'
+
+      import { makeExecutePlanController } from
+      './factories/controllers/execute-plan-controller-factory'
+
+      import { ChalkLoggerAdapter } from '../infra/log/chalk-logger-adapter'
+
+
+      const main = async (): Promise<void> => {
+        const logger = new ChalkLoggerAdapter()
+        const args = process.argv.slice(2)
+
+        if (args.length < 1) {
+          logger.error('Usage: ts-node src/main/server.ts <path_to_implementation.yaml>')
+          process.exit(1)
+        }
+
+        const implementationPath = args[0]
+        const controller = makeExecutePlanController()
+
+        const response = await controller.handle({ implementationPath })
+
+        if (response.statusCode >= 400) {
+          logger.error(`Execution failed with status ${response.statusCode}:`, response.body)
+          process.exit(1)
+        } else {
+          logger.success('Execution finished.')
+        }
+      }
+
+
+      main().catch(console.error)
+    validation:
+      patterns: []
+      command: tsc --noEmit
+    rlhf_score: 1
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:32:11.551Z (0ms).
+      RLHF Score: 1. No validation script provided."
+  - id: step-21-setup-module-alias
+    type: create_file
+    layer: main
+    description: Create documentation for module-alias configuration
+    path: docs/module-alias-setup.md
+    template: >
+      # Path Alias Configuration
+
+
+      This document describes how to configure module-alias for Clean
+      Architecture path aliases.
+
+
+      ## 1. Install module-alias
+
+
+      ```bash
+
+      npm install module-alias
+
+      npm install --save-dev @types/node
+
+      ```
+
+
+      ## 2. Configure tsconfig.json
+
+
+      Add the following to your `tsconfig.json`:
+
+
+      ```json
+
+      {
+        "compilerOptions": {
+          "baseUrl": "src",
+          "paths": {
+            "@/*": ["*"]
+          }
+        }
+      }
+
+      ```
+
+
+      ## 3. Configure package.json
+
+
+      Add the following to your `package.json`:
+
+
+      ```json
+
+      {
+        "name": "your-project",
+        "version": "1.0.0",
+        "_moduleAliases": {
+          "@": "dist"
+        }
+      }
+
+      ```
+
+
+      ## 4. Import in entry point
+
+
+      The entry point (`src/main/server.ts`) should import module-alias at the
+      top:
+
+
+      ```typescript
+
+      import 'module-alias/register'
+
+      ```
+
+
+      ✅ This configuration is complete and already implemented in step-20.
+    rlhf_score: 2
+    status: SUCCESS
+    execution_log: "Action completed successfully at 2025-10-02T09:33:13.113Z (1ms).
+      RLHF Score: 2. No validation script provided."
+dependencies:
+  npm:
+    - fs-extra
+    - yaml
+    - zx
+    - chalk
+    - module-alias
+    - "@types/fs-extra"
+    - "@types/yaml"

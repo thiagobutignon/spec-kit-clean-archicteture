@@ -44,7 +44,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run templates:build",
+    "prepare": "husky",
     "prepublishOnly": "npm run test",
     "postinstall": "chmod +x src/bin/regent",
     "lint": "eslint .",
@@ -73,7 +73,9 @@
     "eslint": "^9.35.0",
     "eslint-plugin-boundaries": "^5.0.1",
     "globals": "^16.4.0",
+    "husky": "^9.1.7",
     "js-yaml": "^4.1.0",
+    "lint-staged": "^16.2.3",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.44.0",
@@ -90,5 +92,13 @@
     "inquirer": "^12.9.6",
     "shelljs": "^0.10.0",
     "zod": "^3.23.0"
+  },
+  "lint-staged": {
+    ".claude/commands/*.md": [
+      "npm run validate:commands"
+    ],
+    "scripts/validate-command-consistency.ts": [
+      "npm run validate:commands"
+    ]
   }
 }

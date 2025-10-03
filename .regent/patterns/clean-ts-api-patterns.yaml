@@ -1,0 +1,448 @@
+metadata:
+  generated: 2025-10-02T00:00:00.000Z
+  source: clean-ts-api/src
+  tool: The Regent Pattern Extractor
+  version: 1.0.0
+  description: Extracted patterns from clean-ts-api reference implementation
+  filesAnalyzed:
+    domain: 13
+    data: 34
+    infra: 13
+    presentation: 23
+    main: 104
+    validation: 9
+
+patterns:
+  domain:
+    - id: DOM001
+      name: use-case-single-method-interface
+      regex: export interface \w+\s*\{[\s\S]*?(?:execute|add|load|save|check|auth):\s*\([^)]*\)\s*=>\s*Promise<
+      severity: high
+      description: Use cases must be interfaces with a single method that returns a Promise
+      examples:
+        - violation: |
+            export interface AddAccount {
+              add: (account: any) => any
+            }
+          fix: |
+            export interface AddAccount {
+              add: (account: AddAccount.Params) => Promise<AddAccount.Result>
+            }
+
+    - id: DOM002
+      name: use-case-namespace-for-types
+      regex: export namespace \w+\s*\{[\s\S]*?export type (Params|Result)
+      severity: medium
+      description: Use cases should use namespaces to define Params and Result types
+      examples:
+        - violation: |
+            export interface AddAccount {
+              add: (account: { name: string }) => Promise<boolean>
+            }
+          fix: |
+            export interface AddAccount {
+              add: (account: AddAccount.Params) => Promise<AddAccount.Result>
+            }
+            export namespace AddAccount {
+              export type Params = { name: string }
+              export type Result = boolean
+            }
+
+    - id: DOM003
+      name: no-external-dependencies
+      regex: from ['"](?!@/domain)
+      severity: critical
+      description: Domain layer must not import from other layers (data, infra, presentation, validation)
+      examples:
+        - violation: |
+            import { Repository } from '@/data/protocols'
+          fix: |
+            // Domain should only import from @/domain
+
+    - id: DOM004
+      name: model-as-type-not-class
+      regex: export type \w+Model\s*=\s*\{
+      severity: medium
+      description: Domain models should be defined as types, not classes
+      examples:
+        - violation: |
+            export class SurveyModel {
+              id: string
+            }
+          fix: |
+            export type SurveyModel = {
+              id: string
+            }
+
+  data:
+    - id: DAT001
+      name: use-case-implementation-class
+      regex: export class Db\w+\s+implements\s+\w+\s*\{
+      severity: high
+      description: Data layer use case implementations should be prefixed with Db and implement domain interfaces
+      examples:
+        - violation: |
+            export class AddAccount implements AddAccount {
+          fix: |
+            export class DbAddAccount implements AddAccount {
+
+    - id: DAT002
+      name: constructor-dependency-injection
+      regex: constructor\s*\([^)]*private readonly
+      severity: high
+      description: Data layer classes must use constructor dependency injection with private readonly
+      examples:
+        - violation: |
+            constructor(hasher: Hasher) {
+              this.hasher = hasher
+            }
+          fix: |
+            constructor(
+              private readonly hasher: Hasher
+            ) {}
+
+    - id: DAT003
+      name: protocol-interface-in-data
+      regex: export interface \w+(Repository|Hasher|Encrypter|Decrypter|Comparer)\s*\{
+      severity: medium
+      description: Data layer protocols should use Repository, Hasher, Encrypter, Decrypter, or Comparer suffixes
+      examples:
+        - violation: |
+            export interface AccountData {
+          fix: |
+            export interface AccountRepository {
+
+    - id: DAT004
+      name: repository-namespace-types
+      regex: export namespace \w+Repository\s*\{[\s\S]*?export type (Params|Result)
+      severity: medium
+      description: Repository interfaces should use namespaces for Params and Result types
+      examples:
+        - violation: |
+            export interface AddAccountRepository {
+              add: (data: any) => Promise<boolean>
+            }
+          fix: |
+            export interface AddAccountRepository {
+              add: (data: AddAccountRepository.Params) => Promise<AddAccountRepository.Result>
+            }
+            export namespace AddAccountRepository {
+              export type Params = AddAccount.Params
+              export type Result = boolean
+            }
+
+    - id: DAT005
+      name: no-presentation-imports
+      regex: from ['"]@/presentation
+      severity: critical
+      description: Data layer must not import from presentation layer
+      examples:
+        - violation: |
+            import { Controller } from '@/presentation/protocols'
+          fix: |
+            // Remove presentation imports from data layer
+
+  infra:
+    - id: INF001
+      name: adapter-suffix-naming
+      regex: export class \w+Adapter\s+implements
+      severity: medium
+      description: Infrastructure implementations should use Adapter suffix
+      examples:
+        - violation: |
+            export class BcryptHasher implements Hasher {
+          fix: |
+            export class BcryptAdapter implements Hasher {
+
+    - id: INF002
+      name: repository-implements-multiple-interfaces
+      regex: export class \w+Repository\s+implements\s+\w+Repository(?:,\s*\w+Repository)+
+      severity: low
+      description: Repository can implement multiple repository interfaces
+      examples:
+        - violation: |
+            export class AccountRepo implements AddAccountRepository {
+          fix: |
+            export class AccountMongoRepository implements AddAccountRepository, LoadAccountByEmailRepository {
+
+    - id: INF003
+      name: external-lib-only-in-infra
+      regex: import\s+.+\s+from\s+['"](?!@/)(bcrypt|mongodb|jsonwebtoken|validator)['"]
+      severity: high
+      description: External library imports (bcrypt, mongodb, etc) should only exist in infra layer
+      examples:
+        - violation: |
+            // In domain or data layer
+            import bcrypt from 'bcrypt'
+          fix: |
+            // In infra layer
+            import bcrypt from 'bcrypt'
+            export class BcryptAdapter implements Hasher {
+
+    - id: INF004
+      name: no-domain-imports-in-infra
+      regex: from ['"]@/domain/(?!models)
+      severity: medium
+      description: Infrastructure should only import domain models, not use cases
+      examples:
+        - violation: |
+            import { AddAccount } from '@/domain/usecases'
+          fix: |
+            import { SurveyModel } from '@/domain/models'
+
+  presentation:
+    - id: PRE001
+      name: controller-implements-interface
+      regex: export class \w+Controller\s+implements\s+Controller
+      severity: high
+      description: Controllers must implement the Controller interface
+      examples:
+        - violation: |
+            export class SignUpController {
+          fix: |
+            export class SignUpController implements Controller {
+
+    - id: PRE002
+      name: controller-handle-method
+      regex: async handle\s*\(request:\s*\w+\):\s*Promise<HttpResponse>
+      severity: critical
+      description: Controllers must have an async handle method that returns Promise<HttpResponse>
+      examples:
+        - violation: |
+            handle(request: any): any {
+          fix: |
+            async handle(request: SignUpController.Request): Promise<HttpResponse> {
+
+    - id: PRE003
+      name: middleware-implements-interface
+      regex: export class \w+Middleware\s+implements\s+Middleware
+      severity: high
+      description: Middlewares must implement the Middleware interface
+      examples:
+        - violation: |
+            export class AuthMiddleware {
+          fix: |
+            export class AuthMiddleware implements Middleware {
+
+    - id: PRE004
+      name: error-classes-extend-error
+      regex: export class \w+Error\s+extends\s+Error
+      severity: medium
+      description: Custom error classes should extend Error
+      examples:
+        - violation: |
+            export class InvalidParamError {
+          fix: |
+            export class InvalidParamError extends Error {
+
+    - id: PRE005
+      name: no-direct-use-case-calls
+      regex: import\s+.*\s+from\s+['"]@/data/usecases['"]
+      severity: critical
+      description: Presentation layer should import use cases from domain, not data
+      examples:
+        - violation: |
+            import { DbAddAccount } from '@/data/usecases'
+          fix: |
+            import { AddAccount } from '@/domain/usecases'
+
+  validation:
+    - id: VAL001
+      name: validation-implements-interface
+      regex: export class \w+Validation\s+implements\s+Validation
+      severity: high
+      description: Validation classes must implement the Validation interface
+      examples:
+        - violation: |
+            export class EmailValidation {
+          fix: |
+            export class EmailValidation implements Validation {
+
+    - id: VAL002
+      name: validation-single-validate-method
+      regex: validate\s*\(input:\s*any\):\s*Error
+      severity: high
+      description: Validation classes must have a validate method that returns Error or void
+      examples:
+        - violation: |
+            validate(input: any): boolean {
+          fix: |
+            validate(input: any): Error {
+
+    - id: VAL003
+      name: composite-pattern-for-validations
+      regex: export class ValidationComposite\s+implements\s+Validation
+      severity: medium
+      description: Use composite pattern to combine multiple validations
+      examples:
+        - violation: |
+            // Multiple validation checks in controller
+          fix: |
+            export class ValidationComposite implements Validation {
+              constructor(private readonly validations: Validation[]) {}
+            }
+
+    - id: VAL004
+      name: validation-errors-from-presentation
+      regex: from ['"]@/presentation/errors['"]
+      severity: low
+      description: Validation layer can import errors from presentation layer
+      examples:
+        - violation: |
+            throw new Error('Invalid param')
+          fix: |
+            import { InvalidParamError } from '@/presentation/errors'
+            return new InvalidParamError(fieldName)
+
+  main:
+    - id: MAIN001
+      name: factory-function-returns-interface
+      regex: export const make\w+\s*=\s*\([^)]*\):\s*\w+\s*=>
+      severity: high
+      description: Factory functions should return domain interfaces, not concrete classes
+      examples:
+        - violation: |
+            export const makeDbAddAccount = (): DbAddAccount => {
+          fix: |
+            export const makeDbAddAccount = (): AddAccount => {
+
+    - id: MAIN002
+      name: factory-naming-convention
+      regex: export const make\w+
+      severity: medium
+      description: Factory functions should start with 'make' prefix
+      examples:
+        - violation: |
+            export const createAddAccount = () => {
+          fix: |
+            export const makeAddAccount = () => {
+
+    - id: MAIN003
+      name: controller-decorator-pattern
+      regex: export class \w+Decorator\s+implements\s+Controller
+      severity: medium
+      description: Use decorator pattern for cross-cutting concerns like logging
+      examples:
+        - violation: |
+            // Logging inside controller
+          fix: |
+            export class LogControllerDecorator implements Controller {
+              constructor(
+                private readonly controller: Controller,
+                private readonly logErrorRepository: LogErrorRepository
+              ) {}
+            }
+
+    - id: MAIN004
+      name: adapter-pattern-for-frameworks
+      regex: export const \w+Adapter\s*=
+      severity: high
+      description: Use adapter pattern to integrate with external frameworks (Express, Apollo)
+      examples:
+        - violation: |
+            app.post('/signup', (req, res) => {
+              const controller = new SignUpController()
+          fix: |
+            app.post('/signup', expressRouteAdapter(makeSignUpController()))
+
+    - id: MAIN005
+      name: middleware-adapter-pattern
+      regex: export const \w+MiddlewareAdapter
+      severity: medium
+      description: Use adapter pattern for middlewares to integrate with frameworks
+      examples:
+        - violation: |
+            app.use((req, res, next) => {
+          fix: |
+            app.use(expressMiddlewareAdapter(makeAuthMiddleware()))
+
+    - id: MAIN006
+      name: dependency-composition-in-main
+      regex: export const make\w+\s*=.*new \w+\(
+      severity: high
+      description: Main layer is responsible for composing all dependencies
+      examples:
+        - violation: |
+            // Dependencies created inside use cases
+          fix: |
+            export const makeDbAddAccount = (): AddAccount => {
+              const hasher = new BcryptAdapter(12)
+              const repository = new AccountMongoRepository()
+              return new DbAddAccount(hasher, repository)
+            }
+
+crossCuttingConcerns:
+  - id: CCC001
+    name: path-alias-usage
+    regex: from ['"]@/
+    severity: low
+    description: Use path aliases (@/) instead of relative imports
+    applies: all
+    examples:
+      - violation: |
+          import { AddAccount } from '../../../domain/usecases'
+        fix: |
+          import { AddAccount } from '@/domain/usecases'
+
+  - id: CCC002
+    name: barrel-exports
+    regex: export \* from ['"]\.
+    severity: low
+    description: Use barrel exports (index.ts) to simplify imports
+    applies: all
+    examples:
+      - violation: |
+          import { AddAccount } from './add-account'
+          import { LoadAccount } from './load-account'
+        fix: |
+          // In index.ts
+          export * from './add-account'
+          export * from './load-account'
+
+dependencyRules:
+  allowed:
+    domain: []
+    data:
+      - '@/domain'
+    infra:
+      - '@/data'
+      - '@/domain/models'
+      - 'external-libs'
+    presentation:
+      - '@/domain'
+      - '@/validation'
+    validation:
+      - '@/presentation/protocols'
+      - '@/presentation/errors'
+    main:
+      - '@/domain'
+      - '@/data'
+      - '@/infra'
+      - '@/presentation'
+      - '@/validation'
+
+  forbidden:
+    domain:
+      - '@/data'
+      - '@/infra'
+      - '@/presentation'
+      - '@/validation'
+      - '@/main'
+    data:
+      - '@/infra'
+      - '@/presentation'
+      - '@/validation'
+      - '@/main'
+    infra:
+      - '@/presentation'
+      - '@/validation'
+      - '@/main'
+    presentation:
+      - '@/data'
+      - '@/infra'
+      - '@/main'
+    validation:
+      - '@/domain'
+      - '@/data'
+      - '@/infra'
+      - '@/main'

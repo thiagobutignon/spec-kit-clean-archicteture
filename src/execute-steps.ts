@@ -9,9 +9,12 @@
 import * as crypto from 'crypto';
 import * as os from 'os';
 import * as yaml from 'yaml';
-import 'zx/globals';
+import fsExtra from 'fs-extra';
+import * as nodePath from 'path';
+import { $, chalk, argv } from 'zx';
 import Logger from './core/logger';
-import { EnhancedRLHFSystem, LayerInfo } from './core/rlhf-system';
+import { EnhancedRLHFSystem } from './core/rlhf-system';
+import type { LayerInfo } from './core/rlhf-system';
 import { resolveLogDirectory } from './utils/log-path-resolver';
 import { EnhancedTemplateValidator } from './validate-template';
 import type { ValidationResult } from './validate-template';
@@ -25,6 +28,10 @@ import {
 } from './utils/commit-generator';
 import { validateConfig } from './utils/config-validator';
 import { EXIT_CODES, RATE_LIMITS, RETRY, TIMING } from './utils/constants';
+
+// Use fs-extra as fs and path from node to avoid conflicts with zx
+const fs = fsExtra;
+const path = nodePath;
 
 $.verbose = true;
 $.shell = '/bin/bash';

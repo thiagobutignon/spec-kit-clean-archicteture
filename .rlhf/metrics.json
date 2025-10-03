@@ -1,0 +1,452 @@
+[
+  {
+    "stepId": "step-1-domain-commit-config-model",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.484Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-2-domain-quality-check-model",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.484Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-3-domain-audit-log-model",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.484Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-4-domain-validate-template",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.484Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-5-domain-run-quality-check",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.484Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-6-domain-calculate-score",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.484Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-7-domain-rollback-step",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.484Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-8-domain-check-git-safety",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.484Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-9-domain-validate-script",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.484Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-10-domain-detect-package-manager",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.484Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-11-domain-validate-layer",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.484Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-12-domain-execute-validation-script",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-13-data-template-validator-protocol",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-14-data-quality-check-protocol",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-15-data-rlhf-protocol",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-16-data-config-protocol",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-17-data-audit-protocol",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-18-data-script-executor-protocol",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-19-data-package-manager-protocol",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-20-data-layer-validator-protocol",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-21-data-script-validator-protocol",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-22-data-validate-template-impl",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-23-data-run-quality-check-impl",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-24-data-calculate-score-impl",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-25-data-rollback-step-impl",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-26-data-check-git-safety-impl",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-27-data-validate-script-impl",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-28-data-detect-package-manager-impl",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-29-data-validate-layer-impl",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-30-data-execute-validation-script-impl",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-31-infra-yaml-template-validator",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-32-infra-npm-quality-check",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-33-infra-json-rlhf",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.485Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-34-infra-yaml-config",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-35-infra-file-audit",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-36-infra-bash-script-executor",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-37-infra-enhanced-git-repository",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-38-infra-package-manager-detector",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-39-infra-layer-validator",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-40-infra-script-validator",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-41-presentation-lint-error",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-42-presentation-test-error",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-43-presentation-invalid-script-error",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-44-presentation-layer-violation-error",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-45-main-validate-template-factory",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-46-main-run-quality-check-factory",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-47-main-calculate-score-factory",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-48-main-rollback-step-factory",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-49-main-check-git-safety-factory",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  },
+  {
+    "stepId": "step-50-main-enhanced-executor",
+    "stepType": "create_file",
+    "success": true,
+    "duration": 0,
+    "timestamp": "2025-10-02T19:25:36.486Z",
+    "layer": "all",
+    "target": "backend"
+  }
+]
