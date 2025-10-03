@@ -3,15 +3,87 @@
 // Only fs-extra requires default import in ESM/tsx context
 import * as fs from 'fs';
 import path from 'path';
+import chalk from 'chalk';
 
 // Usaremos um nome de arquivo de log consistente para cada execução
 const LOG_FILE_NAME = 'execution.log';
 
+export enum LogLevel {
+  DEBUG = 0,
+  INFO = 1,
+  WARN = 2,
+  ERROR = 3,
+  SUCCESS = 4,
+}
+
+export interface LogContext {
+  stepId?: string;
+  layer?: string;
+  action?: string;
+  progress?: string;
+  duration?: number;
+  file?: string;
+  [key: string]: unknown;
+}
+
+export interface LoggerOptions {
+  logDirectory: string;
+  verbose?: boolean;
+  quiet?: boolean;
+  showTimestamp?: boolean;
+  timestampFormat?: 'iso' | 'relative' | 'elapsed';
+  colorize?: boolean;
+  logLevel?: LogLevel;
+}
+
+export interface ExecutionSummary {
+  totalSteps: number;
+  completedSteps: number;
+  failedSteps: number;
+  skippedSteps: number;
+  totalDuration: number;
+  averageStepDuration: number;
+  qualityChecks: {
+    passed: number;
+    failed: number;
+    skipped: number;
+  };
+  rlhfScore: {
+    average: number;
+    total: number;
+    breakdown: Record<number, number>;
+  };
+}
+
 class Logger {
   private logFilePath: string;
   private logStream: fs.WriteStream;
+  private verbose: boolean;
+  private quiet: boolean;
+  private showTimestamp: boolean;
+  private timestampFormat: 'iso' | 'relative' | 'elapsed';
+  private colorize: boolean;
+  private logLevel: LogLevel;
+  private startTime: number;
+  private executionSummary: ExecutionSummary;
+  private currentStepStartTime?: number;
 
-  constructor(logDirectory: string) {
+  constructor(options: LoggerOptions | string) {
+    // Backward compatibility: support old string constructor
+    if (typeof options === 'string') {
+      options = { logDirectory: options };
+    }
+
+    const {
+      logDirectory,
+      verbose = false,
+      quiet = false,
+      showTimestamp = true,
+      timestampFormat = 'iso',
+      colorize = true,
+      logLevel = LogLevel.INFO,
+    } = options;
+
     // Garante que o diretório de logs exista
     fs.mkdirSync(logDirectory, { recursive: true });
     this.logFilePath = path.join(logDirectory, LOG_FILE_NAME);
@@ -19,26 +91,317 @@ class Logger {
     // Cria um stream de escrita para o arquivo de log.
     // A flag 'a' significa 'append', então não sobrescrevemos o log a cada execução.
     this.logStream = fs.createWriteStream(this.logFilePath, { flags: 'a' });
-    
-    console.log(`📝 Logging to: ${this.logFilePath}`);
+
+    this.verbose = verbose || process.env.LOG_VERBOSE === 'true';
+    this.quiet = quiet || process.env.LOG_QUIET === 'true';
+    this.showTimestamp = showTimestamp;
+    this.timestampFormat = timestampFormat;
+    this.colorize = colorize && process.stdout.isTTY;
+    this.logLevel = logLevel;
+    this.startTime = Date.now();
+
+    // Initialize execution summary
+    this.executionSummary = {
+      totalSteps: 0,
+      completedSteps: 0,
+      failedSteps: 0,
+      skippedSteps: 0,
+      totalDuration: 0,
+      averageStepDuration: 0,
+      qualityChecks: {
+        passed: 0,
+        failed: 0,
+        skipped: 0,
+      },
+      rlhfScore: {
+        average: 0,
+        total: 0,
+        breakdown: {},
+      },
+    };
+
+    if (!this.quiet) {
+      console.log(chalk.gray(`📝 Logging to: ${this.logFilePath}`));
+    }
+  }
+
+  private formatTimestamp(): string {
+    if (!this.showTimestamp) return '';
+
+    const now = Date.now();
+
+    switch (this.timestampFormat) {
+      case 'iso':
+        return `[${new Date().toISOString()}]`;
+      case 'relative':
+        return `[+${((now - this.startTime) / 1000).toFixed(1)}s]`;
+      case 'elapsed':
+        const elapsed = now - this.startTime;
+        const hours = Math.floor(elapsed / 3600000);
+        const minutes = Math.floor((elapsed % 3600000) / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        return `[${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}]`;
+      default:
+        return `[${new Date().toISOString()}]`;
+    }
+  }
+
+  private formatContext(context?: LogContext): string {
+    if (!context || Object.keys(context).length === 0) return '';
+
+    const parts: string[] = [];
+
+    if (context.stepId) parts.push(`step=${context.stepId}`);
+    if (context.layer) parts.push(`layer=${context.layer}`);
+    if (context.action) parts.push(`action=${context.action}`);
+    if (context.progress) parts.push(`progress=${context.progress}`);
+    if (context.duration !== undefined) parts.push(`duration=${context.duration.toFixed(1)}s`);
+    if (context.file) parts.push(`file=${context.file}`);
+
+    // Add any other context properties
+    for (const [key, value] of Object.entries(context)) {
+      if (!['stepId', 'layer', 'action', 'progress', 'duration', 'file'].includes(key)) {
+        parts.push(`${key}=${JSON.stringify(value)}`);
+      }
+    }
+
+    return parts.length > 0 ? ` {${parts.join(', ')}}` : '';
+  }
+
+  private getLevelPrefix(level: LogLevel): string {
+    if (!this.colorize) {
+      switch (level) {
+        case LogLevel.DEBUG:
+          return '[DEBUG]';
+        case LogLevel.INFO:
+          return '[INFO]';
+        case LogLevel.WARN:
+          return '[WARN]';
+        case LogLevel.ERROR:
+          return '[ERROR]';
+        case LogLevel.SUCCESS:
+          return '[SUCCESS]';
+      }
+    }
+
+    switch (level) {
+      case LogLevel.DEBUG:
+        return chalk.gray('[DEBUG]');
+      case LogLevel.INFO:
+        return chalk.blue('[INFO]');
+      case LogLevel.WARN:
+        return chalk.yellow('[WARN]');
+      case LogLevel.ERROR:
+        return chalk.red('[ERROR]');
+      case LogLevel.SUCCESS:
+        return chalk.green('[SUCCESS]');
+    }
+  }
+
+  private writeLog(level: LogLevel, message: string, context?: LogContext): void {
+    // Skip if log level is too low
+    if (level < this.logLevel && level !== LogLevel.SUCCESS) return;
+    if (this.quiet && level !== LogLevel.ERROR) return;
+
+    const timestamp = this.formatTimestamp();
+    const levelPrefix = this.getLevelPrefix(level);
+    const contextStr = this.verbose ? this.formatContext(context) : '';
+    const formattedMessage = `${timestamp} ${levelPrefix} ${message}${contextStr}\n`;
+
+    // Write to file (always, without color)
+    const fileMessage = `${timestamp} [${LogLevel[level]}] ${message}${contextStr}\n`;
+    this.logStream.write(fileMessage);
+
+    // Write to console (with color if enabled)
+    if (!this.quiet || level === LogLevel.ERROR) {
+      if (level === LogLevel.ERROR) {
+        process.stderr.write(formattedMessage);
+      } else {
+        process.stdout.write(formattedMessage);
+      }
+    }
+  }
+
+  public debug(message: string, context?: LogContext): void {
+    this.writeLog(LogLevel.DEBUG, message, context);
+  }
+
+  public info(message: string, context?: LogContext): void {
+    this.writeLog(LogLevel.INFO, message, context);
+  }
+
+  public warn(message: string, context?: LogContext): void {
+    this.writeLog(LogLevel.WARN, message, context);
+  }
+
+  public error(message: string, context?: LogContext): void {
+    this.writeLog(LogLevel.ERROR, message, context);
+  }
+
+  public success(message: string, context?: LogContext): void {
+    this.writeLog(LogLevel.SUCCESS, message, context);
   }
 
   public log(message: string): void {
-    const timestamp = new Date().toISOString();
-    const formattedMessage = `[${timestamp}] ${message}\n`;
-
-    // Escreve no console
-    process.stdout.write(formattedMessage);
-    // E escreve no arquivo de log
-    this.logStream.write(formattedMessage);
+    // Backward compatibility
+    this.info(message);
   }
 
-  public error(message: string): void {
-    const timestamp = new Date().toISOString();
-    const formattedMessage = `[${timestamp}] [ERROR] ${message}\n`;
+  public startStep(stepId: string, description: string, layer?: string): void {
+    this.currentStepStartTime = Date.now();
+    this.executionSummary.totalSteps++;
 
-    process.stderr.write(formattedMessage);
-    this.logStream.write(formattedMessage);
+    if (!this.quiet) {
+      const layerInfo = layer ? chalk.gray(`(${layer})`) : '';
+      console.log(
+        `\n${chalk.cyan('▶️')}  ${chalk.bold(`[${this.executionSummary.totalSteps}/${this.executionSummary.totalSteps}] ${stepId}`)} ${layerInfo}`,
+      );
+      console.log(`   ${description}`);
+    }
+
+    this.info(`Starting step: ${stepId}`, { stepId, layer, action: 'start' });
+  }
+
+  public completeStep(stepId: string, success: boolean, details?: string): void {
+    const duration = this.currentStepStartTime ? (Date.now() - this.currentStepStartTime) / 1000 : 0;
+
+    if (success) {
+      this.executionSummary.completedSteps++;
+      this.executionSummary.totalDuration += duration;
+
+      if (!this.quiet) {
+        console.log(`   ${chalk.green('✅')} Step completed in ${duration.toFixed(1)}s`);
+        if (details) console.log(`   ${chalk.gray(details)}`);
+      }
+
+      this.success(`Completed step: ${stepId}`, { stepId, duration });
+    } else {
+      this.executionSummary.failedSteps++;
+
+      if (!this.quiet) {
+        console.log(`   ${chalk.red('❌')} Step failed after ${duration.toFixed(1)}s`);
+        if (details) console.log(`   ${chalk.red(details)}`);
+      }
+
+      this.error(`Failed step: ${stepId}`, { stepId, duration });
+    }
+
+    this.currentStepStartTime = undefined;
+
+    // Update average
+    if (this.executionSummary.completedSteps > 0) {
+      this.executionSummary.averageStepDuration =
+        this.executionSummary.totalDuration / this.executionSummary.completedSteps;
+    }
+  }
+
+  public logQualityCheck(name: string, passed: boolean, details?: string): void {
+    if (passed) {
+      this.executionSummary.qualityChecks.passed++;
+      if (!this.quiet) {
+        console.log(`      ${chalk.green('✅')} ${name}: Passed`);
+        if (details && this.verbose) console.log(`         ${chalk.gray(details)}`);
+      }
+    } else {
+      this.executionSummary.qualityChecks.failed++;
+      if (!this.quiet) {
+        console.log(`      ${chalk.red('❌')} ${name}: Failed`);
+        if (details) console.log(`         ${chalk.red(details)}`);
+      }
+    }
+  }
+
+  public logRLHFScore(score: number, breakdown: string): void {
+    this.executionSummary.rlhfScore.total += score;
+    this.executionSummary.rlhfScore.breakdown[score] =
+      (this.executionSummary.rlhfScore.breakdown[score] || 0) + 1;
+
+    const completedCount = this.executionSummary.completedSteps;
+    if (completedCount > 0) {
+      this.executionSummary.rlhfScore.average = this.executionSummary.rlhfScore.total / completedCount;
+    }
+
+    if (!this.quiet) {
+      console.log(`\n   ${chalk.cyan('🧮')} RLHF Analysis:`);
+      console.log(`      ${breakdown}`);
+      console.log(
+        `      ${chalk.bold('📊 Final score:')} ${score >= 0 ? chalk.green(score) : chalk.red(score)}/2`,
+      );
+    }
+  }
+
+  public logProgress(current: number, total: number, eta?: number): void {
+    if (this.quiet) return;
+
+    const percentage = Math.floor((current / total) * 100);
+    const completed = Math.floor(percentage / 5);
+    const remaining = 20 - completed;
+    const progressBar = chalk.green('█'.repeat(completed)) + chalk.gray('░'.repeat(remaining));
+
+    const etaStr = eta ? ` | ETA: ${this.formatDuration(eta)}` : '';
+    console.log(`\nProgress: ${progressBar} ${percentage}%${etaStr}\n`);
+  }
+
+  private formatDuration(ms: number): string {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+
+    if (hours > 0) {
+      return `${hours}h ${minutes % 60}m`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds % 60}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  }
+
+  public printExecutionSummary(): void {
+    if (this.quiet) return;
+
+    const totalDuration = Date.now() - this.startTime;
+
+    console.log('\n' + chalk.bold('═'.repeat(60)));
+    console.log(chalk.bold.cyan('📊 Execution Summary'));
+    console.log(chalk.bold('═'.repeat(60)));
+
+    console.log('\n' + chalk.bold('Steps:'));
+    console.log(`   Total:     ${this.executionSummary.totalSteps}`);
+    console.log(`   ${chalk.green('✅ Completed:')} ${this.executionSummary.completedSteps}`);
+    console.log(`   ${chalk.red('❌ Failed:')}    ${this.executionSummary.failedSteps}`);
+    console.log(`   ${chalk.yellow('⊘  Skipped:')}   ${this.executionSummary.skippedSteps}`);
+
+    console.log('\n' + chalk.bold('Quality Checks:'));
+    console.log(`   ${chalk.green('✅ Passed:')}  ${this.executionSummary.qualityChecks.passed}`);
+    console.log(`   ${chalk.red('❌ Failed:')}  ${this.executionSummary.qualityChecks.failed}`);
+    console.log(`   ${chalk.yellow('⊘  Skipped:')} ${this.executionSummary.qualityChecks.skipped}`);
+
+    console.log('\n' + chalk.bold('RLHF Scores:'));
+    console.log(`   Average:   ${this.executionSummary.rlhfScore.average.toFixed(2)}/2`);
+    console.log(`   Total:     ${this.executionSummary.rlhfScore.total}`);
+    console.log(`   Breakdown:`);
+    for (const [score, count] of Object.entries(this.executionSummary.rlhfScore.breakdown)) {
+      const scoreNum = Number(score);
+      const color = scoreNum >= 0 ? chalk.green : chalk.red;
+      console.log(`      ${color(`Score ${score}:`)} ${count} step(s)`);
+    }
+
+    console.log('\n' + chalk.bold('Performance:'));
+    console.log(`   Total duration:   ${this.formatDuration(totalDuration)}`);
+    console.log(`   Average per step: ${this.executionSummary.averageStepDuration.toFixed(1)}s`);
+
+    console.log('\n' + chalk.bold('═'.repeat(60)));
+
+    this.info('Execution summary printed', {
+      totalSteps: this.executionSummary.totalSteps,
+      completedSteps: this.executionSummary.completedSteps,
+      failedSteps: this.executionSummary.failedSteps,
+      averageRLHFScore: this.executionSummary.rlhfScore.average,
+    });
+  }
+
+  public getExecutionSummary(): ExecutionSummary {
+    return { ...this.executionSummary };
   }
 
   public close(): void {
