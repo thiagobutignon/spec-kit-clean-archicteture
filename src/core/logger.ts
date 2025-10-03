@@ -1,3 +1,6 @@
+// Using namespace import for native Node.js 'fs' module (not fs-extra)
+// This is correct and not affected by the ESM bug - native fs works fine with namespace imports
+// Only fs-extra requires default import in ESM/tsx context
 import * as fs from 'fs';
 import path from 'path';
 

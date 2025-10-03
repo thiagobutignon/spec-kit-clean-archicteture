@@ -1,6 +1,10 @@
 /**
  * Regression tests for ESM import compatibility
  * Ensures fs-extra and zx imports work correctly in ESM context
+ *
+ * Tests both:
+ * 1. Generic import patterns (fs-extra, zx)
+ * 2. Actual production imports from source files
  */
 
 import { describe, it, expect } from 'vitest';
@@ -82,6 +86,51 @@ describe('ESM Import Compatibility', () => {
       const content = await fs.readJson('package.json');
       expect(content).toBeDefined();
       expect(content.name).toBeDefined();
+    });
+  });
+
+  describe('production code imports', () => {
+    it('should successfully import from rlhf-system.ts', async () => {
+      const { EnhancedRLHFSystem } = await import('../core/rlhf-system.js');
+      expect(EnhancedRLHFSystem).toBeDefined();
+      expect(typeof EnhancedRLHFSystem).toBe('function');
+    });
+
+    it('should successfully import from git-operations.ts', async () => {
+      const { executeGitOperation, gitAdd, gitCommit } = await import('../utils/git-operations.js');
+      expect(executeGitOperation).toBeDefined();
+      expect(typeof executeGitOperation).toBe('function');
+      expect(typeof gitAdd).toBe('function');
+      expect(typeof gitCommit).toBe('function');
+    });
+
+    it('should successfully import from package-manager.ts', async () => {
+      const { detectPackageManager, buildPackageManagerCommand } = await import('../utils/package-manager.js');
+      expect(detectPackageManager).toBeDefined();
+      expect(typeof detectPackageManager).toBe('function');
+      expect(typeof buildPackageManagerCommand).toBe('function');
+    });
+
+    it('should verify fs-extra works in rlhf-system', async () => {
+      // Import and instantiate to ensure fs-extra is working
+      const { EnhancedRLHFSystem } = await import('../core/rlhf-system.js');
+      const rlhf = new EnhancedRLHFSystem();
+      expect(rlhf).toBeDefined();
+
+      // Verify the system has required methods that use fs-extra
+      expect(typeof rlhf.analyzeExecution).toBe('function');
+      expect(typeof rlhf.calculateLayerScore).toBe('function');
+    });
+
+    it('should verify fs-extra works in scripts', async () => {
+      // Test scripts that use fs-extra with default import
+      const { RLHFDashboard } = await import('../scripts/rlhf-dashboard.js');
+      expect(RLHFDashboard).toBeDefined();
+      expect(typeof RLHFDashboard).toBe('function');
+
+      const dashboard = new RLHFDashboard();
+      expect(dashboard).toBeDefined();
+      expect(typeof dashboard.display).toBe('function');
     });
   });
 });

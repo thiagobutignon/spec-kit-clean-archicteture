@@ -29,6 +29,11 @@ export default tseslint.config(
       }],
       // Prevent namespace imports from fs-extra in ESM context
       '@typescript-eslint/no-require-imports': 'error',
+      // Enforce default import for fs-extra to prevent ESM compatibility issues
+      'no-restricted-syntax': ['error', {
+        selector: 'ImportDeclaration[source.value="fs-extra"] ImportNamespaceSpecifier',
+        message: 'Use default import for fs-extra in ESM context: import fs from "fs-extra" (not import * as fs from "fs-extra"). Namespace imports only work with native Node.js modules like "fs".',
+      }],
     },
   },
 
