@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import * as path from 'path';
 import * as yaml from 'yaml';
 import chalk from 'chalk';
