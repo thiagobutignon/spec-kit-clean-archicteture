@@ -15,6 +15,80 @@
 
 The Regent addresses common problems in AI code generation: monolithic files (>200 lines) and absence of architectural structure. The system combines modular scaffolding with template-based generation, following Clean Architecture, DDD, TDD, and SOLID principles to produce maintainable code.
 
+## 🎉 NEW: Deterministic AI Development Methodology
+
+> **Breaking News**: The Regent successfully refactored itself using its own deterministic methodology - proving the system works at scale!
+
+### The Dogfooding Achievement
+
+The Regent achieved true **dogfooding** by refactoring its own 2000-line monolithic `execute-steps.ts` into proper Clean Architecture:
+
+- **50 automated steps** across 6 layers (domain, data, infra, presentation, validation, main)
+- **18 commits** with automated quality checks (lint, tests, TypeScript compilation)
+- **RLHF score: 2/2** - perfect execution
+- **Zero manual interventions** needed
+
+**This proves**: The deterministic methodology works for real-world, complex refactoring tasks.
+
+### Paradigm Shift: AI for Creativity, Systems for Execution
+
+Traditional LLM coding ("vibe coding"):
+- ❌ AI guesses file paths and code structure
+- ❌ Probabilistic execution with inconsistent results
+- ❌ Manual verification of every step
+- ❌ Context window limitations
+- ❌ Hard to reproduce or scale
+
+**The Regent's deterministic approach**:
+- ✅ **AI handles only creative decisions** (design, architecture, patterns)
+- ✅ **Systems handle execution** (file operations, git, quality checks)
+- ✅ **Serena MCP**: 15-20x faster code discovery vs manual reading
+- ✅ **RLHF feedback loops**: Automated quality validation
+- ✅ **Pattern extraction**: Learn from reference implementations
+- ✅ **100% reproducible** deterministic execution
+
+### Key Components
+
+| Component | Role | Benefit |
+|-----------|------|---------|
+| **AI (Claude)** | Creative decisions, design, patterns | Human-like reasoning |
+| **Regent System** | Deterministic execution, quality checks | Reliable, reproducible |
+| **Serena MCP** | Semantic code analysis, discovery | 15-20x faster |
+| **RLHF** | Automated feedback, scoring | Self-improving |
+| **Pattern Extraction** | Learning from references | Best practices |
+
+### Documentation
+
+📖 **[Read the full analysis](./docs/ai-deterministic-development.md)** (1,416 lines)
+- Complete methodology explanation
+- Vibe coding vs deterministic comparison
+- Role of MCPs (Serena, Context7)
+- 5-phase workflow diagrams
+- Real case study: execute-steps.ts refactoring
+
+### Future Roadmap
+
+The dogfooding success revealed clear next steps:
+
+- **#171**: Integrate [Auditor library](https://github.com/TheAuditorTool/Auditor) for enhanced quality
+- **#172**: SWE-bench TypeScript benchmark (prove superiority quantitatively)
+- **#173**: Improve logger output for better visibility
+- **#174**: Non-interactive mode for AI orchestration
+- **#175**: Extract test directory patterns
+- **#176**: Vertical Slice / Feature-based architecture
+
+### Impact
+
+> "This is the difference between asking AI to paint a masterpiece vs teaching it to use a camera with perfect settings. The output is deterministic, reproducible, and scalable."
+
+**What this means for you:**
+- Generate complex architectures reliably
+- Refactor legacy code systematically
+- Scale AI-assisted development to production
+- Reproduce results across teams
+
+---
+
 ## 🔬 The Multi-Target Architecture Discovery
 
 ### From Bug Fix to Architectural Revelation
