@@ -14,5 +14,5 @@ templates/*-infra-template.regent
 templates/*-presentation-template.regent
 templates/*-main-template.regent
 
-# Dogfooding test projects
-dogfooding/
+# Dogfooding test projects (root level only, not docs/dogfooding)
+/dogfooding/
