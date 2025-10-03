@@ -6,7 +6,7 @@
 import { extractScope } from './scope-extractor';
 
 export type StepType = 'create_file' | 'refactor_file' | 'delete_file' | 'folder' | 'branch' | 'pull_request' | 'validation' | 'test' | 'conditional_file';
-export type ConventionalCommitType = 'feat' | 'refactor' | 'chore' | 'fix' | 'test' | 'docs' | null;
+export type ConventionalCommitType = 'regent' | 'feat' | 'refactor' | 'chore' | 'fix' | 'test' | 'docs' | null;
 
 /**
  * Configuration for commit generation
@@ -56,15 +56,15 @@ export const DEFAULT_COMMIT_CONFIG: CommitConfig = {
   conventionalCommits: {
     enabled: true,
     typeMapping: {
-      create_file: 'feat',
-      refactor_file: 'refactor',
-      delete_file: 'chore',
-      folder: 'chore',
+      create_file: 'regent',
+      refactor_file: 'regent',
+      delete_file: 'regent',
+      folder: 'regent',
       branch: null,
       pull_request: null,
       validation: null,
-      test: 'test',
-      conditional_file: 'feat',
+      test: 'regent',
+      conditional_file: 'regent',
     },
   },
   coAuthor: 'Claude <noreply@anthropic.com>',
@@ -186,7 +186,7 @@ function enhanceDescription(description: string, filePath: string | undefined): 
  *
  * @example
  * generateCommitMessage('create_file', 'Create Product domain model', 'src/domain/models/product.ts')
- * // Returns: 'feat(domain): create Product domain model\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>'
+ * // Returns: 'regent(domain): create Product domain model\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>'
  */
 export function generateCommitMessage(
   stepType: StepType,
