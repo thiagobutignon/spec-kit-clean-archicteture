@@ -8,8 +8,10 @@
 
 import * as crypto from 'crypto';
 import * as os from 'os';
+import * as path from 'path';
 import * as yaml from 'yaml';
-import 'zx/globals';
+import { $, chalk, argv } from 'zx';
+import fs from 'fs-extra';
 import Logger from './core/logger';
 import { EnhancedRLHFSystem, LayerInfo } from './core/rlhf-system';
 import { resolveLogDirectory } from './utils/log-path-resolver';
