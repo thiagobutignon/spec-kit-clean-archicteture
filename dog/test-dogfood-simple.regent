@@ -1,0 +1,84 @@
+name: Simple Dogfooding Test
+description: Minimal 5-step test to validate the entire system works
+target: backend
+layer: domain
+
+steps:
+  - id: step-1-create-test-model
+    layer: domain
+    action: create_file
+    path: dog/src/domain/models/test-model.ts
+    template: |
+      export interface TestModel {
+        id: string
+        name: string
+        timestamp: Date
+      }
+
+  - id: step-2-create-test-usecase
+    layer: domain
+    action: create_file
+    path: dog/src/domain/usecases/test-usecase.ts
+    template: |
+      import { TestModel } from '../models/test-model'
+
+      export interface TestUseCase {
+        execute: (id: string) => Promise<TestModel>
+      }
+
+  - id: step-3-create-test-protocol
+    layer: data
+    action: create_file
+    path: dog/src/data/protocols/test-repository.ts
+    template: |
+      import { TestModel } from '../../domain/models/test-model'
+
+      export interface TestRepository {
+        findById: (id: string) => Promise<TestModel | null>
+      }
+
+  - id: step-4-create-test-implementation
+    layer: data
+    action: create_file
+    path: dog/src/data/usecases/db-test-usecase.ts
+    template: |
+      import { TestUseCase } from '../../domain/usecases/test-usecase'
+      import { TestModel } from '../../domain/models/test-model'
+      import { TestRepository } from '../protocols/test-repository'
+
+      export class DbTestUseCase implements TestUseCase {
+        constructor(private readonly testRepository: TestRepository) {}
+
+        async execute(id: string): Promise<TestModel> {
+          const model = await this.testRepository.findById(id)
+          if (!model) {
+            throw new Error('Test model not found')
+          }
+          return model
+        }
+      }
+
+  - id: step-5-create-test-adapter
+    layer: infra
+    action: create_file
+    path: dog/src/infra/db/memory-test-repository.ts
+    template: |
+      import { TestRepository } from '../../data/protocols/test-repository'
+      import { TestModel } from '../../domain/models/test-model'
+
+      export class MemoryTestRepository implements TestRepository {
+        private readonly data: Map<string, TestModel> = new Map()
+
+        async findById(id: string): Promise<TestModel | null> {
+          return this.data.get(id) || null
+        }
+
+        async save(model: TestModel): Promise<void> {
+          this.data.set(model.id, model)
+        }
+      }
+
+evaluation:
+  final_rlhf_score: null
+  final_status: PENDING
+  commit_hashes: []
