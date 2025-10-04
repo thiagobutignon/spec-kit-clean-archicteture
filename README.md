@@ -1004,6 +1004,31 @@ Every refactoring pattern includes comprehensive AI guidance:
 
 ## 🎯 Key Features
 
+### Automated Commit Convention
+
+The Regent uses a special **`regent`** commit type for all automated commits, making it easy to distinguish between human and AI-generated code:
+
+```bash
+# Regent automated commits use 'regent' type
+regent(domain): step-1-create-user-model
+regent(data): step-2-create-repository
+regent(infra): step-3-create-adapter
+
+# Human commits use standard types
+feat(api): add user authentication
+fix(ui): resolve login button styling
+docs: update API documentation
+```
+
+**Benefits:**
+- **Easy Filtering**: `git log --grep="^regent"` shows only automated commits
+- **Clear History**: Instantly see which code was AI-generated vs hand-written
+- **Bulk Operations**: Revert or analyze all Regent commits at once
+- **CI/CD Integration**: Skip automated commits in workflows
+
+**Configuration:**
+The project includes `.commitlintrc.json` to validate both `regent` and standard conventional commit types.
+
 ### Backend Features (All 5 Layers)
 
 - **Domain Layer**: Use cases, entities, value objects, domain errors

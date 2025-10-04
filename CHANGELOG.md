@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Automated Commit Convention** (#179)
+  - Standardized all Regent automated commits to use `regent` conventional commit type
+  - Added `regent` to ConventionalCommitType enum in commit-generator.ts
+  - Updated all type mappings to use `regent` instead of `feat`, `fix`, `chore`, etc.
+  - Benefits:
+    - Easy identification: `git log --grep="^regent"` shows only automated commits
+    - Clear git history: instant distinction between AI-generated and manual code
+    - Bulk operations: revert or analyze all Regent commits at once
+    - CI/CD integration: skip automated commits in workflows
+  - Added `.commitlintrc.json` to validate both `regent` and standard commit types
+  - Updated README.md with commit convention documentation
+  - Updated CONTRIBUTING.md to clarify `regent` type is for automated commits only
+  - All 46 tests updated and passing
+
 ### Planning for v2.4.0
 
 **Breakthrough: Deterministic AI Development Methodology**
