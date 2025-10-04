@@ -1,0 +1,60 @@
+#!/usr/bin/env node
+/**
+ * The Regent CLI
+ * Main entry point for the CLI application
+ */
+import { Command } from 'commander';
+import chalk from 'chalk';
+import { initCommand } from './commands/init.js';
+import { checkCommand } from './commands/check.js';
+import { setupMcpCommand } from './commands/setup-mcp.js';
+import { showBanner } from './utils/banner.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf-8'));
+const program = new Command();
+// CLI metadata
+program
+    .name('regent')
+    .description('The Regent - AI-powered Clean Architecture CLI with guaranteed architectural quality')
+    .version(packageJson.version, '-v, --version', 'output the current version');
+// Custom help display - show banner before help
+program.addHelpText('beforeAll', () => {
+    showBanner();
+    return '';
+});
+// Commands
+program
+    .command('init')
+    .description('Initialize a new Clean Architecture project (use "regent init --help" for all options)')
+    .argument('[project-name]', 'Name for your new project directory')
+    .option('--ai <assistant>', 'AI assistant to use (claude, gemini, copilot, cursor)')
+    .option('--here', 'Initialize in current directory')
+    .option('--force', 'Force overwrite existing files without backup')
+    .option('--backup-dir <path>', 'Custom directory for config file backups')
+    .option('--cleanup-old-backups', 'Clean up old backups, keeping only the 10 most recent')
+    .option('--dry-run', 'Show what would be backed up without making any changes')
+    .option('--no-git', 'Skip git repository initialization')
+    .option('--skip-mcp', 'Skip MCP server installation')
+    .option('--debug', 'Show debug information')
+    .action(initCommand);
+program
+    .command('check')
+    .description('Check that all required tools are installed')
+    .action(checkCommand);
+program
+    .command('setup-mcp')
+    .description('Create or update project-level .mcp.json configuration')
+    .option('--force', 'Overwrite existing .mcp.json without prompting')
+    .option('--all', 'Configure all MCP servers without prompting')
+    .action(setupMcpCommand);
+// Handle case where no command is provided
+program.action(() => {
+    showBanner();
+    console.log(chalk.dim('Run \'regent --help\' for usage information\n'));
+});
+// Parse arguments
+program.parse();

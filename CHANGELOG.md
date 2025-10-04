@@ -283,6 +283,30 @@ This release focuses on three key areas:
   - Migration from per-directory to project-level configuration
   - File: `docs/troubleshooting/mcp-subdirectory-workaround.md`
 
+- **Enhanced Logger System** (#185)
+  - Comprehensive improvements to logging infrastructure
+  - Multiple log levels (DEBUG, INFO, WARN, ERROR, SUCCESS) with filtering
+  - Structured logging with contextual information
+  - Progress tracking with visual indicators
+  - Execution summary with metrics
+  - RLHF score tracking and visualization with validation
+  - Flexible configuration (verbose, quiet, timestamp formats, colorization)
+  - Backward compatible with legacy Logger(string) constructor
+  - 34 comprehensive tests covering all major functionality
+  - Complete API documentation: `docs/logger-api.md`
+  - Security improvements:
+    - Stream error handling to prevent crashes
+    - Graceful shutdown handlers (SIGINT, SIGTERM, exit)
+    - Log injection sanitization
+    - Proper resource cleanup to prevent memory leaks
+  - Performance improvements:
+    - Fixed race condition in tests with proper stream flushing
+    - Optimized step progress display ([current/total] format)
+  - Code quality:
+    - Translated Portuguese comments to English
+    - Fixed LogLevel enum ordering for intuitive filtering
+    - RLHF score validation against expected range
+
 - Automated NPM package publishing via GitHub Actions
 - Release process documentation
 - CHANGELOG.md for tracking project changes
