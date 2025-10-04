@@ -141,6 +141,9 @@ class Logger {
   }
 
   private setupGracefulShutdown(): void {
+    // Guard against multiple registrations
+    // This is safe because setupGracefulShutdown is private and only called once in the constructor
+    // The flag ensures idempotency in case of future refactoring
     if (this.shutdownHandlersRegistered) return;
 
     this.closeStreamHandler = () => {
@@ -236,6 +239,8 @@ class Logger {
 
   private writeLog(level: LogLevel, message: string, context?: LogContext): void {
     // Skip if log level is too low
+    // SUCCESS messages bypass log level filtering because they represent critical milestones
+    // that should always be visible regardless of verbosity settings
     if (level < this.logLevel && level !== LogLevel.SUCCESS) return;
     if (this.quiet && level !== LogLevel.ERROR) return;
 
@@ -358,6 +363,8 @@ class Logger {
 
   public logRLHFScore(score: number, breakdown: string): void {
     // Validate RLHF score is in expected range
+    // We warn instead of throwing to maintain execution flow and allow debugging
+    // Invalid scores are still tracked but logged for investigation
     if (!VALID_RLHF_SCORES.includes(score as typeof VALID_RLHF_SCORES[number])) {
       this.warn(`Unexpected RLHF score: ${score}. Expected one of: ${VALID_RLHF_SCORES.join(', ')}`);
     }
@@ -383,7 +390,8 @@ class Logger {
   public logProgress(current: number, total: number, eta?: number): void {
     if (this.quiet) return;
 
-    const percentage = Math.floor((current / total) * 100);
+    // Guard against division by zero
+    const percentage = total > 0 ? Math.floor((current / total) * 100) : 0;
     const completed = Math.floor(percentage / 5);
     const remaining = 20 - completed;
     const progressBar = chalk.green('█'.repeat(completed)) + chalk.gray('░'.repeat(remaining));

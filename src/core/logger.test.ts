@@ -28,17 +28,17 @@ describe('Logger', () => {
 
   // Helper to flush logs and read content
   const getLogContent = async (): Promise<string> => {
-    // Flush the stream and wait for it
+    // Flush the stream and wait for it to complete
     if (logger && logger['logStream']) {
-      await new Promise<void>((resolve) => {
-        const stream = logger['logStream'];
-        if (stream.writableEnded || stream.closed) {
-          resolve();
-        } else {
-          stream.once('drain', () => resolve());
+      const stream = logger['logStream'];
+      if (!stream.writableEnded && !stream.closed) {
+        // Write empty string and wait for the write to complete
+        await new Promise<void>((resolve) => {
           stream.write('', () => resolve());
-        }
-      });
+        });
+        // Give a small amount of time for the OS to flush
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
     }
 
     const logPath = path.join(tempDir, 'execution.log');
@@ -332,6 +332,20 @@ describe('Logger', () => {
       expect(summary.rlhfScore.breakdown[2]).toBe(2);
       expect(summary.rlhfScore.breakdown[1]).toBe(1);
     });
+
+    it('should warn on invalid RLHF score', async () => {
+      logger = new Logger({
+        logDirectory: tempDir,
+        colorize: false,
+        showTimestamp: false,
+        quiet: false,
+      });
+
+      logger.logRLHFScore(999, 'Invalid score');
+      const logContent = await getLogContent();
+      expect(logContent).toContain('[WARN] Unexpected RLHF score: 999');
+      expect(logContent).toContain('Expected one of: -2, -1, 0, 1, 2');
+    });
   });
 
   describe('Execution Summary', () => {
@@ -453,6 +467,59 @@ describe('Logger', () => {
     it('should close log stream', () => {
       logger = new Logger(tempDir);
       expect(() => logger.close()).not.toThrow();
+    });
+  });
+
+  describe('Progress Bar', () => {
+    beforeEach(() => {
+      logger = new Logger({
+        logDirectory: tempDir,
+        colorize: false,
+        quiet: false,
+      });
+    });
+
+    it('should handle zero total in progress bar', () => {
+      // Should not crash or produce Infinity/NaN
+      expect(() => logger.logProgress(5, 0)).not.toThrow();
+    });
+
+    it('should handle normal progress values', () => {
+      expect(() => logger.logProgress(5, 10)).not.toThrow();
+      expect(() => logger.logProgress(10, 10)).not.toThrow();
+      expect(() => logger.logProgress(0, 10)).not.toThrow();
+    });
+  });
+
+  describe('Stream Error Handling', () => {
+    it('should handle stream write errors gracefully', async () => {
+      logger = new Logger(tempDir);
+
+      // Simulate stream error
+      logger['logStream'].emit('error', new Error('Write failed'));
+
+      // Should not crash
+      expect(() => logger.info('test after error')).not.toThrow();
+      expect(() => logger.warn('another test')).not.toThrow();
+    });
+
+    it('should continue logging to console even if stream fails', () => {
+      logger = new Logger({
+        logDirectory: tempDir,
+        quiet: false,
+        colorize: false,
+      });
+
+      const spy = vi.spyOn(process.stdout, 'write');
+
+      // Simulate stream error
+      logger['logStream'].emit('error', new Error('Disk full'));
+
+      // Should still write to console
+      logger.info('test message');
+      expect(spy).toHaveBeenCalled();
+
+      spy.mockRestore();
     });
   });
 });
