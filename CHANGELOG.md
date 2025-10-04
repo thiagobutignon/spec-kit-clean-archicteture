@@ -45,7 +45,16 @@ The Regent achieved true dogfooding by refactoring its own 2000-line monolithic 
   - 5-phase workflow diagrams
   - Real-world case study: execute-steps.ts refactoring (50 steps)
   - Comparison table: Traditional LLM vs Deterministic approach
+  - **Table of Contents** for easy navigation (49 sections)
   - File: `docs/ai-deterministic-development.md`
+
+- **Dogfooding Artifacts Documentation**
+  - Complete README explaining refactoring artifacts
+  - Success metrics and timeline
+  - Learning guide for users, contributors, and researchers
+  - Reproducibility instructions
+  - Case study highlights (namespace pollution bug)
+  - File: `docs/dogfooding/README.md`
 
 - **Dogfooding Test Suite**
   - Validates generated code structure (dog/src)
