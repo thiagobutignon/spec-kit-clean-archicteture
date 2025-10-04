@@ -27,6 +27,7 @@ import {
 } from './utils/commit-generator';
 import { validateConfig } from './utils/config-validator';
 import { EXIT_CODES, RATE_LIMITS, RETRY, TIMING } from './utils/constants';
+import { ExecutionOptions, parseExecutionOptions } from './utils/execution-options.js';
 
 $.verbose = true;
 $.shell = '/bin/bash';
@@ -140,12 +141,6 @@ interface ImplementationPlan {
   [key: string]: unknown;
 }
 
-interface ExecutionOptions {
-  nonInteractive?: boolean;
-  autoConfirm?: boolean;
-  strict?: boolean;
-}
-
 class EnhancedStepExecutor {
   private plan: ImplementationPlan;
   private logger: Logger;
@@ -190,7 +185,7 @@ class EnhancedStepExecutor {
     this.plan = { steps: [] };
 
     // Parse execution options (CLI flags, env vars, config)
-    this.executionOptions = this.parseExecutionOptions(options);
+    this.executionOptions = parseExecutionOptions(options);
 
     // Use the utility function to resolve log directory
     const logDir = resolveLogDirectory(implementationPath);
@@ -206,49 +201,6 @@ class EnhancedStepExecutor {
     this.setupCleanupHandlers();
   }
 
-  /**
-   * Parse execution options from CLI flags, environment variables, and config
-   * Priority: CLI flags > Environment variables > Config file
-   */
-  private parseExecutionOptions(options: ExecutionOptions): ExecutionOptions {
-    // Start with provided options (from CLI)
-    const parsed: ExecutionOptions = { ...options };
-
-    // Check environment variables if not set by CLI
-    if (parsed.nonInteractive === undefined) {
-      parsed.nonInteractive =
-        process.env.REGENT_NON_INTERACTIVE === '1' ||
-        process.env.REGENT_NON_INTERACTIVE === 'true' ||
-        process.env.CI === 'true' ||
-        !!process.env.CLAUDE_CODE ||
-        !!process.env.AI_ORCHESTRATOR;
-    }
-
-    if (parsed.autoConfirm === undefined) {
-      parsed.autoConfirm =
-        process.env.REGENT_AUTO_CONFIRM === '1' ||
-        process.env.REGENT_AUTO_CONFIRM === 'true';
-    }
-
-    if (parsed.strict === undefined) {
-      parsed.strict =
-        process.env.REGENT_STRICT === '1' ||
-        process.env.REGENT_STRICT === 'true';
-    }
-
-    // Log execution mode
-    if (parsed.nonInteractive) {
-      console.log(chalk.cyan('   ℹ️  Running in non-interactive mode'));
-      if (parsed.strict) {
-        console.log(chalk.yellow('   ⚠️  Strict mode: Will fail on warnings'));
-      }
-      if (parsed.autoConfirm) {
-        console.log(chalk.yellow('   ⚠️  Auto-confirm mode: All prompts auto-approved'));
-      }
-    }
-
-    return parsed;
-  }
 
   /**
    * Setup signal handlers for graceful cleanup on interrupt
