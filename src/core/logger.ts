@@ -5,15 +5,18 @@ import * as fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 
-// Usaremos um nome de arquivo de log consistente para cada execução
+// We use a consistent log file name for each execution
 const LOG_FILE_NAME = 'execution.log';
+
+// Valid RLHF score range for validation
+const VALID_RLHF_SCORES = [-2, -1, 0, 1, 2] as const;
 
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,
-  WARN = 2,
-  ERROR = 3,
-  SUCCESS = 4,
+  SUCCESS = 2,
+  WARN = 3,
+  ERROR = 4,
 }
 
 export interface LogContext {
@@ -67,6 +70,8 @@ class Logger {
   private startTime: number;
   private executionSummary: ExecutionSummary;
   private currentStepStartTime?: number;
+  private expectedTotalSteps?: number;
+  private shutdownHandlersRegistered = false;
 
   constructor(options: LoggerOptions | string) {
     // Backward compatibility: support old string constructor
