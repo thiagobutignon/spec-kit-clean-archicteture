@@ -102,12 +102,16 @@ All contributions must meet these scoring thresholds:
    - [ ] Add/update tests
 
 2. **PR Title Format**
+
+   Use conventional commit format. For human contributions, use standard types:
    ```
    feat: add new feature
    fix: resolve issue
    docs: update documentation
    refactor: improve code structure
    ```
+
+   **Note:** The `regent` type is reserved for automated commits created by the Regent CLI. Manual contributions should use standard conventional commit types (`feat`, `fix`, `docs`, `refactor`, etc.).
 
 3. **PR Description Template**
    ```markdown
