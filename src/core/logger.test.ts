@@ -28,8 +28,19 @@ describe('Logger', () => {
 
   // Helper to flush logs and read content
   const getLogContent = async (): Promise<string> => {
-    // Wait a bit for the stream to flush
-    await new Promise(resolve => setTimeout(resolve, 50));
+    // Flush the stream and wait for it
+    if (logger && logger['logStream']) {
+      await new Promise<void>((resolve) => {
+        const stream = logger['logStream'];
+        if (stream.writableEnded || stream.closed) {
+          resolve();
+        } else {
+          stream.once('drain', () => resolve());
+          stream.write('', () => resolve());
+        }
+      });
+    }
+
     const logPath = path.join(tempDir, 'execution.log');
     if (!fs.existsSync(logPath)) {
       return '';

@@ -72,6 +72,7 @@ class Logger {
   private currentStepStartTime?: number;
   private expectedTotalSteps?: number;
   private shutdownHandlersRegistered = false;
+  private closeStreamHandler?: () => void;
 
   constructor(options: LoggerOptions | string) {
     // Backward compatibility: support old string constructor
@@ -89,13 +90,19 @@ class Logger {
       logLevel = LogLevel.INFO,
     } = options;
 
-    // Garante que o diretório de logs exista
+    // Ensure the log directory exists
     fs.mkdirSync(logDirectory, { recursive: true });
     this.logFilePath = path.join(logDirectory, LOG_FILE_NAME);
 
-    // Cria um stream de escrita para o arquivo de log.
-    // A flag 'a' significa 'append', então não sobrescrevemos o log a cada execução.
+    // Create a write stream for the log file
+    // The 'a' flag means 'append', so we don't overwrite the log on each execution
     this.logStream = fs.createWriteStream(this.logFilePath, { flags: 'a' });
+
+    // Handle stream errors to prevent crashes
+    this.logStream.on('error', (err) => {
+      console.error('Logger stream error:', err.message);
+      // Stream errors are non-fatal; logging will continue to console only
+    });
 
     this.verbose = verbose || process.env.LOG_VERBOSE === 'true';
     this.quiet = quiet || process.env.LOG_QUIET === 'true';
@@ -128,6 +135,30 @@ class Logger {
     if (!this.quiet) {
       console.log(chalk.gray(`📝 Logging to: ${this.logFilePath}`));
     }
+
+    // Setup graceful shutdown handlers
+    this.setupGracefulShutdown();
+  }
+
+  private setupGracefulShutdown(): void {
+    if (this.shutdownHandlersRegistered) return;
+
+    this.closeStreamHandler = () => {
+      if (this.logStream && !this.logStream.closed) {
+        this.logStream.end();
+      }
+    };
+
+    process.on('SIGINT', this.closeStreamHandler);
+    process.on('SIGTERM', this.closeStreamHandler);
+    process.on('exit', this.closeStreamHandler);
+
+    this.shutdownHandlersRegistered = true;
+  }
+
+  private sanitizeMessage(message: string): string {
+    // Replace newlines with escaped newlines to prevent log injection
+    return message.replace(/\r?\n/g, '\\n');
   }
 
   private formatTimestamp(): string {
@@ -208,13 +239,16 @@ class Logger {
     if (level < this.logLevel && level !== LogLevel.SUCCESS) return;
     if (this.quiet && level !== LogLevel.ERROR) return;
 
+    // Sanitize message to prevent log injection
+    const sanitizedMessage = this.sanitizeMessage(message);
+
     const timestamp = this.formatTimestamp();
     const levelPrefix = this.getLevelPrefix(level);
     const contextStr = this.verbose ? this.formatContext(context) : '';
-    const formattedMessage = `${timestamp} ${levelPrefix} ${message}${contextStr}\n`;
+    const formattedMessage = `${timestamp} ${levelPrefix} ${sanitizedMessage}${contextStr}\n`;
 
     // Write to file (always, without color)
-    const fileMessage = `${timestamp} [${LogLevel[level]}] ${message}${contextStr}\n`;
+    const fileMessage = `${timestamp} [${LogLevel[level]}] ${sanitizedMessage}${contextStr}\n`;
     this.logStream.write(fileMessage);
 
     // Write to console (with color if enabled)
@@ -252,14 +286,20 @@ class Logger {
     this.info(message);
   }
 
-  public startStep(stepId: string, description: string, layer?: string): void {
+  public startStep(stepId: string, description: string, layer?: string, totalSteps?: number): void {
     this.currentStepStartTime = Date.now();
     this.executionSummary.totalSteps++;
 
+    // Store expected total steps if provided
+    if (totalSteps !== undefined) {
+      this.expectedTotalSteps = totalSteps;
+    }
+
     if (!this.quiet) {
       const layerInfo = layer ? chalk.gray(`(${layer})`) : '';
+      const total = this.expectedTotalSteps || this.executionSummary.totalSteps;
       console.log(
-        `\n${chalk.cyan('▶️')}  ${chalk.bold(`[${this.executionSummary.totalSteps}/${this.executionSummary.totalSteps}] ${stepId}`)} ${layerInfo}`,
+        `\n${chalk.cyan('▶️')}  ${chalk.bold(`[${this.executionSummary.totalSteps}/${total}] ${stepId}`)} ${layerInfo}`,
       );
       console.log(`   ${description}`);
     }
@@ -317,6 +357,11 @@ class Logger {
   }
 
   public logRLHFScore(score: number, breakdown: string): void {
+    // Validate RLHF score is in expected range
+    if (!VALID_RLHF_SCORES.includes(score as typeof VALID_RLHF_SCORES[number])) {
+      this.warn(`Unexpected RLHF score: ${score}. Expected one of: ${VALID_RLHF_SCORES.join(', ')}`);
+    }
+
     this.executionSummary.rlhfScore.total += score;
     this.executionSummary.rlhfScore.breakdown[score] =
       (this.executionSummary.rlhfScore.breakdown[score] || 0) + 1;
@@ -410,6 +455,14 @@ class Logger {
   }
 
   public close(): void {
+    // Remove shutdown handlers to prevent memory leaks
+    if (this.closeStreamHandler) {
+      process.off('SIGINT', this.closeStreamHandler);
+      process.off('SIGTERM', this.closeStreamHandler);
+      process.off('exit', this.closeStreamHandler);
+      this.shutdownHandlersRegistered = false;
+    }
+
     this.logStream.end();
   }
 }
