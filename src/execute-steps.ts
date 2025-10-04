@@ -1842,7 +1842,12 @@ async function main() {
     strict: argv.strict || false,
   };
 
-  const arg = argv._[0] as string;
+  // Validate template path argument
+  if (typeof argv._[0] !== 'string') {
+    console.error(chalk.red.bold('Error: Template path must be a string'));
+    process.exit(EXIT_CODES.ERROR);
+  }
+  const arg = argv._[0];
 
   // Check for batch execution
   if (arg.startsWith('--')) {

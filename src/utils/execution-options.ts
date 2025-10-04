@@ -11,6 +11,41 @@ export interface ExecutionOptions {
 }
 
 /**
+ * Environment variable names for execution options
+ */
+const ENV_VARS = {
+  REGENT_NON_INTERACTIVE: 'REGENT_NON_INTERACTIVE',
+  REGENT_AUTO_CONFIRM: 'REGENT_AUTO_CONFIRM',
+  REGENT_STRICT: 'REGENT_STRICT',
+  CI: 'CI',
+  CLAUDE_CODE: 'CLAUDE_CODE',
+  AI_ORCHESTRATOR: 'AI_ORCHESTRATOR',
+} as const;
+
+/**
+ * Valid boolean values for environment variables
+ */
+const BOOLEAN_VALUES = {
+  TRUE_NUMERIC: '1',
+  TRUE_STRING: 'true',
+} as const;
+
+/**
+ * Check if environment variable is set to a truthy value
+ */
+function isEnvTrue(varName: string): boolean {
+  const value = process.env[varName];
+  return value === BOOLEAN_VALUES.TRUE_NUMERIC || value === BOOLEAN_VALUES.TRUE_STRING;
+}
+
+/**
+ * Check if environment variable is set (any value)
+ */
+function isEnvSet(varName: string): boolean {
+  return !!process.env[varName];
+}
+
+/**
  * Parse execution options from CLI flags, environment variables, and config
  * Priority: CLI flags > Environment variables > Config file
  *
@@ -24,39 +59,34 @@ export function parseExecutionOptions(options: ExecutionOptions): ExecutionOptio
   // Check environment variables if not set by CLI
   if (parsed.nonInteractive === undefined) {
     parsed.nonInteractive =
-      process.env.REGENT_NON_INTERACTIVE === '1' ||
-      process.env.REGENT_NON_INTERACTIVE === 'true' ||
-      process.env.CI === 'true' ||
-      !!process.env.CLAUDE_CODE ||
-      !!process.env.AI_ORCHESTRATOR;
+      isEnvTrue(ENV_VARS.REGENT_NON_INTERACTIVE) ||
+      isEnvTrue(ENV_VARS.CI) ||
+      isEnvSet(ENV_VARS.CLAUDE_CODE) ||
+      isEnvSet(ENV_VARS.AI_ORCHESTRATOR);
   }
 
   if (parsed.autoConfirm === undefined) {
-    parsed.autoConfirm =
-      process.env.REGENT_AUTO_CONFIRM === '1' ||
-      process.env.REGENT_AUTO_CONFIRM === 'true';
+    parsed.autoConfirm = isEnvTrue(ENV_VARS.REGENT_AUTO_CONFIRM);
   }
 
   if (parsed.strict === undefined) {
-    parsed.strict =
-      process.env.REGENT_STRICT === '1' ||
-      process.env.REGENT_STRICT === 'true';
+    parsed.strict = isEnvTrue(ENV_VARS.REGENT_STRICT);
   }
 
   // Validate conflicting flags
   if (parsed.strict && parsed.autoConfirm) {
-    console.warn(chalk.yellow('   ⚠️  --strict overrides --yes flag'));
+    console.warn(chalk.yellow`   ⚠️  --strict overrides --yes flag`);
     parsed.autoConfirm = false;
   }
 
   // Log execution mode
   if (parsed.nonInteractive) {
-    console.log(chalk.cyan('   ℹ️  Running in non-interactive mode'));
+    console.log(chalk.cyan`   ℹ️  Running in non-interactive mode`);
     if (parsed.strict) {
-      console.log(chalk.yellow('   ⚠️  Strict mode: Will fail on warnings'));
+      console.log(chalk.yellow`   ⚠️  Strict mode: Will fail on warnings`);
     }
     if (parsed.autoConfirm) {
-      console.log(chalk.yellow('   ⚠️  Auto-confirm mode: All prompts auto-approved'));
+      console.log(chalk.yellow`   ⚠️  Auto-confirm mode: All prompts auto-approved`);
     }
   }
 

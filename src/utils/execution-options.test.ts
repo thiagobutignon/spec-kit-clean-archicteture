@@ -21,6 +21,14 @@ describe('parseExecutionOptions', () => {
   });
 
   afterEach(() => {
+    // Clean env vars in afterEach too for safety
+    delete process.env.REGENT_NON_INTERACTIVE;
+    delete process.env.REGENT_AUTO_CONFIRM;
+    delete process.env.REGENT_STRICT;
+    delete process.env.CI;
+    delete process.env.CLAUDE_CODE;
+    delete process.env.AI_ORCHESTRATOR;
+
     vi.restoreAllMocks();
   });
 
