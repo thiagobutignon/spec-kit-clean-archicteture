@@ -51,7 +51,7 @@ jobs:
 
             ### What to do next:
 
-            1. **Review the validation errors** in the [workflow logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            1. **Review the validation errors** in the [workflow logs](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
             2. **Fix the identified inconsistencies** in the affected command files
             3. **Re-run validation locally** to verify fixes:
                \`\`\`bash
