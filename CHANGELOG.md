@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Pre-commit Hook for Command Validation** (#168)
+  - Automatic validation before every git commit
+  - Configured with Husky and lint-staged
+  - Only runs when `.claude/commands/` files change
+  - Only runs when validation script changes
+  - Fast execution (< 1 second)
+  - Easy bypass with `--no-verify` for emergencies
+  - Catches issues before CI/CD
+  - Fastest feedback loop (immediate)
+  - Prevents bad commits from reaching remote
+  - Developer-friendly with clear error messages
+  - Maintains backward compatibility: `prepare` script runs both template building and husky
+  - Files: `.husky/pre-commit`, `package.json` (lint-staged config)
+  - Dependencies: husky@^9.1.7, lint-staged@^16.2.3
+
 - **Command Consistency CI/CD Workflow** (#167)
   - GitHub Action workflow to validate command consistency automatically
   - Runs on changes to `.claude/commands/` directory
