@@ -1,0 +1,89 @@
+name: Command Consistency Check
+
+on:
+  pull_request:
+    paths:
+      - '.claude/commands/**'
+      - 'scripts/validate-command-consistency.ts'
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  validate:
+    name: Validate Command Consistency
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run command validation
+        id: validation
+        run: npm run validate:commands
+        continue-on-error: true
+
+      - name: Comment on PR (if failure)
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Create helpful comment with actionable guidance
+            const comment = `## ❌ Command Consistency Validation Failed
+
+            The command consistency validator detected issues with the slash commands in this PR.
+
+            ### What to do next:
+
+            1. **Review the validation errors** in the [workflow logs](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+            2. **Fix the identified inconsistencies** in the affected command files
+            3. **Re-run validation locally** to verify fixes:
+               \`\`\`bash
+               npm run validate:commands
+               \`\`\`
+            4. **Push your fixes** - this check will run automatically
+
+            ### Common Issues:
+
+            - **Terminology drift**: Commands using different terms for same concepts
+            - **Missing YAML keywords**: Commands not referencing YAML structure
+            - **Execution order**: Missing references to proper command sequence
+            - **Rule references**: Commands not citing architectural rules
+            - **Template patterns**: Commands not following established patterns
+
+            ### Need Help?
+
+            See documentation:
+            - \`docs/processes/architectural-change-checklist.md\` - Process for maintaining consistency
+            - \`docs/edge-cases/modular-yaml-edge-cases.md\` - Edge case guidance
+            - \`scripts/validate-command-consistency.ts\` - Validation rules
+
+            ---
+            🤖 This check runs automatically on changes to \`.claude/commands/\` files.`;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Fail workflow if validation failed
+        if: steps.validation.outcome == 'failure'
+        run: exit 1
