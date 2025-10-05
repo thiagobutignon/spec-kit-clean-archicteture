@@ -36,6 +36,13 @@ interface LayerPatterns {
   cross_cutting: Pattern[];
 }
 
+interface ExtractionFailure {
+  layer: string;
+  error: string;
+}
+
+const failures: ExtractionFailure[] = [];
+
 const SYSTEM_PROMPT = `You are a comprehensive code quality and architecture pattern analyzer.
 
 Given source code files, extract validation patterns that enforce best practices.
@@ -114,6 +121,37 @@ Focus on extracting patterns for:
 
 DO NOT include markdown, explanations, or anything except the JSON.`;
 
+async function checkDependencies(): Promise<void> {
+  const errors: string[] = [];
+
+  // Check for tsx runtime
+  try {
+    execFileSync('which', ['tsx'], { encoding: 'utf-8' });
+  } catch {
+    errors.push('tsx runtime not found. Install with: npm install -g tsx');
+  }
+
+  // Check for claude CLI
+  try {
+    execFileSync('which', ['claude'], { encoding: 'utf-8' });
+  } catch {
+    errors.push('Claude CLI not found. Install with: npm install -g @anthropic-ai/claude-cli');
+  }
+
+  // Check for yaml package (runtime check)
+  try {
+    await import('yaml');
+  } catch {
+    errors.push('yaml package not found. Install with: npm install yaml');
+  }
+
+  if (errors.length > 0) {
+    console.error('❌ Missing dependencies:');
+    errors.forEach(err => console.error(`   - ${err}`));
+    process.exit(1);
+  }
+}
+
 async function analyzeCodeWithClaude(code: string, layer: string): Promise<Pattern[]> {
   const truncatedCode = code.substring(0, 10000);
   const prompt = `${SYSTEM_PROMPT}
@@ -153,15 +191,23 @@ Extract patterns that would catch violations in similar code.`;
     return parsed.patterns;
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error(`Failed to analyze ${layer} code: ${errorMsg}`);
+    console.error(`❌ Failed to analyze ${layer} code: ${errorMsg}`);
+
     if (process.env.DEBUG) {
       console.error('Stack trace:', error);
     }
+
+    // Track failure for final summary
+    failures.push({ layer, error: errorMsg });
+
     return [];
   }
 }
 
-async function getFilesFromSerena(targetDir: string, layer: string): Promise<string[]> {
+async function getFiles(
+  targetDir: string,
+  filter?: (f: string) => boolean
+): Promise<string[]> {
   const allFiles: string[] = [];
 
   // Search in both src/ and tests/ directories
@@ -170,38 +216,15 @@ async function getFilesFromSerena(targetDir: string, layer: string): Promise<str
   for (const dir of searchDirs) {
     try {
       const files = await fs.readdir(dir, { recursive: true });
-      const layerFiles = files
-        .filter(f => f.toString().includes(layer))
-        .filter(f => f.toString().endsWith('.ts') || f.toString().endsWith('.tsx'))
-        .map(f => `${dir}/${f}`);
-
-      allFiles.push(...layerFiles);
-    } catch {
-      // Directory doesn't exist, skip silently
-      continue;
-    }
-  }
-
-  if (allFiles.length === 0) {
-    console.warn(`   ⚠️  No files found for ${layer} layer in ${searchDirs.join(', ')}`);
-  }
-
-  return allFiles;
-}
-
-async function getAllFiles(targetDir: string): Promise<string[]> {
-  const allFiles: string[] = [];
-
-  // Search in both src/ and tests/ directories
-  const searchDirs = [targetDir, targetDir.replace('/src', '/tests')];
-
-  for (const dir of searchDirs) {
-    try {
-      const files = await fs.readdir(dir, { recursive: true });
-      const tsFiles = files
+      let tsFiles = files
         .filter(f => f.toString().endsWith('.ts') || f.toString().endsWith('.tsx'))
         .filter(f => !f.toString().includes('node_modules'))
-        .map(f => `${dir}/${f}`);
+        .map(f => path.join(dir, f.toString()));
+
+      // Apply custom filter if provided
+      if (filter) {
+        tsFiles = tsFiles.filter(filter);
+      }
 
       allFiles.push(...tsFiles);
     } catch {
@@ -211,6 +234,21 @@ async function getAllFiles(targetDir: string): Promise<string[]> {
   }
 
   return allFiles;
+}
+
+async function getFilesFromSerena(targetDir: string, layer: string): Promise<string[]> {
+  const files = await getFiles(targetDir, f => f.includes(layer));
+
+  if (files.length === 0) {
+    const searchDirs = [targetDir, targetDir.replace('/src', '/tests')];
+    console.warn(`   ⚠️  No files found for ${layer} layer in ${searchDirs.join(', ')}`);
+  }
+
+  return files;
+}
+
+async function getAllFiles(targetDir: string): Promise<string[]> {
+  return getFiles(targetDir);
 }
 
 async function extractPatternsForLayer(
@@ -340,8 +378,12 @@ async function main() {
   console.log(`📁 Target: ${targetDir}`);
   console.log(`💾 Output: ${outputFile}`);
 
+  // Check dependencies
+  console.log('\n🔍 Checking dependencies...');
+  await checkDependencies();
+
   // Validate paths
-  console.log('\n🔍 Validating paths...');
+  console.log('🔍 Validating paths...');
   await validatePaths(targetDir, outputFile);
 
   const layers = ['domain', 'data', 'infra', 'presentation', 'main'];
@@ -417,6 +459,14 @@ async function main() {
   const totalPatterns = Object.values(allPatterns).reduce((sum, patterns) => sum + patterns.length, 0);
   console.log(`\n📈 Total: ${totalPatterns} patterns extracted`);
   console.log(`\n💾 Saved to: ${outputFile}`);
+
+  // Show failures if any
+  if (failures.length > 0) {
+    console.log(`\n⚠️  Failed Extractions: ${failures.length}`);
+    failures.forEach(({ layer, error }) => {
+      console.log(`   - ${layer}: ${error}`);
+    });
+  }
 }
 
 main().catch(error => {
