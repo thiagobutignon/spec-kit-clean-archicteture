@@ -69,7 +69,10 @@ interface ExtractionFailure {
   error: string;
 }
 
-const failures: ExtractionFailure[] = [];
+interface ExtractionResult {
+  patterns: Pattern[];
+  failures: ExtractionFailure[];
+}
 
 // Configuration constants
 const MAX_PROMPT_SIZE = 50000; // Maximum prompt size to prevent DoS
@@ -77,6 +80,7 @@ const MAX_CODE_SAMPLE_LENGTH = 10000; // Claude context window limit
 const MAX_SRC_SAMPLES = 3; // Number of source files to sample
 const MAX_TEST_SAMPLES = 2; // Number of test files to sample
 const MAX_CONCURRENT_API_CALLS = 3; // Rate limiting for Claude API (prevent rate limit errors)
+const MAX_FILE_SIZE = 1024 * 1024; // 1MB - Maximum file size to prevent memory exhaustion
 
 const SYSTEM_PROMPT = `You are a comprehensive code quality and architecture pattern analyzer.
 
@@ -218,9 +222,9 @@ async function checkDependencies(): Promise<void> {
  * Analyzes code with Claude CLI (or mock if unavailable) to extract validation patterns
  * @param code - Source code to analyze (will be sanitized and truncated)
  * @param layer - Layer name for context (domain, data, infra, etc.)
- * @returns Array of extracted patterns, or empty array on failure
+ * @returns Extraction result with patterns and any failures
  */
-async function analyzeCodeWithClaude(code: string, layer: string): Promise<Pattern[]> {
+async function analyzeCodeWithClaude(code: string, layer: string): Promise<ExtractionResult> {
   // Sanitize and truncate code to prevent injection attacks
   const sanitizedCode = sanitizeInput(code);
   const truncatedCode = sanitizedCode.substring(0, MAX_CODE_SAMPLE_LENGTH);
@@ -245,12 +249,26 @@ Extract patterns that would catch violations in similar code.`;
 
     // Try to use Claude CLI if available, fallback to mock
     try {
-      const result = execFileSync('claude', ['-p', prompt, '--output-format', 'json'], {
-        encoding: 'utf-8',
-        maxBuffer: 10 * 1024 * 1024, // 10MB
-      });
+      // Try with --output-format flag (newer versions)
+      let result: string;
+      try {
+        result = execFileSync('claude', ['-p', prompt, '--output-format', 'json'], {
+          encoding: 'utf-8',
+          maxBuffer: 10 * 1024 * 1024, // 10MB
+        });
+      } catch (flagError) {
+        // Fallback to no flag (older versions or different CLI behavior)
+        if (process.env.DEBUG) {
+          console.warn(`   ⚠️  --output-format flag not supported, trying without flag`);
+        }
+        result = execFileSync('claude', ['-p', prompt], {
+          encoding: 'utf-8',
+          maxBuffer: 10 * 1024 * 1024, // 10MB
+        });
+      }
+
       const response = JSON.parse(result);
-      content = response.result;
+      content = response.result || result; // Fallback to raw result if no .result property
     } catch (claudeError) {
       // Claude CLI not available - use mock data
       console.warn(`   ⚠️  Claude CLI unavailable, using mock patterns for ${layer}`);
@@ -284,15 +302,17 @@ Extract patterns that would catch violations in similar code.`;
 
     if (!validation.success) {
       console.error(`❌ Invalid pattern format for ${layer}:`, validation.error.issues);
-      // Return empty array on validation failure
-      failures.push({
-        layer,
-        error: `Schema validation failed: ${validation.error.issues.map(i => i.message).join(', ')}`
-      });
-      return [];
+      const error = `Schema validation failed: ${validation.error.issues.map(i => i.message).join(', ')}`;
+      return {
+        patterns: [],
+        failures: [{ layer, error }]
+      };
     }
 
-    return validation.data.patterns;
+    return {
+      patterns: validation.data.patterns,
+      failures: []
+    };
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     console.error(`❌ Failed to analyze ${layer} code: ${errorMsg}`);
@@ -301,10 +321,10 @@ Extract patterns that would catch violations in similar code.`;
       console.error('Stack trace:', error);
     }
 
-    // Track failure for final summary
-    failures.push({ layer, error: errorMsg });
-
-    return [];
+    return {
+      patterns: [],
+      failures: [{ layer, error: errorMsg }]
+    };
   }
 }
 
@@ -362,7 +382,7 @@ async function getAllFiles(targetDir: string): Promise<string[]> {
 async function extractPatternsForLayer(
   targetDir: string,
   layer: string
-): Promise<Pattern[]> {
+): Promise<ExtractionResult> {
   console.log(`\n📂 Analyzing ${layer} layer...`);
 
   const files = await getFilesFromSerena(targetDir, layer);
@@ -373,7 +393,7 @@ async function extractPatternsForLayer(
   console.log(`   Found ${files.length} files (${srcFiles.length} src, ${testFiles.length} tests)`);
 
   if (files.length === 0) {
-    return [];
+    return { patterns: [], failures: [] };
   }
 
   // Read first 5 files as samples (to avoid token limits)
@@ -399,20 +419,20 @@ async function extractPatternsForLayer(
   }
 
   if (!combinedCode) {
-    return [];
+    return { patterns: [], failures: [] };
   }
 
   console.log(`   🤖 Analyzing with Claude...`);
-  const patterns = await analyzeCodeWithClaude(combinedCode, layer);
-  console.log(`   ✅ Extracted ${patterns.length} patterns`);
+  const result = await analyzeCodeWithClaude(combinedCode, layer);
+  console.log(`   ✅ Extracted ${result.patterns.length} patterns`);
 
-  return patterns;
+  return result;
 }
 
 async function extractQualityPatterns(
   targetDir: string,
   category: string
-): Promise<Pattern[]> {
+): Promise<ExtractionResult> {
   console.log(`\n📊 Analyzing ${category} patterns...`);
 
   const allFiles = await getAllFiles(targetDir);
@@ -423,7 +443,7 @@ async function extractQualityPatterns(
   console.log(`   Found ${allFiles.length} total files (${srcFiles.length} src, ${testFiles.length} tests)`);
 
   if (allFiles.length === 0) {
-    return [];
+    return { patterns: [], failures: [] };
   }
 
   // For quality patterns, sample from all code
@@ -455,14 +475,14 @@ async function extractQualityPatterns(
   }
 
   if (!combinedCode) {
-    return [];
+    return { patterns: [], failures: [] };
   }
 
   console.log(`   🤖 Analyzing with Claude...`);
-  const patterns = await analyzeCodeWithClaude(combinedCode, category);
-  console.log(`   ✅ Extracted ${patterns.length} patterns`);
+  const result = await analyzeCodeWithClaude(combinedCode, category);
+  console.log(`   ✅ Extracted ${result.patterns.length} patterns`);
 
-  return patterns;
+  return result;
 }
 
 /**
@@ -504,8 +524,6 @@ async function validatePaths(targetDir: string, outputFile: string): Promise<voi
     await fs.mkdir(outputDir, { recursive: true });
   }
 }
-
-const MAX_FILE_SIZE = 1024 * 1024; // 1MB
 
 /**
  * Main execution function
@@ -557,8 +575,12 @@ async function main() {
   const layerResults = await Promise.all(
     layers.map(layer => limit(() => extractPatternsForLayer(targetDir, layer)))
   );
-  layerResults.forEach((patterns, index) => {
-    allPatterns[layers[index] as keyof LayerPatterns] = patterns;
+
+  // Collect patterns and failures from results
+  const allFailures: ExtractionFailure[] = [];
+  layerResults.forEach((result, index) => {
+    allPatterns[layers[index] as keyof LayerPatterns] = result.patterns;
+    allFailures.push(...result.failures);
   });
 
   // Extract quality patterns from all code (parallel with rate limiting)
@@ -566,8 +588,10 @@ async function main() {
   const qualityResults = await Promise.all(
     qualityCategories.map(category => limit(() => extractQualityPatterns(targetDir, category)))
   );
-  qualityResults.forEach((patterns, index) => {
-    allPatterns[qualityCategories[index] as keyof LayerPatterns] = patterns;
+
+  qualityResults.forEach((result, index) => {
+    allPatterns[qualityCategories[index] as keyof LayerPatterns] = result.patterns;
+    allFailures.push(...result.failures);
   });
 
   // Generate YAML output
@@ -610,9 +634,9 @@ async function main() {
   console.log(`\n💾 Saved to: ${outputFile}`);
 
   // Show failures if any
-  if (failures.length > 0) {
-    console.log(`\n⚠️  Failed Extractions: ${failures.length}`);
-    failures.forEach(({ layer, error }) => {
+  if (allFailures.length > 0) {
+    console.log(`\n⚠️  Failed Extractions: ${allFailures.length}`);
+    allFailures.forEach(({ layer, error }) => {
       console.log(`   - ${layer}: ${error}`);
     });
   }

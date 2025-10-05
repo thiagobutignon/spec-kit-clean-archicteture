@@ -20,3 +20,6 @@ templates/*-main-template.regent
 # Auto-generated pattern files (generate during installation or CI/CD)
 .regent/patterns/auto-generated.yaml
 .regent/patterns/*-comprehensive.yaml
+
+# Reference implementations for pattern extraction testing
+clean-ts-api/

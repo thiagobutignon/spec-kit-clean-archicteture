@@ -70,7 +70,7 @@ Traditional LLM coding ("vibe coding"):
 
 The dogfooding success revealed clear next steps:
 
-- **#171**: Integrate [Auditor library](https://github.com/TheAuditorTool/Auditor) for enhanced quality
+- **#171**: ✅ Integrate [TheAuditor](https://github.com/TheAuditorTool/Auditor) for enhanced quality (Planning Complete - See [Integration Docs](#-theauditor-integration))
 - **#172**: SWE-bench TypeScript benchmark (prove superiority quantitatively)
 - **#173**: Improve logger output for better visibility
 - **#174**: Non-interactive mode for AI orchestration
@@ -152,6 +152,60 @@ This architecture transforms The Regent from a **prescriptive tool** into an **a
 ### The Real Power
 
 The true "secret sauce" isn't just generating code - it's generating **contextually optimized code** for your specific architecture needs while maintaining Clean Architecture principles as invariants.
+
+## 🔬 TheAuditor Integration
+
+The Regent is integrating with [TheAuditor](https://github.com/TheAuditorTool/Auditor) for enhanced security and quality analysis.
+
+### Integration Status
+
+**Planning Phase: ✅ Complete** (Issue [#171](https://github.com/thiagobutignon/the-regent/issues/171))
+
+### Documentation
+
+- 📋 [**Integration Roadmap**](./docs/theauditor-integration-roadmap.md) - 4-phase implementation plan with code examples
+- 🔍 [**Comparative Analysis**](./docs/theauditor-comparative-analysis.md) - Feature comparison and complementary capabilities
+- 🧠 [**Strategic Analysis**](./docs/theauditor-strategic-analysis.md) - Neuroscience-inspired "Perfect Triad" architecture
+
+### The Perfect Triad Architecture
+
+The integration creates a three-component system analogous to brain architecture:
+
+| Component | Brain Analog | Role |
+|-----------|--------------|------|
+| **spec-kit** | Prefrontal Cortex | Strategic planning & decision-making |
+| **The Regent** | Motor Cortex | Deterministic execution & implementation |
+| **TheAuditor** | Sensory System | Security feedback & quality validation |
+
+### Integration Phases
+
+1. **Phase 1: Foundation** (Weeks 1-2)
+   - Install TheAuditor as dependency
+   - Create adapter in infrastructure layer
+   - Basic integration tests
+
+2. **Phase 2: Feedback Loop** (Weeks 3-4)
+   - RLHF score mapping
+   - Automated quality validation
+   - Pattern learning system
+
+3. **Phase 3: Unified CLI** (Weeks 5-6)
+   - Single command interface
+   - Adaptive model routing
+   - Cost optimization (54% savings)
+
+4. **Phase 4: Continuous Learning** (Weeks 7-8)
+   - Template improvements from feedback
+   - Self-improving patterns
+   - Community pattern sharing
+
+### Benefits
+
+- ✅ **Enhanced Security**: SAST vulnerability detection
+- ✅ **Quality Validation**: Automated code quality checks
+- ✅ **RLHF Integration**: Security findings → learning scores
+- ✅ **Cost Optimization**: Adaptive model selection
+- ✅ **Offline-First**: Works without internet connectivity
 
 ## 🔍 Pattern Extraction & Code Analysis
 
