@@ -43,6 +43,12 @@ interface ExtractionFailure {
 
 const failures: ExtractionFailure[] = [];
 
+// Configuration constants
+const MAX_PROMPT_SIZE = 50000; // Maximum prompt size to prevent DoS
+const MAX_CODE_SAMPLE_LENGTH = 10000; // Claude context window limit
+const MAX_SRC_SAMPLES = 3; // Number of source files to sample
+const MAX_TEST_SAMPLES = 2; // Number of test files to sample
+
 const SYSTEM_PROMPT = `You are a comprehensive code quality and architecture pattern analyzer.
 
 Given source code files, extract validation patterns that enforce best practices.
@@ -153,7 +159,7 @@ async function checkDependencies(): Promise<void> {
 }
 
 async function analyzeCodeWithClaude(code: string, layer: string): Promise<Pattern[]> {
-  const truncatedCode = code.substring(0, 10000);
+  const truncatedCode = code.substring(0, MAX_CODE_SAMPLE_LENGTH);
   const prompt = `${SYSTEM_PROMPT}
 
 Analyze this ${layer} layer code and extract validation patterns:
@@ -163,6 +169,11 @@ ${truncatedCode} // Truncated for context window
 \`\`\`
 
 Extract patterns that would catch violations in similar code.`;
+
+  // Validate prompt size to prevent DoS attacks
+  if (prompt.length > MAX_PROMPT_SIZE) {
+    throw new Error(`Prompt size (${prompt.length}) exceeds maximum safe size (${MAX_PROMPT_SIZE})`);
+  }
 
   try {
     // Use execFileSync with array arguments to avoid command injection
@@ -227,8 +238,12 @@ async function getFiles(
       }
 
       allFiles.push(...tsFiles);
-    } catch {
-      // Directory doesn't exist, skip silently
+    } catch (error) {
+      // Directory doesn't exist or not accessible
+      if (process.env.DEBUG) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.warn(`Directory ${dir} not accessible: ${errorMsg}`);
+      }
       continue;
     }
   }
@@ -270,11 +285,18 @@ async function extractPatternsForLayer(
 
   // Read first 5 files as samples (to avoid token limits)
   // Prioritize src files, then tests
-  const samples = [...srcFiles.slice(0, 3), ...testFiles.slice(0, 2)];
+  const samples = [...srcFiles.slice(0, MAX_SRC_SAMPLES), ...testFiles.slice(0, MAX_TEST_SAMPLES)];
   let combinedCode = '';
 
   for (const file of samples) {
     try {
+      // Enforce file size limit
+      const stats = await fs.stat(file);
+      if (stats.size > MAX_FILE_SIZE) {
+        console.warn(`   ⚠️  Skipping ${file}: exceeds size limit (${stats.size} > ${MAX_FILE_SIZE})`);
+        continue;
+      }
+
       const content = await fs.readFile(file, 'utf-8');
       combinedCode += `\n// File: ${file}\n${content}\n`;
     } catch (error) {
@@ -313,6 +335,7 @@ async function extractQualityPatterns(
 
   // For quality patterns, sample from all code
   // Prefer test files for TDD patterns, src files for others
+  const MAX_QUALITY_SAMPLES = 5;
   let samples: string[];
   if (category === 'tdd') {
     samples = [...testFiles.slice(0, 4), ...srcFiles.slice(0, 1)];
@@ -323,6 +346,13 @@ async function extractQualityPatterns(
   let combinedCode = '';
   for (const file of samples) {
     try {
+      // Enforce file size limit
+      const stats = await fs.stat(file);
+      if (stats.size > MAX_FILE_SIZE) {
+        console.warn(`   ⚠️  Skipping ${file}: exceeds size limit (${stats.size} > ${MAX_FILE_SIZE})`);
+        continue;
+      }
+
       const content = await fs.readFile(file, 'utf-8');
       combinedCode += `\n// File: ${file}\n${content}\n`;
     } catch (error) {
@@ -343,6 +373,11 @@ async function extractQualityPatterns(
 }
 
 async function validatePaths(targetDir: string, outputFile: string): Promise<void> {
+  // Check for path traversal patterns
+  if (targetDir.includes('..') || outputFile.includes('..')) {
+    throw new Error('Path traversal patterns (..) are not allowed');
+  }
+
   // Validate target directory exists and is within project bounds
   const absoluteTarget = path.resolve(targetDir);
   const projectRoot = path.resolve(process.cwd());
