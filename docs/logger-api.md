@@ -307,3 +307,248 @@ logger.info('message');
 logger.error('error message', { context: 'details' });
 logger.close();
 ```
+
+## Troubleshooting
+
+### Logs Not Appearing in File
+
+**Symptom**: Console shows logs but file is empty or missing
+
+**Possible Causes & Solutions**:
+
+1. **Stream not flushed**: Call `logger.close()` before process exits
+   ```typescript
+   process.on('exit', () => logger.close());
+   ```
+
+2. **Permission denied**: Logger falls back to console-only mode
+   ```
+   Warning: Could not create log directory at /path: EACCES: permission denied
+   Logging will continue to console only.
+   ```
+   **Solution**: Check directory permissions or use a different path
+
+3. **Log directory doesn't exist**: Logger creates it automatically, but parent must exist
+   ```typescript
+   // Ensure parent directory exists
+   const logger = new Logger({ logDirectory: './logs' }); // ✅ Works
+   const logger = new Logger({ logDirectory: './non/exist/logs' }); // ❌ May fail
+   ```
+
+### Colors Not Showing
+
+**Symptom**: Console output shows raw ANSI codes or no colors
+
+**Possible Causes & Solutions**:
+
+1. **Not a TTY**: Colors are auto-disabled for non-TTY environments
+   ```typescript
+   // Force colorization (not recommended)
+   const logger = new Logger({
+     logDirectory: './logs',
+     colorize: true,  // Usually auto-detected
+   });
+   ```
+
+2. **CI/CD environment**: Most CI systems aren't TTYs
+   **Solution**: Colors automatically disabled; check file logs instead
+
+3. **Windows Command Prompt**: May not support ANSI colors
+   **Solution**: Use Windows Terminal, PowerShell, or disable colors
+
+### Context Not Showing in Logs
+
+**Symptom**: Logs don't show `{step=..., layer=...}` context
+
+**Possible Causes & Solutions**:
+
+1. **Verbose mode disabled**: Context only shown when verbose=true
+   ```typescript
+   const logger = new Logger({
+     logDirectory: './logs',
+     verbose: true,  // Enable to see context
+   });
+   ```
+
+2. **Environment variable**: Set `LOG_VERBOSE=true`
+   ```bash
+   LOG_VERBOSE=true node your-script.js
+   ```
+
+### Log Level Filtering Issues
+
+**Symptom**: Expected log messages not appearing
+
+**Possible Causes & Solutions**:
+
+1. **Log level too high**: DEBUG messages won't show if logLevel=INFO
+   ```typescript
+   const logger = new Logger({
+     logDirectory: './logs',
+     logLevel: LogLevel.DEBUG,  // Show everything
+   });
+   ```
+
+2. **Quiet mode enabled**: Only ERROR messages show in quiet mode
+   ```typescript
+   // Check quiet mode
+   const logger = new Logger({
+     logDirectory: './logs',
+     quiet: false,  // Ensure not in quiet mode
+   });
+   ```
+
+3. **SUCCESS messages**: These always show regardless of log level
+   - This is intentional for critical milestones
+
+### Performance Issues
+
+**Symptom**: Logging is slow or blocking
+
+**Possible Causes & Solutions**:
+
+1. **Synchronous writes**: Use async patterns
+   ```typescript
+   // Don't do this in a tight loop
+   for (let i = 0; i < 10000; i++) {
+     logger.debug(`Item ${i}`);  // ❌ Slow
+   }
+
+   // Better approach
+   logger.debug(`Processing ${items.length} items`);
+   processItems();
+   logger.debug(`Completed ${items.length} items`);
+   ```
+
+2. **Verbose logging in production**: Use appropriate log levels
+   ```typescript
+   const logger = new Logger({
+     logDirectory: './logs',
+     logLevel: process.env.NODE_ENV === 'production'
+       ? LogLevel.INFO
+       : LogLevel.DEBUG,
+   });
+   ```
+
+3. **Large context objects**: Minimize context in hot paths
+   ```typescript
+   // ❌ Avoid large objects
+   logger.debug('Processing', {
+     data: hugeArray,  // Don't log entire arrays
+   });
+
+   // ✅ Log summary instead
+   logger.debug('Processing', {
+     count: hugeArray.length,
+     first: hugeArray[0],
+   });
+   ```
+
+### Step Progress Shows [N/N] Instead of [current/total]
+
+**Symptom**: Progress shows `[1/1]`, `[2/2]` instead of `[1/50]`, `[2/50]`
+
+**Solution**: Pass `totalSteps` parameter
+```typescript
+// ❌ Without totalSteps
+logger.startStep('step-1', 'Processing', 'domain');
+// Shows: [1/1] step-1
+
+// ✅ With totalSteps
+logger.startStep('step-1', 'Processing', 'domain', 50);
+// Shows: [1/50] step-1
+```
+
+### Invalid RLHF Score Warning
+
+**Symptom**: Warning message: `Unexpected RLHF score: X`
+
+**Cause**: RLHF scores must be in range [-2, -1, 0, 1, 2]
+
+**Solution**: Use valid score values
+```typescript
+// ✅ Valid scores
+logger.logRLHFScore(-2, 'Major violations');
+logger.logRLHFScore(-1, 'Minor violations');
+logger.logRLHFScore(0, 'Neutral');
+logger.logRLHFScore(1, 'Good');
+logger.logRLHFScore(2, 'Perfect');
+
+// ❌ Invalid score
+logger.logRLHFScore(999, 'Invalid');  // Triggers warning
+```
+
+### Logs Contain Escaped Newlines
+
+**Symptom**: Logs show `\n` instead of actual newlines
+
+**Cause**: Log injection prevention sanitizes newlines
+
+**This is intentional** to prevent log injection attacks:
+```typescript
+// Input: "test\ninjection"
+// Logged as: "test\\ninjection"
+```
+
+**Solution**: If you need multiline output, use multiple log calls:
+```typescript
+// Instead of
+logger.info(`Line 1\nLine 2\nLine 3`);
+
+// Use
+logger.info('Line 1');
+logger.info('Line 2');
+logger.info('Line 3');
+```
+
+### Memory Warnings: MaxListenersExceeded
+
+**Symptom**: Warning about too many event listeners
+
+**Cause**: Creating multiple Logger instances without closing them
+
+**Solution**: Reuse logger instance and close properly
+```typescript
+// ✅ Good: Single instance
+const logger = new Logger({ logDirectory: './logs' });
+// ... use logger ...
+logger.close();
+
+// ❌ Bad: Multiple instances without closing
+for (let i = 0; i < 20; i++) {
+  const logger = new Logger({ logDirectory: './logs' });  // Memory leak!
+}
+```
+
+### File Locks on Windows
+
+**Symptom**: File is locked or can't be deleted
+
+**Cause**: Stream not properly closed
+
+**Solution**: Always call `close()` and wait for process exit
+```typescript
+const logger = new Logger({ logDirectory: './logs' });
+
+// Setup cleanup
+process.on('beforeExit', () => {
+  logger.close();
+});
+
+// Or use try-finally
+try {
+  // ... logging ...
+} finally {
+  logger.close();
+}
+```
+
+### Getting Help
+
+If you encounter issues not covered here:
+
+1. **Check the log file**: `execution.log` often has more details
+2. **Enable DEBUG level**: See all internal logging
+3. **Check file permissions**: Ensure write access to log directory
+4. **Review examples**: See "Example: Complete Workflow" section
+5. **File an issue**: Report bugs with minimal reproduction case
