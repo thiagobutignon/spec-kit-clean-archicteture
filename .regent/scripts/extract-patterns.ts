@@ -27,11 +27,17 @@ interface LayerPatterns {
   infra: Pattern[];
   presentation: Pattern[];
   main: Pattern[];
+  tdd: Pattern[];
+  solid: Pattern[];
+  dry: Pattern[];
+  design_patterns: Pattern[];
+  kiss_yagni: Pattern[];
+  cross_cutting: Pattern[];
 }
 
-const SYSTEM_PROMPT = `You are a Clean Architecture pattern analyzer.
+const SYSTEM_PROMPT = `You are a comprehensive code quality and architecture pattern analyzer.
 
-Given source code files, extract validation patterns that enforce Clean Architecture rules.
+Given source code files, extract validation patterns that enforce best practices.
 
 Output ONLY valid JSON in this exact format:
 {
@@ -52,12 +58,58 @@ Output ONLY valid JSON in this exact format:
   ]
 }
 
-Focus on:
+Focus on extracting patterns for:
+
+**Clean Architecture:**
 - Layer dependency violations (domain importing from data/infra)
 - Missing interfaces (use cases without contracts)
 - External dependencies in wrong layers (axios in domain)
-- Architecture patterns (ISP, SRP, DDD)
 - Naming conventions
+
+**TDD Patterns:**
+- Test structure (AAA: Arrange, Act, Assert)
+- Test naming conventions (should, describe patterns)
+- Mock/Spy/Stub patterns
+- Test coverage indicators
+- Red-Green-Refactor cycle compliance
+
+**SOLID Principles:**
+- SRP: Single Responsibility (classes doing too much)
+- OCP: Open/Closed (modification vs extension)
+- LSP: Liskov Substitution (interface contract violations)
+- ISP: Interface Segregation (fat interfaces)
+- DIP: Dependency Inversion (direct implementations vs abstractions)
+
+**DRY Violations:**
+- Duplicated code blocks
+- Repeated logic patterns
+- Similar function implementations
+
+**Design Patterns:**
+- Factory Pattern implementation
+- Strategy Pattern usage
+- Repository Pattern
+- Observer/Event patterns
+- Decorator Pattern
+- Adapter Pattern
+- Singleton (anti-pattern detection)
+- God Object (anti-pattern)
+
+**KISS/YAGNI:**
+- Unnecessary complexity
+- Over-engineering
+- Unused code paths
+- Dead code
+- Premature optimization
+
+**Cross-Cutting Concerns:**
+- Logging patterns
+- Error handling consistency
+- Validation patterns
+- Security concerns (auth, sanitization)
+- Performance patterns (caching, lazy loading)
+- Transaction boundaries
+- Monitoring/Observability
 
 DO NOT include markdown, explanations, or anything except the JSON.`;
 
@@ -177,18 +229,34 @@ async function main() {
   console.log(`💾 Output: ${outputFile}`);
 
   const layers = ['domain', 'data', 'infra', 'presentation', 'main'];
+  const qualityCategories = ['tdd', 'solid', 'dry', 'design_patterns', 'kiss_yagni', 'cross_cutting'];
+
   const allPatterns: LayerPatterns = {
     domain: [],
     data: [],
     infra: [],
     presentation: [],
-    main: []
+    main: [],
+    tdd: [],
+    solid: [],
+    dry: [],
+    design_patterns: [],
+    kiss_yagni: [],
+    cross_cutting: []
   };
 
   // Extract patterns for each layer
   for (const layer of layers) {
     const patterns = await extractPatternsForLayer(targetDir, layer);
     allPatterns[layer as keyof LayerPatterns] = patterns;
+  }
+
+  // Extract quality patterns from all code
+  console.log('\n🎯 Analyzing quality patterns across codebase...');
+  for (const category of qualityCategories) {
+    console.log(`\n📊 Analyzing ${category} patterns...`);
+    const patterns = await extractPatternsForLayer(targetDir, category);
+    allPatterns[category as keyof LayerPatterns] = patterns;
   }
 
   // Generate YAML output
@@ -211,12 +279,23 @@ async function main() {
   await fs.writeFile(outputFile, yamlContent, 'utf-8');
 
   console.log('\n✅ Pattern extraction complete!');
-  console.log(`📊 Summary:`);
+  console.log(`\n📊 Clean Architecture Summary:`);
   console.log(`   Domain: ${allPatterns.domain.length} patterns`);
   console.log(`   Data: ${allPatterns.data.length} patterns`);
   console.log(`   Infra: ${allPatterns.infra.length} patterns`);
   console.log(`   Presentation: ${allPatterns.presentation.length} patterns`);
   console.log(`   Main: ${allPatterns.main.length} patterns`);
+
+  console.log(`\n🎯 Quality Patterns Summary:`);
+  console.log(`   TDD: ${allPatterns.tdd.length} patterns`);
+  console.log(`   SOLID: ${allPatterns.solid.length} patterns`);
+  console.log(`   DRY: ${allPatterns.dry.length} patterns`);
+  console.log(`   Design Patterns: ${allPatterns.design_patterns.length} patterns`);
+  console.log(`   KISS/YAGNI: ${allPatterns.kiss_yagni.length} patterns`);
+  console.log(`   Cross-Cutting: ${allPatterns.cross_cutting.length} patterns`);
+
+  const totalPatterns = Object.values(allPatterns).reduce((sum, patterns) => sum + patterns.length, 0);
+  console.log(`\n📈 Total: ${totalPatterns} patterns extracted`);
   console.log(`\n💾 Saved to: ${outputFile}`);
 }
 
