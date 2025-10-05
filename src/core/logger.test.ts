@@ -197,7 +197,8 @@ describe('Logger', () => {
       });
       logger.info('Test message');
       const logContent = await getLogContent();
-      expect(logContent).toMatch(/\[\d{2}:\d{2}:\d{2}\]/);
+      // Accept 2-3 digits for hours to support processes up to 999 hours
+      expect(logContent).toMatch(/\[\d{2,3}:\d{2}:\d{2}\]/);
     });
 
     it('should hide timestamps when showTimestamp is false', async () => {
