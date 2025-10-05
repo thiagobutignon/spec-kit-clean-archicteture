@@ -99,17 +99,31 @@ Extract patterns that would catch violations in similar code.`;
 }
 
 async function getFilesFromSerena(targetDir: string, layer: string): Promise<string[]> {
-  try {
-    // Use filesystem to search for files in specific layer
-    const files = await fs.readdir(targetDir, { recursive: true });
-    return files
-      .filter(f => f.toString().includes(layer))
-      .filter(f => f.toString().endsWith('.ts') || f.toString().endsWith('.tsx'))
-      .map(f => `${targetDir}/${f}`);
-  } catch {
-    console.warn('Failed to read directory, returning empty array');
-    return [];
+  const allFiles: string[] = [];
+
+  // Search in both src/ and tests/ directories
+  const searchDirs = [targetDir, targetDir.replace('/src', '/tests')];
+
+  for (const dir of searchDirs) {
+    try {
+      const files = await fs.readdir(dir, { recursive: true });
+      const layerFiles = files
+        .filter(f => f.toString().includes(layer))
+        .filter(f => f.toString().endsWith('.ts') || f.toString().endsWith('.tsx'))
+        .map(f => `${dir}/${f}`);
+
+      allFiles.push(...layerFiles);
+    } catch {
+      // Directory doesn't exist, skip silently
+      continue;
+    }
   }
+
+  if (allFiles.length === 0) {
+    console.warn(`   ⚠️  No files found for ${layer} layer in ${searchDirs.join(', ')}`);
+  }
+
+  return allFiles;
 }
 
 async function extractPatternsForLayer(
@@ -119,14 +133,19 @@ async function extractPatternsForLayer(
   console.log(`\n📂 Analyzing ${layer} layer...`);
 
   const files = await getFilesFromSerena(targetDir, layer);
-  console.log(`   Found ${files.length} files`);
+
+  const srcFiles = files.filter(f => f.includes('/src/'));
+  const testFiles = files.filter(f => f.includes('/tests/') || f.includes('/test/'));
+
+  console.log(`   Found ${files.length} files (${srcFiles.length} src, ${testFiles.length} tests)`);
 
   if (files.length === 0) {
     return [];
   }
 
   // Read first 5 files as samples (to avoid token limits)
-  const samples = files.slice(0, 5);
+  // Prioritize src files, then tests
+  const samples = [...srcFiles.slice(0, 3), ...testFiles.slice(0, 2)];
   let combinedCode = '';
 
   for (const file of samples) {
