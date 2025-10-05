@@ -4,16 +4,12 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { parseExecutionOptions } from './execution-options';
+import { cleanupExecutionEnvVars } from '../__tests__/helpers/env-cleanup';
 
 describe('parseExecutionOptions', () => {
   beforeEach(() => {
     // Clear environment variables before each test
-    delete process.env.REGENT_NON_INTERACTIVE;
-    delete process.env.REGENT_AUTO_CONFIRM;
-    delete process.env.REGENT_STRICT;
-    delete process.env.CI;
-    delete process.env.CLAUDE_CODE;
-    delete process.env.AI_ORCHESTRATOR;
+    cleanupExecutionEnvVars();
 
     // Mock console methods to suppress output during tests
     vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -22,12 +18,7 @@ describe('parseExecutionOptions', () => {
 
   afterEach(() => {
     // Clean env vars in afterEach too for safety
-    delete process.env.REGENT_NON_INTERACTIVE;
-    delete process.env.REGENT_AUTO_CONFIRM;
-    delete process.env.REGENT_STRICT;
-    delete process.env.CI;
-    delete process.env.CLAUDE_CODE;
-    delete process.env.AI_ORCHESTRATOR;
+    cleanupExecutionEnvVars();
 
     vi.restoreAllMocks();
   });
@@ -61,6 +52,42 @@ describe('parseExecutionOptions', () => {
 
     it('should detect REGENT_NON_INTERACTIVE=true', () => {
       process.env.REGENT_NON_INTERACTIVE = 'true';
+      const options = parseExecutionOptions({});
+      expect(options.nonInteractive).toBe(true);
+    });
+
+    it('should detect REGENT_NON_INTERACTIVE=True (case-insensitive)', () => {
+      process.env.REGENT_NON_INTERACTIVE = 'True';
+      const options = parseExecutionOptions({});
+      expect(options.nonInteractive).toBe(true);
+    });
+
+    it('should detect REGENT_NON_INTERACTIVE=TRUE (case-insensitive)', () => {
+      process.env.REGENT_NON_INTERACTIVE = 'TRUE';
+      const options = parseExecutionOptions({});
+      expect(options.nonInteractive).toBe(true);
+    });
+
+    it('should detect REGENT_NON_INTERACTIVE=yes', () => {
+      process.env.REGENT_NON_INTERACTIVE = 'yes';
+      const options = parseExecutionOptions({});
+      expect(options.nonInteractive).toBe(true);
+    });
+
+    it('should detect REGENT_NON_INTERACTIVE=YES (case-insensitive)', () => {
+      process.env.REGENT_NON_INTERACTIVE = 'YES';
+      const options = parseExecutionOptions({});
+      expect(options.nonInteractive).toBe(true);
+    });
+
+    it('should detect REGENT_NON_INTERACTIVE=on', () => {
+      process.env.REGENT_NON_INTERACTIVE = 'on';
+      const options = parseExecutionOptions({});
+      expect(options.nonInteractive).toBe(true);
+    });
+
+    it('should detect REGENT_NON_INTERACTIVE=ON (case-insensitive)', () => {
+      process.env.REGENT_NON_INTERACTIVE = 'ON';
       const options = parseExecutionOptions({});
       expect(options.nonInteractive).toBe(true);
     });

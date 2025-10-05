@@ -506,9 +506,18 @@ class EnhancedStepExecutor {
         } else if (this.executionOptions.autoConfirm) {
           // Auto-confirm mode: Proceed automatically
           console.log(chalk.yellow('   ✅ Auto-confirming (--yes flag)'));
+          this.logAuditEvent('auto_confirm_git_dirty', {
+            reason: 'Uncommitted changes detected',
+            autoConfirm: true,
+          });
         } else if (this.executionOptions.strict) {
-          // Strict non-interactive mode: Fail immediately
-          console.log(chalk.red('   ❌ Failing due to uncommitted changes (strict mode)'));
+          // Strict non-interactive mode: Fail immediately with actionable guidance
+          console.log(chalk.red('   ❌ Strict mode: Uncommitted changes detected'));
+          console.log(chalk.gray('   To proceed, choose one of these options:'));
+          console.log(chalk.gray('   • Run: git status          (see uncommitted changes)'));
+          console.log(chalk.gray('   • Run: git commit -am "msg" (commit changes)'));
+          console.log(chalk.gray('   • Run: git stash           (temporarily save changes)'));
+          console.log(chalk.gray('   • Remove --strict flag     (allow execution with uncommitted changes)'));
           return false;
         } else {
           // Non-interactive mode: Proceed without confirmation
@@ -627,12 +636,21 @@ class EnhancedStepExecutor {
 
         // Check execution mode
         if (this.executionOptions.strict) {
-          // Strict mode: Fail on validation errors
-          console.log(chalk.red('   ❌ Failing due to validation errors (strict mode)'));
+          // Strict mode: Fail on validation errors with actionable guidance
+          console.log(chalk.red('   ❌ Strict mode: Validation errors detected'));
+          console.log(chalk.gray('   To proceed, choose one of these options:'));
+          console.log(chalk.gray('   • Fix the validation errors listed above'));
+          console.log(chalk.gray('   • Run: npx tsx src/validate-template.ts <template>  (validate template)'));
+          console.log(chalk.gray('   • Remove --strict flag  (allow execution with warnings)'));
           return false;
         } else if (this.executionOptions.autoConfirm) {
           // Auto-confirm mode: Proceed despite errors
           console.log(chalk.yellow('   ⚠️  Continuing despite validation errors (--yes flag)'));
+          this.logAuditEvent('auto_confirm_validation_errors', {
+            errorCount: this.validationResult.errors.length,
+            warningCount: this.validationResult.warnings.length,
+            autoConfirm: true,
+          });
           return true;
         } else if (this.executionOptions.nonInteractive) {
           // Non-interactive mode: Proceed with warning
@@ -1755,6 +1773,16 @@ class EnhancedStepExecutor {
 async function executeBatch(pattern: string, options: ExecutionOptions): Promise<void> {
   console.log(chalk.cyan.bold(`\n🚀 Batch execution mode: ${pattern}`));
 
+  // Security warning for batch operations with auto-confirm
+  // Note: strict mode overrides autoConfirm, so no warning if strict is enabled
+  if (options.autoConfirm && !options.strict && pattern === '--all') {
+    console.log(chalk.yellow.bold('\n⚠️  WARNING: Running batch execution with --yes flag'));
+    console.log(chalk.yellow('   This will auto-confirm ALL prompts for ALL templates'));
+    console.log(chalk.yellow('   Only use this in trusted CI/CD environments'));
+    console.log(chalk.gray('   Press Ctrl+C within 3 seconds to abort...\n'));
+    await new Promise(resolve => setTimeout(resolve, 3000));
+  }
+
   let templates: string[] = [];
 
   if (pattern === '--all') {
@@ -1812,6 +1840,7 @@ async function executeBatch(pattern: string, options: ExecutionOptions): Promise
 async function main() {
   const args = argv._;
 
+  // Validate arguments before any usage
   if (args.length < 1) {
     console.error(chalk.red.bold('Usage: npx tsx execute-steps.ts <path_to_implementation.yaml> [options]'));
     console.error(chalk.gray('\nBatch Execution Options:'));
@@ -1835,6 +1864,12 @@ async function main() {
     process.exit(1);
   }
 
+  // Validate template path type
+  if (typeof args[0] !== 'string') {
+    console.error(chalk.red.bold('Error: Template path must be a string'));
+    process.exit(EXIT_CODES.ERROR);
+  }
+
   // Parse execution options from CLI flags
   const options: ExecutionOptions = {
     nonInteractive: argv['non-interactive'] || argv.nonInteractive || false,
@@ -1842,12 +1877,7 @@ async function main() {
     strict: argv.strict || false,
   };
 
-  // Validate template path argument
-  if (typeof argv._[0] !== 'string') {
-    console.error(chalk.red.bold('Error: Template path must be a string'));
-    process.exit(EXIT_CODES.ERROR);
-  }
-  const arg = argv._[0];
+  const arg = args[0];
 
   // Check for batch execution
   if (arg.startsWith('--')) {

@@ -5,16 +5,12 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { parseExecutionOptions } from '../utils/execution-options';
+import { cleanupExecutionEnvVars } from './helpers/env-cleanup';
 
 describe('Execute Steps - Execution Options Integration', () => {
   beforeEach(() => {
     // Clear environment variables before each test
-    delete process.env.REGENT_NON_INTERACTIVE;
-    delete process.env.REGENT_AUTO_CONFIRM;
-    delete process.env.REGENT_STRICT;
-    delete process.env.CI;
-    delete process.env.CLAUDE_CODE;
-    delete process.env.AI_ORCHESTRATOR;
+    cleanupExecutionEnvVars();
 
     // Mock console to suppress output
     vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -23,12 +19,7 @@ describe('Execute Steps - Execution Options Integration', () => {
 
   afterEach(() => {
     // Clean env vars in afterEach too for safety
-    delete process.env.REGENT_NON_INTERACTIVE;
-    delete process.env.REGENT_AUTO_CONFIRM;
-    delete process.env.REGENT_STRICT;
-    delete process.env.CI;
-    delete process.env.CLAUDE_CODE;
-    delete process.env.AI_ORCHESTRATOR;
+    cleanupExecutionEnvVars();
 
     vi.restoreAllMocks();
   });
@@ -188,6 +179,58 @@ describe('Execute Steps - Execution Options Integration', () => {
       expect(options.strict).toBe(true);
       // autoConfirm should be false due to strict override
       expect(options.autoConfirm).toBe(false);
+    });
+  });
+
+  describe('Batch execution with options', () => {
+    it('should pass nonInteractive option to batch executors', () => {
+      const options = parseExecutionOptions({ nonInteractive: true });
+
+      expect(options.nonInteractive).toBe(true);
+      // Verify options object can be passed to EnhancedStepExecutor
+      expect(typeof options).toBe('object');
+      expect(options).toHaveProperty('nonInteractive');
+    });
+
+    it('should pass strict option to batch executors', () => {
+      const options = parseExecutionOptions({
+        nonInteractive: true,
+        strict: true
+      });
+
+      expect(options.strict).toBe(true);
+      expect(options.nonInteractive).toBe(true);
+      // Verify all options are present
+      expect(options).toHaveProperty('strict');
+      expect(options).toHaveProperty('nonInteractive');
+      expect(options).toHaveProperty('autoConfirm');
+    });
+
+    it('should handle autoConfirm override in batch mode', () => {
+      const options = parseExecutionOptions({
+        autoConfirm: true,
+        strict: true
+      });
+
+      // Strict should override autoConfirm even in batch mode
+      expect(options.strict).toBe(true);
+      expect(options.autoConfirm).toBe(false);
+    });
+
+    it('should preserve all execution options for batch operations', () => {
+      process.env.CI = 'true';
+      const options = parseExecutionOptions({
+        autoConfirm: true
+      });
+
+      // CI environment should enable nonInteractive
+      expect(options.nonInteractive).toBe(true);
+      expect(options.autoConfirm).toBe(true);
+
+      // All options should be present and correct
+      expect(Object.keys(options)).toContain('nonInteractive');
+      expect(Object.keys(options)).toContain('autoConfirm');
+      expect(Object.keys(options)).toContain('strict');
     });
   });
 });

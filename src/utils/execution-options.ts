@@ -23,19 +23,17 @@ const ENV_VARS = {
 } as const;
 
 /**
- * Valid boolean values for environment variables
+ * Valid boolean values for environment variables (case-insensitive)
  */
-const BOOLEAN_VALUES = {
-  TRUE_NUMERIC: '1',
-  TRUE_STRING: 'true',
-} as const;
+const TRUTHY_VALUES = ['1', 'true', 'yes', 'on'] as const;
 
 /**
  * Check if environment variable is set to a truthy value
+ * Accepts: '1', 'true', 'yes', 'on' (case-insensitive)
  */
 function isEnvTrue(varName: string): boolean {
-  const value = process.env[varName];
-  return value === BOOLEAN_VALUES.TRUE_NUMERIC || value === BOOLEAN_VALUES.TRUE_STRING;
+  const value = process.env[varName]?.toLowerCase();
+  return TRUTHY_VALUES.includes(value as typeof TRUTHY_VALUES[number]);
 }
 
 /**
