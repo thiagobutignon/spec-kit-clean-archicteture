@@ -139,6 +139,49 @@ All contributions must meet these scoring thresholds:
    - Code review by maintainers
    - Architecture compliance check
 
+## 📝 Updating the Changelog
+
+All PRs (except docs/ci/typos) must update CHANGELOG.md:
+
+1. Add entry under `## [Unreleased]` section
+2. Use appropriate category (Added/Changed/Fixed/Removed/Security)
+3. Include PR number: `- Description (#123)`
+4. Follow [Keep a Changelog](https://keepachangelog.com/) format
+
+### Categories
+
+- **Added**: New features
+- **Changed**: Changes to existing functionality
+- **Deprecated**: Soon-to-be removed features
+- **Removed**: Removed features
+- **Fixed**: Bug fixes
+- **Security**: Security fixes
+- **Performance**: Performance improvements
+
+### Example
+
+```markdown
+## [Unreleased]
+
+### Fixed
+- Fix namespace pollution from zx/globals (#177)
+
+### Added
+- Non-interactive execution mode for AI orchestration (#174)
+```
+
+### Exceptions (skip-changelog label)
+
+If your PR only touches these areas, add the `skip-changelog` label:
+- Documentation-only changes (README, docs/)
+- Typo fixes
+- CI/CD config changes (.github/workflows/)
+- Development tooling (.gitignore, .editorconfig)
+- Test-only changes (no production code)
+- Code formatting (prettier, lint auto-fixes)
+
+The CI will automatically check for CHANGELOG updates and allow skipping with the label.
+
 ## 📚 Documentation
 
 When contributing documentation:

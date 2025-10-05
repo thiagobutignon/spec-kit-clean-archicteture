@@ -1,0 +1,56 @@
+name: Changelog Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  check-changelog:
+    name: Verify CHANGELOG.md updated
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if CHANGELOG was modified
+        run: |
+          # Get list of modified files
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+
+          # Check if CHANGELOG.md is in the list
+          if echo "$FILES" | grep -q "^CHANGELOG.md$"; then
+            echo "✅ CHANGELOG.md was updated"
+            exit 0
+          fi
+
+          # Allow skip with label
+          if gh pr view ${{ github.event.pull_request.number }} --json labels \
+             | jq -e '.labels[] | select(.name == "skip-changelog")' > /dev/null; then
+            echo "⏭️  Skipping CHANGELOG check (skip-changelog label)"
+            exit 0
+          fi
+
+          echo "❌ CHANGELOG.md must be updated"
+          echo ""
+          echo "Please add an entry to CHANGELOG.md under ## [Unreleased]"
+          echo ""
+          echo "Follow Keep a Changelog format:"
+          echo "  ### Added     - New features"
+          echo "  ### Changed   - Changes to existing functionality"
+          echo "  ### Fixed     - Bug fixes"
+          echo "  ### Removed   - Removed features"
+          echo "  ### Security  - Security improvements"
+          echo ""
+          echo "Include your PR number: - Description (#${{ github.event.pull_request.number }})"
+          echo ""
+          echo "If this PR doesn't need a changelog entry (typo, docs, CI/CD, tests),"
+          echo "add the 'skip-changelog' label to this PR."
+          exit 1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

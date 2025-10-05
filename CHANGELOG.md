@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **CHANGELOG Enforcement in PRs** (#186)
+  - GitHub Action workflow to verify CHANGELOG.md updates in all PRs
+  - Support for `skip-changelog` label for exceptions (docs, typo, CI/CD, tests)
+  - Pull request template with CHANGELOG reminder checklist
+  - CONTRIBUTING.md section with comprehensive CHANGELOG guidelines
+  - Automated enforcement ensures version history completeness
+  - Clear error messages guide contributors on proper format
+  - Examples and categories (Added/Changed/Fixed/Removed/Security)
+  - Security: Explicit permissions block (principle of least privilege)
+  - File: `.github/workflows/changelog-check.yml`
+  - File: `.github/pull_request_template.md`
+  - Documentation: `CONTRIBUTING.md` (Updating the Changelog section)
+
 - **Automated Commit Convention** (#179)
   - Standardized all Regent automated commits to use `regent` conventional commit type
   - Added `regent` to ConventionalCommitType enum in commit-generator.ts
