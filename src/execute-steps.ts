@@ -245,8 +245,23 @@ class EnhancedStepExecutor {
 
   /**
    * Log security-relevant events for audit trail
-   * @param event - Event type (e.g., 'script_validation', 'git_operation', 'rollback')
-   * @param details - Event details object
+   *
+   * Audit events are stored in memory (last 100 entries) and can be viewed in real-time
+   * by setting the AUDIT_LOG environment variable to 'true'.
+   *
+   * Key audit events logged:
+   * - auto_confirm_git_dirty: When --yes bypasses git dirty check
+   * - auto_confirm_validation_errors: When --yes bypasses validation errors
+   * - script_validation: When scripts are validated for security
+   * - git_operation: Git operations performed
+   * - rollback_started: When rollback is initiated
+   * - rollback_success/rollback_failed: Rollback results
+   *
+   * Usage:
+   *   AUDIT_LOG=true npx tsx src/execute-steps.ts template.regent --yes
+   *
+   * @param event - Event type (e.g., 'auto_confirm_git_dirty', 'script_validation')
+   * @param details - Event details object (error counts, reasons, etc.)
    */
   private logAuditEvent(event: string, details: Record<string, unknown>): void {
     const auditEntry = {
@@ -1773,16 +1788,6 @@ class EnhancedStepExecutor {
 async function executeBatch(pattern: string, options: ExecutionOptions): Promise<void> {
   console.log(chalk.cyan.bold(`\n🚀 Batch execution mode: ${pattern}`));
 
-  // Security warning for batch operations with auto-confirm
-  // Note: strict mode overrides autoConfirm, so no warning if strict is enabled
-  if (options.autoConfirm && !options.strict && pattern === '--all') {
-    console.log(chalk.yellow.bold('\n⚠️  WARNING: Running batch execution with --yes flag'));
-    console.log(chalk.yellow('   This will auto-confirm ALL prompts for ALL templates'));
-    console.log(chalk.yellow('   Only use this in trusted CI/CD environments'));
-    console.log(chalk.gray('   Press Ctrl+C within 3 seconds to abort...\n'));
-    await new Promise(resolve => setTimeout(resolve, 3000));
-  }
-
   let templates: string[] = [];
 
   if (pattern === '--all') {
@@ -1810,6 +1815,17 @@ async function executeBatch(pattern: string, options: ExecutionOptions): Promise
   }
 
   console.log(chalk.blue(`Found ${templates.length} templates to execute`));
+
+  // Security warning for batch operations with auto-confirm
+  // Note: strict mode overrides autoConfirm, so no warning if strict is enabled
+  // Show warning for any batch operation with multiple templates
+  if (options.autoConfirm && !options.strict && templates.length > 1) {
+    console.log(chalk.yellow.bold(`\n⚠️  WARNING: Running batch execution with --yes flag (${templates.length} templates)`));
+    console.log(chalk.yellow('   This will auto-confirm ALL prompts for ALL templates'));
+    console.log(chalk.yellow('   Only use this in trusted CI/CD environments'));
+    console.log(chalk.gray('   Press Ctrl+C within 3 seconds to abort...\n'));
+    await new Promise(resolve => setTimeout(resolve, 3000));
+  }
 
   let succeeded = 0;
   let failed = 0;

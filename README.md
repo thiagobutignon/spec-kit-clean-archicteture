@@ -260,6 +260,32 @@ Always verify:
 - Operations are non-destructive
 - The environment is secure and isolated
 
+#### 📋 Audit Logging
+
+The Regent includes an audit trail for security-relevant events, especially useful when using `--yes` flag in CI/CD environments.
+
+**Enable Audit Logging:**
+```bash
+# View audit events in real-time
+AUDIT_LOG=true npx tsx src/execute-steps.ts template.regent --yes
+
+# Combine with other flags
+AUDIT_LOG=true CI=true npx tsx src/execute-steps.ts --all --yes
+```
+
+**Audit Events Logged:**
+- `auto_confirm_git_dirty` - When --yes bypasses uncommitted changes warning
+- `auto_confirm_validation_errors` - When --yes bypasses validation errors
+- `script_validation` - Script security validation results
+- `git_operation` - Git commands executed
+- `rollback_started/success/failed` - Rollback operations
+
+**Features:**
+- Last 100 events stored in memory
+- Real-time console output with `AUDIT_LOG=true`
+- Includes timestamps and detailed context
+- Helps track automated decisions in CI/CD pipelines
+
 ### Architecture Validation Scripts
 
 The Regent includes powerful NPM scripts to validate and visualize your Clean Architecture:

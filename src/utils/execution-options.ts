@@ -33,6 +33,7 @@ const TRUTHY_VALUES = ['1', 'true', 'yes', 'on'] as const;
  */
 function isEnvTrue(varName: string): boolean {
   const value = process.env[varName]?.toLowerCase();
+  if (!value) return false;
   return TRUTHY_VALUES.includes(value as typeof TRUTHY_VALUES[number]);
 }
 
