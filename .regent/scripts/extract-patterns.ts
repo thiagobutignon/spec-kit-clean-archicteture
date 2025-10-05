@@ -178,6 +178,30 @@ async function getFilesFromSerena(targetDir: string, layer: string): Promise<str
   return allFiles;
 }
 
+async function getAllFiles(targetDir: string): Promise<string[]> {
+  const allFiles: string[] = [];
+
+  // Search in both src/ and tests/ directories
+  const searchDirs = [targetDir, targetDir.replace('/src', '/tests')];
+
+  for (const dir of searchDirs) {
+    try {
+      const files = await fs.readdir(dir, { recursive: true });
+      const tsFiles = files
+        .filter(f => f.toString().endsWith('.ts') || f.toString().endsWith('.tsx'))
+        .filter(f => !f.toString().includes('node_modules'))
+        .map(f => `${dir}/${f}`);
+
+      allFiles.push(...tsFiles);
+    } catch {
+      // Directory doesn't exist, skip silently
+      continue;
+    }
+  }
+
+  return allFiles;
+}
+
 async function extractPatternsForLayer(
   targetDir: string,
   layer: string
@@ -220,6 +244,53 @@ async function extractPatternsForLayer(
   return patterns;
 }
 
+async function extractQualityPatterns(
+  targetDir: string,
+  category: string
+): Promise<Pattern[]> {
+  console.log(`\n📊 Analyzing ${category} patterns...`);
+
+  const allFiles = await getAllFiles(targetDir);
+
+  const srcFiles = allFiles.filter(f => f.includes('/src/'));
+  const testFiles = allFiles.filter(f => f.includes('/tests/') || f.includes('/test/'));
+
+  console.log(`   Found ${allFiles.length} total files (${srcFiles.length} src, ${testFiles.length} tests)`);
+
+  if (allFiles.length === 0) {
+    return [];
+  }
+
+  // For quality patterns, sample from all code
+  // Prefer test files for TDD patterns, src files for others
+  let samples: string[];
+  if (category === 'tdd') {
+    samples = [...testFiles.slice(0, 4), ...srcFiles.slice(0, 1)];
+  } else {
+    samples = [...srcFiles.slice(0, 4), ...testFiles.slice(0, 1)];
+  }
+
+  let combinedCode = '';
+  for (const file of samples) {
+    try {
+      const content = await fs.readFile(file, 'utf-8');
+      combinedCode += `\n// File: ${file}\n${content}\n`;
+    } catch {
+      console.warn(`   ⚠️  Could not read ${file}`);
+    }
+  }
+
+  if (!combinedCode) {
+    return [];
+  }
+
+  console.log(`   🤖 Analyzing with Claude...`);
+  const patterns = await analyzeCodeWithClaude(combinedCode, category);
+  console.log(`   ✅ Extracted ${patterns.length} patterns`);
+
+  return patterns;
+}
+
 async function main() {
   const targetDir = process.argv[2] || './src';
   const outputFile = process.argv[3] || '.regent/patterns/auto-generated.yaml';
@@ -254,8 +325,7 @@ async function main() {
   // Extract quality patterns from all code
   console.log('\n🎯 Analyzing quality patterns across codebase...');
   for (const category of qualityCategories) {
-    console.log(`\n📊 Analyzing ${category} patterns...`);
-    const patterns = await extractPatternsForLayer(targetDir, category);
+    const patterns = await extractQualityPatterns(targetDir, category);
     allPatterns[category as keyof LayerPatterns] = patterns;
   }
 
