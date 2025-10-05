@@ -2,6 +2,7 @@
 // This is correct and not affected by the ESM bug - native fs works fine with namespace imports
 // Only fs-extra requires default import in ESM/tsx context
 import * as fs from 'fs';
+import { Writable } from 'stream';
 import path from 'path';
 import chalk from 'chalk';
 
@@ -72,6 +73,7 @@ class Logger {
   private currentStepStartTime?: number;
   private expectedTotalSteps?: number;
   private shutdownHandlersRegistered = false;
+  private shutdownInProgress = false;
   private closeStreamHandler?: () => void;
 
   constructor(options: LoggerOptions | string) {
@@ -112,7 +114,7 @@ class Logger {
       console.warn('Logging will continue to console only.');
       this.logFilePath = '';
       // Create a dummy writable stream that does nothing
-      this.logStream = new (require('stream').Writable)({
+      this.logStream = new Writable({
         write(_chunk: any, _encoding: any, callback: () => void) {
           callback();
         },
@@ -162,6 +164,10 @@ class Logger {
     if (this.shutdownHandlersRegistered) return;
 
     this.closeStreamHandler = () => {
+      // Protect against concurrent shutdown signals
+      if (this.shutdownInProgress) return;
+      this.shutdownInProgress = true;
+
       if (this.logStream && !this.logStream.closed) {
         this.logStream.end();
       }
