@@ -269,6 +269,97 @@ The Regent system uses **9 numbered commands** (`/01` through `/09`) that follow
 
 > **Migration Note**: If you were using legacy commands (`/constitution`, `/specify`, `/plan`, `/tasks`, `/implement`, `/clarify`, `/analyze`), they have been removed as of v2.2.0. Use the numbered workflow above instead - start with `/01-plan-layer-features` to begin your implementation.
 
+### Execution Modes
+
+The Regent supports different execution modes for automation and CI/CD integration:
+
+#### CLI Flags
+
+| Flag | Description | Use Case |
+|------|-------------|----------|
+| `--non-interactive` | Disable all prompts, proceed with defaults | CI/CD pipelines, automated workflows |
+| `--yes` | Auto-confirm all prompts | Trusted automated environments |
+| `--strict` | Fail immediately on warnings/uncommitted changes | Quality gates, pre-commit checks |
+
+#### Environment Variables
+
+| Variable | Value | Effect |
+|----------|-------|--------|
+| `REGENT_NON_INTERACTIVE` | `1` or `true` | Enable non-interactive mode |
+| `REGENT_AUTO_CONFIRM` | `1` or `true` | Auto-confirm all prompts |
+| `REGENT_STRICT` | `1` or `true` | Enable strict mode |
+| `CI` | `true` | Auto-detected, enables non-interactive mode |
+| `CLAUDE_CODE` | Any value | Auto-detected, enables non-interactive mode |
+| `AI_ORCHESTRATOR` | Any value | Auto-detected, enables non-interactive mode |
+
+#### Priority Order
+
+Settings are applied in this order (highest to lowest priority):
+1. CLI flags
+2. Environment variables
+3. Config file (`interactive_safety` in `.regent/config/execute.yml`)
+
+#### Examples
+
+```bash
+# Non-interactive mode for CI/CD
+npx tsx src/execute-steps.ts template.regent --non-interactive
+
+# Auto-confirm all prompts (use with caution)
+npx tsx src/execute-steps.ts template.regent --yes
+
+# Strict mode for quality gates
+npx tsx src/execute-steps.ts template.regent --strict
+
+# Combine flags
+npx tsx src/execute-steps.ts --all --non-interactive --strict
+
+# Environment variable
+REGENT_NON_INTERACTIVE=1 npx tsx src/execute-steps.ts template.regent
+
+# CI environment (auto-detected)
+CI=true npx tsx src/execute-steps.ts template.regent
+```
+
+#### ⚠️ Security Warning
+
+**The `--yes` flag bypasses all safety prompts and should only be used in trusted CI/CD environments.**
+
+- ✅ Safe: `CI=true regent execute template.regent --yes` (in trusted CI pipeline)
+- ❌ Unsafe: Using `--yes` for destructive operations in local development
+- ⚠️ Note: `--strict` mode overrides `--yes` to prevent unintended auto-confirmations
+
+Always verify:
+- Scripts are from trusted sources
+- Operations are non-destructive
+- The environment is secure and isolated
+
+#### 📋 Audit Logging
+
+The Regent includes an audit trail for security-relevant events, especially useful when using `--yes` flag in CI/CD environments.
+
+**Enable Audit Logging:**
+```bash
+# View audit events in real-time
+AUDIT_LOG=true npx tsx src/execute-steps.ts template.regent --yes
+
+# Combine with other flags
+AUDIT_LOG=true CI=true npx tsx src/execute-steps.ts --all --yes
+```
+
+**Audit Events Logged:**
+- `auto_confirm_git_dirty` - When --yes bypasses uncommitted changes warning
+- `auto_confirm_validation_errors` - When --yes bypasses validation errors
+- `script_validation` - Script security validation results
+- `git_operation` - Git commands executed
+- `rollback_started/success/failed` - Rollback operations
+
+**Features:**
+- Last 100 events stored in memory
+- Real-time console output with `AUDIT_LOG=true`
+- Includes timestamps and detailed context
+- Helps track automated decisions in CI/CD pipelines
+
 ### Architecture Validation Scripts
 
 The Regent includes powerful NPM scripts to validate and visualize your Clean Architecture:

@@ -27,6 +27,7 @@ import {
 } from './utils/commit-generator';
 import { validateConfig } from './utils/config-validator';
 import { EXIT_CODES, RATE_LIMITS, RETRY, TIMING } from './utils/constants';
+import { ExecutionOptions, parseExecutionOptions } from './utils/execution-options.js';
 
 $.verbose = true;
 $.shell = '/bin/bash';
@@ -158,6 +159,7 @@ class EnhancedStepExecutor {
   private lastGitOpTime: number = 0;
   private rateLimitLock: Promise<void> = Promise.resolve();
   private auditLog: Array<{ timestamp: string; event: string; details: Record<string, unknown> }> = [];
+  private executionOptions: ExecutionOptions;
 
   /**
    * Create a new EnhancedStepExecutor instance
@@ -171,6 +173,7 @@ class EnhancedStepExecutor {
    *
    * @param {string} implementationPath - Path to the YAML implementation file
    *                                      (e.g., './spec/001-feature/domain/implementation.yaml')
+   * @param {ExecutionOptions} options - Execution options for non-interactive mode
    *
    * @example
    * ```typescript
@@ -178,8 +181,11 @@ class EnhancedStepExecutor {
    * await executor.run();
    * ```
    */
-  constructor(private implementationPath: string) {
+  constructor(private implementationPath: string, options: ExecutionOptions = {}) {
     this.plan = { steps: [] };
+
+    // Parse execution options (CLI flags, env vars, config)
+    this.executionOptions = parseExecutionOptions(options);
 
     // Use the utility function to resolve log directory
     const logDir = resolveLogDirectory(implementationPath);
@@ -194,6 +200,7 @@ class EnhancedStepExecutor {
     // Setup cleanup handlers
     this.setupCleanupHandlers();
   }
+
 
   /**
    * Setup signal handlers for graceful cleanup on interrupt
@@ -238,8 +245,23 @@ class EnhancedStepExecutor {
 
   /**
    * Log security-relevant events for audit trail
-   * @param event - Event type (e.g., 'script_validation', 'git_operation', 'rollback')
-   * @param details - Event details object
+   *
+   * Audit events are stored in memory (last 100 entries) and can be viewed in real-time
+   * by setting the AUDIT_LOG environment variable to 'true'.
+   *
+   * Key audit events logged:
+   * - auto_confirm_git_dirty: When --yes bypasses git dirty check
+   * - auto_confirm_validation_errors: When --yes bypasses validation errors
+   * - script_validation: When scripts are validated for security
+   * - git_operation: Git operations performed
+   * - rollback_started: When rollback is initiated
+   * - rollback_success/rollback_failed: Rollback results
+   *
+   * Usage:
+   *   AUDIT_LOG=true npx tsx src/execute-steps.ts template.regent --yes
+   *
+   * @param event - Event type (e.g., 'auto_confirm_git_dirty', 'script_validation')
+   * @param details - Event details object (error counts, reasons, etc.)
    */
   private logAuditEvent(event: string, details: Record<string, unknown>): void {
     const auditEntry = {
@@ -481,10 +503,11 @@ class EnhancedStepExecutor {
         console.log(chalk.yellow('   The execute command will create commits. Please commit or stash your changes first.'));
         console.log(chalk.gray('   Run: git status to see your changes'));
 
-        // Check if interactive safety is enabled (default: true)
-        const interactiveSafety = this.commitConfig.interactiveSafety !== false;
+        // Check execution mode
+        const isInteractive = !this.executionOptions.nonInteractive && this.commitConfig.interactiveSafety !== false;
 
-        if (interactiveSafety) {
+        if (isInteractive) {
+          // Interactive mode: Ask user for confirmation
           const { confirmAction } = await import('./utils/prompt-utils.js');
           const shouldContinue = await confirmAction(
             'Do you want to continue anyway? This may result in mixed commits.',
@@ -495,10 +518,25 @@ class EnhancedStepExecutor {
             console.log(chalk.yellow('⏸️  Execution aborted by user. Please commit or stash your changes first.'));
             return false;
           }
+        } else if (this.executionOptions.autoConfirm) {
+          // Auto-confirm mode: Proceed automatically
+          console.log(chalk.yellow('   ✅ Auto-confirming (--yes flag)'));
+          this.logAuditEvent('auto_confirm_git_dirty', {
+            reason: 'Uncommitted changes detected',
+            autoConfirm: true,
+          });
+        } else if (this.executionOptions.strict) {
+          // Strict non-interactive mode: Fail immediately with actionable guidance
+          console.log(chalk.red('   ❌ Strict mode: Uncommitted changes detected'));
+          console.log(chalk.gray('   To proceed, choose one of these options:'));
+          console.log(chalk.gray('   • Run: git status          (see uncommitted changes)'));
+          console.log(chalk.gray('   • Run: git commit -am "msg" (commit changes)'));
+          console.log(chalk.gray('   • Run: git stash           (temporarily save changes)'));
+          console.log(chalk.gray('   • Remove --strict flag     (allow execution with uncommitted changes)'));
+          return false;
         } else {
-          // Non-interactive mode: give user 5 seconds to abort
-          console.log(chalk.yellow('\n   Continuing in 5 seconds... (Press Ctrl+C to abort)'));
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          // Non-interactive mode: Proceed without confirmation
+          console.log(chalk.yellow('   ▶️  Proceeding in non-interactive mode'));
         }
       }
 
@@ -611,13 +649,36 @@ class EnhancedStepExecutor {
           });
         }
 
-        // Ask user if they want to continue despite validation errors
-        console.log(chalk.yellow('\n⚠️  Template has validation errors.'));
-        console.log(chalk.yellow('Do you want to continue anyway? (not recommended)'));
-        console.log(chalk.gray('Press Ctrl+C to abort, or wait 5 seconds to continue...'));
-
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        return true; // Continue with warnings
+        // Check execution mode
+        if (this.executionOptions.strict) {
+          // Strict mode: Fail on validation errors with actionable guidance
+          console.log(chalk.red('   ❌ Strict mode: Validation errors detected'));
+          console.log(chalk.gray('   To proceed, choose one of these options:'));
+          console.log(chalk.gray('   • Fix the validation errors listed above'));
+          console.log(chalk.gray('   • Run: npx tsx src/validate-template.ts <template>  (validate template)'));
+          console.log(chalk.gray('   • Remove --strict flag  (allow execution with warnings)'));
+          return false;
+        } else if (this.executionOptions.autoConfirm) {
+          // Auto-confirm mode: Proceed despite errors
+          console.log(chalk.yellow('   ⚠️  Continuing despite validation errors (--yes flag)'));
+          this.logAuditEvent('auto_confirm_validation_errors', {
+            errorCount: this.validationResult.errors.length,
+            warningCount: this.validationResult.warnings.length,
+            autoConfirm: true,
+          });
+          return true;
+        } else if (this.executionOptions.nonInteractive) {
+          // Non-interactive mode: Proceed with warning
+          console.log(chalk.yellow('   ⚠️  Continuing despite validation errors (non-interactive mode)'));
+          return true;
+        } else {
+          // Interactive mode: Wait for user decision
+          console.log(chalk.yellow('\n⚠️  Template has validation errors.'));
+          console.log(chalk.yellow('Do you want to continue anyway? (not recommended)'));
+          console.log(chalk.gray('Press Ctrl+C to abort, or wait 5 seconds to continue...'));
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          return true;
+        }
       }
 
       console.log(chalk.green('✅ Template validation passed!'));
@@ -1724,7 +1785,7 @@ class EnhancedStepExecutor {
 }
 
 // Batch execution support
-async function executeBatch(pattern: string): Promise<void> {
+async function executeBatch(pattern: string, options: ExecutionOptions): Promise<void> {
   console.log(chalk.cyan.bold(`\n🚀 Batch execution mode: ${pattern}`));
 
   let templates: string[] = [];
@@ -1755,6 +1816,17 @@ async function executeBatch(pattern: string): Promise<void> {
 
   console.log(chalk.blue(`Found ${templates.length} templates to execute`));
 
+  // Security warning for batch operations with auto-confirm
+  // Note: strict mode overrides autoConfirm, so no warning if strict is enabled
+  // Show warning for any batch operation with multiple templates
+  if (options.autoConfirm && !options.strict && templates.length > 1) {
+    console.log(chalk.yellow.bold(`\n⚠️  WARNING: Running batch execution with --yes flag (${templates.length} templates)`));
+    console.log(chalk.yellow('   This will auto-confirm ALL prompts for ALL templates'));
+    console.log(chalk.yellow('   Only use this in trusted CI/CD environments'));
+    console.log(chalk.gray('   Press Ctrl+C within 3 seconds to abort...\n'));
+    await new Promise(resolve => setTimeout(resolve, 3000));
+  }
+
   let succeeded = 0;
   let failed = 0;
 
@@ -1763,7 +1835,7 @@ async function executeBatch(pattern: string): Promise<void> {
     console.log('─'.repeat(50));
 
     try {
-      const executor = new EnhancedStepExecutor(template);
+      const executor = new EnhancedStepExecutor(template, options);
       await executor.run();
       succeeded++;
       console.log(chalk.green(`✅ Success: ${path.basename(template)}`));
@@ -1784,28 +1856,51 @@ async function executeBatch(pattern: string): Promise<void> {
 async function main() {
   const args = argv._;
 
+  // Validate arguments before any usage
   if (args.length < 1) {
-    console.error(chalk.red.bold('Usage: npx tsx execute-steps-enhanced.ts <path_to_implementation.yaml>'));
-    console.error(chalk.gray('\nOptions:'));
+    console.error(chalk.red.bold('Usage: npx tsx execute-steps.ts <path_to_implementation.yaml> [options]'));
+    console.error(chalk.gray('\nBatch Execution Options:'));
     console.error(chalk.gray('  --all              Execute all templates'));
     console.error(chalk.gray('  --layer=<layer>    Execute templates for specific layer'));
     console.error(chalk.gray('  --target=<target>  Execute templates for specific target'));
+    console.error(chalk.gray('\nExecution Mode Flags:'));
+    console.error(chalk.gray('  --non-interactive  No prompts, fail on uncommitted changes'));
+    console.error(chalk.gray('  --yes              Auto-confirm all prompts'));
+    console.error(chalk.gray('  --strict           Fail on any warnings or uncommitted changes'));
+    console.error(chalk.gray('\nEnvironment Variables:'));
+    console.error(chalk.gray('  REGENT_NON_INTERACTIVE=1  Enable non-interactive mode'));
+    console.error(chalk.gray('  REGENT_AUTO_CONFIRM=1     Auto-confirm all prompts'));
+    console.error(chalk.gray('  REGENT_STRICT=1           Enable strict mode'));
+    console.error(chalk.gray('  CI=true                   Auto-detected CI environment'));
     console.error(chalk.gray('\nExamples:'));
-    console.error(chalk.gray('  npx tsx execute-steps-enhanced.ts templates/backend-domain-template.regent'));
-    console.error(chalk.gray('  npx tsx execute-steps-enhanced.ts --all'));
-    console.error(chalk.gray('  npx tsx execute-steps-enhanced.ts --layer=domain'));
-    console.error(chalk.gray('  npx tsx execute-steps-enhanced.ts --target=backend'));
+    console.error(chalk.gray('  npx tsx execute-steps.ts templates/backend-domain-template.regent'));
+    console.error(chalk.gray('  npx tsx execute-steps.ts --all --non-interactive'));
+    console.error(chalk.gray('  npx tsx execute-steps.ts --layer=domain --strict'));
+    console.error(chalk.gray('  REGENT_NON_INTERACTIVE=1 npx tsx execute-steps.ts template.regent'));
     process.exit(1);
   }
 
-  const arg = argv._[0] as string;
+  // Validate template path type
+  if (typeof args[0] !== 'string') {
+    console.error(chalk.red.bold('Error: Template path must be a string'));
+    process.exit(EXIT_CODES.ERROR);
+  }
+
+  // Parse execution options from CLI flags
+  const options: ExecutionOptions = {
+    nonInteractive: argv['non-interactive'] || argv.nonInteractive || false,
+    autoConfirm: argv.yes || argv.y || false,
+    strict: argv.strict || false,
+  };
+
+  const arg = args[0];
 
   // Check for batch execution
   if (arg.startsWith('--')) {
-    await executeBatch(arg);
+    await executeBatch(arg, options);
   } else {
     // Single file execution
-    const executor = new EnhancedStepExecutor(arg);
+    const executor = new EnhancedStepExecutor(arg, options);
     await executor.run();
   }
 }
