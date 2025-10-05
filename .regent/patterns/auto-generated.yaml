@@ -1,0 +1,433 @@
+metadata:
+  generated: 2025-10-05T15:30:00.000Z
+  source: ./src
+  tool: The Regent Pattern Extractor
+  version: 2.0.0
+  description: Auto-generated patterns extracted from The Regent codebase
+  files_analyzed: 37
+
+patterns:
+  # Domain Layer Patterns
+  domain:
+    - id: DOM001
+      name: interface-options-suffix
+      regex: export interface \w+Options \{
+      severity: low
+      description: Options interfaces should follow the 'Options' suffix pattern for consistency
+      examples:
+        - violation: export interface InitConfig {
+          fix: export interface InitOptions {
+
+    - id: DOM002
+      name: type-union-for-enums
+      regex: export type \w+ = '[^']+'\s*\|\s*'[^']+'
+      severity: low
+      description: Use type unions for enum-like values in TypeScript
+      examples:
+        - violation: enum StepType { CREATE = 'create_file' }
+          fix: export type StepType = 'create_file' | 'refactor_file' | 'delete_file';
+
+    - id: DOM003
+      name: architectural-scope-type
+      regex: export type ArchitecturalScope = 'domain' \| 'data' \| 'infra' \| 'presentation' \| 'main' \| 'core'
+      severity: medium
+      description: Architectural scope types should be explicitly defined for Clean Architecture compliance
+      examples:
+        - violation: const scope = 'domain'
+          fix: |
+            export type ArchitecturalScope = 'domain' | 'data' | 'infra' | 'presentation' | 'main' | 'core';
+            const scope: ArchitecturalScope = 'domain';
+
+  # Data Layer Patterns
+  data:
+    - id: DAT001
+      name: validation-result-pattern
+      regex: "\\{\\s*success:\\s*boolean;[\\s\\S]*data\\?:[\\s\\S]*errors\\?:"
+      severity: medium
+      description: Validation functions should return consistent result objects with success, data, and errors
+      examples:
+        - violation: |
+            function validate(input: any) {
+              if (error) throw new Error();
+              return data;
+            }
+          fix: |
+            function validateConfig(config: unknown): {
+              success: boolean;
+              data?: ValidatedConfig;
+              errors?: string[];
+            } {
+              if (result.success) {
+                return { success: true, data: result.data };
+              }
+              return { success: false, errors: ['error'] };
+            }
+
+    - id: DAT002
+      name: zod-schema-naming
+      regex: export const \w+Schema = z\.(object|string|number|array|enum)
+      severity: low
+      description: Zod schemas should use 'Schema' suffix for clarity
+      examples:
+        - violation: const CommitConfig = z.object({})
+          fix: const CommitConfigSchema = z.object({})
+
+    - id: DAT003
+      name: safe-parse-pattern
+      regex: \.safeParse\(
+      severity: medium
+      description: Use safeParse() instead of parse() for validation to avoid throwing errors
+      examples:
+        - violation: const result = schema.parse(data);
+          fix: |
+            const result = schema.safeParse(data);
+            if (!result.success) {
+              // handle errors
+            }
+
+  # Infrastructure Layer Patterns
+  infra:
+    - id: INF001
+      name: custom-error-class-naming
+      regex: export class (?!.*Error$)\w+ extends Error
+      severity: high
+      description: Custom error classes must end with 'Error' suffix
+      examples:
+        - violation: export class MCPInstallation extends Error {}
+          fix: export class MCPInstallationError extends Error {}
+
+    - id: INF002
+      name: error-class-name-property
+      regex: export class \w+Error extends Error \{[\s\S]*?constructor[\s\S]*?super\([\s\S]*?\n\s*this\.name = ['"]\w+Error['"];
+      severity: medium
+      description: Custom error classes should set this.name property in constructor
+      examples:
+        - violation: |
+            export class MCPInstallationError extends Error {
+              constructor(msg: string) {
+                super(msg);
+              }
+            }
+          fix: |
+            export class MCPInstallationError extends Error {
+              constructor(msg: string) {
+                super(msg);
+                this.name = 'MCPInstallationError';
+              }
+            }
+
+    - id: INF003
+      name: error-cause-property
+      regex: this\.cause = \w+;
+      severity: low
+      description: Error classes should preserve original error in cause property for debugging
+      examples:
+        - violation: |
+            constructor(msg: string) {
+              super(msg);
+            }
+          fix: |
+            constructor(serverName: string, originalError: unknown) {
+              super(`Failed to install ${serverName}`);
+              this.cause = originalError;
+            }
+
+    - id: INF004
+      name: exec-error-type-casting
+      regex: const err = \w+ as ExecError
+      severity: low
+      description: Use proper type casting for exec errors to access stderr and message
+      examples:
+        - violation: const errorMsg = originalError.message;
+          fix: |
+            const err = originalError as ExecError;
+            const errorMsg = err?.stderr?.toString() || err?.message || 'Unknown error';
+
+    - id: INF005
+      name: constants-uppercase
+      regex: export const [A-Z_]+ = \{
+      severity: low
+      description: Constant objects should use SCREAMING_SNAKE_CASE naming
+      examples:
+        - violation: export const timing = { delay: 100 }
+          fix: export const TIMING = { delay: 100 }
+
+    - id: INF006
+      name: package-manager-type
+      regex: export type PackageManager = 'npm' \| 'yarn' \| 'pnpm'
+      severity: low
+      description: Package manager type should include common package managers
+      examples:
+        - violation: const pm = 'npm'
+          fix: |
+            export type PackageManager = 'npm' | 'yarn' | 'pnpm';
+            const pm: PackageManager = 'npm';
+
+  # Presentation/CLI Layer Patterns
+  presentation:
+    - id: PRES001
+      name: cli-command-function-naming
+      regex: export (async )?function \w+Command\(
+      severity: low
+      description: CLI command functions should use 'Command' suffix
+      examples:
+        - violation: export function init() {}
+          fix: export function initCommand() {}
+
+    - id: PRES002
+      name: mcp-config-interface
+      regex: export interface MCPConfig \{[\s\S]*?mcpServers:
+      severity: medium
+      description: MCP configuration should follow standard structure with mcpServers property
+      examples:
+        - violation: |
+            interface Config {
+              servers: any
+            }
+          fix: |
+            export interface MCPJsonConfig {
+              mcpServers: {
+                [key: string]: MCPServerConfig;
+              };
+            }
+
+    - id: PRES003
+      name: supported-servers-const-assertion
+      regex: export const SUPPORTED_\w+ = \[.*\] as const
+      severity: low
+      description: Use const assertion for supported values arrays to get literal types
+      examples:
+        - violation: export const SUPPORTED_MCP_SERVERS = ['serena', 'context7']
+          fix: export const SUPPORTED_MCP_SERVERS = ['serena', 'context7', 'chrome-devtools'] as const;
+
+  # Main/Composition Layer Patterns
+  main:
+    - id: MAIN001
+      name: default-config-pattern
+      regex: export const DEFAULT_\w+(_CONFIG)?: \w+ = \{
+      severity: low
+      description: Default configurations should use DEFAULT_ prefix and uppercase naming
+      examples:
+        - violation: export const defaultCommitConfig = {}
+          fix: export const DEFAULT_COMMIT_CONFIG: CommitConfig = {}
+
+    - id: MAIN002
+      name: timeout-config-object
+      regex: export const \w+_TIMEOUT = \{[\s\S]*?MAX:[\s\S]*?MIN:
+      severity: low
+      description: Timeout configurations should include MAX and MIN values
+      examples:
+        - violation: export const TIMEOUT = 5000;
+          fix: |
+            export const VERIFICATION_TIMEOUT = {
+              MAX: 30000,
+              MIN: 1000
+            };
+
+  # TDD/Testing Patterns
+  tdd:
+    - id: TDD001
+      name: test-describe-block-organization
+      regex: describe\(['"][\w\s]+['"],\s*\(\)\s*=>\s*\{
+      severity: medium
+      description: Tests should be organized within describe blocks
+      examples:
+        - violation: test('should work', () => {})
+          fix: |
+            describe('MyClass', () => {
+              test('should work', () => {})
+            })
+
+    - id: TDD002
+      name: test-naming-should-convention
+      regex: (test|it)\(['"]should
+      severity: low
+      description: Test descriptions should start with 'should' for consistency
+      examples:
+        - violation: test('works correctly', () => {})
+          fix: test('should work correctly', () => {})
+
+  # SOLID Principles
+  solid:
+    - id: SOLID001
+      name: interface-segregation-config
+      regex: export interface \w+Config \{[\s\S]{500,}\}
+      severity: medium
+      description: Large config interfaces may violate ISP - consider splitting into smaller interfaces
+      examples:
+        - violation: |
+            export interface AppConfig {
+              // 50+ properties
+            }
+          fix: |
+            export interface DatabaseConfig { }
+            export interface AuthConfig { }
+            export interface AppConfig extends DatabaseConfig, AuthConfig { }
+
+    - id: SOLID002
+      name: dependency-injection-constructor
+      regex: constructor\([^)]*readonly [^)]*\)
+      severity: low
+      description: Use readonly modifier for injected dependencies (DIP pattern)
+      examples:
+        - violation: constructor(private logger: Logger) {}
+          fix: constructor(private readonly logger: Logger) {}
+
+  # DRY Patterns
+  dry:
+    - id: DRY001
+      name: type-inference-from-zod
+      regex: export type \w+ = z\.infer<typeof \w+Schema>
+      severity: low
+      description: Use z.infer to derive types from Zod schemas (DRY)
+      examples:
+        - violation: |
+            const Schema = z.object({ name: z.string() })
+            export type Config = { name: string }
+          fix: |
+            const ConfigSchema = z.object({ name: z.string() })
+            export type ValidatedConfig = z.infer<typeof ConfigSchema>
+
+    - id: DRY002
+      name: reusable-error-message-pattern
+      regex: const errorMsg = \w+\?\.stderr\?\.toString\(\) \|\| \w+\?\.message \|\| ['"]Unknown error['"]
+      severity: low
+      description: Reusable pattern for extracting error messages from various error types
+      examples:
+        - violation: const msg = error.message || 'error'
+          fix: const errorMsg = err?.stderr?.toString() || err?.message || 'Unknown error';
+
+  # Design Patterns
+  design_patterns:
+    - id: DP001
+      name: factory-pattern-make-prefix
+      regex: export (const|function) make\w+
+      severity: low
+      description: Factory functions should use 'make' prefix
+      examples:
+        - violation: export function createLogger() {}
+          fix: export function makeLogger() {}
+
+    - id: DP002
+      name: builder-pattern-options-object
+      regex: function \w+\([^)]*options:\s*\w+Options
+      severity: low
+      description: Use options object parameter for functions with multiple optional parameters
+      examples:
+        - violation: function init(name?: string, force?: boolean, dry?: boolean) {}
+          fix: |
+            interface InitOptions {
+              name?: string;
+              force?: boolean;
+              dry?: boolean;
+            }
+            function init(options: InitOptions) {}
+
+  # KISS/YAGNI Patterns
+  kiss_yagni:
+    - id: KISS001
+      name: simple-type-unions
+      regex: export type \w+ = ('[^']+'\s*\|\s*){2,5}'[^']+'
+      severity: low
+      description: Simple type unions are preferred over complex enums for straightforward cases
+      examples:
+        - violation: |
+            enum PackageManager {
+              NPM = 'npm',
+              YARN = 'yarn'
+            }
+          fix: export type PackageManager = 'npm' | 'yarn' | 'pnpm';
+
+    - id: KISS002
+      name: early-return-validation
+      regex: if \(![\w.]+\) (return|throw)
+      severity: low
+      description: Use early returns for validation to keep code simple and readable
+      examples:
+        - violation: |
+            function validate(input) {
+              if (input) {
+                // 100 lines of logic
+              }
+            }
+          fix: |
+            function validate(input) {
+              if (!input) return { success: false };
+              // logic continues
+            }
+
+  # Cross-Cutting Concerns
+  cross_cutting:
+    - id: CC001
+      name: log-context-interface
+      regex: export interface LogContext \{
+      severity: low
+      description: Define LogContext interface for structured logging across the application
+      examples:
+        - violation: logger.info('message', { arbitrary: 'data' })
+          fix: |
+            export interface LogContext {
+              executionId?: string;
+              step?: string;
+              timestamp?: string;
+            }
+            logger.info('message', context: LogContext)
+
+    - id: CC002
+      name: execution-metrics-tracking
+      regex: export interface ExecutionMetrics \{
+      severity: medium
+      description: Track execution metrics for performance monitoring
+      examples:
+        - violation: console.log('done')
+          fix: |
+            export interface ExecutionMetrics {
+              startTime: number;
+              endTime: number;
+              duration: number;
+            }
+
+    - id: CC003
+      name: git-operation-result-pattern
+      regex: export interface \w+Result \{[\s\S]*?success:\s*boolean;
+      severity: medium
+      description: Operation results should include success boolean and optional error info
+      examples:
+        - violation: function doOperation() { /* void or throw */ }
+          fix: |
+            export interface GitOperationResult {
+              success: boolean;
+              message?: string;
+              error?: Error;
+            }
+
+    - id: CC004
+      name: retry-configuration-constants
+      regex: export const RETRY = \{[\s\S]*?MAX_ATTEMPTS:[\s\S]*?DELAY_MS:
+      severity: low
+      description: Define retry configurations as constants for consistency
+      examples:
+        - violation: |
+            let retries = 3;
+            const delay = 1000;
+          fix: |
+            export const RETRY = {
+              MAX_ATTEMPTS: 3,
+              DELAY_MS: 1000,
+              BACKOFF_MULTIPLIER: 2
+            };
+
+    - id: CC005
+      name: exit-code-constants
+      regex: export const EXIT_CODES = \{
+      severity: low
+      description: Define exit codes as named constants for CLI applications
+      examples:
+        - violation: process.exit(1);
+          fix: |
+            export const EXIT_CODES = {
+              SUCCESS: 0,
+              ERROR: 1,
+              VALIDATION_ERROR: 2
+            };
+            process.exit(EXIT_CODES.ERROR);
