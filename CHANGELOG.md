@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Automated enforcement ensures version history completeness
   - Clear error messages guide contributors on proper format
   - Examples and categories (Added/Changed/Fixed/Removed/Security)
+  - Security: Explicit permissions block (principle of least privilege)
   - File: `.github/workflows/changelog-check.yml`
   - File: `.github/pull_request_template.md`
   - Documentation: `CONTRIBUTING.md` (Updating the Changelog section)

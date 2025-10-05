@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   check-changelog:
     name: Verify CHANGELOG.md updated
@@ -45,7 +49,7 @@ jobs:
           echo ""
           echo "Include your PR number: - Description (#${{ github.event.pull_request.number }})"
           echo ""
-          echo "If this PR doesn't need a changelog entry (typo, docs, CI/CD, tests),\n"
+          echo "If this PR doesn't need a changelog entry (typo, docs, CI/CD, tests),"
           echo "add the 'skip-changelog' label to this PR."
           exit 1
         env:
