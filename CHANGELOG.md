@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fastest feedback loop (immediate)
   - Prevents bad commits from reaching remote
   - Developer-friendly with clear error messages
+  - Maintains backward compatibility: `prepare` script runs both template building and husky
   - Files: `.husky/pre-commit`, `package.json` (lint-staged config)
   - Dependencies: husky@^9.1.7, lint-staged@^16.2.3
 

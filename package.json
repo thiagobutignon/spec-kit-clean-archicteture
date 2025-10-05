@@ -44,7 +44,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "prepare": "husky",
+    "prepare": "npm run templates:build && husky",
     "prepublishOnly": "npm run test",
     "postinstall": "chmod +x src/bin/regent",
     "lint": "eslint .",
