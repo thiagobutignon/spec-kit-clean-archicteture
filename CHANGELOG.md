@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Command Consistency CI/CD Workflow** (#167)
+  - GitHub Action workflow to validate command consistency automatically
+  - Runs on changes to `.claude/commands/` directory
+  - Runs on changes to validation script
+  - Posts detailed PR comment on failure with actionable guidance
+  - Fast feedback loop (< 30 seconds)
+  - Prevents architectural drift and prompt inconsistencies
+  - Security: Explicit permissions block (contents: read, pull-requests: write, issues: write)
+  - Common issues guidance: terminology drift, missing YAML keywords, execution order, rule references
+  - Links to documentation: architectural-change-checklist.md, modular-yaml-edge-cases.md
+  - File: `.github/workflows/validate-commands.yml`
+  - Integration with npm script: `npm run validate:commands`
+
 - **CHANGELOG Enforcement in PRs** (#186)
   - GitHub Action workflow to verify CHANGELOG.md updates in all PRs
   - Support for `skip-changelog` label for exceptions (docs, typo, CI/CD, tests)
