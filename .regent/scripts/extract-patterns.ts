@@ -256,7 +256,7 @@ Extract patterns that would catch violations in similar code.`;
           encoding: 'utf-8',
           maxBuffer: 10 * 1024 * 1024, // 10MB
         });
-      } catch (flagError) {
+      } catch {
         // Fallback to no flag (older versions or different CLI behavior)
         if (process.env.DEBUG) {
           console.warn(`   ⚠️  --output-format flag not supported, trying without flag`);
@@ -269,7 +269,7 @@ Extract patterns that would catch violations in similar code.`;
 
       const response = JSON.parse(result);
       content = response.result || result; // Fallback to raw result if no .result property
-    } catch (claudeError) {
+    } catch {
       // Claude CLI not available - use mock data
       console.warn(`   ⚠️  Claude CLI unavailable, using mock patterns for ${layer}`);
       content = JSON.stringify({
@@ -448,7 +448,6 @@ async function extractQualityPatterns(
 
   // For quality patterns, sample from all code
   // Prefer test files for TDD patterns, src files for others
-  const MAX_QUALITY_SAMPLES = 5;
   let samples: string[];
   if (category === 'tdd') {
     samples = [...testFiles.slice(0, 4), ...srcFiles.slice(0, 1)];

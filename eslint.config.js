@@ -14,6 +14,8 @@ export default tseslint.config(
       "validate-implementation.ts", // Ignora nosso script validador
       "execute-steps.ts", // Ignora nosso script executor
       "coverage/", // Ignore generated coverage reports
+      "clean-ts-api/**", // Reference implementation for testing
+      "spec-kit/**", // Spec kit submodule
     ],
   },
 
