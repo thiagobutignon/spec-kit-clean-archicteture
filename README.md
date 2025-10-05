@@ -153,6 +153,67 @@ This architecture transforms The Regent from a **prescriptive tool** into an **a
 
 The true "secret sauce" isn't just generating code - it's generating **contextually optimized code** for your specific architecture needs while maintaining Clean Architecture principles as invariants.
 
+## 🔍 Pattern Extraction & Code Analysis
+
+The Regent includes automated pattern extraction to learn from existing codebases and generate validation rules.
+
+### Extract Patterns from Codebase
+
+```bash
+# Extract patterns from source code
+npx tsx .regent/scripts/extract-patterns.ts ./src .regent/patterns/auto-generated.yaml
+
+# Or use the slash command in Claude Code
+/extract-patterns-from-codebase clean-ts-api
+```
+
+### Pattern Categories
+
+The extraction tool analyzes **11 categories** of code quality:
+
+**Clean Architecture Layers:**
+- Domain, Data, Infrastructure, Presentation, Main
+
+**Quality Patterns:**
+- TDD (Test-Driven Development)
+- SOLID Principles
+- DRY Violations
+- Design Patterns (Factory, Strategy, Repository, etc.)
+- KISS/YAGNI
+- Cross-Cutting Concerns (logging, error handling, security)
+
+### Example Output
+
+```yaml
+metadata:
+  generated: "2025-01-02T10:30:00Z"
+  source: "./src"
+  tool: "The Regent Pattern Extractor"
+
+patterns:
+  domain:
+    - id: "DOM001"
+      name: "entity-without-validation"
+      regex: "class\\s+(\\w+Entity)\\s+{[^}]*constructor"
+      severity: "high"
+      description: "Domain entities should validate their state"
+      examples:
+        - violation: "class User { constructor(name) { this.name = name; } }"
+          fix: "class User { constructor(name) { this.validate(name); } }"
+```
+
+### Security Features
+
+- ✅ Path traversal protection
+- ✅ File size limits (1MB)
+- ✅ Prompt size validation (50KB)
+- ✅ Input sanitization for malicious content
+- ✅ Schema validation with Zod
+
+### Environment Variables
+
+- `DEBUG=1` - Enable detailed logging for troubleshooting
+
 ## 🚀 Quick Start
 
 ### Installation

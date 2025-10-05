@@ -1,0 +1,48 @@
+# Example auto-generated pattern file
+# This file shows the expected structure for pattern extraction output
+# To generate actual patterns, run: npx tsx .regent/scripts/extract-patterns.ts <target-dir> <output-file>
+
+metadata:
+  generated: "2025-01-02T10:30:00Z"
+  source: "./src"
+  tool: "The Regent Pattern Extractor"
+  version: "1.0.0"
+
+patterns:
+  domain:
+    - id: "DOM001"
+      name: "entity-without-validation"
+      regex: "class\\s+(\\w+Entity)\\s+{[^}]*constructor\\([^)]*\\)\\s*{(?![^}]*validate)"
+      severity: "high"
+      description: "Domain entities should validate their state in constructor"
+      examples:
+        - violation: |
+            class UserEntity {
+              constructor(name: string, email: string) {
+                this.name = name;
+                this.email = email;
+              }
+            }
+          fix: |
+            class UserEntity {
+              constructor(name: string, email: string) {
+                this.validate({ name, email });
+                this.name = name;
+                this.email = email;
+              }
+              private validate(props: { name: string; email: string }) {
+                if (!props.name) throw new Error('Name is required');
+                if (!props.email.includes('@')) throw new Error('Invalid email');
+              }
+            }
+
+  data: []
+  infra: []
+  presentation: []
+  main: []
+  tdd: []
+  solid: []
+  dry: []
+  design_patterns: []
+  kiss_yagni: []
+  cross_cutting: []
