@@ -8,6 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- **TheAuditor Integration Documentation** (#171)
+  - Comprehensive integration roadmap with 4-phase implementation plan
+  - Strategic analysis documenting neuroscience-inspired architecture
+  - Comparative analysis between TheAuditor and The Regent
+  - Pattern extraction command `/extract-patterns-from-codebase`
+  - Pattern extraction script `.regent/scripts/extract-patterns.ts`
+  - Support for 11 pattern categories:
+    - 5 Clean Architecture layers (domain, data, infra, presentation, main)
+    - 6 Quality patterns (TDD, SOLID, DRY, Design Patterns, KISS/YAGNI, Cross-Cutting)
+  - Enhanced pattern categories documentation (440 lines)
+  - Pattern extraction output format documentation
+  - Files:
+    - `docs/theauditor-integration-roadmap.md` (+297 lines)
+    - `docs/theauditor-comparative-analysis.md`
+    - `docs/theauditor-strategic-analysis.md`
+    - `docs/enhanced-pattern-categories.md` (+440 lines)
+    - `docs/pattern-extraction-output-format.md`
+    - `.claude/commands/extract-patterns-from-codebase.md` (+87 lines)
+    - `.regent/scripts/extract-patterns.ts` (+220 lines)
+
 - **Pre-commit Hook for Command Validation** (#168)
   - Automatic validation before every git commit
   - Configured with Husky and lint-staged

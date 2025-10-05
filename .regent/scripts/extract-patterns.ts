@@ -6,8 +6,9 @@
  */
 
 import * as fs from 'fs/promises';
+import * as path from 'path';
 import * as yaml from 'yaml';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 
 interface Pattern {
   id: string;
@@ -114,22 +115,23 @@ Focus on extracting patterns for:
 DO NOT include markdown, explanations, or anything except the JSON.`;
 
 async function analyzeCodeWithClaude(code: string, layer: string): Promise<Pattern[]> {
+  const truncatedCode = code.substring(0, 10000);
   const prompt = `${SYSTEM_PROMPT}
 
 Analyze this ${layer} layer code and extract validation patterns:
 
 \`\`\`typescript
-${code.substring(0, 10000)} // Truncated for context window
+${truncatedCode} // Truncated for context window
 \`\`\`
 
 Extract patterns that would catch violations in similar code.`;
 
   try {
-    // Execute claude CLI in headless mode with JSON output
-    const result = execSync(`claude -p ${JSON.stringify(prompt)} --output-format json`, {
+    // Use execFileSync with array arguments to avoid command injection
+    // Note: This requires a claude CLI wrapper that accepts these args
+    const result = execFileSync('claude', ['-p', prompt, '--output-format', 'json'], {
       encoding: 'utf-8',
       maxBuffer: 10 * 1024 * 1024, // 10MB
-      shell: '/bin/bash'
     });
 
     // Parse JSON response from Claude Code
@@ -143,9 +145,18 @@ Extract patterns that would catch violations in similar code.`;
       .trim();
 
     const parsed = JSON.parse(jsonStr);
-    return parsed.patterns || [];
+
+    if (!parsed.patterns || !Array.isArray(parsed.patterns)) {
+      throw new Error('Invalid response format: missing patterns array');
+    }
+
+    return parsed.patterns;
   } catch (error) {
-    console.error(`Failed to analyze ${layer} code:`, error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error(`Failed to analyze ${layer} code: ${errorMsg}`);
+    if (process.env.DEBUG) {
+      console.error('Stack trace:', error);
+    }
     return [];
   }
 }
@@ -228,8 +239,9 @@ async function extractPatternsForLayer(
     try {
       const content = await fs.readFile(file, 'utf-8');
       combinedCode += `\n// File: ${file}\n${content}\n`;
-    } catch {
-      console.warn(`   ⚠️  Could not read ${file}`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.warn(`   ⚠️  Could not read ${file}: ${errorMsg}`);
     }
   }
 
@@ -275,8 +287,9 @@ async function extractQualityPatterns(
     try {
       const content = await fs.readFile(file, 'utf-8');
       combinedCode += `\n// File: ${file}\n${content}\n`;
-    } catch {
-      console.warn(`   ⚠️  Could not read ${file}`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.warn(`   ⚠️  Could not read ${file}: ${errorMsg}`);
     }
   }
 
@@ -291,6 +304,34 @@ async function extractQualityPatterns(
   return patterns;
 }
 
+async function validatePaths(targetDir: string, outputFile: string): Promise<void> {
+  // Validate target directory exists and is within project bounds
+  const absoluteTarget = path.resolve(targetDir);
+  const projectRoot = path.resolve(process.cwd());
+
+  if (!absoluteTarget.startsWith(projectRoot)) {
+    throw new Error('Target directory must be within project root');
+  }
+
+  // Check target directory exists and is readable
+  try {
+    await fs.access(absoluteTarget, fs.constants.R_OK);
+  } catch {
+    throw new Error(`Target directory not accessible: ${targetDir}`);
+  }
+
+  // Check output directory is writable, create if needed
+  const outputDir = path.dirname(path.resolve(outputFile));
+  try {
+    await fs.access(outputDir, fs.constants.W_OK);
+  } catch {
+    // Try to create it
+    await fs.mkdir(outputDir, { recursive: true });
+  }
+}
+
+const MAX_FILE_SIZE = 1024 * 1024; // 1MB
+
 async function main() {
   const targetDir = process.argv[2] || './src';
   const outputFile = process.argv[3] || '.regent/patterns/auto-generated.yaml';
@@ -298,6 +339,10 @@ async function main() {
   console.log('🚀 Clean Architecture Pattern Extractor');
   console.log(`📁 Target: ${targetDir}`);
   console.log(`💾 Output: ${outputFile}`);
+
+  // Validate paths
+  console.log('\n🔍 Validating paths...');
+  await validatePaths(targetDir, outputFile);
 
   const layers = ['domain', 'data', 'infra', 'presentation', 'main'];
   const qualityCategories = ['tdd', 'solid', 'dry', 'design_patterns', 'kiss_yagni', 'cross_cutting'];
@@ -316,18 +361,23 @@ async function main() {
     cross_cutting: []
   };
 
-  // Extract patterns for each layer
-  for (const layer of layers) {
-    const patterns = await extractPatternsForLayer(targetDir, layer);
-    allPatterns[layer as keyof LayerPatterns] = patterns;
-  }
+  // Extract patterns for each layer (parallel for better performance)
+  console.log('\n🏗️  Analyzing Clean Architecture layers in parallel...');
+  const layerResults = await Promise.all(
+    layers.map(layer => extractPatternsForLayer(targetDir, layer))
+  );
+  layerResults.forEach((patterns, index) => {
+    allPatterns[layers[index] as keyof LayerPatterns] = patterns;
+  });
 
-  // Extract quality patterns from all code
-  console.log('\n🎯 Analyzing quality patterns across codebase...');
-  for (const category of qualityCategories) {
-    const patterns = await extractQualityPatterns(targetDir, category);
-    allPatterns[category as keyof LayerPatterns] = patterns;
-  }
+  // Extract quality patterns from all code (parallel for better performance)
+  console.log('\n🎯 Analyzing quality patterns across codebase in parallel...');
+  const qualityResults = await Promise.all(
+    qualityCategories.map(category => extractQualityPatterns(targetDir, category))
+  );
+  qualityResults.forEach((patterns, index) => {
+    allPatterns[qualityCategories[index] as keyof LayerPatterns] = patterns;
+  });
 
   // Generate YAML output
   const output = {
