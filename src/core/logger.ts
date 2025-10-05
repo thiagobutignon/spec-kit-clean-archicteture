@@ -115,7 +115,7 @@ class Logger {
       this.logFilePath = '';
       // Create a dummy writable stream that does nothing
       this.logStream = new Writable({
-        write(_chunk: any, _encoding: any, callback: () => void) {
+        write(_chunk: unknown, _encoding: BufferEncoding, callback: (error?: Error | null) => void) {
           callback();
         },
       });
