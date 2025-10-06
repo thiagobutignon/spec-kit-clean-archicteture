@@ -29,7 +29,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       - `MAX_FILE_SIZE` (default: 1MB, range: 1KB-10MB)
       - Smart validation with fallback to defaults on invalid input
       - Warning messages for out-of-range values
-  - Comprehensive test suite with 50 tests covering:
+  - **User Experience**: Standardized error message format with consistent emoji usage
+      - ✅ Success messages, ❌ Errors, ⚠️ Warnings, 💡 Hints
+      - 🔒 Security errors, 🔍 Debug info, 📊 Statistics
+      - All messages follow documented format standards
+      - Enhanced readability and user guidance
+  - Comprehensive test suite with 51 tests covering:
     - Helper functions (sanitization, prefix generation, layer prefixes)
     - Path validation and traversal prevention
     - Schema validation (pattern IDs, names, regex, severity)
@@ -38,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Mock data generation for CI/CD environments
     - Security (command injection, prompt validation)
     - Error recovery (retry logic, network resilience)
+    - Error message consistency (emoji format standards)
     - Integration tests (end-to-end flow with mocked dependencies)
   - **Security features** (defense in depth):
     - Input sanitization (null bytes, ANSI codes, control characters)
@@ -65,7 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `docs/pattern-extraction-output-format.md` (+125 lines)
     - `.claude/commands/extract-patterns-from-codebase.md` (+87 lines)
     - `.regent/scripts/extract-patterns.ts` (+850 lines)
-    - `.regent/scripts/__tests__/extract-patterns.test.ts` (+672 lines, 50 tests)
+    - `.regent/scripts/__tests__/extract-patterns.test.ts` (+672 lines, 51 tests)
     - `README.md` (TheAuditor Integration section)
     - `.gitignore` (auto-generated patterns, reference implementations)
 

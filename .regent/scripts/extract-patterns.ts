@@ -60,6 +60,26 @@
  * - Monitor Claude CLI usage and API calls
  *
  * @see https://github.com/thiagobutignon/the-regent/security for more info
+ *
+ * ERROR MESSAGE STANDARDS
+ * =======================
+ * All user-facing messages follow a consistent emoji-based format:
+ *
+ * ✅ Success messages (successful operations, validations passed)
+ * ❌ Errors (critical failures, operations failed)
+ * ⚠️  Warnings (non-critical issues, degraded functionality)
+ * 💡 Hints/Suggestions (actionable guidance, next steps)
+ * 🔍 Debug info (technical details when DEBUG=1)
+ * 🔒 Security (security-related errors and warnings)
+ * 📊 📈 📋 📂 📁 💾 Statistics/Data (summaries, file operations)
+ * 🚀 🏗️ 🎯 🤖 Process/Action (ongoing operations, analysis steps)
+ * 📝 📏 Technical metrics (code size, response data)
+ *
+ * Format Guidelines:
+ * - Top-level messages start with emoji + space
+ * - Nested/indented messages use 3-space indent + emoji
+ * - Thrown errors include emoji prefix for consistency
+ * - DEBUG output uses technical emojis (🔍 📝 📏)
  */
 
 import * as fs from 'fs/promises';
@@ -420,19 +440,19 @@ function validatePromptSecurity(prompt: string): void {
   // Check dangerous patterns only in non-code sections
   for (const pattern of dangerousPatterns) {
     if (pattern.test(promptWithoutCode)) {
-      throw new Error(`Security: Prompt contains potentially dangerous pattern: ${pattern}`);
+      throw new Error(`🔒 Security: Prompt contains potentially dangerous pattern: ${pattern}`);
     }
   }
 
   // Validate prompt doesn't exceed safe limits
   if (prompt.length > MAX_PROMPT_SIZE) {
-    throw new Error(`Security: Prompt size (${prompt.length}) exceeds maximum safe size (${MAX_PROMPT_SIZE})`);
+    throw new Error(`🔒 Security: Prompt size (${prompt.length}) exceeds maximum safe size (${MAX_PROMPT_SIZE})`);
   }
 
   // Check for excessive nested structures that could cause issues
   const nestedBrackets = (prompt.match(/[{[]/g) || []).length;
   if (nestedBrackets > 1000) {
-    throw new Error('Security: Prompt contains excessive nested structures');
+    throw new Error('🔒 Security: Prompt contains excessive nested structures');
   }
 }
 
@@ -510,8 +530,8 @@ Extract patterns that would catch violations in similar code.`;
       } catch (parseError) {
         console.error(`❌ Failed to parse Claude CLI response for ${layer}`);
         if (DEBUG) {
-          console.error('   Raw response:', result.substring(0, 200));
-          console.error('   Parse error:', parseError);
+          console.error('   📝 Raw response:', result.substring(0, 200));
+          console.error('   🔍 Parse error:', parseError);
         }
         throw new Error(`JSON parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
       }
@@ -588,9 +608,9 @@ Extract patterns that would catch violations in similar code.`;
       }
 
       if (DEBUG) {
-        console.error('   Full error:', error);
-        console.error('   Code sample length:', code.length);
-        console.error('   Prompt length:', prompt.length);
+        console.error('   🔍 Full error:', error);
+        console.error('   📏 Code sample length:', code.length);
+        console.error('   📏 Prompt length:', prompt.length);
       }
 
       return {
@@ -635,7 +655,7 @@ async function getFiles(
       // Directory doesn't exist or not accessible
       if (DEBUG) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        console.warn(`Directory ${dir} not accessible: ${errorMsg}`);
+        console.warn(`   ⚠️  Directory ${dir} not accessible: ${errorMsg}`);
       }
       continue;
     }
@@ -808,7 +828,7 @@ async function extractQualityPatterns(
 async function validatePaths(targetDir: string, outputFile: string): Promise<void> {
   // Check for path traversal patterns
   if (targetDir.includes('..') || outputFile.includes('..')) {
-    throw new Error('Path traversal patterns (..) are not allowed');
+    throw new Error('🔒 Security: Path traversal patterns (..) are not allowed');
   }
 
   // Validate target directory exists and is within project bounds
@@ -816,14 +836,14 @@ async function validatePaths(targetDir: string, outputFile: string): Promise<voi
   const projectRoot = path.resolve(process.cwd());
 
   if (!absoluteTarget.startsWith(projectRoot)) {
-    throw new Error('Target directory must be within project root');
+    throw new Error('🔒 Security: Target directory must be within project root');
   }
 
   // Check target directory exists and is readable
   try {
     await fs.access(absoluteTarget, fs.constants.R_OK);
   } catch {
-    throw new Error(`Target directory not accessible: ${targetDir}`);
+    throw new Error(`❌ Error: Target directory not accessible: ${targetDir}`);
   }
 
   // Check output directory is writable, create if needed

@@ -6,9 +6,10 @@
  * ✅ Helper Functions (sanitization, prefix generation)
  * ✅ Path Validation (traversal, project boundaries)
  * ✅ Schema Validation (IDs, names, regex, severity)
- * ✅ Configuration (constants, DEBUG flag)
+ * ✅ Configuration (constants, DEBUG flag, environment variables)
  * ✅ Security (prompt validation, command injection)
  * ✅ Error Recovery (retry logic, fallback scenarios)
+ * ✅ Error Message Consistency (emoji usage, format standards)
  * ✅ File System Operations (with mocked fs)
  * ✅ Integration Tests (end-to-end flow with mocks)
  *
@@ -385,17 +386,17 @@ describe('Pattern Extraction - Security (Command Injection)', () => {
 
       for (const pattern of dangerousPatterns) {
         if (pattern.test(promptWithoutCode)) {
-          throw new Error(`Security: Prompt contains potentially dangerous pattern: ${pattern}`);
+          throw new Error(`🔒 Security: Prompt contains potentially dangerous pattern: ${pattern}`);
         }
       }
 
       if (prompt.length > 50000) {
-        throw new Error(`Security: Prompt size (${prompt.length}) exceeds maximum safe size (50000)`);
+        throw new Error(`🔒 Security: Prompt size (${prompt.length}) exceeds maximum safe size (50000)`);
       }
 
       const nestedBrackets = (prompt.match(/[{[]/g) || []).length;
       if (nestedBrackets > 1000) {
-        throw new Error('Security: Prompt contains excessive nested structures');
+        throw new Error('🔒 Security: Prompt contains excessive nested structures');
       }
     };
 
@@ -431,6 +432,13 @@ describe('Pattern Extraction - Security (Command Injection)', () => {
     it('should allow safe prompts', () => {
       const safePrompt = 'Analyze this TypeScript code and extract patterns.';
       expect(() => validatePromptSecurity(safePrompt)).not.toThrow();
+    });
+
+    it('should use consistent emoji prefixes in security errors', () => {
+      // All security errors should start with 🔒
+      expect(() => validatePromptSecurity('test; rm -rf /')).toThrow(/^🔒 Security:/);
+      expect(() => validatePromptSecurity('a'.repeat(50001))).toThrow(/^🔒 Security:/);
+      expect(() => validatePromptSecurity('['.repeat(1001))).toThrow(/^🔒 Security:/);
     });
   });
 });
