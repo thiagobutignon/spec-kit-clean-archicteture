@@ -474,14 +474,15 @@ function sanitizeInput(input: string): string {
 }
 
 /**
- * Checks for required dependencies (tsx, yaml) and optional ones (claude CLI)
- * @throws {Error} If critical dependencies are missing
+ * Validates all required dependencies are installed
+ * Checks both system commands (tsx, claude) and npm packages (yaml, zod, p-limit)
+ * @throws Exits with code 1 if critical dependencies are missing
  */
 async function checkDependencies(): Promise<void> {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // Check for tsx runtime
+  // Check for tsx runtime (required)
   try {
     execFileSync('which', ['tsx'], { encoding: 'utf-8' });
   } catch {
@@ -496,11 +497,19 @@ async function checkDependencies(): Promise<void> {
     warnings.push('For real analysis, install Claude Code from: https://claude.ai/download');
   }
 
-  // Check for yaml package (runtime check)
-  try {
-    await import('yaml');
-  } catch {
-    errors.push('yaml package not found. Install with: npm install yaml');
+  // Check for required npm packages (pre-flight validation)
+  const requiredPackages: Array<{ name: string; installCmd: string }> = [
+    { name: 'yaml', installCmd: 'npm install yaml' },
+    { name: 'zod', installCmd: 'npm install zod' },
+    { name: 'p-limit', installCmd: 'npm install p-limit' }
+  ];
+
+  for (const pkg of requiredPackages) {
+    try {
+      await import(pkg.name);
+    } catch {
+      errors.push(`${pkg.name} package not found. Install with: ${pkg.installCmd}`);
+    }
   }
 
   if (errors.length > 0) {

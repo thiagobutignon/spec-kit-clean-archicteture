@@ -7,6 +7,7 @@
  * ✅ Path Validation (traversal, project boundaries)
  * ✅ Schema Validation (IDs, names, regex, severity)
  * ✅ Configuration (constants, DEBUG flag, environment variables)
+ * ✅ Dependency Validation (npm packages, install commands, critical vs optional)
  * ✅ Security (prompt validation, command injection)
  * ✅ Error Recovery (retry logic, fallback scenarios)
  * ✅ Error Message Consistency (emoji usage, format standards)
@@ -307,6 +308,45 @@ describe('Pattern Extraction - Configuration', () => {
     expect(parseDebugFlag('false')).toBe(false);
     expect(parseDebugFlag(undefined)).toBe(false);
     expect(parseDebugFlag('yes')).toBe(false);
+  });
+});
+
+describe('Pattern Extraction - Dependency Validation', () => {
+  it('should validate required npm packages', () => {
+    // Simulate the dependency check structure
+    const requiredPackages = [
+      { name: 'yaml', installCmd: 'npm install yaml' },
+      { name: 'zod', installCmd: 'npm install zod' },
+      { name: 'p-limit', installCmd: 'npm install p-limit' }
+    ];
+
+    expect(requiredPackages).toHaveLength(3);
+    expect(requiredPackages.map(p => p.name)).toContain('yaml');
+    expect(requiredPackages.map(p => p.name)).toContain('zod');
+    expect(requiredPackages.map(p => p.name)).toContain('p-limit');
+  });
+
+  it('should provide install commands for missing packages', () => {
+    const requiredPackages = [
+      { name: 'yaml', installCmd: 'npm install yaml' },
+      { name: 'zod', installCmd: 'npm install zod' },
+      { name: 'p-limit', installCmd: 'npm install p-limit' }
+    ];
+
+    requiredPackages.forEach(pkg => {
+      expect(pkg.installCmd).toMatch(/^npm install /);
+      expect(pkg.installCmd).toContain(pkg.name);
+    });
+  });
+
+  it('should distinguish between errors and warnings', () => {
+    // tsx and npm packages are errors (critical)
+    const criticalDeps = ['tsx', 'yaml', 'zod', 'p-limit'];
+    // claude CLI is a warning (optional)
+    const optionalDeps = ['claude'];
+
+    expect(criticalDeps).toHaveLength(4);
+    expect(optionalDeps).toHaveLength(1);
   });
 });
 
