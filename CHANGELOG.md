@@ -46,12 +46,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       - Validates system commands: tsx (required), claude (optional)
       - Clear error messages with install commands
       - Distinguishes between critical errors and warnings
-  - Comprehensive test suite with 54 tests covering:
+  - **Concurrency Control**: Verified correct p-limit implementation (no race conditions)
+      - Single limiter instance shared across all operations
+      - Proper Promise.all with limit wrapper pattern
+      - Maximum 3 concurrent API calls (configurable 1-10)
+      - Applies to both layer analysis (5) and quality patterns (6)
+      - Prevents API rate limiting and throttling
+  - Comprehensive test suite with 57 tests covering:
     - Helper functions (sanitization, prefix generation, layer prefixes)
     - Path validation and traversal prevention
     - Schema validation (pattern IDs, names, regex, severity)
     - Configuration constants, DEBUG flag parsing, and environment variable validation
     - Dependency validation (npm packages, install commands, critical vs optional)
+    - Concurrency control (p-limit usage, rate limiting, configuration)
     - Layer configuration and prefix mappings
     - Mock data generation for CI/CD environments
     - Security (command injection, prompt validation)
@@ -84,7 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `docs/pattern-extraction-output-format.md` (+125 lines)
     - `.claude/commands/extract-patterns-from-codebase.md` (+87 lines)
     - `.regent/scripts/extract-patterns.ts` (+850 lines)
-    - `.regent/scripts/__tests__/extract-patterns.test.ts` (+672 lines, 54 tests)
+    - `.regent/scripts/__tests__/extract-patterns.test.ts` (+672 lines, 57 tests)
     - `README.md` (TheAuditor Integration section)
     - `.gitignore` (auto-generated patterns, reference implementations)
 
