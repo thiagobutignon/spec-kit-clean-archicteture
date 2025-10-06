@@ -81,6 +81,22 @@ const MAX_SRC_SAMPLES = 3; // Number of source files to sample
 const MAX_TEST_SAMPLES = 2; // Number of test files to sample
 const MAX_CONCURRENT_API_CALLS = 3; // Rate limiting for Claude API (prevent rate limit errors)
 const MAX_FILE_SIZE = 1024 * 1024; // 1MB - Maximum file size to prevent memory exhaustion
+const DEBUG = process.env.DEBUG === '1' || process.env.DEBUG === 'true'; // Type-safe debug flag
+
+// Layer ID prefixes for consistent pattern IDs
+const LAYER_PREFIXES: Record<string, string> = {
+  domain: 'DOM',
+  data: 'DAT',
+  infra: 'INF',
+  presentation: 'PRE',
+  main: 'MAI',
+  tdd: 'TDD',
+  solid: 'SOL',
+  dry: 'DRY',
+  design_patterns: 'DES',
+  kiss_yagni: 'KIS',
+  cross_cutting: 'CRO'
+};
 
 const SYSTEM_PROMPT = `You are a comprehensive code quality and architecture pattern analyzer.
 
@@ -161,6 +177,15 @@ Focus on extracting patterns for:
 DO NOT include markdown, explanations, or anything except the JSON.`;
 
 /**
+ * Get layer ID prefix for pattern IDs
+ * @param layer - Layer name
+ * @returns Three-letter prefix for pattern IDs
+ */
+function getLayerPrefix(layer: string): string {
+  return LAYER_PREFIXES[layer] || layer.toUpperCase().padEnd(3, 'X').slice(0, 3);
+}
+
+/**
  * Sanitize file content to prevent command injection or malicious input
  * Removes control characters and escape sequences
  */
@@ -168,10 +193,10 @@ function sanitizeInput(input: string): string {
   return input
     // Remove null bytes
     .replace(/\0/g, '')
+    // Remove ANSI escape codes (must be done BEFORE removing control characters)
+    .replace(/\x1B\[[0-9;]*[a-zA-Z]/g, '')
     // Remove other control characters (except newline, tab, carriage return)
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-    // Remove ANSI escape codes
-    .replace(/\x1B\[[0-9;]*[a-zA-Z]/g, '')
     // Limit consecutive newlines
     .replace(/\n{5,}/g, '\n\n\n\n');
 }
@@ -258,7 +283,7 @@ Extract patterns that would catch violations in similar code.`;
         });
       } catch {
         // Fallback to no flag (older versions or different CLI behavior)
-        if (process.env.DEBUG) {
+        if (DEBUG) {
           console.warn(`   ⚠️  --output-format flag not supported, trying without flag`);
         }
         result = execFileSync('claude', ['-p', prompt], {
@@ -275,7 +300,7 @@ Extract patterns that would catch violations in similar code.`;
       content = JSON.stringify({
         patterns: [
           {
-            id: `${layer.toUpperCase().slice(0, 3)}001`,
+            id: `${getLayerPrefix(layer)}001`,
             name: `mock-${layer}-pattern`,
             regex: `${layer}.*violation`,
             severity: 'medium',
@@ -316,9 +341,12 @@ Extract patterns that would catch violations in similar code.`;
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     console.error(`❌ Failed to analyze ${layer} code: ${errorMsg}`);
+    console.error(`   💡 Suggestion: Check if Claude CLI is installed or enable DEBUG=1 for details`);
 
-    if (process.env.DEBUG) {
-      console.error('Stack trace:', error);
+    if (DEBUG) {
+      console.error('   Full error:', error);
+      console.error('   Code sample length:', code.length);
+      console.error('   Prompt length:', prompt.length);
     }
 
     return {
@@ -353,7 +381,7 @@ async function getFiles(
       allFiles.push(...tsFiles);
     } catch (error) {
       // Directory doesn't exist or not accessible
-      if (process.env.DEBUG) {
+      if (DEBUG) {
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.warn(`Directory ${dir} not accessible: ${errorMsg}`);
       }
@@ -604,8 +632,8 @@ async function main() {
     patterns: allPatterns
   };
 
-  // Ensure output directory exists
-  const outputDir = outputFile.substring(0, outputFile.lastIndexOf('/'));
+  // Ensure output directory exists (using path.dirname for cross-platform support)
+  const outputDir = path.dirname(path.resolve(outputFile));
   await fs.mkdir(outputDir, { recursive: true });
 
   // Write YAML
