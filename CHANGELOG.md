@@ -15,6 +15,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comparative analysis between TheAuditor and The Regent
   - Pattern extraction command `/extract-patterns-from-codebase`
   - Pattern extraction script `.regent/scripts/extract-patterns.ts`
+  - Comprehensive test suite with 22 tests covering:
+    - Helper functions (sanitization, prefix generation)
+    - Path validation and traversal prevention
+    - Schema validation (pattern IDs, names, regex, severity)
+    - Configuration constants and DEBUG flag parsing
+    - Layer configuration and prefix mappings
+    - Mock data generation
+  - Security features:
+    - Input sanitization (null bytes, ANSI codes, control characters)
+    - Path traversal protection with project boundary validation
+    - File size limits (1MB) to prevent DoS attacks
+    - Prompt size limits (50KB) to prevent token exhaustion
+    - Command injection protection via execFileSync
+    - Zod schema validation for runtime type safety
   - Support for 11 pattern categories:
     - 5 Clean Architecture layers (domain, data, infra, presentation, main)
     - 6 Quality patterns (TDD, SOLID, DRY, Design Patterns, KISS/YAGNI, Cross-Cutting)
@@ -27,7 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `docs/enhanced-pattern-categories.md` (+440 lines)
     - `docs/pattern-extraction-output-format.md`
     - `.claude/commands/extract-patterns-from-codebase.md` (+87 lines)
-    - `.regent/scripts/extract-patterns.ts` (+220 lines)
+    - `.regent/scripts/extract-patterns.ts` (+550 lines)
+    - `.regent/scripts/__tests__/extract-patterns.test.ts` (+281 lines)
 
 - **Pre-commit Hook for Command Validation** (#168)
   - Automatic validation before every git commit

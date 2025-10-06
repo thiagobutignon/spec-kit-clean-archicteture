@@ -244,6 +244,47 @@ async function checkDependencies(): Promise<void> {
 }
 
 /**
+ * Retry wrapper with exponential backoff for API calls
+ * @param fn - Async function to retry
+ * @param maxRetries - Maximum number of retry attempts (default: 3)
+ * @returns Result of the function call
+ * @internal Reserved for future use with external API integrations
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3
+): Promise<T> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error;
+      }
+
+      // Check if error is retryable (network/timeout errors)
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      const isRetryable = errorMsg.includes('ETIMEDOUT') ||
+                          errorMsg.includes('ECONNREFUSED') ||
+                          errorMsg.includes('ENOTFOUND') ||
+                          errorMsg.includes('rate limit');
+
+      if (!isRetryable) {
+        throw error; // Don't retry non-network errors
+      }
+
+      const backoffMs = Math.pow(2, attempt) * 1000;
+      if (DEBUG) {
+        console.warn(`   ⚠️  Attempt ${attempt} failed, retrying in ${backoffMs}ms...`);
+      }
+      await new Promise(resolve => setTimeout(resolve, backoffMs));
+    }
+  }
+  throw new Error('Retry loop completed without success'); // Should never reach here
+}
+
+/**
  * Analyzes code with Claude CLI (or mock if unavailable) to extract validation patterns
  * @param code - Source code to analyze (will be sanitized and truncated)
  * @param layer - Layer name for context (domain, data, infra, etc.)
@@ -339,16 +380,39 @@ Extract patterns that would catch violations in similar code.`;
       failures: []
     };
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error(`❌ Failed to analyze ${layer} code: ${errorMsg}`);
-    console.error(`   💡 Suggestion: Check if Claude CLI is installed or enable DEBUG=1 for details`);
+    // Provide specific error messages based on error type
+    if (error instanceof Error) {
+      if (error.message.includes('ENOENT') || error.message.includes('command not found')) {
+        console.error(`❌ Claude CLI not found for ${layer} analysis`);
+        console.error(`   💡 Install from: https://claude.ai/download`);
+      } else if (error.message.includes('ETIMEDOUT')) {
+        console.error(`❌ API timeout while analyzing ${layer}`);
+        console.error(`   💡 Check network connection or retry later`);
+      } else if (error.message.includes('rate limit')) {
+        console.error(`❌ Rate limit exceeded for ${layer}`);
+        console.error(`   💡 Wait a few minutes before retrying`);
+      } else if (error.message.includes('Prompt size')) {
+        console.error(`❌ Code sample too large for ${layer}: ${error.message}`);
+        console.error(`   💡 Try analyzing a smaller subset of files`);
+      } else {
+        console.error(`❌ Failed to analyze ${layer}: ${error.message}`);
+        console.error(`   💡 Enable DEBUG=1 for details`);
+      }
 
-    if (DEBUG) {
-      console.error('   Full error:', error);
-      console.error('   Code sample length:', code.length);
-      console.error('   Prompt length:', prompt.length);
+      if (DEBUG) {
+        console.error('   Full error:', error);
+        console.error('   Code sample length:', code.length);
+        console.error('   Prompt length:', prompt.length);
+      }
+
+      return {
+        patterns: [],
+        failures: [{ layer, error: error.message }]
+      };
     }
 
+    // Fallback for non-Error objects
+    const errorMsg = String(error);
     return {
       patterns: [],
       failures: [{ layer, error: errorMsg }]
@@ -427,24 +491,30 @@ async function extractPatternsForLayer(
   // Read first 5 files as samples (to avoid token limits)
   // Prioritize src files, then tests
   const samples = [...srcFiles.slice(0, MAX_SRC_SAMPLES), ...testFiles.slice(0, MAX_TEST_SAMPLES)];
-  let combinedCode = '';
 
-  for (const file of samples) {
-    try {
-      // Enforce file size limit
-      const stats = await fs.stat(file);
-      if (stats.size > MAX_FILE_SIZE) {
-        console.warn(`   ⚠️  Skipping ${file}: exceeds size limit (${stats.size} > ${MAX_FILE_SIZE})`);
-        continue;
+  // Read files in parallel for better performance
+  const fileContents = await Promise.all(
+    samples.map(async (file) => {
+      try {
+        // Enforce file size limit
+        const stats = await fs.stat(file);
+        if (stats.size > MAX_FILE_SIZE) {
+          console.warn(`   ⚠️  Skipping ${file}: exceeds size limit (${stats.size} > ${MAX_FILE_SIZE})`);
+          return null;
+        }
+
+        const content = await fs.readFile(file, 'utf-8');
+        return `\n// File: ${file}\n${content}\n`;
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.warn(`   ⚠️  Could not read ${file}: ${errorMsg}`);
+        return null;
       }
+    })
+  );
 
-      const content = await fs.readFile(file, 'utf-8');
-      combinedCode += `\n// File: ${file}\n${content}\n`;
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      console.warn(`   ⚠️  Could not read ${file}: ${errorMsg}`);
-    }
-  }
+  // Filter out nulls and join
+  const combinedCode = fileContents.filter(Boolean).join('');
 
   if (!combinedCode) {
     return { patterns: [], failures: [] };
@@ -483,23 +553,29 @@ async function extractQualityPatterns(
     samples = [...srcFiles.slice(0, 4), ...testFiles.slice(0, 1)];
   }
 
-  let combinedCode = '';
-  for (const file of samples) {
-    try {
-      // Enforce file size limit
-      const stats = await fs.stat(file);
-      if (stats.size > MAX_FILE_SIZE) {
-        console.warn(`   ⚠️  Skipping ${file}: exceeds size limit (${stats.size} > ${MAX_FILE_SIZE})`);
-        continue;
-      }
+  // Read files in parallel for better performance
+  const fileContents = await Promise.all(
+    samples.map(async (file) => {
+      try {
+        // Enforce file size limit
+        const stats = await fs.stat(file);
+        if (stats.size > MAX_FILE_SIZE) {
+          console.warn(`   ⚠️  Skipping ${file}: exceeds size limit (${stats.size} > ${MAX_FILE_SIZE})`);
+          return null;
+        }
 
-      const content = await fs.readFile(file, 'utf-8');
-      combinedCode += `\n// File: ${file}\n${content}\n`;
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      console.warn(`   ⚠️  Could not read ${file}: ${errorMsg}`);
-    }
-  }
+        const content = await fs.readFile(file, 'utf-8');
+        return `\n// File: ${file}\n${content}\n`;
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.warn(`   ⚠️  Could not read ${file}: ${errorMsg}`);
+        return null;
+      }
+    })
+  );
+
+  // Filter out nulls and join
+  const combinedCode = fileContents.filter(Boolean).join('');
 
   if (!combinedCode) {
     return { patterns: [], failures: [] };

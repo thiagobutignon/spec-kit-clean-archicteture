@@ -259,7 +259,8 @@ describe('Pattern Extraction - Layer Configuration', () => {
 describe('Pattern Extraction - Mock Data', () => {
   it('should generate valid mock pattern', () => {
     const layer = 'domain';
-    const getLayerPrefix = (l: string) => 'DOM';
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const getLayerPrefix = (_l: string) => 'DOM';
 
     const mockPattern = {
       id: `${getLayerPrefix(layer)}001`,
