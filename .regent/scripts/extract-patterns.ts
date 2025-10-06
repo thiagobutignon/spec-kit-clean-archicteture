@@ -330,7 +330,8 @@ async function withRetry<T>(
       await new Promise(resolve => setTimeout(resolve, backoffMs));
     }
   }
-  throw new Error('Retry loop completed without success'); // Should never reach here
+  // Note: This point is unreachable - loop always returns or throws
+  // TypeScript knows the return type is Promise<T>, no need for unreachable code
 }
 
 /**
