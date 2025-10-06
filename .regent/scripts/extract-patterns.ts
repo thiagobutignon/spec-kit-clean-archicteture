@@ -94,6 +94,69 @@ import pLimit from 'p-limit';
 // ============================================================================
 
 /**
+ * Validates regex pattern for ReDoS (Regular Expression Denial of Service) vulnerabilities
+ * Checks for catastrophic backtracking patterns that could cause performance issues
+ *
+ * Dangerous Patterns Detected:
+ * - Nested quantifiers: (a+)+ or (a*)*
+ * - Nested wildcards: (.*)+
+ * - Alternation with overlap: (a|a)+ or (a|ab)+
+ * - Excessive backtracking groups
+ *
+ * @param pattern - Regex pattern string to validate
+ * @returns true if safe, false if potentially dangerous
+ *
+ * @see https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS
+ */
+function isRegexSafe(pattern: string): boolean {
+  // Check for nested quantifiers (catastrophic backtracking)
+  const nestedQuantifiers = /(\(.*?[+*]\))[+*{]/;
+  if (nestedQuantifiers.test(pattern)) {
+    return false;
+  }
+
+  // Check for alternation with duplicates or overlap
+  const alternationWithDuplicates = /\([^)]*\|[^)]*\)[+*]/;
+  if (alternationWithDuplicates.test(pattern)) {
+    // Allow simple alternations like (jpg|png|gif)
+    // but block potentially dangerous ones like (a|ab)+
+    const hasOverlap = /\(([^|)]+)\|[^)]*\1[^)]*\)[+*]/.test(pattern);
+    if (hasOverlap) {
+      return false;
+    }
+  }
+
+  // Check for nested wildcards
+  const nestedWildcards = /\(\.\*[+*]?\)[+*]/;
+  if (nestedWildcards.test(pattern)) {
+    return false;
+  }
+
+  // Check for excessive nested groups (performance concern)
+  const maxNestedGroups = 10;
+  let maxNesting = 0;
+  let currentNesting = 0;
+  for (const char of pattern) {
+    if (char === '(') {
+      currentNesting++;
+      maxNesting = Math.max(maxNesting, currentNesting);
+    } else if (char === ')') {
+      currentNesting--;
+    }
+  }
+  if (maxNesting > maxNestedGroups) {
+    return false;
+  }
+
+  // Check pattern length (very long patterns can be problematic)
+  if (pattern.length > 500) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * Zod schema for pattern example validation
  * Ensures each pattern example has both violation and fix code samples
  * @example
@@ -112,7 +175,7 @@ const PatternExampleSchema = z.object({
  * Enforces structure and constraints for pattern definitions:
  * - ID format: 3 uppercase letters + 3 digits (e.g., DOM001, DAT002)
  * - Name: kebab-case format (e.g., entity-validation)
- * - Regex: Must be valid JavaScript regular expression
+ * - Regex: Must be valid JavaScript regular expression AND safe from ReDoS
  * - Severity: One of critical, high, medium, low
  * - Description: Minimum 10 characters
  * - Examples: Optional array of violation/fix pairs
@@ -120,14 +183,20 @@ const PatternExampleSchema = z.object({
 const PatternSchema = z.object({
   id: z.string().regex(/^[A-Z]{3}\d{3}$/, 'ID must be 3 uppercase letters + 3 digits'),
   name: z.string().regex(/^[a-z0-9-]+$/, 'Name must be kebab-case'),
-  regex: z.string().refine((val) => {
-    try {
-      new RegExp(val);
-      return true;
-    } catch {
-      return false;
-    }
-  }, 'Must be a valid regex pattern'),
+  regex: z.string()
+    .refine((val) => {
+      try {
+        new RegExp(val);
+        return true;
+      } catch {
+        return false;
+      }
+    }, 'Must be a valid regex pattern')
+    .refine((val) => isRegexSafe(val), {
+      message: 'Regex pattern may cause catastrophic backtracking (ReDoS vulnerability). ' +
+               'Avoid nested quantifiers like (a+)+, nested wildcards like (.*)+, ' +
+               'or excessive nesting depth.'
+    }),
   severity: z.enum(['critical', 'high', 'medium', 'low']),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   examples: z.array(PatternExampleSchema).optional()

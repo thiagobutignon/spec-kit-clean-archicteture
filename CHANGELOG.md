@@ -52,13 +52,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       - Maximum 3 concurrent API calls (configurable 1-10)
       - Applies to both layer analysis (5) and quality patterns (6)
       - Prevents API rate limiting and throttling
-  - Comprehensive test suite with 57 tests covering:
+  - **ReDoS Protection**: Regex complexity validation to prevent catastrophic backtracking
+      - Detects nested quantifiers: `(a+)+`, `(a*)*`, `(\w+)+`
+      - Detects nested wildcards: `(.*)+`, `(.*)*`
+      - Detects alternation overlap: `(a|ab)+`
+      - Enforces maximum nesting depth (10 levels)
+      - Enforces pattern length limit (500 chars)
+      - Integrated into PatternSchema with detailed error messages
+      - Prevents Regular Expression Denial of Service (ReDoS) attacks
+  - Comprehensive test suite with 58 tests covering:
     - Helper functions (sanitization, prefix generation, layer prefixes)
     - Path validation and traversal prevention
     - Schema validation (pattern IDs, names, regex, severity)
     - Configuration constants, DEBUG flag parsing, and environment variable validation
     - Dependency validation (npm packages, install commands, critical vs optional)
     - Concurrency control (p-limit usage, rate limiting, configuration)
+    - ReDoS protection (nested quantifiers, wildcards, alternation, nesting, length)
     - Layer configuration and prefix mappings
     - Mock data generation for CI/CD environments
     - Security (command injection, prompt validation)
@@ -69,6 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Input sanitization (null bytes, ANSI codes, control characters)
     - **Command injection protection** via prompt validation
     - **Shell operator detection** (with code block exemption)
+    - **ReDoS protection** via regex complexity validation
     - Path traversal protection with project boundary validation
     - File size limits (1MB) to prevent DoS attacks
     - Prompt size limits (50KB) to prevent token exhaustion
@@ -90,8 +100,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `docs/enhanced-pattern-categories.md` (+440 lines)
     - `docs/pattern-extraction-output-format.md` (+125 lines)
     - `.claude/commands/extract-patterns-from-codebase.md` (+87 lines)
-    - `.regent/scripts/extract-patterns.ts` (+850 lines)
-    - `.regent/scripts/__tests__/extract-patterns.test.ts` (+672 lines, 57 tests)
+    - `.regent/scripts/extract-patterns.ts` (+1,175 lines)
+    - `.regent/scripts/__tests__/extract-patterns.test.ts` (+672 lines, 58 tests)
     - `README.md` (TheAuditor Integration section)
     - `.gitignore` (auto-generated patterns, reference implementations)
 

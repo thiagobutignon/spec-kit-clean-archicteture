@@ -5,11 +5,11 @@
  * TEST COVERAGE:
  * ✅ Helper Functions (sanitization, prefix generation)
  * ✅ Path Validation (traversal, project boundaries)
- * ✅ Schema Validation (IDs, names, regex, severity)
+ * ✅ Schema Validation (IDs, names, regex, severity, ReDoS protection)
  * ✅ Configuration (constants, DEBUG flag, environment variables)
  * ✅ Dependency Validation (npm packages, install commands, critical vs optional)
  * ✅ Concurrency Control (p-limit usage, rate limiting, concurrent operations)
- * ✅ Security (prompt validation, command injection)
+ * ✅ Security (prompt validation, command injection, ReDoS vulnerabilities)
  * ✅ Error Recovery (retry logic, fallback scenarios)
  * ✅ Error Message Consistency (emoji usage, format standards)
  * ✅ File System Operations (with mocked fs)
@@ -202,6 +202,67 @@ describe('Pattern Extraction - Schema Validation', () => {
     expect(isValidRegex('[a-z]+')).toBe(true);
     expect(isValidRegex('(')).toBe(false); // Invalid regex
     expect(isValidRegex('[')).toBe(false); // Invalid regex
+  });
+
+  it('should detect ReDoS vulnerabilities in regex patterns', () => {
+    // Replicate the isRegexSafe function for testing
+    const isRegexSafe = (pattern: string): boolean => {
+      // Check for nested quantifiers
+      const nestedQuantifiers = /(\(.*?[+*]\))[+*{]/;
+      if (nestedQuantifiers.test(pattern)) return false;
+
+      // Check for alternation with duplicates
+      const alternationWithDuplicates = /\([^)]*\|[^)]*\)[+*]/;
+      if (alternationWithDuplicates.test(pattern)) {
+        const hasOverlap = /\(([^|)]+)\|[^)]*\1[^)]*\)[+*]/.test(pattern);
+        if (hasOverlap) return false;
+      }
+
+      // Check for nested wildcards
+      const nestedWildcards = /\(\.\*[+*]?\)[+*]/;
+      if (nestedWildcards.test(pattern)) return false;
+
+      // Check for excessive nested groups
+      let maxNesting = 0, currentNesting = 0;
+      for (const char of pattern) {
+        if (char === '(') {
+          currentNesting++;
+          maxNesting = Math.max(maxNesting, currentNesting);
+        } else if (char === ')') {
+          currentNesting--;
+        }
+      }
+      if (maxNesting > 10) return false;
+
+      // Check pattern length
+      if (pattern.length > 500) return false;
+
+      return true;
+    };
+
+    // Safe patterns
+    expect(isRegexSafe('class\\s+(\\w+Entity)')).toBe(true);
+    expect(isRegexSafe('[a-z]+')).toBe(true);
+    expect(isRegexSafe('(jpg|png|gif)')).toBe(true);
+
+    // Dangerous patterns - nested quantifiers
+    expect(isRegexSafe('(a+)+')).toBe(false);
+    expect(isRegexSafe('(a*)*')).toBe(false);
+    expect(isRegexSafe('(\\w+)+')).toBe(false);
+
+    // Dangerous patterns - nested wildcards
+    expect(isRegexSafe('(.*)+' )).toBe(false);
+    expect(isRegexSafe('(.*)*')).toBe(false);
+
+    // Dangerous patterns - alternation with overlap (simplified check)
+    expect(isRegexSafe('(a|ab)+')).toBe(false);
+
+    // Pattern too long
+    expect(isRegexSafe('a'.repeat(501))).toBe(false);
+
+    // Excessive nesting
+    const deeplyNested = '('.repeat(11) + 'a' + ')'.repeat(11);
+    expect(isRegexSafe(deeplyNested)).toBe(false);
   });
 
   it('should validate severity levels', () => {
