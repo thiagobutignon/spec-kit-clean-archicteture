@@ -3,6 +3,35 @@
 /**
  * Extract Clean Architecture Patterns from Codebase
  * Uses Serena MCP + Claude CLI to analyze code and generate validation patterns
+ *
+ * ⚠️  SECURITY WARNING ⚠️
+ * ====================
+ * This script analyzes code and sends it to Claude CLI for pattern extraction.
+ *
+ * ONLY USE WITH TRUSTED CODEBASES!
+ *
+ * Security Measures Implemented:
+ * - Input sanitization (null bytes, ANSI codes, control characters)
+ * - Prompt validation for command injection patterns
+ * - Path traversal protection
+ * - File size limits (1MB max per file)
+ * - Prompt size limits (50KB max)
+ * - execFileSync with argument arrays (no shell interpolation)
+ * - 60-second timeout on CLI calls
+ * - Windows window hiding for security
+ *
+ * Residual Risks:
+ * - Malicious code could craft prompts that exploit Claude CLI vulnerabilities
+ * - No sandboxing of the analysis process
+ * - Analyzed code content is sent to external API
+ *
+ * Mitigation:
+ * - Only analyze codebases you trust
+ * - Review generated patterns before committing
+ * - Run in isolated environment for untrusted code
+ * - Monitor Claude CLI usage and API calls
+ *
+ * @see https://github.com/thiagobutignon/the-regent/security for more info
  */
 
 import * as fs from 'fs/promises';
@@ -305,18 +334,68 @@ async function withRetry<T>(
 }
 
 /**
+ * Validates prompt for security concerns before sending to CLI
+ * @param prompt - The prompt to validate
+ * @throws Error if prompt contains suspicious patterns
+ */
+function validatePromptSecurity(prompt: string): void {
+  // Check for command injection patterns
+  const dangerousPatterns = [
+    /;[\s]*(?:rm|del|format|curl|wget|nc|netcat|bash|sh|powershell|cmd)/i,
+    /\$\(.*\)/,  // Command substitution
+    /`[^`]*`/,   // Backtick command execution
+    /&&|;|\||>/,  // Shell operators (except in code blocks)
+    /\x00/,      // Null bytes (should already be removed but double-check)
+  ];
+
+  // Allow shell operators inside code blocks (between triple backticks)
+  const codeBlockRegex = /```[\s\S]*?```/g;
+  const codeBlocks: string[] = [];
+  const promptWithoutCode = prompt.replace(codeBlockRegex, (match) => {
+    codeBlocks.push(match);
+    return `__CODE_BLOCK_${codeBlocks.length - 1}__`;
+  });
+
+  // Check dangerous patterns only in non-code sections
+  for (const pattern of dangerousPatterns) {
+    if (pattern.test(promptWithoutCode)) {
+      throw new Error(`Security: Prompt contains potentially dangerous pattern: ${pattern}`);
+    }
+  }
+
+  // Validate prompt doesn't exceed safe limits
+  if (prompt.length > MAX_PROMPT_SIZE) {
+    throw new Error(`Security: Prompt size (${prompt.length}) exceeds maximum safe size (${MAX_PROMPT_SIZE})`);
+  }
+
+  // Check for excessive nested structures that could cause issues
+  const nestedBrackets = (prompt.match(/[{[]/g) || []).length;
+  if (nestedBrackets > 1000) {
+    throw new Error('Security: Prompt contains excessive nested structures');
+  }
+}
+
+/**
  * Calls Claude CLI with retry logic for network resilience
- * @param prompt - The prompt to send to Claude
+ * ⚠️  SECURITY WARNING: This function passes prompts to external CLI.
+ * Only use with trusted codebases. Prompts are validated but not sandboxed.
+ *
+ * @param prompt - The prompt to send to Claude (will be validated)
  * @returns Raw response string from Claude CLI
+ * @throws Error if prompt fails security validation
  */
 async function callClaudeCLI(prompt: string): Promise<string> {
+  // Validate prompt security before sending to CLI
+  validatePromptSecurity(prompt);
+
   return withRetry(async () => {
     // Try with --output-format flag (newer versions)
     try {
       return execFileSync('claude', ['-p', prompt, '--output-format', 'json'], {
         encoding: 'utf-8',
         maxBuffer: 10 * 1024 * 1024, // 10MB
-        timeout: 60000 // 60 second timeout
+        timeout: 60000, // 60 second timeout
+        windowsHide: true // Hide window on Windows for security
       });
     } catch {
       // Fallback to no flag (older versions or different CLI behavior)
@@ -326,7 +405,8 @@ async function callClaudeCLI(prompt: string): Promise<string> {
       return execFileSync('claude', ['-p', prompt], {
         encoding: 'utf-8',
         maxBuffer: 10 * 1024 * 1024, // 10MB
-        timeout: 60000 // 60 second timeout
+        timeout: 60000, // 60 second timeout
+        windowsHide: true // Hide window on Windows for security
       });
     }
   }, 3); // 3 retry attempts with exponential backoff
@@ -353,10 +433,7 @@ ${truncatedCode} // Truncated for context window
 
 Extract patterns that would catch violations in similar code.`;
 
-  // Validate prompt size to prevent DoS attacks
-  if (prompt.length > MAX_PROMPT_SIZE) {
-    throw new Error(`Prompt size (${prompt.length}) exceeds maximum safe size (${MAX_PROMPT_SIZE})`);
-  }
+  // Note: Prompt validation (size, injection patterns) is done in callClaudeCLI
 
   try {
     let content: string;
@@ -712,6 +789,10 @@ async function main() {
   const outputFile = process.argv[3] || '.regent/patterns/auto-generated.yaml';
 
   console.log('🚀 Clean Architecture Pattern Extractor');
+  console.log('');
+  console.log('⚠️  SECURITY WARNING: This tool analyzes code and sends it to Claude CLI.');
+  console.log('   Only use with TRUSTED codebases. See file header for security details.');
+  console.log('');
   console.log(`📁 Target: ${targetDir}`);
   console.log(`💾 Output: ${outputFile}`);
 
