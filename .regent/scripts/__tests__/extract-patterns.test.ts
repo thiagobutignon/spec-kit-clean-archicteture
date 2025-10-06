@@ -24,7 +24,7 @@
  * - File system operations are mocked to avoid creating real files
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as path from 'path';
 
 describe('Pattern Extraction - Helper Functions', () => {
@@ -213,7 +213,73 @@ describe('Pattern Extraction - Schema Validation', () => {
 });
 
 describe('Pattern Extraction - Configuration', () => {
-  it('should have consistent configuration constants', () => {
+  describe('getEnvInt helper', () => {
+    const getEnvInt = (envVar: string, defaultValue: number, minValue?: number, maxValue?: number): number => {
+      const value = process.env[envVar];
+      if (!value) return defaultValue;
+
+      const parsed = parseInt(value, 10);
+      if (isNaN(parsed)) {
+        return defaultValue;
+      }
+
+      if (minValue !== undefined && parsed < minValue) {
+        return minValue;
+      }
+
+      if (maxValue !== undefined && parsed > maxValue) {
+        return maxValue;
+      }
+
+      return parsed;
+    };
+
+    beforeEach(() => {
+      // Clear all test environment variables
+      delete process.env.TEST_CONFIG_VAR;
+    });
+
+    it('should return default value when env var not set', () => {
+      expect(getEnvInt('TEST_CONFIG_VAR', 100)).toBe(100);
+    });
+
+    it('should parse valid integer from env var', () => {
+      process.env.TEST_CONFIG_VAR = '200';
+      expect(getEnvInt('TEST_CONFIG_VAR', 100)).toBe(200);
+    });
+
+    it('should return default when env var is not a number', () => {
+      process.env.TEST_CONFIG_VAR = 'not-a-number';
+      expect(getEnvInt('TEST_CONFIG_VAR', 100)).toBe(100);
+    });
+
+    it('should enforce minimum value', () => {
+      process.env.TEST_CONFIG_VAR = '5';
+      expect(getEnvInt('TEST_CONFIG_VAR', 100, 10)).toBe(10);
+    });
+
+    it('should enforce maximum value', () => {
+      process.env.TEST_CONFIG_VAR = '500';
+      expect(getEnvInt('TEST_CONFIG_VAR', 100, undefined, 200)).toBe(200);
+    });
+
+    it('should allow values within min/max range', () => {
+      process.env.TEST_CONFIG_VAR = '150';
+      expect(getEnvInt('TEST_CONFIG_VAR', 100, 10, 200)).toBe(150);
+    });
+
+    it('should handle negative numbers correctly', () => {
+      process.env.TEST_CONFIG_VAR = '-10';
+      expect(getEnvInt('TEST_CONFIG_VAR', 100)).toBe(-10);
+    });
+
+    it('should handle zero correctly', () => {
+      process.env.TEST_CONFIG_VAR = '0';
+      expect(getEnvInt('TEST_CONFIG_VAR', 100)).toBe(0);
+    });
+  });
+
+  it('should have consistent default configuration constants', () => {
     const MAX_FILE_SIZE = 1024 * 1024; // 1MB
     const MAX_PROMPT_SIZE = 50000;
     const MAX_CODE_SAMPLE_LENGTH = 10000;

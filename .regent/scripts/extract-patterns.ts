@@ -4,6 +4,34 @@
  * Extract Clean Architecture Patterns from Codebase
  * Uses Serena MCP + Claude CLI to analyze code and generate validation patterns
  *
+ * CONFIGURATION
+ * =============
+ * All constants can be configured via environment variables:
+ *
+ * - MAX_PROMPT_SIZE (default: 50000, range: 1000-200000)
+ *   Maximum prompt size in characters to prevent DoS attacks
+ *
+ * - MAX_CODE_SAMPLE_LENGTH (default: 10000, range: 100-50000)
+ *   Maximum code sample length for Claude context window
+ *
+ * - MAX_SRC_SAMPLES (default: 3, range: 1-20)
+ *   Number of source files to sample per layer
+ *
+ * - MAX_TEST_SAMPLES (default: 2, range: 1-20)
+ *   Number of test files to sample per layer
+ *
+ * - MAX_CONCURRENT_API_CALLS (default: 3, range: 1-10)
+ *   Rate limiting for Claude API to prevent rate limit errors
+ *
+ * - MAX_FILE_SIZE (default: 1048576 (1MB), range: 1024-10485760)
+ *   Maximum file size in bytes to prevent memory exhaustion
+ *
+ * - DEBUG (values: '1' or 'true')
+ *   Enable debug output with detailed logging
+ *
+ * Example usage:
+ *   MAX_SRC_SAMPLES=5 MAX_TEST_SAMPLES=3 npm run extract-patterns
+ *
  * ⚠️  SECURITY WARNING ⚠️
  * ====================
  * This script analyzes code and sends it to Claude CLI for pattern extraction.
@@ -14,8 +42,8 @@
  * - Input sanitization (null bytes, ANSI codes, control characters)
  * - Prompt validation for command injection patterns
  * - Path traversal protection
- * - File size limits (1MB max per file)
- * - Prompt size limits (50KB max)
+ * - File size limits (1MB max per file by default)
+ * - Prompt size limits (50KB max by default)
  * - execFileSync with argument arrays (no shell interpolation)
  * - 60-second timeout on CLI calls
  * - Windows window hiding for security
@@ -109,13 +137,45 @@ interface SkippedFile {
   size?: number;
 }
 
-// Configuration constants
-const MAX_PROMPT_SIZE = 50000; // Maximum prompt size to prevent DoS
-const MAX_CODE_SAMPLE_LENGTH = 10000; // Claude context window limit
-const MAX_SRC_SAMPLES = 3; // Number of source files to sample
-const MAX_TEST_SAMPLES = 2; // Number of test files to sample
-const MAX_CONCURRENT_API_CALLS = 3; // Rate limiting for Claude API (prevent rate limit errors)
-const MAX_FILE_SIZE = 1024 * 1024; // 1MB - Maximum file size to prevent memory exhaustion
+// Configuration constants (configurable via environment variables)
+/**
+ * Parse and validate environment variable as positive integer
+ * @param envVar - Environment variable name
+ * @param defaultValue - Default value if env var not set
+ * @param minValue - Minimum allowed value (optional)
+ * @param maxValue - Maximum allowed value (optional)
+ * @returns Validated integer value
+ */
+function getEnvInt(envVar: string, defaultValue: number, minValue?: number, maxValue?: number): number {
+  const value = process.env[envVar];
+  if (!value) return defaultValue;
+
+  const parsed = parseInt(value, 10);
+  if (isNaN(parsed)) {
+    console.warn(`⚠️  Invalid ${envVar}="${value}" (not a number), using default: ${defaultValue}`);
+    return defaultValue;
+  }
+
+  if (minValue !== undefined && parsed < minValue) {
+    console.warn(`⚠️  ${envVar}="${parsed}" below minimum (${minValue}), using minimum`);
+    return minValue;
+  }
+
+  if (maxValue !== undefined && parsed > maxValue) {
+    console.warn(`⚠️  ${envVar}="${parsed}" above maximum (${maxValue}), using maximum`);
+    return maxValue;
+  }
+
+  return parsed;
+}
+
+// Configuration with environment variable overrides
+const MAX_PROMPT_SIZE = getEnvInt('MAX_PROMPT_SIZE', 50000, 1000, 200000); // Maximum prompt size to prevent DoS
+const MAX_CODE_SAMPLE_LENGTH = getEnvInt('MAX_CODE_SAMPLE_LENGTH', 10000, 100, 50000); // Claude context window limit
+const MAX_SRC_SAMPLES = getEnvInt('MAX_SRC_SAMPLES', 3, 1, 20); // Number of source files to sample
+const MAX_TEST_SAMPLES = getEnvInt('MAX_TEST_SAMPLES', 2, 1, 20); // Number of test files to sample
+const MAX_CONCURRENT_API_CALLS = getEnvInt('MAX_CONCURRENT_API_CALLS', 3, 1, 10); // Rate limiting for Claude API (prevent rate limit errors)
+const MAX_FILE_SIZE = getEnvInt('MAX_FILE_SIZE', 1024 * 1024, 1024, 10 * 1024 * 1024); // Default 1MB - Maximum file size to prevent memory exhaustion
 const DEBUG = process.env.DEBUG === '1' || process.env.DEBUG === 'true'; // Type-safe debug flag
 
 // Layer ID prefixes for consistent pattern IDs

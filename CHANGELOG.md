@@ -20,13 +20,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - **Performance**: Parallel file reading with Promise.all
     - **Monitoring**: Skipped files tracking with grouped summary report
     - **Version Detection**: Claude CLI version check at startup
-  - Comprehensive test suite with 22 tests covering:
+    - **Configuration**: Environment variable overrides for all constants with validation
+      - `MAX_PROMPT_SIZE` (default: 50000, range: 1000-200000)
+      - `MAX_CODE_SAMPLE_LENGTH` (default: 10000, range: 100-50000)
+      - `MAX_SRC_SAMPLES` (default: 3, range: 1-20)
+      - `MAX_TEST_SAMPLES` (default: 2, range: 1-20)
+      - `MAX_CONCURRENT_API_CALLS` (default: 3, range: 1-10)
+      - `MAX_FILE_SIZE` (default: 1MB, range: 1KB-10MB)
+      - Smart validation with fallback to defaults on invalid input
+      - Warning messages for out-of-range values
+  - Comprehensive test suite with 50 tests covering:
     - Helper functions (sanitization, prefix generation, layer prefixes)
     - Path validation and traversal prevention
     - Schema validation (pattern IDs, names, regex, severity)
-    - Configuration constants and DEBUG flag parsing
+    - Configuration constants, DEBUG flag parsing, and environment variable validation
     - Layer configuration and prefix mappings
     - Mock data generation for CI/CD environments
+    - Security (command injection, prompt validation)
+    - Error recovery (retry logic, network resilience)
+    - Integration tests (end-to-end flow with mocked dependencies)
   - **Security features** (defense in depth):
     - Input sanitization (null bytes, ANSI codes, control characters)
     - **Command injection protection** via prompt validation
@@ -53,7 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `docs/pattern-extraction-output-format.md` (+125 lines)
     - `.claude/commands/extract-patterns-from-codebase.md` (+87 lines)
     - `.regent/scripts/extract-patterns.ts` (+850 lines)
-    - `.regent/scripts/__tests__/extract-patterns.test.ts` (+281 lines)
+    - `.regent/scripts/__tests__/extract-patterns.test.ts` (+672 lines, 50 tests)
     - `README.md` (TheAuditor Integration section)
     - `.gitignore` (auto-generated patterns, reference implementations)
 
