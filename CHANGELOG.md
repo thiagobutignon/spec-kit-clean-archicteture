@@ -34,6 +34,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       - 🔒 Security errors, 🔍 Debug info, 📊 Statistics
       - All messages follow documented format standards
       - Enhanced readability and user guidance
+  - **Documentation**: Comprehensive JSDoc documentation for all schemas, interfaces, and constants
+      - Zod schemas (PatternExampleSchema, PatternSchema, PatternsResponseSchema)
+      - TypeScript interfaces (Pattern, LayerPatterns, ExtractionFailure, ExtractionResult, SkippedFile)
+      - Configuration constants (MAX_PROMPT_SIZE, MAX_CODE_SAMPLE_LENGTH, etc.)
+      - SYSTEM_PROMPT with detailed pattern category descriptions
+      - LAYER_PREFIXES with usage examples
+      - All documentation includes purpose, defaults, ranges, and examples
   - Comprehensive test suite with 51 tests covering:
     - Helper functions (sanitization, prefix generation, layer prefixes)
     - Path validation and traversal prevention

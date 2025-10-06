@@ -89,12 +89,34 @@ import { execFileSync } from 'child_process';
 import { z } from 'zod';
 import pLimit from 'p-limit';
 
-// Zod schema for pattern validation
+// ============================================================================
+// ZODS SCHEMAS - Runtime Validation
+// ============================================================================
+
+/**
+ * Zod schema for pattern example validation
+ * Ensures each pattern example has both violation and fix code samples
+ * @example
+ * {
+ *   violation: "// Bad: Entity without validation",
+ *   fix: "// Good: Entity with validation"
+ * }
+ */
 const PatternExampleSchema = z.object({
   violation: z.string(),
   fix: z.string()
 });
 
+/**
+ * Zod schema for individual pattern validation
+ * Enforces structure and constraints for pattern definitions:
+ * - ID format: 3 uppercase letters + 3 digits (e.g., DOM001, DAT002)
+ * - Name: kebab-case format (e.g., entity-validation)
+ * - Regex: Must be valid JavaScript regular expression
+ * - Severity: One of critical, high, medium, low
+ * - Description: Minimum 10 characters
+ * - Examples: Optional array of violation/fix pairs
+ */
 const PatternSchema = z.object({
   id: z.string().regex(/^[A-Z]{3}\d{3}$/, 'ID must be 3 uppercase letters + 3 digits'),
   name: z.string().regex(/^[a-z0-9-]+$/, 'Name must be kebab-case'),
@@ -111,10 +133,29 @@ const PatternSchema = z.object({
   examples: z.array(PatternExampleSchema).optional()
 });
 
+/**
+ * Zod schema for validating Claude API responses
+ * Ensures the response contains a valid patterns array
+ * Used to validate JSON responses from Claude CLI before processing
+ */
 const PatternsResponseSchema = z.object({
   patterns: z.array(PatternSchema)
 });
 
+// ============================================================================
+// TYPE DEFINITIONS - TypeScript Interfaces
+// ============================================================================
+
+/**
+ * Pattern definition for code quality validation
+ * Represents a single validation rule extracted from the codebase
+ * @property id - Unique identifier (format: XXX###, e.g., DOM001)
+ * @property name - Kebab-case pattern name (e.g., entity-validation)
+ * @property regex - Regular expression to detect violations
+ * @property severity - Impact level: critical, high, medium, low
+ * @property description - Human-readable explanation of what the pattern detects
+ * @property examples - Optional code samples showing violation and fix
+ */
 interface Pattern {
   id: string;
   name: string;
@@ -127,6 +168,25 @@ interface Pattern {
   }[];
 }
 
+/**
+ * Collection of patterns organized by layer and quality category
+ * Contains all extracted patterns from the codebase analysis
+ *
+ * Clean Architecture Layers:
+ * @property domain - Domain/business logic patterns
+ * @property data - Data access and repository patterns
+ * @property infra - Infrastructure and external service patterns
+ * @property presentation - UI and presentation layer patterns
+ * @property main - Application composition and dependency injection patterns
+ *
+ * Quality Pattern Categories:
+ * @property tdd - Test-Driven Development patterns
+ * @property solid - SOLID principles violations
+ * @property dry - Don't Repeat Yourself violations
+ * @property design_patterns - Design pattern anti-patterns
+ * @property kiss_yagni - Keep It Simple / You Aren't Gonna Need It violations
+ * @property cross_cutting - Cross-cutting concerns (logging, error handling, etc.)
+ */
 interface LayerPatterns {
   domain: Pattern[];
   data: Pattern[];
@@ -141,25 +201,48 @@ interface LayerPatterns {
   cross_cutting: Pattern[];
 }
 
+/**
+ * Represents a failed pattern extraction attempt
+ * Used to track which layers failed analysis and why
+ * @property layer - Layer or category name that failed
+ * @property error - Error message describing the failure
+ */
 interface ExtractionFailure {
   layer: string;
   error: string;
 }
 
+/**
+ * Result of a pattern extraction operation
+ * Contains both successfully extracted patterns and any failures
+ * @property patterns - Array of successfully extracted patterns
+ * @property failures - Array of extraction failures for error reporting
+ */
 interface ExtractionResult {
   patterns: Pattern[];
   failures: ExtractionFailure[];
 }
 
+/**
+ * Represents a file that was skipped during analysis
+ * Used to track and report files that couldn't be processed
+ * @property file - File path that was skipped
+ * @property reason - Reason for skipping (e.g., "Exceeds size limit", "Read error")
+ * @property size - Optional file size in bytes (for size-related skips)
+ */
 interface SkippedFile {
   file: string;
   reason: string;
   size?: number;
 }
 
-// Configuration constants (configurable via environment variables)
+// ============================================================================
+// CONFIGURATION - Environment Variables & Constants
+// ============================================================================
+
 /**
  * Parse and validate environment variable as positive integer
+ * Provides safe fallback to defaults with user-friendly warnings
  * @param envVar - Environment variable name
  * @param defaultValue - Default value if env var not set
  * @param minValue - Minimum allowed value (optional)
@@ -189,16 +272,69 @@ function getEnvInt(envVar: string, defaultValue: number, minValue?: number, maxV
   return parsed;
 }
 
-// Configuration with environment variable overrides
-const MAX_PROMPT_SIZE = getEnvInt('MAX_PROMPT_SIZE', 50000, 1000, 200000); // Maximum prompt size to prevent DoS
-const MAX_CODE_SAMPLE_LENGTH = getEnvInt('MAX_CODE_SAMPLE_LENGTH', 10000, 100, 50000); // Claude context window limit
-const MAX_SRC_SAMPLES = getEnvInt('MAX_SRC_SAMPLES', 3, 1, 20); // Number of source files to sample
-const MAX_TEST_SAMPLES = getEnvInt('MAX_TEST_SAMPLES', 2, 1, 20); // Number of test files to sample
-const MAX_CONCURRENT_API_CALLS = getEnvInt('MAX_CONCURRENT_API_CALLS', 3, 1, 10); // Rate limiting for Claude API (prevent rate limit errors)
-const MAX_FILE_SIZE = getEnvInt('MAX_FILE_SIZE', 1024 * 1024, 1024, 10 * 1024 * 1024); // Default 1MB - Maximum file size to prevent memory exhaustion
-const DEBUG = process.env.DEBUG === '1' || process.env.DEBUG === 'true'; // Type-safe debug flag
+/**
+ * Maximum prompt size in characters (configurable via MAX_PROMPT_SIZE env var)
+ * Default: 50,000 characters
+ * Range: 1,000 - 200,000
+ * Purpose: Prevents DoS attacks and token exhaustion
+ */
+const MAX_PROMPT_SIZE = getEnvInt('MAX_PROMPT_SIZE', 50000, 1000, 200000);
 
-// Layer ID prefixes for consistent pattern IDs
+/**
+ * Maximum code sample length for Claude context window (configurable via MAX_CODE_SAMPLE_LENGTH env var)
+ * Default: 10,000 characters
+ * Range: 100 - 50,000
+ * Purpose: Ensures code samples fit within Claude's context window
+ */
+const MAX_CODE_SAMPLE_LENGTH = getEnvInt('MAX_CODE_SAMPLE_LENGTH', 10000, 100, 50000);
+
+/**
+ * Number of source files to sample per layer (configurable via MAX_SRC_SAMPLES env var)
+ * Default: 3 files
+ * Range: 1 - 20
+ * Purpose: Balances analysis quality with API cost and execution time
+ */
+const MAX_SRC_SAMPLES = getEnvInt('MAX_SRC_SAMPLES', 3, 1, 20);
+
+/**
+ * Number of test files to sample per layer (configurable via MAX_TEST_SAMPLES env var)
+ * Default: 2 files
+ * Range: 1 - 20
+ * Purpose: Provides test patterns without overwhelming the context
+ */
+const MAX_TEST_SAMPLES = getEnvInt('MAX_TEST_SAMPLES', 2, 1, 20);
+
+/**
+ * Maximum concurrent API calls to Claude CLI (configurable via MAX_CONCURRENT_API_CALLS env var)
+ * Default: 3 concurrent calls
+ * Range: 1 - 10
+ * Purpose: Rate limiting to prevent API throttling and errors
+ */
+const MAX_CONCURRENT_API_CALLS = getEnvInt('MAX_CONCURRENT_API_CALLS', 3, 1, 10);
+
+/**
+ * Maximum file size in bytes (configurable via MAX_FILE_SIZE env var)
+ * Default: 1,048,576 bytes (1MB)
+ * Range: 1,024 bytes (1KB) - 10,485,760 bytes (10MB)
+ * Purpose: Prevents memory exhaustion from large files
+ */
+const MAX_FILE_SIZE = getEnvInt('MAX_FILE_SIZE', 1024 * 1024, 1024, 10 * 1024 * 1024);
+
+/**
+ * Debug mode flag (configurable via DEBUG env var)
+ * Accepts: '1' or 'true'
+ * Purpose: Enables detailed logging for troubleshooting
+ */
+const DEBUG = process.env.DEBUG === '1' || process.env.DEBUG === 'true';
+
+/**
+ * Layer ID prefixes for consistent pattern identification
+ * Maps layer/category names to 3-letter prefixes used in pattern IDs
+ * @example
+ * - Domain patterns: DOM001, DOM002, ...
+ * - Data patterns: DAT001, DAT002, ...
+ * - TDD patterns: TDD001, TDD002, ...
+ */
 const LAYER_PREFIXES: Record<string, string> = {
   domain: 'DOM',
   data: 'DAT',
@@ -213,6 +349,27 @@ const LAYER_PREFIXES: Record<string, string> = {
   cross_cutting: 'CRO'
 };
 
+/**
+ * System prompt for Claude CLI pattern extraction
+ * Instructs Claude to analyze code and extract validation patterns
+ *
+ * Format Requirements:
+ * - Output must be valid JSON only (no markdown, no explanations)
+ * - Pattern IDs: 3 uppercase letters + 3 digits (e.g., DOM001)
+ * - Pattern names: kebab-case (e.g., entity-validation)
+ * - Severity levels: critical, high, medium, low
+ *
+ * Pattern Categories:
+ * - Clean Architecture (layer violations, dependencies)
+ * - TDD (test structure, naming, mocking)
+ * - SOLID Principles (SRP, OCP, LSP, ISP, DIP)
+ * - DRY (code duplication detection)
+ * - Design Patterns (implementations and anti-patterns)
+ * - KISS/YAGNI (over-engineering, dead code)
+ * - Cross-Cutting Concerns (logging, error handling, security)
+ *
+ * @see PatternsResponseSchema for validation schema
+ */
 const SYSTEM_PROMPT = `You are a comprehensive code quality and architecture pattern analyzer.
 
 Given source code files, extract validation patterns that enforce best practices.
