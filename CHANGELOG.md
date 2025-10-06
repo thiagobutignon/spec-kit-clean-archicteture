@@ -9,40 +9,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **TheAuditor Integration Documentation** (#171)
+- **TheAuditor Integration Documentation & Pattern Extraction** (#171, PR #189)
   - Comprehensive integration roadmap with 4-phase implementation plan
-  - Strategic analysis documenting neuroscience-inspired architecture
+  - Strategic analysis documenting neuroscience-inspired architecture ("Perfect Triad")
   - Comparative analysis between TheAuditor and The Regent
   - Pattern extraction command `/extract-patterns-from-codebase`
-  - Pattern extraction script `.regent/scripts/extract-patterns.ts`
+  - Pattern extraction script `.regent/scripts/extract-patterns.ts` with production-ready features:
+    - **Retry Logic**: Exponential backoff (2s, 4s, 8s) for network resilience
+    - **Error Handling**: Specific messages for ENOENT, ETIMEDOUT, rate limits, parse errors
+    - **Performance**: Parallel file reading with Promise.all
+    - **Monitoring**: Skipped files tracking with grouped summary report
+    - **Version Detection**: Claude CLI version check at startup
   - Comprehensive test suite with 22 tests covering:
-    - Helper functions (sanitization, prefix generation)
+    - Helper functions (sanitization, prefix generation, layer prefixes)
     - Path validation and traversal prevention
     - Schema validation (pattern IDs, names, regex, severity)
     - Configuration constants and DEBUG flag parsing
     - Layer configuration and prefix mappings
-    - Mock data generation
-  - Security features:
+    - Mock data generation for CI/CD environments
+  - **Security features** (defense in depth):
     - Input sanitization (null bytes, ANSI codes, control characters)
+    - **Command injection protection** via prompt validation
+    - **Shell operator detection** (with code block exemption)
     - Path traversal protection with project boundary validation
     - File size limits (1MB) to prevent DoS attacks
     - Prompt size limits (50KB) to prevent token exhaustion
-    - Command injection protection via execFileSync
+    - execFileSync with argument arrays (no shell interpolation)
     - Zod schema validation for runtime type safety
+    - 60-second timeout on CLI calls
+    - Windows window hiding for security
+    - Comprehensive security warnings in code and runtime
   - Support for 11 pattern categories:
     - 5 Clean Architecture layers (domain, data, infra, presentation, main)
     - 6 Quality patterns (TDD, SOLID, DRY, Design Patterns, KISS/YAGNI, Cross-Cutting)
   - Enhanced pattern categories documentation (440 lines)
   - Pattern extraction output format documentation
+  - **New dependencies**: `p-limit` (rate limiting), `zod` (schema validation)
   - Files:
     - `docs/theauditor-integration-roadmap.md` (+297 lines)
-    - `docs/theauditor-comparative-analysis.md`
-    - `docs/theauditor-strategic-analysis.md`
+    - `docs/theauditor-comparative-analysis.md` (+215 lines)
+    - `docs/theauditor-strategic-analysis.md` (+180 lines)
     - `docs/enhanced-pattern-categories.md` (+440 lines)
-    - `docs/pattern-extraction-output-format.md`
+    - `docs/pattern-extraction-output-format.md` (+125 lines)
     - `.claude/commands/extract-patterns-from-codebase.md` (+87 lines)
-    - `.regent/scripts/extract-patterns.ts` (+550 lines)
+    - `.regent/scripts/extract-patterns.ts` (+850 lines)
     - `.regent/scripts/__tests__/extract-patterns.test.ts` (+281 lines)
+    - `README.md` (TheAuditor Integration section)
+    - `.gitignore` (auto-generated patterns, reference implementations)
 
 - **Pre-commit Hook for Command Validation** (#168)
   - Automatic validation before every git commit
@@ -98,6 +111,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated README.md with commit convention documentation
   - Updated CONTRIBUTING.md to clarify `regent` type is for automated commits only
   - All 46 tests updated and passing
+
+### Fixed
+
+- **Pattern Extraction Script Improvements** (#171, PR #189)
+  - Removed unreachable code in `withRetry()` function after loop completion
+  - Fixed ESLint errors (unused variables in tests and implementation)
+  - Fixed ANSI escape code sanitization order (must run before control character removal)
+  - Improved error handling with specific messages for different error types
+  - Added proper TypeScript typing to avoid explicit `any` types
+
+### Security
+
+- **Command Injection Protection** (#171, PR #189)
+  - Added `validatePromptSecurity()` function to detect malicious patterns
+  - Shell command detection: rm, del, curl, wget, bash, powershell, cmd, etc.
+  - Command substitution pattern detection: `$(...)` and backtick execution
+  - Shell operator detection: `&&`, `;`, `|`, `>` (with code block exemption)
+  - Smart code block handling: allows legitimate operators in triple-backtick blocks
+  - Prompt size validation: 50KB maximum to prevent DoS
+  - Nested structure limits: max 1000 brackets to prevent complexity attacks
+  - Added comprehensive security warnings in file header and runtime output
+  - Added `windowsHide: true` to execFileSync for Windows security
+  - **IMPORTANT**: Script should only be used with TRUSTED codebases
+  - See file header for complete security documentation and residual risks
 
 ### Planning for v2.4.0
 
