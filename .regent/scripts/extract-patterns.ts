@@ -74,6 +74,12 @@ interface ExtractionResult {
   failures: ExtractionFailure[];
 }
 
+interface SkippedFile {
+  file: string;
+  reason: string;
+  size?: number;
+}
+
 // Configuration constants
 const MAX_PROMPT_SIZE = 50000; // Maximum prompt size to prevent DoS
 const MAX_CODE_SAMPLE_LENGTH = 10000; // Claude context window limit
@@ -244,13 +250,27 @@ async function checkDependencies(): Promise<void> {
 }
 
 /**
+ * Checks Claude CLI version and availability
+ * @returns Version string or null if unavailable
+ */
+function getClaudeVersion(): string | null {
+  try {
+    const version = execFileSync('claude', ['--version'], {
+      encoding: 'utf-8',
+      timeout: 5000
+    }).trim();
+    return version;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Retry wrapper with exponential backoff for API calls
  * @param fn - Async function to retry
  * @param maxRetries - Maximum number of retry attempts (default: 3)
  * @returns Result of the function call
- * @internal Reserved for future use with external API integrations
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function withRetry<T>(
   fn: () => Promise<T>,
   maxRetries = 3
@@ -285,6 +305,34 @@ async function withRetry<T>(
 }
 
 /**
+ * Calls Claude CLI with retry logic for network resilience
+ * @param prompt - The prompt to send to Claude
+ * @returns Raw response string from Claude CLI
+ */
+async function callClaudeCLI(prompt: string): Promise<string> {
+  return withRetry(async () => {
+    // Try with --output-format flag (newer versions)
+    try {
+      return execFileSync('claude', ['-p', prompt, '--output-format', 'json'], {
+        encoding: 'utf-8',
+        maxBuffer: 10 * 1024 * 1024, // 10MB
+        timeout: 60000 // 60 second timeout
+      });
+    } catch {
+      // Fallback to no flag (older versions or different CLI behavior)
+      if (DEBUG) {
+        console.warn(`   ⚠️  --output-format flag not supported, trying without flag`);
+      }
+      return execFileSync('claude', ['-p', prompt], {
+        encoding: 'utf-8',
+        maxBuffer: 10 * 1024 * 1024, // 10MB
+        timeout: 60000 // 60 second timeout
+      });
+    }
+  }, 3); // 3 retry attempts with exponential backoff
+}
+
+/**
  * Analyzes code with Claude CLI (or mock if unavailable) to extract validation patterns
  * @param code - Source code to analyze (will be sanitized and truncated)
  * @param layer - Layer name for context (domain, data, infra, etc.)
@@ -315,29 +363,31 @@ Extract patterns that would catch violations in similar code.`;
 
     // Try to use Claude CLI if available, fallback to mock
     try {
-      // Try with --output-format flag (newer versions)
-      let result: string;
+      const result = await callClaudeCLI(prompt);
+
+      // Parse JSON response with error handling
+      let response: { result?: string; [key: string]: unknown };
       try {
-        result = execFileSync('claude', ['-p', prompt, '--output-format', 'json'], {
-          encoding: 'utf-8',
-          maxBuffer: 10 * 1024 * 1024, // 10MB
-        });
-      } catch {
-        // Fallback to no flag (older versions or different CLI behavior)
+        response = JSON.parse(result) as { result?: string; [key: string]: unknown };
+      } catch (parseError) {
+        console.error(`❌ Failed to parse Claude CLI response for ${layer}`);
         if (DEBUG) {
-          console.warn(`   ⚠️  --output-format flag not supported, trying without flag`);
+          console.error('   Raw response:', result.substring(0, 200));
+          console.error('   Parse error:', parseError);
         }
-        result = execFileSync('claude', ['-p', prompt], {
-          encoding: 'utf-8',
-          maxBuffer: 10 * 1024 * 1024, // 10MB
-        });
+        throw new Error(`JSON parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
       }
 
-      const response = JSON.parse(result);
       content = response.result || result; // Fallback to raw result if no .result property
-    } catch {
+    } catch (cliError) {
       // Claude CLI not available - use mock data
-      console.warn(`   ⚠️  Claude CLI unavailable, using mock patterns for ${layer}`);
+      const errorMsg = cliError instanceof Error ? cliError.message : String(cliError);
+      if (errorMsg.includes('ENOENT') || errorMsg.includes('command not found')) {
+        console.warn(`   ⚠️  Claude CLI not found, using mock patterns for ${layer}`);
+      } else {
+        console.warn(`   ⚠️  Claude CLI error (${errorMsg}), using mock patterns for ${layer}`);
+      }
+
       content = JSON.stringify({
         patterns: [
           {
@@ -473,7 +523,8 @@ async function getAllFiles(targetDir: string): Promise<string[]> {
 
 async function extractPatternsForLayer(
   targetDir: string,
-  layer: string
+  layer: string,
+  skippedFiles: SkippedFile[]
 ): Promise<ExtractionResult> {
   console.log(`\n📂 Analyzing ${layer} layer...`);
 
@@ -499,6 +550,11 @@ async function extractPatternsForLayer(
         // Enforce file size limit
         const stats = await fs.stat(file);
         if (stats.size > MAX_FILE_SIZE) {
+          skippedFiles.push({
+            file,
+            reason: 'Exceeds size limit',
+            size: stats.size
+          });
           console.warn(`   ⚠️  Skipping ${file}: exceeds size limit (${stats.size} > ${MAX_FILE_SIZE})`);
           return null;
         }
@@ -507,6 +563,10 @@ async function extractPatternsForLayer(
         return `\n// File: ${file}\n${content}\n`;
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
+        skippedFiles.push({
+          file,
+          reason: errorMsg
+        });
         console.warn(`   ⚠️  Could not read ${file}: ${errorMsg}`);
         return null;
       }
@@ -529,7 +589,8 @@ async function extractPatternsForLayer(
 
 async function extractQualityPatterns(
   targetDir: string,
-  category: string
+  category: string,
+  skippedFiles: SkippedFile[]
 ): Promise<ExtractionResult> {
   console.log(`\n📊 Analyzing ${category} patterns...`);
 
@@ -560,6 +621,11 @@ async function extractQualityPatterns(
         // Enforce file size limit
         const stats = await fs.stat(file);
         if (stats.size > MAX_FILE_SIZE) {
+          skippedFiles.push({
+            file,
+            reason: 'Exceeds size limit',
+            size: stats.size
+          });
           console.warn(`   ⚠️  Skipping ${file}: exceeds size limit (${stats.size} > ${MAX_FILE_SIZE})`);
           return null;
         }
@@ -568,6 +634,10 @@ async function extractQualityPatterns(
         return `\n// File: ${file}\n${content}\n`;
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
+        skippedFiles.push({
+          file,
+          reason: errorMsg
+        });
         console.warn(`   ⚠️  Could not read ${file}: ${errorMsg}`);
         return null;
       }
@@ -649,6 +719,14 @@ async function main() {
   console.log('\n🔍 Checking dependencies...');
   await checkDependencies();
 
+  // Check Claude CLI version
+  const claudeVersion = getClaudeVersion();
+  if (claudeVersion) {
+    console.log(`✅ Claude CLI detected: ${claudeVersion}`);
+  } else {
+    console.warn('⚠️  Claude CLI not detected - will use mock patterns');
+  }
+
   // Validate paths
   console.log('🔍 Validating paths...');
   await validatePaths(targetDir, outputFile);
@@ -670,13 +748,16 @@ async function main() {
     cross_cutting: []
   };
 
+  // Track skipped files for summary reporting
+  const skippedFiles: SkippedFile[] = [];
+
   // Create rate limiter to prevent API throttling
   const limit = pLimit(MAX_CONCURRENT_API_CALLS);
 
   // Extract patterns for each layer (parallel with rate limiting)
   console.log(`\n🏗️  Analyzing Clean Architecture layers (max ${MAX_CONCURRENT_API_CALLS} concurrent)...`);
   const layerResults = await Promise.all(
-    layers.map(layer => limit(() => extractPatternsForLayer(targetDir, layer)))
+    layers.map(layer => limit(() => extractPatternsForLayer(targetDir, layer, skippedFiles)))
   );
 
   // Collect patterns and failures from results
@@ -689,7 +770,7 @@ async function main() {
   // Extract quality patterns from all code (parallel with rate limiting)
   console.log(`\n🎯 Analyzing quality patterns (max ${MAX_CONCURRENT_API_CALLS} concurrent)...`);
   const qualityResults = await Promise.all(
-    qualityCategories.map(category => limit(() => extractQualityPatterns(targetDir, category)))
+    qualityCategories.map(category => limit(() => extractQualityPatterns(targetDir, category, skippedFiles)))
   );
 
   qualityResults.forEach((result, index) => {
@@ -741,6 +822,30 @@ async function main() {
     console.log(`\n⚠️  Failed Extractions: ${allFailures.length}`);
     allFailures.forEach(({ layer, error }) => {
       console.log(`   - ${layer}: ${error}`);
+    });
+  }
+
+  // Show skipped files summary
+  if (skippedFiles.length > 0) {
+    console.log(`\n📋 Skipped Files Summary: ${skippedFiles.length} file(s)`);
+
+    // Group by reason
+    const byReason = new Map<string, SkippedFile[]>();
+    skippedFiles.forEach(sf => {
+      const existing = byReason.get(sf.reason) || [];
+      existing.push(sf);
+      byReason.set(sf.reason, existing);
+    });
+
+    byReason.forEach((files, reason) => {
+      console.log(`\n   ${reason}: ${files.length} file(s)`);
+      files.slice(0, 5).forEach(f => {
+        const sizeInfo = f.size ? ` (${(f.size / 1024).toFixed(1)}KB)` : '';
+        console.log(`      - ${f.file}${sizeInfo}`);
+      });
+      if (files.length > 5) {
+        console.log(`      ... and ${files.length - 5} more`);
+      }
     });
   }
 }
