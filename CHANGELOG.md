@@ -60,11 +60,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       - Enforces pattern length limit (500 chars)
       - Integrated into PatternSchema with detailed error messages
       - Prevents Regular Expression Denial of Service (ReDoS) attacks
-  - Comprehensive test suite with 58 tests covering:
+  - **Maintainability**: External prompt file for easy updates without code changes
+      - System prompt moved to `.regent/prompts/pattern-extraction.txt` (77 lines)
+      - Loaded at startup via `loadSystemPrompt()` function
+      - Easier to review, edit, and version control prompt changes
+      - Reduces code complexity and improves separation of concerns
+      - Test coverage for prompt file loading and content validation
+  - Comprehensive test suite with 59 tests covering:
     - Helper functions (sanitization, prefix generation, layer prefixes)
     - Path validation and traversal prevention
     - Schema validation (pattern IDs, names, regex, severity)
-    - Configuration constants, DEBUG flag parsing, and environment variable validation
+    - Configuration constants, DEBUG flag parsing, environment variable validation, and external prompt loading
     - Dependency validation (npm packages, install commands, critical vs optional)
     - Concurrency control (p-limit usage, rate limiting, configuration)
     - ReDoS protection (nested quantifiers, wildcards, alternation, nesting, length)
@@ -100,8 +106,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `docs/enhanced-pattern-categories.md` (+440 lines)
     - `docs/pattern-extraction-output-format.md` (+125 lines)
     - `.claude/commands/extract-patterns-from-codebase.md` (+87 lines)
-    - `.regent/scripts/extract-patterns.ts` (+1,175 lines)
-    - `.regent/scripts/__tests__/extract-patterns.test.ts` (+672 lines, 58 tests)
+    - `.regent/scripts/extract-patterns.ts` (+1,100 lines)
+    - `.regent/prompts/pattern-extraction.txt` (+77 lines)
+    - `.regent/scripts/__tests__/extract-patterns.test.ts` (+696 lines, 59 tests)
     - `README.md` (TheAuditor Integration section)
     - `.gitignore` (auto-generated patterns, reference implementations)
 

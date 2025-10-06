@@ -439,83 +439,21 @@ const LAYER_PREFIXES: Record<string, string> = {
  *
  * @see PatternsResponseSchema for validation schema
  */
-const SYSTEM_PROMPT = `You are a comprehensive code quality and architecture pattern analyzer.
-
-Given source code files, extract validation patterns that enforce best practices.
-
-Output ONLY valid JSON in this exact format:
-{
-  "patterns": [
-    {
-      "id": "DOM001",
-      "name": "pattern-name-kebab-case",
-      "regex": "valid regex pattern",
-      "severity": "critical|high|medium|low",
-      "description": "What this pattern detects",
-      "examples": [
-        {
-          "violation": "// bad code",
-          "fix": "// good code"
-        }
-      ]
-    }
-  ]
+/**
+ * Loads the system prompt from external file for maintainability
+ * Prompt defines the pattern extraction instructions for Claude
+ * @returns System prompt content
+ * @throws Error if prompt file cannot be read
+ */
+async function loadSystemPrompt(): Promise<string> {
+  const promptPath = path.join(__dirname, '../prompts/pattern-extraction.txt');
+  try {
+    const prompt = await fs.readFile(promptPath, 'utf-8');
+    return prompt.trim();
+  } catch (error) {
+    throw new Error(`❌ Failed to load system prompt from ${promptPath}: ${error}`);
+  }
 }
-
-Focus on extracting patterns for:
-
-**Clean Architecture:**
-- Layer dependency violations (domain importing from data/infra)
-- Missing interfaces (use cases without contracts)
-- External dependencies in wrong layers (axios in domain)
-- Naming conventions
-
-**TDD Patterns:**
-- Test structure (AAA: Arrange, Act, Assert)
-- Test naming conventions (should, describe patterns)
-- Mock/Spy/Stub patterns
-- Test coverage indicators
-- Red-Green-Refactor cycle compliance
-
-**SOLID Principles:**
-- SRP: Single Responsibility (classes doing too much)
-- OCP: Open/Closed (modification vs extension)
-- LSP: Liskov Substitution (interface contract violations)
-- ISP: Interface Segregation (fat interfaces)
-- DIP: Dependency Inversion (direct implementations vs abstractions)
-
-**DRY Violations:**
-- Duplicated code blocks
-- Repeated logic patterns
-- Similar function implementations
-
-**Design Patterns:**
-- Factory Pattern implementation
-- Strategy Pattern usage
-- Repository Pattern
-- Observer/Event patterns
-- Decorator Pattern
-- Adapter Pattern
-- Singleton (anti-pattern detection)
-- God Object (anti-pattern)
-
-**KISS/YAGNI:**
-- Unnecessary complexity
-- Over-engineering
-- Unused code paths
-- Dead code
-- Premature optimization
-
-**Cross-Cutting Concerns:**
-- Logging patterns
-- Error handling consistency
-- Validation patterns
-- Security concerns (auth, sanitization)
-- Performance patterns (caching, lazy loading)
-- Transaction boundaries
-- Monitoring/Observability
-
-DO NOT include markdown, explanations, or anything except the JSON.`;
 
 /**
  * Get layer ID prefix for pattern IDs
@@ -732,14 +670,15 @@ async function callClaudeCLI(prompt: string): Promise<string> {
  * Analyzes code with Claude CLI (or mock if unavailable) to extract validation patterns
  * @param code - Source code to analyze (will be sanitized and truncated)
  * @param layer - Layer name for context (domain, data, infra, etc.)
+ * @param systemPrompt - System prompt defining extraction instructions
  * @returns Extraction result with patterns and any failures
  */
-async function analyzeCodeWithClaude(code: string, layer: string): Promise<ExtractionResult> {
+async function analyzeCodeWithClaude(code: string, layer: string, systemPrompt: string): Promise<ExtractionResult> {
   // Sanitize and truncate code to prevent injection attacks
   const sanitizedCode = sanitizeInput(code);
   const truncatedCode = sanitizedCode.substring(0, MAX_CODE_SAMPLE_LENGTH);
 
-  const prompt = `${SYSTEM_PROMPT}
+  const prompt = `${systemPrompt}
 
 Analyze this ${layer} layer code and extract validation patterns:
 
@@ -917,7 +856,8 @@ async function getAllFiles(targetDir: string): Promise<string[]> {
 async function extractPatternsForLayer(
   targetDir: string,
   layer: string,
-  skippedFiles: SkippedFile[]
+  skippedFiles: SkippedFile[],
+  systemPrompt: string
 ): Promise<ExtractionResult> {
   console.log(`\n📂 Analyzing ${layer} layer...`);
 
@@ -974,7 +914,7 @@ async function extractPatternsForLayer(
   }
 
   console.log(`   🤖 Analyzing with Claude...`);
-  const result = await analyzeCodeWithClaude(combinedCode, layer);
+  const result = await analyzeCodeWithClaude(combinedCode, layer, systemPrompt);
   console.log(`   ✅ Extracted ${result.patterns.length} patterns`);
 
   return result;
@@ -983,7 +923,8 @@ async function extractPatternsForLayer(
 async function extractQualityPatterns(
   targetDir: string,
   category: string,
-  skippedFiles: SkippedFile[]
+  skippedFiles: SkippedFile[],
+  systemPrompt: string
 ): Promise<ExtractionResult> {
   console.log(`\n📊 Analyzing ${category} patterns...`);
 
@@ -1045,7 +986,7 @@ async function extractQualityPatterns(
   }
 
   console.log(`   🤖 Analyzing with Claude...`);
-  const result = await analyzeCodeWithClaude(combinedCode, category);
+  const result = await analyzeCodeWithClaude(combinedCode, category, systemPrompt);
   console.log(`   ✅ Extracted ${result.patterns.length} patterns`);
 
   return result;
@@ -1112,6 +1053,11 @@ async function main() {
   console.log(`📁 Target: ${targetDir}`);
   console.log(`💾 Output: ${outputFile}`);
 
+  // Load system prompt from external file
+  console.log('\n📝 Loading system prompt...');
+  const systemPrompt = await loadSystemPrompt();
+  console.log(`✅ System prompt loaded (${systemPrompt.length} chars)`);
+
   // Check dependencies
   console.log('\n🔍 Checking dependencies...');
   await checkDependencies();
@@ -1154,7 +1100,7 @@ async function main() {
   // Extract patterns for each layer (parallel with rate limiting)
   console.log(`\n🏗️  Analyzing Clean Architecture layers (max ${MAX_CONCURRENT_API_CALLS} concurrent)...`);
   const layerResults = await Promise.all(
-    layers.map(layer => limit(() => extractPatternsForLayer(targetDir, layer, skippedFiles)))
+    layers.map(layer => limit(() => extractPatternsForLayer(targetDir, layer, skippedFiles, systemPrompt)))
   );
 
   // Collect patterns and failures from results
@@ -1167,7 +1113,7 @@ async function main() {
   // Extract quality patterns from all code (parallel with rate limiting)
   console.log(`\n🎯 Analyzing quality patterns (max ${MAX_CONCURRENT_API_CALLS} concurrent)...`);
   const qualityResults = await Promise.all(
-    qualityCategories.map(category => limit(() => extractQualityPatterns(targetDir, category, skippedFiles)))
+    qualityCategories.map(category => limit(() => extractQualityPatterns(targetDir, category, skippedFiles, systemPrompt)))
   );
 
   qualityResults.forEach((result, index) => {

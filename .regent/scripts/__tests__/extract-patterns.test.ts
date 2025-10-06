@@ -6,7 +6,7 @@
  * ✅ Helper Functions (sanitization, prefix generation)
  * ✅ Path Validation (traversal, project boundaries)
  * ✅ Schema Validation (IDs, names, regex, severity, ReDoS protection)
- * ✅ Configuration (constants, DEBUG flag, environment variables)
+ * ✅ Configuration (constants, DEBUG flag, environment variables, external prompt loading)
  * ✅ Dependency Validation (npm packages, install commands, critical vs optional)
  * ✅ Concurrency Control (p-limit usage, rate limiting, concurrent operations)
  * ✅ Security (prompt validation, command injection, ReDoS vulnerabilities)
@@ -370,6 +370,29 @@ describe('Pattern Extraction - Configuration', () => {
     expect(parseDebugFlag('false')).toBe(false);
     expect(parseDebugFlag(undefined)).toBe(false);
     expect(parseDebugFlag('yes')).toBe(false);
+  });
+
+  it('should load system prompt from external file', async () => {
+    const fs = await import('fs/promises');
+    const promptPath = path.join(__dirname, '../../prompts/pattern-extraction.txt');
+
+    // Verify file exists and can be read
+    const promptContent = await fs.readFile(promptPath, 'utf-8');
+
+    // Verify content structure
+    expect(promptContent).toContain('You are a comprehensive code quality and architecture pattern analyzer');
+    expect(promptContent).toContain('Output ONLY valid JSON in this exact format');
+    expect(promptContent).toContain('Clean Architecture:');
+    expect(promptContent).toContain('TDD Patterns:');
+    expect(promptContent).toContain('SOLID Principles:');
+    expect(promptContent).toContain('DRY Violations:');
+    expect(promptContent).toContain('Design Patterns:');
+    expect(promptContent).toContain('KISS/YAGNI:');
+    expect(promptContent).toContain('Cross-Cutting Concerns:');
+
+    // Verify reasonable length (should be several hundred characters)
+    expect(promptContent.length).toBeGreaterThan(500);
+    expect(promptContent.length).toBeLessThan(10000);
   });
 });
 
