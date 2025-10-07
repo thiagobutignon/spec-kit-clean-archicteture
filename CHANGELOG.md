@@ -8,6 +8,110 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- **TheAuditor Integration Documentation & Pattern Extraction** (#171, PR #189)
+  - Comprehensive integration roadmap with 4-phase implementation plan
+  - Strategic analysis documenting neuroscience-inspired architecture ("Perfect Triad")
+  - Comparative analysis between TheAuditor and The Regent
+  - Pattern extraction command `/extract-patterns-from-codebase`
+  - Pattern extraction script `.regent/scripts/extract-patterns.ts` with production-ready features:
+    - **Retry Logic**: Exponential backoff (2s, 4s, 8s) for network resilience
+    - **Error Handling**: Specific messages for ENOENT, ETIMEDOUT, rate limits, parse errors
+    - **Performance**: Parallel file reading with Promise.all
+    - **Monitoring**: Skipped files tracking with grouped summary report
+    - **Version Detection**: Claude CLI version check at startup
+    - **Configuration**: Environment variable overrides for all constants with validation
+      - `MAX_PROMPT_SIZE` (default: 50000, range: 1000-200000)
+      - `MAX_CODE_SAMPLE_LENGTH` (default: 10000, range: 100-50000)
+      - `MAX_SRC_SAMPLES` (default: 3, range: 1-20)
+      - `MAX_TEST_SAMPLES` (default: 2, range: 1-20)
+      - `MAX_CONCURRENT_API_CALLS` (default: 3, range: 1-10)
+      - `MAX_FILE_SIZE` (default: 1MB, range: 1KB-10MB)
+      - Smart validation with fallback to defaults on invalid input
+      - Warning messages for out-of-range values
+  - **User Experience**: Standardized error message format with consistent emoji usage
+      - ✅ Success messages, ❌ Errors, ⚠️ Warnings, 💡 Hints
+      - 🔒 Security errors, 🔍 Debug info, 📊 Statistics
+      - All messages follow documented format standards
+      - Enhanced readability and user guidance
+  - **Documentation**: Comprehensive JSDoc documentation for all schemas, interfaces, and constants
+      - Zod schemas (PatternExampleSchema, PatternSchema, PatternsResponseSchema)
+      - TypeScript interfaces (Pattern, LayerPatterns, ExtractionFailure, ExtractionResult, SkippedFile)
+      - Configuration constants (MAX_PROMPT_SIZE, MAX_CODE_SAMPLE_LENGTH, etc.)
+      - SYSTEM_PROMPT with detailed pattern category descriptions
+      - LAYER_PREFIXES with usage examples
+      - All documentation includes purpose, defaults, ranges, and examples
+  - **Dependency Validation**: Comprehensive pre-flight checks for all required packages
+      - Validates npm packages: yaml, zod, p-limit
+      - Validates system commands: tsx (required), claude (optional)
+      - Clear error messages with install commands
+      - Distinguishes between critical errors and warnings
+  - **Concurrency Control**: Verified correct p-limit implementation (no race conditions)
+      - Single limiter instance shared across all operations
+      - Proper Promise.all with limit wrapper pattern
+      - Maximum 3 concurrent API calls (configurable 1-10)
+      - Applies to both layer analysis (5) and quality patterns (6)
+      - Prevents API rate limiting and throttling
+  - **ReDoS Protection**: Regex complexity validation to prevent catastrophic backtracking
+      - Detects nested quantifiers: `(a+)+`, `(a*)*`, `(\w+)+`
+      - Detects nested wildcards: `(.*)+`, `(.*)*`
+      - Detects alternation overlap: `(a|ab)+`
+      - Enforces maximum nesting depth (10 levels)
+      - Enforces pattern length limit (500 chars)
+      - Integrated into PatternSchema with detailed error messages
+      - Prevents Regular Expression Denial of Service (ReDoS) attacks
+  - **Maintainability**: External prompt file for easy updates without code changes
+      - System prompt moved to `.regent/prompts/pattern-extraction.txt` (77 lines)
+      - Loaded at startup via `loadSystemPrompt()` function
+      - Easier to review, edit, and version control prompt changes
+      - Reduces code complexity and improves separation of concerns
+      - Test coverage for prompt file loading and content validation
+  - Comprehensive test suite with 59 tests covering:
+    - Helper functions (sanitization, prefix generation, layer prefixes)
+    - Path validation and traversal prevention
+    - Schema validation (pattern IDs, names, regex, severity)
+    - Configuration constants, DEBUG flag parsing, environment variable validation, and external prompt loading
+    - Dependency validation (npm packages, install commands, critical vs optional)
+    - Concurrency control (p-limit usage, rate limiting, configuration)
+    - ReDoS protection (nested quantifiers, wildcards, alternation, nesting, length)
+    - Layer configuration and prefix mappings
+    - Mock data generation for CI/CD environments
+    - Security (command injection, prompt validation)
+    - Error recovery (retry logic, network resilience)
+    - Error message consistency (emoji format standards)
+    - Integration tests (end-to-end flow with mocked dependencies)
+  - **Security features** (defense in depth):
+    - Input sanitization (null bytes, ANSI codes, control characters)
+    - **Command injection protection** via prompt validation
+    - **Shell operator detection** (with code block exemption)
+    - **ReDoS protection** via regex complexity validation
+    - Path traversal protection with project boundary validation
+    - File size limits (1MB) to prevent DoS attacks
+    - Prompt size limits (50KB) to prevent token exhaustion
+    - execFileSync with argument arrays (no shell interpolation)
+    - Zod schema validation for runtime type safety
+    - 60-second timeout on CLI calls
+    - Windows window hiding for security
+    - Comprehensive security warnings in code and runtime
+  - Support for 11 pattern categories:
+    - 5 Clean Architecture layers (domain, data, infra, presentation, main)
+    - 6 Quality patterns (TDD, SOLID, DRY, Design Patterns, KISS/YAGNI, Cross-Cutting)
+  - Enhanced pattern categories documentation (440 lines)
+  - Pattern extraction output format documentation
+  - **New dependencies**: `p-limit` (rate limiting), `zod` (schema validation)
+  - Files:
+    - `docs/theauditor-integration-roadmap.md` (+297 lines)
+    - `docs/theauditor-comparative-analysis.md` (+215 lines)
+    - `docs/theauditor-strategic-analysis.md` (+180 lines)
+    - `docs/enhanced-pattern-categories.md` (+440 lines)
+    - `docs/pattern-extraction-output-format.md` (+125 lines)
+    - `.claude/commands/extract-patterns-from-codebase.md` (+87 lines)
+    - `.regent/scripts/extract-patterns.ts` (+1,100 lines)
+    - `.regent/prompts/pattern-extraction.txt` (+77 lines)
+    - `.regent/scripts/__tests__/extract-patterns.test.ts` (+696 lines, 59 tests)
+    - `README.md` (TheAuditor Integration section)
+    - `.gitignore` (auto-generated patterns, reference implementations)
+
 - **Pre-commit Hook for Command Validation** (#168)
   - Automatic validation before every git commit
   - Configured with Husky and lint-staged
@@ -62,6 +166,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated README.md with commit convention documentation
   - Updated CONTRIBUTING.md to clarify `regent` type is for automated commits only
   - All 46 tests updated and passing
+
+### Fixed
+
+- **Pattern Extraction Script Improvements** (#171, PR #189)
+  - Removed unreachable code in `withRetry()` function after loop completion
+  - Fixed ESLint errors (unused variables in tests and implementation)
+  - Fixed ANSI escape code sanitization order (must run before control character removal)
+  - Improved error handling with specific messages for different error types
+  - Added proper TypeScript typing to avoid explicit `any` types
+  - Verified file completeness: All 16 functions properly implemented (1,175 lines)
+  - Confirmed no truncated code or syntax errors (367 tests passing)
+
+### Security
+
+- **Command Injection Protection** (#171, PR #189)
+  - Added `validatePromptSecurity()` function to detect malicious patterns
+  - Shell command detection: rm, del, curl, wget, bash, powershell, cmd, etc.
+  - Command substitution pattern detection: `$(...)` and backtick execution
+  - Shell operator detection: `&&`, `;`, `|`, `>` (with code block exemption)
+  - Smart code block handling: allows legitimate operators in triple-backtick blocks
+  - Prompt size validation: 50KB maximum to prevent DoS
+  - Nested structure limits: max 1000 brackets to prevent complexity attacks
+  - Added comprehensive security warnings in file header and runtime output
+  - Added `windowsHide: true` to execFileSync for Windows security
+  - **IMPORTANT**: Script should only be used with TRUSTED codebases
+  - See file header for complete security documentation and residual risks
 
 ### Planning for v2.4.0
 

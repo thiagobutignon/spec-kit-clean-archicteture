@@ -2,17 +2,20 @@
 // This is correct and not affected by the ESM bug - native fs works fine with namespace imports
 // Only fs-extra requires default import in ESM/tsx context
 import * as fs from 'fs';
+import { Writable } from 'stream';
 import path from 'path';
 import chalk from 'chalk';
-// Usaremos um nome de arquivo de log consistente para cada execução
+// We use a consistent log file name for each execution
 const LOG_FILE_NAME = 'execution.log';
+// Valid RLHF score range for validation
+const VALID_RLHF_SCORES = [-2, -1, 0, 1, 2];
 export var LogLevel;
 (function (LogLevel) {
     LogLevel[LogLevel["DEBUG"] = 0] = "DEBUG";
     LogLevel[LogLevel["INFO"] = 1] = "INFO";
-    LogLevel[LogLevel["WARN"] = 2] = "WARN";
-    LogLevel[LogLevel["ERROR"] = 3] = "ERROR";
-    LogLevel[LogLevel["SUCCESS"] = 4] = "SUCCESS";
+    LogLevel[LogLevel["SUCCESS"] = 2] = "SUCCESS";
+    LogLevel[LogLevel["WARN"] = 3] = "WARN";
+    LogLevel[LogLevel["ERROR"] = 4] = "ERROR";
 })(LogLevel || (LogLevel = {}));
 class Logger {
     logFilePath;
@@ -26,18 +29,41 @@ class Logger {
     startTime;
     executionSummary;
     currentStepStartTime;
+    expectedTotalSteps;
+    shutdownHandlersRegistered = false;
+    shutdownInProgress = false;
+    closeStreamHandler;
     constructor(options) {
         // Backward compatibility: support old string constructor
         if (typeof options === 'string') {
             options = { logDirectory: options };
         }
         const { logDirectory, verbose = false, quiet = false, showTimestamp = true, timestampFormat = 'iso', colorize = true, logLevel = LogLevel.INFO, } = options;
-        // Garante que o diretório de logs exista
-        fs.mkdirSync(logDirectory, { recursive: true });
-        this.logFilePath = path.join(logDirectory, LOG_FILE_NAME);
-        // Cria um stream de escrita para o arquivo de log.
-        // A flag 'a' significa 'append', então não sobrescrevemos o log a cada execução.
-        this.logStream = fs.createWriteStream(this.logFilePath, { flags: 'a' });
+        // Ensure the log directory exists
+        try {
+            fs.mkdirSync(logDirectory, { recursive: true });
+            this.logFilePath = path.join(logDirectory, LOG_FILE_NAME);
+            // Create a write stream for the log file
+            // The 'a' flag means 'append', so we don't overwrite the log on each execution
+            this.logStream = fs.createWriteStream(this.logFilePath, { flags: 'a' });
+            // Handle stream errors to prevent crashes
+            this.logStream.on('error', (err) => {
+                console.error('Logger stream error:', err.message);
+                // Stream errors are non-fatal; logging will continue to console only
+            });
+        }
+        catch (err) {
+            // If directory creation fails (e.g., permissions), fall back to console-only logging
+            console.warn(`Warning: Could not create log directory at ${logDirectory}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+            console.warn('Logging will continue to console only.');
+            this.logFilePath = '';
+            // Create a dummy writable stream that does nothing
+            this.logStream = new Writable({
+                write(_chunk, _encoding, callback) {
+                    callback();
+                },
+            });
+        }
         this.verbose = verbose || process.env.LOG_VERBOSE === 'true';
         this.quiet = quiet || process.env.LOG_QUIET === 'true';
         this.showTimestamp = showTimestamp;
@@ -67,6 +93,32 @@ class Logger {
         if (!this.quiet) {
             console.log(chalk.gray(`📝 Logging to: ${this.logFilePath}`));
         }
+        // Setup graceful shutdown handlers
+        this.setupGracefulShutdown();
+    }
+    setupGracefulShutdown() {
+        // Guard against multiple registrations
+        // This is safe because setupGracefulShutdown is private and only called once in the constructor
+        // The flag ensures idempotency in case of future refactoring
+        if (this.shutdownHandlersRegistered)
+            return;
+        this.closeStreamHandler = () => {
+            // Protect against concurrent shutdown signals
+            if (this.shutdownInProgress)
+                return;
+            this.shutdownInProgress = true;
+            if (this.logStream && !this.logStream.closed) {
+                this.logStream.end();
+            }
+        };
+        process.on('SIGINT', this.closeStreamHandler);
+        process.on('SIGTERM', this.closeStreamHandler);
+        process.on('exit', this.closeStreamHandler);
+        this.shutdownHandlersRegistered = true;
+    }
+    sanitizeMessage(message) {
+        // Replace newlines with escaped newlines to prevent log injection
+        return message.replace(/\r?\n/g, '\\n');
     }
     formatTimestamp() {
         if (!this.showTimestamp)
@@ -82,7 +134,9 @@ class Logger {
                 const hours = Math.floor(elapsed / 3600000);
                 const minutes = Math.floor((elapsed % 3600000) / 60000);
                 const seconds = Math.floor((elapsed % 60000) / 1000);
-                return `[${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}]`;
+                // Use 3-digit padding for hours to support processes up to 999 hours (~41 days)
+                // For even longer processes, hours will naturally expand beyond 3 digits
+                return `[${hours.toString().padStart(3, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}]`;
             default:
                 return `[${new Date().toISOString()}]`;
         }
@@ -91,22 +145,25 @@ class Logger {
         if (!context || Object.keys(context).length === 0)
             return '';
         const parts = [];
+        // Sanitize string values to prevent log injection through context fields
         if (context.stepId)
-            parts.push(`step=${context.stepId}`);
+            parts.push(`step=${this.sanitizeMessage(context.stepId)}`);
         if (context.layer)
-            parts.push(`layer=${context.layer}`);
+            parts.push(`layer=${this.sanitizeMessage(context.layer)}`);
         if (context.action)
-            parts.push(`action=${context.action}`);
+            parts.push(`action=${this.sanitizeMessage(context.action)}`);
         if (context.progress)
-            parts.push(`progress=${context.progress}`);
+            parts.push(`progress=${this.sanitizeMessage(context.progress)}`);
         if (context.duration !== undefined)
             parts.push(`duration=${context.duration.toFixed(1)}s`);
         if (context.file)
-            parts.push(`file=${context.file}`);
-        // Add any other context properties
+            parts.push(`file=${this.sanitizeMessage(context.file)}`);
+        // Add any other context properties with sanitization
         for (const [key, value] of Object.entries(context)) {
             if (!['stepId', 'layer', 'action', 'progress', 'duration', 'file'].includes(key)) {
-                parts.push(`${key}=${JSON.stringify(value)}`);
+                // Sanitize the stringified value to prevent injection
+                const sanitizedValue = this.sanitizeMessage(JSON.stringify(value));
+                parts.push(`${key}=${sanitizedValue}`);
             }
         }
         return parts.length > 0 ? ` {${parts.join(', ')}}` : '';
@@ -141,16 +198,20 @@ class Logger {
     }
     writeLog(level, message, context) {
         // Skip if log level is too low
+        // SUCCESS messages bypass log level filtering because they represent critical milestones
+        // that should always be visible regardless of verbosity settings
         if (level < this.logLevel && level !== LogLevel.SUCCESS)
             return;
         if (this.quiet && level !== LogLevel.ERROR)
             return;
+        // Sanitize message to prevent log injection
+        const sanitizedMessage = this.sanitizeMessage(message);
         const timestamp = this.formatTimestamp();
         const levelPrefix = this.getLevelPrefix(level);
         const contextStr = this.verbose ? this.formatContext(context) : '';
-        const formattedMessage = `${timestamp} ${levelPrefix} ${message}${contextStr}\n`;
+        const formattedMessage = `${timestamp} ${levelPrefix} ${sanitizedMessage}${contextStr}\n`;
         // Write to file (always, without color)
-        const fileMessage = `${timestamp} [${LogLevel[level]}] ${message}${contextStr}\n`;
+        const fileMessage = `${timestamp} [${LogLevel[level]}] ${sanitizedMessage}${contextStr}\n`;
         this.logStream.write(fileMessage);
         // Write to console (with color if enabled)
         if (!this.quiet || level === LogLevel.ERROR) {
@@ -162,35 +223,88 @@ class Logger {
             }
         }
     }
+    /**
+     * Logs a debug message. Only displayed when logLevel is set to DEBUG.
+     * @param message - The message to log
+     * @param context - Optional structured context information
+     */
     debug(message, context) {
         this.writeLog(LogLevel.DEBUG, message, context);
     }
+    /**
+     * Logs an informational message.
+     * @param message - The message to log
+     * @param context - Optional structured context information
+     */
     info(message, context) {
         this.writeLog(LogLevel.INFO, message, context);
     }
+    /**
+     * Logs a warning message.
+     * @param message - The message to log
+     * @param context - Optional structured context information
+     */
     warn(message, context) {
         this.writeLog(LogLevel.WARN, message, context);
     }
+    /**
+     * Logs an error message. Always displayed even in quiet mode.
+     * @param message - The message to log
+     * @param context - Optional structured context information
+     */
     error(message, context) {
         this.writeLog(LogLevel.ERROR, message, context);
     }
+    /**
+     * Logs a success message. Always displayed regardless of log level (critical milestone).
+     * @param message - The message to log
+     * @param context - Optional structured context information
+     */
     success(message, context) {
         this.writeLog(LogLevel.SUCCESS, message, context);
     }
+    /**
+     * Legacy logging method for backward compatibility. Maps to info().
+     * @param message - The message to log
+     * @deprecated Use info() instead for better semantic clarity
+     */
     log(message) {
         // Backward compatibility
         this.info(message);
     }
-    startStep(stepId, description, layer) {
+    /**
+     * Starts tracking a new execution step with progress indication.
+     * @param stepId - Unique identifier for the step
+     * @param description - Human-readable description of what the step does
+     * @param layer - Optional layer name (e.g., 'domain', 'infrastructure')
+     * @param totalSteps - Optional total number of expected steps for accurate progress display
+     * @example
+     * logger.startStep('validate-schema', 'Validating input schema', 'domain', 5);
+     */
+    startStep(stepId, description, layer, totalSteps) {
         this.currentStepStartTime = Date.now();
         this.executionSummary.totalSteps++;
+        // Store expected total steps if provided
+        if (totalSteps !== undefined) {
+            this.expectedTotalSteps = totalSteps;
+        }
         if (!this.quiet) {
             const layerInfo = layer ? chalk.gray(`(${layer})`) : '';
-            console.log(`\n${chalk.cyan('▶️')}  ${chalk.bold(`[${this.executionSummary.totalSteps}/${this.executionSummary.totalSteps}] ${stepId}`)} ${layerInfo}`);
+            const total = this.expectedTotalSteps || this.executionSummary.totalSteps;
+            console.log(`\n${chalk.cyan('▶️')}  ${chalk.bold(`[${this.executionSummary.totalSteps}/${total}] ${stepId}`)} ${layerInfo}`);
             console.log(`   ${description}`);
         }
         this.info(`Starting step: ${stepId}`, { stepId, layer, action: 'start' });
     }
+    /**
+     * Completes a previously started step and updates execution summary.
+     * @param stepId - The identifier of the step being completed
+     * @param success - Whether the step completed successfully
+     * @param details - Optional details about the completion (success message or error details)
+     * @example
+     * logger.completeStep('validate-schema', true, 'All validations passed');
+     * logger.completeStep('build-app', false, 'TypeScript compilation errors');
+     */
     completeStep(stepId, success, details) {
         const duration = this.currentStepStartTime ? (Date.now() - this.currentStepStartTime) / 1000 : 0;
         if (success) {
@@ -219,6 +333,15 @@ class Logger {
                 this.executionSummary.totalDuration / this.executionSummary.completedSteps;
         }
     }
+    /**
+     * Logs the result of a quality check (e.g., lint, tests, build).
+     * @param name - Name of the quality check
+     * @param passed - Whether the quality check passed
+     * @param details - Optional details about the check result
+     * @example
+     * logger.logQualityCheck('TypeScript Lint', true);
+     * logger.logQualityCheck('Unit Tests', false, '3 tests failed');
+     */
     logQualityCheck(name, passed, details) {
         if (passed) {
             this.executionSummary.qualityChecks.passed++;
@@ -237,7 +360,22 @@ class Logger {
             }
         }
     }
+    /**
+     * Logs an RLHF (Reinforcement Learning from Human Feedback) score for code quality.
+     * Valid scores are -2, -1, 0, 1, 2. Invalid scores will trigger a warning but still be tracked.
+     * @param score - The RLHF score (-2 to +2)
+     * @param breakdown - Detailed breakdown explanation of the score
+     * @example
+     * logger.logRLHFScore(2, 'Perfect implementation with comprehensive tests');
+     * logger.logRLHFScore(-1, 'Multiple violations detected');
+     */
     logRLHFScore(score, breakdown) {
+        // Validate RLHF score is in expected range
+        // We warn instead of throwing to maintain execution flow and allow debugging
+        // Invalid scores are still tracked but logged for investigation
+        if (!VALID_RLHF_SCORES.includes(score)) {
+            this.warn(`Unexpected RLHF score: ${score}. Expected one of: ${VALID_RLHF_SCORES.join(', ')}`);
+        }
         this.executionSummary.rlhfScore.total += score;
         this.executionSummary.rlhfScore.breakdown[score] =
             (this.executionSummary.rlhfScore.breakdown[score] || 0) + 1;
@@ -251,10 +389,19 @@ class Logger {
             console.log(`      ${chalk.bold('📊 Final score:')} ${score >= 0 ? chalk.green(score) : chalk.red(score)}/2`);
         }
     }
+    /**
+     * Displays a progress bar for long-running operations.
+     * @param current - Current progress value
+     * @param total - Total expected value (must be > 0 for meaningful percentage)
+     * @param eta - Optional estimated time remaining in milliseconds
+     * @example
+     * logger.logProgress(25, 100, 5000); // 25% complete, 5s ETA
+     */
     logProgress(current, total, eta) {
         if (this.quiet)
             return;
-        const percentage = Math.floor((current / total) * 100);
+        // Guard against division by zero
+        const percentage = total > 0 ? Math.floor((current / total) * 100) : 0;
         const completed = Math.floor(percentage / 5);
         const remaining = 20 - completed;
         const progressBar = chalk.green('█'.repeat(completed)) + chalk.gray('░'.repeat(remaining));
@@ -275,6 +422,13 @@ class Logger {
             return `${seconds}s`;
         }
     }
+    /**
+     * Prints a comprehensive execution summary to the console.
+     * Includes step counts, quality check results, RLHF scores, and performance metrics.
+     * Not displayed in quiet mode.
+     * @example
+     * logger.printExecutionSummary();
+     */
     printExecutionSummary() {
         if (this.quiet)
             return;
@@ -311,10 +465,30 @@ class Logger {
             averageRLHFScore: this.executionSummary.rlhfScore.average,
         });
     }
+    /**
+     * Returns a copy of the current execution summary with all metrics.
+     * @returns A copy of the execution summary object
+     * @example
+     * const summary = logger.getExecutionSummary();
+     * console.log(`Completed ${summary.completedSteps} of ${summary.totalSteps} steps`);
+     */
     getExecutionSummary() {
         return { ...this.executionSummary };
     }
+    /**
+     * Closes the log file stream and removes shutdown handlers.
+     * Should be called when the logger is no longer needed to prevent resource leaks.
+     * @example
+     * logger.close();
+     */
     close() {
+        // Remove shutdown handlers to prevent memory leaks
+        if (this.closeStreamHandler) {
+            process.off('SIGINT', this.closeStreamHandler);
+            process.off('SIGTERM', this.closeStreamHandler);
+            process.off('exit', this.closeStreamHandler);
+            this.shutdownHandlersRegistered = false;
+        }
         this.logStream.end();
     }
 }

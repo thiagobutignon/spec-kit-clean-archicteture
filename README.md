@@ -70,7 +70,7 @@ Traditional LLM coding ("vibe coding"):
 
 The dogfooding success revealed clear next steps:
 
-- **#171**: Integrate [Auditor library](https://github.com/TheAuditorTool/Auditor) for enhanced quality
+- **#171**: ✅ Integrate [TheAuditor](https://github.com/TheAuditorTool/Auditor) for enhanced quality (Planning Complete - See [Integration Docs](#-theauditor-integration))
 - **#172**: SWE-bench TypeScript benchmark (prove superiority quantitatively)
 - **#173**: Improve logger output for better visibility
 - **#174**: Non-interactive mode for AI orchestration
@@ -152,6 +152,121 @@ This architecture transforms The Regent from a **prescriptive tool** into an **a
 ### The Real Power
 
 The true "secret sauce" isn't just generating code - it's generating **contextually optimized code** for your specific architecture needs while maintaining Clean Architecture principles as invariants.
+
+## 🔬 TheAuditor Integration
+
+The Regent is integrating with [TheAuditor](https://github.com/TheAuditorTool/Auditor) for enhanced security and quality analysis.
+
+### Integration Status
+
+**Planning Phase: ✅ Complete** (Issue [#171](https://github.com/thiagobutignon/the-regent/issues/171))
+
+### Documentation
+
+- 📋 [**Integration Roadmap**](./docs/theauditor-integration-roadmap.md) - 4-phase implementation plan with code examples
+- 🔍 [**Comparative Analysis**](./docs/theauditor-comparative-analysis.md) - Feature comparison and complementary capabilities
+- 🧠 [**Strategic Analysis**](./docs/theauditor-strategic-analysis.md) - Neuroscience-inspired "Perfect Triad" architecture
+
+### The Perfect Triad Architecture
+
+The integration creates a three-component system analogous to brain architecture:
+
+| Component | Brain Analog | Role |
+|-----------|--------------|------|
+| **spec-kit** | Prefrontal Cortex | Strategic planning & decision-making |
+| **The Regent** | Motor Cortex | Deterministic execution & implementation |
+| **TheAuditor** | Sensory System | Security feedback & quality validation |
+
+### Integration Phases
+
+1. **Phase 1: Foundation** (Weeks 1-2)
+   - Install TheAuditor as dependency
+   - Create adapter in infrastructure layer
+   - Basic integration tests
+
+2. **Phase 2: Feedback Loop** (Weeks 3-4)
+   - RLHF score mapping
+   - Automated quality validation
+   - Pattern learning system
+
+3. **Phase 3: Unified CLI** (Weeks 5-6)
+   - Single command interface
+   - Adaptive model routing
+   - Cost optimization (54% savings)
+
+4. **Phase 4: Continuous Learning** (Weeks 7-8)
+   - Template improvements from feedback
+   - Self-improving patterns
+   - Community pattern sharing
+
+### Benefits
+
+- ✅ **Enhanced Security**: SAST vulnerability detection
+- ✅ **Quality Validation**: Automated code quality checks
+- ✅ **RLHF Integration**: Security findings → learning scores
+- ✅ **Cost Optimization**: Adaptive model selection
+- ✅ **Offline-First**: Works without internet connectivity
+
+## 🔍 Pattern Extraction & Code Analysis
+
+The Regent includes automated pattern extraction to learn from existing codebases and generate validation rules.
+
+### Extract Patterns from Codebase
+
+```bash
+# Extract patterns from source code
+npx tsx .regent/scripts/extract-patterns.ts ./src .regent/patterns/auto-generated.yaml
+
+# Or use the slash command in Claude Code
+/extract-patterns-from-codebase clean-ts-api
+```
+
+### Pattern Categories
+
+The extraction tool analyzes **11 categories** of code quality:
+
+**Clean Architecture Layers:**
+- Domain, Data, Infrastructure, Presentation, Main
+
+**Quality Patterns:**
+- TDD (Test-Driven Development)
+- SOLID Principles
+- DRY Violations
+- Design Patterns (Factory, Strategy, Repository, etc.)
+- KISS/YAGNI
+- Cross-Cutting Concerns (logging, error handling, security)
+
+### Example Output
+
+```yaml
+metadata:
+  generated: "2025-01-02T10:30:00Z"
+  source: "./src"
+  tool: "The Regent Pattern Extractor"
+
+patterns:
+  domain:
+    - id: "DOM001"
+      name: "entity-without-validation"
+      regex: "class\\s+(\\w+Entity)\\s+{[^}]*constructor"
+      severity: "high"
+      description: "Domain entities should validate their state"
+      examples:
+        - violation: "class User { constructor(name) { this.name = name; } }"
+          fix: "class User { constructor(name) { this.validate(name); } }"
+```
+
+### Security Features
+
+- ✅ Path traversal protection
+- ✅ File size limits (1MB)
+- ✅ Prompt size validation (50KB)
+- ✅ Input sanitization for malicious content
+- ✅ Schema validation with Zod
+
+### Environment Variables
+
+- `DEBUG=1` - Enable detailed logging for troubleshooting
 
 ## 🚀 Quick Start
 

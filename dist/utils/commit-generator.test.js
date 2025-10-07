@@ -4,23 +4,23 @@
 import { describe, it, expect } from 'vitest';
 import { mapStepTypeToCommitType, generateCommitMessage, shouldCommitStep, formatCommitMessageForShell, createQualityCheckResult, DEFAULT_COMMIT_CONFIG, } from './commit-generator';
 describe('mapStepTypeToCommitType', () => {
-    it('should map create_file to feat', () => {
-        expect(mapStepTypeToCommitType('create_file')).toBe('feat');
+    it('should map create_file to regent', () => {
+        expect(mapStepTypeToCommitType('create_file')).toBe('regent');
     });
-    it('should map refactor_file to refactor', () => {
-        expect(mapStepTypeToCommitType('refactor_file')).toBe('refactor');
+    it('should map refactor_file to regent', () => {
+        expect(mapStepTypeToCommitType('refactor_file')).toBe('regent');
     });
-    it('should map delete_file to chore', () => {
-        expect(mapStepTypeToCommitType('delete_file')).toBe('chore');
+    it('should map delete_file to regent', () => {
+        expect(mapStepTypeToCommitType('delete_file')).toBe('regent');
     });
-    it('should map folder to chore', () => {
-        expect(mapStepTypeToCommitType('folder')).toBe('chore');
+    it('should map folder to regent', () => {
+        expect(mapStepTypeToCommitType('folder')).toBe('regent');
     });
-    it('should map test to test', () => {
-        expect(mapStepTypeToCommitType('test')).toBe('test');
+    it('should map test to regent', () => {
+        expect(mapStepTypeToCommitType('test')).toBe('regent');
     });
-    it('should map conditional_file to feat', () => {
-        expect(mapStepTypeToCommitType('conditional_file')).toBe('feat');
+    it('should map conditional_file to regent', () => {
+        expect(mapStepTypeToCommitType('conditional_file')).toBe('regent');
     });
     it('should return null for branch', () => {
         expect(mapStepTypeToCommitType('branch')).toBe(null);
@@ -56,27 +56,27 @@ describe('generateCommitMessage', () => {
     it('should generate conventional commit for create_file with domain scope', () => {
         const message = generateCommitMessage('create_file', 'Create Product entity', 'src/domain/models/product.ts');
         // Description already includes entity name and type, so it won't be enhanced
-        expect(message).toBe('feat(domain): create Product entity\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>');
+        expect(message).toBe('regent(domain): create Product entity\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>');
     });
     it('should generate conventional commit for refactor_file with data scope', () => {
         const message = generateCommitMessage('refactor_file', 'Refactor logic', 'src/data/usecases/create-user.ts');
         // Should enhance with entity name and type
-        expect(message).toContain('refactor(data):');
+        expect(message).toContain('regent(data):');
         expect(message).toContain('🤖 Generated with Claude Code');
     });
     it('should generate conventional commit for delete_file with infra scope', () => {
         const message = generateCommitMessage('delete_file', 'Remove deprecated adapter', 'src/infra/cache/old-cache.ts');
         // Should enhance with file type info
-        expect(message).toContain('chore(infra):');
+        expect(message).toContain('regent(infra):');
         expect(message).toContain('remove deprecated adapter');
     });
     it('should lowercase first letter of description', () => {
         const message = generateCommitMessage('create_file', 'Add new user validator', 'src/domain/validators/user-validator.ts');
-        expect(message).toContain('feat(domain): add new user validator');
+        expect(message).toContain('regent(domain): add new user validator');
     });
     it('should use core scope when no path provided', () => {
         const message = generateCommitMessage('create_file', 'Add configuration file');
-        expect(message).toContain('feat(core): add configuration file');
+        expect(message).toContain('regent(core): add configuration file');
     });
     it('should return null for step types that should not commit', () => {
         expect(generateCommitMessage('branch', 'Create feature branch')).toBe(null);
@@ -112,15 +112,15 @@ describe('generateCommitMessage', () => {
     });
     it('should extract scope from complex path', () => {
         const message = generateCommitMessage('create_file', 'Create order entity', 'product-catalog/src/features/order-management/shared/domain/entities/order.ts');
-        expect(message).toContain('feat(domain):');
+        expect(message).toContain('regent(domain):');
     });
     it('should handle presentation scope', () => {
         const message = generateCommitMessage('create_file', 'Create user controller', 'src/presentation/controllers/user-controller.ts');
-        expect(message).toContain('feat(presentation):');
+        expect(message).toContain('regent(presentation):');
     });
     it('should handle main scope', () => {
         const message = generateCommitMessage('create_file', 'Create user factory', 'src/main/factories/user-factory.ts');
-        expect(message).toContain('feat(main):');
+        expect(message).toContain('regent(main):');
     });
 });
 describe('shouldCommitStep', () => {
@@ -232,11 +232,11 @@ describe('DEFAULT_COMMIT_CONFIG', () => {
     });
     it('should have correct type mappings', () => {
         const mappings = DEFAULT_COMMIT_CONFIG.conventionalCommits.typeMapping;
-        expect(mappings.create_file).toBe('feat');
-        expect(mappings.refactor_file).toBe('refactor');
-        expect(mappings.delete_file).toBe('chore');
-        expect(mappings.folder).toBe('chore');
-        expect(mappings.test).toBe('test');
+        expect(mappings.create_file).toBe('regent');
+        expect(mappings.refactor_file).toBe('regent');
+        expect(mappings.delete_file).toBe('regent');
+        expect(mappings.folder).toBe('regent');
+        expect(mappings.test).toBe('regent');
         expect(mappings.branch).toBe(null);
         expect(mappings.pull_request).toBe(null);
     });
