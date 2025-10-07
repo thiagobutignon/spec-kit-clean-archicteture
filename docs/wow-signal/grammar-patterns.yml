@@ -1,0 +1,559 @@
+# Clean Architecture Grammar Patterns
+# YAML specification for automated pattern validation
+
+version: "1.0"
+architecture: "Clean Architecture (Manguinho)"
+grammar_type: "Context-Free Grammar (Chomsky Type 2)"
+
+# ============================================================================
+# PATTERN DEFINITIONS
+# ============================================================================
+
+patterns:
+  # -------------------------------------------------------------------------
+  # DOM-001: UseCase Contract Pattern
+  # -------------------------------------------------------------------------
+  - id: DOM-001
+    name: "UseCase Contract"
+    layer: domain
+    linguistic_role: "Transitive Verb Definition"
+    description: "Complete use case contract with interface and namespace"
+
+    regex:
+      pattern: |
+        export\s+interface\s+(?P<name>\w+)\s*\{[\s\S]*?\}\s*
+        export\s+namespace\s+\1\s*\{[\s\S]*?
+        export\s+type\s+Params[\s\S]*?
+        export\s+type\s+Result
+      flags: [multiline, dotall]
+
+    structure:
+      - element: interface
+        required: true
+        name_pattern: "^[A-Z][a-zA-Z]+$"
+
+      - element: namespace
+        required: true
+        name_matches: interface_name
+
+      - element: namespace_exports
+        required_types:
+          - Params
+          - Result
+
+    example: |
+      export interface AddAccount {
+        add: (account: AddAccount.Params) => Promise<AddAccount.Result>
+      }
+
+      export namespace AddAccount {
+        export type Params = {
+          name: string
+          email: string
+          password: string
+        }
+        export type Result = boolean
+      }
+
+    violations:
+      - type: missing_namespace
+        message: "Incomplete use case contract - missing namespace"
+        explanation: "Transitive verb requires explicit direct object (Params) and predicate (Result)"
+        severity: error
+
+      - type: missing_params
+        message: "Namespace missing Params type"
+        explanation: "Transitive verb has no direct object specification"
+        severity: error
+
+      - type: missing_result
+        message: "Namespace missing Result type"
+        explanation: "Verb has no defined outcome (predicate)"
+        severity: error
+
+      - type: any_type_used
+        message: "Using 'any' instead of namespace types"
+        explanation: "Loose parameters - direct object not properly structured"
+        severity: warning
+
+  # -------------------------------------------------------------------------
+  # DATA-001: Implementation Pattern
+  # -------------------------------------------------------------------------
+  - id: DATA-001
+    name: "UseCase Implementation"
+    layer: data
+    linguistic_role: "Active Sentence (Subject performs Verb)"
+    description: "Implements domain use case with protocol dependencies"
+
+    regex:
+      pattern: |
+        export\s+class\s+Db(?P<name>\w+)\s+implements\s+(?P<interface>\w+)\s*\{
+        \s*constructor\s*\(\s*(?P<deps>(private\s+readonly\s+\w+:\s*\w+[,\s]*)+)\)
+      flags: [multiline]
+
+    structure:
+      - element: class_name
+        pattern: "^Db[A-Z][a-zA-Z]+$"
+        convention: "PascalCase with Db prefix"
+
+      - element: implements
+        required: true
+        type: domain_interface
+
+      - element: constructor
+        required: true
+
+      - element: dependencies
+        all_must_be: interfaces
+        no_concrete: true
+        modifiers: ["private", "readonly"]
+
+    constraints:
+      dependencies:
+        - must_be_interfaces: true
+        - cannot_import_from: ["infra"]
+        - can_import_from: ["domain", "data/protocols"]
+
+    example: |
+      export class DbAddAccount implements AddAccount {
+        constructor(
+          private readonly hasher: Hasher,
+          private readonly addAccountRepository: AddAccountRepository,
+          private readonly checkAccountByEmailRepository: CheckAccountByEmailRepository
+        ) {}
+
+        async add(accountData: AddAccount.Params): Promise<AddAccount.Result> {
+          const hashedPassword = await this.hasher.hash(accountData.password)
+          return this.addAccountRepository.add({ ...accountData, password: hashedPassword })
+        }
+      }
+
+    violations:
+      - type: concrete_dependency
+        message: "Implementation depends on concrete class"
+        explanation: "Verb implementation depends on concrete adverb instead of abstract protocol"
+        severity: error
+        suggestion: "Change dependency to interface type"
+
+      - type: wrong_naming
+        message: "Implementation class should start with 'Db'"
+        explanation: "Subject (implementation) should follow naming convention"
+        severity: warning
+
+      - type: no_implements
+        message: "Class doesn't implement domain interface"
+        explanation: "Implementation must fulfill verb contract"
+        severity: error
+
+  # -------------------------------------------------------------------------
+  # INFRA-001: Adapter Pattern
+  # -------------------------------------------------------------------------
+  - id: INFRA-001
+    name: "Infrastructure Adapter"
+    layer: infrastructure
+    linguistic_role: "Concrete Adverb (Specific manner of action)"
+    description: "Implements data protocol using external technology"
+
+    regex:
+      pattern: |
+        export\s+class\s+(?P<name>\w+)(Adapter|Repository)\s+implements\s+(?P<protocols>[\w\s,]+)
+      flags: [multiline]
+
+    structure:
+      - element: class_name
+        must_end_with: ["Adapter", "Repository"]
+        pattern: "^[A-Z][a-zA-Z]+(Adapter|Repository)$"
+
+      - element: implements
+        required: true
+        type: data_protocol
+        can_implement_multiple: true
+
+      - element: external_import
+        required: true
+        description: "Must import from external library"
+
+    constraints:
+      imports:
+        - must_have_external: true
+        - cannot_import_from: ["domain"]
+        - can_import_from: ["data/protocols", "infra"]
+
+    example: |
+      import bcrypt from 'bcrypt'
+
+      export class BcryptAdapter implements Hasher, HashComparer {
+        constructor(private readonly salt: number) {}
+
+        async hash(plaintext: string): Promise<string> {
+          return bcrypt.hash(plaintext, this.salt)
+        }
+
+        async compare(plaintext: string, digest: string): Promise<boolean> {
+          return bcrypt.compare(plaintext, digest)
+        }
+      }
+
+    violations:
+      - type: no_external_dependency
+        message: "Adapter doesn't use external library"
+        explanation: "Concrete adverb must provide specific implementation"
+        severity: warning
+
+      - type: wrong_naming
+        message: "Adapter must end with 'Adapter' or 'Repository'"
+        explanation: "Part of speech must be clearly identified"
+        severity: error
+
+      - type: domain_dependency
+        message: "Infrastructure depends on domain"
+        explanation: "Adverb cannot depend on noun - grammatical violation"
+        severity: error
+
+  # -------------------------------------------------------------------------
+  # PRES-001: Controller Pattern
+  # -------------------------------------------------------------------------
+  - id: PRES-001
+    name: "Presentation Controller"
+    layer: presentation
+    linguistic_role: "Context (Delivery mechanism)"
+    description: "Provides HTTP context for domain use cases"
+
+    regex:
+      pattern: |
+        export\s+class\s+(?P<name>\w+)Controller\s+implements\s+Controller
+        [\s\S]*?async\s+handle\s*\(\s*request:\s*(?P<request_type>[\w.]+)\s*\):\s*Promise<HttpResponse>
+      flags: [multiline, dotall]
+
+    structure:
+      - element: class_name
+        must_end_with: "Controller"
+        pattern: "^[A-Z][a-zA-Z]+Controller$"
+
+      - element: implements
+        required: true
+        value: "Controller"
+
+      - element: handle_method
+        required: true
+        signature: "(request: T) => Promise<HttpResponse>"
+
+      - element: namespace
+        recommended: true
+        exports: ["Request"]
+
+    constraints:
+      dependencies:
+        - can_depend_on: ["domain/usecases", "presentation/protocols", "validation"]
+        - cannot_depend_on: ["infra", "data/usecases"]
+
+      business_logic:
+        - should_not_contain:
+            - "bcrypt"
+            - "hash"
+            - "encrypt"
+            - "database operations"
+        - should_delegate_to: "use cases"
+
+    example: |
+      export class SignUpController implements Controller {
+        constructor(
+          private readonly addAccount: AddAccount,
+          private readonly validation: Validation,
+          private readonly authentication: Authentication
+        ) {}
+
+        async handle(request: SignUpController.Request): Promise<HttpResponse> {
+          const error = this.validation.validate(request)
+          if (error) return badRequest(error)
+
+          const isValid = await this.addAccount.add(request)
+          if (!isValid) return forbidden(new EmailInUseError())
+
+          const authModel = await this.authentication.auth(request)
+          return ok(authModel)
+        }
+      }
+
+      export namespace SignUpController {
+        export type Request = {
+          name: string
+          email: string
+          password: string
+          passwordConfirmation: string
+        }
+      }
+
+    violations:
+      - type: infrastructure_dependency
+        message: "Controller depends on infrastructure"
+        explanation: "Context should not depend on concrete adverbs"
+        severity: error
+
+      - type: business_logic_present
+        message: "Controller contains business logic"
+        explanation: "Context layer should only orchestrate, not execute business logic"
+        severity: warning
+
+      - type: missing_error_handling
+        message: "Missing try/catch for error handling"
+        explanation: "Context must handle all exceptions"
+        severity: warning
+
+  # -------------------------------------------------------------------------
+  # MAIN-001: Factory Pattern
+  # -------------------------------------------------------------------------
+  - id: MAIN-001
+    name: "Dependency Factory"
+    layer: main
+    linguistic_role: "Sentence Composer (Assembly)"
+    description: "Composes dependencies into complete implementation"
+
+    regex:
+      pattern: |
+        export\s+const\s+make(?P<name>\w+)\s*=\s*\(\)\s*:\s*(?P<return_type>\w+)\s*=>
+      flags: [multiline]
+
+    structure:
+      - element: function_name
+        must_start_with: "make"
+        pattern: "^make[A-Z][a-zA-Z]+$"
+
+      - element: return_type
+        must_be: interface
+        cannot_be: concrete_class
+
+      - element: dependencies
+        instantiation: ["factory_calls", "new_instances"]
+
+    constraints:
+      return:
+        - type: interface
+        - from_layers: ["domain", "presentation"]
+
+      implementation:
+        - returns: concrete_class
+        - injects: dependencies
+
+    example: |
+      export const makeDbAddAccount = (): AddAccount => {
+        const salt = 12
+        const bcryptAdapter = new BcryptAdapter(salt)
+        const accountMongoRepository = new AccountMongoRepository()
+        return new DbAddAccount(bcryptAdapter, accountMongoRepository, accountMongoRepository)
+      }
+
+    violations:
+      - type: returns_concrete
+        message: "Factory returns concrete class instead of interface"
+        explanation: "Sentence composer should hide implementation details"
+        severity: error
+
+      - type: incomplete_assembly
+        message: "Missing required dependencies"
+        explanation: "Incomplete sentence - missing required parts"
+        severity: error
+
+  # -------------------------------------------------------------------------
+  # VAL-001: Validation Pattern
+  # -------------------------------------------------------------------------
+  - id: VAL-001
+    name: "Input Validation"
+    layer: validation
+    linguistic_role: "Grammar Checker (Correctness)"
+    description: "Validates input correctness before execution"
+
+    regex:
+      pattern: |
+        export\s+class\s+(?P<name>\w+)Validation\s+implements\s+Validation
+        [\s\S]*?validate\s*\(\s*input:\s*any\s*\):\s*Error
+      flags: [multiline, dotall]
+
+    structure:
+      - element: class_name
+        must_end_with: "Validation"
+
+      - element: implements
+        value: "Validation"
+
+      - element: validate_method
+        signature: "(input: any) => Error | undefined"
+        should_not_throw: true
+        should_not_modify_input: true
+
+    example: |
+      export class EmailValidation implements Validation {
+        constructor(
+          private readonly fieldName: string,
+          private readonly emailValidator: EmailValidator
+        ) {}
+
+        validate(input: any): Error | undefined {
+          const isValid = this.emailValidator.isValid(input[this.fieldName])
+          if (!isValid) {
+            return new InvalidParamError(this.fieldName)
+          }
+        }
+      }
+
+    violations:
+      - type: throws_exception
+        message: "Validation throws instead of returning error"
+        explanation: "Grammar checker should return violations, not throw"
+        severity: error
+
+      - type: modifies_input
+        message: "Validation modifies input"
+        explanation: "Grammar checker should only validate, not transform"
+        severity: error
+
+# ============================================================================
+# DEPENDENCY RULES
+# ============================================================================
+
+dependency_rules:
+  # Allowed dependencies
+  allowed:
+    - from: data
+      to: [domain, data]
+
+    - from: infrastructure
+      to: [data/protocols, infrastructure]
+
+    - from: presentation
+      to: [domain, presentation, validation]
+
+    - from: validation
+      to: [presentation/protocols, validation]
+
+    - from: main
+      to: [domain, data, infrastructure, presentation, validation]
+
+  # Forbidden dependencies (grammar violations)
+  forbidden:
+    - from: domain
+      to: [data, infrastructure, presentation, validation, main]
+      reason: "Core grammar cannot depend on implementations"
+      severity: error
+
+    - from: data/usecases
+      to: [infrastructure]
+      reason: "Verb implementations should depend on protocols, not concrete adapters"
+      severity: error
+
+    - from: presentation
+      to: [infrastructure, data]
+      reason: "Context cannot depend on concrete adverbs or verb implementations"
+      severity: error
+
+    - from: "*"
+      to: "*"
+      type: circular
+      reason: "Circular dependencies create unparseable grammar"
+      severity: error
+
+# ============================================================================
+# NAMING CONVENTIONS
+# ============================================================================
+
+naming_conventions:
+  domain:
+    models:
+      pattern: "^[A-Z][a-zA-Z]+Model$"
+      example: "SurveyModel, AccountModel"
+
+    usecases:
+      pattern: "^[A-Z][a-zA-Z]+$"
+      example: "AddAccount, Authentication"
+      verb_starts: ["Add", "Create", "Update", "Delete", "Load", "Save", "Check"]
+
+  data:
+    usecases:
+      pattern: "^Db[A-Z][a-zA-Z]+$"
+      example: "DbAddAccount, DbAuthentication"
+
+    protocols:
+      patterns:
+        - "^[A-Z][a-zA-Z]+Repository$"
+        - "^(Hasher|HashComparer|Encrypter|Decrypter)$"
+      example: "AddAccountRepository, Hasher"
+
+  infrastructure:
+    adapters:
+      pattern: "^[A-Z][a-zA-Z]+(Adapter|Repository)$"
+      example: "BcryptAdapter, AccountMongoRepository"
+
+  presentation:
+    controllers:
+      pattern: "^[A-Z][a-zA-Z]+Controller$"
+      example: "SignUpController, LoginController"
+
+  validation:
+    validators:
+      pattern: "^[A-Z][a-zA-Z]+Validation$"
+      example: "EmailValidation, RequiredFieldValidation"
+
+  main:
+    factories:
+      pattern: "^make[A-Z][a-zA-Z]+$"
+      example: "makeDbAddAccount, makeSignUpController"
+
+# ============================================================================
+# VALIDATION SEVERITY
+# ============================================================================
+
+severity_levels:
+  error:
+    - dependency_violation
+    - missing_required_element
+    - circular_dependency
+    - concrete_dependency
+
+  warning:
+    - naming_convention_violation
+    - missing_recommended_element
+    - business_logic_in_controller
+
+  info:
+    - optimization_suggestion
+    - style_improvement
+
+# ============================================================================
+# META-LANGUAGE PROPERTIES
+# ============================================================================
+
+meta_properties:
+  consistency:
+    description: "Same rules apply everywhere"
+    verifiable: true
+
+  composability:
+    description: "Patterns combine predictably"
+    verifiable: true
+
+  expressiveness:
+    description: "Can express any business logic"
+    verifiable: true
+
+  verifiability:
+    description: "Can validate correctness automatically"
+    verifiable: true
+    tools: ["dependency-cruiser", "TypeScript", "ESLint"]
+
+# ============================================================================
+# GRAMMAR TYPE
+# ============================================================================
+
+grammar_classification:
+  chomsky_hierarchy: "Type 2 (Context-Free Grammar)"
+
+  properties:
+    - recursive: true
+    - composable: true
+    - parseable: true
+    - verifiable: true
+
+  comparison:
+    - similar_to: "Programming language grammar"
+    - analogous_to: "Natural language syntax"
+    - formality: "Context-free with semantic constraints"
